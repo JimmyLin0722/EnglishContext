@@ -58,7 +58,7 @@ const APP_LAYERS = ["core", "state", "services", "ui", "views"];
 /** core 內必須最先載入的檔案（建置特例） */
 const CORE_FIRST = ["constants.js", "wordkey.js"];
 
-/** 產物禁止出現的外部資源樣式（B-7、AC-19-01） */
+/** 產物禁止出現的外部資源樣式（B-7、AC-19-01）與錄音 API（v0.5，AC-21-03） */
 export const FORBIDDEN_PATTERNS = Object.freeze([
   { name: "<script src>", re: /<script[^>]*\ssrc=/i },
   { name: "<link href>", re: /<link[^>]*\shref=/i },
@@ -69,6 +69,8 @@ export const FORBIDDEN_PATTERNS = Object.freeze([
   { name: "cdn.", re: /cdn\./i },
   { name: "fonts.googleapis", re: /fonts\.googleapis/i },
   { name: "cdn.tailwindcss.com", re: /cdn\.tailwindcss\.com/i },
+  // v0.5（FE-41）：錄音 API 出現數須為 0，含註解（AC-21-03、NFR-3）
+  { name: "MediaRecorder", re: /MediaRecorder/ },
 ]);
 
 /** 建置中止錯誤；code 供測試判斷原因 */

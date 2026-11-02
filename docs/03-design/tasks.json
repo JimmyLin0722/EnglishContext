@@ -2898,7 +2898,7 @@
         "`node tools/build.mjs --out <scratchpad>/t.html` 成功；若環境有無頭瀏覽器，以替身 getUserMedia 驗證收音條點亮、聆聽結束 ≤ 100ms 全暗、離開單字卡頁後替身 track 為 ended，結果寫入回報",
         "只寫入本任務 paths"
       ],
-      "status": "todo",
+      "status": "done",
       "retries": 0
     },
     {
@@ -2942,7 +2942,7 @@
         "`node tools/build.mjs --out <scratchpad>/t.html` 成功；若環境有無頭瀏覽器，依 AC-32-01、AC-32-04 操作一次並寫入回報",
         "只寫入本任務 paths"
       ],
-      "status": "todo",
+      "status": "done",
       "retries": 0
     },
     {
@@ -3001,7 +3001,7 @@
         "只寫入本任務 paths",
         "backup.test.js「回歸 R6-1」不論執行日期皆通過，且未修改 core/backup.js"
       ],
-      "status": "todo",
+      "status": "done",
       "retries": 0
     }
   ]

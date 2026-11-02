@@ -382,6 +382,7 @@ async function loadCoreLikeBrowser() {
 }
 
 test("回歸 R6-1：依建置順序於瀏覽器環境載入，匯出與匯入正常", async () => {
+  const vm = require("node:vm");
   const { sandbox, order } = await loadCoreLikeBrowser();
   // 前提：重現問題的載入順序（backup.js 在 persist.js 之前）
   assert.ok(order.indexOf("core/backup.js") >= 0 && order.indexOf("core/persist.js") >= 0);
@@ -396,7 +397,11 @@ test("回歸 R6-1：依建置順序於瀏覽器環境載入，匯出與匯入正
   // 匯出：不拋例外，內容正確
   const d = sampleData();
   let exp;
-  assert.doesNotThrow(() => { exp = VB.buildBackup(d, "2026.10.30", new Date(2026, 9, 30, 9, 0, 0)); });
+  // 匯出時間須在沙箱 realm 內建立：主 realm 的 Date 傳入後 `now instanceof Date` 為 false，
+  // backup.js 會改用當下時間，使本測試依執行日期而失敗（FE-41 (7)）
+  const exportAt = vm.runInContext("new Date(2026, 9, 30, 9, 0, 0)", sandbox);
+  assert.ok(vm.runInContext("(function (x) { return x instanceof Date; })", sandbox)(exportAt), "匯出時間應為沙箱 realm 的 Date");
+  assert.doesNotThrow(() => { exp = VB.buildBackup(d, "2026.10.30", exportAt); });
   assert.equal(exp.filename, "english-master-track-backup-20261030.json");
   const obj = JSON.parse(exp.json);
   assert.equal(obj.format, "english-master-track-backup");

@@ -230,7 +230,7 @@ pre {
   color: var(--text-muted);
 }
 
-/* ─── 導覽：行動版（< 768px）選單鈕展開 2 欄 × 3 列 ─── */
+/* ─── 導覽：行動版（< 768px）選單鈕展開 2 欄（v0.5 起 4 鈕 = 2 × 2） ─── */
 .app-nav {
   display: none;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -518,7 +518,7 @@ body.has-dialog {
 
 /* 置於檔尾：須覆寫前面的 .toast-root、body、.app-nav 基礎規則（同權重以後者為準） */
 /* ─── 導覽：手機（≤ 640px）固定底部導覽列（v0.4，FE-26；architecture.md §9.1、PRD US-27、Q-33） ───
- * 641～767px 維持上方「選單」鈕展開 2 欄 × 3 列；≥ 768px 維持單列頁籤。
+ * 641～767px 維持上方「選單」鈕展開 2 欄（v0.5 起 4 鈕 = 2 × 2）；≥ 768px 維持單列頁籤。
  * 斷點 640 = interaction.UI.NAV_BOTTOM_MAX_PX（§7.12，shell.test.js 檢查）。
  * 首次模式（body[data-entry]）的隱藏規則屬 FE-32，不在此處。 */
 :root {
@@ -539,7 +539,7 @@ body.has-dialog {
     bottom: 0;
     z-index: 900;
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr)); /* v0.5（FE-38）：6 → 4（隱藏頁不列入導覽） */
     gap: 0;
     max-width: none;
     height: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px));
@@ -1725,10 +1725,13 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
 
 /* 31-speech.css */
 /*
- * styles/31-speech.css — 抽認卡語音面板（FE-12）
- * 依據：architecture.md §9（行動優先 RWD；觸控 ≥ 44px；不得出現水平捲軸；燈號綠黃紅）
- * 涵蓋：AC-07-04（停用樣式）、AC-08-01（聆聽中紅色閃爍）、AC-08-06～AC-08-08、AC-08-11、AC-08-13（需要連網標示）
+ * styles/31-speech.css — 抽認卡語音面板（FE-12；v0.9 收音條 FE-39）
+ * 依據：architecture.md §9（行動優先 RWD；觸控 ≥ 44px；不得出現水平捲軸；燈號綠黃紅；v0.5 收音條列）、
+ *       §7.11 A-5、A-6
+ * 涵蓋：AC-07-04（停用樣式）、AC-08-01（聆聽中紅色閃爍）、AC-08-06～AC-08-08、AC-08-11、AC-08-13（需要連網標示）、
+ *       AC-33-03、AC-33-08、AC-31-03
  * 規則：燈號同時以文字（綠燈／黃燈／紅燈）表示，不只靠顏色辨識。
+ *       收音條是狀態顯示不是動畫：.sp-meter__bar 一律無 transition、無 animation（A-6）。
  */
 
 .sp-panel {
@@ -1761,6 +1764,11 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
 }
 
 /* ─── 麥克風 ─── */
+/* 固定最小寬度：「麥克風跟讀」與「聆聽中」切換時按鈕寬度不變，旁邊的收音條不位移（AC-33-03） */
+.sp-mic {
+  min-width: 8.5em;
+}
+
 .sp-mic__dot {
   display: inline-block;
   width: 10px;
@@ -1791,9 +1799,70 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   }
 }
 
+/* 減少動態：「聆聽中」為固定紅底白字 + 文字「聆聽中」，不閃爍（A-5、AC-33-08、AC-31-03） */
 @media (prefers-reduced-motion: reduce) {
   .sp-mic.is-listening {
     animation: none;
+  }
+}
+
+/* ─── 收音條（AC-33-03、AC-33-08；§9 收音條列、§7.11 A-6） ─── */
+/* 常駐、固定大小（5 × 6px + 4 × 3px = 42px 寬、18px 高）；切換狀態時版面不位移 */
+.sp-meter {
+  display: inline-flex;
+  flex: none;
+  align-items: flex-end;
+  gap: 3px;
+  width: 42px;
+  height: 18px;
+  align-self: center;
+}
+
+.sp-meter__bar {
+  display: block;
+  flex: none;
+  width: 6px;
+  border-radius: 1px;
+  background: var(--border);
+  /* 格數變化直接切換、無漸變（不只在減少動態時） */
+  transition: none;
+  animation: none;
+}
+
+/* 高度由左到右遞增（純裝飾，不影響判定） */
+.sp-meter__bar:nth-child(1) {
+  height: 6px;
+}
+
+.sp-meter__bar:nth-child(2) {
+  height: 9px;
+}
+
+.sp-meter__bar:nth-child(3) {
+  height: 12px;
+}
+
+.sp-meter__bar:nth-child(4) {
+  height: 15px;
+}
+
+.sp-meter__bar:nth-child(5) {
+  height: 18px;
+}
+
+.sp-meter__bar.is-on {
+  background: var(--correct);
+}
+
+/* 強制色彩模式：暗格只有外框、亮格填滿系統文字色，仍可分辨亮暗 */
+@media (forced-colors: active) {
+  .sp-meter__bar {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .sp-meter__bar.is-on {
+    background: CanvasText;
   }
 }
 
@@ -3011,13 +3080,11 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
 </header>
 <div id="app-banner" class="app-banner"></div>
 <nav id="app-nav" class="app-nav" aria-label="功能區">
-  <!-- （v0.4，FE-26）每個按鈕：內嵌 SVG 圖示（單一 path、不寫命名空間屬性）＋ 文字（TAB_LABELS）；≥ 641px 以 CSS 隱藏圖示 -->
+  <!-- （v0.5，FE-38）只留 4 鈕，依 NAV_TAB_ORDER；（v0.4，FE-26）每個按鈕：內嵌 SVG 圖示（單一 path、不寫命名空間屬性）＋ 文字（TAB_LABELS）；≥ 641px 以 CSS 隱藏圖示 -->
   <button type="button" class="app-nav__btn" data-tab="dashboard"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M2 17a10 10 0 0 1 20 0h-2.5a7.5 7.5 0 0 0-15 0zm9.3-.7 5-6 1.4 1.4-5 6zM14 17a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM2 19h20v2H2z"/></svg><span class="app-nav__label">主控台</span></button>
   <button type="button" class="app-nav__btn" data-tab="customizer"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3zM7 4h3v6H7zm7 5h3v6h-3zm-5 5h3v6H9z"/></svg><span class="app-nav__label">難易度設定</span></button>
   <button type="button" class="app-nav__btn" data-tab="flashcards"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 3h13a2 2 0 0 1 2 2v11h-2V5H6zM3 7h13a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm1 2v10h11V9zm2 3h7v1.5H6zm0 3h5v1.5H6z"/></svg><span class="app-nav__label">單字卡</span></button>
   <button type="button" class="app-nav__btn" data-tab="part5"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 6l1.4-1.4 1.6 1.6 3.1-3.1 1.4 1.4-4.5 4.5zm0 6l1.4-1.4 1.6 1.6 3.1-3.1 1.4 1.4-4.5 4.5zm0 6l1.4-1.4 1.6 1.6 3.1-3.1 1.4 1.4-4.5 4.5zM12 5h9v2h-9zm0 6h9v2h-9zm0 6h9v2h-9z"/></svg><span class="app-nav__label">模擬測驗</span></button>
-  <button type="button" class="app-nav__btn" data-tab="decoder"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M10 3a7 7 0 1 1 0 14 7 7 0 1 1 0-14zm0 2a5 5 0 1 0 0 10 5 5 0 1 0 0-10zm5 11.4 1.4-1.4 5.6 5.6-1.4 1.4z"/></svg><span class="app-nav__label">解碼器</span></button>
-  <button type="button" class="app-nav__btn" data-tab="phrasebank"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M4 6h6v7l-2.5 5H5l2-5H4zm10 0h6v7l-2.5 5H15l2-5h-3z"/></svg><span class="app-nav__label">句型庫</span></button>
 </nav>
 <main id="app-main" class="app-main">
   <section id="view-dashboard" class="view" aria-label="主控台" hidden></section>
@@ -3027,8 +3094,9 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   </section>
   <section id="view-flashcards" class="view" aria-label="單字卡" hidden></section>
   <section id="view-part5" class="view" aria-label="模擬測驗" hidden></section>
-  <section id="view-decoder" class="view" aria-label="解碼器" hidden></section>
-  <section id="view-phrasebank" class="view" aria-label="句型庫" hidden></section>
+  <!-- （v0.5，FE-38）隱藏頁 decoder、phrasebank 暫停開放（HT-4、HT-5）：section 保留為空且永遠 hidden、不設 aria-label，供未來開放時恢復 -->
+  <section id="view-decoder" class="view" hidden></section>
+  <section id="view-phrasebank" class="view" hidden></section>
   <section id="view-sources" class="view" aria-label="資料來源與授權" hidden></section>
 </main>
 <footer id="app-footer" class="app-footer">
@@ -3056,6 +3124,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * 來源：docs/02-contract/data-schema.ts 的 export const（v0.4 的 14 個 + v0.8 新增 4 個），數值與字串逐字複製，不得自行修改。
  * （FE-20）v0.8 新增 TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS；
  * （FE-22）v0.8 持久化升版：CURRENT_SCHEMA_VERSION 1 → 2、SUPPORTED_SCHEMA_VERSIONS [1] → [1, 2]（契約 README §5.3）。
+ * （FE-34）v0.9：NAV_TAB_ORDER 6 項 → 4 項（R-18 三）；新增 HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS（US-32）；TAB_LABELS 不變（HT-4）。
  * 契約變更時必須同步更新本檔與 src/app/__tests__/goal.test.js 的字面值斷言。
  * 本模組不碰 DOM；Node 以 require 載入，瀏覽器掛到 EMT.core.constants。
  */
@@ -3156,8 +3225,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     sources: "資料來源與授權"
   };
 
-  // §10（v0.8）導覽列項目與順序（AC-20-03、AC-27-01）：恰好 6 項，不含 "sources"
-  var NAV_TAB_ORDER = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank"];
+  // §8（v0.9）學習進度紀錄欄位（US-32、README §5.7 CI-4）：切換難易度初始化時只覆寫這 6 欄（白名單），順序同 data-schema.ts
+  var LEARNING_PROGRESS_FIELDS = ["masteredWordKeys", "vocabQuiz", "part5", "streak", "todayLearned", "learnedHistory"];
+
+  // §10（v0.9）導覽列項目與順序（AC-20-03、AC-27-01）：恰好 4 項，不含 "sources"、不含隱藏頁（R-18 三）
+  var NAV_TAB_ORDER = ["dashboard", "customizer", "flashcards", "part5"];
+
+  // §10（v0.9）隱藏頁面（AC-20-04、HT-1～HT-5）：currentTab 不得為這些值；TAB_LABELS 保留其文字供未來開放
+  var HIDDEN_TAB_IDS = ["decoder", "phrasebank"];
 
   return deepFreeze({
     COLOR_LEVELS: COLOR_LEVELS,
@@ -3177,7 +3252,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     LEARNED_HISTORY_DAYS: LEARNED_HISTORY_DAYS,
     DASHBOARD_CHART_DAYS: DASHBOARD_CHART_DAYS,
     TAB_LABELS: TAB_LABELS,
-    NAV_TAB_ORDER: NAV_TAB_ORDER
+    NAV_TAB_ORDER: NAV_TAB_ORDER,
+    HIDDEN_TAB_IDS: HIDDEN_TAB_IDS,
+    LEARNING_PROGRESS_FIELDS: LEARNING_PROGRESS_FIELDS
   });
 });
 
@@ -4807,6 +4884,229 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   });
 });
 
+/* core/meter.js */
+/*
+ * core/meter.js — 收音條音量核心（FE-35）
+ * 依據：architecture.md v0.5 §7.14「收音條常數」「core/meter.js 函式」；契約 README §9.3 DS-01
+ * 涵蓋：US-33；AC-33-03（5 格、更新間隔 ≤ 100 ms）、AC-33-04（RMS、dBFS、門檻 T1～T5、分析視窗 ≤ 100 ms）
+ * 純函式與凍結常數：不依賴其他模組，無 DOM、無 Web Audio、無計時器、無任何網路 API。
+ *
+ * 門檻 THRESHOLDS_DBFS 是本專案唯一來源（Q-37 決議 A 預設值）。
+ * 可調範圍（範圍內由主控代核、不改 PRD）：
+ *   - 每格在預設值 ±10 dB 以內；
+ *   - T1 < T2 < T3 < T4 < T5，且相鄰差 ≥ 6 dB；
+ *   - T5 ≤ −9 dBFS。
+ * 超出上述範圍須回 PM 修訂 PRD。meter.test.js 以 validateThresholds(THRESHOLDS_DBFS).ok === true 鎖定。
+ */
+(function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.core = root.EMT.core || {};
+    root.EMT.core.meter = api;
+  }
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  /** 預設門檻（dBFS），供 validateThresholds 做 ±10 dB 範圍檢查；不可修改。 */
+  var DEFAULT_THRESHOLDS_DBFS = Object.freeze([-50, -40, -30, -20, -10]);
+
+  /** 目前採用的門檻 T1～T5（dBFS）；≥ Tn 點亮第 n 格。 */
+  var THRESHOLDS_DBFS = Object.freeze([-50, -40, -30, -20, -10]);
+
+  /** 收音條格數（AC-33-03）。 */
+  var BAR_COUNT = 5;
+
+  /** 分析視窗上限（毫秒；AC-33-04「最近一個 ≤ 100 ms 分析視窗」）。 */
+  var MAX_WINDOW_MS = 100;
+
+  /** 分析視窗樣本數上限（48 kHz 時 42.7 ms、44.1 kHz 時 46.4 ms）。 */
+  var FFT_SIZE_MAX = 2048;
+
+  /** 分析視窗樣本數下限（瀏覽器分析節點允許的最小值）。 */
+  var FFT_SIZE_MIN = 32;
+
+  /** 顯示更新間隔（毫秒；AC-33-03 ≤ 100 ms）。 */
+  var UPDATE_INTERVAL_MS = 50;
+
+  /** 範圍檢查參數（§7.14 可調範圍）。 */
+  var RANGE = Object.freeze({
+    MAX_DEVIATION_DB: 10,
+    MIN_GAP_DB: 6,
+    T5_MAX_DBFS: -9
+  });
+
+  /** 是否為有限數值（NaN、±Infinity、非 number 皆否）。 */
+  function isNum(v) {
+    return typeof v === "number" && isFinite(v);
+  }
+
+  /** 是否為可逐項讀取的樣本序列（一般陣列或 TypedArray；DataView 除外）。 */
+  function isSeq(v) {
+    if (Array.isArray(v)) return true;
+    return typeof ArrayBuffer !== "undefined" && ArrayBuffer.isView(v) &&
+      typeof v.length === "number";
+  }
+
+  /**
+   * 均方根：√(Σx² ÷ n)。非有限值忽略不計入 n；空、非陣列或全無有效值 → 0。
+   * @param {number[]|Float32Array|ArrayLike<number>} samples 時域樣本（−1～1）
+   * @returns {number}
+   */
+  function rmsOf(samples) {
+    if (!isSeq(samples)) return 0;
+    var sum = 0;
+    var n = 0;
+    for (var i = 0; i < samples.length; i++) {
+      var x = samples[i];
+      if (!isNum(x)) continue;
+      sum += x * x;
+      n++;
+    }
+    if (n === 0) return 0;
+    return Math.sqrt(sum / n);
+  }
+
+  /**
+   * RMS → dBFS：rms > 0 且有限 → 20 × log10(rms)；否則 −Infinity（RMS = 0 視為全暗）。
+   * @param {number} rms
+   * @returns {number}
+   */
+  function dbfsOf(rms) {
+    if (!isNum(rms) || rms <= 0) return -Infinity;
+    return 20 * Math.log(rms) / Math.LN10;
+  }
+
+  /**
+   * dBFS → 亮格數 0～5：由第 1 格起逐格檢查 db >= th[i]，遇到第一個不成立即停，
+   * 因此亮格一定從左側連續；恰等於門檻算點亮；NaN、−Infinity → 0。
+   * @param {number} db
+   * @param {number[]} [th] 門檻陣列，預設 THRESHOLDS_DBFS
+   * @returns {number}
+   */
+  function levelOf(db, th) {
+    var t = Array.isArray(th) ? th : THRESHOLDS_DBFS;
+    if (typeof db !== "number" || db !== db || db === -Infinity) return 0;
+    var max = Math.min(t.length, BAR_COUNT);
+    var k = 0;
+    while (k < max && isNum(t[k]) && db >= t[k]) k++;
+    return k;
+  }
+
+  /**
+   * 時域樣本 → 亮格數：levelOf(dbfsOf(rmsOf(samples)))。
+   * @param {number[]|Float32Array} samples
+   * @returns {number}
+   */
+  function levelOfSamples(samples) {
+    return levelOf(dbfsOf(rmsOf(samples)));
+  }
+
+  /**
+   * 位元組時域樣本（0～255，128 為零點）→ 浮點樣本：(v − 128) ÷ 128。
+   * 供只能讀取位元組時域資料的實作使用。非陣列 → 長度 0；非有限值轉為 NaN（rmsOf 會忽略）。
+   * @param {Uint8Array|number[]} bytes
+   * @returns {Float32Array}
+   */
+  function bytesToFloat(bytes) {
+    if (!isSeq(bytes)) return new Float32Array(0);
+    var out = new Float32Array(bytes.length);
+    for (var i = 0; i < bytes.length; i++) {
+      var v = bytes[i];
+      out[i] = isNum(v) ? (v - 128) / 128 : NaN;
+    }
+    return out;
+  }
+
+  /**
+   * 分析視窗樣本數：不超過 FFT_SIZE_MAX 且 fftSize ÷ sampleRate ≤ MAX_WINDOW_MS / 1000 的最大 2 的冪，
+   * 最小 FFT_SIZE_MIN；sampleRate 非正有限數 → FFT_SIZE_MAX。
+   * @param {number} sampleRate 取樣率（Hz）
+   * @returns {number}
+   */
+  function fftSizeFor(sampleRate) {
+    if (!isNum(sampleRate) || sampleRate <= 0) return FFT_SIZE_MAX;
+    var size = FFT_SIZE_MAX;
+    // 以「size × 1000 ≤ MAX_WINDOW_MS × rate」比較，避免浮點除法誤差
+    while (size > FFT_SIZE_MIN && size * 1000 > MAX_WINDOW_MS * sampleRate) size = size / 2;
+    return size;
+  }
+
+  /**
+   * 檢查門檻是否在 §7.14 可調範圍內。
+   * 規則：長度 5、皆為有限數、各在預設 ±10 dB、嚴格遞增且相鄰差 ≥ 6 dB、T5 ≤ −9 dBFS。
+   * @param {number[]} th
+   * @returns {{ ok: boolean, errors: string[] }}
+   */
+  function validateThresholds(th) {
+    var errors = [];
+    if (!Array.isArray(th)) {
+      errors.push("門檻必須是陣列");
+      return Object.freeze({ ok: false, errors: Object.freeze(errors) });
+    }
+    if (th.length !== BAR_COUNT) {
+      errors.push("門檻數量必須為 " + BAR_COUNT + "（目前 " + th.length + "）");
+    }
+    var allNum = true;
+    for (var i = 0; i < th.length; i++) {
+      if (!isNum(th[i])) {
+        errors.push("T" + (i + 1) + " 不是有限數值");
+        allNum = false;
+      }
+    }
+    if (allNum && th.length === BAR_COUNT) {
+      for (var j = 0; j < BAR_COUNT; j++) {
+        if (Math.abs(th[j] - DEFAULT_THRESHOLDS_DBFS[j]) > RANGE.MAX_DEVIATION_DB) {
+          errors.push("T" + (j + 1) + " 超出預設值 " + DEFAULT_THRESHOLDS_DBFS[j] + " ±" + RANGE.MAX_DEVIATION_DB + " dB");
+        }
+        if (j > 0) {
+          var gap = th[j] - th[j - 1];
+          if (gap <= 0) {
+            errors.push("T" + j + " < T" + (j + 1) + " 不成立（必須嚴格遞增）");
+          } else if (gap < RANGE.MIN_GAP_DB) {
+            errors.push("T" + j + " 與 T" + (j + 1) + " 相差 " + gap + " dB，小於 " + RANGE.MIN_GAP_DB + " dB");
+          }
+        }
+      }
+      if (th[BAR_COUNT - 1] > RANGE.T5_MAX_DBFS) {
+        errors.push("T5 必須 ≤ " + RANGE.T5_MAX_DBFS + " dBFS");
+      }
+    }
+    return Object.freeze({ ok: errors.length === 0, errors: Object.freeze(errors) });
+  }
+
+  /**
+   * 亮格數 → 長度 5 的布林陣列（前 level 個為 true）；非 0～5 整數 → 全 false。
+   * @param {number} level
+   * @returns {ReadonlyArray<boolean>}
+   */
+  function barsModel(level) {
+    var ok = typeof level === "number" && level % 1 === 0 && level >= 0 && level <= BAR_COUNT;
+    var bars = [];
+    for (var i = 0; i < BAR_COUNT; i++) bars.push(ok && i < level);
+    return Object.freeze(bars);
+  }
+
+  return Object.freeze({
+    THRESHOLDS_DBFS: THRESHOLDS_DBFS,
+    DEFAULT_THRESHOLDS_DBFS: DEFAULT_THRESHOLDS_DBFS,
+    BAR_COUNT: BAR_COUNT,
+    MAX_WINDOW_MS: MAX_WINDOW_MS,
+    FFT_SIZE_MAX: FFT_SIZE_MAX,
+    UPDATE_INTERVAL_MS: UPDATE_INTERVAL_MS,
+    rmsOf: rmsOf,
+    dbfsOf: dbfsOf,
+    levelOf: levelOf,
+    levelOfSamples: levelOfSamples,
+    bytesToFloat: bytesToFloat,
+    fftSizeFor: fftSizeFor,
+    validateThresholds: validateThresholds,
+    barsModel: barsModel
+  });
+});
+
 /* core/persist.js */
 /*
  * EMT.core.persist — 持久化預設值、StorageRecord 驗證與遷移（FE-06；architecture.md §7.5；FE-22 v0.8 升版 §7.8）
@@ -5598,6 +5898,221 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   };
 });
 
+/* core/reinit.js */
+/*
+ * core/reinit.js — 切換難易度初始化學習紀錄的純規則（FE-34）
+ * 依據：architecture.md v0.5 §7.15（函式表）、§4.6；契約 README §5.2 預設值、§5.7 CI-1～CI-4 與「有學習紀錄」對照表、
+ *       §7.7 V-ST-02、V-ST-14；data-schema.ts LEARNING_PROGRESS_FIELDS、PersistedData
+ * 涵蓋：US-32、AC-01-07、AC-32-01～AC-32-03、AC-32-05～AC-32-07、AC-32-10
+ * 全部純函式、不碰 DOM、不修改傳入值。原子寫入（一次 setItem、失敗不替換記憶體）由 store.confirmApplyGoal 負責（DS-04）。
+ * LD-1：載入時只取用 constants；goal、learning 一律在函式內取用（persist.defaultData() 由呼叫端傳入 defaults）。
+ * Node 以 require 載入，瀏覽器掛到 EMT.core.reinit。
+ */
+(function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.core = root.EMT.core || {};
+    root.EMT.core.reinit = api;
+  }
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // LD-1：載入時只取 constants（建置保證最先載入）；不存在視為組裝錯誤（LD-3）
+  var isNode = typeof require === "function" && typeof module === "object";
+  var g = typeof self !== "undefined" ? self : this;
+  var C;
+  if (isNode) {
+    C = require("./constants.js");
+  } else {
+    C = g && g.EMT && g.EMT.core && g.EMT.core.constants;
+  }
+  if (!C) throw new Error("EMT.core.reinit：缺少模組 EMT.core.constants");
+
+  var NODE_PATH = { goal: "./goal.js", learning: "./learning.js" };
+
+  /** 其他 core 依賴於呼叫時才取（LD-1）；取不到屬程式組裝錯誤，丟出含模組名稱的 Error（LD-3） */
+  function dep(name) {
+    if (isNode) {
+      return require(NODE_PATH[name]);
+    }
+    var mod = g && g.EMT && g.EMT.core && g.EMT.core[name];
+    if (!mod) {
+      throw new Error("[EMT.core.reinit] 找不到 EMT.core." + name);
+    }
+    return mod;
+  }
+  function GOAL() { return dep("goal"); }
+  function LEARN() { return dep("learning"); }
+
+  var hasOwn = Object.prototype.hasOwnProperty;
+
+  /** 純物件判定：排除 null、陣列、Date 等 */
+  function isPlainObject(v) {
+    return Object.prototype.toString.call(v) === "[object Object]";
+  }
+
+  /** 大於 0 的有限數字（型別不符視為不成立） */
+  function isPositive(v) {
+    return typeof v === "number" && isFinite(v) && v > 0;
+  }
+
+  /** 深複本（PersistedData 皆為 JSON 可表示的值）；不修改來源 */
+  function clone(v) {
+    if (Array.isArray(v)) {
+      return v.map(clone);
+    }
+    if (v && typeof v === "object") {
+      var out = {};
+      Object.keys(v).forEach(function (k) {
+        out[k] = clone(v[k]);
+      });
+      return out;
+    }
+    return v;
+  }
+
+  /**
+   * 分數的生效色級（V-ST-02）：Color(S) 經藍、金 → 綠。分數不落在任何色級時為 null。
+   * @param {number} score
+   * @returns {string|null}
+   */
+  function effectiveOf(score) {
+    var G = GOAL();
+    var color = G.colorOf(score);
+    return color === null ? null : G.effectiveColorOf(color);
+  }
+
+  /**
+   * 生效色級是否改變（CI-3）：effective(新分數) ≠ 記憶體中的 goal.effectiveColor。
+   * 綠 ↔ 藍 ↔ 金、同色級內調分數皆為 false。
+   * @param {object} goalState GoalState
+   * @param {number} newScore 按「套用」當下的 draftScore
+   * @returns {boolean}
+   */
+  function effectiveChanged(goalState, newScore) {
+    var current = isPlainObject(goalState) ? goalState.effectiveColor : undefined;
+    return effectiveOf(newScore) !== current;
+  }
+
+  /**
+   * 「有學習紀錄」(a)～(f) 逐項判斷（CI-2，逐字依契約 §5.7 對照表）。欄位缺漏或型別不符視為該項不成立。
+   * (e) 只看 today − 29 ～ today − 1（不看 today，FB-33）。
+   * @param {*} data 記憶體中的 PersistedData
+   * @param {string} today 本地日期 YYYY-MM-DD
+   * @returns {{a: boolean, b: boolean, c: boolean, d: boolean, e: boolean, f: boolean}}
+   */
+  function recordFlags(data, today) {
+    var L = LEARN();
+    var d = isPlainObject(data) ? data : {};
+
+    // (a) 已掌握單字數 > 0
+    var a = Array.isArray(d.masteredWordKeys) && d.masteredWordKeys.length > 0;
+
+    // (b) 四選一測驗答題數 > 0
+    var b = isPlainObject(d.vocabQuiz) && isPositive(d.vocabQuiz.answered);
+
+    // (c) 模擬測驗累計答題數 > 0
+    var c = isPlainObject(d.part5) && isPositive(d.part5.totalAnswered);
+
+    // (d) 今日已學數 X > 0（date === today 才算，同 LR-6）
+    var t = d.todayLearned;
+    var dd = isPlainObject(t) && L.isValidLocalDate(today) && t.date === today &&
+      Array.isArray(t.wordKeys) && t.wordKeys.length > 0;
+
+    // (e) 近 30 天歷史（today − 29 ～ today − 1）中至少 1 天字數 > 0
+    var e = false;
+    var h = d.learnedHistory;
+    if (isPlainObject(h) && L.isValidLocalDate(today)) {
+      var lo = L.addDays(today, -29);
+      var hi = L.addDays(today, -1);
+      var keys = Object.keys(h);
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        if (L.isValidLocalDate(k) && L.compareDate(k, lo) >= 0 && L.compareDate(k, hi) <= 0 && isPositive(h[k])) {
+          e = true;
+          break;
+        }
+      }
+    }
+
+    // (f) 有打卡紀錄
+    var s = d.streak;
+    var f = isPlainObject(s) && ((hasOwn.call(s, "lastActiveDate") && s.lastActiveDate !== null && s.lastActiveDate !== undefined) ||
+      isPositive(s.days));
+
+    return { a: a, b: b, c: c, d: dd, e: e, f: f };
+  }
+
+  /**
+   * 是否有學習紀錄（CI-2）：(a)～(f) 任一成立。
+   * @param {*} data
+   * @param {string} today
+   * @returns {boolean}
+   */
+  function hasLearningRecord(data, today) {
+    var fl = recordFlags(data, today);
+    return fl.a || fl.b || fl.c || fl.d || fl.e || fl.f;
+  }
+
+  /**
+   * 是否需要跳出確認視窗（CI-1）：生效色級改變且有學習紀錄。
+   * @param {*} data 記憶體中的 PersistedData（新分數 = data.goal.draftScore）
+   * @param {string} today
+   * @returns {boolean}
+   */
+  function needsConfirm(data, today) {
+    if (!isPlainObject(data) || !isPlainObject(data.goal)) {
+      return false;
+    }
+    return effectiveChanged(data.goal, data.goal.draftScore) && hasLearningRecord(data, today);
+  }
+
+  /**
+   * 建立初始化後的新資料（CI-4，白名單）。回傳新物件，不修改 data、newGoal、defaults。
+   * - 先淺複製 data 的全部鍵（customVocab、sttNoticeAcknowledged 與日後新增欄位原值保留）
+   * - goal = newGoal 的複本
+   * - LEARNING_PROGRESS_FIELDS 6 欄 = defaults[欄] 的深複本（defaults 由呼叫端傳入 persist.defaultData()，AC-32-02）
+   * defaults 缺少任一欄 → 拋含欄位名的 Error（LD-3：程式組裝錯誤）。
+   * @param {object} data 目前的 PersistedData
+   * @param {object} newGoal 新套用的 GoalState
+   * @param {object} defaults README §5.2 預設值
+   * @returns {object} PersistedData
+   */
+  function buildReinitData(data, newGoal, defaults) {
+    var fields = C.LEARNING_PROGRESS_FIELDS;
+    if (!isPlainObject(defaults)) {
+      throw new Error("[EMT.core.reinit] buildReinitData：defaults 不是物件，缺少欄位 " + fields.join("、"));
+    }
+    fields.forEach(function (name) {
+      if (!hasOwn.call(defaults, name)) {
+        throw new Error("[EMT.core.reinit] buildReinitData：defaults 缺少欄位 " + name);
+      }
+    });
+    var src = isPlainObject(data) ? data : {};
+    var out = {};
+    Object.keys(src).forEach(function (k) {
+      out[k] = src[k];
+    });
+    out.goal = clone(newGoal);
+    fields.forEach(function (name) {
+      out[name] = clone(defaults[name]);
+    });
+    return out;
+  }
+
+  return Object.freeze({
+    effectiveOf: effectiveOf,
+    effectiveChanged: effectiveChanged,
+    recordFlags: recordFlags,
+    hasLearningRecord: hasLearningRecord,
+    needsConfirm: needsConfirm,
+    buildReinitData: buildReinitData
+  });
+});
+
 /* core/similarity.js */
 /*
  * core/similarity.js — 辨識吻合度（FE-05）
@@ -6144,6 +6659,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - 狀態以「換新物件」方式更新（不就地修改），getState() 回傳的物件呼叫端不可修改。
  * - 不使用任何網路 API（AC-18-06）。
  *
+ * - （v0.9，FE-37）切換難易度初始化（契約 §5.7 CI-1～CI-10、architecture §7.15）：一般模式「套用」改經 requestApplyGoal
+ *   （生效色級改變且有學習紀錄 → 回 "confirm"、不改任何狀態）；confirmApplyGoal 以 reinit.buildReinitData 建新物件、
+ *   一次 setItem，成功（或 storage 停用）才替換記憶體；失敗（quota／error）只還原記憶體 draftScore。
+ *   cancelApplyGoal 只還原記憶體 draftScore、不寫入（CI-9）。setTab 忽略 HIDDEN_TAB_IDS（HT-1）。
+ *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
  */
@@ -6177,13 +6697,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         QUIZ: require("../core/quiz.js"),
         P: require("../core/persist.js"),
         BACKUP: require("../core/backup.js"),
-        LEARN: require("../core/learning.js")
+        LEARN: require("../core/learning.js"),
+        REINIT: require("../core/reinit.js")
       };
     } else {
       var c = root.EMT.core;
       coreCache = {
         C: c.constants, WK: c.wordkey, GOAL: c.goal, VOCAB: c.vocab, CUSTOM: c.custom,
-        STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning
+        STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning,
+        REINIT: c.reinit
       };
     }
     return coreCache;
@@ -6704,6 +7226,71 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
 
     /**
+     * （v0.9）一般難易度設定頁「套用」的唯一入口（CI-1、AC-01-02、AC-01-07、AC-32-01、AC-32-05～AC-32-07）。
+     * - 首次模式 → "ignored"（首次畫面用 startLearning）
+     * - 生效色級改變且有學習紀錄（reinit.needsConfirm）→ "confirm"：不改任何狀態、不呼叫 setItem（CI-10）
+     * - 其他 → 既有 applyGoal()（不清除任何資料）→ "applied"
+     * @returns {{status: "applied"|"confirm"|"ignored"}}
+     */
+    function requestApplyGoal() {
+      ensureInit();
+      if (state.runtime.entryMode === "firstRun") { return { status: "ignored" }; }
+      if (core().REINIT.needsConfirm(state.data, today())) { return { status: "confirm" }; }
+      applyGoal();
+      return { status: "applied" };
+    }
+
+    /**
+     * 記憶體中把 draftScore 改回 appliedScore（CI-9；不寫入，以 commit(…, false) 通知 "goal"）。
+     * @returns {boolean} 是否有變更
+     */
+    function revertDraft() {
+      var d = state.data;
+      if (d.goal.draftScore === d.goal.appliedScore) { return false; }
+      var data = assign(d, { goal: assign(d.goal, { draftScore: d.goal.appliedScore }) });
+      commit(data, state.runtime, ["goal"], false);
+      return true;
+    }
+
+    /**
+     * （v0.9）確認視窗「確定」：套用並初始化學習紀錄（CI-4～CI-8、DS-04、AC-32-02、AC-32-03、AC-32-09～AC-32-11）。
+     * 1. 以 appliedGoalState() 算新 goal 與執行期，reinit.buildReinitData 建立新物件（現行 state.data 不被觸碰）
+     * 2. storage 正常 → writeData 一次 setItem（不 removeItem、不碰 unreadable 鍵）
+     * 3. quota／error → 不替換記憶體，只還原記憶體 draftScore（不寫入）；不改 writeStatus、不發 storage／learningQuota tag、
+     *    不改 learningQuotaNoticeShown（CI-7）
+     * 4. 成功或 storage 停用（不寫入，CI-6）→ 以新資料取代記憶體，執行期依 CI-8 重建
+     * @returns {{ok: true, write: "ok"|"disabled"} | {ok: false, reason: "quota"|"error"|"firstRun"}}
+     */
+    function confirmApplyGoal() {
+      ensureInit();
+      if (state.runtime.entryMode === "firstRun") { return { ok: false, reason: "firstRun" }; }
+      var K = core();
+      var g = appliedGoalState();
+      var newData = K.REINIT.buildReinitData(state.data, g.data.goal, K.P.defaultData());
+      var w = writeData(newData);
+      if (!w.ok && (w.reason === "quota" || w.reason === "error")) {
+        revertDraft();
+        return { ok: false, reason: w.reason };
+      }
+      var tags = ["goal", "studySet", "flashcard", "quiz", "speech", "stats", "streak", "part5", "learning"];
+      noteWrite(w, tags);
+      // CI-8：g.runtime 已依新 goal 重建 studySet、flashcard 回第 1 張正面（模式保持、測驗模式重新出題）、lastResult = null；
+      // 單字集只由 goal 與 customVocab 推導，兩者在 g.data 與 newData 相同
+      state = { data: newData, runtime: g.runtime };
+      notify(tags);
+      return { ok: true, write: w.ok ? "ok" : "disabled" };
+    }
+
+    /**
+     * （v0.9）確認視窗「取消」／Esc／點視窗外（CI-9、AC-32-04）：只在記憶體把 draftScore 改回 appliedScore，
+     * setItem 0 次（契約 FB-35）；單字卡位置與其他欄位不變。
+     */
+    function cancelApplyGoal() {
+      ensureInit();
+      revertDraft();
+    }
+
+    /**
      * 「套用」的狀態計算（applyGoal 與 startLearning 共用，不提交）：
      * appliedScore = draftScore、依 V-ST-02 重算色級、重建單字集、抽認卡回第 1 張正面（模式保持，測驗模式重新出題）。
      * @returns {{data: object, runtime: object, changed: boolean}}
@@ -7113,11 +7700,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       commit(state.data, assign(rt, { phrasebank: assign(rt.phrasebank, { keyword: kw }) }), ["phrasebank"], false);
     }
 
-    /** 由 router 呼叫；（v0.8）首次模式只接受 customizer、sources，其他值忽略（AC-25-01、AC-25-07） */
+    /**
+     * 由 router 呼叫；（v0.8）首次模式只接受 customizer、sources，其他值忽略（AC-25-01、AC-25-07）。
+     * （v0.9）HIDDEN_TAB_IDS（解碼器、句型庫）一律忽略，currentTab 永不為隱藏頁（HT-1、AC-20-04）；導向主控台由 router 負責。
+     */
     function setTab(tabId) {
       ensureInit();
       var rt = state.runtime;
       if (TAB_IDS.indexOf(tabId) === -1 || rt.currentTab === tabId) { return; }
+      if (core().C.HIDDEN_TAB_IDS.indexOf(tabId) !== -1) { return; }
       if (rt.entryMode === "firstRun" && FIRST_RUN_TABS.indexOf(tabId) === -1) { return; }
       commit(state.data, assign(rt, { currentTab: tabId }), ["tab"], false);
     }
@@ -7220,6 +7811,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         setDraftScore: setDraftScore,
         clickColor: clickColor,
         applyGoal: applyGoal,
+        requestApplyGoal: requestApplyGoal,
+        confirmApplyGoal: confirmApplyGoal,
+        cancelApplyGoal: cancelApplyGoal,
         startLearning: startLearning,
         addCustomWord: addCustomWord,
         deleteCustomWord: deleteCustomWord,
@@ -7507,6 +8101,472 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   return { vibrate: vibrate };
+});
+
+/* services/mic.js */
+/*
+ * services/mic.js — 麥克風服務（FE-36）
+ * 依據：architecture.md v0.5 §7.14「隱私與 API 限制」「麥克風生命週期」「services/mic.js API」「錯誤對照（DS-03）」；
+ *       契約 README §8 AC-21-03 列、§9.3 DS-02、DS-03；PRD US-33、Q-36
+ * 涵蓋：AC-33-01～AC-33-07、AC-08-09、AC-21-03
+ *
+ * 隱私限制（AC-21-03、NFR-3）：
+ * - 只以 getUserMedia({ audio: true }) 取得音軌，接到 AnalyserNode 即時讀取音量；
+ * - 不使用任何錄音 API，不錄製、不編碼、不輸出音訊，也不把任何節點接到喇叭輸出節點（避免回授與播放）；
+ * - 不做任何網路傳送，不寫入 store、AppState 或任何瀏覽器儲存；音量值只存在本模組區域變數，用完即丟。
+ *
+ * 提供 EMT.services.mic：
+ * - isSupported() → boolean：navigator.mediaDevices 存在且 getUserMedia 為函式
+ * - isActive() → boolean：持有音軌且至少一條 readyState === "live"
+ * - acquire() → Promise<{ ok: true, reused, metering } | { ok: false, reason }>，永不 reject
+ *     reason：「permission」權限被拒、「notfound」找不到裝置、「unavailable」無法使用（照常辨識）、
+ *             「released」取得中已被 release（呼叫端不顯示訊息）
+ * - startMeter(onLevel) → boolean：每 meter.UPDATE_INTERVAL_MS 讀一次音量，只在亮格數改變時回呼 onLevel(k)
+ * - stopMeter()：同步停止音量讀取；冪等
+ * - onTrackEnded(fn)：設定音軌結束（拔除、被停用）時的唯一回呼
+ * - release()：同步釋放全部資源；冪等
+ * - tracks() → 目前持有音軌陣列的複本（只供 V-MIC 在 DevTools 檢查，程式其他地方不得呼叫）
+ * - create(globalObject)：以指定的全域物件建立獨立實例（Node 測試注入替身）
+ * 載入時不操作 DOM、不呼叫任何瀏覽器 API（LD-2）；所有回呼例外都被攔下。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.services = root.EMT.services || {};
+    root.EMT.services.mic = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (defaultGlobal) {
+  "use strict";
+
+  /** getUserMedia 錯誤名稱 → 權限被拒（DS-03） */
+  var PERMISSION_ERRORS = ["NotAllowedError", "PermissionDeniedError", "SecurityError"];
+
+  /** getUserMedia 錯誤名稱 → 找不到裝置（DS-03） */
+  var NOTFOUND_ERRORS = ["NotFoundError", "DevicesNotFoundError", "OverconstrainedError"];
+
+  /**
+   * 取得 core/meter（LD-1：於呼叫時取用）。不存在時視為組裝錯誤（LD-3）。
+   */
+  function meter() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../core/meter.js");
+    } else {
+      m = defaultGlobal && defaultGlobal.EMT && defaultGlobal.EMT.core && defaultGlobal.EMT.core.meter;
+    }
+    if (!m) throw new Error("EMT.core.meter 未載入（services/mic.js）");
+    return m;
+  }
+
+  /**
+   * getUserMedia 失敗原因分類（§7.14 錯誤對照表）。
+   * @param {*} err
+   * @returns {"permission"|"notfound"|"unavailable"}
+   */
+  function reasonOfError(err) {
+    var name = "";
+    try {
+      name = err && typeof err.name === "string" ? err.name : "";
+    } catch (e) {
+      name = "";
+    }
+    if (PERMISSION_ERRORS.indexOf(name) >= 0) return "permission";
+    if (NOTFOUND_ERRORS.indexOf(name) >= 0) return "notfound";
+    return "unavailable";
+  }
+
+  /** 安全呼叫回呼 */
+  function call(fn, arg) {
+    if (typeof fn !== "function") return;
+    try {
+      fn(arg);
+    } catch (e) {
+      if (typeof console !== "undefined") console.error("[EMT.services.mic] 回呼執行失敗", e);
+    }
+  }
+
+  /** 吞掉可能回傳 Promise 的呼叫結果中的例外 */
+  function swallow(result) {
+    try {
+      if (result && typeof result.then === "function") result.then(null, function () {});
+    } catch (e) {
+      /* 忽略 */
+    }
+  }
+
+  /** 安全中斷節點連線 */
+  function disconnect(node) {
+    if (!node) return;
+    try {
+      if (typeof node.disconnect === "function") node.disconnect();
+    } catch (e) {
+      /* 忽略 */
+    }
+  }
+
+  /** 安全關閉 AudioContext（Promise 例外吞掉） */
+  function closeContext(ctx) {
+    if (!ctx) return;
+    try {
+      if (typeof ctx.close === "function") swallow(ctx.close());
+    } catch (e) {
+      /* 忽略 */
+    }
+  }
+
+  /** 安全停止音軌 */
+  function stopTrack(t) {
+    try {
+      if (t && typeof t.stop === "function") t.stop();
+    } catch (e) {
+      /* 忽略 */
+    }
+  }
+
+  /** 取出串流中的音軌陣列 */
+  function tracksOf(stream) {
+    try {
+      if (stream && typeof stream.getAudioTracks === "function") return Array.prototype.slice.call(stream.getAudioTracks());
+      if (stream && typeof stream.getTracks === "function") return Array.prototype.slice.call(stream.getTracks());
+    } catch (e) {
+      /* 忽略 */
+    }
+    return [];
+  }
+
+  /**
+   * 以指定的全域物件建立麥克風實例。
+   * @param {object} g 全域物件（瀏覽器為 window）
+   */
+  function create(g) {
+    // 持有狀態（音量值與節點只存在這些區域變數）
+    var stream = null; // 目前持有的串流
+    var held = []; // 目前持有的音軌
+    var unbinders = []; // 解除各音軌 ended 監聽的函式
+    var ctx = null; // AudioContext（取得中即已建立）
+    var source = null; // MediaStreamAudioSourceNode
+    var analyser = null; // AnalyserNode（不接到喇叭輸出節點）
+    var buffer = null; // 時域樣本緩衝
+    var byteBuffer = null; // 只支援 getByteTimeDomainData 時的緩衝
+    var timer = null; // 音量讀取計時器
+    var epoch = 0; // 每次 release() 遞增，用來辨識取得中被釋放
+    var pending = null; // 取得中的 Promise
+    var endedCb = null; // onTrackEnded 回呼
+    var pagehideBound = false; // pagehide 是否已登錄
+
+    function mediaDevices() {
+      try {
+        var nav = g && g.navigator;
+        var md = nav && nav.mediaDevices;
+        return md && typeof md.getUserMedia === "function" ? md : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function isSupported() {
+      return mediaDevices() !== null;
+    }
+
+    function isActive() {
+      if (!stream) return false;
+      for (var i = 0; i < held.length; i++) {
+        try {
+          if (held[i] && held[i].readyState === "live") return true;
+        } catch (e) {
+          /* 忽略 */
+        }
+      }
+      return false;
+    }
+
+    function stopMeter() {
+      if (timer === null) return;
+      var t = timer;
+      timer = null;
+      try {
+        var clear = g && typeof g.clearInterval === "function" ? g.clearInterval : clearInterval;
+        clear.call(g, t);
+      } catch (e) {
+        /* 忽略 */
+      }
+    }
+
+    /** 拆除音量分析節點與 AudioContext */
+    function teardownAudio() {
+      disconnect(source);
+      disconnect(analyser);
+      closeContext(ctx);
+      source = null;
+      analyser = null;
+      buffer = null;
+      byteBuffer = null;
+      ctx = null;
+    }
+
+    /** 同步釋放全部持有資源（不改 epoch） */
+    function teardown() {
+      stopMeter();
+      var ts = held;
+      var us = unbinders;
+      stream = null;
+      held = [];
+      unbinders = [];
+      for (var i = 0; i < us.length; i++) {
+        try {
+          us[i]();
+        } catch (e) {
+          /* 忽略 */
+        }
+      }
+      for (var j = 0; j < ts.length; j++) stopTrack(ts[j]);
+      teardownAudio();
+    }
+
+    function release() {
+      epoch++;
+      pending = null;
+      teardown();
+    }
+
+    function onTrackEnded(fn) {
+      endedCb = typeof fn === "function" ? fn : null;
+    }
+
+    function tracks() {
+      return held.slice();
+    }
+
+    /** 音軌 ended（拔除、被停用）→ 清除持有狀態並通知（AC-33-06） */
+    function bindEnded(s, t) {
+      var handler = function () {
+        if (stream !== s) return;
+        teardown();
+        call(endedCb);
+      };
+      try {
+        if (typeof t.addEventListener === "function") {
+          t.addEventListener("ended", handler);
+          unbinders.push(function () {
+            if (typeof t.removeEventListener === "function") t.removeEventListener("ended", handler);
+          });
+        } else {
+          t.onended = handler;
+          unbinders.push(function () {
+            if (t.onended === handler) t.onended = null;
+          });
+        }
+      } catch (e) {
+        /* 忽略 */
+      }
+    }
+
+    /** 第一次取得成功時登錄一次 pagehide → release（重新整理、關閉分頁） */
+    function bindPagehide() {
+      if (pagehideBound) return;
+      try {
+        if (g && typeof g.addEventListener === "function") {
+          g.addEventListener("pagehide", function () {
+            release();
+          });
+          pagehideBound = true;
+        }
+      } catch (e) {
+        /* 忽略 */
+      }
+    }
+
+    /** 同步建立 AudioContext（仍在使用者點擊處理中，符合自動播放政策）；失敗回 null */
+    function newContext() {
+      try {
+        var C = g && (g.AudioContext || g.webkitAudioContext);
+        if (typeof C !== "function") return null;
+        return new C();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    /** 建立 source → analyser（不接到喇叭輸出節點）；失敗時拆除音訊節點，回傳是否可讀音量 */
+    function setupAnalyser(s) {
+      if (!ctx) return false;
+      try {
+        source = ctx.createMediaStreamSource(s);
+        analyser = ctx.createAnalyser();
+        analyser.fftSize = meter().fftSizeFor(ctx.sampleRate);
+        source.connect(analyser);
+        var size = analyser.fftSize;
+        if (typeof size !== "number" || !(size > 0)) size = 2048;
+        if (typeof analyser.getFloatTimeDomainData === "function") {
+          buffer = new Float32Array(size);
+        } else if (typeof analyser.getByteTimeDomainData === "function") {
+          byteBuffer = new Uint8Array(size);
+        } else {
+          throw new Error("AnalyserNode 不支援時域讀取");
+        }
+        return true;
+      } catch (e) {
+        teardownAudio();
+        return false;
+      }
+    }
+
+    function acquire() {
+      try {
+        // 同頁重用：不再呼叫 getUserMedia（AC-33-01）
+        if (isActive()) {
+          if (ctx) {
+            try {
+              if (typeof ctx.resume === "function") swallow(ctx.resume());
+            } catch (e) {
+              /* 忽略 */
+            }
+          }
+          return Promise.resolve({ ok: true, reused: true, metering: analyser !== null });
+        }
+        // 取得中再呼叫 → 共用同一個結果
+        if (pending) return pending;
+        // 持有的音軌已全部結束 → 清除後重新取得
+        if (stream) teardown();
+
+        var md = mediaDevices();
+        if (!md) return Promise.resolve({ ok: false, reason: "unavailable" });
+
+        var myEpoch = epoch;
+        ctx = newContext();
+        var myCtx = ctx;
+
+        var p = new Promise(function (resolve) {
+          var gum;
+          try {
+            gum = Promise.resolve(md.getUserMedia({ audio: true }));
+          } catch (e) {
+            gum = Promise.reject(e);
+          }
+          gum.then(
+            function (s) {
+              // 取得中已 release：停止晚到的音軌（AC-33-02）
+              if (myEpoch !== epoch) {
+                var late = tracksOf(s);
+                for (var i = 0; i < late.length; i++) stopTrack(late[i]);
+                closeContext(myCtx);
+                resolve({ ok: false, reason: "released" });
+                return;
+              }
+              pending = null;
+              var ts = tracksOf(s);
+              if (!s || ts.length === 0) {
+                teardownAudio();
+                resolve({ ok: false, reason: "unavailable" });
+                return;
+              }
+              stream = s;
+              held = ts;
+              unbinders = [];
+              for (var j = 0; j < ts.length; j++) bindEnded(s, ts[j]);
+              bindPagehide();
+              var metering = setupAnalyser(s);
+              resolve({ ok: true, reused: false, metering: metering });
+            },
+            function (err) {
+              if (myEpoch !== epoch) {
+                closeContext(myCtx);
+                resolve({ ok: false, reason: "released" });
+                return;
+              }
+              pending = null;
+              teardownAudio();
+              resolve({ ok: false, reason: reasonOfError(err) });
+            }
+          ).then(null, function () {
+            // 防護：任何意外例外都收斂為 unavailable
+            if (myEpoch === epoch) pending = null;
+            resolve({ ok: false, reason: "unavailable" });
+          });
+        });
+        pending = p;
+        return p;
+      } catch (e) {
+        pending = null;
+        return Promise.resolve({ ok: false, reason: "unavailable" });
+      }
+    }
+
+    /** 讀取一次時域樣本並換算亮格數 */
+    function readLevel() {
+      var m = meter();
+      if (buffer) {
+        analyser.getFloatTimeDomainData(buffer);
+        return m.levelOfSamples(buffer);
+      }
+      analyser.getByteTimeDomainData(byteBuffer);
+      return m.levelOfSamples(m.bytesToFloat(byteBuffer));
+    }
+
+    function startMeter(onLevel) {
+      stopMeter();
+      if (!analyser) {
+        call(onLevel, 0);
+        return false;
+      }
+      var last = null;
+      var tick = function () {
+        if (!analyser) {
+          stopMeter();
+          return;
+        }
+        var k;
+        try {
+          k = readLevel();
+        } catch (e) {
+          return;
+        }
+        if (k === last) return;
+        last = k;
+        call(onLevel, k);
+      };
+      try {
+        var interval = meter().UPDATE_INTERVAL_MS;
+        var set = g && typeof g.setInterval === "function" ? g.setInterval : setInterval;
+        timer = set.call(g, tick, interval);
+        return true;
+      } catch (e) {
+        timer = null;
+        call(onLevel, 0);
+        return false;
+      }
+    }
+
+    return {
+      isSupported: isSupported,
+      isActive: isActive,
+      acquire: acquire,
+      startMeter: startMeter,
+      stopMeter: stopMeter,
+      onTrackEnded: onTrackEnded,
+      release: release,
+      tracks: tracks
+    };
+  }
+
+  // 預設實例：建立時只設定區域變數，不呼叫任何瀏覽器 API（LD-2）
+  var instance = create(defaultGlobal);
+
+  return {
+    isSupported: instance.isSupported,
+    isActive: instance.isActive,
+    acquire: instance.acquire,
+    startMeter: instance.startMeter,
+    stopMeter: instance.stopMeter,
+    onTrackEnded: instance.onTrackEnded,
+    release: instance.release,
+    tracks: instance.tracks,
+    reasonOfError: reasonOfError,
+    create: create
+  };
 });
 
 /* services/stt.js */
@@ -8733,6 +9793,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - body[data-entry="firstRun"] 時只接受 customizer、sources，其他回 false（AC-25-01、AC-20-03）。
  * - start() 訂閱 store：收到 "entry" tag 且 runtime.entryMode === "main" → body.dataset.entry = "main"、
  *   go("dashboard")（「開始學習」與首次還原成功共用此路徑，view 不直接切頁；換頁動畫照常）。
+ * （v0.5，FE-38）隱藏頁守門（§4.2 v0.5 router 新行為、§7.16；契約 §5.8 HT-3、HT-5、DS-05；AC-20-04、E-68）：
+ * - go(tabId) 遇 HIDDEN_TAB_IDS（呼叫時取 EMT.core.constants）→ 首次模式回 false、不切頁；
+ *   一般模式改 go("dashboard") 並回 false。不顯示錯誤、不 console.error。[data-go]、程式內部呼叫皆經此守門，
+ *   因此隱藏頁的 view 照常登錄（TAB_IDS、register 仍接受 7 個 TabId），但永遠不會 mount。
+ * - start() 綁定 window 的 hashchange，並在啟動時檢查一次 location.hash：片段正規化（normalizeHash）後
+ *   屬隱藏頁 → 一般模式 go("dashboard")、首次模式不動作；其他片段一律忽略（本系統不使用 hash 路由，不改網址）。
  * 載入時只做登錄，不操作 DOM、不讀其他模組成員（LD-2）。
  */
 (function (root) {
@@ -8745,6 +9811,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   var DEFAULT_TAB = "dashboard";
   // （v0.4，FE-32）首次模式可到達的頁面（契約 FS-2、FS-3；與 store.setTab 的限制一致）
   var FIRST_RUN_TABS = ["customizer", "sources"];
+  // （v0.5，FE-38）constants 模組不存在時的退路（值同契約 HIDDEN_TAB_IDS）
+  var FALLBACK_HIDDEN_TAB_IDS = ["decoder", "phrasebank"];
   // 換頁進場動畫 class（05-motion.css）
   var ENTER_CLASS = "view--entering";
   // interaction 模組不存在時的退路（值同 §7.12 PAGE_ANIM_MS）
@@ -8760,6 +9828,32 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   /** 是否為合法的 TabId */
   function isTabId(tabId) {
     return TAB_IDS.indexOf(tabId) >= 0;
+  }
+
+  /** 隱藏頁清單：EMT.core.constants.HIDDEN_TAB_IDS（呼叫時取用，LD-2） */
+  function hiddenTabIds() {
+    var core = EMT.core;
+    var c = core && core.constants;
+    var list = c && c.HIDDEN_TAB_IDS;
+    return Array.isArray(list) ? list : FALLBACK_HIDDEN_TAB_IDS;
+  }
+
+  /** 是否為隱藏頁（HT-3） */
+  function isHiddenTab(tabId) {
+    return hiddenTabIds().indexOf(tabId) >= 0;
+  }
+
+  /**
+   * 網址片段正規化（純函式）：去開頭 "#"、去開頭 "/"、去開頭 "view-"、轉小寫。
+   * 例："#/decoder" → "decoder"、"#view-Phrasebank" → "phrasebank"。非字串回 ""。
+   * @param {string} hash
+   * @returns {string}
+   */
+  function normalizeHash(hash) {
+    if (typeof hash !== "string") return "";
+    var h = hash.replace(/^#+/, "").replace(/^\/+/, "").toLowerCase();
+    if (h.indexOf("view-") === 0) h = h.slice(5);
+    return h;
   }
 
   /** 安全呼叫模組方法；單一模組出錯不影響其他頁面與導覽 */
@@ -8866,6 +9960,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    */
   function go(tabId) {
     if (!isTabId(tabId)) return false;
+    // （v0.5）隱藏頁：首次模式維持原頁；一般模式改顯示主控台（HT-3、E-68，不顯示錯誤）
+    if (isHiddenTab(tabId)) {
+      if (!isFirstRun()) go(DEFAULT_TAB);
+      return false;
+    }
     // 首次模式只能在難易度設定與資料來源頁之間往返（AC-25-01、AC-25-07）
     if (isFirstRun() && FIRST_RUN_TABS.indexOf(tabId) < 0) return false;
     var next = sectionOf(tabId);
@@ -8965,6 +10064,26 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
+   * （v0.5）檢查目前網址片段：屬隱藏頁 → 一般模式顯示主控台；首次模式與其他片段不動作、不改網址。
+   * @returns {boolean} 是否因隱藏頁片段導向主控台
+   */
+  function checkHash() {
+    var loc = root.location;
+    var tab = normalizeHash(loc && typeof loc.hash === "string" ? loc.hash : "");
+    if (!tab || !isHiddenTab(tab) || isFirstRun()) return false;
+    go(DEFAULT_TAB);
+    return true;
+  }
+
+  /** 綁定 window 的 hashchange（不存在 addEventListener 的環境略過） */
+  function bindHashChange() {
+    if (typeof root.addEventListener !== "function") return;
+    root.addEventListener("hashchange", function () {
+      checkHash();
+    });
+  }
+
+  /**
    * store 通知（v0.4，FE-32）：首次模式結束（"entry" tag 且 entryMode 為 main）→ 解除導覽隱藏並切到主控台。
    * @param {object} state AppState
    * @param {string[]} tags
@@ -8998,9 +10117,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     if (!started) {
       started = true;
       bindEvents();
+      bindHashChange();
     }
     subscribeStore();
     if (!go(isTabId(tabId) ? tabId : DEFAULT_TAB)) go(DEFAULT_TAB);
+    // （v0.5）啟動時檢查一次網址片段（AC-20-04）
+    checkHash();
   }
 
   EMT.views = EMT.views || {};
@@ -9014,6 +10136,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       return currentTab;
     },
     isTabId: isTabId,
+    isHiddenTab: isHiddenTab,
+    normalizeHash: normalizeHash,
     closeMenu: function () {
       setMenuOpen(false);
     }
@@ -9773,7 +10897,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * 依據：architecture.md §4.2、§4.3（setDraftScore／clickColor／applyGoal）、§7.1（core/goal.js）、§9（v0.4 色級大卡片）；
  *       契約 COLOR_LEVELS、GoalState、SCORE_MIN、SCORE_MAX、SCORE_STEP、N_O；PRD 色級定義表、Q-15、Q-28、Q-32。
  * 涵蓋：AC-01-01～AC-01-03、AC-01-05～AC-01-07、AC-02-01、AC-02-02、AC-02-05～AC-02-10、AC-03-03、AC-22-04、
- *       AC-26-01～AC-26-04、AC-25-06（一般頁）；（FE-32）US-25、AC-25-01～AC-25-03、AC-25-10、AC-25-11、AC-18-02
+ *       AC-26-01～AC-26-04、AC-25-06（一般頁）；（FE-32）US-25、AC-25-01～AC-25-03、AC-25-10、AC-25-11、AC-18-02；
+ *       （FE-40）US-32、AC-32-01、AC-32-02、AC-32-04、AC-32-08、AC-32-11、AC-01-02、AC-03-05
  *
  * 版面（掛在 #customizer-goal）：
  * - 狀態列（.cz-status-slot）：「目前目標色級」「目前生效色級」（藍、金套用後生效顯示「綠（內建上限）」）
@@ -9781,7 +10906,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   選中卡片 = colorOf(draftScore)；分數變更時只切換 aria-pressed 與選中 class，不重建卡片（AC-26-03、AC-22-04）
  * - 分數區：滑桿與數字輸入框雙向同步；每次有效變更呼叫 actions.setDraftScore
  * - 試算區：對應色級、建議總字量、每日新字量、預計週數與提示
- * - 「套用」按鈕（.cz-actions）：呼叫 actions.applyGoal（未套用離開頁面不改生效色級）
+ * - 「套用」按鈕（.cz-actions）：呼叫 actions.requestApplyGoal（未套用離開頁面不改生效色級）
+ *   （v0.5，FE-40；architecture.md §7.15）回 "confirm" 時開初始化確認視窗（EMT.ui.dialog.confirm）：
+ *   「確定」→ actions.confirmApplyGoal（失敗 toast「儲存空間不足，未套用」）；取消、Esc、點視窗外 → actions.cancelApplyGoal。
+ *   視窗開啟中以區域旗標 pending 忽略再次按「套用」。本檔不直接呼叫 applyGoal（SD-FB-26，測試以原始碼掃描鎖定）。
  *   狀態列與按鈕區各自為獨立容器，供首次模式（FE-32）只替換這兩區
  * - （v0.4，FE-32）首次模式（runtime.entryMode = "firstRun"；architecture.md §7.9、契約 §5.5 FS-3）：
  *   標題下顯示引導文字（取代一般說明）；按鈕區改為「開始學習」（actions.startLearning）與
@@ -9858,6 +10986,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     restore: "從備份還原",
     firstRunGuide: "先選擇你的目標難易度，按「開始學習」後進入主控台。",
     applied: "已套用目標",
+    // （FE-40）切換難易度初始化確認視窗（AC-32-01、Q-38；architecture.md §7.15 確認視窗表）
+    reinitTitle: "切換難易度",
+    reinitLine1: "目前已有學習統計資料，切換難易度將初始化學習紀錄。",
+    reinitLine2: "建議先按「取消」，到主控台按「匯出備份」保存目前紀錄。",
+    reinitOk: "確定",
+    reinitCancel: "取消",
+    applyFailed: "儲存空間不足，未套用",
     unknown: "—",
     wordsUnit: " 字",
     dailyUnit: " 字/天",
@@ -10032,8 +11167,23 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     };
   }
 
+  /**
+   * （FE-40）初始化確認視窗的參數（AC-32-01、Q-38）：內文兩行以 \n 分行（dialog 以 pre-line 顯示），
+   * 只有「確定」「取消」2 個按鈕。每次回傳新物件。
+   * @returns {{title: string, message: string, okText: string, cancelText: string}}
+   */
+  function reinitDialogOptions() {
+    return {
+      title: T.reinitTitle,
+      message: T.reinitLine1 + "\n" + T.reinitLine2,
+      okText: T.reinitOk,
+      cancelText: T.reinitCancel
+    };
+  }
+
   var helpers = {
     TEXT: T,
+    reinitDialogOptions: reinitDialogOptions,
     entryModeOf: entryModeOf,
     actionsModel: actionsModel,
     formatInt: formatInt,
@@ -10061,6 +11211,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     var typing = false;     // 數字輸入框正在輸入（input 事件期間不覆寫使用者正在打的字）
     var busy = false;       // 本頁自己呼叫 action 期間略過 store 通知（由事件處理自行局部更新）
     var mode = null;        // （FE-32）按鈕區目前呈現的進入模式："firstRun"｜"main"
+    var pending = false;    // （FE-40）初始化確認視窗開啟中：忽略再次按「套用」
 
     function store() { return EMT.store; }
 
@@ -10377,20 +11528,86 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       syncDraft();
     }
 
-    /** 套用（AC-01-02、AC-01-07） */
-    function onApply() {
+    /** 顯示 toast（模組缺漏時略過：toast 只是提示，不影響狀態） */
+    function toast(text, kind) {
+      if (EMT.ui && EMT.ui.toast && typeof EMT.ui.toast.show === "function") {
+        EMT.ui.toast.show(text, { kind: kind });
+      }
+    }
+
+    /** 依 store 同步分數區、試算、卡片選中與狀態列（AC-32-04：輸入框、滑桿也回到 draftScore） */
+    function syncAll() {
       typing = false;
-      // 輸入框若有尚未修正的有效值，套用前先寫入
-      var r = G.parseScoreInput(refs.input.value);
-      act(function (a) {
-        if (r.ok) { a.setDraftScore(r.score); }
-        a.applyGoal();
-      });
       syncDraft();
       renderStatus();
-      if (EMT.ui && EMT.ui.toast && typeof EMT.ui.toast.show === "function") {
-        EMT.ui.toast.show(T.applied, { kind: "success" });
+    }
+
+    /**
+     * 套用（AC-01-02、AC-01-07；v0.5 FE-40：AC-32-01、AC-32-04、AC-32-05～AC-32-07）。
+     * 一律經 requestApplyGoal；需要初始化時先開確認視窗（architecture.md §7.15 流程）。
+     */
+    function onApply() {
+      typing = false;
+      if (pending) { return; }   // 視窗開啟中再按忽略（背景本已被遮罩攔截，此為保險）
+      // 輸入框若有尚未修正的有效值，套用前先寫入
+      var r = G.parseScoreInput(refs.input.value);
+      var res = act(function (a) {
+        if (r.ok) { a.setDraftScore(r.score); }
+        return a.requestApplyGoal();
+      });
+      var status = res && res.status;
+      if (status === "confirm") {
+        // 尚未改任何狀態（CI-10）；分數區顯示使用者選的分數直到視窗關閉
+        syncDraft();
+        openReinitDialog();
+        return;
       }
+      syncAll();
+      if (status === "applied") { toast(T.applied, "success"); }
+    }
+
+    /**
+     * （FE-40）初始化確認視窗（AC-32-01）。確定 → confirmApplyGoal；取消／Esc／點視窗外 → cancelApplyGoal（AC-32-04）。
+     * store 的 action 不包在 act 內：其 goal 等 tag 通知照常讓各 view（含本頁）重繪；本頁另外補一次同步，確保輸入框值回到 draftScore。
+     */
+    function openReinitDialog() {
+      var dialog = EMT.ui && EMT.ui.dialog;
+      if (!dialog || typeof dialog.confirm !== "function") {
+        // 程式組裝錯誤（LD-3）：狀態未改（requestApplyGoal 回 confirm 時不動任何資料），還原草稿後丟出
+        store().actions.cancelApplyGoal();
+        syncAll();
+        throw new Error("[EMT.customizer] 缺少模組：EMT.ui.dialog");
+      }
+      pending = true;
+      var p;
+      try {
+        p = Promise.resolve(dialog.confirm(reinitDialogOptions()));
+      } catch (e) {
+        p = Promise.reject(e);
+      }
+      return p.then(function (ok) {
+        pending = false;
+        var a = store().actions;
+        if (ok === true) {
+          var w = a.confirmApplyGoal();
+          syncAll();
+          if (w && w.ok) {
+            toast(T.applied, "success");
+          } else if (!w || w.reason !== "firstRun") {
+            // quota／error：store 已還原記憶體 draftScore，localStorage 保持原值（AC-32-11 (b)、CI-7）
+            toast(T.applyFailed, "error");
+          }
+        } else {
+          a.cancelApplyGoal();
+          syncAll();
+        }
+      }, function (e) {
+        // 視窗本身出錯：視同取消（不套用、不清除），記錄錯誤
+        pending = false;
+        store().actions.cancelApplyGoal();
+        syncAll();
+        if (root.console) { root.console.error("[EMT.customizer] 確認視窗失敗", e); }
+      });
     }
 
     /** （FE-32）首次畫面「開始學習」（AC-25-02、AC-25-03、AC-18-02；契約 FS-4） */
@@ -10532,7 +11749,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   環形以內嵌 SVG（core/dom.js 的 svg()）繪製，長條以 div 繪製，文字一律 textContent。
  * - 統計區：連續打卡天數、單字掌握數、模擬測驗正確率（訂閱 store，只重繪本區）。
  * - 目標區：目前目標分數、目前目標色級、目前生效色級、每日新字量（顯示頁面與匯入成功時更新）。
- * - 入口：5 個模組與「資料來源與授權」，以 data-go 交給 router 切換。
+ * - 入口：導覽模組（NAV_TAB_ORDER 去掉 dashboard）與「資料來源與授權」，以 data-go 交給 router 切換。
+ *   （v0.5，FE-38）入口由 NAV_TAB_ORDER 推導，不含隱藏頁（AC-17-06、AC-20-04、契約 §5.8 HT-2）。
  * - 備份：匯出（store.actions.exportBackup → services/download）、匯入（FileReader → store.actions.importBackup）。
  * 所有文字以 textContent 呈現（經 core/dom.js）。
  *
@@ -10634,15 +11852,20 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     };
   }
 
-  // 模組入口（AC-17-06）：tabId 與顯示名稱
-  var ENTRIES = [
-    entry("customizer"),
-    entry("flashcards"),
-    entry("part5"),
-    entry("decoder"),
-    entry("phrasebank"),
-    entry("sources")
-  ];
+  /**
+   * 模組入口（AC-17-06；v0.5，FE-38）：NAV_TAB_ORDER 去掉 dashboard 後加上 sources
+   * （customizer、flashcards、part5、sources）。於讀取時計算（LD-2），隱藏頁不會出現。
+   * @returns {{ tab: string, label: string }[]}
+   */
+  function entries() {
+    var order = core().C.NAV_TAB_ORDER || [];
+    var tabs = [];
+    for (var i = 0; i < order.length; i++) {
+      if (order[i] !== "dashboard") tabs.push(order[i]);
+    }
+    tabs.push("sources");
+    return tabs.map(entry);
+  }
 
   /** 非負整數；異常值 → 0 */
   function safeCount(v) {
@@ -11208,7 +12431,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var effective = statItem(TEXT.effectiveColor, "dash-color");
       var daily = statItem(TEXT.daily);
 
-      var entries = ENTRIES.map(function (en) {
+      var entryItems = entries().map(function (en) {
         return D.el("li", { className: "dash-entries__item" },
           D.el("button", {
             className: "btn dash-entry" + (en.tab === "sources" ? " dash-entry--sources" : ""),
@@ -11250,7 +12473,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         ]),
         D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-entries-h" } }, [
           D.el("h3", { className: "dash-section__title", attrs: { id: "dash-entries-h" }, text: TEXT.entriesTitle }),
-          D.el("ul", { className: "dash-entries" }, entries)
+          D.el("ul", { className: "dash-entries" }, entryItems)
         ]),
         D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-backup-h" } }, [
           D.el("h3", { className: "dash-section__title", attrs: { id: "dash-backup-h" }, text: TEXT.backupTitle }),
@@ -11308,7 +12531,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   return {
     TEXT: TEXT,
-    ENTRIES: ENTRIES,
+    // 讀取時才由 NAV_TAB_ORDER 推導（LD-2）；每次讀取回傳新陣列
+    get ENTRIES() { return entries(); },
     summaryOf: summaryOf,
     goalInfoOf: goalInfoOf,
     importMessage: importMessage,
@@ -12235,7 +13459,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *       只翻面（isFlipped 改變）不重建卡片、不重新呼叫；只有 "speech" tag 的變更（STT 狀態與結果）
  *       FE-11 也不呼叫，由 FE-12 自行 subscribe 更新容器內的分數區。
  *   EMT.components.speechPanel.reset()
- *     - 呼叫時機：換卡（卡片 DOM 重建前）、切換 card／quiz 模式、離開本頁（hide）。
+ *     - 呼叫時機：換卡（卡片 DOM 重建前）、切換 card／quiz 模式（不釋放麥克風，同頁重用）。
+ *   EMT.components.speechPanel.release()（v0.5）
+ *     - 呼叫時機：離開本頁（hide）；= reset() ＋ 釋放麥克風（AC-33-02）。不存在時退回 reset()。
  *   EMT.components.flashcardQuiz.render(containerEl, state)
  *     - containerEl：<div class="fc-quiz">，進入測驗模式時建立一次；之後每次 store 通知含
  *       "flashcard"、"quiz"、"studySet" 任一 tag 時，以同一容器再次呼叫。render 須先清空容器再依 state 重繪（冪等）。
@@ -12614,6 +13840,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   /** 停止語音（換卡、切換模式、離開頁面） */
   function resetSpeech() {
     callComponent("speechPanel", "reset");
+  }
+
+  /** 離開本頁：停止語音並釋放麥克風（speechPanel.release；不存在時退回 reset） */
+  function releaseSpeech() {
+    var c = component("speechPanel");
+    if (c && typeof c.release === "function") callComponent("speechPanel", "release");
+    else resetSpeech();
   }
 
   /** 顯示 toast（toast 模組不存在時略過） */
@@ -12999,9 +14232,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     show: function () {
       render(getState(), true);
     },
-    /** 離開本頁：停止朗讀與聆聽（AC-07-03、AC-08-10） */
+    /**
+     * 離開本頁：停止朗讀與聆聽（AC-07-03、AC-08-10），並釋放麥克風（AC-33-02，§4.4 v0.5）。
+     * 語音面板沒有 release 時退回 reset。
+     */
     hide: function () {
-      resetSpeech();
+      releaseSpeech();
     }
   };
 
@@ -14586,34 +15822,47 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
 /* views/speech-panel.js */
 /*
- * views/speech-panel.js — 抽認卡語音面板（FE-12）
- * 依據：architecture.md §4.4、§7.3、§7.6「TTS」「STT」；契約 SttResult、SttLight、SttStatus、
- *       RuntimeState.speech、PersistedData.sttNoticeAcknowledged、README §7.7 V-ST-08；PRD Q-04、Q-14
+ * views/speech-panel.js — 抽認卡語音面板（FE-12；v0.9 麥克風與收音條 FE-39）
+ * 依據：architecture.md §4.4、§7.3、§7.6「TTS」「STT」、§7.11 A-5、A-6、§7.14、§9「收音條」；
+ *       契約 SttResult、SttLight、SttStatus、RuntimeState.speech、PersistedData.sttNoticeAcknowledged、
+ *       README §7.7 V-ST-08、§8 AC-21-03 列、§9.3 DS-02、DS-03；PRD Q-04、Q-14、Q-36、Q-37
  * 涵蓋：AC-07-01～AC-07-05、AC-08-01～AC-08-03、AC-08-06～AC-08-11、AC-08-13、AC-08-14、
- *       AC-21-02、AC-21-03、AC-22-03
+ *       AC-21-02、AC-21-03、AC-22-03、AC-33-01～AC-33-08
  *
  * 提供 EMT.components.speechPanel（由 FE-11 抽認卡頁呼叫）：
  *   render(containerEl, card, state)
  *     - containerEl：卡片正面的 .fc-speech（每次都是新的空容器）；card：StudyCard；state：AppState。
- *     - 產生：「朗讀」1.0x、0.75x 按鈕；麥克風按鈕與常駐「需要連網」標示；訊息列；分數區。
+ *     - 產生：「朗讀」1.0x、0.75x 按鈕；麥克風按鈕、5 格收音條與常駐「需要連網」標示；訊息列；分數區。
  *     - 首次 render 時訂閱 store；之後 "speech" tag 的變更（麥克風狀態、評分結果）由本元件自行更新，
  *       抽認卡頁不會為此重繪。
  *   reset()
- *     - 換卡、切換模式、離開頁面時呼叫：停止朗讀、中止聆聽（不提示）、清除訊息、麥克風回待機。
+ *     - 換卡、切換模式時呼叫：停止朗讀、中止聆聽（不提示）、停止音量分析並把收音條歸暗、清除訊息、
+ *       麥克風回待機。**不釋放**麥克風音軌（同頁重用，Q-36、AC-33-01）。
+ *   release()
+ *     - 離開單字卡頁時呼叫（flashcards.hide）：reset() ＋ EMT.services.mic.release()，
+ *       停止所有音軌並關閉音訊分析（AC-33-02）。
  *
- * 麥克風流程（AC-08-01、AC-08-02、AC-08-09、AC-08-10、AC-08-13、AC-08-14）：
- *   不支援 → toast「建議使用 Google Chrome / Edge」
+ * 麥克風流程（AC-08-01、AC-08-02、AC-08-09、AC-08-10、AC-08-13、AC-08-14、§7.14 決定表）：
+ *   不支援 SpeechRecognition → 只 toast「建議使用 Google Chrome / Edge」（不取得麥克風）
  *   聆聽中再按 → 停止並回待機（不提示）
- *   離線 → 「語音辨識需要網路連線」
+ *   取得麥克風中再按 → 忽略（區域旗標，不進 store）
+ *   離線 → 「語音辨識需要網路連線」（不取得麥克風）
  *   sttNoticeAcknowledged 為 false → 狀態 notice，以 ui.dialog 顯示說明：
- *       「我知道了」→ acknowledgeSttNotice 後開始聆聽；「取消」→ 回待機（下次仍顯示，V-ST-08）
- *   開始聆聽 → 狀態 listening（按鈕文字「聆聽中」、紅色閃爍）
+ *       「我知道了」→ acknowledgeSttNotice 後取得麥克風；「取消」→ 回待機、不取得麥克風（下次仍顯示，V-ST-08）
+ *   取得麥克風（EMT.services.mic.acquire，已持有音軌時直接重用）：
+ *       permission → 「需要麥克風權限」與開啟方式，不辨識；notfound → 「找不到麥克風裝置」，不辨識；
+ *       unavailable → 不提示，照常辨識、收音條全暗（AC-33-07）；released → 不提示、不辨識；
+ *       完成時若已換卡（gen 改變）→ 不開始辨識（音軌留著供同頁重用）
+ *   開始聆聽 → 狀態 listening（按鈕文字「聆聽中」、紅色閃爍）＋ mic.startMeter 依音量點亮收音條
  *   onresult → core/similarity 計分 → setSttResult、recordSttScored；辨識文字為空 → 「未偵測到語音，請再試一次」
- *   onerror：not-allowed／service-not-allowed／audio-capture → 「需要麥克風權限」與開啟方式；
- *            network → 「語音辨識需要網路連線」；no-speech → 「未偵測到語音，請再試一次」
+ *   onerror：依 §7.6 對照表（audio-capture v0.5 改為「找不到麥克風裝置」）
  *   onend 無結果且非手動停止 → 「未偵測到語音，請再試一次」
+ *   聆聽以任何方式結束 → 同一個工作中 mic.stopMeter() 並把 5 格設暗（AC-33-03）
+ *   聆聽中音軌結束（拔除、被停用）→ 中止辨識、回待機、「找不到麥克風裝置」（AC-33-06）
  *
- * 隱私：不保存任何音訊；評分結果只放執行期狀態（契約 RuntimeState.speech.lastResult，不持久化，AC-21-03）。
+ * 隱私：不保存任何音訊；音量值只存在本元件的區域變數（只用來切換收音條 class），從不傳給 store action；
+ *       評分結果只放執行期狀態（契約 RuntimeState.speech.lastResult，不持久化，AC-21-03）。
+ *       本檔不直接存取麥克風，一律經 services/mic.js。
  * 安全：所有文字（含辨識結果與自訂單字）一律經 EMT.core.dom.el 以 textContent 寫入（C-7）。
  * 純邏輯（錯誤訊息對照、評分結果、分數區模型）於 Node 下以 module.exports 匯出供單元測試；
  * 瀏覽器下只登錄元件，載入時不操作 DOM。
@@ -14643,12 +15892,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     offline: "語音辨識需要網路連線",                      // AC-08-14
     permission: "需要麥克風權限",                         // AC-08-09
     permissionHelp: "開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。",
-    audioCaptureHelp: "請確認裝置已連接麥克風；並點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許。",
+    noDevice: "找不到麥克風裝置",                         // AC-33-05、AC-33-06（v0.9）
+    noDeviceHelp: "請確認裝置已連接麥克風後再按一次",     // AC-33-05（v0.9）
+    meterLabel: "收音音量",                               // §7.14 收音條 aria-label
     noSpeech: "未偵測到語音，請再試一次",                 // AC-08-10
     generic: "語音辨識發生錯誤，請稍後再試一次",
     noticeTitle: "語音辨識說明",
-    // AC-08-13 原文
-    notice: "語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統不保存、不上傳錄音",
+    // AC-08-13（v0.9）原文
+    notice: "語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統只即時讀取音量以顯示收音條，不錄音、不保存、不上傳錄音。停留在單字卡頁期間，瀏覽器可能持續顯示麥克風使用中圖示，離開單字卡頁即停止使用麥克風",
     noticeOk: "我知道了",
     noticeCancel: "取消",
     resultTitle: "辨識吻合度",                            // AC-08-11、Q-14
@@ -14680,7 +15931,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       case "service-not-allowed":
         return { text: TEXT.permission, help: TEXT.permissionHelp, kind: "error" };
       case "audio-capture":
-        return { text: TEXT.permission, help: TEXT.audioCaptureHelp, kind: "error" };
+        // v0.5 修訂（契約 DS-03、PRD R-18 二 (d)）：與麥克風取得失敗 notfound 同訊息
+        return { text: TEXT.noDevice, help: TEXT.noDeviceHelp, kind: "error" };
       case "network":
         return { text: TEXT.offline, help: "", kind: "error" };
       case "no-speech":
@@ -14690,6 +15942,64 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       default:
         return { text: TEXT.generic, help: "", kind: "error" };
     }
+  }
+
+  /**
+   * 依 mic.acquire() 的失敗原因決定提示（§7.14 錯誤對照，DS-03）。
+   * @param {string} reason "permission" | "notfound" | "unavailable" | "released"
+   * @returns {{text: string, help: string, kind: string}|null}
+   *   null = 不提示（unavailable 照常辨識；released 為取得中已離開頁面）
+   */
+  function messageForAcquire(reason) {
+    switch (reason) {
+      case "permission":
+        return { text: TEXT.permission, help: TEXT.permissionHelp, kind: "error" };   // AC-08-09
+      case "notfound":
+        return { text: TEXT.noDevice, help: TEXT.noDeviceHelp, kind: "error" };       // AC-33-05
+      default:
+        return null;                                                                   // AC-33-07
+    }
+  }
+
+  /**
+   * 取得 core/meter（呼叫時取用；Node 測試下改以 require 載入）；不存在回 null。
+   */
+  function meterLib() {
+    var m = EMT.core && EMT.core.meter;
+    if (!m && typeof module === "object" && module.exports && typeof require === "function") {
+      try {
+        m = require("../core/meter.js");
+      } catch (e) {
+        m = null;
+      }
+    }
+    return m && typeof m.barsModel === "function" ? m : null;
+  }
+
+  // 收音條格數（與 core/meter.BAR_COUNT 相同；meter 不存在時的後備）
+  var BAR_COUNT = 5;
+
+  /**
+   * 收音條模型：長度 5 的布林陣列，前 level 個為 true（委派 meter.barsModel）。
+   * meter 不存在或回傳格式不符時一律全暗。
+   * @param {number} level 亮格數 0～5
+   * @returns {boolean[]}
+   */
+  function meterBarsOf(level) {
+    var dark = [];
+    for (var i = 0; i < BAR_COUNT; i++) dark.push(false);
+    var m = meterLib();
+    if (!m) return dark;
+    var bars;
+    try {
+      bars = m.barsModel(level);
+    } catch (e) {
+      return dark;
+    }
+    if (!bars || bars.length !== BAR_COUNT) return dark;
+    var out = [];
+    for (var j = 0; j < BAR_COUNT; j++) out.push(bars[j] === true);
+    return out;
   }
 
   /**
@@ -14748,6 +16058,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     TEXT: TEXT,
     LIGHT_LABELS: LIGHT_LABELS,
     messageForError: messageForError,
+    messageForAcquire: messageForAcquire,
+    meterBarsOf: meterBarsOf,
     buildResult: buildResult,
     resultModel: resultModel,
     targetOf: targetOf
@@ -14769,6 +16081,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   var gen = 0;            // 每次 reset／換卡遞增；非同步回呼（對話框、朗讀）據此判斷是否仍有效
   var unsubscribe = null;
   var shownResult = null; // 分數區目前顯示的 SttResult（參照比對，避免重複重建）
+  var acquiringGen = -1;  // 取得麥克風中時記錄當時的 gen；等於目前 gen 即為「取得中」（區域旗標，不進 store）
+  var meterActive = false; // 音量分析是否進行中（聆聽中才為 true）
+  var shownLevel = 0;     // 收音條目前亮格數（只供重建 DOM 時還原顯示；不寫入任何狀態）
+  var trackEndedBound = false; // 是否已向 mic 登錄音軌結束回呼
 
   function dom() {
     return EMT.core.dom;
@@ -14831,6 +16147,83 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   function similarity() {
     return EMT.core && EMT.core.similarity;
+  }
+
+  /** services/mic（不存在時回 null，流程退回 v0.8：不讀音量、照常辨識） */
+  function micService() {
+    var m = services().mic;
+    return m && typeof m === "object" ? m : null;
+  }
+
+  /** 是否正在取得麥克風（同一個 gen 內） */
+  function isAcquiring() {
+    return acquiringGen === gen;
+  }
+
+  // ── 收音條（§7.14、§7.11 A-6：只切換 is-on class，無漸變） ──
+
+  function renderBars(level) {
+    shownLevel = level;
+    if (!ui || !ui.bars) return;
+    var model = meterBarsOf(level);
+    for (var i = 0; i < ui.bars.length; i++) {
+      ui.bars[i].classList.toggle("is-on", model[i] === true);
+    }
+  }
+
+  /** 同步停止音量分析並把 5 格設暗（不等計時器，AC-33-03 聆聽結束 ≤ 100 ms） */
+  function stopMeterNow() {
+    meterActive = false;
+    var m = micService();
+    if (m && typeof m.stopMeter === "function") {
+      try { m.stopMeter(); } catch (e) { /* 忽略 */ }
+    }
+    renderBars(0);
+  }
+
+  /** 進入聆聽後開始讀取音量；回呼只切換收音條，不寫入任何狀態 */
+  function startMeter(myGen) {
+    renderBars(0);
+    var m = micService();
+    if (!m || typeof m.startMeter !== "function") return;
+    meterActive = true;
+    try {
+      m.startMeter(function (level) {
+        if (!meterActive || myGen !== gen) return;
+        renderBars(level);
+      });
+    } catch (e) {
+      meterActive = false;
+      renderBars(0);
+    }
+  }
+
+  /** 音軌結束（拔除、被停用）：聆聽中 → 中止辨識並提示；未聆聽 → 不提示（AC-33-06） */
+  function onTrackEnded() {
+    try {
+      var sp = speechOf(getState());
+      if (sp.sttStatus !== "listening") {
+        stopMeterNow();
+        return;
+      }
+      gen++; // 讓本次聆聽晚到的回呼失效
+      var stt = services().stt;
+      try { if (stt && typeof stt.abort === "function") stt.abort(); } catch (e) { /* 忽略 */ }
+      endWith({ text: TEXT.noDevice, help: TEXT.noDeviceHelp, kind: "error" });
+    } catch (e) {
+      if (typeof console !== "undefined") console.error("[EMT.components.speechPanel] 音軌結束處理失敗", e);
+    }
+  }
+
+  /** 向 mic 登錄音軌結束回呼（只登錄一次） */
+  function bindTrackEnded() {
+    if (trackEndedBound) return;
+    var m = micService();
+    if (!m || typeof m.onTrackEnded !== "function") return;
+    try {
+      m.onTrackEnded(onTrackEnded);
+      trackEndedBound = true;
+    } catch (e) { /* 忽略 */ }
   }
 
   /** 面板是否仍在畫面上 */
@@ -14903,6 +16296,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   function renderMic(sp) {
     if (!ui) return;
     var listening = sp.sttStatus === "listening";
+    // 狀態已離開聆聽（含由其他途徑改變）→ 收音條不得停在亮格
+    if (!listening && meterActive) stopMeterNow();
     var btn = ui.micBtn;
     btn.classList.toggle("is-listening", listening);
     btn.setAttribute("aria-pressed", listening ? "true" : "false");
@@ -14936,6 +16331,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   // ── STT 流程 ──
 
   function setStatus(s) {
+    // 聆聽以任何方式結束（結果、逾時、無結果、錯誤、再按、start 失敗）都經過這裡：
+    // 先在同一個工作中停止音量分析並歸暗（AC-33-03）
+    if (s !== "listening") stopMeterNow();
     act("setSttStatus", s);
   }
 
@@ -15008,6 +16406,62 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         endWith(null);
         toast(TEXT.sttUnsupported, "error");
       } else endWith({ text: TEXT.generic, help: "", kind: "error" });
+      return;
+    }
+    // 已進入聆聽：開始依音量點亮收音條（無 analyser 時 mic 會立即回報 0，收音條維持全暗）
+    if (myGen === gen && speechOf(getState()).sttStatus === "listening") startMeter(myGen);
+  }
+
+  /**
+   * 取得（或重用）麥克風後才開始辨識（§7.14 決定表；順序：acquire 結束後才 stt.start）。
+   * @param {number} myGen 按下時的 gen
+   */
+  function acquireThenListen(myGen) {
+    var m = micService();
+    if (!m || typeof m.acquire !== "function") {
+      // 沒有麥克風服務：視同 unavailable，照常辨識（AC-33-07）
+      startListening(myGen);
+      return;
+    }
+    acquiringGen = myGen;
+    var p;
+    try {
+      p = m.acquire();
+    } catch (e) {
+      p = null;
+    }
+    Promise.resolve(p).then(function (r) {
+      onAcquired(r, myGen);
+    }, function () {
+      // acquire 永不 reject；保險起見視同 unavailable
+      onAcquired({ ok: false, reason: "unavailable" }, myGen);
+    });
+  }
+
+  /** 取得麥克風結束 */
+  function onAcquired(r, myGen) {
+    if (acquiringGen === myGen) acquiringGen = -1;
+    // 期間已換卡、切換模式或離開頁面：不開始辨識（音軌由 mic 保留供同頁重用，或已被 release）
+    if (myGen !== gen || !attached()) return;
+    try {
+      if (r && r.ok === true) {
+        startListening(myGen);
+        return;
+      }
+      var reason = r && r.reason;
+      if (reason === "released") return;          // 取得中已釋放：不顯示任何訊息
+      var m = messageForAcquire(reason);
+      if (m) {
+        // permission／notfound：不辨識、不顯示分數、收音條全暗（AC-08-09、AC-33-05）
+        clearResult();
+        endWith(m);
+        return;
+      }
+      startListening(myGen);                       // unavailable：照常辨識（AC-33-07）
+    } catch (e) {
+      if (typeof console !== "undefined") console.error("[EMT.components.speechPanel] 開始聆聽失敗", e);
+      try { clearResult(); } catch (e2) { /* 忽略 */ }
+      endWith({ text: TEXT.generic, help: "", kind: "error" });
     }
   }
 
@@ -15042,7 +16496,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         // 只在按「我知道了」時記錄已讀（V-ST-08）
         act("acknowledgeSttNotice");
         if (myGen === gen && attached()) {
-          startListening(myGen);
+          // 按「我知道了」後才取得麥克風（AC-08-13）；取得期間按鈕回待機，再按由 acquiring 旗標忽略
+          leaveNotice();
+          acquireThenListen(myGen);
           return;
         }
       }
@@ -15069,6 +16525,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         setStatus("idle");
         return;
       }
+      if (isAcquiring()) return;                             // 取得麥克風中：忽略
       setMessage(null);
       if (typeof stt.isOnline === "function" && !stt.isOnline()) {
         // 離線不會進入 startListening，需在此清除前次分數（AC-08-14「不顯示分數」，BUG-001）
@@ -15082,7 +16539,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         showNotice(myGen);
         return;
       }
-      startListening(myGen);
+      acquireThenListen(myGen);
     } catch (e) {
       if (typeof console !== "undefined") console.error("[EMT.components.speechPanel] 麥克風操作失敗", e);
       try { clearResult(); } catch (e2) { /* 忽略 */ }
@@ -15152,8 +16609,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       on: { click: onMicClick }
     }, [micDot, micText]);
     var badge = el("span", { className: "sp-net", text: TEXT.needNetwork });
+    // 5 格收音條：常駐、固定大小，只切換各格 is-on（AC-33-03；§7.14 DOM）
+    var bars = [];
+    for (var b = 0; b < BAR_COUNT; b++) bars.push(el("span", { className: "sp-meter__bar" }));
+    var meterEl = el("span", { className: "sp-meter", attrs: { role: "img", "aria-label": TEXT.meterLabel } }, bars);
 
-    var sttRow = el("div", { className: "sp-stt" }, [micBtn, badge]);
+    var sttRow = el("div", { className: "sp-stt" }, [micBtn, meterEl, badge]);
     var msg = el("div", { className: "sp-msg", attrs: { role: "status", "aria-live": "polite", hidden: true } });
     var result = el("div", { className: "sp-result", attrs: { "aria-live": "polite", hidden: true } });
 
@@ -15166,10 +16627,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       root: rootEl,
       micBtn: micBtn,
       micText: micText,
+      bars: bars,
       msg: msg,
       result: result
     };
     shownResult = undefined;
+    // 聆聽中重建面板（同一張卡重繪）時還原收音條；其他情況一律全暗
+    renderBars(meterActive ? shownLevel : 0);
   }
 
   /** 停止所有語音活動（不改動畫面參照） */
@@ -15201,6 +16665,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           var s = store();
           if (s && typeof s.subscribe === "function") unsubscribe = s.subscribe(onStore);
         }
+        bindTrackEnded();
         // 麥克風在新容器上一定是待機；殘留的 notice 狀態由對話框結束時處理
         sync(st);
       } catch (e) {
@@ -15208,10 +16673,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
     },
 
-    /** 停止朗讀與聆聽（AC-07-03、AC-08-10） */
+    /**
+     * 停止朗讀與聆聽（AC-07-03、AC-08-10）；同時停止音量分析、收音條歸暗。
+     * 不釋放麥克風音軌（同頁重用，Q-36、AC-33-01）。
+     */
     reset: function () {
       try {
         stopAll();
+        stopMeterNow();
         cardKey = null;
         message = null;
         renderMessage();
@@ -15219,6 +16688,22 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         if (sp.sttStatus === "listening") setStatus("idle");
       } catch (e) {
         if (typeof console !== "undefined") console.error("[EMT.components.speechPanel] reset 失敗", e);
+      }
+    },
+
+    /**
+     * 離開單字卡頁：reset() ＋ 釋放麥克風（停止所有音軌、關閉音訊分析，AC-33-02）。
+     * mic.release() 為同步，呼叫結束時音軌即為 ended。
+     */
+    release: function () {
+      component.reset();
+      var m = micService();
+      if (m && typeof m.release === "function") {
+        try {
+          m.release();
+        } catch (e) {
+          if (typeof console !== "undefined") console.error("[EMT.components.speechPanel] 釋放麥克風失敗", e);
+        }
       }
     }
   };

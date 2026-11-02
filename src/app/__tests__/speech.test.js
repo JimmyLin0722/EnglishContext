@@ -1133,6 +1133,8 @@ describe("speech.test.js", () => {
     assert.match(block(".sp-mic.is-listening"), /animation:\s*sp-blink/);
     assert.match(css, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.sp-mic\.is-listening\s*\{\s*animation:\s*none;/);
     assert.equal(panel.TEXT.micListening, "聆聽中");
+    // 麥克風按鈕固定最小寬度：切換「聆聽中」時收音條不位移（AC-33-03）
+    assert.match(block(".sp-mic"), /min-width:\s*[\d.]+em/);
   });
 
   test("原始碼：speech-panel.js 不含錄音 API 名稱、不直接存取麥克風或儲存", () => {

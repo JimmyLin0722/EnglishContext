@@ -209,6 +209,23 @@ test("B-7：其他外部資源樣式（link href、img、iframe、CDN）即中�
   }
 });
 
+test("B-7（v0.5，FE-41）：程式、註解或模板含 MediaRecorder 即中止（AC-21-03）", async () => {
+  const { FORBIDDEN_PATTERNS } = await loadBuild();
+  assert.ok(
+    FORBIDDEN_PATTERNS.some((p) => p.name === "MediaRecorder" && p.re.test("MediaRecorder")),
+    "FORBIDDEN_PATTERNS 須含 MediaRecorder"
+  );
+  // 程式呼叫
+  await expectAbort({ "app/services/x.js": "var r = new MediaRecorder(stream);\n" }, "EXTERNAL_RESOURCE");
+  // 只出現在註解也中止
+  await expectAbort({ "app/core/x.js": "// 不使用 MediaRecorder\nvar a = 1;\n" }, "EXTERNAL_RESOURCE");
+  // 模板
+  await expectAbort({ "app/index.html": TEMPLATE.replace("</head>", "<!-- MediaRecorder -->\n</head>") }, "EXTERNAL_RESOURCE");
+  // 對照：getUserMedia 本身不在 B-7 禁止清單（位置由靜態檢查限制）
+  const ok = await runBuild({ "app/services/mic.js": "var g = 'getUserMedia';\n" });
+  assert.ok(ok.written && ok.written.includes("getUserMedia"));
+});
+
 test("B-5：樣式含 @import 或 url(http 即中止；B-7 模板含 @import 也中止", async () => {
   await expectAbort({ "app/styles/00-base.css": '@import "x.css";\nbody{}' }, "CSS_IMPORT");
   await expectAbort({ "app/styles/00-base.css": "body{background:url( 'https://x/y.png')}" }, "CSS_EXTERNAL_URL");

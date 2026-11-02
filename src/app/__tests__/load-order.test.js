@@ -144,7 +144,28 @@ describe("load-order.test.js", () => {
     for (const u of ["motion", "bottomNav", "importFlow"]) assert.equal(typeof EMT.ui[u], "object", "缺少 EMT.ui." + u);
   });
 
-  test("LD-2：views 載入時只登錄頁面（主控台與 6 個功能區共 7 個頁籤皆經 EMT.views.register 登錄）", async () => {
+  test("v0.9 新模組（FE-41）：core meter／reinit、services mic 依建置順序載入不拋例外且存在", async () => {
+    const { files } = await appFiles();
+    const expected = ["core/meter.js", "core/reinit.js", "services/mic.js"];
+    for (const f of expected) assert.ok(files.includes(f), "建置清單缺少 " + f);
+    // 層序：core 新模組在 services 之前，mic 在 ui、views 之前
+    assert.ok(files.indexOf("core/meter.js") < files.findIndex((f) => f.startsWith("services/")));
+    assert.ok(files.indexOf("core/reinit.js") < files.findIndex((f) => f.startsWith("services/")));
+    assert.ok(files.indexOf("services/mic.js") < files.findIndex((f) => f.startsWith("ui/")));
+    const { sandbox, logs } = makeSandbox();
+    vm.createContext(sandbox);
+    const failures = loadAll(sandbox, files);
+    assert.deepEqual(failures, [], "載入時拋出例外");
+    assert.deepEqual(logs.error, [], "載入時輸出 console.error");
+    const EMT = sandbox.EMT;
+    assert.equal(typeof EMT.core.meter, "object", "缺少 EMT.core.meter");
+    assert.equal(typeof EMT.core.reinit, "object", "缺少 EMT.core.reinit");
+    assert.equal(typeof EMT.services.mic, "object", "缺少 EMT.services.mic");
+    // 載入時不得觸發麥克風（沙箱沒有 navigator；載入不拋例外即表示未於載入期取用）
+    assert.equal(typeof sandbox.navigator, "undefined");
+  });
+
+  test("LD-2、HT-5：views 載入時只登錄頁面（主控台與 6 個功能區共 7 個頁籤皆經 EMT.views.register 登錄；隱藏頁 decoder、phrasebank 仍登錄）", async () => {
     const { files } = await appFiles();
     const { sandbox } = makeSandbox();
     vm.createContext(sandbox);

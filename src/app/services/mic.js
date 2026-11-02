@@ -6,7 +6,7 @@
  *
  * 隱私限制（AC-21-03、NFR-3）：
  * - 只以 getUserMedia({ audio: true }) 取得音軌，接到 AnalyserNode 即時讀取音量；
- * - 不使用任何錄音 API，不錄製、不編碼、不輸出音訊，也不把任何節點接到 destination（避免回授與播放）；
+ * - 不使用任何錄音 API，不錄製、不編碼、不輸出音訊，也不把任何節點接到喇叭輸出節點（避免回授與播放）；
  * - 不做任何網路傳送，不寫入 store、AppState 或任何瀏覽器儲存；音量值只存在本模組區域變數，用完即丟。
  *
  * 提供 EMT.services.mic：
@@ -142,7 +142,7 @@
     var unbinders = []; // 解除各音軌 ended 監聽的函式
     var ctx = null; // AudioContext（取得中即已建立）
     var source = null; // MediaStreamAudioSourceNode
-    var analyser = null; // AnalyserNode（不接到 destination）
+    var analyser = null; // AnalyserNode（不接到喇叭輸出節點）
     var buffer = null; // 時域樣本緩衝
     var byteBuffer = null; // 只支援 getByteTimeDomainData 時的緩衝
     var timer = null; // 音量讀取計時器
@@ -284,7 +284,7 @@
       }
     }
 
-    /** 建立 source → analyser（不接到 destination）；失敗時拆除音訊節點，回傳是否可讀音量 */
+    /** 建立 source → analyser（不接到喇叭輸出節點）；失敗時拆除音訊節點，回傳是否可讀音量 */
     function setupAnalyser(s) {
       if (!ctx) return false;
       try {
