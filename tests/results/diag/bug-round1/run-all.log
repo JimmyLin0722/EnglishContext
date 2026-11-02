@@ -1,0 +1,214 @@
+
+> english-master-track@0.1.0 test:e2e
+> node tests/run-all.mjs
+
+
+▶ node tests/data/data-check.mjs D:\Demo\Clude\我的多益攻略\tests\results\data.json
+  PASS TC-D01 AC-03-06 N_O=1000、N_B=2809、N_G=5620；VOCAB_MANIFEST nB=2809 nG=5620；依字表重算=5620
+  PASS TC-D02 AC-03-07 重複 0 筆
+  PASS TC-D03 AC-03-08 排名連續=true；1～N_B 與 NGSL SFI Rank 順序一致=true；> N_B 皆來自 TSL/BSL/NAWL=true；全序列符合 R-1～R-4=true
+  PASS TC-D04 AC-03-09 集合相同=true（2809 vs 2809）；缺少功能詞=無；功能詞具完整卡片欄位 10/10
+  PASS TC-D05 AC-06-08 > N_B 空白 0 筆；≤ N_B 型別錯誤 0 筆；≤ N_B 空白 1259 筆（允許）
+  PASS TC-D06 AC-06-01、AC-06-02、AC-06-07 欄位問題 0 筆；pos 值：art. v. conj. prep. adv. aux. pron. adj. n. num. int. pref.
+  PASS TC-D07 AC-06-02（契約 V-VOC-07 M-8） 字首字 6 筆（non、pre、ex、multi、semi、neo）；不符 0
+  PASS TC-D08 AC-23-03 問題 0；missing 4 筆（résumé、café、entrée、unauthorize）皆原創=true；ECDICT 釋義 5576 筆、原創 44 筆；音標標 ECDICT 0 筆=true；ECDICT 子集鍵 5616
+  PASS TC-D09 AC-23-05 登錄 NGSL、TSL、BSL、NAWL、ECDICT、ORIGINAL；缺漏 無；以未確認字表為唯一來源 0 筆
+  PASS TC-D10 AC-23-02 資料中字表種類 4（NGSL、NAWL、TSL、BSL）、登錄字表 4；includedItemCount 相符=true；ECDICT 筆數登錄 5576 / 實際 5576；MIT 全文與 sources/ecdict/LICENSE 一致=true
+  PASS TC-D11 AC-05-01、AC-05-02、AC-05-03 範本 資工、商管、生醫統計；每範本字數 10/10/10；與內建重複 0；30 字互不重複=true
+  PASS TC-D12 AC-10-01、AC-10-02、AC-11-02 共 200 題；preposition_collocation 50、part_of_speech 50、context_vocabulary 50、connector 50；結構問題 0；正解位置 A～D 50/50/50/50
+  PASS TC-D13 AC-12-02、AC-12-03 共 50 句；缺主詞或動詞或非原創 0 句
+  PASS TC-D14 AC-14-01 主題：Abstract 摘要(5)、方法論(5)、文獻回顧（Research Gap）(5)
+  PASS TC-D15 AC-15-02 共 100 則；gap 25、aim 25、findings 25、limitations 25
+  PASS TC-D16 AC-23-04（標記） 來源標記非原創 0 筆（共 5970）；精確片語搜尋比對列入人工驗收 TC-M09
+  PASS TC-D17 AC-09-02 釋義非空 5620/5620；相異釋義 5606；同一釋義最多重複 3 次
+資料驗收：通過 17、失敗 0
+
+▶ node tests/data/records-check.mjs C:\Users\User\AppData\Local\Temp\emt-qa-gkRyWk\validate-full.txt D:\Demo\Clude\我的多益攻略\tests\results\records.json
+V-VOC-17 警告：8 筆，紀錄缺列 0
+V-VOC-17 清單（資訊）：179 筆，紀錄缺列 0
+H-1W 警告：0 筆，紀錄缺列 0
+V-VOC-09 原創原因：40 筆，紀錄缺列 0
+
+▶ node tests/static/static-check.mjs D:\Demo\Clude\我的多益攻略\tests\results\static.json C:\Users\User\AppData\Local\Temp\emt-qa-gkRyWk\rebuilt.html
+  PASS TC-S01 AC-19-01 dist 檔案：english-master-track.html；<style> 區塊 1；外部資源樣式命中：無；程式網路 API：無
+  PASS TC-S02 AC-19-04 3,030,574 bytes（上限 5,242,880）
+  PASS TC-S03 AC-04-09 src/app 命中 0；產物程式命中 無
+  PASS TC-S04 AC-21-02 命中：無
+  PASS TC-S05 AC-21-03（程式面） 命中：無
+  PASS TC-S06 AC-23-06 開頭註解含 MIT 全文與 Copyright=true；CC BY-SA 聲明與網址=true；<meta charset> 結束於第 70 byte
+  PASS TC-S07 AC-04-04、AC-24-07（產物） <script> 開 2／關 2；javascript: 連結=false
+  PASS TC-S08 AC-19-01（D-1 不打包） 命中：無
+  PASS TC-S09 AC-19-01（交付物可追溯） 重建產物 3,030,574 bytes；與 dist 位元組相同=true
+靜態檢查：通過 9、失敗 0
+
+▶ node tests/static/boundary-check.mjs D:\Demo\Clude\我的多益攻略\tests\results\boundary.json
+檔案總數 184；屬於任務 120；人類／上游文件 38；QA tests/ 26；不屬於任何任務 0
+任務 paths 中不存在的檔案：src/app/styles/90-overrides.css
+多任務共用檔案：src/data/sources.js(CT-02→CT-23)、src/data/vocab-0001.js(CT-02→CT-03)、src/data/vocab-0401.js(CT-02→CT-04)、src/data/vocab-0801.js(CT-02→CT-05)、src/data/vocab-1201.js(CT-02→CT-06)、src/data/vocab-1601.js(CT-02→CT-07)、src/data/vocab-2001.js(CT-02→CT-08)、src/data/vocab-2401.js(CT-02→CT-09)、src/data/vocab-2810.js(CT-02→CT-10)、src/data/vocab-3160.js(CT-02→CT-11)、src/data/vocab-3510.js(CT-02→CT-12)、src/data/vocab-3860.js(CT-02→CT-13)、src/data/vocab-4210.js(CT-02→CT-14)、src/data/vocab-4560.js(CT-02→CT-15)、src/data/vocab-4910.js(CT-02→CT-16)、src/data/vocab-5260.js(CT-02→CT-17)、src/data/part5.js(CT-19→CT-20)、src/data/_records/part5.md(CT-19→CT-20)、tools/build.mjs(FE-01→FE-18)、src/app/index.html(FE-01→FE-02)
+
+▶ node tests/e2e/e2e-goal.mjs
+  PASS TC-18-02 AC-18-02 localStorage 初始=無；目前目標分數=600｜目前目標色級=綠｜目前生效色級=綠｜每日新字量=15 字/天；共 5620 張；toast=[]；例外 0
+  PASS TC-01-01 AC-01-01 橘 10～215 分 1,000 字；棕 220～465 分 2,809 字；綠 470～725 分 5,620 字；藍 730～855 分 待定 鎖定 即將開放；金 860～990 分 待定 鎖定 即將開放；官方門檻/Tier 字樣=false
+  PASS TC-02-01 AC-02-01 滑桿 720 → 輸入框 720；輸入 650 → 滑桿 650；鍵盤右鍵 → 655/655
+  PASS TC-02-02 AC-02-02 「5」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「995」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「abc」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「1e2」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「７００」→ 提示「請輸入 10～990 的分數」試算 綠/54 週
+  PASS TC-02-03 AC-02-03 每日新字量：10 字/天、10 字/天、10 字/天、10 字/天、15 字/天、15 字/天、20 字/天、20 字/天、20 字/天、20 字/天
+  PASS TC-02-04 AC-02-04 對應色級：橘、橘、棕、棕、綠、綠、藍（即將開放）、藍（即將開放）、金（即將開放）、金（即將開放）
+  PASS TC-02-05a AC-02-05 S=100 → 1,000 字、15 週；S=300 → 2,809 字、41 週；S=600 → 5,620 字、54 週（c=0；N_G=5,620 → ⌈5620/105⌉=54）
+  PASS TC-02-09 AC-02-09 723 → 725、722 → 720；滑桿 step=5
+  PASS TC-02-10a AC-02-10 色級「藍（即將開放）」、字量「待定」、20 字/天、41 週、旁註=true、提示=true（⌈5620/140⌉=41）
+  PASS TC-02-07 AC-02-07、AC-22-04 10 次（輸入事件到繪製後）ms：3.4、1.5、16.9、18.1、15.3、16.3、15.4、17.5、16.5、17.2；最大 18.1（無頭 Chrome、未降速；基準環境量測列人工 TC-M07）
+  PASS TC-01-05 AC-01-05 300 點綠 → 470（綠、15 字/天、54 週）；500 點綠 → 500
+  PASS TC-03-06 AC-03-06、AC-03-01、AC-03-02、AC-03-04 orange → 共 1000 張；brown → 共 2809 張；green → 共 5620 張
+  PASS TC-01-02 AC-01-02 套用橘後生效 橘；點綠套用後生效 綠、抽認卡 共 5620 張
+  PASS TC-01-03 AC-01-03 點棕未套用後離開：生效 綠、共 5620 張；主控台 目前目標分數=470｜目前目標色級=綠｜目前生效色級=綠｜每日新字量=15 字/天
+  PASS TC-01-06 AC-01-06 分數對應色級 棕；目前生效 綠；共 5620 張
+  PASS TC-01-07 AC-01-07、AC-03-03 點藍 → 730、「藍（即將開放）」、提示=true；套用後目標 藍、生效「綠（內建上限）」、共 5620 張；點金 → 860；套用後目標 金、生效「綠（內建上限）」、共 5620 張
+  PASS TC-17-06 AC-17-06 600：目前目標分數=600｜目前目標色級=綠｜目前生效色級=綠｜每日新字量=15 字/天 ／ 730：目前目標分數=730｜目前目標色級=藍｜目前生效色級=綠（內建上限）｜每日新字量=15 字/天 ／ 860：目前目標分數=860｜目前目標色級=金｜目前生效色級=綠（內建上限）｜每日新字量=15 字/天 ／ 300：目前目標分數=300｜目前目標色級=棕｜目前生效色級=棕｜每日新字量=10 字/天 ／ 100：目前目標分數=100｜目前目標色級=橘｜目前生效色級=橘｜每日新字量=10 字/天；入口 customizer:true flashcards:true part5:true decoder:true phrasebank:true sources:true；統計 連續打卡天數、單字掌握數、Part 5 正確率
+  PASS TC-03-05 AC-03-05 套用前 第 5 / 5620 張/true；套用橘後 第 1 / 1000 張/false/the
+  PASS TC-02-08 AC-02-08 重載前 735/藍（即將開放）/41 週；重載後 輸入框 735、滑桿 735、藍（即將開放）/41 週
+  PASS TC-01-04 AC-01-04 重載後 生效 棕、目標分數 300、輸入框 300
+  PASS TC-02-05b AC-02-05 c=409 字、S=300 → 35 週（預期 35 週）
+  PASS TC-02-06 AC-02-06 c=1,000 字、S=100 → 0 週、顯示「已達成目標字量」=true
+  PASS TC-02-10b AC-02-10 c=5,620 字、S=800 → 0 週
+  PASS TC-22-02 AC-22-02 單字集 共 5650 張；10 次套用（含 toast 與繪製）ms：3.2、9.7、17.1、16.9、16.2、17.2、14.5、16.5、16.6、15.4；最大 17.2（無頭 Chrome、未降速）
+  PASS TC-X-goal （全套件）無未處理例外 例外：[]；console.error：[]
+
+▶ node tests/e2e/e2e-cards.mjs
+  PASS TC-04-01 AC-04-01 英文單字（必填）、中文釋義（必填）、音標（選填）、詞性（選填）、搭配詞（選填）、論文例句（選填）
+  PASS TC-04-03 AC-04-03 英文空白 → 「此欄位為必填，請輸入內容」；釋義空白 → 「此欄位為必填，請輸入內容」；自訂字數 0 → 0
+  PASS TC-04-02 AC-04-02 toast ["已新增「kubernetes」"]；清單「kubernetes /ˌkubɚˈnɛtiz/ n. 容器編排平台 自訂擴充 刪除」；單字集 5620 → 5621；卡片 kubernetes、第 5621 / 5621 張、TTS 1.0x/0.75x、麥克風=true；朗讀 [{"text":"kubernetes","lang":"en-US","rate":1,"voice":"QA en-US local","queueBefore":false}]
+  PASS TC-04-04 AC-04-04 第二筆（英文單字欄為 XSS 字串）結果 {"word":"","meaning":"","phonetic":"","pos":"","collocation":"","example":"","message":""}；清單含原文字元 2 筆、img/script 元素 0；卡片顯示原文=true；整頁 img/額外 script 0；腳本未執行=true；alert 對話框 0（studySet 索引 5621/5621）
+  PASS TC-04-06 AC-04-06 內建 Office → 「單字已存在」；自訂已有 Latency 再加 LATENCY → 「單字已存在」
+  PASS TC-04-05 AC-04-05 重載前後自訂單字 13 / 13 筆，內容完全相同=true
+  PASS TC-05-01 AC-05-01 資工、商管、生醫統計
+  PASS TC-05-02 AC-05-02、AC-05-04 第一次：10 字、提示「已注入 10 個單字」；第二次：10 字、提示「已注入 0 個單字（皆已存在）」
+  PASS TC-05-03 AC-05-03 商管 10 字（Monetization,Disintermediation,Commoditization,Onboarding,Crowdfunding,Rebranding,Upselling,Franchisee,Churn,Divestiture）；生醫統計 10 字（Heterogeneous,Covariate,Confounder,Stratification,Randomization,Multicollinearity,Heteroscedasticity,Biomarker,Imputation,Comorbidity）
+  PASS TC-05-05 AC-05-05 卡片 Heterogeneous（第 5621 / 5630 張）出處「自訂擴充」；0.75x 朗讀 [{"text":"Heterogeneous","lang":"en-US","rate":0.75,"voice":"QA en-US local","queueBefore":false}]；STT 結果「辨識吻合度  100 綠燈  此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」
+  PASS TC-04-07 AC-04-07 刪除前 5640 張、刪除後 共 5639 張；確認對話框：無；重載後清單含 Monetization=false
+  PASS TC-04-08 AC-04-08 刪除目前卡 Rebranding（第 5635 張）後顯示 Upselling（預期下一張 Upselling、第 5635 / 5638 張）；刪除最後一張 Divestiture 後顯示 Churn（預期前一張 Churn、第 5637 / 5637 張）
+  PASS TC-06-01 AC-06-01 正面：the /ðə/、欄位 多益常考搭配詞、TTS 1.0x/0.75x、麥克風=true、標示「需要連網」
+  PASS TC-06-02 AC-06-02、AC-06-03 點卡片 → 背面（stadium）：詞性=n. 名詞；中文釋義=露天大型運動場；學術文獻應用情境=Stadium construction；完整例句=The concert will tak；再點 → 正面=true；「翻面」鈕 → true
+  PASS TC-06-04 AC-06-04、AC-06-05 第 1 張：上一張停用=true、點擊後 第 1 / 5620 張；背面按下一張 → 第 2 / 5620 張、正面=true；最後一張：下一張停用=true、點擊後 第 5620 / 5620 張
+  PASS TC-06-07 AC-06-07 the 背面欄位 詞性/中文釋義/完整例句｜抽查 500 張問題 0｜自訂卡正面 多益常考搭配詞=—；背面 詞性=—；中文釋義=只填必填；學術文獻應用情境=—；完整例句=—；音標 —
+  PASS TC-23-01 AC-23-01 檢查 257 張內建卡；不一致 0；範例 the「單字來源：NGSL 1.2（CC BY-SA 4.0） ／ 音標：原創；釋義：ECDICT（MIT，已修改）」；café「單字來源：TSL 1.2（CC BY-SA 4.0） ／ 音標：原創；釋義：原創」；gay「單字來源：NGSL 1.2（CC BY-SA 4.0） ／ 音標：原創；釋義：原創」；client「單字來源：TSL 1.2（CC BY-SA 4.0）、BSL 1.2（CC BY-SA 4.0）、NAWL 1.2（CC BY-SA 4.0） ／ 音標：原創；釋義：ECDICT（MIT，已修改）」；自訂卡見 TC-05-05
+  PASS TC-09-01 AC-09-01 測驗模式：he、4 選項；再點 → 抽認卡=true
+  PASS TC-09-02 AC-09-02 the：先鋒；創始人；開創 | （定冠詞）那 | 傷害；損害；損傷 | 測量；權衡；措施；程度；a：（不定冠詞）一個 | 貴的；奢華的；費用浩大的 | 結構；骨架；準則；參照標準 | 教授；claim：拷問；折磨；苦悶 | 重新整理；再排列 | 懷疑；猜想；嫌疑犯；可疑的 | 要求；主張；斷言；認領；stadium：使滿意；滿足；符合 | 包括；包含；圍繞 | 露天大型運動場 | 基本上；根本上；undergraduate：自己；自我；本性 | 大學部學生；大學生的 | 法院；庭院；追求；招致 | 劑量；服用量；給藥（單字集相異釋義 5606）
+  PASS TC-09-03 AC-09-03、AC-17-03 答對：狀態 neutral,neutral,neutral,correct、鎖定=true、再點不變=true；答錯：neutral(rgb(255, 255, 255)),correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226)),neutral(rgb(255, 255, 255))；同字答對兩次後掌握數 1（主控台「1 字」）、答題 2/2
+  PASS TC-09-04 AC-09-04 localStorage：答題 3、答對 2、已掌握 ["do"]
+  PASS TC-09-05 AC-09-05 qaquizword：英畝 | 探險家；探測者；勘探器 | 勤奮 | 四選一自訂測試
+  PASS TC-09-07 AC-09-07 20 次正解位置：BCDBADCDADAACADCCCBA
+  PASS TC-17-02 AC-17-02 初始 0 天；D 翻卡 1 天；D 再做 Part 5 1 天；D+1 開啟 1 天；D+1 翻卡 2 天；中斷一天（D+3）開啟 0 天；D+3 四選一作答 1 天；lastActiveDate=2026-04-02
+  PASS TC-17-05 AC-17-05 4/3 學習後 2 天；時鐘調回 3/20 開啟 2 天、學習後 2 天（days 2 → 2、lastActiveDate 2026-04-03）
+  PASS TC-24-01 AC-24-01、AC-24-02 檔名 english-master-track-backup-20261030.json（本地日期 20261030）；網路請求 0；6795 bytes；format=english-master-track-backup、schemaVersion=1；欄位齊全=true；不含內建內容=true；goal={"draftScore":300,"appliedScore":300,"appliedColor":"brown","effectiveColor":"brown"}；自訂 10、已掌握 1、測驗 {"answered":1,"correct":1}、part5 {"currentIndex":1,"lockedSelection":null,"phase":"question","roundAnswered":1,"roundCorrect":1,"totalAnswered":1,"totalCorrect":1}、streak {"days":1,"lastActiveDate":"2026-10-30"}、STT 已讀 true
+  PASS TC-24-03 AC-24-03 對話框「匯入備份  匯入將覆蓋目前所有進度  取消 匯入」；提示 ["已匯入，略過 0 筆"]；匯入後與匯出內容相同=true；重載後相同=true
+  PASS TC-24-04 AC-24-04 取消後 localStorage 不變=true、記憶體不變=true；提示 []
+  PASS TC-24-05 AC-24-05 非 JSON：備份檔格式錯誤，未匯入；空檔：備份檔格式錯誤，未匯入；缺少 data：備份檔格式錯誤，未匯入；缺少 goal：備份檔格式錯誤，未匯入；型別錯誤：備份檔格式錯誤，未匯入；頂層為陣列：備份檔格式錯誤，未匯入；format 錯：備份檔格式錯誤，未匯入；未處理例外 0
+  PASS TC-24-06 AC-24-06 版本缺失：「備份檔版本不相容（檔案版本：無；支援版本：1）」；版本 99：「備份檔版本不相容（檔案版本：99；支援版本：1）」；版本字串：「備份檔版本不相容（檔案版本：無；支援版本：1）」
+  PASS TC-24-07 AC-24-07 提示 ["已匯入，略過 0 筆"]；清單原文=true；卡片原文=true；img 元素 0；alert 0
+  PASS TC-24-08 AC-24-08 提示 ["已匯入，略過 3 筆"]（預期略過 3 筆：內建重複 1、檔內重複 1、不存在的已掌握 1）；匯入後自訂 10 筆、掌握數「1 字」
+  PASS TC-X-cards （全套件）無未處理例外 例外：[]
+  PASS TC-06-06 AC-06-06 空狀態「目前單字集是空的，沒有可以顯示的單字卡。  請到自訂器套用目標分數，或新增自訂單字、注入領域範本。  前往自訂器」；顯示卡片=false；按鈕導向 customizer（以無內建資料的 fixture 建置驗證）
+  PASS TC-09-06 AC-09-06 3 字時按測驗模式：提示 ["單字數不足 4 個，無法產生選項"]；模式 card
+  PASS TC-04-08b AC-04-08、AC-06-06 刪光後空狀態顯示=true、空白卡=false
+  PASS TC-X-fixture （fixture）無未處理例外 []
+
+▶ node tests/e2e/e2e-speech.mjs
+  PASS TC-08-13 AC-08-13 常駐標示「需要連網」；首次按下說明「語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統不保存、不上傳錄音」[我知道了/取消]；取消後 starts 0→0、狀態 idle、已讀 false；再按仍顯示說明=true；我知道了 → starts 1、狀態 listening、localStorage 已讀 true；之後再按顯示說明=false
+  PASS TC-07-01 AC-07-01、AC-07-02 [{"text":"Latency","lang":"en-US","rate":1,"voice":"QA en-US local","queueBefore":false},{"text":"Latency","lang":"en-US","rate":0.75,"voice":"QA en-US local","queueBefore":false}]
+  PASS TC-07-03 AC-07-03 cancel 次數：播放前 5 → 第一次播放 6 → 播放中再按 7 → 切換卡片 8；每次 speak 前皆已無朗讀中=true
+  PASS TC-08-01 AC-08-01 lang=en-US、interimResults=false；按鈕狀態 listening、文字「聆聽中」
+  PASS TC-08-03 AC-08-03 Latency. → 100、綠燈
+  PASS TC-08-04 AC-08-04 address ← adress → 86、黃燈
+  PASS TC-08-05 AC-08-05 sitting ← kitten → 57、紅燈
+  PASS TC-08-12 AC-08-12 Comply with. → 100；complied with → 75、黃燈
+  PASS TC-08-06 AC-08-06、AC-08-07、AC-08-08 100→100/綠燈；90→90/綠燈；89→89/黃燈/提示；65→65/黃燈/提示；64→64/紅燈/並列；0→0/紅燈/並列；徽章底色 {"綠燈":"rgb(22, 163, 74)","黃燈":"rgb(202, 138, 4)","紅燈":"rgb(220, 38, 38)"}
+  PASS TC-08-11 AC-08-11 標題「辨識吻合度」；說明「此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；畫面含「發音評分」=false
+  PASS TC-08-09 AC-08-09（含 §7.6 錯誤對照表） not-allowed：「需要麥克風權限  開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。」、idle；service-not-allowed：「需要麥克風權限  開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。」、idle；audio-capture：「需要麥克風權限  請確認裝置已連接麥克風；並點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許。」、idle；network：「語音辨識需要網路連線」、idle；no-speech：「未偵測到語音，請再試一次」、idle；aborted：「語音辨識發生錯誤，請稍後再試一次」、idle；language-not-supported：「語音辨識發生錯誤，請稍後再試一次」、idle
+  PASS TC-08-10 AC-08-10 空結果：「未偵測到語音，請再試一次」、idle；逾時：「未偵測到語音，請再試一次」、idle；再按停止：listening → idle、訊息「」
+  PASS TC-22-03 AC-22-03 onresult → 徽章繪製 ms：3、2.8、1.7、16.6、15.8、17.2、13、10.7、8.8、8.5（無頭 Chrome、未降速）
+  PASS TC-21-03 AC-21-03（執行期） localStorage 鍵與長度 {"englishMasterTrack:state":6527}；含音訊樣式字串=false
+  PASS TC-08-14 AC-08-14 離線 navigator.onLine=false：「語音辨識需要網路連線」、idle、未開始辨識=true、顯示分數=false；辨識中 network 錯誤：「語音辨識需要網路連線」、idle、顯示分數=false
+  PASS TC-08-14b AC-08-14 先評分 100/綠燈，離線再按麥克風：訊息「語音辨識需要網路連線」、idle、分數區仍顯示「」
+  PASS TC-X-speech （全套件）無未處理例外 []
+  PASS TC-07-04 AC-07-04 按鈕 [{"aria":"true","title":"此瀏覽器不支援語音朗讀","disabled":false,"opacity":"0.5","cursor":"not-allowed"},{"aria":"true","title":"此瀏覽器不支援語音朗讀","disabled":false,"opacity":"0.5","cursor":"not-allowed"}]；點擊 toast ["此瀏覽器不支援語音朗讀"]；其他功能（翻面）正常=true
+  PASS TC-08-02 AC-08-02 麥克風 aria-disabled=true、title「建議使用 Google Chrome / Edge」、disabled 屬性=false；toast ["建議使用 Google Chrome / Edge"]；狀態 idle
+  PASS TC-07-05 AC-07-05 toast ["此裝置未安裝美式英語語音"]；實際朗讀 0 次；未處理例外 0
+
+▶ node tests/e2e/e2e-content.mjs
+  PASS TC-17-04a AC-17-04 答題數 0 時顯示「—」
+  PASS TC-10-02 AC-10-02 第 1 題：固定介系詞搭配、空格=true、選項 A.for B.with C.to D.at；前 8 題涵蓋題型 4 種
+  PASS TC-11-01 AC-11-01、AC-11-02、AC-11-03、AC-11-06 答錯：correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226)),locked(rgb(255, 255, 255)),locked(rgb(255, 255, 255))；答對：locked,locked,correct,locked；解析兩段非空=true；計數 0/0 → 答錯 1/0 → 重複點擊 1/0 → 答對 2/1
+  PASS TC-11-05 AC-11-05 重載前 第 5 / 200 題（未作答=true）；重載後 第 5 / 200 題、未作答=true
+  PASS TC-11-04 AC-11-04、AC-11-07 下一題未作答=true；結算「Part 5 模擬測驗 本輪結算 答對 197 / 200 累計答對 197 / 200 重新開始」、按鈕 重新開始；累計 200/197；重新開始後 第 1 / 200 題、未作答=true、累計 200/197
+  PASS TC-17-04b AC-17-04 答題 10、答對 7 → 正確率「70%」
+  PASS TC-17-01 AC-17-01 連續打卡天數==1 天；單字掌握數==0 字；Part 5 正確率==70%
+  PASS TC-12-01 AC-12-01、AC-12-02、AC-12-03 例句 50 句逐一切換檢查；缺主詞/動詞 0；色系（文字/底色）主詞 藍/藍、動詞 紅/紅、受詞 綠/綠、修飾 紫/紫；圖例 主主詞、動核心動詞、受受詞／補語、修修飾語／子句／插入語；任意句輸入框不存在=true
+  PASS TC-13-01 AC-13-01、AC-13-02、AC-13-03、AC-13-04 淡化：修飾語 2 段 opacity 0.3、filter grayscale(1)、主幹 opacity 1；切換到 第 48 / 50 句 仍淡化=true；還原：opacity 1、filter none；按鈕「淡化修飾語」(false) → 「還原修飾語」(true)
+  PASS TC-14-01 AC-14-01 Abstract 摘要（5 則）、方法論（5 則）、文獻回顧（Research Gap）（5 則）
+  PASS TC-15-01 AC-15-01 全部、研究空白 Gap、研究目的 Aim、研究結果 Findings、研究限制 Limitations
+  PASS TC-15-02 AC-15-02、AC-15-03 gap 25 則（類別 gap）；aim 25 則（類別 aim）；findings 25 則（類別 findings）；limitations 25 則（類別 limitations）；回到全部 100 則
+  PASS TC-16-01 AC-16-01 逐字：「g」65 則、「ga」13 則、「gap」9 則；大寫 GAP 相同=true；中文「缺口」4 則、相符=true；gap + Aim 分類 1 則、相符=true；10 次按鍵更新 ms：3.6、11.6、17.3、15.9、16.4、16.6、16.4、17.2、16.6、16.7
+  PASS TC-16-02 AC-16-02 0 則、提示「找不到符合的句型」
+  PASS TC-16-03 AC-16-03 剪貼簿「Evidence on [topic] comes almost entirely from [region], so it is unclear whether the findings hold elsewhere.」與模板相同=true；提示 ["已複製"]
+  PASS TC-23-02 AC-23-02 主控台入口=true、頁尾連結=true；缺欄位 無；缺聲明 無；列出字表 4 種／資料中 4 種；ECDICT MIT 全文可展開=true
+  PASS TC-X-content （全套件）無未處理例外 []
+  PASS TC-16-04a AC-16-04 剪貼簿拒絕：提示 ["複製失敗，請手動選取"]；反白文字與模板相同=true；未處理例外 0
+  PASS TC-16-04b AC-16-04 剪貼簿不存在：提示 ["複製失敗，請手動選取"]；反白文字與模板相同=true；未處理例外 0
+
+▶ node tests/e2e/e2e-env.mjs
+  PASS TC-18-03 AC-18-03、AC-24-01 警示「進度將無法保存」；套用 300 + 自訂 1 + 範本 10 → 共 2820 張；Part 5 作答 1；匯出 english-master-track-backup-20261030.json（分數 300、自訂 11）；主控台 連續打卡天數==1 天；單字掌握數==0 字；Part 5 正確率==100%；目前目標分數==300；目前目標色級==棕；目前生效色級==棕；每日新字量==10 字/天；例外 0
+  PASS TC-18-04 AC-18-04 新增時訊息 ["儲存空間不足"]；範本注入 toast ["儲存空間不足"]、狀態「」；localStorage 不變=true；記憶體自訂字 qaquotaok
+  PASS TC-24-09 AC-24-09 提示 ["儲存空間不足，未匯入"]；localStorage 不變=true；記憶體不變=true
+  PASS TC-18-05 AC-18-05 非 JSON：toast ["資料讀取失敗，已重設"]、主控台 600/綠/綠/15 字/天、原字串保存=true；Schema 不符：toast ["資料讀取失敗，已重設"]、主控台 600/綠/綠/15 字/天、原字串保存=true；版本 99：toast ["資料讀取失敗，已重設"]、主控台 600/綠/綠/15 字/天、原字串保存=true；V-ST-03 違反：toast ["資料讀取失敗，已重設"]、主控台 600/綠/綠/15 字/天、原字串保存=true
+  PASS TC-21-01 AC-21-01、AC-18-06、AC-19-03 整個工作階段請求 1 筆（["file:///D:/Demo/Clude/%E6%88%91%E7%9A%84%E5%A4%9A%E7%9B%8A%E6%94%BB%E7%95%A5/dis"]）；載入後操作期間請求 0 筆（[]）；非本機請求 0；Console 資源錯誤 0；以 file:// 直接開啟（無伺服器）正常運作
+  PASS TC-19-02a AC-19-02 離線模擬下各頁 dashboard:true customizer:true flashcards:true part5:true decoder:true phrasebank:true sources:true；TTS（本機語音）朗讀 1 次；Console 錯誤 0；實機斷網列人工 TC-M03
+  PASS TC-20-01 AC-20-01 56 個畫面狀態（4 尺寸 × 14 狀態）；問題 0
+  PASS TC-14-02 AC-14-02、AC-23-02（375px） decoder/strategies：水平捲軸=false、超出 0；sources：水平捲軸=false、超出 0；sources/details：水平捲軸=false、超出 0
+  PASS TC-20-03 AC-20-03 375px 以「選單」導覽到達：dashboard:true customizer:true flashcards:true part5:true decoder:true phrasebank:true
+  PASS TC-20-02 AC-20-02 375px 觸控操作 57 項：選單:OK、導覽 dashboard:OK、選單:OK、導覽 customizer:OK、選單:OK、導覽 flashcards:OK、選單:OK、導覽 part5:OK、選單:OK、導覽 decoder:OK、選單:OK、導覽 phrasebank:OK、選單:OK、導覽 customizer:OK、色級 橘:OK、滑桿拖曳:OK(615/615)、套用:OK、輸入框:OK、英文單字欄:OK、中文釋義欄:OK、新增單字:OK、範本 資工:OK、刪除自訂字:OK、選單:OK、導覽 flashcards:OK、翻面:OK、點卡片翻回:OK、下一張:OK、上一張:OK、TTS 1.0x:OK、TTS 0.75x:OK、麥克風:OK、說明 我知道了:OK、麥克風停止:OK、測驗模式:OK、四選一選項:OK、離開測驗模式:OK、選單:OK、導覽 part5:OK、Part 5 選項:OK、下一題:OK、選單:OK、導覽 decoder:OK、下一句:OK、淡化修飾語:OK、顯示角色文字:OK、註解片段:OK、閱讀策略展開:OK、選單:OK、導覽 phrasebank:OK、分類 Gap:OK、搜尋框:OK、複製:OK、頁尾 資料來源:OK、選單:OK、導覽 dashboard:OK、主控台入口:OK；小於 44px 的點擊目標：點卡片翻回 309×24（解碼器註解片段高 105～105px，屬行內文字片段，非 §9 列舉元件，觸控可操作；觀察事項見報告）
+  FAIL TC-22-01 AC-22-01 本機無頭 Chrome 參考值（非基準環境）：一般 10 次最大 36.1 ms（36.1、19.5、8.8、32.8、29、2.8、30.5、3.9、5.6、14.8）；4 倍降速最大 116.9 ms（116.9、19.8、10.5、30.5、31、12.4、33.9、47.9、17.8、10.5）
+  PASS TC-22-02b AC-22-02 本機無頭 Chrome 參考值（非基準環境）：一般 10 次最大 17.7 ms（4.5、4.6、16.7、17.2、15.1、17、15、17.7、16.1、15.5）；4 倍降速最大 26.4 ms（25.7、24.6、26.4、18.5、17.9、24.5、13.8、16.2、13、14.3）
+  PASS TC-22-04 AC-22-04 本機無頭 Chrome 參考值（非基準環境）：一般 10 次最大 19.4 ms（14.7、18.3、15.2、16.6、16.4、16.8、16.9、17.1、19.4、14.1）；4 倍降速最大 21.2 ms（14.4、15、18.6、13.7、18.3、16.1、15.5、17.8、21.2、12.2）
+  PASS TC-22-03b AC-22-03 本機無頭 Chrome 參考值（非基準環境）：一般 10 次最大 19.6 ms（19.6、6.3、13.1、3.6、9.6、16.1、9、16.7、8、16.7）；4 倍降速最大 26.8 ms（22.4、8.8、19.6、10.1、18.2、8.3、14.3、24.6、17.7、26.8）
+  PASS TC-16-01b AC-16-01 本機無頭 Chrome 參考值（非基準環境）：一般 10 次最大 11.7 ms（3.3、3.7、11.7、2.2、4、4.3、3.3、4.2、6、1.8）；4 倍降速最大 24.7 ms（23.2、17.1、9.7、12.7、24.7、20.7、22.6、14.2、18.2、9）
+  PASS TC-22-05a AC-22-05 本機無頭 Chrome 參考值：timeOrigin → emt-ready（入口可點擊）一般 85、88、90、87、91 ms；4 倍降速 360、399、483、399、380 ms；基準環境實測列人工 TC-M07
+
+▶ node tests/e2e/e2e-persist.mjs
+  PASS TC-18-01 AC-18-01 重新開啟後資料完全相同=true；主控台畫面相同=true；目標 455/brown、自訂 1、Part 5 2/2（第 2 / 200 題、已作答鎖定=true）、打卡 1 天、STT 已讀 true
+
+▶ node tests/e2e/e2e-goal.mjs
+  PASS TC-18-02 AC-18-02 localStorage 初始=無；目前目標分數=600｜目前目標色級=綠｜目前生效色級=綠｜每日新字量=15 字/天；共 5620 張；toast=[]；例外 0
+  PASS TC-01-01 AC-01-01 橘 10～215 分 1,000 字；棕 220～465 分 2,809 字；綠 470～725 分 5,620 字；藍 730～855 分 待定 鎖定 即將開放；金 860～990 分 待定 鎖定 即將開放；官方門檻/Tier 字樣=false
+  PASS TC-02-01 AC-02-01 滑桿 720 → 輸入框 720；輸入 650 → 滑桿 650；鍵盤右鍵 → 655/655
+  PASS TC-02-02 AC-02-02 「5」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「995」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「abc」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「1e2」→ 提示「請輸入 10～990 的分數」試算 綠/54 週；「７００」→ 提示「請輸入 10～990 的分數」試算 綠/54 週
+  PASS TC-02-03 AC-02-03 每日新字量：10 字/天、10 字/天、10 字/天、10 字/天、15 字/天、15 字/天、20 字/天、20 字/天、20 字/天、20 字/天
+  PASS TC-02-04 AC-02-04 對應色級：橘、橘、棕、棕、綠、綠、藍（即將開放）、藍（即將開放）、金（即將開放）、金（即將開放）
+  PASS TC-02-05a AC-02-05 S=100 → 1,000 字、15 週；S=300 → 2,809 字、41 週；S=600 → 5,620 字、54 週（c=0；N_G=5,620 → ⌈5620/105⌉=54）
+  PASS TC-02-09 AC-02-09 723 → 725、722 → 720；滑桿 step=5
+  PASS TC-02-10a AC-02-10 色級「藍（即將開放）」、字量「待定」、20 字/天、41 週、旁註=true、提示=true（⌈5620/140⌉=41）
+  PASS TC-02-07 AC-02-07、AC-22-04 10 次（輸入事件到繪製後）ms：2.6、2.2、16.6、16.3、18.1、15、17.2、16、17.6、16.6；最大 18.1（無頭 Chrome、未降速；基準環境量測列人工 TC-M07）
+  PASS TC-01-05 AC-01-05 300 點綠 → 470（綠、15 字/天、54 週）；500 點綠 → 500
+  PASS TC-03-06 AC-03-06、AC-03-01、AC-03-02、AC-03-04 orange → 共 1000 張；brown → 共 2809 張；green → 共 5620 張
+  PASS TC-01-02 AC-01-02 套用橘後生效 橘；點綠套用後生效 綠、抽認卡 共 5620 張
+  PASS TC-01-03 AC-01-03 點棕未套用後離開：生效 綠、共 5620 張；主控台 目前目標分數=470｜目前目標色級=綠｜目前生效色級=綠｜每日新字量=15 字/天
+  PASS TC-01-06 AC-01-06 分數對應色級 棕；目前生效 綠；共 5620 張
+  PASS TC-01-07 AC-01-07、AC-03-03 點藍 → 730、「藍（即將開放）」、提示=true；套用後目標 藍、生效「綠（內建上限）」、共 5620 張；點金 → 860；套用後目標 金、生效「綠（內建上限）」、共 5620 張
+  PASS TC-17-06 AC-17-06 600：目前目標分數=600｜目前目標色級=綠｜目前生效色級=綠｜每日新字量=15 字/天 ／ 730：目前目標分數=730｜目前目標色級=藍｜目前生效色級=綠（內建上限）｜每日新字量=15 字/天 ／ 860：目前目標分數=860｜目前目標色級=金｜目前生效色級=綠（內建上限）｜每日新字量=15 字/天 ／ 300：目前目標分數=300｜目前目標色級=棕｜目前生效色級=棕｜每日新字量=10 字/天 ／ 100：目前目標分數=100｜目前目標色級=橘｜目前生效色級=橘｜每日新字量=10 字/天；入口 customizer:true flashcards:true part5:true decoder:true phrasebank:true sources:true；統計 連續打卡天數、單字掌握數、Part 5 正確率
+  PASS TC-03-05 AC-03-05 套用前 第 5 / 5620 張/true；套用橘後 第 1 / 1000 張/false/the
+  PASS TC-02-08 AC-02-08 重載前 735/藍（即將開放）/41 週；重載後 輸入框 735、滑桿 735、藍（即將開放）/41 週
+  PASS TC-01-04 AC-01-04 重載後 生效 棕、目標分數 300、輸入框 300
+  PASS TC-02-05b AC-02-05 c=409 字、S=300 → 35 週（預期 35 週）
+  PASS TC-02-06 AC-02-06 c=1,000 字、S=100 → 0 週、顯示「已達成目標字量」=true
+  PASS TC-02-10b AC-02-10 c=5,620 字、S=800 → 0 週
+  PASS TC-22-02 AC-22-02 單字集 共 5650 張；10 次套用（含 toast 與繪製）ms：3.2、10.5、16.4、16.8、15.3、17、16、15.6、17.1、17.2；最大 17.2（無頭 Chrome、未降速）
+  PASS TC-X-goal （全套件）無未處理例外 例外：[]；console.error：[]
+
+══ 彙整 ══ {
+  "total": 158,
+  "pass": 149,
+  "fail": 1,
+  "manual": 8,
+  "failed": [
+    "e2e-env.json TC-22-01 AC-22-01"
+  ]
+}

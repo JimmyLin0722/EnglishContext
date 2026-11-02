@@ -1,0 +1,44 @@
+/*
+ * styles/05-motion.css — 動畫時間變數、換頁動畫、減少動態總開關（FE-24）
+ * 依據：architecture.md v0.4 §7.11（A-1～A-5、換頁列）、§7.12（Q-33 設計常數）
+ * 涵蓋：US-31；AC-31-01～AC-31-04、AC-22-01
+ * 規則：
+ * - 動畫時間只在此處（CSS 變數）與 core/interaction.js 的 UI 常數兩處定義，值須相同（A-4；router-motion.test.js 比對）。
+ * - 只用 @keyframes／transition，由 JS 加上／移除 class 觸發（A-1）；不得引入其他樣式檔或外部資源（建置會中止）。
+ * - 減少動態時全域關閉動畫與轉場（A-3）。
+ */
+
+/* ─── 動畫時間（= interaction.UI.*_MS） ─── */
+:root {
+  --emt-dur-page: 240ms;   /* PAGE_ANIM_MS，≤ 300ms（AC-31-01） */
+  --emt-dur-flip: 360ms;   /* FLIP_ANIM_MS，≤ 400ms（AC-28-01） */
+  --emt-dur-slide: 200ms;  /* SLIDE_ANIM_MS */
+  --emt-dur-answer: 480ms; /* ANSWER_ANIM_MS，≤ 600ms（AC-29-01） */
+  --emt-dur-ring: 500ms;   /* RING_ANIM_MS */
+}
+
+/* ─── 換頁進場（router.go 加上 view--entering；無離場動畫） ─── */
+@keyframes emt-view-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.view.view--entering {
+  animation: emt-view-in var(--emt-dur-page) ease-out both;
+}
+
+/* ─── 減少動態總開關（AC-31-03） ─── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

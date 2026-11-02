@@ -1,0 +1,232 @@
+/*
+ * load-order.test.js — src/app 全部模組依建置順序載入的回歸測試（FE-19）
+ * 依據：architecture.md v0.3 §4.1 模組取用時機 LD-1～LD-3、「回歸測試位置：全部模組」；§5 建置串接順序
+ * 做法：以 tools/build.mjs 的 listAppFiles 取得實際串接順序，在只有 self／window／console 的 node:vm 沙箱
+ *       （沒有 module、require、document、localStorage、資料全域變數）依序載入 src/app 全部 .js（不含 main.js、__tests__）。
+ * 背景：R6-1（backup.js 早於 persist.js 載入，載入時取用 EMT.core.persist 得到 undefined）在 Node 單元測試中
+ *       因 require 不受順序影響而測不到；本檔對全部模組做同樣的瀏覽器環境模擬。
+ */
+"use strict";
+
+const { describe, test } = require("node:test");
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const path = require("node:path");
+const vm = require("node:vm");
+const { pathToFileURL } = require("node:url");
+
+describe("load-order.test.js", () => {
+  const APP_DIR = path.join(__dirname, "..");
+  const BUILD_MJS = path.join(APP_DIR, "..", "..", "tools", "build.mjs");
+
+  /** 依建置順序列出要載入的檔案（不含 main.js 與 __tests__） */
+  async function appFiles() {
+    const build = await import(pathToFileURL(BUILD_MJS).href);
+    const all = build.listAppFiles(APP_DIR);
+    return {
+      all: all,
+      files: all.filter((f) => f !== "main.js" && !f.startsWith("__tests__/"))
+    };
+  }
+
+  /** 讀取原始碼（去除 BOM） */
+  function source(rel) {
+    return fs.readFileSync(path.join(APP_DIR, rel), "utf8").replace(/^﻿/, "");
+  }
+
+  /**
+   * 建立瀏覽器模擬沙箱：只有 self、window（皆指向全域）與 console。
+   * console 會記錄 error／warn，供斷言載入時沒有錯誤輸出。
+   */
+  function makeSandbox() {
+    const logs = { error: [], warn: [] };
+    const con = {
+      log() {},
+      info() {},
+      debug() {},
+      warn: (...a) => logs.warn.push(a.map(String).join(" ")),
+      error: (...a) => logs.error.push(a.map(String).join(" "))
+    };
+    const sandbox = { console: con };
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    return { sandbox, logs };
+  }
+
+  /**
+   * 依序載入檔案；回傳每個檔案的載入錯誤（無錯誤則為空陣列）。
+   * @param {object} sandbox 已 createContext 的沙箱
+   * @param {string[]} files
+   * @param {Function} [after] 每載入一個檔案後呼叫 after(rel)
+   */
+  function loadAll(sandbox, files, after) {
+    const failures = [];
+    for (const rel of files) {
+      try {
+        vm.runInContext(source(rel), sandbox, { filename: rel });
+      } catch (e) {
+        failures.push(rel + "：" + (e && e.message));
+      }
+      if (after) after(rel);
+    }
+    return failures;
+  }
+
+  // ── 前提：建置順序 ──
+
+  test("建置順序：core（constants、wordkey 最先）→ state → services → ui → views → main.js；涵蓋 src/app 全部 .js", async () => {
+    const { all, files } = await appFiles();
+    assert.deepEqual(all.slice(0, 2), ["core/constants.js", "core/wordkey.js"]);
+    assert.equal(all[all.length - 1], "main.js");
+    const layerOf = (f) => ["core", "state", "services", "ui", "views"].indexOf(f.split("/")[0]);
+    for (let i = 1; i < files.length; i++) {
+      assert.ok(layerOf(files[i - 1]) <= layerOf(files[i]), files[i - 1] + " → " + files[i]);
+    }
+    // 與實際目錄比對：每一層的 .js 都在清單中（不遺漏新增的模組）
+    for (const layer of ["core", "state", "services", "ui", "views"]) {
+      const onDisk = fs.readdirSync(path.join(APP_DIR, layer)).filter((n) => n.endsWith(".js")).map((n) => layer + "/" + n);
+      for (const f of onDisk) assert.ok(files.includes(f), "建置清單缺少 " + f);
+    }
+    assert.ok(!all.some((f) => f.startsWith("__tests__/")), "測試檔不得被串接");
+  });
+
+  // ── LD-1、LD-2：依建置順序載入全部模組 ──
+
+  test("LD-1、LD-2：依建置順序在 vm 沙箱載入 src/app 全部檔案（不含 main.js）不拋例外、無錯誤輸出", async () => {
+    const { files } = await appFiles();
+    const { sandbox, logs } = makeSandbox();
+    vm.createContext(sandbox);
+    const failures = loadAll(sandbox, files);
+    assert.deepEqual(failures, [], "載入時拋出例外");
+    assert.deepEqual(logs.error, [], "載入時輸出 console.error");
+    assert.equal(typeof sandbox.module, "undefined");
+    assert.equal(typeof sandbox.require, "undefined");
+    assert.equal(typeof sandbox.document, "undefined");
+  });
+
+  test("載入後 EMT.core 下每個 core 檔對應的模組皆存在（content.js 依 §4.1 掛在 EMT.content）", async () => {
+    const { files } = await appFiles();
+    const { sandbox } = makeSandbox();
+    vm.createContext(sandbox);
+    loadAll(sandbox, files);
+    const EMT = sandbox.EMT;
+    assert.ok(EMT && EMT.core, "EMT.core 不存在");
+    const coreFiles = files.filter((f) => f.startsWith("core/"));
+    assert.ok(coreFiles.length >= 13);
+    for (const rel of coreFiles) {
+      const name = path.basename(rel, ".js");
+      const mod = name === "content" ? EMT.content : EMT.core[name];
+      assert.ok(mod && (typeof mod === "object" || typeof mod === "function"), "缺少模組：" + rel);
+    }
+    // 其他層也已完成登錄
+    assert.equal(typeof EMT.store, "object");
+    assert.equal(typeof EMT.router, "object");
+    for (const s of ["clipboard", "download", "stt", "tts"]) assert.ok(EMT.services && EMT.services[s], "缺少 EMT.services." + s);
+    for (const u of ["banner", "dialog", "toast"]) assert.ok(EMT.ui && EMT.ui[u], "缺少 EMT.ui." + u);
+    for (const c of ["speechPanel", "flashcardQuiz"]) assert.ok(EMT.components && EMT.components[c], "缺少 EMT.components." + c);
+  });
+
+  test("v0.8 新模組（FE-33）：core learning／interaction、ui motion／bottomNav／importFlow、services haptics 依建置順序載入後皆存在", async () => {
+    const { files } = await appFiles();
+    // 檔案在建置清單中，且層級順序正確（core → services → ui）
+    const expected = ["core/learning.js", "core/interaction.js", "services/haptics.js", "ui/motion.js", "ui/bottom-nav.js", "ui/import-flow.js"];
+    for (const f of expected) assert.ok(files.includes(f), "建置清單缺少 " + f);
+    assert.ok(files.indexOf("services/haptics.js") < files.indexOf("ui/motion.js"));
+    assert.ok(files.indexOf("ui/motion.js") < files.findIndex((f) => f.startsWith("views/")));
+    const { sandbox, logs } = makeSandbox();
+    vm.createContext(sandbox);
+    const failures = loadAll(sandbox, files);
+    assert.deepEqual(failures, []);
+    assert.deepEqual(logs.error, []);
+    const EMT = sandbox.EMT;
+    for (const c of ["learning", "interaction"]) assert.equal(typeof EMT.core[c], "object", "缺少 EMT.core." + c);
+    assert.equal(typeof EMT.services.haptics, "object", "缺少 EMT.services.haptics");
+    for (const u of ["motion", "bottomNav", "importFlow"]) assert.equal(typeof EMT.ui[u], "object", "缺少 EMT.ui." + u);
+  });
+
+  test("LD-2：views 載入時只登錄頁面（主控台與 6 個功能區共 7 個頁籤皆經 EMT.views.register 登錄）", async () => {
+    const { files } = await appFiles();
+    const { sandbox } = makeSandbox();
+    vm.createContext(sandbox);
+    const registered = [];
+    loadAll(sandbox, files, (rel) => {
+      // router 載入後包一層紀錄，之後的 views 呼叫 register 時記下頁籤代碼
+      if (rel === "ui/router.js") {
+        const views = sandbox.EMT.views;
+        const orig = views.register;
+        views.register = function (tabId, mod) {
+          registered.push(tabId);
+          return orig.apply(this, arguments);
+        };
+      }
+    });
+    const tabs = Array.from(new Set(registered)).sort();
+    assert.deepEqual(tabs, ["customizer", "dashboard", "decoder", "flashcards", "part5", "phrasebank", "sources"].sort());
+    // 自訂器頁 = customizer + custom-vocab 兩個模組
+    assert.equal(registered.filter((t) => t === "customizer").length, 2);
+  });
+
+  test("LD-2：載入時不讀取 document、localStorage 與 9 個資料全域變數", async () => {
+    const { files } = await appFiles();
+    const { sandbox } = makeSandbox();
+    const watched = [
+      "document", "localStorage",
+      "MASTER_VOCAB_DATABASE", "DATA_SOURCE_REGISTRY", "VOCAB_MANIFEST", "PROJECT_LICENSE", "DOMAIN_TEMPLATES",
+      "PART5_QUESTION_BANK", "DECODER_SENTENCES", "READING_STRATEGIES", "ACADEMIC_PHRASEBANK"
+    ];
+    const hits = [];
+    let current = "";
+    for (const name of watched) {
+      // getter 回傳 undefined（與不存在時相同），只記錄被讀取
+      Object.defineProperty(sandbox, name, { configurable: true, get() { hits.push(current + " 讀取 " + name); return undefined; } });
+    }
+    vm.createContext(sandbox);
+    const failures = [];
+    for (const rel of files) {
+      current = rel;
+      try {
+        vm.runInContext(source(rel), sandbox, { filename: rel });
+      } catch (e) {
+        failures.push(rel + "：" + e.message);
+      }
+    }
+    assert.deepEqual(failures, []);
+    assert.deepEqual(hits, []);
+  });
+
+  // ── LD-3：取用的模組不存在 → 丟出含模組名稱的 Error ──
+
+  test("LD-3：缺少 core/persist.js 時，backup 匯入丟出含模組名稱的 Error，不被當成「格式錯誤」", async () => {
+    const { files } = await appFiles();
+    const { sandbox } = makeSandbox();
+    vm.createContext(sandbox);
+    const failures = loadAll(sandbox, files.filter((f) => f !== "core/persist.js"));
+    assert.deepEqual(failures, [], "缺一個 core 模組時載入本身仍不應拋例外（LD-1）");
+    const B = sandbox.EMT.core.backup;
+    assert.ok(B);
+    const backup = JSON.stringify({
+      format: "english-master-track-backup",
+      schemaVersion: 1,
+      exportedAt: "2026-10-30T01:00:00.000Z",
+      contentDataVersion: "2026.10.30",
+      data: {
+        goal: { draftScore: 600, appliedScore: 600, appliedColor: "green", effectiveColor: "green" },
+        customVocab: [],
+        masteredWordKeys: [],
+        vocabQuiz: { answered: 0, correct: 0 },
+        part5: { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 0, totalCorrect: 0 },
+        streak: { days: 0, lastActiveDate: null },
+        sttNoticeAcknowledged: false
+      }
+    });
+    let result;
+    let error = null;
+    try {
+      result = B.importSteps(backup, { builtinKeys: new Set(), part5Length: 4 });
+    } catch (e) {
+      error = e;
+    }
+    assert.ok(error, "應丟出例外，實際回傳：" + JSON.stringify(result));
+    assert.match(String(error.message), /persist/);
+  });
+});

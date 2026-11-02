@@ -1,0 +1,255 @@
+/*
+ * styles/30-flashcards.css — 單字卡頁（FE-11；翻卡、換卡動畫與觸控，FE-28）
+ * 依據：architecture.md §9（行動優先 RWD；斷點 768px）、v0.4 §7.10～§7.12；沿用 00-base.css 的變數、.btn、.card
+ * 涵蓋：AC-06-01～AC-06-07、AC-23-01、AC-20-01（無水平捲軸）、AC-20-02（觸控 ≥ 44px）、AC-28-01、AC-28-03、AC-28-05
+ * 子元件容器 .fc-speech（FE-12）、.fc-quiz（FE-13）只定位，內部樣式由各自的 CSS 負責。
+ */
+
+.fc {
+  min-width: 0;
+}
+
+.fc-title {
+  font-size: 1.35rem;
+  margin-bottom: var(--gap);
+}
+
+/* ─── 頂部列：計數 + 測驗模式 ─── */
+.fc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px var(--gap);
+  margin-bottom: var(--gap);
+}
+
+.fc-counter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  color: var(--text-muted);
+  min-width: 0;
+}
+
+.fc-position {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.fc-mode-btn.is-active,
+.fc-mode-btn[aria-pressed="true"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-text);
+}
+
+/* ─── 卡片 ─── */
+.fc-stage {
+  min-width: 0;
+  /* 換卡滑入時卡片暫時位移 24px，裁掉水平溢出以免出現水平捲軸；保留陰影的顯示空間 */
+  overflow-x: clip;
+  overflow-clip-margin: 16px;
+}
+
+.fc-card {
+  /* 垂直捲動交給瀏覽器，水平位移交給 JS 判斷換卡（§7.10、AC-28-05） */
+  touch-action: pan-y;
+  cursor: pointer;
+  padding: 20px 16px 12px;
+  box-shadow: var(--shadow);
+  min-height: 16rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.fc-card[data-flipped="true"] {
+  background: #fbfcfe;
+}
+
+.fc-face {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.fc-word {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.fc-word--small {
+  font-size: 1.25rem;
+  margin-bottom: var(--gap);
+}
+
+.fc-phonetic {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 1.15rem;
+  margin-bottom: var(--gap);
+}
+
+.fc-fields {
+  margin: 0 0 var(--gap);
+}
+
+.fc-field {
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+
+.fc-field:first-child {
+  border-top: 0;
+}
+
+.fc-field__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.fc-field__value {
+  margin: 2px 0 0;
+  white-space: pre-line;
+}
+
+.fc-field--meaning .fc-field__value {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+/* ─── 翻卡與換卡動畫（FE-28；§7.11；時長 = interaction.UI.FLIP_ANIM_MS／SLIDE_ANIM_MS） ───
+ * class 由 EMT.ui.motion.enter 加上並自動移除；減少動態時 05-motion.css 全域關閉、motion 也不加 class。
+ * 只有一面可見（另一面 hidden），翻轉中不會出現正反面重疊（AC-28-08）。 */
+@keyframes fc-flip-in {
+  from {
+    transform: perspective(800px) rotateY(-90deg);
+  }
+  to {
+    transform: perspective(800px) rotateY(0);
+  }
+}
+
+.fc-face.fc-face--flip-in {
+  animation: fc-flip-in var(--emt-dur-flip) ease-out both;
+}
+
+/* 新卡由右滑入（下一張） */
+@keyframes fc-card-in-next {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 新卡由左滑入（上一張） */
+@keyframes fc-card-in-prev {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fc-card.fc-card--in-next {
+  animation: fc-card-in-next var(--emt-dur-slide) ease-out both;
+}
+
+.fc-card.fc-card--in-prev {
+  animation: fc-card-in-prev var(--emt-dur-slide) ease-out both;
+}
+
+/* 語音面板容器（FE-12 填入內容） */
+.fc-speech {
+  cursor: auto;
+  min-width: 0;
+}
+
+.fc-speech:empty {
+  display: none;
+}
+
+/* 出處（AC-23-01） */
+.fc-attrib {
+  margin-top: var(--gap);
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  cursor: auto;
+}
+
+.fc-attrib__line {
+  margin: 0;
+}
+
+/* 測驗模式容器（FE-13 填入內容） */
+.fc-quiz {
+  min-height: 16rem;
+  min-width: 0;
+}
+
+/* ─── 導覽列 ─── */
+.fc-nav {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: var(--gap);
+}
+
+.fc-nav .btn {
+  width: 100%;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+/* 測驗模式隱藏「翻面」後改為兩欄 */
+.fc-nav:has(.fc-flip[hidden]) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* ─── 空狀態（AC-06-06） ─── */
+.fc-empty {
+  text-align: center;
+  padding: 32px 16px;
+}
+
+.fc-empty__msg {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.fc-empty__hint {
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+@media (min-width: 768px) {
+  .fc-card {
+    padding: 28px 32px 16px;
+    min-height: 18rem;
+  }
+
+  .fc-word {
+    font-size: 2.5rem;
+  }
+
+  .fc-nav {
+    max-width: 30rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "rate1": {
+    "viewportH": 900,
+    "hostTop": 1017,
+    "belowFold": true,
+    "hiddenAtClick": true,
+    "frames": [
+      {
+        "t": 0.8,
+        "hidden": true
+      },
+      {
+        "t": 8.9,
+        "hidden": false
+      },
+      {
+        "t": 25.2,
+        "hidden": false
+      },
+      {
+        "t": 41.5,
+        "hidden": false
+      }
+    ],
+    "itemsAtReveal": 30,
+    "totalVocab": 30,
+    "itemsFinal": 30,
+    "msUntilListFull": 41.6
+  },
+  "rate4": {
+    "viewportH": 900,
+    "hostTop": 1017,
+    "belowFold": true,
+    "hiddenAtClick": true,
+    "frames": [
+      {
+        "t": 3.1,
+        "hidden": true
+      },
+      {
+        "t": 21.5,
+        "hidden": false
+      },
+      {
+        "t": 40.7,
+        "hidden": false
+      },
+      {
+        "t": 43.9,
+        "hidden": false
+      }
+    ],
+    "itemsAtReveal": 20,
+    "totalVocab": 30,
+    "itemsFinal": 30,
+    "msUntilListFull": 75.4
+  }
+}

@@ -1,0 +1,288 @@
+/*
+ * styles/40-part5.css — Part 5 模擬測驗頁（FE-14）
+ * 依據：architecture.md §9（行動優先 RWD；觸控 ≥ 44px；不得出現水平捲軸）
+ * 涵蓋：AC-10-02（含空格句子、A～D 選項、題型標籤）、AC-11-01（鎖定與標色）、AC-11-02（解析區）、AC-11-04（結算）
+ * 規則：標色同時搭配文字標記（「正確答案」「你的選擇」），不只靠顏色辨識。
+ */
+
+.p5-heading {
+  margin-bottom: 4px;
+  font-size: 1.25rem;
+}
+
+/* 標題下說明「題型對應多益 Part 5」（FE-23 新增；樣式同難易度設定頁 .cz-intro：次要色、較小字級） */
+.p5-heading-note {
+  margin: 0 0 var(--gap);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ─── 題號與題型 ─── */
+.p5-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: var(--gap);
+}
+
+.p5-number {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.p5-number:focus,
+.p5-summary__title:focus {
+  outline: none;
+}
+
+.p5-number:focus-visible,
+.p5-summary__title:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.p5-type {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #e0ecff;
+  color: var(--primary-hover);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* ─── 題目句與底線空格 ─── */
+.p5-sentence {
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  line-height: 1.9;
+}
+
+.p5-blank {
+  display: inline-block;
+  width: 4.5em;
+  max-width: 100%;
+  height: 1.2em;
+  margin: 0 0.2em;
+  border-bottom: 2px solid var(--text);
+  vertical-align: baseline;
+}
+
+/* ─── 選項 ─── */
+.p5-options {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.p5-options__item {
+  min-width: 0;
+}
+
+.p5-option {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  width: 100%;
+  min-height: var(--touch);
+  padding: 10px 14px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.p5-option__letter {
+  flex: 0 0 auto;
+  font-weight: 700;
+}
+
+.p5-option__text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.p5-option__badge {
+  flex: 0 0 auto;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+@media (hover: hover) {
+  .p5-option--idle:hover {
+    border-color: var(--primary);
+  }
+}
+
+/* 鎖定後：不可再點，但未標色的選項維持可讀（不用 .btn 的半透明） */
+.p5-option:disabled {
+  cursor: default;
+}
+
+.p5-option--locked {
+  color: var(--text-muted);
+}
+
+.p5-option--correct {
+  border-color: var(--correct);
+  background: var(--correct-bg);
+  color: var(--correct);
+  font-weight: 600;
+}
+
+.p5-option--correct .p5-option__badge {
+  background: var(--correct);
+}
+
+.p5-option--wrong {
+  border-color: var(--wrong);
+  background: var(--wrong-bg);
+  color: var(--wrong);
+  font-weight: 600;
+}
+
+.p5-option--wrong .p5-option__badge {
+  background: var(--wrong);
+}
+
+/* ─── 作答結果與解析 ─── */
+.p5-feedback {
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.p5-feedback--correct {
+  color: var(--correct);
+}
+
+.p5-feedback--wrong {
+  color: var(--wrong);
+}
+
+.p5-explain {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.p5-explain__title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.p5-explain__body {
+  margin-bottom: 12px;
+}
+
+.p5-structure {
+  margin: 0;
+  padding-left: 1.25em;
+}
+
+.p5-warning {
+  color: var(--warning-text);
+  background: var(--warning-bg);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+}
+
+.p5-actions .btn {
+  min-width: 8em;
+}
+
+/* ─── 結算 ─── */
+.p5-summary {
+  text-align: center;
+}
+
+.p5-summary__title {
+  font-size: 1.15rem;
+}
+
+.p5-summary__score {
+  margin-bottom: 4px;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.p5-summary__total {
+  color: var(--text-muted);
+}
+
+.p5-summary .btn-row {
+  justify-content: center;
+}
+
+.p5-empty__text {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* 平板以上：選項 2 欄 */
+@media (min-width: 768px) {
+  .p5-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ─── 答題回饋動畫（FE-29；architecture.md v0.4 §7.11；AC-29-01） ───
+ * 只在「本次點擊造成作答」時由 views/part5.js 以 ui/motion.enter 加上、時間到自動移除；
+ * 動畫只改 transform，顏色（綠／紅）與 disabled 由狀態 class 決定，動畫結束後保留。
+ * 減少動態時 05-motion.css 全域關閉動畫，motion.enter 也不加 class（A-3）。
+ */
+@keyframes p5-opt-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes p5-opt-shake {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.p5-option.p5-opt--pop {
+  animation: p5-opt-pop var(--emt-dur-answer) ease-out;
+}
+
+.p5-option.p5-opt--shake {
+  animation: p5-opt-shake var(--emt-dur-answer) ease-in-out;
+}

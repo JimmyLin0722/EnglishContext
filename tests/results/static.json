@@ -1,0 +1,65 @@
+[
+  {
+    "suite": "static",
+    "tc": "TC-S01",
+    "ac": "AC-19-01",
+    "result": "通過",
+    "note": "dist 檔案：english-master-track.html；<style> 區塊 1；外部資源樣式命中：無；程式網路 API：無"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-S02",
+    "ac": "AC-19-04",
+    "result": "通過",
+    "note": "3,047,158 bytes（上限 5,242,880）"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-S03",
+    "ac": "AC-04-09",
+    "result": "通過",
+    "note": "src/app 命中 0；產物程式命中 無"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-S04",
+    "ac": "AC-21-02",
+    "result": "通過",
+    "note": "命中：無"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-S05",
+    "ac": "AC-21-03（程式面）",
+    "result": "通過",
+    "note": "命中：無"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-S06",
+    "ac": "AC-23-06",
+    "result": "通過",
+    "note": "開頭註解含 MIT 全文與 Copyright=true；CC BY-SA 聲明與網址=true；<meta charset> 結束於第 70 byte"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-S07",
+    "ac": "AC-04-04、AC-24-07（產物）",
+    "result": "通過",
+    "note": "<script> 開 2／關 2；javascript: 連結=false"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-S08",
+    "ac": "AC-19-01（D-1 不打包）",
+    "result": "通過",
+    "note": "命中：無"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-S09",
+    "ac": "AC-19-01（交付物可追溯）",
+    "result": "通過",
+    "note": "重建產物 3,047,158 bytes；與 dist 位元組相同=true"
+  }
+]

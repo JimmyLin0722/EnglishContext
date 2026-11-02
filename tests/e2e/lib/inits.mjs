@@ -1,0 +1,175 @@
+// QA E2E：以 Page.addScriptToEvaluateOnNewDocument 注入的模擬環境（architecture.md §10「E2E」）
+
+/** 記錄所有出現過的 toast 文字（toast 會自動消失，故以 MutationObserver 收集） */
+export const TOAST_RECORDER = `
+(() => {
+  window.__qaToasts = [];
+  const seen = new WeakSet();
+  const grab = (n) => {
+    if (!n || n.nodeType !== 1) return;
+    const list = n.matches && n.matches(".toast") ? [n] : (n.querySelectorAll ? [...n.querySelectorAll(".toast")] : []);
+    for (const t of list) { if (!seen.has(t)) { seen.add(t); window.__qaToasts.push({ text: t.textContent, kind: t.getAttribute("data-kind") || "", at: performance.now() }); } }
+  };
+  new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) grab(n); })
+    .observe(document, { childList: true, subtree: true });
+})();
+`;
+
+/**
+ * 假的 speechSynthesis / SpeechSynthesisUtterance。
+ * mode："ok"（有 en-US 本機語音）、"novoice"（只有非 en-US 語音）、"unsupported"（API 不存在）
+ */
+export function fakeTts(mode = "ok") {
+  return `
+(() => {
+  const mode = ${JSON.stringify(mode)};
+  window.__qaTts = { spoken: [], cancels: 0, mode };
+  if (mode === "unsupported") {
+    try { Object.defineProperty(window, "speechSynthesis", { value: undefined, configurable: true, writable: true }); } catch (e) {}
+    try { Object.defineProperty(window, "SpeechSynthesisUtterance", { value: undefined, configurable: true, writable: true }); } catch (e) {}
+    return;
+  }
+  const voices = mode === "novoice"
+    ? [{ name: "QA zh-TW", lang: "zh-TW", localService: true, default: true, voiceURI: "qa-zh" }]
+    : [{ name: "QA en-GB", lang: "en-GB", localService: true, default: false, voiceURI: "qa-gb" },
+       { name: "QA en-US remote", lang: "en-US", localService: false, default: false, voiceURI: "qa-us-r" },
+       { name: "QA en-US local", lang: "en_US", localService: true, default: true, voiceURI: "qa-us-l" }];
+  class U { constructor(text) { this.text = text; this.lang = ""; this.rate = 1; this.voice = null; this.onend = null; this.onerror = null; this.onstart = null; } }
+  const synth = {
+    speaking: false, pending: false, paused: false,
+    getVoices() { return voices.slice(); },
+    speak(u) { window.__qaTts.spoken.push({ text: u.text, lang: u.lang, rate: u.rate, voice: u.voice && u.voice.name, queueBefore: synth.speaking }); synth.speaking = true; },
+    cancel() { window.__qaTts.cancels++; synth.speaking = false; },
+    pause() {}, resume() {},
+    addEventListener() {}, removeEventListener() {}, onvoiceschanged: null,
+  };
+  Object.defineProperty(window, "speechSynthesis", { value: synth, configurable: true, writable: true });
+  Object.defineProperty(window, "SpeechSynthesisUtterance", { value: U, configurable: true, writable: true });
+})();
+`;
+}
+
+/**
+ * 假的 SpeechRecognition。mode："ok" 或 "unsupported"。
+ * 測試以 window.__qaStt.last 取得最近一個實例，呼叫 emitResult(text) / emitError(code) / emitEnd()。
+ */
+export function fakeStt(mode = "ok") {
+  return `
+(() => {
+  const mode = ${JSON.stringify(mode)};
+  window.__qaStt = { instances: [], starts: 0, stops: 0, aborts: 0, last: null };
+  if (mode === "unsupported") {
+    try { Object.defineProperty(window, "SpeechRecognition", { value: undefined, configurable: true, writable: true }); } catch (e) {}
+    try { Object.defineProperty(window, "webkitSpeechRecognition", { value: undefined, configurable: true, writable: true }); } catch (e) {}
+    return;
+  }
+  class R {
+    constructor() { this.lang = ""; this.interimResults = true; this.maxAlternatives = 5; this.continuous = true; this.onresult = null; this.onerror = null; this.onend = null; this.started = false; window.__qaStt.instances.push(this); window.__qaStt.last = this; }
+    start() { this.started = true; window.__qaStt.starts++; }
+    stop() { window.__qaStt.stops++; const self = this; setTimeout(() => self.emitEnd(), 10); }
+    abort() { window.__qaStt.aborts++; const self = this; setTimeout(() => { self.onerror && self.onerror({ error: "aborted" }); self.emitEnd(); }, 10); }
+    emitResult(text) { const alt = { transcript: text, confidence: 0.9 }; const res = [alt]; res.isFinal = true; const results = [res]; this.onresult && this.onresult({ results, resultIndex: 0 }); }
+    emitError(code) { this.onerror && this.onerror({ error: code }); }
+    emitEnd() { const f = this.onend; f && f({}); }
+  }
+  Object.defineProperty(window, "SpeechRecognition", { value: undefined, configurable: true, writable: true });
+  Object.defineProperty(window, "webkitSpeechRecognition", { value: R, configurable: true, writable: true });
+})();
+`;
+}
+
+/** 剪貼簿：mode "ok"（記錄寫入內容）、"reject"、"missing" */
+export function fakeClipboard(mode = "ok") {
+  return `
+(() => {
+  const mode = ${JSON.stringify(mode)};
+  window.__qaClip = { written: [] };
+  const nav = navigator;
+  if (mode === "missing") { try { Object.defineProperty(nav, "clipboard", { value: undefined, configurable: true }); } catch (e) {} return; }
+  const clip = { writeText(t) { if (mode === "reject") return Promise.reject(new DOMException("denied", "NotAllowedError")); window.__qaClip.written.push(t); return Promise.resolve(); } };
+  try { Object.defineProperty(nav, "clipboard", { value: clip, configurable: true }); } catch (e) {}
+})();
+`;
+}
+
+/**
+ * localStorage 模擬：mode "disabled"（存取即拋 SecurityError）、"quota"（setItem 拋 QuotaExceededError，
+ * 可由 window.__qaQuota = false 解除）
+ */
+export function storageMode(mode) {
+  return `
+(() => {
+  const mode = ${JSON.stringify(mode)};
+  if (mode === "disabled") {
+    const thrower = () => { throw new DOMException("The operation is insecure.", "SecurityError"); };
+    try { Object.defineProperty(window, "localStorage", { get: thrower, configurable: true }); } catch (e) {}
+    for (const k of ["getItem", "setItem", "removeItem", "clear", "key"]) Storage.prototype[k] = thrower;
+    return;
+  }
+  if (mode === "quota") {
+    window.__qaQuota = true;
+    const orig = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (k, v) {
+      if (window.__qaQuota) throw new DOMException("The quota has been exceeded.", "QuotaExceededError");
+      return orig.call(this, k, v);
+    };
+  }
+})();
+`;
+}
+
+/** 把裝置時鐘固定位移到指定的本地日期（同一時刻的時分秒），用於打卡跨日測試 */
+export function fakeDate(ymd) {
+  return `
+(() => {
+  const [y, m, d] = ${JSON.stringify(ymd)}.split("-").map(Number);
+  const RealDate = Date;
+  const now = new RealDate();
+  const target = new RealDate(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
+  const offset = target.getTime() - now.getTime();
+  class FakeDate extends RealDate {
+    constructor(...a) { if (a.length === 0) super(RealDate.now() + offset); else super(...a); }
+    static now() { return RealDate.now() + offset; }
+  }
+  FakeDate.UTC = RealDate.UTC; FakeDate.parse = RealDate.parse;
+  window.Date = FakeDate;
+})();
+`;
+}
+
+/**
+ * （v0.8）可在執行中調整的時鐘：初始為本地 `ymd hh:mm:ss`，之後以 window.__qaSetClock("YYYY-MM-DDTHH:MM:SS") 跳到指定本地時間
+ * （之後照實際流逝前進）。用於 AC-30-07 跨午夜。
+ */
+export function controllableClock(local) {
+  return `
+(() => {
+  const RealDate = Date;
+  const parse = (s) => { const [d, t = "12:00:00"] = s.split("T"); const [y, m, dd] = d.split("-").map(Number); const [hh, mm, ss] = t.split(":").map(Number); return new RealDate(y, m - 1, dd, hh, mm, ss || 0).getTime(); };
+  // 位移保存在 sessionStorage，重新載入後沿用（同一分頁內時間持續前進，不會倒回初始值）
+  let offset = parse(${JSON.stringify(local)}) - RealDate.now();
+  try { const v = sessionStorage.getItem("__qaClockOffset"); if (v !== null) offset = Number(v); else sessionStorage.setItem("__qaClockOffset", String(offset)); } catch (e) {}
+  window.__qaSetClock = (s) => { offset = parse(s) - RealDate.now(); try { sessionStorage.setItem("__qaClockOffset", String(offset)); } catch (e) {} };
+  class FakeDate extends RealDate {
+    constructor(...a) { if (a.length === 0) super(RealDate.now() + offset); else super(...a); }
+    static now() { return RealDate.now() + offset; }
+  }
+  FakeDate.UTC = RealDate.UTC; FakeDate.parse = RealDate.parse;
+  window.Date = FakeDate;
+})();
+`;
+}
+
+/** （v0.8）navigator.vibrate 替身：mode "stub"（記錄參數、回 true）、"missing"（不存在，如 iOS Safari）、"throw"（呼叫即拋） */
+export function fakeVibrate(mode = "stub") {
+  return `
+(() => {
+  const mode = ${JSON.stringify(mode)};
+  window.__qaVib = [];
+  const proto = Object.getPrototypeOf(navigator);
+  if (mode === "missing") { try { delete proto.vibrate; } catch (e) {} try { Object.defineProperty(navigator, "vibrate", { value: undefined, configurable: true }); } catch (e) {} return; }
+  const fn = mode === "throw" ? function () { throw new Error("qa vibrate throw"); } : function (p) { window.__qaVib.push(JSON.parse(JSON.stringify(p))); return true; };
+  try { Object.defineProperty(navigator, "vibrate", { value: fn, configurable: true, writable: true }); } catch (e) {}
+})();
+`;
+}

@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://english-master-track.local/contract/storage-schema.json",
+  "meta": {
+    "doc": "CONTRACT-STORAGE",
+    "version": "0.8",
+    "status": "approved",
+    "author": "sa-agent",
+    "approved_by": "JimmyLin",
+    "approved_at": "2026-10-30",
+    "upstream": "docs/01-PRD.md v0.8（approved，JimmyLin，2026-10-30）",
+    "covers": ["FR-6.1", "FR-6.2", "AC-08-13", "AC-09-04", "AC-11-05", "AC-11-07", "AC-17-02", "AC-17-03", "AC-17-05", "AC-18-01", "AC-18-02", "AC-18-05", "AC-24-02", "AC-24-05", "AC-24-06", "AC-24-08", "AC-24-10", "AC-24-11", "AC-25-01", "AC-25-04", "AC-25-09", "AC-30-03", "AC-30-06", "AC-30-07", "AC-30-09", "AC-30-11", "AC-30-12", "AC-30-13", "R-17"],
+    "notes": "根結構描述 localStorage 鍵 englishMasterTrack:state 的值（StorageRecord，schemaVersion 2）。schemaVersion 1 的紀錄只作為遷移輸入（README §5.3 MG-1～MG-4），遷移後再以本根結構驗證。備份檔結構見 $defs/BackupFile。鍵 englishMasterTrack:unreadable 存原始字串，不受本 schema 約束（README §5.3 RS-1～RS-4）。todayLearned、learnedHistory 分兩層：$defs/TodayLearnedState、$defs/LearnedHistory 為『結構（shape）』，不符 = 整個欄位型別錯誤（讀 localStorage 只重設該欄、匯入則格式錯誤）；$defs/TodayLearnedStateNormalized、$defs/LearnedHistoryNormalized 為正規化後的值，程式寫出（localStorage、匯出備份）必須符合，QA 可用 $defs/PersistedDataWritten 驗證匯出檔。本檔無法表達的規則（今天的日期範圍、一致性、correct ≤ answered 等）列於 README §7 V-ST-xx。",
+    "changelog": [
+      { "version": "0.1", "date": "2026-10-29", "author": "sa-agent", "note": "初版：StorageRecord（schemaVersion 1）與 BackupFile。" },
+      { "version": "0.2", "date": "2026-10-29", "author": "sa-agent", "note": "契約隨 README／data-schema.ts 升版（授權查證、N_B／N_G 回填、DataSourceEntry 新增欄位，皆屬內容資料檔）。持久化結構無變更，schemaVersion 維持 1，不需遷移。" },
+      { "version": "0.3", "date": "2026-10-30", "author": "sa-agent", "note": "上游改為 PRD v0.5；契約隨 README／data-schema.ts 升版（FB-12 依 PRD R-12 解除，商管範本代表字改為 Monetization，屬內容資料檔）。持久化結構無變更，schemaVersion 維持 1，不需遷移。" },
+      { "version": "0.4", "date": "2026-10-30", "author": "sa-agent", "note": "上游改為 PRD v0.6；契約隨 README／data-schema.ts 升版（FB-10 依 PRD R-13 解除：phoneticSource 收窄為 ORIGINAL、meaningSource 判定規則、ECDICT 素材到位與釋義撰寫規則，皆屬內容資料檔）。持久化結構無變更，schemaVersion 維持 1，不需遷移。" },
+      { "version": "0.5", "date": "2026-10-30", "author": "sa-agent", "note": "修訂已核准的 v0.4（/pg-run 階段回饋，README §9.1）；status 改回 draft 並與 README、data-schema.ts 同步。只改 description：BackupFile 匯入檢查順序補上頂層欄位檢查與 customVocab 重複的匯入例外（IM-1、IM-2）；date-time 註明為強制檢查。properties、required、additionalProperties、const／enum 皆未改動；schemaVersion 維持 1，不需遷移。" },
+      { "version": "0.6", "date": "2026-10-30", "author": "sa-agent", "note": "修訂已核准的 v0.5（/pg-run 後段回饋，README §9.2 DF-07～DF-10）；status 改回 draft 並與 README、data-schema.ts 同步。本檔只改 meta（版本、狀態、變更紀錄）與 notes 補充 unreadable 鍵的重設時機（README §5.3 RS-1～RS-4）。執行期錯誤碼 write_failed（IM-6）不持久化，本檔不涉及。properties、required、additionalProperties、const／enum 皆未改動；schemaVersion 維持 1，不需遷移。" },
+      { "version": "0.7", "date": "2026-10-30", "author": "sa-agent", "note": "修訂已核准的 v0.6，依人類決議（JimmyLin，2026-10-30）FB-24（write_failed 文字定案）、FB-25（PartOfSpeech 新增 \"pref.\"）；status 改回 draft，三檔同步。兩者皆不涉及持久化：PartOfSpeech 只用於內建字庫 BuiltinVocabItem.pos（內容資料檔）；本檔 CustomVocabItem.pos 為自由字串 { \"type\": \"string\" }，已再確認不受影響；write_failed 為執行期錯誤碼不持久化。本檔只改 meta（版本、狀態、變更紀錄）；properties、required、additionalProperties、const／enum 皆未改動；schemaVersion 維持 1，不需遷移。" },
+      { "version": "0.8", "date": "2026-10-30", "author": "sa-agent", "note": "修訂已核准的 v0.7，依 PRD v0.8 R-17（人類已同意持久化結構變更）。status 改回 draft，三檔同步；本版為持久化結構變更，須由人類核准（不適用主控代核）。(1) 根 schemaVersion const 1 → 2；(2) PersistedData 新增必填 todayLearned、learnedHistory（required 7 → 9 欄）；(3) 新增 $defs/TodayLearnedState、TodayLearnedStateNormalized、LearnedHistory、LearnedHistoryNormalized、PersistedDataWritten；(4) BackupFile.schemaVersion enum [1] → [1, 2]，頂層 5 欄不變；(5) Part5Progress 說明改用畫面名稱「模擬測驗」（R-15），識別字不變。v1 → v2 遷移：data 補 todayLearned = {date:null, wordKeys:[]}、learnedHistory = {}，其餘欄位不變（README MG-1～MG-4）。" }
+    ]
+  },
+  "title": "StorageRecord（localStorage: englishMasterTrack:state，schemaVersion 2）",
+  "description": "應用程式持久化狀態。寫入時整筆 JSON.stringify 後以單一 setItem 寫入，確保不出現只寫一半的狀態（AC-18-04、AC-24-09）。讀取流程（README §5.3）：JSON.parse → schemaVersion 檢查 → 1 則遷移（MG-1～MG-4）→ todayLearned／learnedHistory 欄位層級檢查（缺少或 shape 不符只重設該欄，RD-1）→ 以本根結構與 V-ST-03 完整驗證 → V-ST-09～V-ST-11 正規化。",
+  "type": "object",
+  "required": ["schemaVersion", "savedAt", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "description": "結構版本。本版寫入 = 2。讀取時 1 先遷移再驗證；缺失、非整數、不在 SUPPORTED_SCHEMA_VERSIONS [1, 2] 視為無法讀取（README §5.3）。",
+      "type": "integer",
+      "const": 2
+    },
+    "savedAt": {
+      "description": "最後寫入時間，ISO 8601（RFC 3339，強制檢查，IM-2）。",
+      "type": "string",
+      "format": "date-time"
+    },
+    "data": { "$ref": "#/$defs/PersistedData" }
+  },
+  "$defs": {
+    "ColorLevel": {
+      "description": "色級代碼（橘、棕、綠、藍、金）。",
+      "enum": ["orange", "brown", "green", "blue", "gold"]
+    },
+    "OpenColorLevel": {
+      "description": "本版開放色級（可作為生效色級）。",
+      "enum": ["orange", "brown", "green"]
+    },
+    "Score": {
+      "description": "多益目標分數：10～990，5 的倍數（Q-12）。",
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 990,
+      "multipleOf": 5
+    },
+    "Count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "LocalDate": {
+      "description": "裝置本地日期 YYYY-MM-DD。本 pattern 只檢查格式；是否為實際存在的日期（如 2026-02-30 不存在）由 README V-ST-09、V-ST-10 檢查。",
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+    },
+    "NonBlankString": {
+      "description": "trim 後非空的字串。",
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "OptionIndex": {
+      "enum": [0, 1, 2, 3]
+    },
+    "GoalState": {
+      "description": "目標設定（AC-01-04、AC-02-08、AC-17-06）。預設 draftScore 600、appliedScore 600、appliedColor green、effectiveColor green（AC-18-02）。",
+      "type": "object",
+      "required": ["draftScore", "appliedScore", "appliedColor", "effectiveColor"],
+      "additionalProperties": false,
+      "properties": {
+        "draftScore": { "$ref": "#/$defs/Score", "description": "滑桿／輸入框目前的有效分數（未套用也保存）。" },
+        "appliedScore": { "$ref": "#/$defs/Score", "description": "最近一次按「套用」（首次畫面為「開始學習」）的分數。" },
+        "appliedColor": { "$ref": "#/$defs/ColorLevel", "description": "目前目標色級 = Color(appliedScore)。冗餘，讀取時重算覆蓋。" },
+        "effectiveColor": { "$ref": "#/$defs/OpenColorLevel", "description": "目前生效色級。冗餘，讀取時重算覆蓋。" }
+      }
+    },
+    "CustomVocabItem": {
+      "description": "自訂單字（AC-04-01～AC-04-09、AC-05-02）。未填選填欄位存空字串。",
+      "type": "object",
+      "required": ["id", "word", "meaning", "phonetic", "pos", "collocation", "example", "academicContext", "origin", "templateId", "createdAt"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^c_[A-Za-z0-9_-]{1,64}$" },
+        "word": { "$ref": "#/$defs/NonBlankString" },
+        "meaning": { "$ref": "#/$defs/NonBlankString" },
+        "phonetic": { "type": "string" },
+        "pos": { "type": "string" },
+        "collocation": { "type": "string" },
+        "example": { "type": "string", "description": "表單「論文例句」。" },
+        "academicContext": { "type": "string", "description": "manual 恆為空字串；template 由範本帶入。" },
+        "origin": { "enum": ["manual", "template"] },
+        "templateId": { "enum": ["cs", "business", "biostat", null] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "origin": { "const": "template" } } },
+          "then": { "properties": { "templateId": { "enum": ["cs", "business", "biostat"] } } },
+          "else": { "properties": { "templateId": { "const": null } } }
+        }
+      ]
+    },
+    "VocabQuizStats": {
+      "description": "單字四選一統計（AC-09-04）。跨欄位規則：correct ≤ answered（V-ST-03）。",
+      "type": "object",
+      "required": ["answered", "correct"],
+      "additionalProperties": false,
+      "properties": {
+        "answered": { "$ref": "#/$defs/Count" },
+        "correct": { "$ref": "#/$defs/Count" }
+      }
+    },
+    "Part5Progress": {
+      "description": "模擬測驗進度（識別字沿用 part5，R-15；AC-11-03～AC-11-07）。跨欄位規則：roundCorrect ≤ roundAnswered、totalCorrect ≤ totalAnswered、roundAnswered ≤ totalAnswered（V-ST-03）；currentIndex ≥ 題庫長度時重設（V-ST-05）。",
+      "type": "object",
+      "required": ["currentIndex", "lockedSelection", "phase", "roundAnswered", "roundCorrect", "totalAnswered", "totalCorrect"],
+      "additionalProperties": false,
+      "properties": {
+        "currentIndex": { "$ref": "#/$defs/Count", "description": "目前題目索引，0 起算。" },
+        "lockedSelection": {
+          "description": "目前題目已作答所選索引；未作答為 null。",
+          "oneOf": [ { "$ref": "#/$defs/OptionIndex" }, { "type": "null" } ]
+        },
+        "phase": { "enum": ["question", "summary"] },
+        "roundAnswered": { "$ref": "#/$defs/Count" },
+        "roundCorrect": { "$ref": "#/$defs/Count" },
+        "totalAnswered": { "$ref": "#/$defs/Count" },
+        "totalCorrect": { "$ref": "#/$defs/Count" }
+      }
+    },
+    "StreakState": {
+      "description": "連續打卡（AC-17-02、AC-17-05）。預設 days 0、lastActiveDate null。",
+      "type": "object",
+      "required": ["days", "lastActiveDate"],
+      "additionalProperties": false,
+      "properties": {
+        "days": { "$ref": "#/$defs/Count" },
+        "lastActiveDate": {
+          "oneOf": [ { "$ref": "#/$defs/LocalDate" }, { "type": "null" } ]
+        }
+      }
+    },
+    "TodayLearnedState": {
+      "description": "（v0.8，schemaVersion 2）今日已學紀錄的『結構（shape）』檢查（US-30、R-17）。不符（非物件、缺鍵、多餘鍵、date 非字串且非 null、wordKeys 非陣列）= 整個欄位型別錯誤：讀 localStorage → 只把本欄重設為 {date:null, wordKeys:[]}（RD-1、AC-30-13）；匯入備份 → 格式錯誤（AC-24-11、AC-24-05）。shape 正確但內容無效（日期格式錯、不是今天、wordKeys 含非字串／空白／重複項）不在此擋，由 README V-ST-09 正規化。預設 {date:null, wordKeys:[]}。",
+      "type": "object",
+      "required": ["date", "wordKeys"],
+      "additionalProperties": false,
+      "properties": {
+        "date": { "type": ["string", "null"], "description": "wordKeys 所屬的本地日期；正規化後只能是 null 或今天。" },
+        "wordKeys": { "type": "array", "description": "當天學過的不重複 wordKey；項目內容由 V-ST-09 檢查。" }
+      }
+    },
+    "TodayLearnedStateNormalized": {
+      "description": "（v0.8）今日已學紀錄正規化後的值；程式寫出時必須符合。另需 V-ST-09：date 非 null 時必須是實際存在的日期且等於寫入當下的本地今天（匯出時為匯出當天）；wordKeys 每項已依 C-2 正規化。上限：不設固定 maxItems（長度 ≤ 當天學過的相異單字數）。",
+      "type": "object",
+      "required": ["date", "wordKeys"],
+      "additionalProperties": false,
+      "properties": {
+        "date": { "oneOf": [ { "$ref": "#/$defs/LocalDate" }, { "type": "null" } ] },
+        "wordKeys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/NonBlankString" }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "date": { "type": "null" } } },
+          "then": { "properties": { "wordKeys": { "maxItems": 0 } } }
+        }
+      ]
+    },
+    "LearnedHistory": {
+      "description": "（v0.8，schemaVersion 2）近 30 天每日已學字數的『結構（shape）』檢查：必須是 JSON 物件（日期 → 字數的對照）。不是物件（陣列、null、字串、數字等）= 整個欄位型別錯誤，處理同 TodayLearnedState。項目層級的無效內容（鍵不是合法日期、值為負數／非整數／非數字、日期晚於今天或早於今天往前第 29 天）不在此擋，由 README V-ST-10 捨棄。預設 {}。",
+      "type": "object"
+    },
+    "LearnedHistoryNormalized": {
+      "description": "（v0.8）近 30 天歷史正規化後的值；程式寫出時必須符合。另需 V-ST-10、V-ST-11：每個鍵為實際存在的日期且落在 [今天 − 29 天, 今天]；todayLearned.date = 今天時 learnedHistory[今天] = todayLearned.wordKeys.length，否則不得有今天的鍵。",
+      "type": "object",
+      "propertyNames": { "$ref": "#/$defs/LocalDate" },
+      "additionalProperties": { "$ref": "#/$defs/Count" },
+      "maxProperties": 30
+    },
+    "PersistedData": {
+      "description": "全部使用者資料（AC-18-01、AC-24-02）。不含內建內容、語音實例、音訊、畫面暫態（R-04、AC-21-03）。schemaVersion 2 起含 todayLearned、learnedHistory（必填；v1 資料由遷移補上）。",
+      "type": "object",
+      "required": ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged", "todayLearned", "learnedHistory"],
+      "additionalProperties": false,
+      "properties": {
+        "goal": { "$ref": "#/$defs/GoalState" },
+        "customVocab": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CustomVocabItem" }
+        },
+        "masteredWordKeys": {
+          "description": "已掌握單字的 wordKey（正規化：NFC、trim、連續空白壓成一個、轉小寫）。陣列長度 = 單字掌握數。",
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/NonBlankString" }
+        },
+        "vocabQuiz": { "$ref": "#/$defs/VocabQuizStats" },
+        "part5": { "$ref": "#/$defs/Part5Progress" },
+        "streak": { "$ref": "#/$defs/StreakState" },
+        "sttNoticeAcknowledged": { "type": "boolean", "description": "STT 說明已讀（AC-08-13）。預設 false。" },
+        "todayLearned": { "$ref": "#/$defs/TodayLearnedState" },
+        "learnedHistory": { "$ref": "#/$defs/LearnedHistory" }
+      }
+    },
+    "PersistedDataWritten": {
+      "description": "（v0.8）程式寫出的 PersistedData（localStorage 寫入、匯出備份的 data）必須符合：PersistedData + 兩個新欄位為正規化後的值。讀取與匯入驗證用 PersistedData，不用本定義。",
+      "allOf": [
+        { "$ref": "#/$defs/PersistedData" },
+        {
+          "properties": {
+            "todayLearned": { "$ref": "#/$defs/TodayLearnedStateNormalized" },
+            "learnedHistory": { "$ref": "#/$defs/LearnedHistoryNormalized" }
+          }
+        }
+      ]
+    },
+    "BackupFile": {
+      "description": "備份檔（AC-24-01～AC-24-11）。檔名 english-master-track-backup-YYYYMMDD.json。匯出：schemaVersion = 2，data 符合 $defs/PersistedDataWritten。匯入檢查順序與錯誤分類見 README §6.2：先檢查 JSON 與 format（格式錯誤），再檢查 schemaVersion（不在 [1, 2] → 版本不相容），schemaVersion 1 的 data 依 MG-1～MG-4 補新欄位預設值（AC-24-10），再以本 schema 驗證頂層欄位（exportedAt 為 date-time、contentDataVersion 為字串、無多餘欄位）與 data（格式錯誤；schemaVersion 2 的 data 缺 todayLearned／learnedHistory 或其 shape 不符亦為格式錯誤，AC-24-11）。匯入例外（IM-1）：data.customVocab 的 id／wordKey 重複屬 V-ST-03（本 schema 不表達），步驟 5 不擋，由步驟 7 清理後再完整檢查；新欄位的項目層級無效內容由步驟 7 以匯入當天為今天正規化（IM-8）。讀 localStorage 時不適用 IM-1。本檔所有 format: date-time 皆為強制檢查（RFC 3339 且 Date.parse 可解析，IM-2）。",
+      "type": "object",
+      "required": ["format", "schemaVersion", "exportedAt", "contentDataVersion", "data"],
+      "additionalProperties": false,
+      "properties": {
+        "format": { "const": "english-master-track-backup" },
+        "schemaVersion": {
+          "description": "備份格式版本號（AC-24-02）= 匯出時的 CURRENT_SCHEMA_VERSION（本版匯出 2）。本版匯入支援 [1, 2]；1 = v0.7 程式匯出的舊版備份（AC-24-10）。",
+          "type": "integer",
+          "enum": [1, 2]
+        },
+        "exportedAt": { "type": "string", "format": "date-time", "description": "匯出時間，RFC 3339 date-time（含時區）。匯入時強制檢查，不符 → 格式錯誤（README IM-2）。" },
+        "contentDataVersion": { "type": "string", "description": "內建字庫資料版本（VOCAB_MANIFEST.dataVersion），僅供參考。" },
+        "data": { "$ref": "#/$defs/PersistedData" }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schemaVersion": 2,
+      "savedAt": "2026-10-30T08:30:00.000Z",
+      "data": {
+        "goal": { "draftScore": 600, "appliedScore": 600, "appliedColor": "green", "effectiveColor": "green" },
+        "customVocab": [],
+        "masteredWordKeys": [],
+        "vocabQuiz": { "answered": 0, "correct": 0 },
+        "part5": { "currentIndex": 0, "lockedSelection": null, "phase": "question", "roundAnswered": 0, "roundCorrect": 0, "totalAnswered": 0, "totalCorrect": 0 },
+        "streak": { "days": 0, "lastActiveDate": null },
+        "sttNoticeAcknowledged": false,
+        "todayLearned": { "date": null, "wordKeys": [] },
+        "learnedHistory": {}
+      }
+    },
+    {
+      "schemaVersion": 2,
+      "savedAt": "2026-10-30T09:15:00.000+08:00",
+      "data": {
+        "goal": { "draftScore": 600, "appliedScore": 600, "appliedColor": "green", "effectiveColor": "green" },
+        "customVocab": [],
+        "masteredWordKeys": ["the"],
+        "vocabQuiz": { "answered": 1, "correct": 1 },
+        "part5": { "currentIndex": 0, "lockedSelection": null, "phase": "question", "roundAnswered": 0, "roundCorrect": 0, "totalAnswered": 0, "totalCorrect": 0 },
+        "streak": { "days": 1, "lastActiveDate": "2026-10-30" },
+        "sttNoticeAcknowledged": false,
+        "todayLearned": { "date": "2026-10-30", "wordKeys": ["the", "of", "latency", "comply with"] },
+        "learnedHistory": { "2026-10-24": 3, "2026-10-27": 10, "2026-10-30": 4 }
+      }
+    }
+  ]
+}

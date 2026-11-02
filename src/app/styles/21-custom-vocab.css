@@ -1,0 +1,160 @@
+/*
+ * 21-custom-vocab.css — 自訂單字表單、清單與領域範本（FE-10）
+ * 依據：architecture.md §9（RWD：375／768／1366 不得水平捲動、觸控目標 ≥ 44px）
+ */
+
+.cv-section__title {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.cv-section__desc {
+  margin: 0 0 var(--gap);
+  color: var(--text-muted);
+}
+
+/* ─── 表單 ─── */
+.cv-form__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 16px;
+}
+
+.cv-form__hint {
+  margin-left: 4px;
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.cv-form__field input,
+.cv-form__field textarea {
+  min-width: 0;
+}
+
+.cv-form__field--example textarea {
+  min-height: 5rem;
+}
+
+.cv-form__message {
+  margin: 0 0 var(--gap);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: var(--wrong-bg);
+  color: var(--danger);
+}
+
+.cv-form .field__error {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 768px) {
+  .cv-form__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cv-form__field--example {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ─── 範本 ─── */
+.cv-templates__btn {
+  flex: 1 1 8rem;
+}
+
+.cv-templates__status {
+  margin: var(--gap) 0 0;
+  font-weight: 600;
+  color: var(--correct);
+}
+
+/* ─── 清單 ─── */
+.cv-list__count {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+}
+
+.cv-list__empty {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.cv-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cv-item {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+
+.cv-item:first-child {
+  border-top: 0;
+}
+
+.cv-item__main {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cv-item__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+}
+
+.cv-item__word {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.cv-item__phonetic,
+.cv-item__pos {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.cv-item__meaning {
+  margin-top: 2px;
+}
+
+.cv-item__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+.cv-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--syn-modifier-bg);
+  color: var(--syn-modifier);
+  font-weight: 600;
+}
+
+.cv-item__source {
+  color: var(--text-muted);
+}
+
+.cv-item__delete {
+  flex: 0 0 auto;
+}
+
+.cv-list__more {
+  margin-top: var(--gap);
+  width: 100%;
+}

@@ -1,0 +1,301 @@
+/*
+ * styles/10-dashboard.css — 學習主控台（FE-08；FE-31 今日學習進度）
+ * 依據：architecture.md §9（行動優先 RWD；斷點 768px）、v0.4 §7.11 環形圖列、§9 色彩與類名（db-ring、db-ring--done、db-bars）
+ * 涵蓋：AC-17-01、AC-17-06、AC-20-01（無水平捲軸）、AC-20-02（觸控尺寸 ≥ 44px）、
+ *       AC-30-01、AC-30-05、AC-30-08、AC-30-10、AC-31-03（減少動態由 05-motion.css 全域關閉 transition）
+ */
+
+.dash-title {
+  font-size: 1.375rem;
+  margin: 0 0 var(--gap);
+}
+
+.dash-section__title {
+  font-size: 1.0625rem;
+  margin: 0 0 var(--gap);
+}
+
+/* 統計與目標數值：手機 2 欄，平板以上 3／4 欄 */
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.dash-stat {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.dash-stat__label {
+  margin: 0 0 4px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.dash-stat__value {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+/* 色級值：左側色塊 */
+.dash-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-color::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+.dash-color[data-color="orange"]::before { background: var(--color-orange); }
+.dash-color[data-color="brown"]::before { background: var(--color-brown); }
+.dash-color[data-color="green"]::before { background: var(--color-green); }
+.dash-color[data-color="blue"]::before { background: var(--color-blue); }
+.dash-color[data-color="gold"]::before { background: var(--color-gold); }
+
+/* 入口：手機 2 欄 */
+.dash-entries {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-entries__item {
+  min-width: 0;
+}
+
+.dash-entry {
+  width: 100%;
+}
+
+.dash-backup__hint {
+  margin: 0 0 var(--gap);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+/* ─── 今日學習進度（FE-31） ─── */
+
+/* 環形圖列：手機時主環在上、兩個小環並排在下；平板以上同一列 */
+.db-rings {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--gap);
+  align-items: center;
+}
+
+.db-today {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.db-minis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+  min-width: 0;
+}
+
+.db-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.db-mini__label {
+  margin: 0 0 6px;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* 環形外框：SVG 與中央數值重疊 */
+.db-ring-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  max-width: 100%;
+}
+
+.db-ring-wrap--main {
+  width: 160px;
+}
+
+.db-ring-wrap--small {
+  width: 104px;
+}
+
+.db-ring {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.db-ring__track {
+  stroke: var(--border);
+}
+
+/* 進度圈：未達成 --primary；只轉場 dashoffset，顏色以 class 切換不做轉場（§7.11） */
+.db-ring__bar {
+  stroke: var(--primary);
+  transition: stroke-dashoffset var(--emt-dur-ring) ease-out;
+}
+
+.db-ring--small .db-ring__bar {
+  stroke: var(--correct);
+}
+
+/* 達成今日目標：滿圈金色（AC-30-05） */
+.db-ring--done .db-ring__bar {
+  stroke: var(--color-gold);
+}
+
+/* 無資料：空環（AC-30-10） */
+.db-ring--empty .db-ring__bar {
+  stroke: transparent;
+}
+
+.db-ring__value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18%;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.db-ring__value--small {
+  font-size: 1.125rem;
+}
+
+.db-today__text {
+  margin: 8px 0 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.db-today__done {
+  margin: 4px 0 0;
+  font-weight: 700;
+  color: var(--color-gold);
+}
+
+.db-today__done[hidden] {
+  display: none;
+}
+
+/* 近 7 天長條圖：7 欄等寬，高度以 % 表示與字數成比例（AC-30-08） */
+.db-bars__title {
+  margin: calc(var(--gap) * 1.5) 0 8px;
+  font-size: 0.9375rem;
+}
+
+.db-bars {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.db-bars__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.db-bars__item[hidden] {
+  display: none;
+}
+
+.db-bars__count {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.db-bars__track {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 32px;
+  height: 96px;
+  border-bottom: 1px solid var(--border);
+}
+
+.db-bars__fill {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+  border-radius: 4px 4px 0 0;
+  background: var(--primary);
+  opacity: 0.55;
+}
+
+.db-bars__item--today .db-bars__fill {
+  opacity: 1;
+}
+
+.db-bars__label {
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.db-bars__item--today .db-bars__label {
+  color: inherit;
+  font-weight: 700;
+}
+
+@media (min-width: 768px) {
+  .db-rings {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  }
+
+  .db-bars__track {
+    height: 120px;
+  }
+
+  .dash-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .dash-stats--goal {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dash-entries {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,600 @@
+/*
+ * styles/00-base.css — 基礎樣式（FE-02）
+ * 依據：architecture.md §9（行動優先 RWD；斷點 768px、1200px；內容區最寬 960px 置中）
+ * 涵蓋：AC-20-01（無水平捲軸）、AC-20-02（觸控尺寸 ≥ 44px）、AC-20-03（導覽可到達 6 個功能區）
+ * 規則：不設任何 > 343px 的固定寬度；需要寬內容時用元素內 overflow-x: auto（.scroll-x）。
+ */
+
+/* ─── 色彩與尺寸變數 ─── */
+:root {
+  /* 色級 5 色（自訂器色級按鈕、主控台） */
+  --color-orange: #e8833a;
+  --color-brown: #8b5a2b;
+  --color-green: #2e9e5b;
+  --color-blue: #2f6fd6;
+  --color-gold: #c9a227;
+
+  /* 語法 4 色系（解碼器，AC-12-01）：文字色／底色 */
+  --syn-subject: #1d4ed8;
+  --syn-subject-bg: #dbeafe;
+  --syn-verb: #b91c1c;
+  --syn-verb-bg: #fee2e2;
+  --syn-object: #15803d;
+  --syn-object-bg: #dcfce7;
+  --syn-modifier: #7e22ce;
+  --syn-modifier-bg: #f3e8ff;
+
+  /* 燈號（AC-08-06） */
+  --light-green: #16a34a;
+  --light-yellow: #ca8a04;
+  --light-red: #dc2626;
+
+  /* 對錯 */
+  --correct: #15803d;
+  --correct-bg: #dcfce7;
+  --wrong: #b91c1c;
+  --wrong-bg: #fee2e2;
+
+  /* 介面 */
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --text: #1f2937;
+  --text-muted: #5b6472;
+  --border: #d5d9e0;
+  --primary: #2f6fd6;
+  --primary-hover: #2459ad;
+  --primary-text: #ffffff;
+  --focus: #f59e0b;
+  --danger: #b91c1c;
+  --warning-bg: #fef3c7;
+  --warning-text: #7c4a03;
+
+  --radius: 8px;
+  --gap: 12px;
+  --touch: 44px;
+  --content-max: 960px;
+  --shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+
+  --font: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --font-ipa: "Segoe UI", "Lucida Sans Unicode", "Arial Unicode MS", sans-serif;
+}
+
+/* ─── 重設與防水平捲軸 ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+h1, h2, h3, h4, p, ul, ol, figure {
+  margin-top: 0;
+}
+
+img, svg, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+table {
+  border-collapse: collapse;
+  max-width: 100%;
+}
+
+pre, code {
+  font-family: Consolas, "Courier New", monospace;
+}
+
+pre {
+  white-space: pre-wrap;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.ipa {
+  font-family: var(--font-ipa);
+}
+
+/* 寬內容（表格、MIT 全文）用元素內捲動，頁面本身不得出現水平捲軸 */
+.scroll-x {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ─── 版面 ─── */
+.app-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 8px 16px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.3;
+  min-width: 0;
+}
+
+.app-banner:empty {
+  display: none;
+}
+
+.app-banner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 8px 16px;
+}
+
+.app-main {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.view {
+  min-width: 0;
+}
+
+.app-footer {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* ─── 導覽：行動版（< 768px）選單鈕展開 2 欄（v0.5 起 4 鈕 = 2 × 2） ─── */
+.app-nav {
+  display: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 8px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.app-nav.is-open {
+  display: grid;
+}
+
+.app-nav__btn {
+  min-height: var(--touch);
+  min-width: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.app-nav__btn[aria-current="page"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-text);
+  font-weight: 600;
+}
+
+.app-nav-toggle {
+  flex: 0 0 auto;
+}
+
+/* ─── 導覽：平板以上（≥ 768px）單列頁籤 ─── */
+@media (min-width: 768px) {
+  .btn.app-nav-toggle {
+    display: none;
+  }
+
+  .app-nav,
+  .app-nav.is-open {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 0 16px;
+    background: transparent;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-nav__btn {
+    flex: 1 1 0;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .app-nav__btn[aria-current="page"] {
+    background: transparent;
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+
+  .app-title {
+    font-size: 1.3rem;
+  }
+}
+
+@media (min-width: 1200px) {
+  .app-main {
+    padding: 24px 16px;
+  }
+}
+
+/* ─── 按鈕 ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--touch);
+  min-width: var(--touch);
+  max-width: 100%;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.3;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn--primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-text);
+}
+
+.btn--secondary {
+  background: var(--surface);
+}
+
+.btn--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #ffffff;
+}
+
+.btn--link {
+  border-color: transparent;
+  background: transparent;
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .btn--primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+  }
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ─── 表單 ─── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: var(--gap);
+  min-width: 0;
+}
+
+.field__label {
+  font-weight: 600;
+}
+
+.field__error {
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="search"],
+input:not([type]),
+select,
+textarea {
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--touch);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input[type="range"] {
+  width: 100%;
+  max-width: 100%;
+  min-height: var(--touch);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 24px;
+  height: 24px;
+}
+
+/* ─── 卡片 ─── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: var(--gap);
+  min-width: 0;
+}
+
+/* ─── toast ─── */
+.toast-root {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  width: 100%;
+  max-width: 30rem;
+  padding: 12px 16px;
+  border-radius: var(--radius);
+  background: #1f2937;
+  color: #ffffff;
+  box-shadow: var(--shadow);
+  white-space: pre-line;
+  pointer-events: auto;
+}
+
+.toast--success {
+  background: var(--correct);
+}
+
+.toast--error {
+  background: var(--danger);
+}
+
+/* ─── dialog ─── */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.dialog {
+  width: 100%;
+  max-width: 30rem;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: 20px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.dialog:focus {
+  outline: none;
+}
+
+.dialog__title {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+}
+
+.dialog__message {
+  margin: 0 0 16px;
+  white-space: pre-line;
+}
+
+.dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+body.has-dialog {
+  overflow: hidden;
+}
+
+/* 置於檔尾：須覆寫前面的 .toast-root、body、.app-nav 基礎規則（同權重以後者為準） */
+/* ─── 導覽：手機（≤ 640px）固定底部導覽列（v0.4，FE-26；architecture.md §9.1、PRD US-27、Q-33） ───
+ * 641～767px 維持上方「選單」鈕展開 2 欄（v0.5 起 4 鈕 = 2 × 2）；≥ 768px 維持單列頁籤。
+ * 斷點 640 = interaction.UI.NAV_BOTTOM_MAX_PX（§7.12，shell.test.js 檢查）。
+ * 首次模式（body[data-entry]）的隱藏規則屬 FE-32，不在此處。 */
+:root {
+  --emt-bottomnav-h: 56px;
+}
+
+@media (max-width: 640px) {
+  /* 不用「選單」鈕 */
+  .btn.app-nav-toggle {
+    display: none;
+  }
+
+  .app-nav,
+  .app-nav.is-open {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 900;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr)); /* v0.5（FE-38）：6 → 4（隱藏頁不列入導覽） */
+    gap: 0;
+    max-width: none;
+    height: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px));
+    margin: 0;
+    padding: 0 0 env(safe-area-inset-bottom, 0px);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 0;
+  }
+
+  .app-nav__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: var(--touch);
+    min-height: var(--touch);
+    padding: 4px 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .app-nav__icon {
+    flex: none;
+    width: 22px;
+    height: 22px;
+  }
+
+  .app-nav__label {
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* 頁面底部留白：最後一個元素不被導覽列遮住（AC-27-03） */
+  body {
+    padding-bottom: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  /* toast 移到導覽列上方 */
+  .toast-root {
+    bottom: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 12px);
+  }
+
+  /* 輸入中（虛擬鍵盤開啟）隱藏導覽列與留白，不遮輸入欄（AC-27-03；ui/bottom-nav.js 設定 is-typing） */
+  html.is-typing .app-nav {
+    display: none;
+  }
+
+  html.is-typing body {
+    padding-bottom: 8px;
+  }
+}
+
+/* 寬螢幕維持純文字頁籤 */
+@media (min-width: 641px) {
+  .app-nav__icon {
+    display: none;
+  }
+}
+
+/* ─── 首次進入模式（v0.4，FE-32；architecture.md §4.2、§7.9、§9.1；契約 §5.5 FS-3；PRD US-25、AC-25-01、AC-25-07） ───
+ * body[data-entry]：boot（啟動前，index.html 預設）→ firstRun／main（main.js、router 設定）。
+ * body[data-tab]：目前頁面代碼（router 設定）。
+ * 規則放在檔尾、不包在 @media 內：以屬性選擇器＋id 的權重覆寫前面各斷點的導覽與留白規則。 */
+
+/* 啟動前：隱藏導覽列、選單鈕與所有 view，避免首次模式閃現導覽（JS 失敗時沒有可用功能，與現況相同） */
+body[data-entry="boot"] #app-nav,
+body[data-entry="boot"] #nav-toggle,
+body[data-entry="boot"] #app-main {
+  display: none;
+}
+
+/* 首次畫面：不顯示導覽列（含底部導覽列）、選單鈕、自訂單字與範本區（Q-35） */
+body[data-entry="firstRun"] #app-nav,
+body[data-entry="firstRun"] #nav-toggle,
+body[data-entry="firstRun"] #customizer-custom {
+  display: none;
+}
+
+/* 首次畫面沒有底部導覽列：取消 ≤ 640px 的底部留白，toast 回到原位（body 基礎規則無 padding） */
+body[data-entry="firstRun"] {
+  padding-bottom: 0;
+}
+
+body[data-entry="firstRun"] .toast-root {
+  bottom: 16px;
+}
+
+/* 頁尾「返回難易度設定」：只在首次模式且目前為資料來源頁時顯示（AC-25-07） */
+#footer-first-run-back {
+  display: none;
+}
+
+body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
+  display: inline-flex;
+}

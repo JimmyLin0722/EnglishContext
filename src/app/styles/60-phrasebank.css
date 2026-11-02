@@ -1,0 +1,138 @@
+/*
+ * 60-phrasebank.css — 學術句型庫頁（FE-16）
+ * 依據：architecture.md §9 RWD；變數取自 00-base.css
+ * 原則：所有區塊 min-width: 0、長字可斷行，375px 起不得出現水平捲軸（AC-20-01）。
+ */
+
+.pb {
+  min-width: 0;
+}
+
+.pb-title {
+  margin: 0 0 var(--gap);
+  font-size: 1.2rem;
+}
+
+/* ─── 分類篩選 ─── */
+.pb-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: var(--gap);
+  min-width: 0;
+}
+
+.pb-filter__btn {
+  flex: 1 1 auto;
+  white-space: normal;
+}
+
+.pb-filter__btn[aria-pressed="true"] {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-text);
+  font-weight: 600;
+}
+
+/* ─── 搜尋與筆數 ─── */
+.pb-search {
+  margin-bottom: 8px;
+}
+
+.pb-count {
+  margin: 0 0 var(--gap);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.pb-empty {
+  margin: 0;
+  padding: 24px 16px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ─── 句型清單 ─── */
+.pb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.pb-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-wrap: anywhere;
+}
+
+/*
+ * BUG-002（AC-22-01、AC-16-01）：由 phrasebank.js 加上本 class，在視窗外時略過樣式計算與版面配置。
+ * 首屏卡片以行內樣式寫入實測高度；首屏之後建立的卡片寫入「已實測平均高度」作為估計值（auto：繪製過一次後改記住實際高度）。
+ * 預設值只在缺少行內高度時使用（與 phrasebank.js DEFAULT_CARD_HEIGHT 相同）。
+ */
+.pb-item--cv {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 220px;
+}
+
+.pb-item[hidden] {
+  display: none;
+}
+
+.pb-item__cat {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.pb-item__template {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.5;
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* 複製失敗時反白的文字更明顯 */
+.pb-item__template::selection {
+  background: #fde68a;
+  color: var(--text);
+}
+
+.pb-item__desc {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.pb-item__example {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.pb-item__example-label {
+  font-weight: 600;
+}
+
+.pb-item__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (min-width: 768px) {
+  .pb-filter__btn {
+    flex: 0 1 auto;
+  }
+}

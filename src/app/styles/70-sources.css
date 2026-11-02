@@ -1,0 +1,136 @@
+/* ─── 資料來源與授權頁（FE-17；AC-23-02、FB-20、FB-21） ─── */
+/* 375px 寬度下長網址與授權全文須換行，不得產生水平捲軸 */
+
+.src-page {
+  min-width: 0;
+}
+
+.src-page__title {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+}
+
+.src-section-title {
+  margin: 20px 0 8px;
+  font-size: 1.1rem;
+}
+
+.src-muted {
+  color: var(--text-muted);
+}
+
+.src-list {
+  min-width: 0;
+}
+
+.src-card,
+.src-project {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.src-card__title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  line-height: 1.4;
+}
+
+.src-card__sub {
+  margin: 12px 0 4px;
+  font-size: 0.95rem;
+}
+
+/* 欄位清單：寬螢幕兩欄（標籤｜值），窄螢幕上下排列 */
+.src-fields {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.src-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  min-width: 0;
+}
+
+.src-row__label {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.src-row__value {
+  margin: 0;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .src-row {
+    grid-template-columns: 9em minmax(0, 1fr);
+    gap: 12px;
+  }
+}
+
+/* 純文字網址：等寬字型、任意位置換行 */
+.src-url {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.src-mods,
+.src-statements {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.src-mods li,
+.src-statements li {
+  margin: 2px 0;
+}
+
+.src-note {
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border-left: 4px solid var(--primary);
+  background: var(--bg);
+}
+
+/* MIT 全文：可摺疊、保留換行 */
+.src-license {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 12px;
+}
+
+.src-license__summary {
+  cursor: pointer;
+  /* 保留預設 list-item 以顯示展開三角形；以上下內距撐出觸控高度 */
+  padding: 11px 0;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.src-license[open] {
+  padding-bottom: 12px;
+}
+
+.src-license-notice {
+  margin: 4px 0 8px;
+  white-space: pre-wrap;
+}
+
+.src-license-text {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  max-width: 100%;
+}
+
+.src-attrib {
+  margin: 12px 0;
+}

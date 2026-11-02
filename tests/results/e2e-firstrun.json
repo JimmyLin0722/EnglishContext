@@ -1,0 +1,177 @@
+[
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-01",
+    "ac": "AC-25-01、AC-20-03（首次畫面不顯示導覽）",
+    "result": "通過",
+    "note": "1366：{\"entry\":\"firstRun\",\"tab\":\"customizer\",\"cards\":\"orange,brown,green,blue,gold\",\"pressed\":\"green\",\"input\":\"600\",\"slider\":true,\"estimate\":true,\"start\":true,\"restore\":true,\"apply\":false,\"nav\":false,\"navBtns\":0,\"toggle\":false,\"dashboard\":false,\"entries\":0,\"custom\":false,\"form\":false,\"templates\":0,\"status\":false,\"footerSources\":true}；375：導覽可見=false、可見導覽鈕 0、選單鈕=false；狀態鍵=無"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-04",
+    "ac": "AC-25-04",
+    "result": "通過",
+    "note": "改分數後 455/brown；重新整理 → firstRun、600、選中 green、狀態鍵 無；關閉重開 → firstRun、600、選中 green、狀態鍵 無"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-07",
+    "ac": "AC-25-07、AC-23-02（任一頁面）",
+    "result": "通過",
+    "note": "資料來源頁 {\"tab\":\"sources\",\"sources\":true,\"entry\":\"firstRun\"}、導覽可見=false、返回連結「返回難易度設定」可見=true；返回後 firstRun/customizer、導覽=false、主控台=false、選中 brown、分數 220；狀態鍵 無"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-11",
+    "ac": "AC-25-11",
+    "result": "通過",
+    "note": "(a) 檔案選擇器開啟=true 後未選檔：firstRun、狀態鍵 無；(a) 確認框「匯入備份  匯入將覆蓋目前所有進度  取消 匯入」按取消：firstRun、狀態鍵 無、提示 []；(b) 非 JSON：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(b) 空檔：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(c) 版本 99：[\"備份檔版本不相容（檔案版本：99；支援版本：1、2）\"]、firstRun、狀態鍵 無；版本訊息「備份檔版本不相容（檔案版本：99；支援版本：1、2）」；之後按「開始學習」→ main、狀態鍵 有"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-11d",
+    "ac": "AC-25-11（d）、AC-24-09",
+    "result": "通過",
+    "note": "容量不足還原：提示 [\"儲存空間不足，未匯入\"]、firstRun、狀態鍵 無；解除後按「開始學習」→ main、狀態鍵 有"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-02",
+    "ac": "AC-25-02",
+    "result": "通過",
+    "note": "720 選中 green；按「開始學習」→ main/dashboard、導覽 6 鈕；主控台 目前目標分數=720｜目前目標色級=綠｜目前生效色級=綠｜每日新字量=15 字/天；單字集 5620；寫入 schemaVersion 2、goal {\"draftScore\":720,\"appliedScore\":720,\"appliedColor\":\"green\",\"effectiveColor\":\"green\"}"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-06",
+    "ac": "AC-25-06",
+    "result": "通過",
+    "note": "{\"entry\":\"main\",\"tab\":\"customizer\",\"cards\":\"orange,brown,green,blue,gold\",\"pressed\":\"green\",\"input\":\"720\",\"slider\":true,\"estimate\":true,\"start\":false,\"restore\":false,\"apply\":true,\"nav\":true,\"navBtns\":6,\"toggle\":false,\"dashboard\":false,\"entries\":0,\"custom\":true,\"form\":true,\"templates\":3,\"status\":true,\"footerSources\":true}"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-05",
+    "ac": "AC-25-05",
+    "result": "通過",
+    "note": "重新載入 → main/dashboard、導覽=true；關閉重開 → main/dashboard（v0.7 狀態見 TC-30-12）"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-03",
+    "ac": "AC-25-03、AC-26-04（首次畫面）",
+    "result": "通過",
+    "note": "點藍 → {\"input\":\"730\",\"cap\":true,\"pressed\":\"blue\"}；開始學習後主控台 目前目標分數=730｜目前目標色級=藍｜目前生效色級=綠（內建上限）｜每日新字量=15 字/天"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-08",
+    "ac": "AC-25-08、AC-18-03",
+    "result": "通過",
+    "note": "開啟 firstRun、警示「進度將無法保存」；開始學習 → main、可翻卡=true、注入範本 10 字；重新開啟 → firstRun、警示「進度將無法保存」；例外 0"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-09",
+    "ac": "AC-25-09、AC-18-05",
+    "result": "通過",
+    "note": "非 JSON：main/dashboard、提示 [\"資料讀取失敗，已重設\"]；空字串：main/dashboard、提示 [\"資料讀取失敗，已重設\"]；版本 99：main/dashboard、提示 [\"資料讀取失敗，已重設\"]"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-25-10",
+    "ac": "AC-25-10、AC-24-03",
+    "result": "通過",
+    "note": "首次畫面點金（860）後還原 300 棕備份：確認框=true、提示 [\"已匯入，略過 0 筆\"] → main/dashboard、導覽=true；主控台 目前目標分數=300｜目前目標色級=棕｜目前生效色級=棕｜每日新字量=10 字/天；goal {\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；重新載入 → main、目前目標分數=300｜目前目標色級=棕｜目前生效色級=棕｜每日新字量=10 字/天"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-24-10",
+    "ac": "AC-24-10",
+    "result": "通過",
+    "note": "v1 備份（無 todayLearned、learnedHistory）匯入：提示 [\"已匯入，略過 0 筆\"]；既有 7 欄還原相同=true；今日已學 0 / 10 字、長條 0,0,0,0,0,0,0；重新載入後 localStorage schemaVersion 2、todayLearned {\"date\":null,\"wordKeys\":[]}"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-24-11",
+    "ac": "AC-24-11、AC-24-05",
+    "result": "通過",
+    "note": "無效項目：提示 [\"已匯入，略過 0 筆\"]、匯入後歷史 {\"2026-10-01\":7,\"2026-10-25\":5}、todayLearned {\"date\":null,\"wordKeys\":[]}、今日已學 0 / 10 字；型別錯誤：learnedHistory 為陣列：[\"備份檔格式錯誤，未匯入\"]；todayLearned 為字串：[\"備份檔格式錯誤，未匯入\"]；wordKeys 不是清單：[\"備份檔格式錯誤，未匯入\"]；learnedHistory 缺少：[\"備份檔格式錯誤，未匯入\"]"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-24-02b",
+    "ac": "AC-24-02",
+    "result": "通過",
+    "note": "v0.8 匯出：schemaVersion 2、todayLearned {\"date\":\"2026-10-30\",\"wordKeys\":[\"the\",\"be\"]}、learnedHistory {\"2026-10-30\":2}（翻 2 張卡；模擬測驗作答不計）"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-26-01",
+    "ac": "AC-26-01、AC-01-01",
+    "result": "通過",
+    "note": "375px：橘 10～215 分 1,000 字 每日新字量：10字/天 343×179／棕 220～465 分 2,809 字 每日新字量：10字/天 343×179／綠 470～725 分 5,620 字 每日新字量：15字/天 343×199／藍 730～855 分 待定 每日新字量：20字/天（僅供試算） 343×179 鎖／金 860～990 分 待定 每日新字量：20字/天（僅供試算） 343×179 鎖｜768px：橘 10～215 分 1,000 字 每日新字量：10字/天 356×179／棕 220～465 分 2,809 字 每日新字量：10字/天 356×179／綠 470～725 分 5,620 字 每日新字量：15字/天 356×199／藍 730～855 分 待定 每日新字量：20字/天（僅供試算） 356×199 鎖／金 860～990 分 待定 每日新字量：20字/天（僅供試算） 356×179 鎖｜1366px：橘 10～215 分 1,000 字 每日新字量：10字/天 179×239／棕 220～465 分 2,809 字 每日新字量：10字/天 179×239／綠 470～725 分 5,620 字 每日新字量：15字/天 179×239／藍 730～855 分 待定 每日新字量：20字/天（僅供試算） 179×239 鎖／金 860～990 分 待定 每日新字量：20字/天（僅供試算） 179×239 鎖；點綠卡右下角 → 分數 470；官方門檻/Tier 字樣=false"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-26-02",
+    "ac": "AC-26-02",
+    "result": "通過",
+    "note": "300 → 選中 brown；點綠 → 選中 green、分數 470、試算 綠/15 字/天；再點橘（未套用）→ 選中 orange、生效 green、單字集 5620"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-26-03",
+    "ac": "AC-26-03",
+    "result": "通過",
+    "note": "輸入 300 → 選中 brown；滑桿 300 → 選中 brown、輸入框 300；點金卡 → 滑桿/輸入框 860/860（交互使用）"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-26-04",
+    "ac": "AC-26-04、AC-01-07",
+    "result": "通過",
+    "note": "blue：{\"input\":\"730\",\"color\":\"藍（即將開放）\",\"cap\":true,\"applyEnabled\":true}；gold：{\"input\":\"860\",\"color\":\"金（即將開放）\",\"cap\":true,\"applyEnabled\":true}"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-27-01",
+    "ac": "AC-27-01、AC-20-01（底部導覽文字）",
+    "result": "通過",
+    "note": "375px：position=fixed、導覽 top 684/684/684（捲動前/中/底）、bottom=740/視窗 740、項目 主控台+圖示、難易度設定+圖示、單字卡+圖示、模擬測驗+圖示、解碼器+圖示、句型庫+圖示、點擊到達 6/6、選單鈕 display=none｜640px：position=fixed、導覽 top 684/684/684（捲動前/中/底）、bottom=740/視窗 740、項目 主控台+圖示、難易度設定+圖示、單字卡+圖示、模擬測驗+圖示、解碼器+圖示、句型庫+圖示、點擊到達 6/6、選單鈕 display=none"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-27-02",
+    "ac": "AC-27-02",
+    "result": "通過",
+    "note": "375px：62.5×55、62.5×55、62.5×55、62.5×55、62.5×55、62.5×55｜640px：106.7×55、106.7×55、106.7×55、106.7×55、106.7×55、106.7×55"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-27-03",
+    "ac": "AC-27-03（自動化部分）",
+    "result": "通過",
+    "note": "375px dashboard：最後元素底 587 ≤ 導覽頂 611=true；375px toast：1 則、底 599 ≤ 導覽頂 611=true；375px 輸入：is-typing=true、導覽隱藏=true、離開後恢復=true；640px dashboard：最後元素底 587 ≤ 導覽頂 611=true；640px toast：1 則、底 599 ≤ 導覽頂 611=true；640px 輸入：is-typing=true、導覽隱藏=true、離開後恢復=true（實機虛擬鍵盤列人工 TC-M10）"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-27-04",
+    "ac": "AC-27-04、AC-20-03",
+    "result": "通過",
+    "note": "641px：position=static、圖示顯示=false、選單鈕 display=flex、到達 6/6；768px：position=static、圖示顯示=false、選單鈕 display=none、到達 6/6；1366px：position=static、圖示顯示=false、選單鈕 display=none、到達 6/6"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-27-05",
+    "ac": "AC-27-05、AC-19-01",
+    "result": "通過",
+    "note": "離線 375px：內嵌 SVG 圖示 6 個、顯示 6；外部圖示元素 0；SVG 含 http 字串=false；外部請求 0；Console 錯誤 0；document.fonts 0"
+  },
+  {
+    "suite": "e2e-firstrun",
+    "tc": "TC-X-firstrun",
+    "ac": "（全套件）無未處理例外",
+    "result": "通過",
+    "note": "例外 []；console.error []"
+  }
+]

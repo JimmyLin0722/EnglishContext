@@ -1,0 +1,40 @@
+來源：ECDICT（skywind3000/ECDICT）
+網址：https://github.com/skywind3000/ECDICT
+原始檔：https://raw.githubusercontent.com/skywind3000/ECDICT/master/ecdict.csv
+分支：master
+commit SHA：ab22ad36302cafc6349a050e2b60894855208055
+commit 日期：2026-10-24T09:15:06Z
+DataSourceEntry.version：master@ab22ad3
+授權：MIT（Copyright (c) 2025 Linwei），原文見同目錄 LICENSE
+下載日期：2026-10-30
+下載者：主控（依契約 v0.3 §3.2、FB-02、FB-04）
+
+抽取規則（契約 §3.2）：
+- wordKey 依 §4.1 R-1～R-4 與 C-2 計算，共 N_G = 5,620（NGSL 2,809 → TSL +1,250 → BSL +1,169 → NAWL +392）
+- 每個 wordKey 先找 word 完全相等的列，沒有再找 word.toLowerCase() 相等的第一列，仍沒有寫入 ecdict_subset_missing.txt
+- 欄位值原樣保留（未轉繁、未改音標）
+
+結果：
+- ecdict_subset.csv：5,616 列（不含表頭），wordKey 不重複
+- ecdict_subset_missing.txt：4 行（résumé、café、entrée、unauthorize）
+- 5,616 + 4 = 5,620 = N_G ✔
+- 子集內 phonetic 為空：65 列；translation 為空：0 列
+
+--- 繁體版（2026-10-30 追加，依 FB-10 使用者決議）---
+ecdict_subset_zhtw.csv：由 ecdict_subset.csv 轉換，只轉 translation 欄，其餘欄位原樣
+轉換工具：OpenCC 1.4.2（Python 套件 opencc，Apache License 2.0），設定 s2twp（簡體→繁體台灣用語，含詞彙轉換）
+結果：5,616 列；translation 有變動 5,295 列；其他欄位不含中文字
+已知限制：s2twp 不轉換部分大陸慣用詞（例：西紅柿 未轉為 番茄），撰寫卡片釋義時需人工確認
+ecdict_subset.csv（簡體原檔）保留不動，作為 V-VOC-09 比對依據
+
+--- 台灣用語補充（2026-10-30 追加）---
+ecdict_subset_zhtw.csv 改為兩段處理：OpenCC s2twp → 同目錄 tw_terms.tsv 自訂對照表取代（只收不需看上下文的詞）
+本次取代：西紅柿→番茄 1、出租車→計程車 1、摩托車→機車 2、快餐→速食 2、因特網→網際網路 1、大學本科生→大學部學生 1
+刻意不自動取代（需依上下文判斷，交由撰寫卡片釋義時處理）：質量（mass 保留／quality 改品質）、程序（procedure 保留／program 改程式）、水平、註冊、文件、地鐵
+
+--- 更正（2026-10-30，依契約 v0.4 FB-22）---
+上一段「刻意不自動取代」只表示 tw_terms.tsv 未處理這些詞，不代表 _zhtw 保留原詞：
+OpenCC s2twp 本身會改寫部分詞，且不分上下文，例如：
+- 程序 → 程式（簡體原檔 60 列含「程序」，_zhtw 剩 4 列；procedure 被誤轉為「程式」）
+- 文件 → 檔案、文档 → 文件
+因此遇到這類詞，應回查 ecdict_subset.csv（簡體原檔）判斷原意（契約 v0.4 M-3、V-VOC-17）。

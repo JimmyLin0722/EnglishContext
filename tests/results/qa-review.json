@@ -1,0 +1,16 @@
+[
+  { "suite": "qa-review", "tc": "TC-D18", "ac": "AC-23-02、AC-23-03（architecture §8.4 紀錄完整性、契約 V-VOC-09／V-VOC-17）", "result": "通過", "note": "tests/data/records-check.mjs 比對 validate.mjs --all --max 100000 全量輸出：V-VOC-17 警告 8 筆、V-VOC-17 清單 179 筆、H-1W 0 筆、V-VOC-09 原創原因 40 筆，_records 缺列 0。QA 逐筆檢視 187 筆上下文用詞的最終 meaning：program/application/driver/script → 程式、file/archive → 檔案、procedure → 程序、quality → 品質、mass → 質量（物理）、level → 水準、menu →（電腦）選單、subway → 地鐵；捷運，皆符合 M-3 台灣用法，判斷錯誤 0" },
+  { "suite": "qa-review", "tc": "TC-D19", "ac": "AC-23-03（契約 V-VOC-18、architecture §8.4 QA 抽查）", "result": "通過", "note": "sample.mjs --ratio 0.05 --min 20 --seed <起始排名+1000> --ecdict-only，15 個分檔共抽 301 筆（vocab-2401 21 筆，其餘各 20 筆），QA 逐筆對照 ecdict_subset_zhtw.csv：簡體或大陸用語 0、新增義項 0、pos 與釋義不一致 0、英式音標 0；各分檔不合格率 0%（門檻 > 5% 退回）。觀察：brake 由 _zhtw「剎車」改為台灣慣用「煞車」、mower 由「刈草機」改為「割草機」，屬 M-3 用詞還原，視為有對應" },
+  { "suite": "qa-review", "tc": "TC-D20", "ac": "AC-11-01（契約 V-P5-05 正解唯一性，architecture §10 建議每題型 10 題）", "result": "通過", "note": "固定種子 20261030 每題型抽 10 題共 40 題（p5-021、029、045、117、129、137、157、161、165、181、014、038、046、078、098、122、162、170、178、194、011、015、027、039、055、135、139、147、163、187、052、068、080、096、112、136、160、168、184、200），QA 逐題判斷：正解唯一且與 correctIndex 一致 40/40" },
+  { "suite": "qa-review", "tc": "TC-B01", "ac": "（越界檢查）", "result": "通過", "note": "tests/static/boundary-check.mjs：專案 168 個檔案中，屬於某任務 paths 120 個、人類／上游文件 34 個、QA tests/ 14 個，不屬於任何任務 0 個；src/app/styles/90-overrides.css 列於 FE-18 paths 但未建立（依 §3「只在發現問題才寫」，非缺陷）" },
+  { "suite": "qa-review", "tc": "TC-B02", "ac": "（越界檢查：sources/、english_master_track.md、docs/）", "result": "通過", "note": "english_master_track.md 最後修改 2026-10-29 14:02；sources/ 全部檔案最後修改 ≤ 2026-10-30 10:06，早於任何 src/ 檔案（最早 10:41）；ecdict_subset*.csv 各 5,616 列、missing 4 行，與 SOURCE.txt 及契約 §3.2 紀錄一致；QA 依字表獨立重算 N_B=2,809、N_G=5,620 與契約一致。docs/ 於實作期間的修改皆為 PRD v0.7（pm-agent）、契約 v0.7（sa-agent）、architecture v0.3（sd-agent）、tasks.json（主控）之版本紀錄，未發現 PG 修改" },
+  { "suite": "qa-review", "tc": "TC-X-edge", "ac": "AC-19-02（Chrome／Edge）跨瀏覽器冒煙", "result": "通過", "note": "以 Microsoft Edge（headless）重跑套件 e2e-goal 全部 25 個 TC：25 通過，結果見 tests/results/e2e-goal-edge.json" },
+  { "suite": "manual", "tc": "TC-M01", "ac": "AC-08-01、AC-08-09、AC-08-13、AC-08-14、AC-21-01", "result": "待人工", "note": "真實麥克風辨識與權限流程" },
+  { "suite": "manual", "tc": "TC-M02", "ac": "AC-07-01～AC-07-05", "result": "待人工", "note": "真實 TTS 語音" },
+  { "suite": "manual", "tc": "TC-M03", "ac": "AC-19-02", "result": "待人工", "note": "實際斷網以 file:// 開啟" },
+  { "suite": "manual", "tc": "TC-M04", "ac": "AC-19-03、AC-18-01", "result": "待人工", "note": "雙擊開啟、關閉分頁後重開" },
+  { "suite": "manual", "tc": "TC-M05", "ac": "AC-20-01～AC-20-03", "result": "待人工", "note": "Android Chrome 實機觸控" },
+  { "suite": "manual", "tc": "TC-M06", "ac": "AC-24-01、AC-24-03", "result": "待人工", "note": "跨裝置匯出匯入" },
+  { "suite": "manual", "tc": "TC-M07", "ac": "AC-22-01～AC-22-05、AC-02-07、AC-16-01", "result": "待人工", "note": "基準環境效能量測" },
+  { "suite": "manual", "tc": "TC-M08", "ac": "AC-23-04", "result": "待人工", "note": "原創性 20 筆精確片語搜尋" }
+]

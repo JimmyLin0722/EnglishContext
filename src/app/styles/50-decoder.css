@@ -1,0 +1,249 @@
+/*
+ * styles/50-decoder.css — 長難句解碼器頁（FE-15）
+ * 依據：architecture.md §7.6「淡化修飾語」、§9（語法 4 色系變數於 00-base.css）
+ * 涵蓋：AC-12-01（四色與圖例）、AC-13-01～AC-13-03（淡化，不設過渡動畫）、AC-14-02（375px 可讀）、AC-20-01
+ * 色盲友善：四種角色除顏色外，另以不同底線樣式（實線／粗雙線／虛線／點線）區分，並可顯示角色文字小標籤。
+ */
+
+.dc-title {
+  font-size: 1.3rem;
+  margin-bottom: var(--gap);
+}
+
+.dc-section-title {
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+/* ─── 圖例 ─── */
+.dc-legend {
+  margin-bottom: var(--gap);
+}
+
+.dc-legend__title {
+  font-size: 1rem;
+  margin-bottom: 6px;
+}
+
+.dc-legend__list {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+@media (min-width: 768px) {
+  .dc-legend__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.dc-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dc-legend__hint {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* 圖例色塊：與句中片段相同的顏色與底線樣式 */
+.dc-swatch {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2em;
+  padding: 0 6px 2px;
+  border-radius: 4px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+/* ─── 片段上色（AC-12-01）─── */
+.seg {
+  border-radius: 3px;
+  padding: 1px 2px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.seg--subject,
+.dc-swatch--subject {
+  color: var(--syn-subject);
+  background: var(--syn-subject-bg);
+  border-bottom: 2px solid var(--syn-subject);
+}
+
+.seg--verb,
+.dc-swatch--verb {
+  color: var(--syn-verb);
+  background: var(--syn-verb-bg);
+  border-bottom: 4px double var(--syn-verb);
+  font-weight: 700;
+}
+
+.seg--object,
+.dc-swatch--object {
+  color: var(--syn-object);
+  background: var(--syn-object-bg);
+  border-bottom: 2px dashed var(--syn-object);
+}
+
+.seg--modifier,
+.dc-swatch--modifier {
+  color: var(--syn-modifier);
+  background: var(--syn-modifier-bg);
+  border-bottom: 2px dotted var(--syn-modifier);
+  font-style: italic;
+}
+
+.seg--plain {
+  padding: 0;
+  background: transparent;
+}
+
+/* 有語法說明的片段：可點擊 */
+.seg--has-note {
+  cursor: pointer;
+  outline: 1px dashed currentColor;
+  outline-offset: 1px;
+}
+
+.seg--has-note:focus-visible {
+  outline: 3px solid var(--focus);
+}
+
+/* 角色文字小標籤（「顯示角色文字」開啟時） */
+.is-labeled .seg[data-label]::before {
+  content: attr(data-label);
+  display: inline-block;
+  margin-right: 3px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: currentColor;
+  font-size: 0.7em;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 1.5;
+  vertical-align: 0.15em;
+  -webkit-text-fill-color: #ffffff;
+}
+
+/* ─── 淡化修飾語（AC-13-01～AC-13-03；§7.6：不設過渡動畫，計算後樣式立即生效）─── */
+.is-dimmed .seg--modifier {
+  opacity: 0.3;
+  filter: grayscale(1);
+}
+
+/* ─── 句子區 ─── */
+.dc-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: var(--gap);
+}
+
+@media (min-width: 768px) {
+  .dc-controls {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.dc-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dc-pos {
+  flex: 1 1 auto;
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .dc-pos {
+    flex: 0 0 auto;
+    min-width: 7em;
+  }
+}
+
+.dc-stage {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  margin-bottom: 8px;
+}
+
+.dc-sentence {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 2.1;
+  overflow-wrap: anywhere;
+}
+
+.dc-sentence--empty {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.dc-note {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.dc-translation {
+  margin: 0 0 4px;
+}
+
+.dc-section {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* ─── 閱讀策略（AC-14-01、AC-14-02）─── */
+.dc-strategy {
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+
+.dc-strategy:first-of-type {
+  border-top: 0;
+}
+
+.dc-strategy__title {
+  display: list-item;
+  min-height: var(--touch);
+  padding: 8px 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dc-strategy__tips {
+  margin: 0 0 12px;
+  padding-left: 1.4em;
+}
+
+.dc-strategy__tips li {
+  margin-bottom: 6px;
+}
+
+.dc-empty {
+  color: var(--text-muted);
+  margin: 0;
+}

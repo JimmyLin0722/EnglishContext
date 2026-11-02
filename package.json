@@ -1,0 +1,16 @@
+{
+  "name": "english-master-track",
+  "version": "0.1.0",
+  "private": true,
+  "description": "English Master Track：單一離線 HTML 的多益與學術英文學習工具",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node tools/build.mjs",
+    "test": "node --test src/app/__tests__/*.test.js",
+    "validate:data": "node src/data/_tools/validate.mjs --all --stage final",
+    "test:e2e": "node tests/run-all.mjs"
+  }
+}

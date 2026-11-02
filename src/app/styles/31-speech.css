@@ -1,0 +1,268 @@
+/*
+ * styles/31-speech.css — 抽認卡語音面板（FE-12；v0.9 收音條 FE-39）
+ * 依據：architecture.md §9（行動優先 RWD；觸控 ≥ 44px；不得出現水平捲軸；燈號綠黃紅；v0.5 收音條列）、
+ *       §7.11 A-5、A-6
+ * 涵蓋：AC-07-04（停用樣式）、AC-08-01（聆聽中紅色閃爍）、AC-08-06～AC-08-08、AC-08-11、AC-08-13（需要連網標示）、
+ *       AC-33-03、AC-33-08、AC-31-03
+ * 規則：燈號同時以文字（綠燈／黃燈／紅燈）表示，不只靠顏色辨識。
+ *       收音條是狀態顯示不是動畫：.sp-meter__bar 一律無 transition、無 animation（A-6）。
+ */
+
+.sp-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: var(--gap);
+  padding-top: var(--gap);
+  border-top: 1px solid var(--border);
+  min-width: 0;
+}
+
+/* ─── 朗讀 ─── */
+.sp-tts,
+.sp-stt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sp-tts__label {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.sp-tts__btn {
+  min-width: 64px;
+}
+
+/* ─── 麥克風 ─── */
+.sp-mic__dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex: none;
+}
+
+.sp-mic.is-listening {
+  border-color: var(--light-red);
+  background: var(--light-red);
+  color: #ffffff;
+  animation: sp-blink 1s ease-in-out infinite;
+}
+
+.sp-mic.is-listening .sp-mic__dot {
+  background: #ffffff;
+}
+
+@keyframes sp-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* 減少動態：「聆聽中」為固定紅底白字 + 文字「聆聽中」，不閃爍（A-5、AC-33-08、AC-31-03） */
+@media (prefers-reduced-motion: reduce) {
+  .sp-mic.is-listening {
+    animation: none;
+  }
+}
+
+/* ─── 收音條（AC-33-03、AC-33-08；§9 收音條列、§7.11 A-6） ─── */
+/* 常駐、固定大小（5 × 6px + 4 × 3px = 42px 寬、18px 高）；切換狀態時版面不位移 */
+.sp-meter {
+  display: inline-flex;
+  flex: none;
+  align-items: flex-end;
+  gap: 3px;
+  width: 42px;
+  height: 18px;
+  align-self: center;
+}
+
+.sp-meter__bar {
+  display: block;
+  flex: none;
+  width: 6px;
+  border-radius: 1px;
+  background: var(--border);
+  /* 格數變化直接切換、無漸變（不只在減少動態時） */
+  transition: none;
+  animation: none;
+}
+
+/* 高度由左到右遞增（純裝飾，不影響判定） */
+.sp-meter__bar:nth-child(1) {
+  height: 6px;
+}
+
+.sp-meter__bar:nth-child(2) {
+  height: 9px;
+}
+
+.sp-meter__bar:nth-child(3) {
+  height: 12px;
+}
+
+.sp-meter__bar:nth-child(4) {
+  height: 15px;
+}
+
+.sp-meter__bar:nth-child(5) {
+  height: 18px;
+}
+
+.sp-meter__bar.is-on {
+  background: var(--correct);
+}
+
+/* 強制色彩模式：暗格只有外框、亮格填滿系統文字色，仍可分辨亮暗 */
+@media (forced-colors: active) {
+  .sp-meter__bar {
+    border: 1px solid CanvasText;
+    background: Canvas;
+  }
+
+  .sp-meter__bar.is-on {
+    background: CanvasText;
+  }
+}
+
+/* 常駐「需要連網」標示（AC-08-13、Q-04） */
+.sp-net {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border: 1px solid var(--warning-text);
+  border-radius: 999px;
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+/* ─── 訊息列 ─── */
+.sp-msg {
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  overflow-wrap: anywhere;
+}
+
+.sp-msg[data-kind="error"] {
+  background: var(--wrong-bg);
+  color: var(--wrong);
+}
+
+.sp-msg__text {
+  margin: 0;
+  font-weight: 600;
+}
+
+.sp-msg__help {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+}
+
+/* ─── 分數區 ─── */
+.sp-result {
+  --sp-light: var(--text-muted);
+  padding: 10px 12px;
+  border: 2px solid var(--sp-light);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.sp-result[data-light="green"] {
+  --sp-light: var(--light-green);
+}
+
+.sp-result[data-light="yellow"] {
+  --sp-light: var(--light-yellow);
+}
+
+.sp-result[data-light="red"] {
+  --sp-light: var(--light-red);
+}
+
+.sp-result__title {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.sp-result__score {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.sp-result__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--sp-light);
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.sp-result__light {
+  color: var(--sp-light);
+  font-weight: 600;
+}
+
+.sp-result__tip {
+  margin: 4px 0;
+  color: var(--warning-text);
+}
+
+.sp-result__note {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.sp-compare {
+  display: grid;
+  gap: 4px;
+  margin: 6px 0;
+}
+
+.sp-compare__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.sp-compare__label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.sp-compare__label::after {
+  content: "：";
+}
+
+.sp-compare__value {
+  margin: 0;
+  font-weight: 600;
+  min-width: 0;
+}

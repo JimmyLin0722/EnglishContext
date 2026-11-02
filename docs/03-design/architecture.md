@@ -1,0 +1,1820 @@
+---
+doc: ARCH
+version: 0.5
+status: approved
+author: sd-agent
+approved_by: JimmyLin（對話中核准，主控代填欄位）
+approved_at: 2026-11-02
+---
+
+# English Master Track — 系統架構與設計
+
+> 上游：`docs/01-PRD.md` v0.9（approved，JimmyLin，2026-11-02）、`docs/02-contract/` v0.9（README.md、data-schema.ts v0.9 approved，主控代核，2026-11-02；storage-schema.json 維持 v0.8 approved，內容無變動）。v0.4 以前的內容仍有效，除非本版明文修改。
+> 搭配文件：`docs/03-design/tasks.json` v0.4（共 64 個任務：既有 56 個全部 `done` 不變；v0.5 新增 FE-34～FE-41 共 8 個，見 §12.4）。
+> **v0.5 增量導讀**（PRD R-18、契約 §5.7、§5.8、§9.3 DS-01～DS-06）：麥克風與收音條（§7.14，推翻原「不使用 `getUserMedia`」限制，仍禁止錄音）、切換難易度初始化確認視窗（§7.15）、隱藏解碼器與句型庫（§7.16）；同步修訂 §7.6（STT 與錯誤對照）、§7.11（減少動態）、§7.13（導覽 4 項）、§9（底部導覽 4 欄）、§10（靜態檢查、V-MIC 實機驗證、§10.2）、§11（T-32～T-39）、§12.4 批次、§13.2 AC 對照、§14 DS 回應、§15 SD-FB-20～SD-FB-27。
+> 本文件只做設計，不改需求與契約；有疑義寫在 §15「回饋上游」。
+> **v0.4 增量導讀**：功能更名 R-15（§7.13）、首次進入流程與狀態機（§7.9）、學習事件記錄點（§7.7）、v1 → v2 遷移（§7.8）、手勢判斷（§7.10）、動畫與減少動態（§7.11）、Q-33 設計常數（§7.12）、底部導覽斷點（§9.1）、測試命令與新增測試（§10.1）、容量估算（§6.1）、批次（§12.3）、AC 對照（§13.1）。
+
+---
+
+## 1. 設計摘要
+
+| 項目 | 決定 | 依據 |
+| :--- | :--- | :--- |
+| 交付物 | `dist/english-master-track.html` 單一檔案，CSS、JS、資料全部內嵌 | NFR-1、AC-19-01～AC-19-04 |
+| 前端技術 | 原生 JavaScript（ES2020，classic script，不用 ES module）＋ 原生 DOM API；**零執行期相依套件**、零框架 | 離線、`file://` 可執行（AC-19-03）、檔案大小（AC-19-04） |
+| 樣式 | 手寫 CSS（CSS 自訂屬性 + 行動優先 RWD），依頁面分檔，建置時串接成一個 `<style>` | Q-17、AC-19-01、AC-20-01 |
+| 建置 | `tools/build.mjs`（Node 內建模組，**無 npm 相依**）：串接資料、程式、樣式、授權標頭 → 單一 HTML，並做大小與外部資源檢查 | 主控補充 6、AC-19-01、AC-19-04、AC-23-06 |
+| 狀態 | 單一 store（`AppState` = `PersistedData` + `RuntimeState`），所有寫入走 action，一次 `setItem` 寫整筆 `StorageRecord` | 契約 §5.3、AC-18-01 |
+| 內容資料 | `src/data/*.js`，每檔只含 `window.X = <JSON 字面值>`（C-4）；字庫依排名分 15 檔 | 契約 §3.1、V-VOC-13 |
+| 內容工具 | `src/data/_tools/*.mjs`（pg-content 撰寫）：讀 `sources/`、算排名、產骨架、匯出素材、合併、抽樣、驗證；**不打包** | 契約 §7「pg-content 必須以 Node 自驗」、R-01 |
+| 測試 | 單元：`node --test`（Node 內建）；資料：`_tools/validate.mjs`；E2E：QA 以 Playwright 對建置產物（`tests/`）；人工：語音、離線、RWD、效能、原創性 | §10 |
+| （v0.4）介面互動 | 動畫全部用內嵌 CSS `@keyframes`／`transition`；手勢用原生 Touch Events；震動用 `navigator.vibrate`；圖示、環形圖、長條圖用內嵌 SVG 或 CSS。**不引入任何函式庫**；動畫時間只放在 CSS 變數與 `core/interaction.js` 常數兩處，以單元測試比對一致 | AC-31-04、Q-33、§7.11、§7.12 |
+| （v0.4）持久化 v2 | `schemaVersion` 2：`PersistedData` 加 `todayLearned`、`learnedHistory`；遷移、讀取規則、備份 v1／v2 匯入全部在 `core/persist.js`、`core/backup.js`；學習紀錄的純規則在新模組 `core/learning.js` | 契約 §5.3～§5.4、§6.3、R-17、§7.7、§7.8 |
+| （v0.4）首次進入 | 執行期 `entryMode`（`firstRun`／`main`）由 store 在啟動時判定一次；首次畫面重用難易度設定頁（`customizer`），導覽以 `body[data-entry]` 的 CSS 隱藏；首次期間 store 不寫入 localStorage | 契約 §5.5 FS-1～FS-7、§7.9 |
+| （v0.5）麥克風與收音條 | **允許** `navigator.mediaDevices.getUserMedia({ audio: true })` + Web Audio `AnalyserNode` 只讀即時音量；**仍禁止**錄音 API（`MediaRecorder`）、`Blob`／`createObjectURL` 輸出音訊、連到 `destination`、任何網路傳送；不保存任何音訊或音量值。音軌只在停留單字卡頁期間保留（Q-36），離開單字卡頁、重新整理、關閉分頁時釋放。新模組 `services/mic.js`（L3）、`core/meter.js`（L1） | R-18 二、US-33、AC-21-03、契約 DS-01～DS-03、§7.14 |
+| （v0.5）切換難易度初始化 | 「套用」時生效色級改變且有學習紀錄 → 確認視窗；「確定」以白名單 `LEARNING_PROGRESS_FIELDS` 建立**新物件**並以**一次** `setItem` 寫入，成功才替換記憶體，失敗整個不套用。純規則在新模組 `core/reinit.js`；store 新增 `requestApplyGoal`／`confirmApplyGoal`／`cancelApplyGoal` | R-18 一、US-32、契約 §5.7 CI-1～CI-10、DS-04、§7.15 |
+| （v0.5）隱藏頁面 | 導覽改為 `NAV_TAB_ORDER` 4 項；主控台入口 3 項 + 資料來源；router、store 以 `HIDDEN_TAB_IDS` 守門（嘗試進入改顯示主控台）；解碼器、句型庫的 view 程式、CSS、資料檔照常打包，只是永遠不會被 mount | R-18 三、AC-20-04、契約 §5.8 HT-1～HT-5、DS-05、§7.16 |
+
+---
+
+## 2. 架構圖與分層
+
+```
+┌──────────────────────────── dist/english-master-track.html（單一檔案）────────────────────────────┐
+│ <!DOCTYPE html><html lang><head><meta charset="utf-8">（前 1,024 bytes 內，v0.2）                   │
+│ <!-- 授權標頭：MIT 全文 + CC BY-SA 4.0 聲明（AC-23-06），緊接在 charset 之後 -->                     │
+│ <style>  styles/*.css 串接  </style>                                                               │
+│ <body>  index.html 殼：頁首、儲存警示列、導覽、7 個 <section>、頁尾、toast、dialog 掛載點            │
+│                                                                                                    │
+│ ┌─ 資料層（pg-content，src/data/）── 先載入 ─────────────────────────────────────────────────────┐ │
+│ │ window.DATA_SOURCE_REGISTRY / VOCAB_MANIFEST / PROJECT_LICENSE      ← sources.js               │ │
+│ │ window.MASTER_VOCAB_DATABASE（15 檔 concat，建置時合併為一個陣列）  ← vocab-XXXX.js           │ │
+│ │ window.DOMAIN_TEMPLATES / PART5_QUESTION_BANK / DECODER_SENTENCES /                            │ │
+│ │        READING_STRATEGIES / ACADEMIC_PHRASEBANK                     ← 其餘資料檔                │ │
+│ └────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│              │ 唯一介面：window 全域變數（契約 §11），前端一律容忍缺漏（C-6）                       │
+│ ┌─ 程式層（pg-frontend，src/app/）── 一個 <script>，依層序串接 ──────────────────────────────────┐ │
+│ │ L1 core/      純函式（無 DOM、無 localStorage）：常數、分數試算、wordKey、單字集、自訂字、       │ │
+│ │               相似度、打卡、四選一、正確率、持久化驗證／遷移、備份匯入匯出、內容讀取、         │ │
+│ │               （v0.4）學習紀錄 learning、介面互動常數與手勢判斷 interaction                    │ │
+│ │               （v0.5）收音條音量計算 meter、切換難易度初始化規則 reinit                         │ │
+│ │                 ↑ Node 可直接 require 做單元測試                                               │ │
+│ │ L2 state/     store：AppState、actions、訂閱、localStorage 轉接（例外／容量）、（v0.4）entryMode、│ │
+│ │               學習事件記錄                                                                     │ │
+│ │ L3 services/  瀏覽器 API 包裝：TTS、STT、剪貼簿、檔案下載、（v0.4）震動 haptics、               │ │
+│ │               （v0.5）麥克風 mic（getUserMedia + AnalyserNode，只讀音量、不錄音）              │ │
+│ │ L4 ui/        共用元件：路由（頁籤、換頁動畫、首次模式限制）、toast、確認對話框、儲存警示列、    │ │
+│ │               （v0.4）motion（減少動態判斷與動畫 class）、bottom-nav、import-flow（共用匯入流程）│ │
+│ │ L5 views/     各頁面：主控台、難易度設定（含首次畫面）、自訂單字、單字卡（+語音面板、四選一）、│ │
+│ │               模擬測驗、解碼器、句型庫、資料來源與授權（v0.4 畫面名稱依 R-15，識別字不改）     │ │
+│ │               （v0.5 解碼器、句型庫隱藏：照常登錄與打包，但 router 拒絕進入，永不 mount）       │ │
+│ │ main.js       啟動：content.load → store.init → banner → 設 body[data-entry] →                 │ │
+│ │               router.start(firstRun ? "customizer" : "dashboard") → bottomNav.init（v0.4）     │ │
+│ └────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────────────────────────────────────┘
+      ▲ 唯讀輸入（不打包）                                         ▼ 使用者狀態
+  sources/wordlists、sources/ecdict  ──(_tools)──► src/data     localStorage「englishMasterTrack:state」
+```
+
+| 層 | 可以依賴 | 不可以 | 說明 |
+| :--- | :--- | :--- | :--- |
+| 資料層 | — | 函式、`undefined`、HTML 字串 | 契約 C-4、V-VOC-10 |
+| L1 core | 其他 core 模組（v0.3：`constants`、`wordkey` 可在載入時取用；其餘 core 依賴一律在函式被呼叫時才取用，見 §4.1 LD-1；不得循環依賴） | DOM、`window` 全域資料、`localStorage`、`Math.random` 以外的副作用 | 可在 Node 測試；亂數以參數注入（預設 `Math.random`） |
+| L2 state | L1 | DOM | 唯一能讀寫 `localStorage` 的地方 |
+| L3 services | L1 | 直接改 store | 只包裝瀏覽器 API，回呼通知呼叫端 |
+| L4 ui | L1、L2 | — | 所有 DOM 寫入經 `core/dom.js`（純文字） |
+| L5 views | L1～L4 | 互相直接呼叫（只能透過 store 或 §4.4、§4.5 的元件介面） | 每頁一檔，各自的 CSS 檔 |
+
+（v0.5）新模組的層別：`core/meter.js`、`core/reinit.js` 屬 L1（遵守 LD-1：載入時只取 `constants`；`reinit` 呼叫 `goal`、`learning`、`persist` 一律在函式內取用）；`services/mic.js` 屬 L3（只包裝 `getUserMedia`、`AudioContext`，不改 store；音訊物件與音量值**不得**進入 `AppState`，契約 AC-21-03 對照）。
+
+（v0.4）新模組的層別：`core/learning.js`、`core/interaction.js` 屬 L1（遵守 LD-1：載入時只取 `constants`、`wordkey`）；`services/haptics.js` 屬 L3；`ui/motion.js`、`ui/bottom-nav.js`、`ui/import-flow.js` 屬 L4（遵守 LD-2：載入時只登錄）。首次畫面的「從備份還原」與主控台的匯入是兩個 view，不得互相呼叫，因此共用流程放在 L4 的 `ui/import-flow.js`（§4.5）。
+
+---
+
+## 3. 目錄結構與負責代理
+
+```
+（專案根目錄）
+├─ package.json                        pg-frontend  FE-01（scripts：build、test、validate:data；無 dependencies；engines node >= 22，見 §5）
+├─ tools/
+│  └─ build.mjs                        pg-frontend  FE-01（FE-18 可調整壓縮層級）→ FE-41（v0.5：B-7 新增禁止 `MediaRecorder`）
+├─ dist/
+│  └─ english-master-track.html        pg-frontend  FE-18 → FE-33 → FE-41（建置產物；其他任務建置一律輸出到 scratchpad）
+├─ tests/                              qa           （E2E 與驗收腳本；QA 可在 package.json 加 devDependencies）
+├─ sources/                            人類／主控    唯讀輸入，不打包（契約 §3.2）
+└─ src/
+   ├─ data/                            pg-content
+   │  ├─ sources.js                    CT-02 建立、CT-23 回填計數與 dataVersion
+   │  ├─ vocab-0001.js … vocab-5260.js CT-02 產骨架；CT-03～CT-17 各填一檔（見 §8.1）
+   │  ├─ templates.js                  CT-18
+   │  ├─ part5.js                      CT-19（前 100 題）→ CT-20（後 100 題、交錯排序、重編 id）
+   │  ├─ decoder.js                    CT-21（DECODER_SENTENCES、READING_STRATEGIES）
+   │  ├─ phrasebank.js                 CT-22
+   │  ├─ _tools/                       （底線開頭：不打包）
+   │  │  ├─ lib.mjs                    CT-01  讀檔（V-IN）、CSV（M-1）、wordKey、排名（R-1～R-8）、ECDICT、分檔表
+   │  │  ├─ validate.mjs               CT-01  契約 V-* 全規則 + SD 自查規則 H-1～H-7
+   │  │  ├─ material.mjs               CT-01  匯出某分檔的撰寫素材到 scratchpad
+   │  │  ├─ fill.mjs                   CT-01  把撰寫結果依 rank 合併回分檔（保留骨架欄位）
+   │  │  ├─ sample.mjs                 CT-01  固定種子抽樣（自查與 QA 共用）
+   │  │  └─ build-skeleton.mjs         CT-02  產生 15 個骨架分檔與 sources.js
+   │  └─ _records/                     （不打包）交付紀錄，QA 驗 V-VOC-17、M-7 的依據
+   │     ├─ CT-01.md、CT-02.md         CT-01、CT-02
+   │     ├─ vocab-XXXX.md（15 份）      CT-03～CT-17 各一份
+   │     ├─ templates.md               CT-18
+   │     ├─ part5.md                   CT-19 → CT-20
+   │     ├─ decoder.md                 CT-21
+   │     ├─ phrasebank.md              CT-22
+   │     └─ CT-23-summary.md           CT-23
+   └─ app/                             pg-frontend（v0.4 修改者以「→」接在原任務之後，依序執行）
+      ├─ index.html                    FE-01 建最小模板 → FE-02 完成殼 → FE-23 更名 → FE-26 底部導覽圖示 → FE-32 首次模式（body[data-entry]、返回鈕）→ FE-38（v0.5：導覽移除解碼器、句型庫 2 鈕；兩個 section 保留但去掉 aria-label）
+      ├─ license-header.txt            FE-01  授權標頭模板（{{YEAR}}）（v0.4 不改：授權文字中的「Part 5」屬授權聲明，R-15 保留）
+      ├─ main.js                       FE-02 → FE-26（呼叫 bottomNav.init）→ FE-32（依 entryMode 啟動）
+      ├─ core/
+      │  ├─ dom.js                     FE-02  安全 DOM 建構（只用 textContent）
+      │  ├─ constants.js               FE-03 → FE-20（TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS）→ FE-22（schemaVersion 2、[1, 2]）→ FE-34（v0.5：NAV_TAB_ORDER 4 項、HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS）
+      │  ├─ wordkey.js                 FE-03  C-2
+      │  ├─ goal.js                    FE-03  分數、色級、試算
+      │  ├─ content.js                 FE-04  讀全域資料（C-6 容錯）
+      │  ├─ vocab.js                   FE-04  字庫排序、N_B/N_G、單字集
+      │  ├─ custom.js                  FE-04  自訂字驗證、去重、範本注入、刪除後索引
+      │  ├─ similarity.js              FE-05  字串清洗、編輯距離、吻合度、燈號
+      │  ├─ streak.js                  FE-05  本地日期、打卡、顯示天數
+      │  ├─ quiz.js                    FE-05  四選一出題
+      │  ├─ stats.js                   FE-05  正確率
+      │  ├─ persist.js                 FE-06 → FE-22  預設值、StorageRecord 驗證、V-ST、遷移鏈（v0.4：MG-1～MG-4、RD-1）
+      │  ├─ backup.js                  FE-06 → FE-22  匯出物件、匯入步驟 1～7（v0.4：版本 1／2、IM-8）
+      │  ├─ learning.js                FE-20（v0.4 新增）今日已學紀錄、歷史正規化、主控台進度數值（§7.7）
+      │  ├─ interaction.js             FE-21（v0.4 新增）Q-33 設計常數、滑動判斷、震動樣式（§7.10、§7.12）
+      │  ├─ meter.js                   FE-35（v0.5 新增）收音條門檻 T1～T5、RMS、dBFS、亮格數、分析視窗大小（§7.14）
+      │  └─ reinit.js                  FE-34（v0.5 新增）生效色級是否改變、「有學習紀錄」(a)～(f)、初始化新資料（§7.15）
+      ├─ state/
+      │  └─ store.js                   FE-07 → FE-25（v2、學習事件）→ FE-30（entryMode、首次流程）→ FE-37（v0.5：切換難易度初始化、隱藏頁守門）
+      ├─ services/
+      │  ├─ download.js                FE-08
+      │  ├─ tts.js                     FE-12
+      │  ├─ stt.js                     FE-12（v0.5 不改）
+      │  ├─ clipboard.js               FE-16
+      │  ├─ haptics.js                 FE-29（v0.4 新增）navigator.vibrate 包裝
+      │  └─ mic.js                     FE-36（v0.5 新增）取得／重用／釋放麥克風音軌、AnalyserNode 音量讀取（§7.14）
+      ├─ ui/
+      │  ├─ router.js                  FE-02 → FE-24（換頁動畫）→ FE-32（首次模式限制、entry 切換）→ FE-38（v0.5：隱藏頁守門、hashchange 守門）
+      │  ├─ toast.js                   FE-02
+      │  ├─ dialog.js                  FE-02
+      │  ├─ banner.js                  FE-07 → FE-25（學習紀錄容量不足提示一次）
+      │  ├─ motion.js                  FE-24（v0.4 新增）減少動態判斷、動畫 class 加上與移除
+      │  ├─ bottom-nav.js              FE-26（v0.4 新增）輸入中隱藏底部導覽列
+      │  └─ import-flow.js             FE-32（v0.4 新增）選檔 → 確認 → 匯入 → 提示的共用流程
+      ├─ views/
+      │  ├─ dashboard.js               FE-08 → FE-23（更名）→ FE-31（今日學習進度）→ FE-38（v0.5：模組入口 3 項 + 資料來源）
+      │  ├─ customizer.js              FE-09 → FE-23（更名）→ FE-27（大卡片）→ FE-32（首次畫面）→ FE-40（v0.5：初始化確認視窗）
+      │  ├─ custom-vocab.js            FE-10
+      │  ├─ flashcards.js              FE-11 → FE-23（更名）→ FE-28（手勢、翻轉動畫）→ FE-39（v0.5：hide 時釋放麥克風）
+      │  ├─ speech-panel.js            FE-12（v0.4 不改；STT 學習事件由 store 的 recordSttScored 記錄）→ FE-39（v0.5：麥克風取得流程、收音條、錯誤對照、說明文字）
+      │  ├─ flashcard-quiz.js          FE-13 → FE-29（答題回饋、只認點擊）
+      │  ├─ part5.js                   FE-14 → FE-23（更名）→ FE-29（答題回饋）
+      │  ├─ decoder.js                 FE-15（v0.5 不改、不刪；入口隱藏，HT-5）
+      │  ├─ phrasebank.js              FE-16（v0.5 不改、不刪；入口隱藏，HT-5）
+      │  └─ sources-page.js            FE-17
+      ├─ styles/
+      │  ├─ 00-base.css                FE-02 → FE-26（底部導覽）→ FE-32（首次模式隱藏規則）→ FE-38（v0.5：底部導覽 4 欄）
+      │  ├─ 05-motion.css              FE-24（v0.4 新增）動畫時間 CSS 變數、換頁動畫、減少動態總開關
+      │  ├─ 10-dashboard.css           FE-08 → FE-31
+      │  ├─ 20-customizer.css          FE-09 → FE-27 → FE-32
+      │  ├─ 21-custom-vocab.css        FE-10
+      │  ├─ 30-flashcards.css          FE-11 → FE-28
+      │  ├─ 31-speech.css              FE-12 → FE-39（v0.5：5 格收音條，無 transition）
+      │  ├─ 32-quiz.css                FE-13 → FE-29
+      │  ├─ 40-part5.css               FE-14 → FE-29
+      │  ├─ 50-decoder.css             FE-15（v0.5 不改、照常打包）
+      │  ├─ 60-phrasebank.css          FE-16（v0.5 不改、照常打包）
+      │  ├─ 70-sources.css             FE-17
+      │  └─ 90-overrides.css           FE-18 → FE-33 → FE-41  跨頁 RWD 修正（只在整合時發現問題才寫）
+      └─ __tests__/                    （不打包）
+         ├─ goal.test.js               FE-03 → FE-20 → FE-22 → FE-34（v0.5 常數）
+         ├─ vocab.test.js、custom.test.js            FE-04
+         ├─ similarity.test.js、streak.test.js、quiz.test.js、stats.test.js   FE-05
+         ├─ persist.test.js、backup.test.js          FE-06 → FE-22
+         ├─ store.test.js              FE-07 → FE-25 → FE-30 → FE-37
+         ├─ build.test.js              FE-01 → FE-41（v0.5：MediaRecorder 中止案例）
+         ├─ _fixtures.js               FE-19 → FE-30 → FE-37（如需新增「有學習紀錄」fixture）  共用小型 fixture（底線開頭，不符合 *.test.js，不會被 npm test 當成測試檔）
+         ├─ load-order.test.js         FE-19 → FE-33 → FE-41  依建置順序載入全部 src/app 檔的回歸測試（§4.1 LD-1～LD-3）
+         ├─ dashboard.test.js          FE-19 → FE-22（支援版本字串）→ FE-31 → FE-38
+         ├─ customizer.test.js         FE-19 → FE-27 → FE-32 → FE-40
+         ├─ custom-vocab.test.js       FE-19  （FE-10）
+         ├─ flashcards.test.js         FE-19 → FE-28 → FE-39
+         ├─ speech.test.js             FE-19  （FE-12：tts、stt、speech-panel）→ FE-39
+         ├─ flashcard-quiz.test.js     FE-19 → FE-29
+         ├─ part5.test.js              FE-19 → FE-29
+         ├─ decoder.test.js            FE-19  （FE-15）
+         ├─ phrasebank.test.js         FE-19  （FE-16：phrasebank、clipboard）
+         ├─ sources-page.test.js       FE-19  （FE-17）
+         ├─ learning.test.js           FE-20（v0.4 新增）
+         ├─ interaction.test.js        FE-21（v0.4 新增）
+         ├─ naming.test.js             FE-23（v0.4 新增）R-15 畫面文字靜態檢查 → FE-38（導覽 4 鈕、隱藏頁文字）
+         ├─ router-motion.test.js      FE-24 → FE-32（v0.4 新增）換頁、減少動態、CSS 常數一致、首次模式限制 → FE-38（隱藏頁守門）
+         ├─ shell.test.js              FE-26（v0.4 新增）導覽順序、文字、內嵌圖示、底部導覽 CSS → FE-38（4 鈕、4 欄）
+         ├─ haptics.test.js            FE-29（v0.4 新增）
+         ├─ first-run.test.js          FE-32（v0.4 新增）首次畫面、import-flow 訊息
+         ├─ reinit.test.js             FE-34（v0.5 新增）
+         ├─ meter.test.js              FE-35（v0.5 新增）
+         └─ mic.test.js                FE-36（v0.5 新增）
+```
+
+規則：
+
+| 代號 | 規則 |
+| :--- | :--- |
+| D-1 | 檔名或目錄以 `_` 開頭（`src/data/_tools/`、`src/data/_records/`）與 `src/app/__tests__/` **一律不打包** |
+| D-2 | 每個檔案只屬於一個任務；後續任務需改同一檔時以 `dependsOn` 串接（`index.html`：FE-01 → FE-02；`sources.js`：CT-02 → CT-23；`part5.js`、`_records/part5.md`：CT-19 → CT-20；`tools/build.mjs`：FE-01 → FE-18；各 `vocab-XXXX.js`：CT-02 → 對應批次任務） |
+| D-3 | 建置產物：除 FE-18 外，任務驗證建置時一律 `--out` 到 scratchpad，不寫 `dist/` |
+| D-4 | 驗證用暫存檔（素材、撰寫中的分段 JSON、fixture）放 scratchpad；需要留存給 QA 的只有 `_records/` |
+| D-5 | `package.json` **不得**設 `"type": "module"`（core 檔需以 CommonJS 被測試 `require`）；建置與工具一律用 `.mjs` |
+| D-6 | （v0.4）既有 `done` 任務的 tasks.json 內容不改；v0.4 對既有檔案的修改一律由新任務（FE-20～FE-33）承接，該檔加入新任務的 `paths`，並以 `dependsOn` 串成上方目錄樹「→」所示的順序。同一檔案的兩個新任務不會同批執行（§12.3） |
+| D-8 | （v0.5）同 D-6：v0.5 對既有檔案的修改由 FE-34～FE-41 承接；**FE-34～FE-41 彼此之間沒有任何共用 path**（每個檔案在 v0.5 只屬於一個新任務），與既有 `done` 任務的串接見上方目錄樹「→」 |
+| D-9 | （v0.5）`src/data/` 本版**不改**、不建 CT 任務（契約 DS-06）：`decoder.js`、`phrasebank.js` 格式與內容不變、照常打包（HT-5、AC-20-04、AC-23-04）；收音條與初始化不涉及內容資料 |
+| D-7 | （v0.4）`src/data/` 本版**不改**：R-15 更名不涉及內容資料（題型標籤 `PART5_TYPE_LABELS` 與授權文字中的「Part 5」屬題型與授權用語，保留），R-16、R-17 只涉及介面與持久化。因此不建 CT 任務 |
+
+---
+
+## 4. 模組介面約定（平行開發的契約）
+
+### 4.1 模組寫法（`src/app/` 全部 `.js`）
+
+| 項目 | 約定 |
+| :--- | :--- |
+| 命名空間 | 全部掛在 `window.EMT`：`EMT.core.<name>`、`EMT.store`、`EMT.services.<name>`、`EMT.ui.<name>`、`EMT.views`（登錄表）、`EMT.components.<name>`、`EMT.content` |
+| core 檔 | UMD 寫法：`(function (root, factory) { var api = factory(); if (typeof module === "object" && module.exports) { module.exports = api; } else { root.EMT = root.EMT || {}; root.EMT.core = root.EMT.core || {}; root.EMT.core.<name> = api; } })(typeof self !== "undefined" ? self : this, function () { … });`。core 之間的依賴：Node 下 `require("./constants.js")`，瀏覽器下讀 `EMT.core.constants`（在 factory 內以 `typeof require === "function" && typeof module === "object"` 判斷） |
+| 其他層 | IIFE，只做登錄，不在載入時執行 DOM 操作；實際動作在 `main.js` 啟動後 |
+| 串接順序 | 建置依層序 `core → state → services → ui → views → main.js`；同層依檔名字母序。core 內 `constants.js`、`wordkey.js` 最先（建置特例）。**（v0.3）建置不另外定義其他模組間的依賴順序**；正確性改由下表 LD-1～LD-3 保證 |
+| DOM 寫入 | 一律經 `EMT.core.dom.el(tag, props, children)`：`props.text` → `textContent`；屬性只用 `setAttribute`（禁止 `on*` 屬性字串）；**全專案禁止** `innerHTML`、`outerHTML`、`insertAdjacentHTML`、`document.write`（C-7、AC-04-09；FE-18 以 grep 驗證） |
+| 文案 | PRD AC 中以「」標出的畫面文字必須**逐字**使用（QA 以文字比對） |
+
+**模組取用時機（v0.3，回應 R6-1）**
+
+背景：建置依檔名排序載入 core，`backup.js` 早於 `persist.js`；`backup.js` 曾在 factory 執行時（載入時）讀取 `EMT.core.persist`，瀏覽器中得到 `undefined` 而出錯（Node 下以 `require` 取用，單元測試測不到）。決議：**不改建置順序**（同層再加依賴排序會讓建置腳本需要解析依賴圖，且新增模組時容易漏設），改以下列規則約束程式寫法。
+
+| 代號 | 規則 |
+| :--- | :--- |
+| LD-1 | core 模組在載入時（factory 本體、頂層 `var`）**只能**取用 `EMT.core.constants`、`EMT.core.wordkey`（建置保證最先載入）；取用其他 core 模組一律寫在**被呼叫的函式內**（例如 `function dep(name) { … }` 於每次呼叫時取得）。Node 下的 `require` 不受順序影響，但為使兩種環境行為一致，同樣放在函式內 |
+| LD-2 | state、services、ui、views 與 `main.js` 在載入時只做登錄（掛上 `EMT.*`），**不得**在載入時讀取其他模組的成員、不得讀取資料全域變數、不得操作 DOM；一律等 `main.js` 於 `DOMContentLoaded` 後啟動 |
+| LD-3 | 取用的模組不存在時，視為程式組裝錯誤：丟出含模組名稱的 `Error`（不得被當成使用者輸入錯誤吞掉；例如匯入流程不得把它判為「檔案格式錯誤」） |
+
+回歸測試位置：
+
+| 範圍 | 位置 | 內容 |
+| :--- | :--- | :--- |
+| R6-1 原案例 | `src/app/__tests__/backup.test.js`「回歸 R6-1：依建置順序於瀏覽器環境載入，匯出與匯入正常」 | 以 `tools/build.mjs` 的 `listAppFiles` 取得實際順序，在 `node:vm` 沙箱（無 `module`、`require`）依序載入全部 core，斷言 `backup.js` 早於 `persist.js` 且匯出、匯入可正常執行 |
+| 全部模組 | `src/app/__tests__/load-order.test.js`（FE-19） | 依 `listAppFiles` 的順序把 `src/app` 全部檔案（不含 `main.js`）載入只有 `self`／`window`／`console` 的 `vm` 沙箱：載入不拋例外（LD-1、LD-2）；載入後 `EMT.core.*` 每個 core 模組皆存在 |
+
+### 4.2 頁面登錄（FE-02 提供）
+
+| API | 說明 |
+| :--- | :--- |
+| `EMT.views.register(tabId, module)` | `module = { mount(rootEl), show(), hide() }`；同一 `tabId` 可登錄多個模組（自訂器頁 = `customizer` + `custom-vocab`）。`mount` 只在第一次顯示前呼叫一次 |
+| `EMT.router.go(tabId)` | 切換頁籤：隱藏舊 section、顯示新 section、呼叫該頁所有模組 `show()`；同步 `store.actions.setTab` |
+| `index.html` 掛載點 | `#app-banner`、`#app-nav`、`#view-dashboard`、`#view-customizer`（內含 `#customizer-goal`、`#customizer-custom`）、`#view-flashcards`、`#view-part5`、`#view-decoder`、`#view-phrasebank`、`#view-sources`、`#app-footer`（含「資料來源與授權」連結）、`#toast-root`、`#dialog-root` |
+| `EMT.ui.toast.show(text, { kind: "info"｜"success"｜"error", ms })` | 純文字 toast |
+| `EMT.ui.dialog.confirm({ title, message, okText, cancelText }) → Promise<boolean>` | 自製模態對話框（不用 `window.confirm`），文字一律 `textContent` |
+| `main.js` 啟動順序 | `DOMContentLoaded` 後依序呼叫（存在才呼叫）：`EMT.content.load()` → `EMT.store.init()` → `EMT.ui.banner.render()` → `EMT.router.start("dashboard")`；最後 `performance.mark("emt-ready")` 並設 `document.documentElement.dataset.ready = "1"`（供 AC-22-05 量測） |
+| （v0.4）`main.js` 啟動順序 | `content.load()` → `store.init()` → `banner.render()` → 設 `document.body.dataset.entry = state.runtime.entryMode`（`"firstRun"`／`"main"`；store 不存在時視為 `"main"`）→ `router.start(entryMode === "firstRun" ? "customizer" : "dashboard")` → `EMT.ui.bottomNav.init()` → `performance.mark("emt-ready")`、`data-ready = "1"`。AC-22-05 的量測終點：一般模式為主控台入口可點擊、首次模式為「開始學習」可點擊，兩者都在 `router.start` 同步 `mount` 完成後，故 `emt-ready` 位置不變即可作為兩種模式的量測點 |
+| （v0.4）`index.html` 掛載點與屬性 | `<body data-entry="boot">`：啟動前隱藏導覽列、選單鈕與所有 view，避免首次模式閃現導覽（§7.9）；`body[data-entry]` 由 `main.js`／router 設定，`body[data-tab]` 由 router 設定為目前頁面代碼。`#app-nav` 內 6 個按鈕依 `NAV_TAB_ORDER`，每個含內嵌 `<svg class="app-nav__icon" aria-hidden="true">` 與 `<span class="app-nav__label">`（文字 = `TAB_LABELS`）；頁尾新增 `#footer-first-run-back`（`data-go="customizer"`，文字「返回難易度設定」，只在首次模式且目前為 `sources` 時以 CSS 顯示，AC-25-07）。**`<body>` 屬性不放在 `<html>` 上**，避免動到 B-1 檢查的開頭片段 |
+| （v0.4）`EMT.router` 新增行為 | `go(tabId)`：(1) 首次模式（`body[data-entry="firstRun"]`）只接受 `customizer`、`sources`，其他回 `false`；(2) 換頁動畫依 §7.11；(3) 新頁 `hidden = false` 之後同步 `performance.mark("emt-page-shown")`（QA 量 AC-22-01 的輔助點）；(4) 設 `body.dataset.tab`。`start()` 時訂閱 store：收到 `"entry"` tag 且 `runtime.entryMode === "main"` → `body.dataset.entry = "main"`、`go("dashboard")`（首次「開始學習」與首次還原成功共用此路徑，view 不直接切頁） |
+| （v0.5）`index.html` 導覽 | `#app-nav` 只剩 4 個按鈕，依 `NAV_TAB_ORDER`（主控台、難易度設定、單字卡、模擬測驗）；**刪除** `data-tab="decoder"`、`data-tab="phrasebank"` 兩鈕（含其 SVG）。`#view-decoder`、`#view-phrasebank` 兩個 `<section>` **保留**（空、永遠 `hidden`），但移除 `aria-label`（不在任何可存取名稱中出現「解碼器」「句型庫」），供未來開放時恢復（§7.16） |
+| （v0.5）`EMT.router` 新增行為 | (1) `go(tabId)`：`tabId` 屬 `HIDDEN_TAB_IDS`（呼叫時取 `EMT.core.constants`）→ 首次模式回 `false`、不切頁；一般模式改為 `go("dashboard")` 並回 `false`。不顯示錯誤、不 `console.error`（HT-3、E-68）。(2) `start()` 綁定 `window` 的 `hashchange`，啟動時也檢查一次 `location.hash`：片段正規化（去 `#`、去開頭 `/`、去開頭 `view-`、轉小寫）後屬 `HIDDEN_TAB_IDS` → 一般模式 `go("dashboard")`、首次模式不動作；其他片段一律忽略（本系統**不使用** hash 路由，不改網址）。(3) 其餘行為不變 |
+
+### 4.3 Store API（FE-07 提供；views 只能透過它改狀態）
+
+| API | 行為重點 | AC |
+| :--- | :--- | :--- |
+| `store.init()` | 依契約 §5.3 讀取；判定 `storageStatus`；以 `appliedScore` 重算色級；建單字集 | AC-18-02、AC-18-03、AC-18-05 |
+| `store.getState()` | 回傳 `AppState`（唯讀，呼叫端不可改）。（v0.3 補註）結構為 `{ data, runtime }`：`data` = `PersistedData`（目標、自訂字、已掌握、統計、打卡等），`runtime` = `RuntimeState`；抽認卡狀態在 `state.runtime.flashcard`（`{ index, isFlipped, mode, quiz }`），語音狀態在 `state.runtime.speech`。`subscribe` 回呼的 `state` 與 §4.4 子元件 `render(…, state)` 的 `state` 皆為同一結構 | — |
+| `store.subscribe(fn) → unsubscribe` | 每次 action 後呼叫 `fn(state, tags)`；`tags` 為變更範圍字串陣列（如 `["goal"]`、`["studySet"]`、`["flashcard"]`），view 依此只重繪受影響區塊 | AC-22-01～AC-22-04 |
+| `actions.setDraftScore(raw) → { ok, score?, error? }` | 以 `goal.parseScoreInput` 驗證、修正為 5 的倍數、存 `draftScore`（未套用也保存）；`error` 填 `parseScoreInput` 回傳的 `message`（即 `SCORE_INVALID_MESSAGE`，§7.1） | AC-02-02、AC-02-08、AC-02-09 |
+| `actions.clickColor(colorId)` | Q-32 規則調整 `draftScore` | AC-01-05、AC-01-07 |
+| `actions.applyGoal()` | `appliedScore = draftScore`、重算色級、重建單字集、抽認卡回第 1 張正面 | AC-01-02、AC-03-05 |
+| `actions.addCustomWord(fields) → { ok, fieldErrors?, reason?: "duplicate"｜"quota" }` | 驗證、wordKey 去重、容量不足時回滾 | AC-04-02～AC-04-06、AC-18-04 |
+| `actions.deleteCustomWord(id)` | 同步移除已掌握 wordKey（V-ST-06）、調整抽認卡索引（AC-04-08） | AC-04-07、AC-04-08 |
+| `actions.injectTemplate(templateId) → { injected, skipped, reason?: "quota" }` | 注入尚未存在的字。（v0.3）容量不足時比照 `addCustomWord`：丟棄新狀態（記憶體回滾）、回 `{ injected: 0, skipped, reason: "quota" }`，不設 `writeStatus`、不以 `storage` tag 通知 banner；由 view 顯示「儲存空間不足」（不顯示「已注入 N 個單字」）。localStorage 停用（`disabled`）時沿用 AC-18-03：保留記憶體、照常回報注入數。理由見 §7.5 | AC-05-02、AC-05-04、AC-18-04 |
+| `actions.gotoCard(index)`、`actions.flipCard()` | 換卡時 `isFlipped = false`、`lastResult = null`；翻卡算學習行為 | AC-06-04、AC-06-05、AC-17-02 |
+| `actions.setFlashcardMode("card"｜"quiz") → { ok, reason?: "insufficient" }` | 進測驗模式時出題；不足 4 個相異釋義回 `insufficient` | AC-09-01、AC-09-06 |
+| （v0.3）測驗模式中單字集變動 | 確認沿用 FE-07 現行做法。`applyGoal`、`deleteCustomWord`、`injectTemplate`、`importBackup` 等重建單字集後：(1) 目前這張卡仍在新集合中 → 保留目前題目（已產生的 4 選項仍可作答）；(2) 目前的卡已不在新集合、或之後換卡（`gotoCard`）需要出新題時，`buildQuiz` 回 `null`（少於 4 張或相異釋義不足）→ 自動退回 `mode = "card"`、`quiz = null`、`isFlipped = false`、STT `lastResult = null`。自動退回**不另外顯示 toast**（使用者沒有點「測驗模式」）；`data.vocabQuiz` 統計不變。之後使用者再點「測驗模式」才依 AC-09-06 顯示「單字數不足 4 個，無法產生選項」並維持抽認卡模式。QA 判定：退回後畫面為卡片模式、無未處理例外、統計數字不變 | AC-09-06（「維持抽認卡模式」的延伸） |
+| `actions.answerVocabQuiz(optionIndex)` | 已作答則忽略；計數、答對加入已掌握、打卡 | AC-09-03、AC-09-04、AC-17-03 |
+| `actions.answerPart5(i)`、`actions.nextPart5()`、`actions.restartPart5()` | 依 `Part5Progress` 規則；鎖定後重複點擊不計 | AC-11-01～AC-11-07 |
+| `actions.recordSttScored()`、`actions.acknowledgeSttNotice()` | 打卡；設定已讀 | AC-17-02、AC-08-13 |
+| `actions.setSttStatus(s)`、`actions.setSttResult(r)` | 執行期語音狀態 | AC-08-01、AC-08-10 |
+| `actions.setDecoderIndex(i)`、`actions.toggleModifierDim()` | 淡化狀態跨句保留 | AC-13-03 |
+| `actions.setPhraseCategory(c)`、`actions.setPhraseKeyword(k)` | 篩選條件 | AC-15-02、AC-16-01 |
+| `actions.setTab(tabId)` | 由 router 呼叫 | — |
+| `actions.exportBackup() → { filename, json }` | 由記憶體狀態產生（localStorage 停用時仍可） | AC-24-01 |
+| `actions.importBackup(text, confirmFn) → Promise<ImportResult>` | 依契約 §6.2；`confirmFn` 由 view 傳入（呼叫 `ui.dialog.confirm`） | AC-24-03～AC-24-09 |
+
+**v0.4 新增與修改（FE-25、FE-30）**
+
+| API | 行為重點 | AC |
+| :--- | :--- | :--- |
+| `store.getState().runtime` | 新增 `entryMode`（`"firstRun"`／`"main"`，契約 FS-1）與 `learningQuotaNoticeShown`（啟動 `false`）。`data` 新增 `todayLearned`、`learnedHistory`（契約 §5.2 預設值） | AC-25-01、AC-30-14 |
+| `store.today() → "YYYY-MM-DD"` | 以 store 注入的 `now` 取本地日期（`streak.localDate`）；主控台與測試一律用它，不自行 `new Date()`，以便以假時鐘測跨午夜 | AC-30-07 |
+| `store.init()` | 依 §7.9 判定 `entryMode`；`parseStored` 的 v1 遷移與 RD-1 由 `persist` 處理（§7.8），`normalizeAfterLoad(data, part5Length, today)` 加今天參數；v1 遷移且驗證通過 → 以一次 `setItem` 寫回（MG-3，失敗不提示）；`entryMode = "firstRun"` 時 `currentTab = "customizer"`，否則 `"dashboard"` | AC-25-01、AC-25-05、AC-25-08、AC-25-09、AC-30-12、AC-30-13 |
+| 寫入守門（FS-2） | `entryMode === "firstRun"` 時，所有一般 action 只改記憶體，**不呼叫 `setItem`**（`writeData` 回 `{ ok: false, reason: "firstRun" }`，不改 `writeStatus`、不發 `storage` tag）。只有 `startLearning`、`importBackup` 步驟 8 可寫第一筆 | AC-25-04、AC-25-07、V-ST-13 |
+| `actions.startLearning() → { ok: true, write: "ok"｜"quota"｜"error"｜"disabled" }` | 僅首次模式有效（一般模式呼叫回 `{ ok: false }`、不做事）。等同 `applyGoal`（`appliedScore = draftScore`、V-ST-02、重建單字集、單字卡回第 1 張）＋ 一次 `setItem`；寫入結果不影響進入：`entryMode = "main"`、`currentTab = "dashboard"`，通知 tags 含 `"entry"`、`"goal"`、`"studySet"`、`"flashcard"`；`quota`／`error` 走既有 `noteWrite`（banner toast「儲存空間不足」） | AC-25-02、AC-25-03、AC-18-02、FS-4 |
+| `actions.setTab(tabId)` | 首次模式只接受 `customizer`、`sources`；其他值忽略（不改 `currentTab`） | AC-25-01、AC-25-07 |
+| `actions.importBackup`（首次模式） | 流程不變；步驟 9 成功時另設 `entryMode = "main"`、`currentTab = "dashboard"`，tags 加 `"entry"`；失敗或取消時 `entryMode` 維持 `"firstRun"`，記憶體與 localStorage 不變。步驟 7 的 ctx 傳入 `today`（匯入當天），供 IM-8 正規化 | AC-25-10、AC-25-11、AC-24-11、FS-5、FS-6 |
+| `actions.flipCard()` | 原行為不變；另在**單字卡模式**且 `isFlipped` 由 `false` 變 `true` 時記錄學習事件 `"flip"`（wordKey = 目前卡）。翻回正面不記錄 | AC-30-03、LR-1 |
+| `actions.answerVocabQuiz(i)` | 原行為不變；`selectedIndex` 由 `null` 變非 `null` 時記錄 `"vocabQuiz"`（wordKey = `quiz.wordKey`，對錯皆算）；已作答再點不記錄 | AC-30-03、LR-1 |
+| `actions.recordSttScored()` | 原行為不變（打卡）；另記錄 `"stt"`：wordKey 取 `wordKey(runtime.speech.lastResult.targetText)`，`lastResult` 為 `null` 時退回目前卡片的 wordKey；兩者都沒有則不記錄。speech-panel 只在顯示分數後呼叫（FE-12 現行做法），逾時、空結果、錯誤不呼叫，故不需修改 | AC-30-03、AC-30-04、LR-1 |
+| 學習事件寫入 | 同一 action 的打卡、`vocabQuiz`、`masteredWordKeys`、`todayLearned`、`learnedHistory` 變更合併為一次 `setItem`（LR-3 (6)、LR-5）。通知 tag 加 `"learning"`。容量不足依 §7.7「LR-7 實作」 | AC-30-14、AC-18-01 |
+| `actions.answerPart5`、`gotoCard`、`deleteCustomWord`、`applyGoal`、`injectTemplate` | **不**記錄學習事件、不改 `todayLearned`／`learnedHistory`（模擬測驗作答仍打卡） | AC-30-04、AC-30-06、LR-4 |
+| `actions.exportBackup()` | `backup.buildBackup` 以匯出當下日期正規化兩個新欄位（契約 §6.1） | AC-24-02、AC-30-09 |
+| 通知 tags（新增） | `"learning"`：今日紀錄或歷史改變；`"entry"`：`entryMode` 改變；`"learningQuota"`：本工作階段第一次學習紀錄容量不足（banner 以 toast 顯示「儲存空間不足」） | — |
+
+**v0.5 新增與修改（FE-37；契約 §5.7 CI-1～CI-10、§5.8 HT-1）**
+
+| API | 行為重點 | AC |
+| :--- | :--- | :--- |
+| `actions.requestApplyGoal() → { status: "applied" } ｜ { status: "confirm" } ｜ { status: "ignored" }` | **一般難易度設定頁「套用」的唯一入口**。`entryMode === "firstRun"` → `"ignored"`（首次畫面用 `startLearning`，CI-1）。以 `reinit.needsConfirm(data, today())`（生效色級改變且有學習紀錄）判斷：成立 → **不改任何狀態、不呼叫 `setItem`**，回 `"confirm"`；不成立 → 執行既有 `applyGoal()`，回 `"applied"`（不清除任何資料） | AC-01-02、AC-01-07、AC-32-01、AC-32-05、AC-32-06、AC-32-07 |
+| `actions.confirmApplyGoal() → { ok: true, write: "ok"｜"disabled" } ｜ { ok: false, reason: "quota"｜"error"｜"firstRun" }` | 視窗「確定」。以 `appliedGoalState()` 的新 `goal` 與 `reinit.buildReinitData(data, goal, persist.defaultData())` 建立**新物件**（不就地修改）。`storageStatus === "ok"` → `writeData(newData)` **一次**；失敗（quota／error）→ **不替換記憶體**，只把記憶體 `goal.draftScore` 改回 `appliedScore`（同 `cancelApplyGoal`，不寫入），`writeStatus` 不變、不發 `storage`／`learningQuota` tag、不改 `learningQuotaNoticeShown`，回 `{ ok: false, reason }`（CI-7）。成功或 `unavailable`（CI-6，不寫入）→ 以新資料取代記憶體，執行期依 CI-8：重建 `studySet`、`flashcard = { index: 0, isFlipped: false, mode 保持, quiz 依模式重出 }`、`speech.lastResult = null`；tags = `goal`、`studySet`、`flashcard`、`quiz`、`speech`、`stats`、`streak`、`part5`、`learning`（成功時 `noteWrite` 照常） | AC-32-02、AC-32-03、AC-32-09、AC-32-10、AC-32-11 |
+| `actions.cancelApplyGoal()` | 視窗「取消」／Esc／點視窗外。`draftScore !== appliedScore` 時只在記憶體把 `draftScore` 改回 `appliedScore`，以 `commit(…, dataChanged = false)` 通知 `"goal"`，**`setItem` 呼叫 0 次**（CI-9，契約 FB-35 的已知行為）；單字卡位置、其他欄位不變 | AC-32-04 |
+| `actions.applyGoal()` | 保留原行為（直接套用、不判斷、不清除），供 `requestApplyGoal` 內部與既有測試使用；**view 不得直接呼叫**（customizer 改呼叫 `requestApplyGoal`，以 `customizer.test.js` 原始碼掃描確認） | — |
+| `actions.setTab(tabId)` | `tabId` 屬 `HIDDEN_TAB_IDS` → 忽略（不改 `currentTab`、不通知），使 `currentTab` 永不為隱藏頁（HT-1）；導向主控台由 router 負責 | AC-20-04 |
+| `importBackup`、`startLearning` | **不**經過初始化判斷（CI-1、AC-32-08）；程式不變 | AC-32-08 |
+
+### 4.4 抽認卡子元件（FE-11 與 FE-12、FE-13 的介面）
+
+| 介面 | 提供者 | 呼叫者 | 約定 |
+| :--- | :--- | :--- | :--- |
+| `EMT.components.speechPanel.render(containerEl, card, state)` | FE-12 | FE-11（卡片正面 `.fc-speech` 容器，每次換卡或重繪時呼叫；不存在則略過） | 產生 TTS 1.0x、0.75x、麥克風按鈕、「需要連網」標示、分數區 |
+| `EMT.components.speechPanel.reset()` | FE-12 | FE-11（換卡、切換模式、離開頁面時） | 停止朗讀與聆聽（AC-07-03、AC-08-10）。（v0.5）同時停止音量分析、收音條歸暗，但**不釋放**麥克風音軌（同頁重用，Q-36） |
+| （v0.5）`EMT.components.speechPanel.release()` | FE-39 | flashcards 的 `hide()`（取代原本呼叫的 `reset()`） | `reset()` ＋ `EMT.services.mic.release()`：停止所有音軌、關閉 `AudioContext`（AC-33-02） |
+| `EMT.components.flashcardQuiz.render(containerEl, state)` | FE-13 | FE-11（`mode === "quiz"` 時取代卡片區） | 顯示題目單字與 4 選項，作答呼叫 `actions.answerVocabQuiz` |
+| 「測驗模式」切換鈕 | FE-11 | — | 呼叫 `actions.setFlashcardMode`；回 `insufficient` 時顯示「單字數不足 4 個，無法產生選項」 |
+
+（v0.3 補註）上表 `render(containerEl, card, state)`、`render(containerEl, state)` 的 `state` 即 `store.getState()` 回傳的 `AppState = { data, runtime }`（§4.3）。子元件讀取抽認卡狀態一律用 `state.runtime.flashcard`（題目在 `state.runtime.flashcard.quiz`）、語音狀態用 `state.runtime.speech`、統計用 `state.data.vocabQuiz`；不得假設 `state.flashcard` 之類的扁平結構。`card` 為 `StudyCard`（`state.runtime.studySet[state.runtime.flashcard.index]`），由 FE-11 傳入以免子元件重算。
+
+### 4.5 v0.4 新增的共用模組介面
+
+| 介面 | 提供者 | 呼叫者 | 約定 |
+| :--- | :--- | :--- | :--- |
+| `EMT.core.learning.*`（§7.7 函式表） | FE-20 | persist、backup、store、dashboard | 純函式、不修改傳入物件 |
+| `EMT.core.interaction.UI`、`classifySwipe`、`isTap`、`swipeTarget`、`vibratePattern`、`patternTotal` | FE-21 | router（經 motion）、flashcards、flashcard-quiz、part5、haptics、測試 | §7.10、§7.12；`UI` 物件凍結 |
+| `EMT.ui.motion.reduced() → boolean` | FE-24 | 所有播放動畫的 view | `matchMedia("(prefers-reduced-motion: reduce)").matches`；`matchMedia` 不存在 → `false`。每次呼叫即時查詢（使用者中途切換系統設定也生效） |
+| `EMT.ui.motion.enter(el, className, ms)` | FE-24 | router、flashcards、flashcard-quiz、part5、dashboard | `reduced()` 為真 → 不加 class、直接回傳；否則先取消該元素同名 class 的舊計時器並移除 class，再加上 class，`setTimeout(ms + 50)` 後移除。**不依賴 `animationend`**（減少動態時 CSS 已關閉動畫，事件不會觸發） |
+| `EMT.ui.motion.cancel(el, className)` | FE-24 | router（隱藏舊頁時） | 立刻移除 class 並清計時器 |
+| `EMT.services.haptics.vibrate(kind) → boolean` | FE-29 | flashcard-quiz、part5 | `kind` 為 `"correct"`／`"wrong"`；`navigator.vibrate` 為函式時以 `interaction.vibratePattern(kind)` 呼叫**一次**並回傳 `true`；不存在、拋例外、或回傳 `false` → 靜默回 `false`（不 toast、不 `console.error`，AC-29-03）。減少動態**不影響**震動（AC-31-03） |
+| `EMT.ui.bottomNav.init()` | FE-26 | main.js | 綁定 `focusin`／`focusout`：焦點在 `input`（`type` 為 text、search、number、email、url、tel、password 或無）、`textarea`、`select` 時，`document.documentElement.classList.add("is-typing")`，離開時移除；重複呼叫只綁一次 |
+| `EMT.ui.importFlow.start() → Promise<ImportResult｜null>` | FE-32 | customizer（首次畫面「從備份還原」） | 建立隱藏 `<input type=file accept=".json,application/json">` → `FileReader.readAsText` → `store.actions.importBackup(text, confirmFn)`，`confirmFn` 以 `ui.dialog.confirm` 顯示「匯入將覆蓋目前所有進度」→ 依結果 toast（文字與主控台完全相同：成功「已匯入，略過 N 筆」、`format`、`version`（列檔案版本與「1、2」）、`quota`、`write_failed`；`cancelled` 與未選檔不提示）。選檔取消回 `null`。訊息文字以匯出的純函式 `messageOf(result)` 產生，測試逐一比對 `dashboard.importMessage` 的輸出（兩處文字不得分歧）。主控台本版**不**改用此模組（降低回歸風險，見 SD-FB-14） |
+
+### 4.6 v0.5 新增的共用模組介面
+
+| 介面 | 提供者 | 呼叫者 | 約定 |
+| :--- | :--- | :--- | :--- |
+| `EMT.core.reinit.*`（§7.15 函式表） | FE-34 | store | 純函式、不修改傳入物件；`goal`、`learning`、`persist` 於函式內取用（LD-1） |
+| `EMT.core.meter.*`（§7.14 常數與函式表） | FE-35 | services/mic、speech-panel、測試 | 純函式；`THRESHOLDS_DBFS` 凍結 |
+| `EMT.services.mic`（§7.14 API 表） | FE-36 | speech-panel（唯一呼叫者） | Promise 不 reject；所有例外收斂為回傳值；回呼例外被攔下；`create(globalObject)` 供 Node 測試注入替身 |
+
+---
+
+## 5. 建置與打包流程
+
+指令（`package.json` scripts）：
+
+| 指令 | 內容 |
+| :--- | :--- |
+| `npm run build` | `node tools/build.mjs`（預設輸出 `dist/english-master-track.html`） |
+| `node tools/build.mjs --out <path> [--data <dir>]` | 任務驗證用：輸出到 scratchpad；`--data` 指向 fixture 資料目錄（內容尚未完成時） |
+| `npm test` | `node --test src/app/__tests__/*.test.js`（v0.2：Node 21 起 `node --test` 的參數視為檔案或 glob，傳目錄會失敗；glob 由 Node 自行展開，Windows `cmd.exe` 不展開萬用字元也能執行） |
+| `npm run validate:data` | `node src/data/_tools/validate.mjs --all --stage final` |
+
+Node 版本：`package.json` 的 `engines.node` 訂為 **`>=22`**（v0.2，原 `>=18`）。理由：`node --test` 自行展開 glob 需 Node 21 以上；Node 18、20 在 Windows 會把 `*.test.js` 當字面檔名而失敗；21 為非 LTS 且已停止維護，故以 LTS 22 為下限。本機 v24.15.0 符合。`package.json` 屬 FE-01 的 paths，調整由 §12.1 的 FE-01 補修處理。
+
+**HTML 開頭順序（v0.2，B-1、B-7 據此檢查）**：HTML 規範要求字元編碼宣告完整出現在檔案前 1,024 bytes；授權標頭約 1.5 KB，若放在 `<meta charset>` 之前，Firefox 以 `file://` 開啟時可能亂碼或重新解析。模板開頭固定為：
+
+```
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<!-- @@LICENSE@@ -->
+<meta name="viewport" …>
+…
+```
+
+授權註解仍位於原始碼第 5 行起的開頭註解區，符合 AC-23-06。`<meta charset>` 之前只允許上述 3 個 ASCII 標籤與空白；不採「`<meta>` 放在 `<html>` 之前」的寫法（會使後面的 `<html>` 成為解析錯誤）。
+
+`tools/build.mjs` 步驟：
+
+| 步驟 | 動作 | 失敗條件 |
+| :--- | :--- | :--- |
+| B-1 | 讀 `src/app/index.html`，必須含 4 個標記各恰好 1 次：`<!-- @@LICENSE@@ -->`（v0.2：模板開頭須符合 `/^\s*<!DOCTYPE html>\s*<html\b[^>]*>\s*<head>\s*<meta charset="utf-8">\s*/i`，且 LICENSE 標記緊接在此比對結果之後，中間只能有空白）、`/* @@STYLES@@ */`（在 `<style>` 內）、`<!-- @@DATA@@ -->`、`<!-- @@APP@@ -->`（`</body>` 前，DATA 在 APP 之前） | 缺標記或位置不符 → 中止（`MARKER_POSITION`） |
+| B-2 | 資料：列出 `--data` 目錄（預設 `src/data/`）下不以 `_` 開頭的 `*.js`；順序 `sources.js` → `vocab-*.js`（檔名序）→ `templates.js` → `part5.js` → `decoder.js` → `phrasebank.js` → 其他（警告）。每檔以 `node:vm` 在 `{ window: {} }` 沙箱執行（驗證 C-4 可執行）；**以 `JSON.stringify` 重新輸出為壓縮字面值**：`window.X=<json>;`。所有 vocab 檔的結果合併、依 `rank` 排序後輸出為**單一** `window.MASTER_VOCAB_DATABASE=[…];`（與 concat 結果等價，契約 §3.1） | 檔案執行失敗 → 中止；資料檔不存在 → 只警告（前端依 C-6 容錯） |
+| B-3 | 內嵌安全：資料 JSON 中的 `</` 換成 `<\/`、`<!--` 換成 `<\!--`；程式碼若含 `</script` 字樣 → 中止 | `</script` 出現在程式碼 |
+| B-4 | 程式：依 §4.1 串接順序收集 `src/app/{core,state,services,ui,views}/**/*.js` 與 `main.js`（排除 `__tests__`），以一個 `<script>` 內嵌 | — |
+| B-5 | 樣式：`src/app/styles/*.css` 依檔名序串接，替換 `/* @@STYLES@@ */` | 含 `@import` 或 `url(http` → 中止 |
+| B-6 | 授權標頭：讀 `src/app/license-header.txt`，`{{YEAR}}` 換成 `PROJECT_LICENSE.copyrightYear`（缺資料時用當年並警告），包成 `<!-- … -->` 替換 `<!-- @@LICENSE@@ -->`；內容中的 `--` 須避免（模板撰寫時不用連續兩個減號） | — |
+| B-7 | 檢查產物：（v0.2）`<meta charset="utf-8">` 的結束位置以 UTF-8 bytes 計 ≤ 1,024，且其前無非 ASCII 字元（超過中止）；大小 ≤ 5,242,880 bytes（AC-19-04，超過中止）；> 4,718,592 bytes（4.5 MiB）警告；不得出現 `<script[^>]*\ssrc=`、`<link[^>]*\shref=`、`@import`、`url\(\s*['"]?https?:`、`<img`、`<iframe`、`cdn.`、`fonts.googleapis`、`cdn.tailwindcss.com`（AC-19-01）。（v0.5，FE-41）`FORBIDDEN_PATTERNS` 新增 `{ name: "MediaRecorder", re: /MediaRecorder/ }`（AC-21-03、NFR-3：產物中錄音 API 出現數 = 0，含註解） | 任一命中 → 中止 |
+| B-8 | 輸出報告：總 bytes、各區段 bytes（標頭／CSS／各資料全域變數／程式）、字庫平均每筆 bytes | — |
+| B-9（備用） | 第 2 層壓縮：只在 B-7 警告時由 FE-18 啟用。把 `MASTER_VOCAB_DATABASE` 改輸出為「欄位名陣列 + 值陣列」並附 10 行以內的還原函式，於其他資料與程式之前還原為契約形狀的 `BuiltinVocabItem[]`（執行期介面不變，契約不需修改） | — |
+
+`index.html` 在開發時不可直接開啟（無資料、無程式）；一律以 `--out` 建到 scratchpad 後開啟。
+
+---
+
+## 6. 檔案大小估算（回應 FB-17、R-02、AC-19-04）
+
+以 `N_G` = 5,620、建置後**壓縮 JSON**（B-2）計算；中文 UTF-8 每字 3 bytes，IPA 符號多為 2 bytes。
+
+| 項目 | 每筆估算（bytes） | 筆數 | 小計 |
+| :--- | :--- | :--- | :--- |
+| 字庫固定開銷（12 個鍵名、引號、逗號、括號、3 個來源標記值、`sources`） | 約 196 | 5,620 | 1.10 MB |
+| 字庫可變內容：word 9、phonetic 16、pos 11、meaning 42、collocation 47、example 77 | 約 202 | 5,620 | 1.14 MB |
+| academicContext：排名 ≤ 2,809（選填，估平均 50）／> 2,809（必填，估 112） | 50／112 | 2,809／2,811 | 0.45 MB |
+| **字庫合計（預期）** | 平均約 483 | 5,620 | **約 2.7 MB** |
+| Part 5（句子、選項、繁中解析） | 約 650 | 200 | 0.13 MB |
+| 長難句（segments、翻譯）＋ 閱讀策略 | 約 1,500 | 50 | 0.08 MB |
+| 句型庫 | 約 300 | 100 | 0.03 MB |
+| 範本、sources.js（含 MIT 全文） | — | — | 0.02 MB |
+| 程式（未壓縮）＋ CSS ＋ 授權標頭 | — | — | 約 0.18 MB |
+| **總計（預期）** | | | **約 3.1 MB** |
+| **總計（悲觀：字庫內容長 25%）** | | | **約 3.8 MB** |
+
+結論：
+
+| 項目 | 決定 |
+| :--- | :--- |
+| 是否需改契約精簡欄位名 | **不需要**。預期 3.1 MB、悲觀 3.8 MB，皆低於 5 MB；FB-17 結案，不提契約修訂 |
+| 保險機制 | B-7 於 4.5 MiB 警告；觸發時 FE-18 啟用 B-9（欄位名只出現一次，可省約 0.9 MB），執行期介面不變 |
+| 內容長度預算（給 CT） | 驗證器 H-7：分檔「壓縮後平均每筆 bytes」> 600 時警告、> 700 時錯誤；`meaning` 建議 ≤ 30 字（契約）、`collocation` ≤ 80 字元、`example` ≤ 160 字元、`academicContext` ≤ 200 字元 |
+| 首次載入（AC-22-05） | 約 3 MB 的字面值解析在中階筆電約 0.1～0.3 秒；啟動只算一次排序與 `Map`，不渲染清單；預估遠低於 3 秒／6 秒 |
+
+### 6.1 v0.4 增量估算（交付檔大小、localStorage 容量，回應契約 FB-32）
+
+**交付檔**：v0.3 實測產物 3,047,158 bytes（QA TC-S09）。
+
+| 新增項目 | 估算 |
+| :--- | :--- |
+| `core/learning.js`、`core/interaction.js`、`ui/motion.js`、`ui/bottom-nav.js`、`ui/import-flow.js`、`services/haptics.js` | 約 25 KB（含繁中註解，未壓縮） |
+| 既有 store、persist、backup、router、views 的修改 | 約 25 KB |
+| CSS（底部導覽、05-motion、卡片、環形圖、長條圖、答題動畫） | 約 10 KB |
+| 6 個內嵌 SVG 導覽圖示（單一 `path`，各約 300 bytes） | 約 2 KB |
+| **合計** | **約 62 KB → 產物約 3.11 MB**，低於 4.5 MiB 警告門檻，不需啟用 B-9 |
+
+**localStorage**（Chrome 以 UTF-16 計，每字元 2 bytes；常見上限每來源 5 MB 字元或 10 MB bytes，以較嚴的 5 MB bytes 估）：
+
+| 欄位 | 一般使用 | 極端情況 | 說明 |
+| :--- | :--- | :--- | :--- |
+| `todayLearned.wordKeys` | 15～50 字 × 約 12 字元 ≈ 0.6 KB | 單日學完 5,650 字：平均 wordKey 9 字元 + 引號與逗號 3 ≈ 68 K 字元 | 契約 FB-32 估 70 KB，與本表一致 |
+| `learnedHistory` | 30 筆 × `"2026-10-30":15,` 約 17 字元 ≈ 0.5 K 字元 | 同左（最多 30 筆，V-ST-10） | 固定上限 |
+| 既有欄位（自訂字 30～200 筆、已掌握字、統計） | 約 10～40 K 字元 | 已掌握 5,650 字 ≈ 68 K 字元 + 自訂 1,000 筆 × 250 ≈ 250 K 字元 | — |
+| **整筆 `StorageRecord`** | **約 50 K 字元（≈ 100 KB）** | **約 400 K 字元（≈ 0.8 MB）** | 遠低於 5 MB；`unreadable` 鍵最壞再複製一份仍低於 2 MB |
+
+**寫入頻率與效能**：每次學習事件（翻到背面、四選一作答、STT 計分）各一次 `setItem`。極端情況序列化 400 K 字元的 `JSON.stringify` + `setItem` 在中階筆電約 2～5 ms、4 倍降速約 10～20 ms，仍在 AC-22-* 的 100 ms 內；一般情況 < 1 ms。**決定**：不做節流或延遲寫入（延遲寫入會讓「關閉分頁前最後一次學習」遺失，違反 AC-18-01、AC-30-11）。
+
+### 6.2 v0.5 增量估算
+
+| 項目 | 估算 |
+| :--- | :--- |
+| 新模組 `core/meter.js`、`core/reinit.js`、`services/mic.js` | 約 15 KB（含繁中註解） |
+| store、speech-panel、customizer、router、dashboard 修改；收音條 CSS | 約 10 KB |
+| 刪除 2 個導覽按鈕與 SVG | 約 −1 KB |
+| **合計** | **約 +24 KB**；以 FE-33 產物為基準仍遠低於 4.5 MiB 警告門檻。`decoder.js`、`phrasebank.js` 資料與 view 照常打包，大小不變（PRD R-18 三 (b)） |
+
+localStorage：v0.5 不新增欄位、不改結構（`schemaVersion` 2）；初始化只會讓資料變小。
+
+---
+
+## 7. 關鍵演算法
+
+### 7.1 分數與試算（`core/goal.js`，FE-03；PRD 色級定義表、Q-12、Q-15、Q-25、Q-28、Q-32）
+
+| 函式 | 定義 | AC |
+| :--- | :--- | :--- |
+| `parseScoreInput(raw)` | 回傳 `{ ok: true, score }` 或 `{ ok: false, message }`（`message` 恆為 `SCORE_INVALID_MESSAGE`）。`raw` 為 `number` 時：有限數才接受；其餘轉字串後 trim。**（v0.2）字串只接受十進位寫法 `/^[0-9]+(\.[0-9]+)?$/`**：空白、正負號、指數（`1e2`）、十六／八／二進位（`0x64`、`0o144`、`0b1`）、`Infinity`、全形數字、千分位逗號一律無效；通過後 `Number(text)`，原值 < 10 或 > 990 → 無效；否則 `normalizeScore`（小數可接受，例：`722.5` → 725） | AC-02-02、AC-02-09 |
+| `SCORE_INVALID_MESSAGE` | 常數「請輸入 10～990 的分數」（AC-02-02 原文）；store 的 `setDraftScore` 以此填 `error` | AC-02-02 |
+| `normalizeScore(x)` | `Math.round(x / 5) * 5`（723 → 725、722 → 720），結果夾在 10～990 | AC-02-09 |
+| `colorOf(S)` | `COLOR_LEVELS` 中 `scoreMin ≤ S ≤ scoreMax` 的 `id` | AC-02-04 |
+| `effectiveColorOf(c)` | `blue`／`gold` → `green`，其他同 `c` | AC-01-07、V-ST-02 |
+| `dailyNewWords(S)` | `COLOR_LEVELS[colorOf(S)].dailyNewWords`（10、10、15、20、20） | AC-02-03 |
+| `targetVocab(S, nB, nG)` | 橘 `N_O`、棕 `nB`、綠 `nG`；藍金 `null`（畫面「待定」）。（v0.3）`nB`、`nG` 不是**大於 0 的有限數**（含 `0`、負數、`NaN`、`null`）時視為資料缺漏 → 回 `null` | AC-02-05、AC-02-10 |
+| `estimate(S, c, nB, nG)` | `T = targetVocab ?? nG`、`W = dailyNewWords(S)`；`weeks = max(0, ⌈(T − c) ÷ (W × 7)⌉)`；`achieved = (開放色級 且 c ≥ T)`；`basedOnGreen = 藍金`。回傳 `{ color, targetVocab, dailyNewWords, weeks, achieved, basedOnGreen }` | AC-02-05、AC-02-06、AC-02-10 |
+| `scoreAfterColorClick(S, colorId)` | `S` 在該色範圍內 → `S`；否則該色 `scoreMin` | AC-01-05、AC-01-07 |
+| `levelOf(colorId)` | 回傳 `COLOR_LEVELS` 中 `id` 相符的 `ColorLevelDefinition`；找不到 → `null`（v0.2 補登，FE-03 已實作） | AC-02-03、AC-02-04 |
+| `isOpenColor(colorId)` | `levelOf(colorId)?.status === "open"`；未知色級 → `false`（v0.2 補登） | AC-01-01、AC-02-10 |
+
+v0.3 決議（FE-09 #8，字量為 0）：在 `goal.js` **統一處理**，不由各 view 各自轉換。理由：(1) 字庫缺漏時（C-6）`prepareBuiltin` 回 `nB = nG = 0`，若 `estimate` 把 0 當有效字量，會得到「`c ≥ T` → 已達成」的錯誤結論，任何呼叫端（自訂器、主控台、日後新頁面）都會踩到；(2) 純函式內處理才能以單元測試鎖定。規則：`T` 取得方式不變，但 `nB`、`nG` ≤ 0 時視同 `null`（藍金的 `T = nG` 也套用）；`T` 為 `null` → `weeks = null`、`achieved = false`。橘色 `N_O` 為契約常數，不受影響。FE-09 view 現有的「0 轉 null」可保留（結果相同），不需修改。程式補修見 §12.2 R3-1。
+
+v0.2 決議說明：`Number()` 會把 `1e2`、`0x64` 視為 100，使用者看到的輸入值與修正結果不一致，與 AC-02-02「非數字不接受」的意圖不符，故改為只接受十進位寫法。滑桿傳入的是 `number`，不受字串規則影響。FE-03 現行實作（`Number(text)` 直接判斷）需補修，見 §12.1。
+
+### 7.2 單字集（`core/vocab.js`、`core/custom.js`，FE-04；V-ST-04、V-VOC-12）
+
+| 函式 | 定義 | AC |
+| :--- | :--- | :--- |
+| `prepareBuiltin(raw)` | 非陣列 → `[]`；複製後依 `rank` 遞增排序；建 `Map<wordKey, item>`；`nB` = `sources` 含 NGSL 的筆數、`nG` = 筆數；與 `VOCAB_MANIFEST` 不符只 `console.warn` | AC-03-06、V-VOC-12 |
+| `limitOf(effectiveColor, nB, nG)` | orange → 1,000（`N_O`）、brown → `nB`、green → `nG` | AC-03-01～AC-03-03 |
+| `buildStudySet(builtinSorted, limit, customVocab)` | `builtinSorted.slice(0, limit)` 轉 `StudyCard` + `customVocab` 依 `createdAt` 遞增；自訂字的 wordKey 若已在**本次截取的**內建卡中則不重複放入（SD 對 V-ST-04 的解讀，見 §15 SD-FB-03）。O(N)，5,650 筆在 4 倍降速下約數毫秒 | AC-03-01～AC-03-04、AC-22-02 |
+| `validateCustomFields(fields)` | 英文單字、中文釋義 trim 後非空；其餘選填存 `""` | AC-04-01、AC-04-03 |
+| `isDuplicate(word, builtinMap, customVocab)` | wordKey 存在於**全部**內建字庫或自訂清單 → 重複 | AC-04-06 |
+| `planTemplateInjection(template, builtinMap, customVocab)` | 依序挑出 wordKey 尚不存在者，回 `{ toAdd, skippedCount }` | AC-05-02、AC-05-04 |
+| `indexAfterDelete(studySet, currentIndex, deletedWordKey)` | 刪除位置 `d`：`d < i` → `i − 1`；`d === i` → 若 `i` 是最後一張則 `i − 1` 否則 `i`；新集合為空 → 0（顯示空狀態） | AC-04-08 |
+
+### 7.3 辨識吻合度（`core/similarity.js`，FE-05；規格書 2.3、2.4、Q-23）
+
+| 函式 | 定義 | AC |
+| :--- | :--- | :--- |
+| `clean(s)` | `s.normalize("NFC").toLowerCase().replace(/[^\p{L}\p{N}]/gu, "")`（去除標點與所有空白，保留含重音字母） | AC-08-03、AC-08-12 |
+| `levenshtein(a, b)` | 兩列滾動陣列 DP，O(m·n) 時間、O(min(m,n)) 空間 | AC-08-04、AC-08-05 |
+| `score(recognized, target)` | `a = clean(recognized)`、`b = clean(target)`；`a` 為空 → 回 `null`（呼叫端提示「未偵測到語音，請再試一次」）；否則 `round((1 − d ÷ max(|a|, |b|)) × 100)` | AC-08-03～AC-08-05、AC-08-10、AC-08-12 |
+| `lightOf(score)` | ≥ 90 green；65～89 yellow；< 65 red | AC-08-06 |
+
+驗算（一律寫成 `score(辨識結果, 目標)`）：`score("adress", "address")` → 86；`score("kitten", "sitting")` → 57；`score("complied with", "comply with")` → 75；`score("Comply with.", "comply with")` → 100；`score("Latency.", "latency")` → 100。
+
+參數順序（v0.2 統一）：正式簽章為 `score(recognized, target)`（第 1 個是辨識結果、第 2 個是目標字，FE-05 實作即如此）。兩者清洗後皆非空時結果與順序無關（編輯距離與 `max` 皆對稱），故 tasks.json FE-05 doneWhen 的 `score('comply with', 'complied with')` 與上列寫法結果相同，視為等價、不另修改；唯一不對稱處是**辨識結果**清洗後為空 → `null`，目標為空而辨識非空 → 0。日後文件、測試與呼叫端一律採本節寫法。
+
+### 7.4 打卡、正確率、四選一（FE-05）
+
+| 函式 | 定義 | AC |
+| :--- | :--- | :--- |
+| `localDate(now)` | 裝置本地時區 `YYYY-MM-DD`（用 `getFullYear/getMonth/getDate`，不用 `toISOString`） | AC-17-02 |
+| `touch(streak, today)` | 依 `StreakState` 註解：null → 1；同日不變；隔 1 天 +1；隔 ≥ 2 天 → 1；`today < last` 不變；`lastActiveDate = max(last, today)`。日差以 `Date.UTC(y, m−1, d)` 相減 ÷ 86,400,000 計算，避開日光節約時間 | AC-17-02、AC-17-05 |
+| `displayDays(streak, today)` | `today ≥ last + 2` → 0；否則 `days`（FB-09） | AC-17-02 |
+| `accuracyText(answered, correct)` | `answered === 0` → 「—」；否則 `Math.round(correct ÷ answered × 100) + "%"` | AC-17-04 |
+| `buildQuiz(studySet, index, rand = Math.random)` | 正解 = 該卡 `meaning`（trim）；其他卡 `meaning` trim 後去重並排除正解，隨機取 3 個；不足 → `null`（insufficient）；Fisher–Yates 洗牌 4 個選項 | AC-09-02、AC-09-05～AC-09-07 |
+
+異常輸入處理（v0.2 補充，FE-05 已依此實作）：
+
+| 函式 | 情況 | 結果 |
+| :--- | :--- | :--- |
+| `touch`、`displayDays` | `lastActiveDate` 為 `null`、格式不符 `YYYY-MM-DD` 或日期不存在（如 `2026-02-30`） | 視同**未打卡**：`touch` → `{ days: 1, lastActiveDate: today }`；`displayDays` → 回傳 `days`（不合法時為 0） |
+| `touch` | `today` 不合法 | 無法判斷，狀態不變（不合法的 `lastActiveDate` 回 `null`） |
+| `touch`、`displayDays` | `days` 非有限數、負數或小數 | 先取 `max(0, floor(days))`（V-ST-07：永不為負） |
+| `touch` | 同一天且 `days` 為 0（異常狀態） | 補成 1（今天確實有學習行為） |
+| `buildQuiz` | `studySet` 非陣列或少於 4 張；`index` 非整數或超出範圍；該卡 `meaning` trim 後為空；相異誘答不足 3 個 | 回 `null`（呼叫端顯示「單字數不足 4 個，無法產生選項」） |
+
+四選一在 5,620 字中抽誘答：不建全部相異釋義集合；以隨機索引抽樣、最多嘗試 50 次湊滿 3 個相異值，失敗時才線性掃描（單字集很小時）。效能判定（v0.2）：單次計時受 GC 與計時器解析度影響不穩定，改為**預熱 100 次後連續執行 1,000 次，以平均值 < 1 ms 判定**；p99 只記錄於測試輸出供參考，不作為通過條件。
+
+### 7.5 持久化與匯入（FE-06、FE-07；契約 §5、§6）
+
+| 項目 | 設計 |
+| :--- | :--- |
+| Schema 驗證 | 不引入 JSON Schema 套件；`core/persist.js` 手寫 `validateStorageRecord`、`validatePersistedData`，逐欄對照 `storage-schema.json`（型別、必填、`additionalProperties`、`enum`、`pattern`、整數範圍）並檢查 V-ST-03 |
+| 遷移 | `MIGRATIONS = { /* v: fn(data) → data(v+1) */ }`；本版空表；`migrate(record)` 依序套用 |
+| localStorage 轉接 | `probe()`：`try { localStorage.getItem(KEY) }` 拋例外 → `unavailable`；`write(record)`：`setItem` 一次；例外名稱 `QuotaExceededError`、`NS_ERROR_DOM_QUOTA_REACHED` 或 `code` 22／1014 → `quota` |
+| 新增自訂字容量不足 | 先算新狀態 → 寫入失敗 → 丟棄新狀態（記憶體回滾）→「儲存空間不足」 |
+| 範本注入容量不足（v0.3） | **不沿用**「一般寫入」做法，改為與新增自訂字相同：寫入失敗 → 丟棄新狀態（記憶體回滾）→ view 顯示「儲存空間不足」，回傳 `reason: "quota"`（§4.3）。理由：(1) 範本注入的本質是批次新增自訂單字，與 AC-18-04 的「新增自訂單字」同屬一類使用者動作，契約 README §5.3 的「新增自訂單字」SD 解讀為包含範本注入；(2) 若保留記憶體，畫面會同時出現「已注入 N 個單字」與「儲存空間不足」兩個互相矛盾的提示，且重新開啟後這些字消失，使用者無從得知哪些字沒存到；(3) 回滾後狀態與 localStorage 一致，使用者清出空間後再按一次即可完整注入（AC-05-04 保證不重複）。「一般寫入」（打卡、作答統計、翻卡等）維持保留記憶體 + banner 提示，因為回滾會使使用者剛完成的操作消失。程式補修見 §12.2 R3-2、R3-3 |
+| 容量不足的分類總表（v0.3） | 回滾 + 「儲存空間不足」：`addCustomWord`、`injectTemplate`；不套用 + 「儲存空間不足，未匯入」：`importBackup`（AC-24-09）；其餘 action：保留記憶體、`writeStatus = "quota"`、banner 以 toast 提示「儲存空間不足」，下次寫入再試 |
+| 匯入 | `core/backup.js` 實作步驟 1～5、7 的純函式；store 負責步驟 6（confirm）、8（一次 `setItem`，失敗不套用）、9（套用、重建單字集、提示「已匯入，略過 N 筆」） |
+| 匯出 | `services/download.js`：`Blob` + `URL.createObjectURL` + `<a download>`；不產生網路請求（`blob:` 為本機 URL） |
+
+### 7.6 其他
+
+| 功能 | 設計 | AC |
+| :--- | :--- | :--- |
+| 句型搜尋 | 啟動時對每則預先算 `haystack = (template + "\n" + descriptionZh).toLowerCase()`；每次 `input` 事件同步過濾（**不做 debounce**），100 則線性比對 < 1 ms | AC-16-01 |
+| 淡化修飾語 | 容器加 class `is-dimmed`；`.is-dimmed .seg--modifier { opacity: 0.3; filter: grayscale(1); }`；**不設 transition**（讓計算後樣式立即為 0.3，利於自動驗證） | AC-13-01～AC-13-03 |
+| TTS | `speechSynthesis.cancel()` 後再 `speak()`；語音挑選：`lang` 為 `en-US`（不分大小寫、`_` 視同 `-`），優先 `localService === true`（R-10）；`getVoices()` 為空時等 `voiceschanged` 最多 1 秒；仍無 en-US → 「此裝置未安裝美式英語語音」 | AC-07-01～AC-07-05 |
+| STT | `window.SpeechRecognition ‖ window.webkitSpeechRecognition`；`lang = "en-US"`、`interimResults = false`、`maxAlternatives = 1`；開始前 `navigator.onLine === false` → 「語音辨識需要網路連線」；`onerror` 依下方「STT 錯誤對照表」；使用者再按一次 → `stop()` 並標記手動停止（不提示）；`onend` 無結果且非手動 → 未偵測提示。~~不使用 `getUserMedia`／`MediaRecorder`~~ **（v0.5 修訂，PRD R-18 二）**：按麥克風時先經 `services/mic.js` 取得或重用麥克風音軌（`getUserMedia`，只接 `AnalyserNode` 讀音量），再啟動 `SpeechRecognition`；取得流程、錯誤處理與釋放時機見 §7.14。**仍禁止** `MediaRecorder` 與任何錄製、編碼、`Blob`／`URL.createObjectURL` 音訊輸出、網路傳送；`services/stt.js` 本身不改 | AC-08-01～AC-08-14、AC-21-03、AC-33-01～AC-33-08 |
+| 資料來源頁列出辭典（v0.3） | 字表：依字庫實際出現的 `sources` 代碼列出（AC-23-02 末段「列出的字表數量與資料中出現的字表種類數一致」）。辭典（`DATA_SOURCE_REGISTRY` 中 `kind = "dictionary"`）：**只有當至少一筆內建單字的 `meaningSource` 等於該辭典代碼時才列出**；registry 有但無任何單字使用 → 不列出、`console.warn`。理由：AC-23-02 要求列出「本檔案實際使用的」外部資料，與字表的判定方式一致。字庫缺漏（C-6）時辭典與字表都不列出，頁面其餘聲明照常顯示。QA 判定：以正式資料建置後 ECDICT 必須列出（V-VOC-09 保證有 `meaningSource = "ECDICT"` 的單字） | AC-23-02 |
+| 剪貼簿 | 只用 `navigator.clipboard.writeText`；不存在或 Promise 失敗 → 「複製失敗，請手動選取」並以 `Selection`／`Range` 反白該句（**不**退回 `execCommand`，以符合 AC-16-04 的判定） | AC-16-03、AC-16-04 |
+| 效能 | 只渲染當前卡片／題目／句子；換頁只切換 `hidden` 並呼叫 `show()`；`subscribe` 依 tags 局部重繪；不渲染整份字庫清單 | AC-22-01～AC-22-04、R-03 |
+
+**STT 錯誤對照表（v0.3 獨立成表，新增 `audio-capture`）**
+
+| `SpeechRecognitionErrorEvent.error` | 主訊息 | 補充說明 | 類型 | AC |
+| :--- | :--- | :--- | :--- | :--- |
+| `not-allowed`、`service-not-allowed` | 「需要麥克風權限」 | 開啟方式（網址列左側圖示 → 將「麥克風」設為允許 → 再按一次麥克風按鈕） | error | AC-08-09 |
+| ~~`audio-capture`（v0.3）~~ | ~~「需要麥克風權限」~~ | ~~「請確認裝置已連接麥克風」~~ | — | v0.5 廢止，見下列 |
+| `audio-capture`（**v0.5 修訂**，契約 DS-03、PRD R-18 二 (d)：裝置沒有麥克風或無法擷取音訊） | 「找不到麥克風裝置」 | 「請確認裝置已連接麥克風後再按一次」 | error | AC-33-05、AC-33-06 |
+| `network` | 「語音辨識需要網路連線」 | — | error | AC-08-14 |
+| `no-speech` | 「未偵測到語音，請再試一次」 | — | info | AC-08-10 |
+| `aborted` 且為手動停止 | 不提示 | — | — | AC-08-10 |
+| 其他代碼（`aborted` 非手動、`language-not-supported`、`bad-grammar` 等） | 「語音辨識發生錯誤，請稍後再試一次」 | — | error | — |
+
+說明（v0.5 修訂）：PRD R-18 二 (d) 把「無麥克風裝置」改為獨立訊息，`audio-capture` 因此改用與 `getUserMedia` 的 `NotFoundError` 相同的「找不到麥克風裝置」（取代 v0.3 與 SD-FB-09 的共用主訊息做法）；`getUserMedia` 錯誤對照見 §7.14「錯誤對照（DS-03）」。QA 判定：以假 `SpeechRecognition` 觸發各代碼，主訊息逐字相符，補充說明包含上表字串；任何代碼都不得拋出未處理例外，麥克風按鈕回到待機。
+
+### 7.7 今日學習紀錄（`core/learning.js` FE-20、store FE-25；契約 §5.4 LR-1～LR-8、V-ST-09～V-ST-12、PRD US-30）
+
+**函式表（全部純函式、不修改傳入值；日期一律 `YYYY-MM-DD` 本地日期字串）**
+
+| 函式 | 定義 | AC／契約 |
+| :--- | :--- | :--- |
+| `isValidLocalDate(s)` | 字串符合 `^\d{4}-\d{2}-\d{2}$` 且 `new Date(y, m − 1, d)` 回推的年月日相同（`2026-02-30` → `false`） | V-ST-09、V-ST-10 |
+| `addDays(ymd, n)` | 以 `Date.UTC(y, m − 1, d + n)` 計算後用 `getUTC*` 組回字串（**不以毫秒加減本地時間**，避開日光節約時間） | V-ST-10 |
+| `compareDate(a, b)` | 字串比較（格式固定，字典序 = 日期序） | — |
+| `emptyToday()` | `{ date: null, wordKeys: [] }` | 契約 §5.2 |
+| `normalizeToday(t, today)` | V-ST-09：`t` 非物件 → `emptyToday()`；`date` 不合法或 ≠ `today` → `emptyToday()`；`date === today` → `wordKeys` 只留字串，各以 `wordKey()`（C-2）正規化，捨棄空字串，重複只留第一次 | AC-30-13、AC-24-11 |
+| `normalizeHistory(h, today)` | V-ST-10：`h` 非純物件 → `{}`；只留鍵合法、`addDays(today, −29) ≤ 鍵 ≤ today`、值 `Number.isInteger(v) && v >= 0` 的項目 | AC-30-09、AC-30-13 |
+| `syncHistory(t, h, today)` | V-ST-11：`t.date === today` → `h[today] = t.wordKeys.length`；`t.date === null` → 刪 `h[today]` | AC-30-09、AC-30-11 |
+| `normalizeLearning(data, today) → { todayLearned, learnedHistory }` | 依序 `normalizeToday` → `normalizeHistory` → `syncHistory`；結果符合 `$defs/PersistedDataWritten` 的兩欄 | V-ST-09～V-ST-11 |
+| `record(t, h, wordKey, today) → { changed, todayLearned, learnedHistory }` | LR-3 (1)～(5)：`t.date ≠ today` → 換日 `{ date: today, wordKeys: [] }`；`wordKey` 已在清單 → `changed: false`（回傳**換日後**的物件，換日本身不算 `changed`）；否則附加、`h[today] = 長度`、`normalizeHistory` 修剪；`wordKey` 先以 C-2 正規化，空字串 → `changed: false` | AC-30-03、AC-30-07、AC-30-09 |
+| `todayCount(t, today)` | LR-6：`t && t.date === today ? t.wordKeys.length : 0` | AC-30-07、AC-30-11 |
+| `dailyGoal(effectiveColor)` | `COLOR_LEVELS` 中該色的 `dailyNewWords`（橘 10、棕 10、綠 15）；未知色級 → 15（生效色級只會是橘棕綠，防禦用） | AC-30-02、R-14 |
+| `chartSeries(h, x, today, days = DASHBOARD_CHART_DAYS)` | 由舊到新 `days` 筆 `{ date, label, count }`：`date = addDays(today, −(days − 1 − i))`、`label = "M/D"`（不補零，如 `10/30`）、`count = h[date] ?? 0`，**最後一筆（today）一律用 `x`** | AC-30-08、LR-6 |
+| `masteryRate(studySet, masteredKeys)` | `denom = studySet.length`；`numer = studySet` 中 wordKey 屬於 `masteredKeys` 的張數；`percent = denom === 0 ? null : Math.round(numer ÷ denom × 100)` | AC-30-10、R-09 |
+| `percentOf(correct, answered)` | `answered` 不是正整數 → `null`；否則 `Math.round(correct ÷ answered × 100)`，夾在 0～100 | AC-30-10、AC-17-04 |
+
+**學習事件記錄點（store，FE-25）**
+
+| `LearningEventKind` | 觸發的 action | 條件 | wordKey 來源 | 不記錄的情況 |
+| :--- | :--- | :--- | :--- | :--- |
+| `"flip"` | `flipCard()` | `mode === "card"` 且 `isFlipped` 由 `false` 變 `true` | `studySet[index].wordKey` | 翻回正面、`gotoCard`、滑動換卡（AC-30-04） |
+| `"vocabQuiz"` | `answerVocabQuiz(i)` | `quiz.selectedIndex` 由 `null` 變非 `null` | `quiz.wordKey` | 已鎖定後再點（AC-29-02 同時不震動） |
+| `"stt"` | `recordSttScored()` | speech-panel 顯示分數後呼叫 | `wordKey(lastResult.targetText)`，無則目前卡 | 逾時、空結果、權限、離線、錯誤（speech-panel 不呼叫） |
+| —（不算） | `answerPart5`、`nextPart5`、`restartPart5` | — | — | 模擬測驗作答只打卡（AC-30-04、LR-1） |
+
+store 內部流程（一個 action 一次寫入）：
+
+```
+action 開始
+  ├─ 原有變更（isFlipped / quiz.selectedIndex / vocabQuiz / masteredWordKeys / streak）
+  ├─ 若為學習事件：r = learning.record(data.todayLearned, data.learnedHistory, wordKey, store.today())
+  │      r.changed 或 todayLearned 有換日 → 新 data 帶入 r.todayLearned、r.learnedHistory；tags += "learning"
+  ├─ 首次模式（entryMode = firstRun）→ 只改記憶體（實際上首次畫面沒有學習頁面，LR-8 防禦）
+  ├─ writeData(data) 一次 setItem
+  └─ commit + notify(tags)
+```
+
+**LR-7 實作（學習紀錄寫入容量不足）**：凡 action 中「學習紀錄實際改變」者，寫入結果 `quota` 時：(1) 記憶體保留（X 照常增加）；(2) 本次寫入**不**經 `noteWrite` 發 `storage` tag（避免與下一點重複提示），`writeStatus` 仍更新為 `quota`；(3) `runtime.learningQuotaNoticeShown` 為 `false` 時設為 `true` 並發 `"learningQuota"` tag，banner 收到後 toast「儲存空間不足」一次。其他例外（`error`）同樣不回滾、不提示；`unavailable` 時只改記憶體（既有 `disabled` 路徑）。學習紀錄未改變的 action（例如同一字再翻一次）維持既有 `noteWrite` 行為。
+
+**顯示的日期來源**：主控台每次繪製呼叫 `store.today()`，不需寫入即可反映跨午夜（AC-30-07 (b)、LR-6）；記憶體中舊日期的 `todayLearned` 等到下一次學習事件才換日寫入。
+
+### 7.8 持久化 v1 → v2 遷移（`core/persist.js`、`core/backup.js`，FE-22；契約 §5.3 MG-1～MG-4、RD-1、RD-2、§6.2、§6.3、IM-8）
+
+**localStorage 讀取（`persist.parseStored(raw)`；簽章不變，日期相關的正規化在 `normalizeAfterLoad`）**
+
+```
+raw === null ─────────────────────────────► { kind: "missing" }          （store 判 firstRun，§7.9）
+JSON.parse 失敗 / 頂層非物件 ─────────────► { kind: "unreadable" }
+schemaVersion 非整數或 ∉ [1, 2] ──────────► { kind: "unreadable" }
+schemaVersion = 1：
+   data 非純物件 ─────────────────────────► { kind: "unreadable" }        （MG-1）
+   data.todayLearned = emptyToday()、data.learnedHistory = {}（一律覆寫，MG-2）、schemaVersion = 2
+   → 完整 v2 驗證（根結構 + V-ST-03）
+        通過 → { kind: "ok", data, migrated: true }                       （store 依 MG-3 寫回一次，失敗不提示）
+        不通過 → { kind: "unreadable" }                                    （RS-1～RS-4）
+schemaVersion = 2：
+   data 非純物件 → { kind: "unreadable" }
+   RD-1：todayLearned 缺少或 shape 不符 $defs/TodayLearnedState → 只把該欄設 emptyToday()
+         learnedHistory 缺少或不是純物件                       → 只把該欄設 {}
+         （記錄 fieldsReset: ["todayLearned"|"learnedHistory"]，不提示、不保存 unreadable）
+   → 完整 v2 驗證 → 通過 { kind: "ok", data, migrated: false, fieldsReset } / 不通過 { kind: "unreadable" }
+```
+
+之後 store 呼叫 `normalizeAfterLoad(data, part5Length, today)`：既有的色級重算、V-ST-05 之外，再以 `learning.normalizeLearning(data, today)` 套 V-ST-09～V-ST-11。RD-1 重設或正規化的結果只在記憶體，等下一次寫入一併寫回（RD-2；實作**不**在啟動時額外寫回，以免首次判定外的啟動多一次寫入）。
+
+**驗證規則（`validatePersistedData` v2）**：必填鍵由 7 個增為 9 個；`todayLearned` shape：純物件、恰有 `date`（字串或 `null`）、`wordKeys`（陣列）兩鍵；`learnedHistory` shape：純物件。shape 驗證（讀取、匯入步驟 5）與「寫出前」驗證（`$defs/PersistedDataWritten`：`date` 合法或 `null`、`wordKeys` 為已正規化不重複字串、歷史鍵值合法）分兩個函式：`validatePersistedData(data, { written: false })` 與 `{ written: true }`；`buildRecord` 前不需每次驗證寫出格式，但單元測試須斷言 store 寫出的每一筆都通過 `{ written: true }`。
+
+**備份**
+
+| 步驟 | v0.4 處理 | AC |
+| :--- | :--- | :--- |
+| 匯出 `buildBackup(data, contentDataVersion, now)` | `schemaVersion = 2`；`data` 先以 `localDate(now)` 套 `normalizeLearning` | AC-24-02 |
+| 步驟 3 | `schemaVersion` ∉ `[1, 2]` → `version`，`supported` 顯示「1、2」（取自 `SUPPORTED_SCHEMA_VERSIONS.join("、")`） | AC-24-06 |
+| 步驟 4 | `schemaVersion = 1`：`data` 非物件 → `format`；否則 MG-2 補兩欄（頂層 `schemaVersion` 原值保留給步驟 5，MG-4） | AC-24-10 |
+| 步驟 5 | `schemaVersion = 2` 時兩欄缺少或 shape 不符 → `format`（IM-8 (1)，**整份不匯入**，與讀取 RD-1 不同） | AC-24-05、AC-24-11 |
+| 步驟 7 | ctx 新增 `today`（匯入當天）；以 `normalizeLearning(data, today)` 處理項目層級無效值（IM-8 (2)），**不計入**「略過 N 筆」 | AC-24-11 |
+| 寫入 localStorage | `StorageRecord.schemaVersion` 一律 2 | MG-4 |
+
+### 7.9 首次進入流程與狀態機（store FE-30、router／main／customizer FE-32；契約 §5.5 FS-1～FS-7、PRD US-25、Q-34、Q-35）
+
+**狀態機**（`entryMode` 只會 `firstRun → main`，不會反向；`main` 的判定只在啟動時做一次）
+
+```
+                      ┌──────────────── 啟動（store.init）────────────────┐
+                      │ getItem 拋例外 → firstRun + storageStatus=unavailable │
+                      │ getItem === null → firstRun                          │
+                      │ 其他任何字串（含 "", 損壞, 版本不符）→ main          │
+                      └───────────────┬───────────────────────┬──────────┘
+                                      ▼                       ▼
+┌──────────────────────── firstRun ────────────────────────┐   main（一般模式；損壞者依 AC-18-05
+│ body[data-entry=firstRun]；currentTab ∈ {customizer, sources} │        重設並提示，AC-25-09）
+│ 畫面：色級大卡片、分數、試算、「開始學習」、「從備份還原」  │
+│ 不顯示：導覽列、選單鈕、自訂單字、範本、狀態列              │
+│ 寫入：0 次（FS-2）                                          │
+│                                                              │
+│  [調分數／點卡片]──► 只改記憶體 draftScore（自環）           │
+│  [頁尾「資料來源與授權」]──► currentTab=sources              │
+│       └─[「返回難易度設定」]──► currentTab=customizer        │
+│  [重新整理／關閉]──► 下次仍 firstRun，回預設 600、綠（AC-25-04）│
+│  [從備份還原] 取消／format／version／quota／write_failed      │
+│       ──► 留在 firstRun，顯示對應訊息（取消不提示，AC-25-11） │
+│  [開始學習] ──────────────┐   [從備份還原] 成功 ─────┐        │
+└───────────────────────────┼──────────────────────────┼────────┘
+                            ▼                          ▼
+         startLearning：appliedScore=draftScore、    importBackup 步驟 8 寫入、
+         一次 setItem（失敗仍進入，FS-4）             步驟 9 套用（FS-5）
+                            └────────────┬─────────────┘
+                                         ▼
+                    entryMode=main、currentTab=dashboard、tag "entry"
+                    router：body[data-entry=main]、go("dashboard")（換頁動畫照常）
+```
+
+| 情境 | 結果 | AC |
+| :--- | :--- | :--- |
+| localStorage 停用 | 每次啟動都是 `firstRun` 並顯示「進度將無法保存」；「開始學習」不寫入、直接進入；還原成功只套用記憶體並進入（契約 FB-31 (b)） | AC-25-08、AC-18-03 |
+| 「開始學習」寫入容量不足 | 仍進入主控台並提示「儲存空間不足」；主鍵仍不存在，下次開啟仍是首次畫面（契約 FB-31 (a)） | FS-4 |
+| 首次畫面上已改分數再還原成功 | 以備份為準，`draftScore` 等全部取自備份（E-58） | AC-25-10 |
+
+**畫面實作（FE-32）**
+
+| 部位 | 做法 |
+| :--- | :--- |
+| 導覽列、選單鈕 | `00-base.css`：`body[data-entry="boot"]` 與 `body[data-entry="firstRun"]` 下 `#app-nav`、`#nav-toggle` 為 `display: none`；`boot` 另隱藏 `#app-main`（JS 失敗時沒有可用功能，與現況相同） |
+| 自訂單字與範本 | `body[data-entry="firstRun"] #customizer-custom { display: none; }`（custom-vocab 模組照常 mount，不需修改） |
+| 難易度設定頁 | `customizer.js` 讀 `runtime.entryMode`：`firstRun` 時標題下加一段引導文字、生效按鈕區顯示「開始學習」（呼叫 `startLearning`）與「從備份還原」（呼叫 `EMT.ui.importFlow.start()`），隱藏「目前目標色級／目前生效色級」狀態列；收到 `"entry"` tag 時切回一般模式（「套用」、狀態列），**只重建按鈕區與狀態列**，不重建卡片與分數區 |
+| 資料來源頁返回 | 頁尾 `#footer-first-run-back`：CSS `body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back { display: inline-flex }`，其他情況隱藏；點擊經既有 `[data-go]` 委派導向 `customizer` |
+| 「全螢幕」 | 首次模式隱藏導覽列後，頁首（產品名稱）、警示列、難易度設定頁、頁尾即構成全畫面；不另做覆蓋層 |
+
+### 7.10 手勢判斷（`core/interaction.js` FE-21、`views/flashcards.js` FE-28、測驗防誤觸 FE-29；PRD US-28、Q-33）
+
+| 函式 | 定義 |
+| :--- | :--- |
+| `classifySwipe(dx, dy)` | `dx = 結束 x − 開始 x`、`dy` 同理。`Math.abs(dx) >= UI.SWIPE_MIN_PX`（50）**且** `Math.abs(dx) > Math.abs(dy)` → `dx < 0 ? "left" : "right"`；否則 `"none"`（含垂直為主、位移不足、`|dx| = |dy|`） |
+| `isTap(dx, dy)` | `Math.hypot(dx, dy) < UI.TAP_SLOP_PX`（10） |
+| `swipeTarget(index, n, dir)` | `"left"` → `index + 1`、`"right"` → `index − 1`；超出 `0～n − 1` 或 `dir = "none"` → `null`（AC-28-04、E-26） |
+
+**單字卡（FE-28）事件流程**
+
+```
+touchstart（passive）：只記 1 指；記錄 startX/startY、moved=false
+touchmove（passive）：任一軸位移 ≥ TAP_SLOP_PX → moved=true（不呼叫 preventDefault；垂直捲動交給瀏覽器）
+touchend：
+   mode !== "card" → 忽略（測驗模式不換題，AC-28-06）
+   dir = classifySwipe(dx, dy)；target = swipeTarget(index, n, dir)
+   target !== null → actions.gotoCard(target)（同步，AC-28-03 ≤ 100 ms）；新卡播放滑入動畫（§7.11）
+   moved → suppressClickUntil = now + 350 ms（擋掉位移後瀏覽器補發的 click，避免誤翻面，AC-28-05）
+click（卡片）：now < suppressClickUntil → 忽略；點在按鈕、語音面板內 → 不翻面（沿用 FE-11 onCardClick，AC-28-02）；否則 flipCard
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 垂直捲動 | 卡片 CSS `touch-action: pan-y`：瀏覽器處理垂直捲動，水平位移交給 JS；不攔截 `touchmove` | AC-28-05 |
+| 滑鼠拖曳 | 不支援（PRD 範圍外）；只綁 Touch Events，不綁 Pointer／Mouse 拖曳 | §2.2 範圍外 |
+| 鍵盤與按鈕 | 「翻面」「上一張」「下一張」按鈕與 Tab／Enter／空白鍵行為不變 | AC-28-07 |
+| 測驗模式防誤觸（FE-29） | 四選一與模擬測驗選項容器記錄觸控位移：`touchstart` 記起點，`touchmove` 位移 ≥ `TAP_SLOP_PX` → 標記本次觸控為滑動；隨後的 `click` 若屬於該次觸控（`now < suppressClickUntil`，350 ms）→ 忽略，不呼叫作答 action。滑鼠與鍵盤點擊不受影響。測驗模式下 flashcards 的 `touchend` 也不換題（上方流程第一行） | AC-28-06、E-42 |
+| 純函式匯出 | flashcards 匯出 `swipeDecision(mode, index, n, dx, dy) → { action: "goto", index } ｜ { action: "none" }`；quiz／part5 匯出 `shouldIgnoreClick(touch, now)`，供 Node 測試 | — |
+
+### 7.11 動畫與減少動態策略（FE-24 基礎；FE-28、FE-29、FE-31 各頁；PRD US-31、AC-28-01、AC-29-01、AC-31-01～AC-31-04）
+
+| 原則 | 做法 |
+| :--- | :--- |
+| A-1 只用 CSS 動畫 | 所有動畫為 `@keyframes` 或 `transition`，以 class 觸發；JS 只負責加上／移除 class（`ui/motion.enter`）。不使用 Web Animations API、`requestAnimationFrame` 逐格動畫或任何函式庫（AC-31-04） |
+| A-2 邏輯狀態先行 | 狀態（`isFlipped`、`index`、`selectedIndex`、`currentTab`）在點擊當下同步更新並重繪最終內容；動畫只是表現層，**任何邏輯都不等待動畫結束、不讀 `animationend`**。因此動畫中再操作，最終畫面一定等於最後的狀態（AC-28-08、AC-31-02、E-44） |
+| A-3 減少動態雙保險 | (1) `05-motion.css` 全域：`@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }`；(2) `motion.enter` 在 `reduced()` 時不加 class。震動不屬於動畫，不受影響（AC-31-03） |
+| A-4 時間單一來源 | CSS 變數在 `05-motion.css` 的 `:root`（`--emt-dur-page`、`--emt-dur-flip`、`--emt-dur-slide`、`--emt-dur-answer`、`--emt-dur-ring`）；JS 用 `interaction.UI.*_MS`。`router-motion.test.js` 讀 CSS 檔比對兩者相等且 ≤ PRD 上限 |
+| A-5 不影響既有無動畫規則 | 解碼器淡化修飾語維持**不設 transition**（§7.6、AC-13-01）；語音面板「聆聽中」閃爍沿用既有 `31-speech.css` 的 reduce 規則。（v0.5）減少動態時「聆聽中」為固定紅底白字 + 文字「聆聽中」（`animation: none`，既有規則已符合，FE-39 以測試鎖定），AC-33-08、AC-31-03 |
+| A-6 收音條屬狀態顯示（v0.5） | 5 格收音條是即時狀態資訊，**不是動畫**：兩種模式下都即時更新（≤ 100 ms），JS 只切換每格 `is-on` class。`31-speech.css` 的 `.sp-meter__bar` **一律** `transition: none; animation: none`（不只在減少動態時），格數變化直接切換、無漸變，因此 A-3 的全域規則不影響其功能（AC-33-03、AC-33-08、NFR-2 減少動態「收音條不計入動畫數但不得有漸變」） |
+| A-7 初始化確認視窗（v0.5） | 沿用 `ui/dialog.js`：目前**沒有**淡入或任何動畫，本版也不加，因此減少動態下自然「直接出現、無淡入」（AC-31-03、AC-32-01）。日後若要加淡入，必須以 class 觸發並受 A-3 規則約束 |
+
+| 動畫 | 觸發 | 實作 | 長度 | AC |
+| :--- | :--- | :--- | :--- | :--- |
+| 換頁 | `router.go` 切到不同頁 | 舊頁**立即** `hidden = true` 並 `motion.cancel(prev, "view--entering")`（不做離場動畫）；新頁 `hidden = false` 後同步 `motion.enter(next, "view--entering", PAGE_ANIM_MS)`。`@keyframes emt-view-in { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: none } }`，`animation: emt-view-in var(--emt-dur-page) ease-out both`。新頁從 `display: none` 變為顯示的同一個工作中加上 class，動畫自第一個影格開始，不需強制重排（避免增加 AC-22-01 的時間）。因為沒有離場動畫，連點時畫面上永遠只有一個 view（AC-31-02） | 240 ms | AC-31-01、AC-31-02、AC-22-01 |
+| 翻卡 | `isFlipped` 改變 | 沿用 FE-11「兩面 `hidden` 切換、不重建 DOM」；新顯示的那一面加 `fc-face--flip-in`：`@keyframes fc-flip-in { from { transform: perspective(800px) rotateY(-90deg) } to { transform: perspective(800px) rotateY(0) } }`。只有一面可見，不會出現正反面重疊；連點兩次時第二次立刻切回正面並重新播放（AC-28-08） | 360 ms | AC-28-01、AC-28-08 |
+| 換卡滑入 | 滑動或按鈕換卡（卡片重建） | 新卡根元素加 `fc-card--in-next`（由右滑入）或 `fc-card--in-prev`（由左滑入）：`translateX(±24px)`＋`opacity` → 0 | 200 ms | AC-28-03 |
+| 答對 | 本次點擊造成作答且答對 | 正確選項 `qz-opt--pop`／`p5-opt--pop`：`scale(1) → 1.06 → 1` | 480 ms | AC-29-01 |
+| 答錯 | 本次點擊造成作答且答錯 | 所選選項 `qz-opt--shake`／`p5-opt--shake`：`translateX` 0 → −6 → 6 → −4 → 4 → 0；正確選項同時標綠（不另加動畫） | 480 ms | AC-29-01 |
+| 環形圖 | 主控台重繪且數值改變 | 進度圈 `stroke-dashoffset` 的 `transition: stroke-dashoffset var(--emt-dur-ring) ease-out`；顏色變金用 class 切換（不做顏色 transition） | 500 ms | AC-30-05、AC-31-03 |
+
+顏色與鎖定：答題動畫只改 `transform`，顏色 class（綠／紅）與 `disabled` 在點擊當下就設定，動畫結束後仍保留（AC-29-01）。重新載入或從狀態重繪時只套顏色、不播放動畫（「本次點擊造成作答」以 view 在呼叫 action 前後比較 `selectedIndex`／`lockedSelection` 判定：前為 `null`、後為非 `null`）。
+
+### 7.12 介面互動設計常數（Q-33 定案值；契約 §5.6 指定屬設計層）
+
+`core/interaction.js` 匯出凍結物件 `UI`；CSS 變數與斷點值須與下表一致（A-4）。
+
+| 常數 | 值 | PRD 上限／依據 | 說明 |
+| :--- | :--- | :--- | :--- |
+| `NAV_BOTTOM_MAX_PX` | 640 | ≤ 640px（Q-33、AC-27-01） | CSS 以 `@media (max-width: 640px)` 寫死同值；`shell.test.js` 檢查 |
+| `PAGE_ANIM_MS` ／ `--emt-dur-page` | 240 | ≤ 300 ms（AC-31-01） | 留 60 ms 餘裕給低階裝置的掉格 |
+| `FLIP_ANIM_MS` ／ `--emt-dur-flip` | 360 | ≤ 400 ms（AC-28-01） | — |
+| `SLIDE_ANIM_MS` ／ `--emt-dur-slide` | 200 | PRD 未訂；SD 訂 ≤ 換頁上限 | 換卡滑入 |
+| `ANSWER_ANIM_MS` ／ `--emt-dur-answer` | 480 | ≤ 600 ms（AC-29-01） | — |
+| `RING_ANIM_MS` ／ `--emt-dur-ring` | 500 | PRD 未訂 | 只在數值改變時播放 |
+| `SWIPE_MIN_PX` | 50 | ≥ 50px 且水平 > 垂直（AC-28-03） | 恰 50 算滑動 |
+| `TAP_SLOP_PX` | 10 | — | 觸控位移小於此值視為點擊 |
+| `CLICK_SUPPRESS_MS` | 350 | — | 滑動後忽略補發 click 的時間 |
+| `VIBRATE_CORRECT` | `40`（總長 40 ms） | ≤ 200 ms（AC-29-02） | 單次短震 |
+| `VIBRATE_WRONG` | `[60, 40, 60]`（總長 160 ms，含中間停頓） | ≤ 200 ms | 兩下，與答對區分 |
+| `TOUCH_MIN_PX` | 44 | ≥ 44×44（AC-26-01、AC-27-02） | 卡片、導覽項目、選項最小尺寸 |
+| `ANIM_CLEANUP_MARGIN_MS` | 50 | — | `motion.enter` 移除 class 的延遲 = 動畫長度 + 此值 |
+
+「震動總長」以 `patternTotal(p)`（陣列各元素相加，含停頓）計算，比 PRD 字面更嚴格。
+
+### 7.13 功能更名（R-15，FE-23；契約 `TAB_LABELS`、`NAV_TAB_ORDER`）
+
+| 位置 | 改前 | 改後 | 來源 |
+| :--- | :--- | :--- | :--- |
+| `index.html` 導覽按鈕文字 | 自訂器、抽認卡、Part 5 | 難易度設定、單字卡、模擬測驗 | `TAB_LABELS`（靜態 HTML 逐字相同，`naming.test.js` 比對） |
+| `index.html` 各 `section` 的 `aria-label` | 同上 | 同上 | `TAB_LABELS` |
+| 主控台模組入口 | 自訂器、抽認卡、Part 5 | 難易度設定、單字卡、模擬測驗 | `dashboard.js` 改用 `C.TAB_LABELS[tab]` 組字 |
+| 主控台統計標籤 | Part 5 正確率 | 模擬測驗正確率 | AC-17-01、AC-17-04 |
+| 難易度設定頁標題、說明 | 目標與字庫自訂器；「…才會更新抽認卡的單字集。」 | 難易度設定；「選擇色級或輸入目標分數即時試算，按「套用」後才會更新單字卡的單字集。」 | AC-01-01 |
+| 單字卡頁標題、空狀態 | 抽認卡；「請到自訂器…」「前往自訂器」 | 單字卡；「請到難易度設定套用目標分數，或新增自訂單字、注入領域範本。」「前往難易度設定」 | AC-06-06 |
+| 模擬測驗頁標題 | Part 5 模擬測驗 | 標題「模擬測驗」，標題下說明「題型對應多益 Part 5」 | AC-10-02 |
+| **不改** | 識別字（`TabId`、`data-tab`、`#view-*`、CSS 類名前綴、檔名、函式與變數名）、localStorage 鍵與結構、授權與資料來源文字中的「Part 5」（`license-header.txt`、`sources-page.js`、`build.test.js`、`sources-page.test.js` 的斷言）、`PART5_TYPE_LABELS`、「測驗模式」「自訂單字」「自訂擴充」「自訂清單」 | — | R-15 |
+| 程式註解 | 可順手更新，不強制 | — | — |
+
+QA 的 E2E 腳本（`tests/`，QA 負責）中以舊文字定位元素者，由 QA 在 `/qa-verify` 時更新（SD-FB-13）。
+
+**v0.5 修訂（PRD R-18 三、契約 `NAV_TAB_ORDER` 4 項、`HIDDEN_TAB_IDS`；FE-34、FE-38）**
+
+| 位置 | v0.4 | v0.5 | 來源 |
+| :--- | :--- | :--- | :--- |
+| `core/constants.js` `NAV_TAB_ORDER` | 6 項（含 decoder、phrasebank） | 4 項：`["dashboard", "customizer", "flashcards", "part5"]`；新增 `HIDDEN_TAB_IDS = ["decoder", "phrasebank"]`（皆凍結） | 契約 v0.9 |
+| `core/constants.js` `TAB_LABELS` | 7 項 | **不變**（保留解碼器、句型庫兩項供未來開放，HT-4；本版不得渲染） | HT-4 |
+| `index.html` 導覽按鈕 | 6 鈕 | 4 鈕，文字 = `TAB_LABELS[NAV_TAB_ORDER[i]]`；兩個隱藏頁的 `<section>` 保留、去掉 `aria-label`（§4.2） | AC-20-03、AC-27-01 |
+| `views/dashboard.js` `ENTRIES` | customizer、flashcards、part5、decoder、phrasebank、sources | 由 `NAV_TAB_ORDER` 去掉 `dashboard` 後再加 `sources` 推導（customizer、flashcards、part5、sources），於讀取時計算（LD-2） | AC-17-06 |
+| 頁尾 | 「資料來源與授權」 | 不變 | HT-2 |
+| `naming.test.js`、`shell.test.js` 的「6 個按鈕」斷言 | 6 | 4，另斷言靜態 HTML、`views/*.js` 產生的入口皆不含 `data-tab`／`data-go` = `decoder`／`phrasebank` | AC-20-04 |
+
+### 7.14 麥克風與收音條（v0.5；`core/meter.js` FE-35、`services/mic.js` FE-36、`views/speech-panel.js` FE-39；PRD US-33、R-18 二、Q-36、Q-37；契約 DS-01～DS-03）
+
+**隱私與 API 限制（推翻 v0.4 §7.6「不使用 `getUserMedia`」；AC-21-03、NFR-3）**
+
+| 允許 | 禁止 |
+| :--- | :--- |
+| `navigator.mediaDevices.getUserMedia({ audio: true })`，**只能**出現在 `services/mic.js` | 錄音 API（`MediaRecorder`）：產物與 `src/app`（`__tests__` 除外）出現數 0，含註解；B-7 擋 |
+| `AudioContext`（或 `webkitAudioContext`）、`createMediaStreamSource`、`createAnalyser`、`getFloatTimeDomainData`（不支援時 `getByteTimeDomainData`） | 把 source 或 analyser `connect` 到 `destination`（避免回授與播放）；`ScriptProcessorNode`、`AudioWorklet`、`createMediaStreamDestination` |
+| 音量值只存在 `mic` 實例與 speech-panel 的區域變數，用完即丟 | 寫入 store／`AppState`、localStorage、IndexedDB、Cache Storage；以 `Blob`、`URL.createObjectURL`、`FileReader` 處理音訊；`fetch`、`XMLHttpRequest`、`WebSocket`、`navigator.sendBeacon` |
+
+**收音條常數（DS-01；唯一來源 `core/meter.js`，凍結物件）**
+
+| 常數 | 值 | 說明／可調範圍 |
+| :--- | :--- | :--- |
+| `THRESHOLDS_DBFS`（T1～T5） | `[-50, -40, -30, -20, -10]` | Q-37 決議 A 預設值。**可調範圍**（範圍內由主控代核、不改 PRD）：每格在預設值 ±10 dB 以內；T1 < T2 < T3 < T4 < T5 且相鄰差 ≥ 6 dB；T5 ≤ −9 dBFS。`meter.test.js` 以 `validateThresholds(THRESHOLDS_DBFS).ok === true` 鎖定；超出範圍須回 PM 修訂 PRD |
+| `BAR_COUNT` | 5 | AC-33-03 |
+| `MAX_WINDOW_MS` | 100 | 分析視窗上限（AC-33-04「最近一個 ≤ 100 ms 分析視窗」） |
+| `FFT_SIZE_MAX` | 2048 | 48 kHz 時視窗 42.7 ms、44.1 kHz 時 46.4 ms |
+| `UPDATE_INTERVAL_MS` | 50 | 顯示更新間隔 ≤ 100 ms（AC-33-03）；以 `setInterval` 讀取（不用 `requestAnimationFrame`：收音條不是動畫，A-6） |
+
+QA 測試音源（AC-33-04）依目前門檻推算：RMS −55、−45、−35、−25、−15、−5 dBFS → 亮 0、1、2、3、4、5 格，完全靜音 → 0。日後若在可調範圍內微調門檻，以本表與 `meter.js` 為準重算，並在變更紀錄註明。
+
+**`core/meter.js` 函式（純函式）**
+
+| 函式 | 定義 |
+| :--- | :--- |
+| `rmsOf(samples)` | `√(Σx² ÷ n)`；接受陣列或 TypedArray；空、非陣列、含非有限值時忽略該值，全無有效值 → 0 |
+| `dbfsOf(rms)` | `rms > 0` 且有限 → `20 × log10(rms)`；否則 `-Infinity`（RMS = 0 視為全暗） |
+| `levelOf(db, th = THRESHOLDS_DBFS)` | 由第 1 格起逐格檢查 `db >= th[i]`，遇到第一個不成立即停，回傳成立格數 0～5（亮格一定從左側連續）；`NaN`、`-Infinity` → 0；`db` 恰等於門檻算點亮 |
+| `levelOfSamples(samples)` | `levelOf(dbfsOf(rmsOf(samples)))` |
+| `bytesToFloat(bytes)` | `(v − 128) ÷ 128`，供只有 `getByteTimeDomainData` 的實作 |
+| `fftSizeFor(sampleRate)` | 不超過 `FFT_SIZE_MAX` 且 `fftSize ÷ sampleRate ≤ 0.1` 的最大 2 的冪，最小 32；`sampleRate` 非正有限數 → 2048 |
+| `validateThresholds(th)` | 回 `{ ok, errors }`：長度 5、皆為有限數、各在預設 ±10、嚴格遞增且相鄰差 ≥ 6、T5 ≤ −9 |
+| `barsModel(level)` | 長度 5 的布林陣列，前 `level` 個為 `true`；非 0～5 整數 → 全 `false` |
+
+**麥克風生命週期（Q-36 決議 A；DS-02）**
+
+```
+（以下皆在單字卡頁；收音條只在單字卡模式的語音面板顯示，AC-33-03）
+ 無音軌 ──按麥克風（支援 SR、在線、說明已讀或剛按「我知道了」）──► 取得中（acquiring，按鈕再按忽略）
+   ▲                                           ├ permission → 「需要麥克風權限」，不辨識 ─────────► 無音軌
+   │                                           ├ notfound   → 「找不到麥克風裝置」，不辨識 ───────► 無音軌
+   │                                           ├ unavailable→ 不提示，照常辨識、收音條全暗（AC-33-07）
+   │                                           └ 成功       ──────────────────────────────────────► 持有音軌
+   │  持有音軌 ──按麥克風──► 重用（不呼叫 getUserMedia，AC-33-01）──► 聆聽中（SR + 每 50 ms 讀音量）
+   │  聆聽中 ──結果／逾時／無結果／錯誤／再按停止／換卡／切測驗模式──► 持有音軌（音量分析停止，收音條同步全暗）
+   │  持有音軌 ──音軌 ended（拔除、被停用）──► 無音軌；若正在聆聽 → 中止辨識並顯示「找不到麥克風裝置」（AC-33-06）
+   └── 離開單字卡頁（router → flashcards.hide → speechPanel.release）、pagehide（重新整理、關閉分頁）：任何狀態 → 釋放
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 首次取得時機 | 只在按麥克風且下列皆成立時：瀏覽器支援 SpeechRecognition（否則只 toast，AC-08-02）、`navigator.onLine !== false`（否則只顯示離線訊息，AC-08-14）、STT 說明已讀或剛按「我知道了」（按「取消」不呼叫，AC-08-13）。順序：`mic.acquire()` 結束（成功或 `unavailable`）後才 `stt.start()` | AC-08-02、AC-08-13、AC-08-14、AC-33-07 |
+| 同頁重用 | `mic.isActive()`（至少一條音軌 `readyState === "live"`）為真 → 直接重用，不呼叫 `getUserMedia`；換卡、翻面、切到測驗模式再切回都不釋放（`speechPanel.reset()` 只停辨識與音量分析） | AC-33-01 |
+| 釋放 | `flashcards.hide()` 改呼叫 `speechPanel.release()`（= `reset()` + `mic.release()`）；`mic` 第一次取得成功時登錄一次 `window` 的 `pagehide` → `release()`。`release()` 同步執行：停止計時器、每條 track `stop()`、source／analyser `disconnect()`、`AudioContext.close()`（Promise 例外吞掉）、清除參照。因此離開後同一個工作中音軌即為 `ended`，遠小於 1 秒 | AC-33-02、NFR-3 |
+| 取得中離開頁面 | `mic` 以遞增的 `epoch` 記錄每次 `release()`；`getUserMedia` 晚於 `release()` 才成功時，立刻停止新音軌並回 `{ ok: false, reason: "released" }`（speech-panel 不顯示任何訊息） | AC-33-02 |
+| 取得中換卡 | speech-panel 以既有 `gen` 判斷：取得完成時若 `gen` 已變，保留音軌（同頁仍可重用）但不開始辨識 | AC-33-01 |
+| AudioContext 與自動播放政策 | `acquire()` 的同步階段（仍在使用者點擊的處理中）建立 `AudioContext`，之後才 `await getUserMedia`；重用時呼叫 `ctx.resume()`（例外吞掉）。建構失敗或 `createAnalyser` 失敗 → 音軌照常保留（仍可達成只詢問一次），`metering = false`，收音條全暗、不提示 | AC-33-03、AC-33-07 |
+| 音量讀取 | `analyser.fftSize = meter.fftSizeFor(ctx.sampleRate)`；每 `UPDATE_INTERVAL_MS` 讀時域樣本 → `meter.levelOfSamples` → 只在格數改變時回呼 `onLevel(k)`；speech-panel 只切換 5 格的 `is-on` class | AC-33-03、AC-33-04 |
+| 歸暗 | 聆聽以任何方式結束時，speech-panel 在同一個工作中呼叫 `mic.stopMeter()` 並把 5 格設為暗（不等計時器），滿足 ≤ 100 ms | AC-33-03、AC-33-06 |
+
+**`services/mic.js` API（FE-36）**
+
+| API | 約定 |
+| :--- | :--- |
+| `isSupported() → boolean` | `navigator.mediaDevices` 存在且 `getUserMedia` 為函式 |
+| `isActive() → boolean` | 持有 stream 且至少一條 audio track `readyState === "live"` |
+| `acquire() → Promise<{ ok: true, reused: boolean, metering: boolean } ｜ { ok: false, reason: "permission"｜"notfound"｜"unavailable"｜"released" }>` | 依上表；**永不 reject**；`getUserMedia` 參數固定 `{ audio: true }`（不要求視訊）；各 track 綁 `ended` → 清除持有狀態並呼叫 `onTrackEnded` 回呼 |
+| `startMeter(onLevel) → boolean` | 有 analyser → 開始每 50 ms 讀取並回 `true`；否則立即 `onLevel(0)` 並回 `false`；重複呼叫先停舊計時器 |
+| `stopMeter()` | 同步清除計時器；冪等 |
+| `onTrackEnded(fn)` | 設定唯一回呼（再設定則覆蓋） |
+| `release()` | 見上表；冪等；`epoch++` |
+| `tracks() → MediaStreamTrack[]` | 目前持有音軌陣列的**複本**（無則 `[]`）；只供 V-MIC 在 DevTools 檢查 `readyState`（§10.2），程式其他地方不得呼叫，也不得存入 store |
+| `create(globalObject)` | 以替身 `navigator`、`AudioContext`、`setInterval` 建立獨立實例（Node 測試） |
+
+**錯誤對照（DS-03；取代 v0.4 以前 `getUserMedia` 不存在時的假設，亦修訂 §7.6 `audio-capture` 列）**
+
+| 來源 | 條件 | `reason` | 畫面訊息（主訊息／補充說明） | 是否開始辨識 | AC |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `getUserMedia` | `navigator.mediaDevices` 或 `getUserMedia` 不存在 | `unavailable` | 不提示 | 是（v0.8 行為） | AC-33-07、E-64 |
+| `getUserMedia` reject | `err.name` 為 `NotAllowedError`、`PermissionDeniedError`、`SecurityError` | `permission` | 「需要麥克風權限」／既有開啟方式說明（`TEXT.permissionHelp`） | 否；下次按下重新嘗試取得 | AC-08-09、E-04 |
+| `getUserMedia` reject | `NotFoundError`、`DevicesNotFoundError`、`OverconstrainedError` | `notfound` | 「找不到麥克風裝置」／「請確認裝置已連接麥克風後再按一次」 | 否 | AC-33-05、E-04 |
+| `getUserMedia` reject | `NotReadableError`、`TrackStartError`、`AbortError`、`TypeError`、其他或無 `name` | `unavailable` | 不提示 | 是 | AC-33-07、E-64 |
+| `AudioContext` | 不存在、建構拋例外、`createMediaStreamSource`／`createAnalyser` 失敗 | 成功（`metering: false`） | 不提示，收音條全暗 | 是 | AC-33-07 |
+| 音軌 `ended` | 聆聽中 | — | 中止辨識（`stt.abort()`）、「找不到麥克風裝置」／同上補充說明 | — | AC-33-06 (b)、E-65 |
+| 音軌 `ended` | 未聆聽 | — | 不提示；下次按下重新 `acquire()`（有其他麥克風即正常聆聽，否則依 AC-33-05） | — | AC-33-06 (a) |
+| SpeechRecognition `onerror` | `not-allowed`、`service-not-allowed` | — | 「需要麥克風權限」／開啟方式（不變） | — | AC-08-09 |
+| SpeechRecognition `onerror` | `audio-capture` | — | 「找不到麥克風裝置」／「請確認裝置已連接麥克風後再按一次」（v0.5 改） | — | AC-33-05、AC-33-06 |
+
+所有分支：按鈕回待機、收音條全暗、不顯示分數、不拋未處理例外；預期內的錯誤不 `console.error`。
+
+**speech-panel 修改重點（FE-39）**
+
+| 項目 | 決定 |
+| :--- | :--- |
+| DOM | `.sp-stt` 列依序：麥克風按鈕、`<span class="sp-meter" role="img" aria-label="收音音量">` 內含 5 個 `<span class="sp-meter__bar">`、「需要連網」標示。收音條固定寬高、常駐（不隱藏、不因狀態增減元素），切換狀態時版面不位移（AC-33-03） |
+| 文字（逐字） | `TEXT.notice` 改為 AC-08-13（v0.9）原文：「語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統只即時讀取音量以顯示收音條，不錄音、不保存、不上傳錄音。停留在單字卡頁期間，瀏覽器可能持續顯示麥克風使用中圖示，離開單字卡頁即停止使用麥克風」；新增 `TEXT.noDevice`「找不到麥克風裝置」、`TEXT.noDeviceHelp`「請確認裝置已連接麥克風後再按一次」、`TEXT.meterLabel`「收音音量」 |
+| 純函式（Node 可測） | `messageForError(code)`（`audio-capture` 改回 `noDevice`）、新增 `messageForAcquire(reason)`（`permission` → 權限訊息、`notfound` → 無裝置訊息、`unavailable`／`released` → `null`）、`meterBarsOf(level)`（委派 `meter.barsModel`，`meter` 不存在時回全暗） |
+| 狀態 | `SttStatus` 不變（`idle`／`notice`／`listening`）；取得中以元件區域旗標 `acquiring` 表示（不進 store）；**任何音量值都不得傳給 store action** |
+| 學習事件 | 不變：只在顯示分數後呼叫 `recordSttScored`（AC-30-04）；取得失敗、`unavailable` 退回路徑的失敗皆不記錄 |
+
+### 7.15 切換難易度初始化學習紀錄（v0.5；`core/reinit.js` FE-34、store FE-37、customizer FE-40；PRD US-32、R-18 一、Q-38；契約 §5.7 CI-1～CI-10、DS-04、V-ST-14）
+
+**流程**
+
+```
+customizer 一般模式「套用」click（視窗開啟中再按忽略：區域旗標 pending）
+  r = actions.requestApplyGoal()
+  ├ "applied" / "ignored" ─► 結束（同 v0.4，AC-01-02、AC-32-05、AC-32-06）
+  └ "confirm" ─► ok = await EMT.ui.dialog.confirm({ title, message, okText: "確定", cancelText: "取消" })
+                 ├ ok === true  ─► w = actions.confirmApplyGoal()
+                 │                   ├ w.ok        ─► 完成（各 view 依 store tags 重繪）
+                 │                   └ !w.ok        ─► toast「儲存空間不足，未套用」（kind error）；store 已還原 draftScore
+                 └ ok === false ─► actions.cancelApplyGoal()（取消、Esc、點視窗外三者相同）
+```
+
+**確認視窗（沿用 `ui/dialog.js`，不改該檔）**
+
+| 項目 | 內容 | AC |
+| :--- | :--- | :--- |
+| 標題 | 「切換難易度」 | — |
+| 內文（`message`，`\n` 換行，dialog 已用 `pre-line`） | 第 1 行「目前已有學習統計資料，切換難易度將初始化學習紀錄。」；第 2 行「建議先按「取消」，到主控台按「匯出備份」保存目前紀錄。」（兩段皆逐字包含 AC-32-01 引號內文字；「匯出備份」= dashboard `TEXT.exportBtn`） | AC-32-01、Q-38 |
+| 按鈕 | 只有「取消」「確定」2 個；開啟時焦點在「取消」（既有行為，降低誤觸） | AC-32-01 |
+| 背景不可操作 | 既有 `.dialog-backdrop`（`position: fixed`、全螢幕、`z-index: 1100` 高於底部導覽 900）攔截點擊、Tab 焦點限制在視窗內、Esc 以捕獲階段攔截 | AC-32-01、CI-10 |
+| 減少動態 | 對話框本來就無動畫（§7.11 A-7） | AC-31-03 |
+
+**`core/reinit.js` 函式（純函式，不修改輸入）**
+
+| 函式 | 定義 | 契約 |
+| :--- | :--- | :--- |
+| `effectiveOf(score)` | `goal.effectiveColorOf(goal.colorOf(score))` | V-ST-02 |
+| `effectiveChanged(goalState, newScore)` | `effectiveOf(newScore) !== goalState.effectiveColor`（綠 ↔ 藍 ↔ 金、同色級調分數皆為 `false`） | CI-3 |
+| `recordFlags(data, today) → { a, b, c, d, e, f }` | 逐字依契約 §5.7「有學習紀錄」對照表：(a) `masteredWordKeys.length > 0`；(b) `vocabQuiz.answered > 0`；(c) `part5.totalAnswered > 0`；(d) `todayLearned.date === today && wordKeys.length > 0`；(e) `learnedHistory` 中存在合法日期鍵 k，`addDays(today, −29) ≤ k ≤ addDays(today, −1)` 且值 > 0（**不看 today**，FB-33；日期函式取自 `core/learning.js`）；(f) `streak.lastActiveDate !== null ‖ streak.days > 0`。欄位缺漏或型別不符視為該項不成立 | CI-2 |
+| `hasLearningRecord(data, today)` | `recordFlags` 任一為 `true` | CI-2 |
+| `needsConfirm(data, today)` | `effectiveChanged(data.goal, data.goal.draftScore) && hasLearningRecord(data, today)` | CI-1 |
+| `buildReinitData(data, newGoal, defaults)` | 回傳**新物件**：先淺複製 `data` 的全部鍵；`goal` = `newGoal` 的複本；`LEARNING_PROGRESS_FIELDS` 每一欄 = `defaults[欄]` 的深複本（`defaults` 由 store 傳入 `persist.defaultData()`，確保與「首次畫面按開始學習」所得值相同，AC-32-02）；其餘欄位（`customVocab`、`sttNoticeAcknowledged` 與日後新增欄位）原值保留（白名單，CI-4）。`defaults` 缺少任一欄 → 拋含欄位名的 `Error`（LD-3：程式組裝錯誤，不得被當成使用者錯誤） | CI-4、AC-32-02、AC-32-03、AC-32-10 |
+
+**原子性（DS-04「先建新物件、成功才替換記憶體」的實作位置）**
+
+| 步驟 | 位置 | 說明 |
+| :--- | :--- | :--- |
+| 1 建新物件 | `store.confirmApplyGoal` 呼叫 `reinit.buildReinitData` | 現行 `state.data` 不被觸碰 |
+| 2 一次寫入 | 同上，經既有 `writeData(newData)`（store 唯一的 `setItem` 出口；寫出前照常 `normalizeLearning`） | 不 `removeItem`、不碰 `unreadable` 鍵、不新增鍵（CI-5） |
+| 3 失敗 | `writeData` 回 `quota`／`error` → `state.data` 原物件不變；只把記憶體 `draftScore` 改回 `appliedScore`（CI-7 指定畫面回到 CI-9 狀態）；回 `{ ok: false }` | localStorage 因 `setItem` 失敗保持原值；不會出現部分清除（AC-32-11 (b)） |
+| 4 成功／停用 | 以新物件取代 `state.data`，依 CI-8 重建執行期；`unavailable` 時不寫入直接取代（CI-6），banner 的「進度將無法保存」既有顯示不變 | AC-32-02、AC-32-11 (a) |
+
+AC-32-02 的畫面結果皆由新資料推導，不另存狀態：主控台 X = 0、D 依新色級（棕 10）、長條圖 7 根 0、打卡 0、掌握 0、掌握率 0%（單字集非空）、模擬測驗正確率「—」；難易度試算 CurrentVocab = 0；模擬測驗第 1 題未作答（`part5` tag）。
+
+### 7.16 隱藏解碼器與句型庫（v0.5；constants FE-34、殼層／router／主控台 FE-38、store FE-37；PRD R-18 三、AC-20-04、E-68；契約 §5.8 HT-1～HT-5、DS-05）
+
+| 層面 | 處理 | HT／AC |
+| :--- | :--- | :--- |
+| 常數 | `NAV_TAB_ORDER` 4 項、`HIDDEN_TAB_IDS = ["decoder", "phrasebank"]`；`TabId`、`TAB_LABELS` 保留 | HT-2、HT-4 |
+| 導覽列（寬螢幕、641～767px 選單、≤ 640px 底部導覽） | `index.html` 只留 4 鈕；底部導覽 `grid-template-columns: repeat(4, minmax(0, 1fr))`（375px 時每項約 94 × 56 px）；641～767px 選單維持 2 欄（4 鈕 = 2 × 2） | AC-20-03、AC-27-01、AC-27-02、AC-27-04 |
+| 主控台入口 | `ENTRIES` 由 `NAV_TAB_ORDER` 推導（customizer、flashcards、part5）+ `sources` | AC-17-06 |
+| 頁尾 | 「資料來源與授權」不變；首次模式返回鈕不變 | HT-2 |
+| router `go()` | 隱藏頁 → 一般模式導向主控台、首次模式維持（回 `false`）；`data-go`、程式內部呼叫皆經此守門 | HT-3、E-68 |
+| 網址片段 | 本系統不使用 hash 路由；為符合 AC-20-04「手動輸入其網址片段時改顯示主控台」，router 另以 `hashchange` 與啟動檢查攔截 `#decoder`、`#phrasebank`、`#view-decoder`、`#view-phrasebank`、`#/decoder` 等寫法（§4.2）→ 一般模式顯示主控台；其他片段忽略 | HT-3、AC-20-04 |
+| store `setTab()` | 隱藏頁一律忽略，`currentTab` 永不為隱藏頁 | HT-1 |
+| 重新載入、匯入備份 | 啟動一律主控台（或首次畫面）；備份不含頁面狀態 | HT-3 |
+| 保留程式與資料 | `views/decoder.js`、`views/phrasebank.js`、`50-decoder.css`、`60-phrasebank.css` 不改、不刪，照常打包並登錄（`EMT.views.register` 仍接受兩個 TabId），但因 router 拒絕進入，永遠不會 `mount`（不建 DOM、不訂閱 store、不排閒置工作）；`RuntimeState.decoder`／`phrasebank` 照常初始化；`src/data/decoder.js`、`phrasebank.js` 照常打包；`index.html` 保留兩個空 `<section hidden>`（去掉 `aria-label`） | HT-4、HT-5、AC-23-04 |
+| 未來開放 | 須先修訂 PRD；再把 id 移回 `NAV_TAB_ORDER`、自 `HIDDEN_TAB_IDS` 移除、恢復 2 個導覽按鈕與 section `aria-label`、底部導覽欄數改回；主控台入口自動推導 | — |
+
+---
+
+## 8. 內容製作設計（pg-content）
+
+### 8.1 字庫分檔與批次（回應 FB-14、R-01、主控補充 3）
+
+依契約 §4.2 紀錄值切分；邊界對齊 `N_B` = 2,809，使每批任務的 `academicContext` 規則一致（排名 ≤ 2,809 選填、> 2,809 必填，AC-06-08）。
+
+| 任務 | 分檔 | 排名區間 | 筆數 | 來源區段（預期） | academicContext | 自查抽樣（10%） | QA 抽查（V-VOC-18） |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| CT-03 | `vocab-0001.js` | 1～400 | 400 | NGSL（含功能詞） | 選填 | 40 | 20 |
+| CT-04 | `vocab-0401.js` | 401～800 | 400 | NGSL | 選填 | 40 | 20 |
+| CT-05 | `vocab-0801.js` | 801～1,200 | 400 | NGSL（跨 `N_O` = 1,000） | 選填 | 40 | 20 |
+| CT-06 | `vocab-1201.js` | 1,201～1,600 | 400 | NGSL | 選填 | 40 | 20 |
+| CT-07 | `vocab-1601.js` | 1,601～2,000 | 400 | NGSL | 選填 | 40 | 20 |
+| CT-08 | `vocab-2001.js` | 2,001～2,400 | 400 | NGSL | 選填 | 40 | 20 |
+| CT-09 | `vocab-2401.js` | 2,401～2,809 | 409 | NGSL | 選填 | 41 | 21 |
+| CT-10 | `vocab-2810.js` | 2,810～3,159 | 350 | TSL | **必填** | 35 | 20 |
+| CT-11 | `vocab-3160.js` | 3,160～3,509 | 350 | TSL | 必填 | 35 | 20 |
+| CT-12 | `vocab-3510.js` | 3,510～3,859 | 350 | TSL | 必填 | 35 | 20 |
+| CT-13 | `vocab-3860.js` | 3,860～4,209 | 350 | TSL → BSL（4,060 起） | 必填 | 35 | 20 |
+| CT-14 | `vocab-4210.js` | 4,210～4,559 | 350 | BSL | 必填 | 35 | 20 |
+| CT-15 | `vocab-4560.js` | 4,560～4,909 | 350 | BSL | 必填 | 35 | 20 |
+| CT-16 | `vocab-4910.js` | 4,910～5,259 | 350 | BSL → NAWL（5,229 起） | 必填 | 35 | 20 |
+| CT-17 | `vocab-5260.js` | 5,260～5,620 | 361 | NAWL | 必填 | 36 | 20 |
+| 合計 | 15 檔 | 1～5,620 | 5,620 | | | 567 | 301 |
+
+- 若 CT-02 依 N-1 重算的 `N_B`、`N_G` 與紀錄值不同：CT-02 標 `blocked` 並回報；由 SA 修訂契約、SD 重切本表，不得自行調整。
+- 15 個批次任務彼此無共用檔案，可全部平行（主控可依資源分次派出）。
+
+### 8.2 骨架與工作流程
+
+| 步驟 | 執行者 | 動作 |
+| :--- | :--- | :--- |
+| W-1 | CT-01 | 寫 `_tools/`：`lib.mjs` 內建上表 `VOCAB_FILES`（檔名 ↔ 排名區間）常數 |
+| W-2 | CT-02 | `build-skeleton.mjs` 依 R-1～R-8 算排名，寫 15 個骨架分檔：`rank`、`word`、`sources`、`phoneticSource: "ORIGINAL"`、`contentSource: "ORIGINAL"`、`meaningSource`（在 `ecdict_subset.csv` → `"ECDICT"`，列於 missing → `"ORIGINAL"`）已定；`phonetic`、`meaning`、`collocation`、`academicContext`、`example` 為 `""`、`pos` 為 `[]` |
+| W-3 | 批次任務 | `node src/data/_tools/material.mjs --file src/data/vocab-XXXX.js --out <scratchpad>/material.jsonl`：每筆輸出 rank、word、wordKey、sources、`_zhtw` translation、簡體 translation、是否在 missing、M-3 上下文用詞命中清單、詞形變化（lemmatized 檔，僅供例句選詞形） |
+| W-4 | 批次任務 | 每次撰寫 ≤ 50 筆，存成 scratchpad 的 `part-NN.jsonl`（每行 `{ rank, phonetic, pos, meaning, collocation, academicContext, example, meaningSource? }`）；`meaningSource` 只在依 M-6 改為 `"ORIGINAL"` 時填 |
+| W-5 | 批次任務 | `node src/data/_tools/fill.mjs --file src/data/vocab-XXXX.js --input <scratchpad>/parts/`：依 rank 合併，**不得改動**骨架欄位（工具拒絕不同的 `rank`／`word`／`sources`） |
+| W-6 | 批次任務 | `node src/data/_tools/validate.mjs --file src/data/vocab-XXXX.js --stage final` 全數通過 |
+| W-7 | 批次任務 | `node src/data/_tools/sample.mjs --file src/data/vocab-XXXX.js --ratio 0.1 --min 35 --seed <起始排名>` 人工自查，結果寫入 `_records/vocab-XXXX.md` |
+
+分檔格式（`fill.mjs`、`build-skeleton.mjs` 統一輸出）：
+
+```
+// 內建字庫 排名 401～800（契約 §3.1；由 _tools 產生，請勿手動調整骨架欄位）
+window.MASTER_VOCAB_DATABASE = (window.MASTER_VOCAB_DATABASE || []).concat([
+{"rank":401,"word":"…", …},
+…
+]);
+```
+
+每筆一行（`JSON.stringify(item)`，鍵順序依 `data-schema.ts` 宣告順序），方便檢查與比對。
+
+### 8.3 撰寫慣例（所有批次一致，平行任務靠此保持風格統一）
+
+**音標 P-1～P-9（美式 IPA；M-5、V-VOC-16）**
+
+| 代號 | 規則 |
+| :--- | :--- |
+| P-1 | 以 `/…/` 包住；多音節字以 `ˈ`（U+02C8）標主重音、`ˌ`（U+02CC）標次重音，放在該音節**之前**；單音節字不標重音；不用音節點 |
+| P-2 | 母音只用：`i ɪ eɪ ɛ æ ɑ ɔ oʊ ʊ u ʌ ə aɪ aʊ ɔɪ`；不用長音符 `ː`，`i`、`u` 不加長音 |
+| P-3 | 捲舌母音：重讀 `ɝ`（bird /bɝd/）、非重讀 `ɚ`（teacher /ˈtitʃɚ/）；母音 + r：`ɪr ɛr ɑr ɔr ʊr aɪr aʊr`（car /kɑr/、care /kɛr/、near /nɪr/、more /mɔr/） |
+| P-4 | 禁用英式符號：`əʊ`、`ɒ`、`ɜ`（未捲舌）、`ɪə`、`eə`、`ʊə`、`ː`（驗證器 H-2 自動攔） |
+| P-5 | 子音：`p b t d k g f v θ ð s z ʃ ʒ h tʃ dʒ m n ŋ l r w j`；`g` 用 ASCII（不用 U+0261）；彈舌不標（water /ˈwɔtɚ/）；成音節 n、l 寫 `ən`、`əl`（button /ˈbʌtən/） |
+| P-6 | 只寫一種發音：最常見的美式發音；名動詞重音不同時取 `pos` 第一個詞性的讀音 |
+| P-7 | 功能詞取一般語流中最常聽到的形式（the /ðə/、a /ə/、of /əv/、to /tə/、and /ənd/、can /kən/ 等）；與契約範例 `/ðə/` 一致 |
+| P-8 | 片語：各字音標以單一空白分隔、整串一組斜線（comply with → /kəmˈplaɪ wɪð/） |
+| P-9 | 允許字元集（H-2）：上述母音／子音符號、`ˈ`、`ˌ`、空白、`/`；其他字元一律報錯 |
+
+**釋義、詞性（M-2～M-4、M-6）**
+
+| 代號 | 規則 |
+| :--- | :--- |
+| T-1 | 素材只取 `ecdict_subset_zhtw.csv` 的 `translation`；保留多益與學術最常用的 1～3 個義項，以全形「；」分隔，≤ 30 字；不新增 ECDICT 沒有的義項（否則依 M-6 標原創並記錄） |
+| T-2 | M-3 用詞（質量、程式／程序、檔案／文件、水平、註冊、地鐵）一律回查簡體原檔判斷；清單外的大陸用語同樣改為台灣用法並記入紀錄 |
+| T-3 | `[計]`、`[醫]` 等領域標記改寫為「（電腦）」「（醫學）」括註或刪除 |
+| T-4 | `pos` 依 M-4 對應，只保留 `meaning` 實際涵蓋的詞性，依常用度排序 |
+| T-5 | 同一分檔內 `meaning` 盡量不重複（V-VOC-14）；遇同義字以補充字區分（如「建立；設立」vs「建立；創辦」） |
+
+**原創欄位（AC-06-01、AC-06-02、AC-06-08、AC-23-04）**
+
+| 代號 | 規則 |
+| :--- | :--- |
+| O-1 | `collocation`：1～3 個多益常見搭配，英文，以「；」分隔，須含該字或其詞形；可加句型提示（如 `the + 名詞：the company policy`）；≤ 80 字元 |
+| O-2 | `example`：一句完整英文，8～20 字，職場／多益情境，含該字或其詞形，大寫開頭，以 `.`、`?`、`!` 結尾；≤ 160 字元 |
+| O-3 | `academicContext`：一句英文論文風格句子（8～25 字），含該字或其詞形，呈現該字在摘要、方法、結果、文獻回顧中的用法；≤ 200 字元。排名 ≤ 2,809：功能詞與無學術用途的生活字留 `""`，其餘建議填寫（非強制） |
+| O-4 | 全部原創：不得抄錄 ETS 題本、Manchester Academic Phrasebank、市售書、辭典例句（含 ECDICT `definition` 欄的英文例句）；不得含 `<`、`>`、`undefined`、`null` 字樣 |
+| O-5 | 同一分檔內 `example` 不重複；避免連續多筆使用同一句型骨架 |
+
+### 8.4 自查（每批必做）與 QA 抽查門檻（回應 V-VOC-18）
+
+| 代號 | 檢查 | 方式 | 範圍 | 不合格處理 |
+| :--- | :--- | :--- | :--- | :--- |
+| S-1 | 契約 V-VOC-01、02（區間內）、03（區間內）、05、06、07、08、09、10、13、15、16 | `validate.mjs --file … --stage final`（自動） | 100% | 任何錯誤即不得交付 |
+| S-2 | 骨架欄位未被改動（`rank`、`word`、`sources`、`phoneticSource`、`contentSource`；`meaningSource` 只允許 ECDICT → ORIGINAL 且需有紀錄） | `validate.mjs` 以 `lib.mjs` 重算比對（自動） | 100% | 同上 |
+| H-1 | `meaning` 不含簡體專用字：字集 = 「簡體原檔 `translation` 出現、但 `_zhtw` `translation` 從未出現」的字元（由資料導出），**扣除**下方「H-1 繁簡同形白名單」 | `validate.mjs`（自動） | 100% | 錯誤；白名單字元改為警告 H-1W（見下） |
+| H-2 | 音標符合 P-9 允許字元集，且不含 P-4 英式符號 | `validate.mjs`（自動） | 100% | 錯誤 |
+| H-3 | `meaning` ≤ 30 字；`collocation`、`example`、`academicContext` 長度上限（§8.3） | `validate.mjs`（自動） | 100% | 警告（超過 30 字須在紀錄說明） |
+| H-4 | `example`、非空的 `academicContext` 大寫開頭、`.?!` 結尾；`collocation`／`example` 含該字或其詞形（以 lemmatized 檔的詞形比對） | `validate.mjs`（自動） | 100% | 警告；未含詞形者逐筆在紀錄說明 |
+| H-5 | 分檔內 `example` 不重複、`meaning` 重複數（V-VOC-14 報告） | `validate.mjs`（自動） | 100% | `example` 重複為錯誤；`meaning` 重複為警告 |
+| H-6 | V-VOC-17 上下文用詞清單：工具自動列出，撰寫者補上最終 `meaning` 與判斷（v0.3，見下方「V-VOC-17 警告的處理」） | `material.mjs`、`validate.mjs` + 紀錄 | 100% | QA 全數檢查 |
+| H-7 | 分檔壓縮後平均每筆 bytes（§6） | `validate.mjs`（自動） | 100% | > 600 警告、> 700 錯誤 |
+| S-3 | 人工自查：釋義是否為精簡而非新增（對照 `_zhtw`）、無大陸用語、`pos` 與釋義一致、音標為美式且正確、例句自然且原創 | `sample.mjs --ratio 0.1 --min 35 --seed <起始排名>` | 10%（每批 35～41 筆，全庫 567 筆） | 抽樣不合格 > 5% → 全檔重新檢查後再抽一次（換種子 = 起始排名 + 1），結果都寫入紀錄 |
+| QA（v0.3） | 紀錄完整性：`validate.mjs --file` 輸出的每一筆 V-VOC-17 警告與 H-1W 警告，在對應 `_records/*.md` 都有一列判斷 | 比對 validate 輸出與紀錄 | 100% | 缺列 → 對該 CT 開 minor BUG（只補紀錄）；判斷錯誤（實為過度轉換或簡體誤用）→ 依下一列 V-VOC-18 門檻計入不合格筆數 |
+| QA | V-VOC-18：`meaningSource = "ECDICT"` 者 (1) 無簡體、無大陸用語 (2) 義項可在 `_zhtw` 找到 (3) `pos` 一致；另抽 `phonetic` 為美式 IPA | `sample.mjs --ratio 0.05 --min 20 --seed <起始排名 + 1000> --ecdict-only` | **每分檔 5%、至少 20 筆**（全庫約 301 筆） | **單一分檔不合格率 > 5%（20 筆中 ≥ 2 筆）→ 該分檔整批開 BUG 退回對應 CT 任務**；1 筆 → 開 minor BUG 只修該筆 |
+
+**驗證時機：`--file` 與 `--all`（v0.3，回應 CT-02）**
+
+`--all` 會檢查全部交付資料檔，平行執行時其他任務尚未產出的檔案會被列為缺檔錯誤，與本任務品質無關。規則：
+
+| 時機 | 指令 | 判定 |
+| :--- | :--- | :--- |
+| 個別 CT 任務的 doneWhen | `validate.mjs --file <本任務 paths 內的每個資料檔> --stage <該任務階段>` | 錯誤 0 |
+| CT-02（骨架） | 對 `sources.js` 與 15 個骨架分檔逐一 `--file … --stage skeleton` | 錯誤 0。tasks.json 中 CT-02 doneWhen 的「`--all --stage skeleton` 錯誤 0」以此等價判定：`--all` 輸出中只屬於「其他任務尚未產出的檔案缺檔」的錯誤不計 |
+| 全部 CT 完成後 | `validate.mjs --all --stage final`（= `npm run validate:data`） | 由 CT-23（其 dependsOn 已涵蓋全部 CT）或主控執行，錯誤 0；FE-18 再跑一次作為交付前關卡 |
+
+**V-VOC-17 警告的處理（v0.3，回應 CT-03、CT-05）**
+
+V-VOC-17 的警告（簡體原檔為「程序」而 `meaning` 用「程式」、原檔為「文件」而用「檔案」）是**提醒人工判斷**，不代表錯誤；program → 程式、file → 檔案 正是台灣正確用法。決議：**不在驗證器加白名單**，以紀錄逐筆寫明判斷即視為已處理。理由：(1) 是否過度轉換取決於該字的英文詞義（procedure → 程序、program → 程式），以 wordKey 白名單會在日後內容修改時遮蔽真正的錯誤；(2) 警告不阻擋交付，不影響 doneWhen；(3) 紀錄本來就要列 V-VOC-17 清單（§8.5），只需多一欄判斷。
+
+| 項目 | 規定 |
+| :--- | :--- |
+| 紀錄位置 | `_records/vocab-XXXX.md` 的「上下文用詞清單」（§8.5），每筆警告一列 |
+| 欄位 | wordKey、英文詞義、簡體原詞、最終 `meaning`、**判斷**（「保留：台灣用法，英文詞義為 …」或「已修改：原為 … 改為 …」） |
+| 完成條件 | 紀錄中判斷列數 ≥ `validate.mjs --file` 輸出的 V-VOC-17 警告數，且每個警告的 wordKey 都有對應列 |
+| QA 判定 | 見上表「QA（v0.3）紀錄完整性」列：缺列 → minor BUG；判斷錯誤 → 計入 V-VOC-18 不合格 |
+
+**H-1 繁簡同形白名單（v0.3，回應 CT-01）**
+
+H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身也是合法繁體」的字元，例如「后」（s2twp 把多數「后」轉為「後」，但「皇后」「王后」的「后」是正確繁體）。若維持錯誤等級，正確的釋義（queen → 皇后）會無法交付。決議：**加白名單，降為警告**。
+
+| 項目 | 規定 |
+| :--- | :--- |
+| 白名單字元 | `后 干 里 范 谷 斗 丑 征 准 松 系 制 只 台 面 云 余 卷 几 志 周 致 症`（繁體中文本身也使用的字；只有同時出現在導出字集中的字元才有作用） |
+| 行為 | 導出字集扣除白名單後的字元 → H-1 **錯誤**（不變）；`meaning` 含白名單字元且該字元在導出字集中 → **H-1W 警告**：「含繁簡同形字「X」，請確認為正確繁體用法」 |
+| 撰寫者處理 | 每筆 H-1W 在 `_records/vocab-XXXX.md` 的「清單外大陸用語修正」段落寫一列判斷（「保留：皇后」或「已修改：后 → 後」） |
+| 工具輸出 | `validate.mjs` 在報告開頭列出導出字集大小與實際被降為警告的白名單字元；CT-01 補修後把該清單寫入 `_records/CT-01.md` |
+| QA 判定 | 與 V-VOC-17 相同：缺列 → minor BUG；判斷錯誤（例如 after 釋義用「后」）→ 計入 V-VOC-18 不合格 |
+
+程式補修見 §12.2 R3-4（CT-01）。
+
+### 8.5 交付紀錄格式（`src/data/_records/*.md`）
+
+| 段落 | 內容 | 依據 |
+| :--- | :--- | :--- |
+| 摘要 | 任務 ID、分檔、排名區間、筆數、日期 | — |
+| 驗證結果 | `validate.mjs` 輸出摘要（錯誤 0、警告清單） | S-1、H-1～H-7 |
+| `meaningSource = "ORIGINAL"` 清單 | wordKey + 原因（missing 4 筆或 M-6 整段改寫） | M-6、M-7、V-VOC-09 |
+| 上下文用詞清單 | wordKey、英文詞義、簡體原詞、最終 `meaning`、判斷（v0.3：每筆 V-VOC-17 警告必有一列，§8.4） | V-VOC-17、M-7 |
+| 清單外大陸用語修正 | wordKey、原詞、改後；（v0.3）H-1W 警告的判斷也列在此 | M-3、T-2、H-1W |
+| 自查抽樣 | 種子、抽到的 wordKey、每筆結論、不合格率 | S-3 |
+| 其他 | 長度超限說明、例句未含詞形說明、回饋上游 | H-3、H-4 |
+
+---
+
+## 9. 樣式方案（RWD）
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 斷點 | 行動優先；`min-width: 768px`（平板）、`min-width: 1200px`（桌機）；內容區 `max-width: 960px` 置中 | AC-20-01 |
+| 防水平捲軸 | 全域 `box-sizing: border-box`；長字串 `overflow-wrap: anywhere`；表格與 MIT 全文用 `overflow-x: auto` 的**元素內**容器（頁面本身不得出現水平捲軸）；圖片無 | AC-20-01 |
+| 導覽 | < 768px：頁首「選單」按鈕展開 2 欄 × 3 列按鈕格（6 個功能區）；≥ 768px：單列頁籤；「資料來源與授權」入口在主控台與頁尾 | AC-20-03、AC-23-02 |
+| 觸控 | 按鈕、選項、滑桿把手最小 44 × 44 px；滑桿 `input[type=range]` 原生元件；不依賴 hover | AC-20-02 |
+| 色彩 | `00-base.css` 定義變數：色級 5 色（橘 `#e8833a`、棕 `#8b5a2b`、綠 `#2e9e5b`、藍 `#2f6fd6`、金 `#c9a227`）；語法 4 色系（主詞藍 `#1d4ed8`／`#dbeafe`、動詞紅 `#b91c1c`／`#fee2e2`、受詞綠 `#15803d`／`#dcfce7`、修飾紫 `#7e22ce`／`#f3e8ff`）；燈號綠黃紅；對錯綠紅 | AC-12-01、AC-08-06 |
+| 字型 | 系統字型堆疊（`system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif`；IPA 用 `"Segoe UI", "Lucida Sans Unicode", "Arial Unicode MS"`）；**不載入外部字型** | AC-19-01 |
+| 類名 | 每頁固定前綴：`db-`、`cz-`、`cv-`、`fc-`、`sp-`、`qz-`、`p5-`、`dc-`、`pb-`、`src-`；共用 `btn`、`card`、`field`、`toast`、`dialog` | — |
+| 狀態 | 停用按鈕用 `disabled` 屬性 + `aria-disabled`；鎖定色級的鎖定圖示以 CSS 繪製或內嵌 SVG（不用 emoji，避免字型差異），並附文字「即將開放」 | AC-01-01、AC-06-04 |
+| 狀態：例外（v0.3） | **AC 要求「點擊停用的按鈕要有提示」時，不得用 `disabled` 屬性**（`disabled` 按鈕不會觸發 `click`，toast 無法出現），改用：`aria-disabled="true"` + `title`（說明原因）＋ 外觀與 `disabled` 相同（CSS 以 `[aria-disabled="true"]` 選取：降低不透明度、`cursor: not-allowed`）；按鈕保持可聚焦；`click` 處理器第一步檢查 `aria-disabled`，為 `"true"` 時只顯示 toast、不執行原本動作。適用範圍：語音面板的 TTS 按鈕（不支援 `speechSynthesis`，AC-07-04「點擊或滑過時提示不支援」）、麥克風按鈕（不支援 `SpeechRecognition`，AC-08-02 toast「建議使用 Google Chrome / Edge」）。其他停用按鈕仍用 `disabled` | AC-07-04、AC-08-02 |
+| QA 判定（v0.3） | 上列例外按鈕：有 `aria-disabled="true"` 與非空 `title`、**沒有** `disabled` 屬性；點擊後出現 toast（AC-08-02 文字逐字相符），不開始朗讀或聆聽，不拋未處理例外。其他停用按鈕：有 `disabled` 屬性。兩種寫法都不得出現 `aria-disabled="true"` 但點擊仍執行動作的情況 | AC-07-04、AC-08-02 |
+| （v0.4）導覽 | **取代上方「導覽」列的 < 768px 部分**：≤ 640px 為固定底部導覽列（§9.1）；641～767px 維持既有「選單」按鈕展開 2 欄 × 3 列；≥ 768px 維持單列頁籤。首次模式三種寬度都不顯示導覽。**（v0.5）導覽只剩 4 項**：底部導覽 4 欄、641～767px 選單 2 欄 × 2 列、≥ 768px 單列 4 個頁籤（§7.16） | AC-20-03、AC-27-01、AC-27-04、AC-25-01、AC-20-04 |
+| （v0.5）收音條 | `31-speech.css`：`.sp-meter` 為 `inline-flex`、固定總寬（約 5 × 6px + 4 × 3px）與高度（約 18px），垂直置中於麥克風按鈕旁；`.sp-meter__bar` 暗色用 `--border`、亮色用 `--correct`，5 格等寬、高度由左到右遞增（純裝飾，不影響判定）；**一律** `transition: none; animation: none`（§7.11 A-6）。不只靠顏色：亮格另加 `is-on` class 供測試，`aria-label`「收音音量」 | AC-33-03、AC-33-08 |
+| （v0.4）色級大卡片 | `20-customizer.css`：卡片為 `<button>`（整張可點、`aria-pressed` 表示選中）；版面 ≤ 640px 單欄、641～1199px 2 欄（第 5 張橫跨或靠左）、≥ 1200px 5 欄；每張 `min-height` ≥ 44px（實際約 120px）；選中樣式 = 色級色 3px 外框 + 淺底，不只靠顏色（另有「已選擇」文字給螢幕閱讀器，`aria-pressed`） | AC-26-01、AC-26-02 |
+| （v0.4）動畫類名 | `view--entering`（換頁）、`fc-face--flip-in`、`fc-card--in-next`、`fc-card--in-prev`、`qz-opt--pop`、`qz-opt--shake`、`p5-opt--pop`、`p5-opt--shake`；主控台環形圖 `db-ring`、`db-ring--done`（金色）、長條圖 `db-bars` | §7.11 |
+| （v0.4）色彩 | 主環形圖達成時沿用既有 `--color-gold`（`#c9a227`）；未達成用 `--primary`；小環形圖用 `--correct`；空環用 `--border`。底部導覽目前項目沿用既有 `aria-current="page"` 樣式 | AC-30-05 |
+
+### 9.1 底部導覽列（FE-26；PRD US-27、Q-33）
+
+```css
+/* 00-base.css（示意；實作以此為準，數值不得改小） */
+:root { --emt-bottomnav-h: 56px; }
+@media (max-width: 640px) {
+  .btn.app-nav-toggle { display: none; }                     /* 不用「選單」鈕 */
+  .app-nav, .app-nav.is-open {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+    display: grid; grid-template-columns: repeat(4, 1fr);      /* v0.5：6 → 4（隱藏解碼器、句型庫） */
+    height: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--surface); border-top: 1px solid var(--border);
+  }
+  .app-nav__btn { min-width: var(--touch); min-height: var(--touch); display: flex; flex-direction: column;
+                  align-items: center; justify-content: center; gap: 2px; padding: 4px 0; }
+  .app-nav__icon { width: 22px; height: 22px; }
+  .app-nav__label { font-size: 11px; line-height: 1.2; white-space: nowrap; }
+  body { padding-bottom: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 8px); }
+  .toast-root { bottom: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 12px); }
+  html.is-typing .app-nav { display: none; }                 /* 虛擬鍵盤開啟時不遮輸入欄（AC-27-03） */
+  html.is-typing body { padding-bottom: 8px; }
+}
+@media (min-width: 641px) { .app-nav__icon { display: none; } }  /* 寬螢幕維持純文字頁籤 */
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 斷點 | `max-width: 640px`（含 640）；641px 起不使用底部導覽 | AC-27-01、AC-27-04 |
+| 項目尺寸 | 375px 時每項約 62 × 56 px；640px 時約 106 × 56 px；皆 ≥ 44 × 44。（v0.5）4 項：375px 約 94 × 56 px、640px 約 160 × 56 px | AC-27-02 |
+| 文字不裁切 | 「難易度設定」5 字 × 11px ≈ 55px < 62px；`white-space: nowrap`。FE-33 在 375px 以 `scrollWidth ≤ clientWidth` 逐項檢查，若裁切再於 `90-overrides.css` 調整字距 | AC-27-01 |
+| 不遮內容 | `body` 底部留白 = 導覽高度 + 安全區 + 8px；toast 移到導覽上方；對話框置中（不受影響）；輸入時隱藏導覽（`ui/bottom-nav.js`） | AC-27-03 |
+| 安全區 | `viewport` meta 加 `viewport-fit=cover`，以 `env(safe-area-inset-bottom)` 避開 iPhone 手勢列 | AC-27-03 |
+| 圖示 | （v0.5 起 4 個）6 個內嵌 `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">`，單一 `<path fill="currentColor">`；**不寫 `xmlns` 屬性**（HTML 內嵌 SVG 不需要，且避免產物出現 `http://` 字串干擾外部資源檢查）；不用 emoji、圖示字型、`<img>` | AC-27-05、AC-19-01 |
+| 首次模式 | `body[data-entry="firstRun"]` 隱藏導覽與底部留白（規則由 FE-32 加在 `00-base.css`） | AC-25-01 |
+
+---
+
+## 10. 測試策略
+
+| 類別 | 負責 | 工具／位置 | 涵蓋 |
+| :--- | :--- | :--- | :--- |
+| 資料自驗 | pg-content（每個 CT） | `src/data/_tools/validate.mjs`、`sample.mjs` | 契約 V-IN、V-SRC、V-VOC、V-TPL、V-P5、V-DEC、V-RS、V-PH；SD 規則 H-1～H-7；AC-03-06～AC-03-09、AC-06-08、AC-10-01、AC-12-02、AC-12-03、AC-14-01、AC-15-02、AC-23-03、AC-23-05 |
+| 單元 | pg-frontend（FE-01、FE-03～FE-07；v0.3 起 FE-19 移入 FE-08～FE-17 的頁面純邏輯測試與載入順序測試） | `npm test` = `node --test src/app/__tests__/*.test.js`（Node ≥ 22；Node 內建 `node:test`、`node:assert`；無套件）。（v0.3）規則：測試檔一律放 `src/app/__tests__/`、副檔名 `.test.js`（CommonJS，不用 `.cjs`／`.mjs` 結尾）、以 `__dirname` 組相對路徑（不得寫死 `D:/…` 等絕對路徑）、**不讀 `src/data/` 正式資料**（用 `_fixtures.js` 的小型 fixture；資料正確性屬 `validate.mjs`）、不需瀏覽器 | 分數修正與範圍、色級判定、每日新字量、試算與週數（AC-02-02～AC-02-06、AC-02-09、AC-02-10 的全部數值例）、色級按鈕分數、單字集截取與去重、刪除後索引、範本注入、編輯距離與吻合度（AC-08-03～AC-08-06、AC-08-12）、打卡（含時鐘調回、跨月、DST）、正確率、四選一（相異、不足、位置隨機 20 次）、StorageRecord 驗證與 V-ST、匯入步驟 1～7 各失敗分支、store 的回滾與一次寫入（以假 `localStorage` 物件）、建置腳本（標記缺失與位置、charset 位於前 1,024 bytes、外部資源偵測、大小上限）；（v0.3，FE-19）各頁面匯出的純邏輯（主控台統計文字與備份檔名、自訂器試算顯示、自訂字表單訊息與範本注入提示含 quota、抽認卡顯示欄位與空狀態、語音錯誤對照與停用按鈕、四選一畫面模型、Part 5 進度與解析、解碼器分段與淡化、句型篩選與複製降級、資料來源頁列出規則）、src/app 全部檔案依建置順序載入（LD-1～LD-3） |
+| E2E | QA | Playwright 以 `file://` 開 `dist/english-master-track.html`；`tests/e2e/`；語音以 `page.addInitScript` 注入假的 `speechSynthesis`、`SpeechRecognition`（可控制 `onresult`／`onerror`）；剪貼簿以覆寫 `navigator.clipboard` 模擬成功與失敗；離線以 `context.setOffline(true)`；localStorage 停用／容量滿以 `addInitScript` 覆寫 `Storage.prototype` | US-01～US-18、US-20、US-24 的畫面行為與文案；AC-04-04／AC-24-07（XSS 字串不產生 `img` 元素）；AC-18-06、AC-21-01（攔截所有 request，數量應為 0）；AC-20-01（4 種視窗 `scrollWidth ≤ clientWidth`）；AC-22-01～AC-22-04（`performance.now()` 量測 10 次，含 `page.emulateCPUThrottling` 不可用時以 CDP `Emulation.setCPUThrottlingRate` 4 倍） |
+| 靜態檢查 | QA（FE-18、FE-33、FE-41 先自檢） | grep／腳本 | AC-04-09（禁止 API 不出現）、AC-19-01（外部資源）、AC-19-04（大小）、AC-21-02（金鑰、SDK）、~~AC-21-03（`MediaRecorder`、`getUserMedia` 不出現）~~ **（v0.5 修訂）AC-21-03：(1) `MediaRecorder` 在產物與 `src/app`（`__tests__` 除外）出現 0 次（含註解；B-7 擋）；(2) `getUserMedia` 只出現在 `services/mic.js`；(3) `mic.js` 不出現 `destination`、`Blob`、`createObjectURL`、`FileReader`、`fetch`、`XMLHttpRequest`、`WebSocket`、`sendBeacon`、`localStorage`、`indexedDB`、`caches`；(4) speech-panel 不把音量值傳給任何 store action**；AC-23-06（標頭）；（v0.5）AC-20-04：產物導覽與 `index.html` 不含 `data-tab="decoder"`／`"phrasebank"`、`views/*.js` 無 `data-go` 指向隱藏頁；`src/data/decoder.js`、`phrasebank.js` 內容仍在產物中（以全域變數名稱與筆數確認） |
+| 人工驗收 | 人類／QA 列清單 | 實機 Chrome／Edge、Android Chrome | （v0.5）**V-MIC**：見 §10.2；真實麥克風辨識與權限流程（AC-08-01、AC-08-09、AC-08-13、AC-08-14）、真實 TTS 語音與無 en-US 語音裝置（AC-07-01～AC-07-05）、`file://` 雙擊與實際斷網（AC-19-02、AC-19-03）、觸控操作（AC-20-02）、首次載入 5 次量測（AC-22-05）、原創性 20 筆精確片語搜尋（AC-23-04）、V-VOC-18 抽查（§8.4）、V-VOC-17 清單全檢、Part 5 正解唯一性抽查（建議每題型 10 題） |
+
+### 10.1 v0.4 測試命令與新增測試範圍
+
+**命令**（`package.json` 不改；仍為 Node ≥ 22）
+
+| 用途 | 命令 | 時機 |
+| :--- | :--- | :--- |
+| 全部單元測試 | `npm test`（= `node --test src/app/__tests__/*.test.js`） | 每個任務收尾；FE-33 交付關卡 |
+| 只跑本任務的測試 | `node --test src/app/__tests__/<檔名>.test.js …` | 同批有其他任務平行時，doneWhen 以本任務 paths 內的測試檔為準（他任務 paths 內的測試失敗不擋，但須在回報列出） |
+| 建置驗證 | `node tools/build.mjs --out <scratchpad>/t.html` | 每個改到 `src/app` 的任務 |
+| 交付建置 | `npm run build` | 只有 FE-33 |
+| 資料驗證 | `npm run validate:data` | FE-33（本版資料不變，確認無回歸） |
+
+**中間狀態的已知失敗（依相依順序自然修復，不得為此跳過或刪除測試）**
+
+| 改動任務 | 暫時失敗的測試 | 修復任務 |
+| :--- | :--- | :--- |
+| FE-22（`CURRENT_SCHEMA_VERSION` 改 2） | `store.test.js` 中「`schemaVersion` 2 視為無法讀取」「匯入版本 2 回 `version`」等以 2 當作不支援版本的案例 | FE-25（改用 3，並新增 v1 遷移、v2 讀取案例） |
+
+**新增與修改的單元測試**
+
+| 檔案 | 任務 | 必含案例 |
+| :--- | :--- | :--- |
+| `learning.test.js`（新） | FE-20 | §7.7 每個函式；AC-30-03 序列 X = 1、1、1、2、3、4（以 `record` 模擬：A flip、A 再 flip、A quiz、B flip、C stt、E quiz）；AC-30-08（3、0、0、10、0、0、4）；AC-30-09 修剪與 30 筆上限；AC-30-10（200 張、50 掌握、10 個集外掌握 → 25；10 題對 7 → 70；空集合與 0 題 → `null`）；AC-30-13 各無效型態（`2026-13-40`、`yesterday`、`2026-02-30`、負數、`1.5`、`"3"`、未來日期、重複與未正規化 wordKey、整欄型別錯）；跨月、跨年、3 月與 11 月的日光節約日（`addDays` 以 UTC 計算，結果與時區無關；可另以子行程設 `TZ=America/New_York` 加測，平台不支援時略過並在回報註明）；不修改輸入（深度凍結輸入後呼叫） |
+| `goal.test.js`（改） | FE-20、FE-22 | `TAB_LABELS` 7 項、`NAV_TAB_ORDER` 6 項逐字；`LEARNED_HISTORY_DAYS` 30、`DASHBOARD_CHART_DAYS` 7；（FE-22）`CURRENT_SCHEMA_VERSION` 2、`SUPPORTED_SCHEMA_VERSIONS` `[1, 2]`；全部凍結 |
+| `interaction.test.js`（新） | FE-21 | `classifySwipe` 邊界（dx = ±49、±50；`|dx| = |dy|`；垂直為主）；`swipeTarget` 首尾不動；`isTap`；`UI` 每個值 ≤ §7.12 的 PRD 上限；`patternTotal(vibratePattern("correct"｜"wrong")) ≤ 200`；`UI` 凍結 |
+| `persist.test.js`、`backup.test.js`（改） | FE-22 | §7.8 每條路徑：v1 遷移（7 欄原值不動、兩欄為預設、即使 v1 內含這兩鍵也覆寫）、v1 `data` 非物件 → unreadable／`format`、v2 RD-1 只重設壞欄、`schemaVersion` 3／0／`"2"` → unreadable／`version`；匯出為 2 且兩欄已正規化；匯入 v1（AC-24-10）、v2 shape 錯 → `format`、v2 項目層級無效 → 捨棄且不計入略過數（AC-24-11）；支援版本字串「1、2」 |
+| `dashboard.test.js`（改） | FE-22、FE-31 | （FE-22）版本不相容訊息改為「支援版本：1、2」；（FE-31）`progressModel`：AC-30-02（橘 10、綠 15、730 → 15）、AC-30-05（14/15 未達、15/15 達成金色、18/15）、AC-30-07（跨午夜：同一 data、`today` 前進一天 → X = 0、長條最右為新日期、前一日保留）、AC-30-08、AC-30-10（`—`）；統計標籤「模擬測驗正確率」 |
+| `naming.test.js`（新） | FE-23 | 讀 `index.html` 與 `views/*.js` 的字串常值：不得含「抽認卡」「自訂器」；「Part 5」只允許出現在授權／來源文字與模擬測驗頁說明「題型對應多益 Part 5」；導覽 6 個按鈕文字依序 = `TAB_LABELS[NAV_TAB_ORDER[i]]`；各 `section` 的 `aria-label` = `TAB_LABELS` |
+| `router-motion.test.js`（新） | FE-24、FE-32 | 極簡假 DOM（`getElementById`、`classList`、`hidden`、`setAttribute`、`dataset`）＋ `vm` 載入 `ui/motion.js`、`ui/router.js`：連續 `go` 3 頁 → 只有最後一頁 `hidden = false` 且其餘無 `view--entering`；`reduced()` 為真時不加 class；`05-motion.css` 的 5 個 CSS 變數 = `interaction.UI` 對應值且 ≤ 上限；含 `prefers-reduced-motion: reduce` 全域規則（`animation: none`、`transition: none`）；（FE-32）首次模式 `go("dashboard")` 回 `false`、`go("sources")` 可、收到 `"entry"` tag 後切到主控台並設 `data-entry="main"` |
+| `store.test.js`（改） | FE-25、FE-30 | （FE-25）§7.7 記錄點表每列、LR-7（quota：X 增加、`learningQuota` tag 只一次、storage 原值不變、無 `storage` tag 重複提示）、AC-30-06、AC-30-11（重建 store 讀回）、AC-30-12（v1 → 寫回 v2、無 unreadable 鍵）、AC-30-13；寫出的每筆 `data` 通過 `validatePersistedData(…, { written: true })`。（FE-30）FS-1～FS-7、V-ST-13：首次模式下 `setDraftScore`、`clickColor`、`setTab("sources")` 後 `setItem` 呼叫數 0；`startLearning` 一次寫入且 `schemaVersion` 2；`startLearning` 遇 quota 仍進入 main、主鍵不存在；`unavailable` 每次 init 都 firstRun；主鍵為 `""` → main + unreadable 流程；首次還原成功 → main 且資料 = 備份（300、棕）；四種失敗 → firstRun、主鍵不存在 |
+| `shell.test.js`（新） | FE-26 | `index.html` 導覽 6 鈕順序 = `NAV_TAB_ORDER`、`data-tab` 不變、每鈕含 `<svg` 且無 `xmlns`、無 `http`、無 `<img`；`00-base.css` 含 `@media (max-width: 640px)` 區塊內 `position: fixed`、`bottom: 0`、`min-height` ≥ 44px（或 `var(--touch)`）；`ui/bottom-nav.js` 在假 DOM 下 focusin 輸入框加 `is-typing`、focusout 移除、按鈕聚焦不加 |
+| `customizer.test.js`（改） | FE-27、FE-32 | （FE-27）`cardModels`：5 張順序、內建字數（`N_O`、`N_B`、`N_G`／「待定」）、每日新字量（10、10、15、20 僅供試算）、鎖定與「即將開放」、選中 = `colorOf(draftScore)`、無「官方門檻」「Tier」。（FE-32）首次模式按鈕區模型：「開始學習」「從備份還原」、無「套用」、無狀態列；一般模式反之 |
+| `flashcards.test.js`（改） | FE-28 | `swipeDecision`：中間卡左右、首尾不動、位移 49、垂直為主、quiz 模式一律 `none`；`suppressClick` 時間窗；翻卡只切 `hidden` 與動畫 class、不重建卡片 |
+| `flashcard-quiz.test.js`、`part5.test.js`（改） | FE-29 | `feedbackOf(before, after, correctIndex)`：首次作答對／錯 → 對應動畫與震動種類；已鎖定再點 → `null`；`shouldIgnoreClick`：觸控位移 ≥ 10 後 350 ms 內 click 忽略、滑鼠 click 不忽略 |
+| `haptics.test.js`（新） | FE-29 | `navigator.vibrate` 為替身函式 → 呼叫 1 次、參數 = `vibratePattern(kind)`；不存在、拋例外 → 回 `false` 不拋出；`console.error` 未被呼叫 |
+| `first-run.test.js`（新） | FE-32 | `importFlow.messageOf` 對 `ok`（略過 0、3）、`format`、`version`（`fileVersion` 2.5、`null`）、`quota`、`write_failed` 的輸出與 `dashboard.importMessage` 完全相同；`cancelled` → `null`；`index.html` 的 `body` 有 `data-entry="boot"`、頁尾有 `#footer-first-run-back`；`00-base.css` 含首次模式隱藏 `#app-nav`、`#nav-toggle`、`#customizer-custom` 的規則 |
+| `load-order.test.js`（改，如需要） | FE-33 | 新 core（`learning`、`interaction`）與 ui（`motion`、`bottom-nav`、`import-flow`）、service（`haptics`）載入不拋例外且存在 |
+
+**E2E 與人工（QA，`/qa-verify` 時新增；SD 建議範圍）**
+
+| 範圍 | 建議方法 | AC |
+| :--- | :--- | :--- |
+| 首次流程 | 清空 localStorage 開啟 → 首次畫面元素與隱藏項目、重新整理仍首次且無主鍵、開始學習、藍卡、從備份還原成功與 4 種失敗、資料來源往返、localStorage 停用 | AC-25-01～AC-25-11 |
+| 底部導覽 | 375、640、641、768、1366 寬；`position: fixed` 捲動不動；每項 `getBoundingClientRect` ≥ 44；最後元素與 toast 不被遮；`page.emulateMedia` 不需要 | AC-27-01～AC-27-05 |
+| 手勢 | CDP `Input.dispatchTouchEvent` 模擬左右滑、49／50px、垂直滑、測驗模式滑動 | AC-28-03～AC-28-06 |
+| 動畫 | `getComputedStyle(el).animationDuration`／`transitionDuration` ≤ 上限；`page.emulateMedia({ reducedMotion: "reduce" })` 後為 `0s` 或 `none` | AC-28-01、AC-29-01、AC-31-01、AC-31-03 |
+| 震動 | `addInitScript` 以替身記錄 `navigator.vibrate` 呼叫；刪除 `navigator.vibrate` 測 AC-29-03 | AC-29-02、AC-29-03 |
+| 今日進度 | 以 `addInitScript` 固定 `Date` 測跨午夜；預寫 v1 狀態與壞欄位測遷移；容量滿測 AC-30-14 | AC-30-01～AC-30-14 |
+| 效能 | AC-22-01 量「click → `emt-page-shown` mark」與下一個 `requestAnimationFrame`；AC-22-05 量到 `emt-ready` | AC-22-01、AC-22-05、AC-28-03 |
+| 人工 | Android Chrome 實機：滑動手感、震動、虛擬鍵盤不遮輸入（AC-27-03）、iOS Safari 不震動不報錯 | AC-27-03、AC-29-02、AC-29-03 |
+
+### 10.2 v0.5 測試範圍（PRD v0.9）
+
+命令與規則同 §10.1（`npm test`、只跑本任務測試、建置到 scratchpad；只有 FE-41 執行 `npm run build`）。
+
+**中間狀態的已知失敗（依相依順序自然修復，不得為此跳過或刪除測試）**
+
+| 改動任務 | 暫時失敗的測試 | 修復任務 |
+| :--- | :--- | :--- |
+| FE-34（`NAV_TAB_ORDER` 改 4 項） | `naming.test.js`「導覽 6 個按鈕」、`shell.test.js`「6 個按鈕依序 = NAV_TAB_ORDER」「文字 = TAB_LABELS[NAV_TAB_ORDER[i]]」（`index.html` 仍有 6 鈕） | FE-38 |
+| 其他 | 預期無：store 保留 `applyGoal()` 原行為（只新增 API），既有 store、customizer、flashcards、part5 等測試不受影響。若實際出現本表以外的失敗且檔案不在該任務 paths → 該任務標 `blocked` 回報主控 | — |
+
+**新增與修改的單元測試**
+
+| 檔案 | 任務 | 必含案例 |
+| :--- | :--- | :--- |
+| `goal.test.js`（改） | FE-34 | `NAV_TAB_ORDER` 恰為 `["dashboard","customizer","flashcards","part5"]`；`HIDDEN_TAB_IDS` 恰為 `["decoder","phrasebank"]`；`LEARNING_PROGRESS_FIELDS` 與契約 `data-schema.ts` 逐項同序（6 項）；三者凍結；`NAV_TAB_ORDER` ∩ `HIDDEN_TAB_IDS` = ∅；`NAV_TAB_ORDER` ∪ `HIDDEN_TAB_IDS` ∪ {`sources`} = `TAB_LABELS` 的鍵；`TAB_LABELS` 仍 7 項不變 |
+| `reinit.test.js`（新） | FE-34 | `effectiveChanged`：600→650、600→730、600→860、730→600 皆 `false`；600→300、300→600、橘→棕皆 `true`（AC-32-05、CI-3）。`recordFlags`：AC-32-07 六種狀態各只有 1 項為 `true`；(e) 只有 today 一筆（= X）→ `false`（FB-33），today − 1 與 today − 29 → `true`、today − 30 與未來日、非法鍵、值 0 → `false`；(d) `date` ≠ today → `false`；全空 → `hasLearningRecord` 為 `false`（AC-32-06）。`needsConfirm` 四種組合。`buildReinitData`：6 欄 `deepEqual` `persist.defaultData()` 對應欄；`goal` = 新值；`customVocab` 深度相等且順序、11 欄不變；`sttNoticeAcknowledged` 保留；鍵集合與輸入相同（AC-32-10）；輸入深度凍結後呼叫不拋例外且不變；結果經 `normalizeLearning` 後通過 `persist.validatePersistedData(…, { written: true })`；`defaults` 缺欄 → 拋含欄位名的 `Error` |
+| `meter.test.js`（新） | FE-35 | AC-33-04：−55、−45、−35、−25、−15、−5 dBFS → 0～5，`-Infinity`（靜音）→ 0；恰等於門檻 → 點亮；`levelOf` 亮格連續；以 48 kHz、2048 樣本、振幅 `√2 × 10^(dB/20)` 的 1 kHz 正弦產生 6 段樣本，`levelOfSamples` 結果同上；`bytesToFloat`；`fftSizeFor(48000)` = 2048、`44100` = 2048、`16000` = 1024、`8000` = 512、`0` = 2048，且 `fftSize ÷ rate ≤ 0.1`；`validateThresholds(THRESHOLDS_DBFS).ok`；超出 ±10、非遞增、相鄰差 5、T5 = −8 皆不通過；`UPDATE_INTERVAL_MS ≤ 100`；常數凍結 |
+| `mic.test.js`（新） | FE-36 | 以 `create()` 注入替身：首次 `acquire` 呼叫 `getUserMedia` 1 次且參數為 `{ audio: true }`；再次 `acquire` → `reused: true` 且不再呼叫；§7.14 錯誤對照表每個 `name` 對應的 `reason`；無 `mediaDevices` → `unavailable`；`release()` 後所有替身 track 的 `stop` 被呼叫、`readyState === "ended"`、`AudioContext.close` 被呼叫、計時器清除、`isActive() === false`，重複呼叫不拋例外；取得中 `release()` → 晚到的 track 被停止且回 `released`；track 觸發 `ended` → `isActive()` 為 `false`、`onTrackEnded` 回呼被呼叫、下次 `acquire` 再呼叫 `getUserMedia`；`AudioContext` 建構拋例外 → `{ ok: true, metering: false }`；任何節點都未 `connect` 到 `destination`；`startMeter` 以替身 analyser 回傳正弦樣本 → `onLevel` 收到預期格數且只在改變時呼叫；`stopMeter` 後不再回呼；`pagehide` 只登錄一次且觸發 `release`；所有路徑 Promise 不 reject；原始碼掃描 `mic.js` 不含 `MediaRecorder`、`Blob`、`createObjectURL`、`FileReader`、`fetch`、`XMLHttpRequest`、`WebSocket`、`sendBeacon`、`localStorage`、`indexedDB`（以字串拼接方式寫斷言，避免測試檔本身成為誤判來源不影響產物） |
+| `store.test.js`（改） | FE-37 | AC-32-05 四步皆 `"applied"` 且學習欄位不變；AC-32-06 → `"applied"`；AC-32-01 → `"confirm"`，`state.data` 同一物件、`setItem` 0 次、`effectiveColor` 仍綠；`confirmApplyGoal` 成功：`setItem` 恰 1 次、寫出 `schemaVersion` 2、6 欄 = 預設、`goal` 300／棕、`customVocab` 與 `sttNoticeAcknowledged` 不變、鍵集合不變、`flashcard.index` 0 且正面、`studySet` 長度 = 新色級內建數 + 自訂數（AC-32-03）、`part5.currentIndex` 0；以同一假 storage 重建 store 讀回結果相同（AC-32-02「重新載入」）；AC-32-09：確定後翻同一字 → X = 1、`streak.days` = 1；quota 與一般例外：`state.data` 學習欄位與 `goal.appliedScore` 不變、storage 原值不變、`draftScore` = `appliedScore`、未發 `storage`／`learningQuota` tag、`learningQuotaNoticeShown` 不變、回 `{ ok: false, reason }`；`unavailable`：`setItem` 0 次、記憶體已初始化；`cancelApplyGoal`：`setItem` 0 次、`draftScore` 還原、tag `goal`；首次模式 `requestApplyGoal` → `"ignored"`；AC-32-08 (b) 匯入不同色級備份不清除；`setTab("decoder")`、`setTab("phrasebank")` 在一般模式不改 `currentTab` |
+| `customizer.test.js`（改） | FE-40 | 匯出純函式 `reinitDialogOptions()` 的標題、內文（逐字含 AC-32-01 兩段文字）、按鈕文字；以假 store 與假 `ui.dialog` 驅動「套用」：`"confirm"` → 開視窗；確定 → 呼叫 `confirmApplyGoal`，失敗 → toast「儲存空間不足，未套用」；取消 → `cancelApplyGoal`；視窗開啟中再按「套用」不重複開窗；`"applied"` → 不開窗；首次模式仍為「開始學習」；原始碼掃描 `customizer.js` 不含 `.applyGoal(` 呼叫 |
+| `naming.test.js`、`shell.test.js`（改） | FE-38 | 導覽 4 鈕依 `NAV_TAB_ORDER` 與 `TAB_LABELS`；每鈕仍含 SVG、無 `xmlns`；`index.html`（去除註解後）不含 `data-tab="decoder"`、`data-tab="phrasebank"`，可見文字與 `aria-label` 不含「解碼器」「句型庫」；兩個隱藏 section 仍存在且有 `hidden`、無 `aria-label`；底部導覽 CSS 為 4 欄 |
+| `router-motion.test.js`（改） | FE-38 | 既有以 `go("decoder")`／`go("phrasebank")` 驗證換頁的案例改用其他頁（如 `part5`、`sources`）；新增：一般模式 `go("decoder")` → 回 `false`、目前頁為 `dashboard`、隱藏頁 section 仍 `hidden`、`mount` 未被呼叫；首次模式 `go("decoder")` → `false` 且仍在 `customizer`；`hashchange` 到 `#decoder`、`#view-phrasebank`、`#/decoder` → 主控台；`#flashcards` 等其他片段 → 不切頁；啟動時 `location.hash = "#phrasebank"` → 主控台；全程無 `console.error` |
+| `dashboard.test.js`（改） | FE-38 | `ENTRIES.map(tab)` = `["customizer","flashcards","part5","sources"]`；`label` = `TAB_LABELS`；不含隱藏頁 |
+| `speech.test.js`（改） | FE-39 | `messageForError("audio-capture")` →「找不到麥克風裝置」＋補充說明；`not-allowed` 等不變；`messageForAcquire` 四種 `reason`；`TEXT.notice` 逐字 = AC-08-13（v0.9）；`meterBarsOf(0～5)`。以極簡假 DOM 與替身 `mic`、`stt`、`store`、`ui.dialog` 驅動麥克風按鈕：不支援 → 只 toast、`acquire` 0 次；離線 → `acquire` 0 次；說明「取消」→ `acquire` 0 次；「我知道了」→ `acquire` 後 `stt.start`；`permission`／`notfound` → 對應訊息、`stt.start` 0 次、收音條全暗；`unavailable` → `stt.start` 1 次、收音條全暗、無訊息；聆聽中 `onLevel(3)` → 恰前 3 格 `is-on`；結果、錯誤、逾時、再按停止、`reset()` 後同步 5 格全暗且 `stopMeter` 被呼叫；聆聽中觸發 track ended → `stt.abort`、「找不到麥克風裝置」；`reset()` 不呼叫 `mic.release`、`release()` 會呼叫；所有 store action 的參數中沒有音量數字（spy） |
+| `flashcards.test.js`（改） | FE-39 | 原始碼掃描或 vm：`hide()` 呼叫 `speechPanel.release`（不存在時退回 `reset`） |
+| `build.test.js`（改） | FE-41 | 程式含 `MediaRecorder` 字樣 → `BuildError`（禁止樣式）；既有案例不變 |
+| `load-order.test.js`（改） | FE-41 | `EMT.core.meter`、`EMT.core.reinit`、`EMT.services.mic` 依建置順序載入不拋例外且存在；`register` 的頁面仍含 7 個 TabId（隱藏頁仍登錄，HT-5） |
+
+**E2E 與人工（QA，`/qa-verify` 時新增；SD 建議範圍）**
+
+| 範圍 | 建議方法 | AC |
+| :--- | :--- | :--- |
+| 初始化確認 | 以 `addInitScript` 預寫 `schemaVersion` 2 的狀態（6 種單項成立、全不成立、自訂 3 字含 `monetization`）；按「套用」後檢查視窗文字、按鈕數、背景點擊無效；確定／取消／Esc／點背景；`Storage.prototype.setItem` 替身拋 `QuotaExceededError` 測 AC-32-11 (b)；停用 localStorage 測 (a)；重新載入；匯出備份比對 | AC-32-01～AC-32-11 |
+| 收音條（替身音源） | `addInitScript` 覆寫 `navigator.mediaDevices.getUserMedia`，回傳測試頁自建 `OscillatorNode` → `createMediaStreamDestination().stream`（**屬 QA 測試腳本，不在產品程式中**），依 §7.14 門檻產生 6 段 RMS；或 Chrome `--use-fake-device-for-media-stream --use-file-for-fake-audio-capture`。量 `.sp-meter__bar.is-on` 數量與更新間隔；替身拋 `NotFoundError`、`NotAllowedError`、`NotReadableError`、刪除 `mediaDevices`；以替身 track 觸發 `ended` | AC-33-03～AC-33-08、AC-08-02、AC-08-09 |
+| 隱藏頁 | 375、1366 寬檢視導覽、底部導覽、主控台、頁尾；網址列輸入 `#decoder`、`#phrasebank`、`#view-decoder`；重新載入；匯入備份；確認 `window.DECODER_SENTENCES.length ≥ 50`、`ACADEMIC_PHRASEBANK.length ≥ 100` 仍在產物中 | AC-20-03、AC-20-04、AC-27-01、AC-17-06 |
+| 靜態 | 依 §10「靜態檢查」v0.5 列 | AC-21-03、AC-20-04 |
+
+**V-MIC 實機驗證（PRD US-33；Windows 11 上的 Google Chrome 與 Microsoft Edge，皆以 `file://` 開啟）**
+
+| 項目 | 內容 |
+| :--- | :--- |
+| 環境 | Windows 11；Google Chrome 與 Microsoft Edge 各自的最新穩定版（記錄版本號）；以檔案總管**雙擊** `dist/english-master-track.html`，網址列為 `file:///…/english-master-track.html`；該瀏覽器對此檔案的麥克風權限為預設「詢問」（每次測試前關閉所有該瀏覽器視窗再開）；1 支可用麥克風；已連網；localStorage 已有「STT 說明已讀」（先在單字卡頁按麥克風 →「我知道了」→ 拒絕或允許皆可，然後關閉瀏覽器重開） |
+| 偵錯輔助 | `EMT.services.mic.tracks()` 回傳目前持有音軌陣列的**複本**（只供 DevTools 檢查，不進 store）。AC-33-02：在單字卡頁取得麥克風後於 Console 執行 `t = EMT.services.mic.tracks()`，離開後執行 `t.map(x => x.readyState)` 應全為 `"ended"` |
+| V-MIC-1（AC-33-01） | 進單字卡頁 → 按麥克風、在權限詢問選「允許」、完成 1 次辨識；不離開本頁（期間換卡、翻面、切測驗模式再切回）再按 4 次；記錄權限詢問出現次數（應為 1），Chrome、Edge 各 1 輪 |
+| V-MIC-2（AC-33-02） | 由導覽與主控台入口各離開 1 次；另測 F5 重新整理與關閉分頁：1 秒內分頁與網址列的麥克風使用中圖示消失；Console 檢查 `readyState`。回單字卡頁再按麥克風，若再次詢問屬可接受 |
+| V-MIC-3（AC-33-03、AC-33-08） | 說話時 5 格依音量點亮、靜默時歸暗；Windows「設定 → 協助工具 → 視覺效果 → 動畫效果」關閉後重測：收音條仍即時變化、無漸變，「聆聽中」不閃爍 |
+| V-MIC-4（AC-08-09） | 權限詢問選「封鎖」→「需要麥克風權限」與開啟方式、收音條全暗、不辨識；再按一次會重新嘗試 |
+| V-MIC-5（AC-33-05、AC-33-06） | 拔除 USB 麥克風（或於 Windows 裝置管理員停用）後按麥克風 →「找不到麥克風裝置」；聆聽中拔除 → 聆聽結束、收音條全暗、顯示錯誤提示 |
+| 結果判定 | AC-33-01 若實測出現第 2 次詢問：QA 開 BUG 並附瀏覽器版本，由人類判斷是否接受為瀏覽器限制（PRD R-18 二） |
+
+---
+
+## 11. 技術風險與對策
+
+| # | 風險 | 影響 | 對策 |
+| :--- | :--- | :--- | :--- |
+| T-01 | 15 個平行批次風格不一（音標慣例、釋義長度、例句句型） | 品質、QA 退件 | §8.3 統一慣例 P／T／O；驗證器 H-1～H-7 自動攔；每批 10% 自查；QA 5% 抽查與退件門檻 |
+| T-02 | 單一代理一次產出 350～409 筆內容超出單次輸出能力 | 任務中斷 | W-4：每次 ≤ 50 筆寫入 scratchpad 分段檔，`fill.mjs` 合併；任務可重入（已寫的分段保留） |
+| T-03 | `s2twp` 過度轉換（程序→程式、文件→檔案）未被發現（FB-22） | 用語錯誤 | `material.mjs` 依**簡體原檔**列出 M-3 命中字；紀錄附 V-VOC-17 清單；QA 全檢 |
+| T-04 | 簡體字殘留 | AC-23-02、C-1 | H-1 以資料導出的簡體專用字集自動攔截 |
+| T-05 | 英式音標殘留或手誤 | NFR-3、R-13 | H-2 允許字元集 + 英式符號黑名單；人工抽查 |
+| T-06 | `N_B`／`N_G` 重算與紀錄值不符（N-1） | 分檔邊界錯位 | CT-02 先驗證；不符即 `blocked`，回 SA／SD，批次任務不會開始 |
+| T-07 | 檔案超過 5 MB | AC-19-04 | §6 估算 3.1 MB；H-7 長度預算；B-7 警告門檻 4.5 MiB；B-9 備援壓縮 |
+| T-08 | `file://` 下 `navigator.clipboard` 不可用或需權限 | AC-16-03 失敗 | 依 AC-16-04 降級為提示 + 反白；人工驗收以實機確認；Chrome 視 `file:` 為安全環境，預期可用 |
+| T-09 | Chrome 的 TTS 線上語音（Google US English）離線無聲 | AC-19-02 | 優先 `localService` 語音（R-10）；`onerror` 時提示 |
+| T-10 | `SpeechRecognition` 在 `file://` 每次要求權限（E-07）、斷網時錯誤碼不一 | AC-08-09、AC-08-14 | 開始前檢查 `navigator.onLine`；`network` 錯誤同訊息；權限流程視為正常 |
+| T-11 | 資料內含 `</script>` 或 `<!--` 破壞內嵌 | 白屏 | B-3 跳脫；V-VOC-10 禁 `<`、`>` |
+| T-12 | 資料檔缺漏或格式錯（內容未完成時前端開發） | 白屏 | C-6 容錯；`core/content.js` 一律回空陣列；FE 任務以 scratchpad fixture 測試；`--data` 參數 |
+| T-13 | 計算後樣式受 transition 影響，自動化驗證 AC-13-01 不穩 | 測試誤判 | 淡化不加 transition（§7.6） |
+| T-14 | 時區與日光節約導致打卡天數計算錯誤 | AC-17-02 | 本地日期字串 + `Date.UTC` 差日；單元測試含跨月、跨年、DST |
+| T-15 | 主控同時派出大量平行任務，`sources/` 只讀但工具同時執行 | 無寫入衝突 | 工具只寫自己 `paths` 內的分檔與 scratchpad；`sources/` 永不寫入 |
+| T-16 | 非內容檔（`_tools/`、`_records/`）放在 `src/data/` | 與 CLAUDE.md「內容資料」描述不完全一致 | D-1 不打包；列入 §15 SD-FB-01 請人類確認 |
+| T-17 | （v0.2）授權標頭放在 `<meta charset>` 前，使編碼宣告超出前 1,024 bytes | Firefox `file://` 中文亂碼或重新解析（AC-19-03） | §5 固定開頭順序；B-1 檢查模板、B-7 檢查產物 bytes 位置；FE-18 自檢 |
+| T-18 | （v0.2）`node --test <目錄>` 在 Node 21 以上失敗；Node 18／20 在 Windows 不展開 glob | `npm test` 無法執行 | `npm test` 改用 glob、`engines` 改 `>=22`（§5） |
+| T-19 | （v0.3）core 模組在載入時讀取其他 core 模組，瀏覽器依檔名序載入時取到 `undefined`（R6-1）；Node 單元測試以 `require` 載入，測不出來 | 建置產物白屏或功能失效 | §4.1 LD-1～LD-3；`backup.test.js` R6-1 案例與 FE-19 `load-order.test.js` 以 `vm` 沙箱依建置順序載入 |
+| T-20 | （v0.3）頁面任務的 paths 不含 `__tests__/`，測試留在 scratchpad（不跨工作階段保留、QA 拿不到、不在 `npm test`） | 回歸無保護、QA 無法重跑 | FE-19 移入並改為相對路徑與 fixture；日後新增頁面任務時 SD 須把對應 `__tests__/<view>.test.js` 列入 paths |
+| T-21 | （v0.3）單元測試讀取 `src/data/` 正式資料，內容任務仍在進行時結果隨資料變動 | `npm test` 不穩定、與 CT 進度耦合 | §10 規則：單元測試只用 fixture；資料正確性由 `validate.mjs` 負責 |
+| T-22 | （v0.4）v1 → v2 遷移有缺陷，已上線使用者開啟新版後資料被重設 | 進度遺失（AC-30-12） | 遷移只「補兩欄」不動其他 7 欄（MG-2）；`persist.test.js` 以 v0.7 實際寫出格式的 fixture 測；store 先存 `unreadable` 再覆蓋（RS-1）；FE-33 以 v0.3 產物產生的真實 localStorage 字串回歸 |
+| T-23 | （v0.4）首次模式下誤寫入 localStorage（例如既有 action 的寫入路徑未經守門） | 重新整理後不再是首次（AC-25-04） | 守門放在 store 唯一的寫入函式 `writeData`（不在各 action 判斷）；`store.test.js` 以計數 `setItem` 斷言 0 次 |
+| T-24 | （v0.4）動畫期間的連點造成狀態與畫面不一致 | AC-28-08、AC-31-02 | §7.11 A-2：狀態同步先行、不依賴 `animationend`；換頁無離場動畫；翻卡只顯示一面 |
+| T-25 | （v0.4）滑動後瀏覽器補發 click 造成誤翻面或誤作答 | AC-28-05、AC-28-06 | `CLICK_SUPPRESS_MS` 時間窗；quiz／part5 只認點擊；E2E 以 CDP 觸控事件驗證 |
+| T-26 | （v0.4）底部導覽遮住內容或輸入欄（虛擬鍵盤） | AC-27-03 | `body` 底部留白、toast 上移、輸入時隱藏導覽；實機人工驗收 |
+| T-27 | （v0.4）每個學習事件都寫整筆 localStorage，極端資料量下拖慢互動 | AC-22-* | §6.1 估算最壞 400 K 字元仍 ≤ 20 ms（4 倍降速）；不做延遲寫入；FE-33 以大型 fixture 量測一次 |
+| T-28 | （v0.4）同一檔案被多個新任務修改，平行時互相覆蓋 | 程式遺失 | D-6、§12.3：同檔任務以 `dependsOn` 串接，不同批 |
+| T-29 | （v0.4）CSS 動畫時間與 JS 常數不同步 | QA 量到的時間與設計不符 | A-4：`router-motion.test.js` 讀 CSS 比對 |
+| T-30 | （v0.4）QA 既有 E2E 以舊文字（抽認卡、自訂器、Part 5）定位元素或依「無首次畫面」的流程撰寫 | 回歸測試大量誤判 | SD-FB-13 知會 QA 更新；PG 不得修改 `tests/` |
+| T-31 | （v0.4）跨午夜時頁面停在主控台、沒有任何操作 | 畫面仍顯示昨天的 X | PRD AC-30-07 只要求「學習行為或回到主控台」時反映，現行設計符合；不加計時器輪詢（避免背景耗電），列為已知行為 |
+| T-32 | （v0.5）**`file://` 下持有 `getUserMedia` 音軌，Chrome／Edge 的 SpeechRecognition 仍可能每次再詢問權限**（兩者是否共用同一次授權取決於瀏覽器實作；PRD R-18 二已列為風險） | AC-33-01 不成立 | 設計已盡量讓授權發生在同一工作階段且音軌不中斷；V-MIC-1 以兩個瀏覽器實測；不成立時依 PRD 由 QA 開 BUG、人類判斷是否接受。**SD 無法在設計階段排除**，列為需要人類注意的首要風險 |
+| T-33 | （v0.5）第一次按麥克風時可能出現**兩次**詢問（`getUserMedia` 一次、SpeechRecognition 一次） | AC-33-01「只在第 1 次出現 1 次」 | 先 `getUserMedia` 取得授權後才 `stt.start()`，正常情況下第二個請求沿用已授予的權限；V-MIC-1 記錄第 1 次按下時的詢問次數，若為 2 次同 T-32 處理 |
+| T-34 | （v0.5）`AudioContext` 在 `await getUserMedia` 之後才建立會被自動播放政策置於 `suspended`，`AnalyserNode` 只讀到 0 | 收音條永遠全暗（AC-33-03） | 在點擊的同步階段建立 `AudioContext`，重用時 `resume()`；`mic.test.js` 斷言建構早於 `getUserMedia` 呼叫；V-MIC-3 實機確認 |
+| T-35 | （v0.5）同時持有音軌與 SpeechRecognition，部分驅動或藍牙耳機切換為通話模式、或辨識品質改變 | 實機體驗 | 不連 `destination`（無回授）；`getUserMedia` 只要求 `{ audio: true }`，不另設 `echoCancellation` 等約束（沿用瀏覽器預設）；V-MIC 實測，問題由人類判斷 |
+| T-36 | （v0.5）瀏覽器自動增益（AGC）使實際格數與替身音源不同 | 實機格數與 AC-33-04 數值不一致 | AC-33-04 以替身音源驗收（PRD 已註明）；實機只看「說話會亮、靜默會暗」；門檻可在 §7.14 範圍內微調、主控代核 |
+| T-37 | （v0.5）離開頁面未經 router（例如瀏覽器返回、分頁切換） | 麥克風使用中圖示持續 | 本系統無 history 路由，離開單字卡頁只能經 router（會呼叫 `hide`）；重新整理與關閉以 `pagehide` 釋放；切到其他瀏覽器分頁不釋放（Q-36 只要求離開單字卡頁），列為已知行為 |
+| T-38 | （v0.5）初始化寫入成功但畫面只更新一部分（某 view 漏聽 tag） | AC-32-02 主控台或模擬測驗頁仍顯示舊值 | `confirmApplyGoal` 發出 `goal`、`studySet`、`flashcard`、`quiz`、`speech`、`stats`、`streak`、`part5`、`learning` 等 tags；各頁 `show()` 時一律依最新狀態重繪；E2E 依 AC-32-02 逐項檢查 |
+| T-39 | （v0.5）QA 或使用者以原始碼搜尋「解碼器」「句型庫」判定 AC-20-04 失敗 | 誤判 | 程式碼依 HT-4、HT-5 必須保留（`TAB_LABELS`、views），原始碼不可能為 0；AC-20-04 判定的是「畫面導覽與入口」。見 SD-FB-21 |
+
+---
+
+## 12. 任務總覽與執行批次
+
+| 批次 | pg-content | pg-frontend | 前置 |
+| :--- | :--- | :--- | :--- |
+| 第 1 批 | CT-01 資料工具 | FE-01 建置腳本、FE-03 分數核心、FE-05 演算法核心 | 無 |
+| 第 2 批 | CT-02 排名骨架與 sources.js、CT-18 範本、CT-19 Part 5（前 100）、CT-21 長難句與閱讀策略、CT-22 句型庫 | FE-02 殼與共用 UI、FE-04 單字集核心、FE-06 持久化與備份核心 | 第 1 批 |
+| 第 3 批 | CT-03～CT-17 字庫 15 批、CT-20 Part 5（後 100、排序） | FE-07 store | 第 2 批 |
+| 第 4 批 | CT-23 字庫整合與 sources.js 回填 | FE-08 主控台與備份、FE-09 自訂器、FE-10 自訂單字與範本、FE-11 抽認卡、FE-14 Part 5、FE-15 解碼器、FE-16 句型庫、FE-17 來源與授權頁 | 第 3 批 |
+| 第 5 批 | — | FE-12 語音、FE-13 四選一 | FE-11 |
+| 第 6 批（v0.3） | — | FE-19 頁面單元測試移入 `__tests__/` | FE-08～FE-17 與 §12.2 的 R3-1～R3-3 |
+| 第 7 批 | — | FE-18 整合建置與自檢（產出 `dist/`） | 全部 FE（含 FE-19）、CT-23 |
+
+任務數：pg-content 23 個（CT-01～CT-23）、pg-frontend 19 個（FE-01～FE-19；FE-19 為 v0.3 新增，由主控加入 tasks.json），共 42 個。
+
+FE-19 與 FE-18 的先後（v0.3）：**FE-19 在前**。理由：FE-18 的 doneWhen 是「`npm test` 成功」，作為交付前最後關卡，應涵蓋全部頁面測試；FE-19 只寫 `src/app/__tests__/` 下的新檔，與 FE-18 的 paths（`tools/build.mjs`、`90-overrides.css`、`dist/`）無重疊，但若平行執行，FE-18 跑的 `npm test` 不含頁面測試，關卡失去意義。請主控在 FE-18 的 `dependsOn` 加入 `FE-19`。FE-19 不依賴 CT 任務（不讀正式資料），可與 CT 第 3、4 批平行。CT 與 FE 兩條線互不依賴，直到 FE-18 才匯合；FE 任務在內容未完成前以 fixture 開發。
+
+### 12.1 v0.2 待派補修（已完成任務的程式需配合，由主控另派；SD 不改任務 paths）
+
+| 編號 | 對象任務（檔案皆在其 paths 內） | 內容 | 時機 |
+| :--- | :--- | :--- | :--- |
+| R2-1 | FE-01（`tools/build.mjs`、`src/app/__tests__/build.test.js`、`src/app/index.html`、`package.json`） | (1) `checkTemplate` 改依 §5 B-1 新規則（LICENSE 緊接 `<meta charset="utf-8">`）；(2) B-7 新增 charset 位置 ≤ 1,024 bytes 檢查；(3) `build.test.js` 的模板常數、「LICENSE 未緊接 DOCTYPE」案例、對實際 `index.html` 的開頭斷言、`startsWith("<!DOCTYPE html>\n<!--\n")` 斷言改為新順序，並新增「charset 超出 1,024 bytes 中止」案例；(4) `index.html` 開頭改為 §5 的順序（其餘不變）；(5) `package.json` 的 `engines.node` 改 `>=22` | **必須在 FE-02 開始前完成**：B-1 檢查、測試與模板三者必須同時變更，否則 `npm test` 或建置會失敗；FE-02 已依賴 FE-01 |
+| R2-2 | FE-03（`src/app/core/goal.js`、`src/app/__tests__/goal.test.js`） | `parseScoreInput` 字串改用 §7.1 的十進位規則；測試新增 `1e2`、`0x64`、`+700`、`-5`、`７００`（全形）、`1,000` 無效，` 723 ` → 725、`722.5` → 725、數字 `700` 有效 | FE-07 開始前完成為宜（FE-07 呼叫 `parseScoreInput`；介面不變，不阻擋平行） |
+
+原 FE-01 任務描述中「`<!DOCTYPE html>`、緊接其後的 `<!-- @@LICENSE@@ -->`」的模板順序以本文件 §5（v0.2）為準。
+
+### 12.2 v0.3 待派補修（由主控另派；檔案皆在原任務 paths 內）
+
+| 編號 | 對象任務（檔案） | 內容 | 時機 |
+| :--- | :--- | :--- | :--- |
+| R3-1 | FE-03（`src/app/core/goal.js`、`src/app/__tests__/goal.test.js`） | §7.1 v0.3：`targetVocab` 在 `nB`／`nG` 不是大於 0 的有限數時回 `null`；`estimate` 藍金的 `T = nG` 同樣要求 > 0。測試新增：棕色 `estimate(S, 0, 0, 0)`、綠色 `estimate(S, 0, 2809, 0)`、藍色 `estimate(S, 0, 0, 0)` → `targetVocab` 為 `null`（藍金原本即 `null`）、`weeks === null`、`achieved === false`；`nB = -1`、`NaN` 同上；橘色 `estimate(S, 0, 0, 0)` 仍以 `N_O` 計算（不受影響）；既有測試若以 0 字量斷言「已達成」，改為新規則 | FE-19 開始前（FE-19 的 customizer 測試以新規則撰寫） |
+| R3-2 | FE-07（`src/app/state/store.js`、`src/app/__tests__/store.test.js`） | §4.3、§7.5 v0.3：`injectTemplate` 寫入遇 quota → 丟棄新狀態、回 `{ injected: 0, skipped, reason: "quota" }`，不設 `writeStatus`、不發 `storage` tag；`disabled` 維持現行（保留記憶體）。測試新增：quota 時 `getState().data.customVocab` 與 storage 原值皆不變、回傳含 `reason: "quota"`、subscribe 未收到 `storage` tag；之後解除 quota 再注入可完整注入 | R3-3 之前 |
+| R3-3 | FE-10（`src/app/views/custom-vocab.js`） | 範本注入結果 `reason === "quota"` → 只顯示 toast「儲存空間不足」（沿用既有 `MSG_QUOTA`），不顯示「已注入 N 個單字」；若注入提示文字由匯出的純函式產生，同步支援 quota 分支（供 FE-19 測試） | R3-2 之後、FE-19 之前 |
+| R3-4 | CT-01（`src/data/_tools/validate.mjs`、`src/data/_tools/lib.mjs`、`src/data/_records/CT-01.md`） | §8.4 v0.3「H-1 繁簡同形白名單」：新增白名單常數；導出字集扣除白名單 → H-1 錯誤；白名單字元命中 → H-1W 警告；報告開頭列出導出字集大小與被降為警告的字元；`CT-01.md` 補記白名單與以 fixture 驗證「后」→ H-1W、非白名單簡體字 → H-1 錯誤。V-VOC-17 不改程式 | 越早越好；最遲在 CT-23 執行 `--all` 之前。已完成的字庫批次不需重跑（白名單只會減少錯誤），但若其紀錄缺 V-VOC-17 判斷欄，由主控通知補紀錄（只改 `_records/vocab-XXXX.md`） |
+
+不需補修（v0.3 確認現行做法）：FE-07 測驗模式退回（§4.3）、FE-11 的 `state.runtime.flashcard` 用法（§4.4）、FE-12 的 `aria-disabled` 寫法（§9）與 `audio-capture` 訊息（§7.6）、FE-17 辭典列出規則（§7.6）、FE-09 view 的 0 轉 null（可保留）、FE-06 `backup.js` 的取用時機（已符合 LD-1、LD-3）。
+
+### 12.3 v0.4 增量任務與執行批次（PRD v0.8、契約 v0.8）
+
+既有 42 個任務（CT-01～CT-23、FE-01～FE-19）全部 `done`，內容不變。v0.4 新增 14 個 pg-frontend 任務，**不新增 pg-content 任務**（D-7）。
+
+| ID | 標題 | dependsOn | 主要 paths |
+| :--- | :--- | :--- | :--- |
+| FE-20 | 契約常數 v0.8 與學習紀錄核心 | — | `core/constants.js`、`core/learning.js` |
+| FE-21 | 介面互動核心（Q-33 常數、滑動判斷、震動樣式） | — | `core/interaction.js` |
+| FE-22 | 持久化 v2：遷移、讀取規則、備份 v1／v2 | FE-20 | `core/persist.js`、`core/backup.js`、`core/constants.js` |
+| FE-23 | R-15 功能更名（畫面文字） | FE-20 | `index.html`、`views/{dashboard,customizer,flashcards,part5}.js` |
+| FE-24 | 換頁動畫與減少動態基礎 | FE-21 | `ui/router.js`、`ui/motion.js`、`styles/05-motion.css` |
+| FE-25 | store：v2 狀態與學習事件記錄 | FE-20、FE-22 | `state/store.js`、`ui/banner.js` |
+| FE-26 | 手機底部導覽列 | FE-20、FE-23 | `index.html`、`styles/00-base.css`、`ui/bottom-nav.js`、`main.js` |
+| FE-27 | 難易度大卡片 | FE-23 | `views/customizer.js`、`styles/20-customizer.css` |
+| FE-28 | 單字卡手勢與翻轉動畫 | FE-21、FE-23、FE-24 | `views/flashcards.js`、`styles/30-flashcards.css` |
+| FE-29 | 答題回饋：顏色、動畫、震動、只認點擊 | FE-21、FE-23、FE-24 | `views/flashcard-quiz.js`、`views/part5.js`、兩個 CSS、`services/haptics.js` |
+| FE-30 | store：首次進入流程 | FE-25 | `state/store.js` |
+| FE-31 | 主控台今日學習進度 | FE-20、FE-22、FE-23、FE-24、FE-25 | `views/dashboard.js`、`styles/10-dashboard.css` |
+| FE-32 | 首次進入畫面與流程整合 | FE-24、FE-26、FE-27、FE-30 | `main.js`、`ui/router.js`、`ui/import-flow.js`、`views/customizer.js`、`styles/{00-base,20-customizer}.css`、`index.html` |
+| FE-33 | v0.8 整合建置與交付前自檢 | FE-20～FE-32 全部 | `dist/`、`styles/90-overrides.css`、`tools/build.mjs`、`load-order.test.js` |
+
+| 批次 | 任務（可平行） | 前置 |
+| :--- | :--- | :--- |
+| v0.4 第 1 批 | FE-20、FE-21 | 無（既有任務皆已 done） |
+| v0.4 第 2 批 | FE-22、FE-23、FE-24 | 第 1 批 |
+| v0.4 第 3 批 | FE-25、FE-26、FE-27、FE-28、FE-29 | 第 2 批 |
+| v0.4 第 4 批 | FE-30、FE-31 | FE-25（及第 2 批） |
+| v0.4 第 5 批 | FE-32 | FE-30、FE-26、FE-27、FE-24 |
+| v0.4 第 6 批 | FE-33 | 全部 |
+
+同批任務的 `paths` 互不重疊（主控可以 tasks.json 驗證）。共用檔案的串接：`constants.js`、`goal.test.js`：FE-20 → FE-22；`index.html`：FE-23 → FE-26 → FE-32；`main.js`：FE-26 → FE-32；`00-base.css`：FE-26 → FE-32；`router.js`、`router-motion.test.js`：FE-24 → FE-32；`customizer.js`、`20-customizer.css`、`customizer.test.js`：FE-23（僅 `customizer.js`）→ FE-27 → FE-32；`store.js`、`store.test.js`：FE-25 → FE-30；`dashboard.js`：FE-23 → FE-31；`dashboard.test.js`：FE-22 → FE-31；`flashcards.js`：FE-23 → FE-28；`part5.js`：FE-23 → FE-29。
+
+任務數（全專案）：pg-content 23、pg-frontend 33（FE-01～FE-33），共 56 個。
+
+### 12.4 v0.5 增量任務與執行批次（PRD v0.9、契約 v0.9）
+
+既有 56 個任務全部 `done`，內容不變。v0.5 新增 8 個 pg-frontend 任務；**不新增 pg-content 任務**（D-9、契約 DS-06）。**FE-34～FE-41 彼此沒有任何共用 path**（D-8）。
+
+| ID | 標題 | dependsOn | paths |
+| :--- | :--- | :--- | :--- |
+| FE-34 | 契約常數 v0.9 與切換難易度初始化核心 | — | `core/constants.js`、`core/reinit.js`、`__tests__/goal.test.js`、`__tests__/reinit.test.js` |
+| FE-35 | 收音條音量核心（門檻常數、RMS、dBFS、亮格數） | — | `core/meter.js`、`__tests__/meter.test.js` |
+| FE-36 | 麥克風服務：取得、重用、釋放、音量讀取 | FE-35 | `services/mic.js`、`__tests__/mic.test.js` |
+| FE-37 | store：切換難易度初始化（原子寫入）與隱藏頁守門 | FE-34 | `state/store.js`、`__tests__/store.test.js`、`__tests__/_fixtures.js` |
+| FE-38 | 隱藏解碼器與句型庫：導覽、底部導覽、主控台入口、路由 | FE-34 | `index.html`、`styles/00-base.css`、`ui/router.js`、`views/dashboard.js`、`__tests__/naming.test.js`、`__tests__/shell.test.js`、`__tests__/router-motion.test.js`、`__tests__/dashboard.test.js` |
+| FE-39 | 語音面板 v0.9：麥克風只詢問一次、5 格收音條、錯誤對照、離開釋放 | FE-35、FE-36 | `views/speech-panel.js`、`styles/31-speech.css`、`views/flashcards.js`、`__tests__/speech.test.js`、`__tests__/flashcards.test.js` |
+| FE-40 | 難易度設定：初始化確認視窗 | FE-37 | `views/customizer.js`、`__tests__/customizer.test.js` |
+| FE-41 | v0.9 整合建置、交付產物與自檢（含 dist 重建） | FE-34～FE-40 | `dist/english-master-track.html`、`tools/build.mjs`、`__tests__/build.test.js`、`__tests__/load-order.test.js`、`styles/90-overrides.css` |
+
+（paths 皆省略前綴 `src/app/`，`dist/`、`tools/` 除外。）
+
+| 批次 | 任務（可平行） | 前置 |
+| :--- | :--- | :--- |
+| v0.5 第 1 批 | FE-34、FE-35 | 無（既有任務皆已 done） |
+| v0.5 第 2 批 | FE-36、FE-37、FE-38 | FE-36 ← FE-35；FE-37、FE-38 ← FE-34 |
+| v0.5 第 3 批 | FE-39、FE-40 | FE-39 ← FE-35、FE-36；FE-40 ← FE-37 |
+| v0.5 第 4 批 | FE-41 | 全部 |
+
+說明：(1) 第 1 批結束後 `naming.test.js`、`shell.test.js` 會暫時失敗，第 2 批 FE-38 修復（§10.2）；(2) 若主控希望縮短路徑，FE-38 與 FE-36、FE-37 無相依，也可提前與第 1 批之後的任何批次並行；(3) FE-39 只依賴 FE-35、FE-36，可與 FE-37、FE-38 同時開始（若主控採「依 dependsOn 即時派發」而非固定批次）。
+
+任務數（全專案）：pg-content 23、pg-frontend 41（FE-01～FE-41），共 64 個。
+
+---
+
+## 13. AC → 任務對照表
+
+（v0.3）共 141 個 AC，全部涵蓋（未涵蓋：無）。v0.4 追加見 §13.1。「CT-03～CT-17」表示 15 個字庫批次任務全部；「CT-10～CT-17」表示排名 > 2,809 的 8 個批次。
+
+| AC | 任務 |
+| :--- | :--- |
+| AC-01-01 | FE-03、FE-09 |
+| AC-01-02 | FE-04、FE-07、FE-09 |
+| AC-01-03 | FE-07、FE-09 |
+| AC-01-04 | FE-06、FE-07 |
+| AC-01-05 | FE-03、FE-09 |
+| AC-01-06 | FE-03、FE-09 |
+| AC-01-07 | FE-03、FE-07、FE-09 |
+| AC-02-01 | FE-09 |
+| AC-02-02 | FE-03、FE-09 |
+| AC-02-03 | FE-03 |
+| AC-02-04 | FE-03 |
+| AC-02-05 | FE-03、FE-09 |
+| AC-02-06 | FE-03、FE-09 |
+| AC-02-07 | FE-09 |
+| AC-02-08 | FE-07、FE-09 |
+| AC-02-09 | FE-03、FE-09 |
+| AC-02-10 | FE-03、FE-09 |
+| AC-03-01 | FE-04 |
+| AC-03-02 | FE-04 |
+| AC-03-03 | FE-04、FE-09 |
+| AC-03-04 | FE-04、FE-11 |
+| AC-03-05 | FE-07、FE-11 |
+| AC-03-06 | CT-02、CT-23、FE-04 |
+| AC-03-07 | CT-01、CT-02、CT-23 |
+| AC-03-08 | CT-01、CT-02、CT-23 |
+| AC-03-09 | CT-02、CT-03、CT-23 |
+| AC-04-01 | FE-10 |
+| AC-04-02 | FE-10 |
+| AC-04-03 | FE-10 |
+| AC-04-04 | FE-02、FE-10 |
+| AC-04-05 | FE-07 |
+| AC-04-06 | FE-04、FE-10 |
+| AC-04-07 | FE-04、FE-07、FE-10 |
+| AC-04-08 | FE-04、FE-11 |
+| AC-04-09 | FE-02、FE-18 |
+| AC-05-01 | CT-18、FE-10 |
+| AC-05-02 | CT-18、FE-04、FE-10 |
+| AC-05-03 | CT-18、FE-10 |
+| AC-05-04 | FE-04、FE-10 |
+| AC-05-05 | CT-18、FE-10 |
+| AC-06-01 | CT-03～CT-17、FE-11 |
+| AC-06-02 | CT-03～CT-17、FE-11 |
+| AC-06-03 | FE-11 |
+| AC-06-04 | FE-11 |
+| AC-06-05 | FE-07、FE-11 |
+| AC-06-06 | FE-11 |
+| AC-06-07 | CT-01、FE-11 |
+| AC-06-08 | CT-10～CT-17、CT-23 |
+| AC-07-01 | FE-12 |
+| AC-07-02 | FE-12 |
+| AC-07-03 | FE-12 |
+| AC-07-04 | FE-12 |
+| AC-07-05 | FE-12 |
+| AC-08-01 | FE-12 |
+| AC-08-02 | FE-12 |
+| AC-08-03 | FE-05、FE-12 |
+| AC-08-04 | FE-05 |
+| AC-08-05 | FE-05 |
+| AC-08-06 | FE-05、FE-12 |
+| AC-08-07 | FE-12 |
+| AC-08-08 | FE-12 |
+| AC-08-09 | FE-12 |
+| AC-08-10 | FE-12 |
+| AC-08-11 | FE-12 |
+| AC-08-12 | FE-05 |
+| AC-08-13 | FE-07、FE-12 |
+| AC-08-14 | FE-12 |
+| AC-09-01 | FE-13 |
+| AC-09-02 | CT-23、FE-05、FE-13 |
+| AC-09-03 | FE-13 |
+| AC-09-04 | FE-07、FE-13 |
+| AC-09-05 | FE-13 |
+| AC-09-06 | FE-05、FE-13 |
+| AC-09-07 | FE-05、FE-13 |
+| AC-10-01 | CT-19、CT-20 |
+| AC-10-02 | CT-19、FE-14 |
+| AC-11-01 | FE-14 |
+| AC-11-02 | CT-19、CT-20、FE-14 |
+| AC-11-03 | FE-07、FE-14 |
+| AC-11-04 | FE-07、FE-14 |
+| AC-11-05 | FE-06、FE-07、FE-14 |
+| AC-11-06 | FE-07、FE-14 |
+| AC-11-07 | FE-07、FE-14 |
+| AC-12-01 | CT-21、FE-15 |
+| AC-12-02 | CT-21、FE-15 |
+| AC-12-03 | CT-21、FE-15 |
+| AC-13-01 | CT-21、FE-15 |
+| AC-13-02 | FE-15 |
+| AC-13-03 | FE-15 |
+| AC-13-04 | FE-15 |
+| AC-14-01 | CT-21、FE-15 |
+| AC-14-02 | FE-15 |
+| AC-15-01 | FE-16 |
+| AC-15-02 | CT-22、FE-16 |
+| AC-15-03 | FE-16 |
+| AC-16-01 | FE-16 |
+| AC-16-02 | FE-16 |
+| AC-16-03 | CT-22、FE-16 |
+| AC-16-04 | FE-16 |
+| AC-17-01 | FE-08 |
+| AC-17-02 | FE-05、FE-07 |
+| AC-17-03 | FE-07 |
+| AC-17-04 | FE-05、FE-08 |
+| AC-17-05 | FE-05 |
+| AC-17-06 | FE-08 |
+| AC-18-01 | FE-07 |
+| AC-18-02 | FE-06、FE-07 |
+| AC-18-03 | FE-07 |
+| AC-18-04 | FE-07、FE-10（v0.3：範本注入的 quota 提示，R3-3） |
+| AC-18-05 | FE-06、FE-07 |
+| AC-18-06 | FE-07、FE-18 |
+| AC-24-01 | FE-06、FE-08 |
+| AC-24-02 | FE-06 |
+| AC-24-03 | FE-07、FE-08 |
+| AC-24-04 | FE-07、FE-08 |
+| AC-24-05 | FE-06、FE-08 |
+| AC-24-06 | FE-06、FE-08 |
+| AC-24-07 | FE-08、FE-10、FE-11 |
+| AC-24-08 | FE-06、FE-08 |
+| AC-24-09 | FE-07 |
+| AC-23-01 | CT-02、CT-03～CT-17、FE-11 |
+| AC-23-02 | CT-02、CT-23、FE-17 |
+| AC-23-03 | CT-01、CT-02、CT-03～CT-17、CT-23 |
+| AC-23-04 | CT-03～CT-17、CT-18、CT-19、CT-20、CT-21、CT-22 |
+| AC-23-05 | CT-02、CT-23 |
+| AC-23-06 | FE-01、FE-18 |
+| AC-19-01 | FE-01、FE-18 |
+| AC-19-02 | FE-18 |
+| AC-19-03 | FE-01、FE-18 |
+| AC-19-04 | FE-01、FE-18 |
+| AC-20-01 | FE-02、FE-18 |
+| AC-20-02 | FE-02、FE-18 |
+| AC-20-03 | FE-02 |
+| AC-21-01 | FE-18 |
+| AC-21-02 | FE-12、FE-18 |
+| AC-21-03 | FE-12 |
+| AC-22-01 | FE-02、FE-18 |
+| AC-22-02 | FE-04、FE-11、FE-18 |
+| AC-22-03 | FE-12 |
+| AC-22-04 | FE-09 |
+| AC-22-05 | FE-01、FE-18 |
+
+### 13.1 v0.4 追加對照（PRD v0.8：192 個 AC）
+
+上表（v0.3，141 個 AC）仍有效；下表列出 v0.8 新增的 51 個 AC，以及 v0.8 修改內容或因 R-15 更名受影響的 AC 所**追加**的 v0.4 任務（既有對應任務不重列）。合計 192 個 AC 全部涵蓋，未涵蓋：無。
+
+**新增 AC（51）**
+
+| AC | 任務 |
+| :--- | :--- |
+| AC-24-10 | FE-22、FE-30（首次還原同規則） |
+| AC-24-11 | FE-20、FE-22 |
+| AC-25-01 | FE-30、FE-32 |
+| AC-25-02 | FE-30、FE-32 |
+| AC-25-03 | FE-30、FE-32 |
+| AC-25-04 | FE-30、FE-32 |
+| AC-25-05 | FE-30、FE-32 |
+| AC-25-06 | FE-27、FE-32 |
+| AC-25-07 | FE-30、FE-32 |
+| AC-25-08 | FE-30、FE-32 |
+| AC-25-09 | FE-30、FE-32 |
+| AC-25-10 | FE-30、FE-32 |
+| AC-25-11 | FE-30、FE-32 |
+| AC-26-01 | FE-27 |
+| AC-26-02 | FE-27 |
+| AC-26-03 | FE-27 |
+| AC-26-04 | FE-27 |
+| AC-27-01 | FE-20、FE-26 |
+| AC-27-02 | FE-26 |
+| AC-27-03 | FE-26、FE-33 |
+| AC-27-04 | FE-26 |
+| AC-27-05 | FE-26 |
+| AC-28-01 | FE-21、FE-28 |
+| AC-28-02 | FE-28 |
+| AC-28-03 | FE-21、FE-28 |
+| AC-28-04 | FE-21、FE-28 |
+| AC-28-05 | FE-21、FE-28 |
+| AC-28-06 | FE-21、FE-28、FE-29 |
+| AC-28-07 | FE-28 |
+| AC-28-08 | FE-28 |
+| AC-29-01 | FE-21、FE-29 |
+| AC-29-02 | FE-21、FE-29 |
+| AC-29-03 | FE-29 |
+| AC-30-01 | FE-31 |
+| AC-30-02 | FE-20、FE-31 |
+| AC-30-03 | FE-20、FE-25 |
+| AC-30-04 | FE-25 |
+| AC-30-05 | FE-20、FE-31 |
+| AC-30-06 | FE-20、FE-25 |
+| AC-30-07 | FE-20、FE-25、FE-31 |
+| AC-30-08 | FE-20、FE-31 |
+| AC-30-09 | FE-20、FE-22、FE-25 |
+| AC-30-10 | FE-20、FE-31 |
+| AC-30-11 | FE-20、FE-25 |
+| AC-30-12 | FE-22、FE-25 |
+| AC-30-13 | FE-20、FE-22、FE-25 |
+| AC-30-14 | FE-25 |
+| AC-31-01 | FE-21、FE-24 |
+| AC-31-02 | FE-24 |
+| AC-31-03 | FE-24、FE-28、FE-29、FE-31 |
+| AC-31-04 | FE-24、FE-33 |
+
+**v0.8 修改內容的 AC（追加任務）**
+
+| AC | 修改重點 | 追加任務 |
+| :--- | :--- | :--- |
+| AC-01-01 | 色級按鈕改為卡片；頁名「難易度設定」 | FE-23、FE-27 |
+| AC-18-01 | 加入今日已學紀錄與近 30 天歷史 | FE-22、FE-25 |
+| AC-18-02 | 首次使用先顯示首次畫面，按「開始學習」後以預設值啟動 | FE-30、FE-32 |
+| AC-20-03 | 導覽文字更名；≤ 640px 底部導覽；首次畫面不顯示導覽 | FE-20、FE-23、FE-26、FE-32 |
+| AC-22-01 | 量到換頁動畫第一個影格 | FE-24、FE-33 |
+| AC-22-05 | 首次使用量到「開始學習」可點擊 | FE-32、FE-33 |
+| AC-24-02 | 備份含今日紀錄與歷史 | FE-22 |
+| AC-24-06 | 支援版本 1、2 | FE-22 |
+
+**R-15 更名涉及的 AC（行為不變，畫面文字或用語更新；追加 FE-23，以 `naming.test.js` 回歸）**
+
+AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-02-07、AC-02-09、AC-02-10、AC-03-01、AC-03-04、AC-03-05、AC-04-02、AC-04-04、AC-04-07、AC-04-08、AC-05-01、AC-05-05、AC-06-01、AC-06-06、AC-07-04、AC-08-13、AC-09-01、AC-09-06、AC-10-02、AC-17-01、AC-17-02、AC-17-04、AC-17-06、AC-22-02、AC-22-04、AC-23-01、AC-24-07（另 AC-01-01、AC-18-01、AC-20-03、AC-24-02 見上表）。其中畫面文字實際改變的是 AC-01-01、AC-06-06、AC-10-02、AC-17-01、AC-17-04、AC-17-06、AC-20-03（§7.13）；其餘只是 PRD 的 Given／When 用語改變，程式行為與文字不需修改。
+
+### 13.2 v0.5 追加對照（PRD v0.9：212 個 AC，本版應驗收 196 個）
+
+§13、§13.1 仍有效；下表列出 v0.9 新增的 20 個 AC，以及 v0.9 修改內容的 AC 所**追加**的 v0.5 任務。**本版應驗收的 196 個 AC 全部涵蓋，未涵蓋：無。**
+
+**新增 AC（20）**
+
+| AC | 任務 | 設計位置 |
+| :--- | :--- | :--- |
+| AC-20-04 | FE-34、FE-37、FE-38、FE-41 | §7.16 |
+| AC-32-01 | FE-34、FE-37、FE-40 | §7.15 |
+| AC-32-02 | FE-34、FE-37、FE-40 | §7.15 |
+| AC-32-03 | FE-34、FE-37 | §7.15 |
+| AC-32-04 | FE-37、FE-40 | §7.15、§4.3 |
+| AC-32-05 | FE-34、FE-37 | §7.15 |
+| AC-32-06 | FE-34、FE-37 | §7.15 |
+| AC-32-07 | FE-34、FE-37 | §7.15 |
+| AC-32-08 | FE-37、FE-40 | §4.3 |
+| AC-32-09 | FE-37 | §7.15 |
+| AC-32-10 | FE-34、FE-37 | §7.15 |
+| AC-32-11 | FE-37、FE-40 | §7.15「原子性」 |
+| AC-33-01 | FE-36、FE-39、FE-41（V-MIC-1 人工） | §7.14、§10.2 |
+| AC-33-02 | FE-36、FE-39、FE-41（V-MIC-2 人工） | §7.14、§10.2 |
+| AC-33-03 | FE-35、FE-36、FE-39 | §7.14 |
+| AC-33-04 | FE-35、FE-36 | §7.14 常數表 |
+| AC-33-05 | FE-36、FE-39 | §7.14 錯誤對照 |
+| AC-33-06 | FE-36、FE-39 | §7.14 錯誤對照 |
+| AC-33-07 | FE-36、FE-39 | §7.14 錯誤對照 |
+| AC-33-08 | FE-39 | §7.11 A-5、A-6 |
+
+**v0.9 修改內容的 AC（追加任務）**
+
+| AC | 修改重點 | 追加任務 |
+| :--- | :--- | :--- |
+| AC-01-02 | 無學習紀錄才直接套用 | FE-37、FE-40 |
+| AC-01-07 | 綠 → 藍、金不跳視窗 | FE-34、FE-37 |
+| AC-03-05 | 確定後回第 1 張；取消維持第 k 張 | FE-37、FE-40 |
+| AC-08-01 | 聆聽中收音條點亮 | FE-39 |
+| AC-08-02 | 不支援時不呼叫 `getUserMedia`、收音條全暗 | FE-39 |
+| AC-08-09 | `getUserMedia` 權限路徑 | FE-36、FE-39 |
+| AC-08-13 | 說明文字加收音條與使用中圖示 | FE-39 |
+| AC-08-14 | 斷網時收音條全暗、不取麥克風 | FE-39 |
+| AC-11-07 | 累計只在初始化時歸 0 | FE-37 |
+| AC-17-02 | 初始化後打卡從 0、下次學習為 1 | FE-37 |
+| AC-17-06 | 主控台 3 個模組入口 + 資料來源 | FE-38 |
+| AC-19-02 | 模組四、五不驗收；收音條斷網不影響 | FE-39、FE-41 |
+| AC-20-03 | 導覽恰 4 項 | FE-34、FE-38 |
+| AC-21-03 | 允許 `getUserMedia` 只讀音量；禁止 `MediaRecorder` | FE-36、FE-39、FE-41 |
+| AC-25-02 | 首次「開始學習」不跳視窗 | FE-37、FE-40 |
+| AC-25-06 | 一般頁「套用」依 US-32 判斷 | FE-40 |
+| AC-26-02 | 點卡片不跳視窗 | FE-40 |
+| AC-27-01 | 底部導覽 4 項 | FE-34、FE-38 |
+| AC-27-02 | 4 項時觸控尺寸（間接影響） | FE-38 |
+| AC-27-04 | 寬螢幕導覽 4 項 | FE-38 |
+| AC-30-06 | 刪除自訂字不回扣；初始化清空 | FE-37 |
+| AC-31-03 | 聆聽中不閃爍、收音條無漸變、確認視窗無淡入 | FE-39、FE-40 |
+| AC-20-01 | 4 種寬度無水平捲軸（導覽變動後回歸） | FE-41 |
+
+**v0.9 暫停（隱藏）的 16 個 AC**：AC-12-01～03、AC-13-01～04、AC-14-01～02、AC-15-01～03、AC-16-01～04——**本版不驗收**；程式由既有 FE-15、FE-16 保留、資料由既有 CT-21、CT-22 保留，v0.5 不改、不刪（HT-5）。AC-23-04（原創標示，含長難句與句型）**仍驗收**，由既有對照任務涵蓋，FE-41 另確認兩份資料仍在產物中。QA 測試計畫應列為「不適用（v0.9 暫停）」。
+
+---
+
+## 14. 回應契約 §9 指名 SD 的回饋
+
+| FB | 回應 | 落實位置 |
+| :--- | :--- | :--- |
+| FB-04（已解除） | 確認 `sources/ecdict/` 6 個檔案到位；不列前置任務，CT-01、CT-02、CT-03～CT-17 直接列為輸入 | tasks.json 各 CT 的 description |
+| FB-05（剩餘待辦） | CT-01 的 `lib.mjs` 依 C-2、V-IN-01～07 實作排名；CT-02 重算並在紀錄回報 `N_B`、`N_G`、各區段，不一致即 `blocked` | §8.1、T-06、CT-02 |
+| FB-10（已解除，SD 待辦） | 釋義精簡、M-3 人工修正、音標原創納入每個批次任務；V-VOC-18 抽樣比例與門檻已訂 | §8.3、§8.4 |
+| FB-14 | 依排名區間拆 15 個批次（350～409 筆），邊界對齊 `N_B`；每批 10% 自查、QA 每分檔 5%（至少 20 筆）抽查、> 5% 整批退回 | §8.1、§8.4 |
+| FB-17 | 估算預期 3.1 MB、悲觀 3.8 MB，低於 5 MB；**不需修訂契約**。建置時壓縮 JSON；4.5 MiB 警告門檻與 B-9 備援壓縮（執行期介面不變） | §5、§6 |
+| FB-20 | 「資料來源與授權」頁**不顯示官網字數**；只顯示「本系統收錄 `includedItemCount` 字」（字表）與 ECDICT「提供釋義 `includedItemCount` 筆」，避免與官網字數對照造成困惑。`originalItemCount` 僅保留在資料中供 QA | FE-17 |
+| FB-21 | 「資料來源與授權」頁 ECDICT 區塊以 `<details>` 可摺疊顯示 `copyrightNotice` 與 `licenseText` 全文（純文字、保留換行、`white-space: pre-wrap`）；並以固定文字顯示「音標改寫為美式 IPA，標為原創，不屬 ECDICT」（L-4） | FE-17 |
+| FB-22 | 上下文用詞以簡體原檔判斷，工具自動列出清單；工作量已納入批次任務 | §8.2 W-3、§8.4 H-6、T-03 |
+| FB-16（R-11，知會） | 依現行 AC-06-07：內建單字學術情境空白時隱藏整欄；自訂單字未填的選填欄位顯示「—」（與 Q-20 決議一致）。不自行統一 | FE-11 |
+| FB-06（知會） | 表單「論文例句」存入 `example`，卡背「完整例句」顯示；自訂單字 `academicContext` 恆空 → 依上列顯示「—」 | FE-10、FE-11 |
+| FB-32（v0.4） | `todayLearned.wordKeys` 不設上限：極端情況整筆狀態約 400 K 字元（≈ 0.8 MB，UTF-16），遠低於 5 MB；每次學習事件寫入最壞約 20 ms（4 倍降速），不做延遲寫入。**結案，不需修訂契約** | §6.1、T-27 |
+| DS-01（v0.5） | 門檻 T1～T5 = −50、−40、−30、−20、−10 dBFS 記為架構常數 `core/meter.js` `THRESHOLDS_DBFS`（唯一來源）；音量 = 最近一個 ≤ 100 ms 分析視窗（`fftSizeFor`，48 kHz 時 42.7 ms）的 RMS，dBFS = 20 × log10(RMS)，RMS = 0 全暗；≥ Tn 點亮第 n 格、亮格自左連續；可調範圍寫入 §7.14 並以 `validateThresholds` 單元測試鎖定 | §7.14、FE-35 |
+| DS-02（v0.5） | 首次取得：支援 SR、在線、說明已讀之後按麥克風；同頁重用；離開單字卡頁（`flashcards.hide` → `speechPanel.release`）、`pagehide` 同步釋放全部音軌與 `AudioContext`；§7.6 限制改為只禁止 `MediaRecorder`，§10 靜態檢查同步修訂 | §7.6、§7.14、§10、FE-36、FE-39 |
+| DS-03（v0.5） | `getUserMedia` 錯誤名稱 → 訊息對照（權限、無裝置、其他靜默退回）；SpeechRecognition `audio-capture` 改用「找不到麥克風裝置」；音軌 `ended` 依 AC-33-06 | §7.14「錯誤對照」、§7.6 |
+| DS-04（v0.5） | 確認視窗沿用 `ui/dialog.js`（Esc、點背景 = 取消；背景不可操作；無淡入）；「先建新物件、成功才替換記憶體」位於 `store.confirmApplyGoal`，純規則在 `core/reinit.js`；V-ST-14 列入 FE-34、FE-37、FE-40 | §7.15、§4.3 |
+| DS-05（v0.5） | 導覽常數改用 `NAV_TAB_ORDER`／`HIDDEN_TAB_IDS`；主控台入口由 `NAV_TAB_ORDER` 推導；本系統無 hash 路由，另加 `hashchange` 守門使隱藏頁片段導向主控台；解碼器、句型庫的程式與資料保留並打包 | §7.13、§7.16、FE-38 |
+| DS-06（v0.5） | 同意：不新增 CT 任務、不新增遷移任務 | D-9、§12.4 |
+| FB-33～FB-35（v0.5，知會） | 依契約定案實作：(e) 不看 today（FB-33）；初始化寫入的任何例外皆顯示「儲存空間不足，未套用」（FB-34）；取消時不寫入、`draftScore` 只還原記憶體（FB-35） | §7.15、§4.3 |
+| FB-27～FB-31（v0.4，知會） | 依契約定案實作：匯入捨棄的歷史項目不計入略過數（FB-27）、`date` 字串格式錯視為「不是今天」（FB-28）、不提供降版（FB-29）、今天歷史與 X 一致（FB-30）、首次「開始學習」寫入失敗與停用時還原的行為（FB-31，另見 SD-FB-19） | §7.7、§7.8、§7.9 |
+
+---
+
+## 15. 回饋上游
+
+| 編號 | 事項 | 對象 | 類型 | 建議 |
+| :--- | :--- | :--- | :--- | :--- |
+| SD-FB-01 | `src/data/_tools/`（驗證與產生工具）與 `src/data/_records/`（交付紀錄）不是「內容資料」，但 pg-content 只能寫 `src/data/`，且 scratchpad 不跨工作階段保留，QA 需要這些紀錄驗 V-VOC-17、M-7 | 人類 | 待辦（確認） | 核准本設計即視為同意；這兩個目錄以 `_` 開頭，建置不打包（D-1）。若不同意，需另指定 pg-content 可寫的非打包目錄 |
+| SD-FB-02 | 建置相關檔案放在 `src/` 以外：`package.json`、`tools/build.mjs`、`dist/`（皆指派 pg-frontend）；QA 的測試放 `tests/`，並可能在 `package.json` 加 Playwright 為 devDependencies（`qa.md` 允許） | 人類、QA | 待辦（知會） | 核准即同意；QA 只可改 `package.json` 的 `devDependencies` 與 `scripts` 中以 `test:e2e` 開頭的項目 |
+| SD-FB-03 | 契約 V-ST-04「內建資料更新後與既有自訂單字 wordKey 相同，單字集只放內建那張」未說明該內建字不在目前截取範圍（如生效色級為橘，而該字排名 3,000）時的行為。SD 採：只與**本次截取**的內建卡去重，不在範圍內則保留自訂卡，使該字仍出現一次 | SA | 待辦（確認） | 若 SA 意圖不同（例如一律只看全部內建字庫），請修訂 V-ST-04；FE-04 屆時調整 |
+| SD-FB-04 | `docs/02-contract/data-schema.ts` 開頭註解區的 `status` 仍為 `in-review`、`approved_by` 空白，而 README 已 approved 且聲明三檔為一組審核 | SA、人類 | 待辦（知會） | 下次修訂契約時同步三檔 frontmatter；本設計以 README 的核准為準 |
+| SD-FB-05 | V-VOC-18 抽查比例與門檻由 SD 訂定（§8.4：每分檔 5%、至少 20 筆，不合格率 > 5% 整批退回） | QA、人類 | 待辦（知會） | QA 依 §8.4 執行；人類若要更嚴格可要求 SD 修訂 |
+| SD-FB-06 | Part 5 題庫陣列順序即出題順序（V-P5-07），契約未規定題型排列；SD 決定 CT-20 以題型交錯排列（每連續 4 題涵蓋 4 種題型），避免使用者連續 50 題同題型 | 人類 | 待辦（知會） | 核准即同意 |
+| SD-FB-08 | （v0.3）契約 README §5.3「寫入：容量不足」只寫「新增自訂單字」回滾、「其他寫入」保留記憶體，未說明範本注入屬哪一類。SD 解讀範本注入屬「新增自訂單字」（§7.5），不需改契約即可實作 | SA | 待辦（知會） | 下次修訂契約時可把該列改為「新增自訂單字（含範本注入）」；若 SA 意圖不同，請告知，FE-07／FE-10 屆時調整 |
+| SD-FB-09 | （v0.3）AC-08-09 只描述權限被拒；`audio-capture`（無麥克風）沿用同一主訊息並加補充說明（§7.6）。PRD 未規定其他 STT 錯誤碼的文案，SD 訂為通用訊息 | PM、QA | 待辦（知會） | 不需改 PRD；QA 依 §7.6 對照表判定 |
+| SD-FB-07 | 排名 ≤ 2,809 的 `academicContext` 契約允許空白；SD 訂為功能詞與無學術用途的生活字留空、其餘建議填寫（非強制），以兼顧內容量與檔案大小 | 人類 | 待辦（知會） | 若希望 ≤ 2,809 全部空白（減少約 0.3 MB 與工作量）或全部填寫，請告知 |
+| SD-FB-10 | （v0.4）PRD 只規定 ≤ 640px 用底部導覽（AC-27-01）與 768px、1366px 用寬螢幕導覽（AC-27-04），**641～767px 未規定**。SD 決定該區間維持既有「選單」按鈕展開 2 × 3 按鈕格（v0.3 行為，§9），不新增第三種版面 | PM、QA | 待辦（知會） | 不需改 PRD；QA 對 641～767px 依 AC-20-01、AC-20-03 驗證即可。若希望 641～767px 也用底部導覽或單列頁籤，請 PM 補 AC |
+| SD-FB-11 | （v0.4）AC-25-01「全螢幕顯示難易度設定的首次畫面」：SD 解讀為隱藏導覽列與選單鈕後，由頁首（產品名稱）、儲存警示列（AC-25-08 需要）、首次畫面內容、頁尾（AC-25-01 要求保留「資料來源與授權」）構成整個畫面，不另做蓋住頁首頁尾的覆蓋層 | PM、QA | 待辦（知會） | 若「全螢幕」意指連頁首也隱藏，請 PM 註明；頁尾連結依 AC-25-01 必須保留 |
+| SD-FB-12 | （v0.4）AC-25-07「開啟資料來源頁再返回」：首次模式沒有導覽列，PRD 未指定返回方式。SD 在頁尾加「返回難易度設定」按鈕（只在首次模式且位於資料來源頁時顯示，§7.9）；瀏覽器「上一頁」不支援（本系統不使用 history 路由，v0.3 起即如此） | PM、QA | 待辦（知會） | QA 以該按鈕驗證 AC-25-07 |
+| SD-FB-13 | （v0.4）QA 既有 E2E（`tests/e2e/*.mjs`）以清空的 localStorage 開啟時，v0.8 會先顯示首次畫面而非主控台，且導覽文字已更名；這些腳本屬 QA 負責、PG 不得修改 | QA | 待辦（知會） | QA 在 `/qa-verify` 時：清空狀態的案例先按「開始學習」或預寫 `schemaVersion` 2 的狀態；以 `data-tab`／`#view-*` 等識別字定位元素（R-15 不改識別字），避免依賴畫面文字 |
+| SD-FB-14 | （v0.4）首次畫面的「從備份還原」與主控台匯入各有一份結果訊息對照（`ui/import-flow.js` 與 `views/dashboard.js`），以 `first-run.test.js` 比對兩者輸出完全相同來防止分歧；本版不重構主控台改用共用模組，以降低已驗收功能的回歸風險 | 人類 | 待辦（知會） | 日後若再改匯入訊息，請一併指派兩個檔案；或另開任務把主控台改用 `ui/import-flow.js` |
+| SD-FB-15 | （v0.4）AC-29-02「震動總長 ≤ 200ms」對 `navigator.vibrate([震, 停, 震])` 是否計入停頓未說明。SD 採較嚴格解讀：**含停頓**的總和 ≤ 200ms（答錯 `[60, 40, 60]` = 160ms） | QA | 待辦（知會） | QA 以替身函式記錄參數並以相同算法判定 |
+| SD-FB-16 | （v0.4）AC-29-01「答錯時所選選項有晃動動畫」：SD 只讓所選（錯誤）選項晃動，正確選項同時標綠但不另加強調動畫，避免兩個動畫同時出現；答對時正確選項有強調動畫 | PM、QA | 待辦（知會） | 若希望答錯時正確選項也有強調動畫，請 PM 註明 |
+| SD-FB-17 | （v0.4）契約 RD-2 允許啟動時把 RD-1／V-ST-09～11 的修正立即寫回。SD 決定**不**在啟動時額外寫回（只有 MG-3 的 v1 遷移會寫回一次），修正結果在下一次 `PersistedData` 寫入時一併寫回 | SA、QA | 待辦（知會） | 不影響 AC-30-13（畫面與記憶體立即正確）；QA 檢查 localStorage 原值時請在一次學習行為之後再比對 |
+| SD-FB-18 | （v0.4）AC-30-07 (b) 只要求「切換到其他功能區再回到主控台」時反映新日期；若使用者停在主控台跨過午夜且不做任何操作，畫面仍顯示前一天的 X，直到下一次學習行為或重新進入主控台（T-31）。SD 不加計時器輪詢 | PM | 待辦（知會） | 若希望停留畫面也自動換日，請 PM 補 AC，SD 再加每分鐘檢查 |
+| SD-FB-19 | （v0.4）契約 FB-31 (a)：「開始學習」寫入失敗（容量不足）仍進入主控台，但主鍵不存在，**下次開啟會再出現首次畫面**。SD 依契約實作；PRD AC-25-08 只涵蓋 localStorage 停用的情況 | PM | 待辦（知會，與契約 FB-31 相同） | 請 PM 確認或補進 AC-25-08 |
+| SD-FB-20 | （v0.5）本系統**不使用** hash 路由（AC-20-04 的條件句不成立），但為了讓「手動輸入解碼器、句型庫網址片段時改顯示主控台」在任何寫法下都成立，router 仍以 `hashchange` 攔截隱藏頁片段（`#decoder`、`#phrasebank`、`#view-…`、`#/…`）；其他片段（如 `#flashcards`）忽略、不切頁 | QA | 待辦（知會） | QA 以上述寫法驗證 AC-20-04；其他片段不屬本 AC |
+| SD-FB-21 | （v0.5）HT-4、HT-5 要求保留程式碼，因此交付檔**原始碼**必然含「解碼器」「句型庫」字樣（`TAB_LABELS`、views 程式）；`index.html` 也保留兩個空的 `<section hidden>`（已去掉 `aria-label`）。AC-20-04 判定範圍為「畫面導覽與入口」 | QA | 待辦（知會） | QA 以可見畫面、可存取名稱與可點擊元素判定，不以原始碼字串搜尋判定 |
+| SD-FB-22 | （v0.5）`audio-capture` 與「聆聽中麥克風被拔除」皆歸為「找不到麥克風裝置」（AC-33-06 (b) 允許依 AC-08-09 或 AC-33-05）；取代 v0.3 SD-FB-09 的共用主訊息做法。`getUserMedia` 的 `SecurityError` 歸為權限問題 | QA、PM | 待辦（知會） | 不需改 PRD；QA 依 §7.14 錯誤對照判定 |
+| SD-FB-23 | （v0.5）AC-33-01「只詢問一次」能否成立取決於 Chrome／Edge 在 `file://` 下的權限實作（T-32、T-33），設計階段無法保證；第一次按下也可能出現 2 次詢問 | 人類 | 待辦（需人類注意） | 依 PRD R-18 二：V-MIC 實測不成立時 QA 開 BUG，人類判斷是否接受為瀏覽器限制 |
+| SD-FB-24 | （v0.5）V-MIC 檢查 AC-33-02 的 `MediaStreamTrack.readyState` 需要取得音軌參照；SD 在 `services/mic.js` 提供唯讀偵錯函式 `tracks()`（回傳複本，不進 store），供 DevTools 使用 | QA | 待辦（知會） | QA 依 §10.2「偵錯輔助」操作 |
+| SD-FB-25 | （v0.5）收音條只在**單字卡模式**的語音面板顯示（AC-33-03 的 Given 即為單字卡模式；測驗模式沒有語音面板）。切到測驗模式時停止聆聽與音量分析，但**不釋放**音軌（AC-33-01 允許期間切測驗模式再切回仍不詢問） | QA | 待辦（知會） | — |
+| SD-FB-26 | （v0.5）store 保留 `applyGoal()` 原行為（直接套用、不判斷初始化），另新增 `requestApplyGoal`／`confirmApplyGoal`／`cancelApplyGoal`；初始化判斷由「view 只能呼叫 `requestApplyGoal`」保證（以 `customizer.test.js` 原始碼掃描鎖定），目的是不讓既有已驗收測試大量改寫 | QA、人類 | 待辦（知會） | QA 以畫面操作驗收 US-32；若希望 store 層強制，可另開任務改 `applyGoal` 並一併改寫既有測試 |
+| SD-FB-27 | （v0.5）初始化寫入失敗時，store **不**更新 `writeStatus`（避免 banner 另跳一次「儲存空間不足」與 view 的「儲存空間不足，未套用」重複）；初始化失敗不影響之後一般寫入的提示 | QA | 待辦（知會） | AC-32-11 (b) 畫面只出現一則「儲存空間不足，未套用」 |
+
+---
+
+## 16. 變更紀錄
+
+| 版本 | 日期 | 作者 | 說明 |
+| :--- | :--- | :--- | :--- |
+| 0.1 | 2026-10-30 | sd-agent | 初版：依 PRD v0.6、契約 v0.4 設計分層架構、目錄與負責代理、模組介面、建置流程（B-1～B-9）、檔案大小估算（FB-17 結案，預期 3.1 MB）、關鍵演算法、字庫 15 批分檔與撰寫慣例（P／T／O）、自查與 QA 抽查門檻、RWD、測試策略、16 項風險；拆 41 個任務（CT 23、FE 18），141 個 AC 全部涵蓋；回應 FB-04、05、06、10、14、16、17、20、21、22；回饋上游 SD-FB-01～07 |
+| 0.2 | 2026-10-30 | sd-agent | 依 /pg-run 階段 PG 回報修訂（v0.1 已由 JimmyLin 核准，改回 draft）：(1) FE-01 回報 `<meta charset>` 落在第 1,541 byte，超出 HTML 規範的前 1,024 bytes → §5 改模板開頭順序為 DOCTYPE → html → head → meta charset → 授權註解，B-1 檢查規則與 B-7 新增 charset 位置檢查，§2 架構圖、T-17 同步；授權註解仍在原始碼開頭，不影響 AC-23-06。(2) `npm test` 改為 `node --test src/app/__tests__/*.test.js`，`engines` 改 `>=22`（§3、§5、§10、T-18）。(3) §7.1 補登 `parseScoreInput` 回傳格式 `{ ok, score }`／`{ ok, message }`、`SCORE_INVALID_MESSAGE`、`levelOf`、`isOpenColor`；決議字串只接受十進位寫法（拒絕 `1e2`、`0x64` 等）；§4.3 註明 `setDraftScore` 的 `error` 來源。(4) §7.3 統一 `score(recognized, target)` 寫法與驗算例；§7.4 補異常輸入處理表，四選一效能改以 1,000 次平均 < 1 ms 判定。(5) 新增 §12.1 待派補修 R2-1（FE-01）、R2-2（FE-03）。tasks.json 同步修改 FE-02、FE-18 的 description／doneWhen，與 FE-01 description 中的 `npm test` 指令與 engines 文字。PRD、契約、localStorage 結構皆未變更。**主控代核**（2026-10-30，依 CLAUDE.md「第 4 階段自動化授權」：未改 PRD、未改持久化結構） |
+| 0.3 | 2026-10-30 | sd-agent | 依 /pg-run 後段 PG 回報的設計問題修訂（v0.2 已由主控代核，改回 draft）：(1) R6-1：§4.1 新增模組取用時機 LD-1～LD-3（core 只能在載入時取用 constants、wordkey，其餘 core 依賴在函式呼叫時才取用；不改建置順序），註明回歸測試位置 `backup.test.js` R6-1 案例與 FE-19 `load-order.test.js`；§2 L1 依賴規則同步；T-19。(2) FE-07 #2：範本注入容量不足**不沿用**一般寫入做法，改為與新增自訂字相同的回滾 + 「儲存空間不足」（§4.3、§7.5，含容量不足分類總表）；SD-FB-08。(3) FE-07 #4：確認測驗模式在單字集不足時退回 card（目前題目保留、出新題失敗才退回、不另顯示 toast），寫入 §4.3。(4) FE-11：§4.3、§4.4 補註 `AppState = { data, runtime }`、`state.runtime.flashcard`。(5) FE-12 #1：§9 新增停用按鈕例外（`aria-disabled="true"` + `title`）與 QA 判定。(6) FE-12 #2：§7.6 新增 STT 錯誤對照表，含 `audio-capture`；SD-FB-09。(7) FE-17：§7.6 寫明辭典只在有單字 `meaningSource` 使用時列出。(8) FE-09：字量 0 改由 `goal.js` 統一視為資料缺漏（§7.1），補修 R3-1。(9) CT-02：§8.4 註明個別任務用 `--file`、`--all` 由 CT-23／主控於全部完成後執行。(10) CT-03、CT-05：V-VOC-17 不加白名單，以紀錄逐筆寫判斷視為已處理，並訂 QA 判定（§8.4、§8.5）。(11) CT-01：H-1 加繁簡同形白名單（含「后」），命中改為 H-1W 警告，補修 R3-4。(12) 新增任務 FE-19（頁面單元測試移入 `src/app/__tests__/`，FE-18 之前）：§3 目錄、§10 測試規則（相對路徑、`.test.js`、不讀正式資料）、§12 批次、T-20、T-21。新增 §12.2 待派補修 R3-1～R3-4；§13 AC-18-04 加 FE-10。**tasks.json 本次未修改**（主控同步中）：FE-19 任務 JSON 與 FE-18 `dependsOn` 加 `FE-19` 由主控加入。PRD、契約、localStorage 結構皆未變更。**主控代核**（2026-10-30，依 CLAUDE.md「第 4 階段自動化授權」：未改 PRD、契約、持久化結構） |
+| 0.4 | 2026-10-30 | sd-agent | 修訂已核准的 v0.3（主控代核），原因：PRD v0.8（R-15 功能更名、R-16 介面互動、R-17 今日已學與持久化 `schemaVersion` 1 → 2）與契約 v0.8（§5.4 LR-1～LR-8、§5.5 FS-1～FS-7、§5.6、§6.3、MG-1～MG-4、RD-1／RD-2、IM-8、V-ST-09～V-ST-13、`TAB_LABELS`、`NAV_TAB_ORDER`、FB-27～FB-32）皆已由 JimmyLin 核准。status 改回 draft、核准欄位清空；**本版設計涉及持久化結構變更的實作，依 CLAUDE.md 須由人類核准**。增量內容：(1) §1、§2、§3 新增模組 `core/learning.js`、`core/interaction.js`、`ui/motion.js`、`ui/bottom-nav.js`、`ui/import-flow.js`、`services/haptics.js`、`styles/05-motion.css` 與 7 個新測試檔，既有檔案標示 v0.4 修改任務串接順序（D-6、D-7：不改 `src/data/`、不建 CT 任務）；(2) §4.2 啟動順序、`body[data-entry]`／`data-tab`、router 新行為；§4.3 store 新 API（`today`、`startLearning`、寫入守門、學習事件、tags）；§4.5 共用模組介面；(3) §6.1 交付檔（約 +62 KB）與 localStorage 容量估算（回應契約 FB-32：最壞約 0.8 MB，不做延遲寫入）；(4) §7.7 學習紀錄函式與記錄點、LR-7 實作；§7.8 v1 → v2 遷移與備份流程；§7.9 首次進入狀態機與畫面做法；§7.10 手勢判斷與測驗防誤觸；§7.11 動畫與減少動態策略（A-1～A-5）；§7.12 Q-33 設計常數（640px、240／360／200／480／500 ms、50px、震動 40 與 [60, 40, 60]）；§7.13 R-15 更名清單；(5) §9 導覽、卡片、動畫類名、色彩，§9.1 底部導覽 CSS；(6) §10.1 測試命令、中間狀態已知失敗、新增測試案例、E2E 與人工建議；(7) §11 新增 T-22～T-31；(8) §12.3 新任務 FE-20～FE-33 與 6 個批次；(9) §13.1 新增 51 個 AC 與修改／更名 AC 的追加對照（192 個 AC 全部涵蓋）；(10) §15 新增 SD-FB-10～SD-FB-19。tasks.json 同步升為 v0.3（只新增任務，既有任務不變） |
+| 0.4（核准） | 2026-10-30 | 主控 | 主控代核：持久化結構變更已由人類於契約 v0.8 核准，本版只實作該契約，不改 PRD、不另改持久化結構；tasks.json v0.3 經 check_tasks 驗證，AC 192/192 涵蓋，新任務彼此無共用 paths。 |
+| 0.4（主控代核補記） | 2026-10-30 | 主控 | /pg-run 中授權一次性擴充 paths（不改 PRD、不改持久化結構）：FE-26 修改 `src/app/__tests__/naming.test.js` 導覽按鈕比對（按鈕內含 svg）；FE-30 修改 `src/app/__tests__/_fixtures.js`：`makeStore()` 預設預寫 v2 主鍵，`opts.firstRun: true` 才模擬首次（首次模式 FS-2 不寫入導致既有測試失敗）。 |
+| 0.5 | 2026-11-02 | sd-agent | 修訂已核准的 v0.4（主控代核），原因：PRD v0.9（approved，JimmyLin，2026-11-02；R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（README、data-schema.ts approved，主控代核；storage-schema.json 維持 v0.8）。status 改為 `in-review`、核准欄位清空。增量內容：(1) **推翻**「不直接存取麥克風音訊」限制：允許 `getUserMedia` + `AnalyserNode` 只讀即時音量，仍禁止 `MediaRecorder`、音訊輸出、網路傳送與保存；新增 §7.14（隱私限制、收音條常數與可調範圍 DS-01、麥克風生命週期與只在單字卡頁保留 Q-36／DS-02、`services/mic.js` API、錯誤對照 DS-03、speech-panel 修改）；修訂 §7.6 STT 列與 `audio-capture` 對照、§7.11 新增 A-6（收音條非動畫、無 transition）、A-7（確認視窗無淡入）、§10 靜態檢查（AC-21-03 改為只禁 `MediaRecorder` 並限制 `getUserMedia` 位置）、§5 B-7 擋 `MediaRecorder`；(2) 新增 §7.15 切換難易度初始化（流程、視窗文字、`core/reinit.js`、原子寫入位置 DS-04）與 §4.3 store 新 API；(3) 新增 §7.16 隱藏頁（導覽 4 項、主控台入口、router 與 hashchange 守門、store `setTab` 守門、保留程式與資料 DS-05），§7.13、§9、§9.1、§4.2 同步；(4) §1、§2、§3（新檔 `core/meter.js`、`core/reinit.js`、`services/mic.js` 與 3 個新測試檔；D-8 新任務間無共用 path、D-9 不改 `src/data/`）、§4.4、§4.6、§6.2；(5) §10.2 測試範圍、中間狀態已知失敗、E2E 建議與 **V-MIC** 實機驗證（Windows 11、Chrome 與 Edge 以 `file://` 開啟）；(6) §11 新增 T-32～T-39；(7) §12.4 新任務 FE-34～FE-41 與 4 個批次；(8) §13.2 新增 20 個 AC 與修改 AC 對照（應驗收 196 個全部涵蓋）、16 個暫停 AC 的處理；(9) §14 回應 DS-01～DS-06、FB-33～FB-35；§15 新增 SD-FB-20～SD-FB-27。tasks.json 同步升為 v0.4（只新增 FE-34～FE-41，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2） |

@@ -1,0 +1,249 @@
+/*
+ * styles/32-quiz.css — 四選一即時測驗模式（FE-13）
+ * 依據：architecture.md §9（行動優先 RWD；斷點 768px）；沿用 00-base.css 的 --correct／--wrong 等變數
+ * 涵蓋：AC-09-01、AC-09-03（正解綠、錯誤紅、鎖定）、AC-20-01（無水平捲軸）、AC-20-02（觸控 ≥ 44px）
+ * 容器 .fc-quiz 的定位由 30-flashcards.css 負責，本檔只管內部。
+ */
+
+.fcq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+/* ─── 題目 ─── */
+.fcq-head {
+  text-align: center;
+  min-width: 0;
+}
+
+.fcq-prompt {
+  color: var(--text-muted);
+  margin: 0 0 4px;
+}
+
+.fcq-word {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.fcq-phonetic {
+  color: var(--text-muted);
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* ─── 選項 ─── */
+.fcq-options {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.fcq-options__item {
+  min-width: 0;
+}
+
+.fcq-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: var(--touch);
+  padding: 10px 12px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.fcq-option__key {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  font-weight: 700;
+}
+
+/* 長釋義可換行 */
+.fcq-option__text {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.fcq-option__badge {
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* 已作答：鎖定（不以 opacity 淡化，避免綠／紅辨識度下降） */
+.fcq-option:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.fcq-option--neutral:disabled {
+  color: var(--text-muted);
+}
+
+/* 正解：綠 */
+.fcq-option--correct {
+  border-color: var(--correct);
+  background: var(--correct-bg);
+  color: var(--correct);
+}
+
+.fcq-option--correct .fcq-option__key,
+.fcq-option--correct .fcq-option__badge {
+  background: var(--correct);
+  border-color: var(--correct);
+  color: #ffffff;
+}
+
+/* 選錯：紅 */
+.fcq-option--wrong {
+  border-color: var(--wrong);
+  background: var(--wrong-bg);
+  color: var(--wrong);
+}
+
+.fcq-option--wrong .fcq-option__key,
+.fcq-option--wrong .fcq-option__badge {
+  background: var(--wrong);
+  border-color: var(--wrong);
+  color: #ffffff;
+}
+
+.fcq-option:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .fcq-option--idle:hover:not(:disabled) {
+    border-color: var(--primary);
+  }
+}
+
+/* ─── 作答結果 ─── */
+.fcq-feedback {
+  margin: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.fcq-feedback:focus {
+  outline: none;
+}
+
+.fcq-feedback:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.fcq-feedback--correct {
+  color: var(--correct);
+}
+
+.fcq-feedback--wrong {
+  color: var(--wrong);
+}
+
+.fcq-hint,
+.fcq-stats {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* 無題目（AC-09-06） */
+.fcq-na {
+  margin: 0;
+  padding: 32px 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .fcq-word {
+    font-size: 2.5rem;
+  }
+
+  /* 平板以上：選項兩欄 */
+  .fcq-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fcq-option {
+    height: 100%;
+  }
+}
+
+/* ─── 答題回饋動畫（FE-29；architecture.md v0.4 §7.11；AC-29-01） ───
+ * 只在「本次點擊造成作答」時由 views/flashcard-quiz.js 以 ui/motion.enter 加上、時間到自動移除；
+ * 動畫只改 transform，顏色（綠／紅）與 disabled 由狀態 class 決定，動畫結束後保留。
+ * 減少動態時 05-motion.css 全域關閉動畫，motion.enter 也不加 class（A-3）。
+ */
+@keyframes qz-opt-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes qz-opt-shake {
+  0% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.fcq-option.qz-opt--pop {
+  animation: qz-opt-pop var(--emt-dur-answer) ease-out;
+}
+
+.fcq-option.qz-opt--shake {
+  animation: qz-opt-shake var(--emt-dur-answer) ease-in-out;
+}

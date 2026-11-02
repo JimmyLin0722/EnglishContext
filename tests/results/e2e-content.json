@@ -1,0 +1,135 @@
+[
+  {
+    "suite": "e2e-content",
+    "tc": "TC-17-04a",
+    "ac": "AC-17-04",
+    "result": "通過",
+    "note": "答題數 0 時顯示「—」"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-10-02",
+    "ac": "AC-10-02",
+    "result": "通過",
+    "note": "第 1 題：固定介系詞搭配、空格=true、選項 A.for B.with C.to D.at；前 8 題涵蓋題型 4 種"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-11-01",
+    "ac": "AC-11-01、AC-11-02、AC-11-03、AC-11-06",
+    "result": "通過",
+    "note": "答錯：correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226)),locked(rgb(255, 255, 255)),locked(rgb(255, 255, 255))；答對：locked,locked,correct,locked；解析兩段非空=true；計數 0/0 → 答錯 1/0 → 重複點擊 1/0 → 答對 2/1"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-11-05",
+    "ac": "AC-11-05",
+    "result": "通過",
+    "note": "重載前 第 5 / 200 題（未作答=true）；重載後 第 5 / 200 題、未作答=true"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-11-04",
+    "ac": "AC-11-04、AC-11-07",
+    "result": "通過",
+    "note": "下一題未作答=true；結算「模擬測驗 題型對應多益 Part 5 本輪結算 答對 197 / 200 累計答對 197 / 200 重新開始」、按鈕 重新開始；累計 200/197；重新開始後 第 1 / 200 題、未作答=true、累計 200/197"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-17-04b",
+    "ac": "AC-17-04",
+    "result": "通過",
+    "note": "答題 10、答對 7 → 正確率「70%」"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-17-01",
+    "ac": "AC-17-01",
+    "result": "通過",
+    "note": "連續打卡天數==1 天；單字掌握數==0 字；模擬測驗正確率==70%"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-12-01",
+    "ac": "AC-12-01、AC-12-02、AC-12-03",
+    "result": "通過",
+    "note": "例句 50 句逐一切換檢查；缺主詞/動詞 0；色系（文字/底色）主詞 藍/藍、動詞 紅/紅、受詞 綠/綠、修飾 紫/紫；圖例 主主詞、動核心動詞、受受詞／補語、修修飾語／子句／插入語；任意句輸入框不存在=true"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-13-01",
+    "ac": "AC-13-01、AC-13-02、AC-13-03、AC-13-04",
+    "result": "通過",
+    "note": "淡化：修飾語 2 段 opacity 0.3、filter grayscale(1)、主幹 opacity 1；切換到 第 48 / 50 句 仍淡化=true；還原：opacity 1、filter none；按鈕「淡化修飾語」(false) → 「還原修飾語」(true)"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-14-01",
+    "ac": "AC-14-01",
+    "result": "通過",
+    "note": "Abstract 摘要（5 則）、方法論（5 則）、文獻回顧（Research Gap）（5 則）"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-15-01",
+    "ac": "AC-15-01",
+    "result": "通過",
+    "note": "全部、研究空白 Gap、研究目的 Aim、研究結果 Findings、研究限制 Limitations"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-15-02",
+    "ac": "AC-15-02、AC-15-03",
+    "result": "通過",
+    "note": "gap 25 則（類別 gap）；aim 25 則（類別 aim）；findings 25 則（類別 findings）；limitations 25 則（類別 limitations）；回到全部 100 則"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-16-01",
+    "ac": "AC-16-01",
+    "result": "通過",
+    "note": "逐字：「g」65 則、「ga」13 則、「gap」9 則；大寫 GAP 相同=true；中文「缺口」4 則、相符=true；gap + Aim 分類 1 則、相符=true；10 次按鍵更新 ms：4、4.8、16.9、17.9、14.4、17.6、16.6、16.1、17.7、16.2"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-16-02",
+    "ac": "AC-16-02",
+    "result": "通過",
+    "note": "0 則、提示「找不到符合的句型」"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-16-03",
+    "ac": "AC-16-03",
+    "result": "通過",
+    "note": "剪貼簿「Evidence on [topic] comes almost entirely from [region], so it is unclear whether the findings hold elsewhere.」與模板相同=true；提示 [\"已複製\"]"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-23-02",
+    "ac": "AC-23-02",
+    "result": "通過",
+    "note": "主控台入口=true、頁尾連結=true；缺欄位 無；缺聲明 無；列出字表 4 種／資料中 4 種；ECDICT MIT 全文可展開=true"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-X-content",
+    "ac": "（全套件）無未處理例外",
+    "result": "通過",
+    "note": "[]"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-16-04a",
+    "ac": "AC-16-04",
+    "result": "通過",
+    "note": "剪貼簿拒絕：提示 [\"複製失敗，請手動選取\"]；反白文字與模板相同=true；未處理例外 0"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-16-04b",
+    "ac": "AC-16-04",
+    "result": "通過",
+    "note": "剪貼簿不存在：提示 [\"複製失敗，請手動選取\"]；反白文字與模板相同=true；未處理例外 0"
+  }
+]
