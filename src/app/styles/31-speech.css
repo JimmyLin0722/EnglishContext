@@ -38,6 +38,11 @@
 }
 
 /* ─── 麥克風 ─── */
+/* 固定最小寬度：「麥克風跟讀」與「聆聽中」切換時按鈕寬度不變，旁邊的收音條不位移（AC-33-03） */
+.sp-mic {
+  min-width: 8.5em;
+}
+
 .sp-mic__dot {
   display: inline-block;
   width: 10px;
