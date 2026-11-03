@@ -1,16 +1,18 @@
 ---
 doc: ARCH
-version: 0.5
+version: 0.7
 status: approved
 author: sd-agent
 approved_by: JimmyLin（對話中核准，主控代填欄位）
-approved_at: 2026-11-02
+approved_at: 2026-11-03
 ---
 
 # English Master Track — 系統架構與設計
 
-> 上游：`docs/01-PRD.md` v0.9（approved，JimmyLin，2026-11-02）、`docs/02-contract/` v0.9（README.md、data-schema.ts v0.9 approved，主控代核，2026-11-02；storage-schema.json 維持 v0.8 approved，內容無變動）。v0.4 以前的內容仍有效，除非本版明文修改。
-> 搭配文件：`docs/03-design/tasks.json` v0.4（共 64 個任務：既有 56 個全部 `done` 不變；v0.5 新增 FE-34～FE-41 共 8 個，見 §12.4）。
+> 上游：`docs/01-PRD.md` v0.11（approved，JimmyLin，2026-11-02）、`docs/02-contract/` v0.11（README.md、data-schema.ts、storage-schema.json 三檔 approved，主控代核，2026-11-02）。v0.6 以前的內容仍有效，除非本版明文修改。
+> 搭配文件：`docs/03-design/tasks.json` v0.6（共 76 個任務：既有 67 個全部 `done` 不變；v0.7 新增 FE-45～FE-53 共 9 個，見 §12.6；另列主控執行項目 MC-01～MC-03，不派給 PG）。
+> **v0.7 增量導讀**（PRD R-20、US-34～US-37、AC-24-12、Q-41～Q-48；契約 §10 DP／MF／HD／PE／SW／UP／IN／NT／PV、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）：加入 PWA。同一份 HTML 兩種形態——`file://` 雙擊（不註冊、零請求）與 https 部署目錄 `dist/site/`（manifest、service worker、圖示、`ads.txt`）。建置新增 B-10～B-16（PWA 輸入、BUILD_ID、`sw.js` 注入、部署目錄），B-7 以「逐字白名單」允許唯一的靜態 `<link rel="icon" href="data:,">`（§5.1）；GitHub Actions 改為 CI 建置後整個上傳 `dist/site/`（§5.2，主控執行）；新模組 `core/pwa.js`、`services/pwa.js`、`ui/pwa-notice.js`、`pwa/sw.template.js`、`tools/serve.mjs`（§3、§4.7、§7.18）。同步修訂 §1、§3、§5、§6.3、§9、§10.4、§11（T-45～T-54）、§12.6、§13.4、§14、§15（SD-FB-31～SD-FB-38）。**不改持久化結構**（`schemaVersion` 2）、不改 `src/data/`、不建 CT 任務。
+> **v0.6 增量導讀**（PRD R-19、Q-39、Q-40；契約 §5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）：難易度設定改為「只選色級、不顯示分數」。點卡片設為該色 `scoreMax`（取代 Q-32，§7.1）；預設分數一律引用 `SCORE_DEFAULT`（725）；首次畫面與一般頁隱藏滑桿、輸入框（不可見、不可聚焦）、卡片移除分數範圍、狀態列與主控台移除目標分數（§7.17）；AC-22-04 量測點改為點卡片；取消初始化確認時卡片回到原色級。同步修訂 §1、§3、§4.3、§7.9、§9、§10.3、§11（T-40～T-44）、§12.5、§13.3、§14、§15（SD-FB-28～SD-FB-30）。**不改持久化結構**（`schemaVersion` 2）、不改 `src/data/`。
 > **v0.5 增量導讀**（PRD R-18、契約 §5.7、§5.8、§9.3 DS-01～DS-06）：麥克風與收音條（§7.14，推翻原「不使用 `getUserMedia`」限制，仍禁止錄音）、切換難易度初始化確認視窗（§7.15）、隱藏解碼器與句型庫（§7.16）；同步修訂 §7.6（STT 與錯誤對照）、§7.11（減少動態）、§7.13（導覽 4 項）、§9（底部導覽 4 欄）、§10（靜態檢查、V-MIC 實機驗證、§10.2）、§11（T-32～T-39）、§12.4 批次、§13.2 AC 對照、§14 DS 回應、§15 SD-FB-20～SD-FB-27。
 > 本文件只做設計，不改需求與契約；有疑義寫在 §15「回饋上游」。
 > **v0.4 增量導讀**：功能更名 R-15（§7.13）、首次進入流程與狀態機（§7.9）、學習事件記錄點（§7.7）、v1 → v2 遷移（§7.8）、手勢判斷（§7.10）、動畫與減少動態（§7.11）、Q-33 設計常數（§7.12）、底部導覽斷點（§9.1）、測試命令與新增測試（§10.1）、容量估算（§6.1）、批次（§12.3）、AC 對照（§13.1）。
@@ -35,6 +37,13 @@ approved_at: 2026-11-02
 | （v0.5）麥克風與收音條 | **允許** `navigator.mediaDevices.getUserMedia({ audio: true })` + Web Audio `AnalyserNode` 只讀即時音量；**仍禁止**錄音 API（`MediaRecorder`）、`Blob`／`createObjectURL` 輸出音訊、連到 `destination`、任何網路傳送；不保存任何音訊或音量值。音軌只在停留單字卡頁期間保留（Q-36），離開單字卡頁、重新整理、關閉分頁時釋放。新模組 `services/mic.js`（L3）、`core/meter.js`（L1） | R-18 二、US-33、AC-21-03、契約 DS-01～DS-03、§7.14 |
 | （v0.5）切換難易度初始化 | 「套用」時生效色級改變且有學習紀錄 → 確認視窗；「確定」以白名單 `LEARNING_PROGRESS_FIELDS` 建立**新物件**並以**一次** `setItem` 寫入，成功才替換記憶體，失敗整個不套用。純規則在新模組 `core/reinit.js`；store 新增 `requestApplyGoal`／`confirmApplyGoal`／`cancelApplyGoal` | R-18 一、US-32、契約 §5.7 CI-1～CI-10、DS-04、§7.15 |
 | （v0.5）隱藏頁面 | 導覽改為 `NAV_TAB_ORDER` 4 項；主控台入口 3 項 + 資料來源；router、store 以 `HIDDEN_TAB_IDS` 守門（嘗試進入改顯示主控台）；解碼器、句型庫的 view 程式、CSS、資料檔照常打包，只是永遠不會被 mount | R-18 三、AC-20-04、契約 §5.8 HT-1～HT-5、DS-05、§7.16 |
+| （v0.6）只選色級、不顯示分數 | 點卡片 → `draftScore` = 該色 `scoreMax`（`goal.scoreForCard`）；預設分數一律引用 `SCORE_DEFAULT`（725）；分數區（滑桿、輸入框、錯誤提示）**保留程式**但整區以 `hidden` + `inert` 隱藏、兩個輸入元件另加 `disabled` 與 `tabindex="-1"`；卡片不建立分數範圍節點；狀態列與主控台不建立「目前目標分數」節點；目標分數只存在資料中 | R-19、Q-39、契約 §5.9 GS-1～GS-8、DS-07～DS-10、§7.17 |
+| （v0.7）交付形態 | **同一份 HTML** 兩種用法：`dist/english-master-track.html`（`file://` 雙擊，**保留**）與部署目錄 `dist/site/index.html`（逐位元組相同）；`dist/site/` 恰 8 檔（契約 DP-1） | R-20 (1)、AC-19-01、AC-36-07、DP-1、DP-2 |
+| （v0.7）PWA 啟用 | 啟動時以 `core/pwa.js` `isEligible` 判定一次（PE-1：https，或 http 且主機 `localhost`／`127.0.0.1`，且 `isSecureContext`，且有 `navigator.serviceWorker`）；不成立 → 全部不做（PE-2）。manifest 與 `apple-touch-icon` 連結**只以程式加入**（HD-2），HTML 原始檔不含 | AC-37-01～AC-37-04、PE-1～PE-4、HD-2、HD-3 |
+| （v0.7）service worker | `src/app/pwa/sw.template.js`（不打包進 HTML）；建置注入 BUILD_ID 與預先快取清單輸出 `dist/site/sw.js`；只快取 7 個靜態網址、只攔截這 7 個網址的同源 GET；更新採「提示後使用者按下才換版」（Q-43 A） | SW-1～SW-11、UP-1～UP-9、AC-35-*、AC-36-03～AC-36-06 |
+| （v0.7）建置識別碼 | BUILD_ID = SHA-256（Node 內建 `crypto`）對「注入前 HTML、manifest、4 張圖示、`sw` 範本」依固定格式計算取前 16 字元；**不含時間、亂數、絕對路徑**；寫入 HTML `<meta name="emt-build-id">` 與 `sw.js` | SW-2、AC-36-01、AC-36-02 |
+| （v0.7）部署 | `.github/workflows/static.yml` 改為：Node 22 → `npm run build`（**不執行 `npm ci`**：零相依、無 lockfile）→ 驗證 → 整個上傳 `dist/site/`；由主控依 §5.2 修改一次（Q-46） | AC-36-07、DS-15 |
+| （v0.7）PWA 畫面 | 主控台「匯出備份」區塊：按鈕列之後常駐 NT-1 說明，其後在 IN-1 成立時渲染「安裝 App」；新版提示為頁首下方的 sticky 文字列（`#pwa-update`），任何頁面、任何 `entryMode` 皆可顯示 | AC-24-12、AC-34-07～AC-34-10、AC-36-03、NT-1、IN-1、UP-6 |
 
 ---
 
@@ -86,6 +95,27 @@ approved_at: 2026-11-02
 | L4 ui | L1、L2 | — | 所有 DOM 寫入經 `core/dom.js`（純文字） |
 | L5 views | L1～L4 | 互相直接呼叫（只能透過 store 或 §4.4、§4.5 的元件介面） | 每頁一檔，各自的 CSS 檔 |
 
+（v0.7）新模組的層別：`core/pwa.js` 屬 L1（PWA 契約常數與純函式，無依賴；**同時**被 `tools/build.mjs` 以 `createRequire` 讀取，作為建置與頁面共用的唯一常數來源）；`services/pwa.js` 屬 L3（包裝 `navigator.serviceWorker`、`beforeinstallprompt`、`appinstalled`、`visibilitychange` 與 `<head>` 連結加入；不直接改 store，以 `onChange(patch)` 回呼通知 `main.js`）；`ui/pwa-notice.js` 屬 L4（新版提示列；「重新整理」動作由 `main.js` 以回呼注入，L4 不呼叫 L3）。`src/app/pwa/sw.template.js` **不屬任何層**：不打包進 HTML，只由建置讀取、注入後輸出為 `dist/site/sw.js`，在 service worker 全域執行（無 `window`、無 `EMT`）。
+
+```
+                 ┌─────────── 瀏覽器分頁（同一份 HTML）────────────┐
+ file:// 開啟 ──►│ main.js → services.pwa.start()                   │
+                 │   core.pwa.isEligible() = false → 全部不做（PE-2）│──► 0 個請求、0 個 SW
+                 └──────────────────────────────────────────────────┘
+                 ┌──────────────────────────────────────────────────┐
+ https/localhost►│ isEligible() = true                              │
+                 │  ├ <head> 加 manifest、apple-touch-icon（HD-2）   │──► GET manifest.webmanifest、icons/*
+                 │  ├ beforeinstallprompt／appinstalled → setPwa     │
+                 │  └ load 後 register("./sw.js")（SW-1）            │──► GET sw.js（updateViaCache: none）
+                 │       updatefound／waiting → setPwa(updateAvailable)
+                 │       「重新整理」→ postMessage SKIP_WAITING → controllerchange → reload 1 次
+                 └──────────────────────────────────────────────────┘
+                         ▲ 只回應 7 個預先快取網址（SW-6）
+                 ┌─────── dist/site/sw.js（Cache "english-master-track-pwa-<BUILD_ID>"）───────┐
+                 │ install：cache:"reload" 取 7 項 → 全部 200 才寫入 │ activate：刪本前綴舊快取 → claim │
+                 └─────────────────────────────────────────────────────────────────────────────┘
+```
+
 （v0.5）新模組的層別：`core/meter.js`、`core/reinit.js` 屬 L1（遵守 LD-1：載入時只取 `constants`；`reinit` 呼叫 `goal`、`learning`、`persist` 一律在函式內取用）；`services/mic.js` 屬 L3（只包裝 `getUserMedia`、`AudioContext`，不改 store；音訊物件與音量值**不得**進入 `AppState`，契約 AC-21-03 對照）。
 
 （v0.4）新模組的層別：`core/learning.js`、`core/interaction.js` 屬 L1（遵守 LD-1：載入時只取 `constants`、`wordkey`）；`services/haptics.js` 屬 L3；`ui/motion.js`、`ui/bottom-nav.js`、`ui/import-flow.js` 屬 L4（遵守 LD-2：載入時只登錄）。首次畫面的「從備份還原」與主控台的匯入是兩個 view，不得互相呼叫，因此共用流程放在 L4 的 `ui/import-flow.js`（§4.5）。
@@ -96,13 +126,24 @@ approved_at: 2026-11-02
 
 ```
 （專案根目錄）
-├─ package.json                        pg-frontend  FE-01（scripts：build、test、validate:data；無 dependencies；engines node >= 22，見 §5）
+├─ package.json                        pg-frontend  FE-01（scripts：build、test、validate:data；無 dependencies；engines node >= 22，見 §5）→ FE-47（v0.7：加 `serve`）
+├─ .github/workflows/static.yml        主控（MC-03，Q-46 授權修改一次；內容見 §5.2）
 ├─ tools/
-│  └─ build.mjs                        pg-frontend  FE-01（FE-18 可調整壓縮層級）→ FE-41（v0.5：B-7 新增禁止 `MediaRecorder`）
+│  ├─ build.mjs                        pg-frontend  FE-01（FE-18 可調整壓縮層級）→ FE-41（v0.5：B-7 新增禁止 `MediaRecorder`）→ FE-47（v0.7：B-10～B-16 PWA、B-7 白名單、`--site`／`--no-site`／`--ads`）
+│  └─ serve.mjs                        pg-frontend  FE-47（v0.7 新增）V-PWA (b) 本機靜態伺服器（Node 內建 `http`，§10.4）
 ├─ dist/
-│  └─ english-master-track.html        pg-frontend  FE-18 → FE-33 → FE-41（建置產物；其他任務建置一律輸出到 scratchpad）
+│  ├─ english-master-track.html        pg-frontend  FE-18 → FE-33 → FE-41 → FE-44 → FE-53（建置產物，`file://` 用，**保留**；其他任務建置一律輸出到 scratchpad）
+│  ├─ ads.txt                          人類（舊位置；MC-01 複製到 `sources/deploy/` 後保留，MC-03 改 workflow 時由主控刪除）
+│  └─ site/                            pg-frontend  FE-53（v0.7 新增，部署目錄，建置產物；恰 8 檔，契約 DP-1）
+│     ├─ index.html                    = dist/english-master-track.html（逐位元組相同，DP-2）
+│     ├─ manifest.webmanifest          建置產生（MF-1～MF-3）
+│     ├─ sw.js                         建置由 src/app/pwa/sw.template.js 注入產生（SW-3）
+│     ├─ ads.txt                       建置自 sources/deploy/ads.txt 原樣複製（DP-6）
+│     └─ icons/                        建置自 src/app/assets/icons/ 原樣複製（4 張 PNG，DP-5）
 ├─ tests/                              qa           （E2E 與驗收腳本；QA 可在 package.json 加 devDependencies）
 ├─ sources/                            人類／主控    唯讀輸入，不打包（契約 §3.2）
+│  ├─ pwa/PWA_Icon.jpg                 人類（Q-45 原圖）；`sources/pwa/README.md` 主控記錄 PNG 產生方式（MC-02）
+│  └─ deploy/ads.txt                   主控（MC-01，v0.7 新增；ads.txt 的唯一來源，DS-12）
 └─ src/
    ├─ data/                            pg-content
    │  ├─ sources.js                    CT-02 建立、CT-23 回填計數與 dataVersion
@@ -127,14 +168,22 @@ approved_at: 2026-11-02
    │     ├─ phrasebank.md              CT-22
    │     └─ CT-23-summary.md           CT-23
    └─ app/                             pg-frontend（v0.4 修改者以「→」接在原任務之後，依序執行）
-      ├─ index.html                    FE-01 建最小模板 → FE-02 完成殼 → FE-23 更名 → FE-26 底部導覽圖示 → FE-32 首次模式（body[data-entry]、返回鈕）→ FE-38（v0.5：導覽移除解碼器、句型庫 2 鈕；兩個 section 保留但去掉 aria-label）
-      ├─ license-header.txt            FE-01  授權標頭模板（{{YEAR}}）（v0.4 不改：授權文字中的「Part 5」屬授權聲明，R-15 保留）
-      ├─ main.js                       FE-02 → FE-26（呼叫 bottomNav.init）→ FE-32（依 entryMode 啟動）
+      ├─ index.html                    FE-01 建最小模板 → FE-02 完成殼 → FE-23 更名 → FE-26 底部導覽圖示 → FE-32 首次模式（body[data-entry]、返回鈕）→ FE-38（v0.5：導覽移除解碼器、句型庫 2 鈕；兩個 section 保留但去掉 aria-label）→ FE-50（v0.7：HD-1 靜態元素、`emt-build-id` 佔位、`#pwa-update` 掛載點）
+      ├─ license-header.txt            FE-01  授權標頭模板（{{YEAR}}）（v0.4 不改：授權文字中的「Part 5」屬授權聲明，R-15 保留）→ FE-47（v0.7：加品牌標識聲明，AC-23-06）
+      ├─ main.js                       FE-02 → FE-26（呼叫 bottomNav.init）→ FE-32（依 entryMode 啟動）→ FE-50（v0.7：pwa.start、pwaNotice.init）
+      ├─ pwa/                          （v0.7 新增；不打包進 HTML：建置的 listAppFiles 只收 core／state／services／ui／views 與 main.js）
+      │  └─ sw.template.js             FE-46  service worker 範本（含 `@@BUILD_ID@@`、`/* @@PRECACHE_URLS@@ */` 佔位，§7.18.3）
+      ├─ assets/                       （v0.7 新增；不打包進 HTML，建置只原樣複製）
+      │  └─ icons/                     主控（MC-02，Q-45 授權；PG 不得修改）
+      │     ├─ icon-192.png            192×192 RGB，any
+      │     ├─ icon-512.png            512×512 RGB，any
+      │     ├─ icon-maskable-512.png   512×512 RGB，maskable（圖案縮至 78%，文字在 80% 安全圓內）
+      │     └─ apple-touch-icon-180.png 180×180 RGB
       ├─ core/
       │  ├─ dom.js                     FE-02  安全 DOM 建構（只用 textContent）
-      │  ├─ constants.js               FE-03 → FE-20（TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS）→ FE-22（schemaVersion 2、[1, 2]）→ FE-34（v0.5：NAV_TAB_ORDER 4 項、HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS）
+      │  ├─ constants.js               FE-03 → FE-20（TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS）→ FE-22（schemaVersion 2、[1, 2]）→ FE-34（v0.5：NAV_TAB_ORDER 4 項、HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS）→ FE-42（v0.6：SCORE_DEFAULT 725）
       │  ├─ wordkey.js                 FE-03  C-2
-      │  ├─ goal.js                    FE-03  分數、色級、試算
+      │  ├─ goal.js                    FE-03  分數、色級、試算 → FE-42（v0.6：scoreForCard、點卡片 = scoreMax）
       │  ├─ content.js                 FE-04  讀全域資料（C-6 容錯）
       │  ├─ vocab.js                   FE-04  字庫排序、N_B/N_G、單字集
       │  ├─ custom.js                  FE-04  自訂字驗證、去重、範本注入、刪除後索引
@@ -147,16 +196,18 @@ approved_at: 2026-11-02
       │  ├─ learning.js                FE-20（v0.4 新增）今日已學紀錄、歷史正規化、主控台進度數值（§7.7）
       │  ├─ interaction.js             FE-21（v0.4 新增）Q-33 設計常數、滑動判斷、震動樣式（§7.10、§7.12）
       │  ├─ meter.js                   FE-35（v0.5 新增）收音條門檻 T1～T5、RMS、dBFS、亮格數、分析視窗大小（§7.14）
-      │  └─ reinit.js                  FE-34（v0.5 新增）生效色級是否改變、「有學習紀錄」(a)～(f)、初始化新資料（§7.15）
+      │  ├─ reinit.js                  FE-34（v0.5 新增）生效色級是否改變、「有學習紀錄」(a)～(f)、初始化新資料（§7.15）
+      │  └─ pwa.js                     FE-45（v0.7 新增）PWA 契約常數（PWA_*）、PE-1 判定、IN-2、IN-1／UP-6 顯示條件、UP-3 重查判斷、初始 PwaRuntimeState（§4.7、§7.18）
       ├─ state/
-      │  └─ store.js                   FE-07 → FE-25（v2、學習事件）→ FE-30（entryMode、首次流程）→ FE-37（v0.5：切換難易度初始化、隱藏頁守門）
+      │  └─ store.js                   FE-07 → FE-25（v2、學習事件）→ FE-30（entryMode、首次流程）→ FE-37（v0.5：切換難易度初始化、隱藏頁守門）→ FE-42（v0.6：clickColor 改用 scoreForCard）→ FE-49（v0.7：RuntimeState.pwa、actions.setPwa）
       ├─ services/
       │  ├─ download.js                FE-08
       │  ├─ tts.js                     FE-12
       │  ├─ stt.js                     FE-12（v0.5 不改）
       │  ├─ clipboard.js               FE-16
       │  ├─ haptics.js                 FE-29（v0.4 新增）navigator.vibrate 包裝
-      │  └─ mic.js                     FE-36（v0.5 新增）取得／重用／釋放麥克風音軌、AnalyserNode 音量讀取（§7.14）
+      │  ├─ mic.js                     FE-36（v0.5 新增）取得／重用／釋放麥克風音軌、AnalyserNode 音量讀取（§7.14）
+      │  └─ pwa.js                     FE-48（v0.7 新增）PE-1 套用、HD-2 連結、SW 註冊與更新流程（UP）、安裝事件（IN）（§4.7、§7.18）
       ├─ ui/
       │  ├─ router.js                  FE-02 → FE-24（換頁動畫）→ FE-32（首次模式限制、entry 切換）→ FE-38（v0.5：隱藏頁守門、hashchange 守門）
       │  ├─ toast.js                   FE-02
@@ -164,10 +215,11 @@ approved_at: 2026-11-02
       │  ├─ banner.js                  FE-07 → FE-25（學習紀錄容量不足提示一次）
       │  ├─ motion.js                  FE-24（v0.4 新增）減少動態判斷、動畫 class 加上與移除
       │  ├─ bottom-nav.js              FE-26（v0.4 新增）輸入中隱藏底部導覽列
-      │  └─ import-flow.js             FE-32（v0.4 新增）選檔 → 確認 → 匯入 → 提示的共用流程
+      │  ├─ import-flow.js             FE-32（v0.4 新增）選檔 → 確認 → 匯入 → 提示的共用流程
+      │  └─ pwa-notice.js              FE-50（v0.7 新增）新版提示列「有新版本，重新整理」（UP-6）
       ├─ views/
-      │  ├─ dashboard.js               FE-08 → FE-23（更名）→ FE-31（今日學習進度）→ FE-38（v0.5：模組入口 3 項 + 資料來源）
-      │  ├─ customizer.js              FE-09 → FE-23（更名）→ FE-27（大卡片）→ FE-32（首次畫面）→ FE-40（v0.5：初始化確認視窗）
+      │  ├─ dashboard.js               FE-08 → FE-23（更名）→ FE-31（今日學習進度）→ FE-38（v0.5：模組入口 3 項 + 資料來源）→ FE-43（v0.6：移除目標分數）→ FE-51（v0.7：NT-1 說明、「安裝 App」按鈕）
+      │  ├─ customizer.js              FE-09 → FE-23（更名）→ FE-27（大卡片）→ FE-32（首次畫面）→ FE-40（v0.5：初始化確認視窗）→ FE-43（v0.6：隱藏分數區、卡片無分數範圍）
       │  ├─ custom-vocab.js            FE-10
       │  ├─ flashcards.js              FE-11 → FE-23（更名）→ FE-28（手勢、翻轉動畫）→ FE-39（v0.5：hide 時釋放麥克風）
       │  ├─ speech-panel.js            FE-12（v0.4 不改；STT 學習事件由 store 的 recordSttScored 記錄）→ FE-39（v0.5：麥克風取得流程、收音條、錯誤對照、說明文字）
@@ -175,12 +227,12 @@ approved_at: 2026-11-02
       │  ├─ part5.js                   FE-14 → FE-23（更名）→ FE-29（答題回饋）
       │  ├─ decoder.js                 FE-15（v0.5 不改、不刪；入口隱藏，HT-5）
       │  ├─ phrasebank.js              FE-16（v0.5 不改、不刪；入口隱藏，HT-5）
-      │  └─ sources-page.js            FE-17
+      │  └─ sources-page.js            FE-17 → FE-52（v0.7：品牌標識聲明，AC-23-02）
       ├─ styles/
       │  ├─ 00-base.css                FE-02 → FE-26（底部導覽）→ FE-32（首次模式隱藏規則）→ FE-38（v0.5：底部導覽 4 欄）
       │  ├─ 05-motion.css              FE-24（v0.4 新增）動畫時間 CSS 變數、換頁動畫、減少動態總開關
-      │  ├─ 10-dashboard.css           FE-08 → FE-31
-      │  ├─ 20-customizer.css          FE-09 → FE-27 → FE-32
+      │  ├─ 10-dashboard.css           FE-08 → FE-31 → FE-43（v0.6：目標區少一項的版面，如需要）→ FE-51（v0.7：NT-1 說明、安裝按鈕）
+      │  ├─ 20-customizer.css          FE-09 → FE-27 → FE-32 → FE-43（v0.6：移除分數範圍樣式、卡片版面）
       │  ├─ 21-custom-vocab.css        FE-10
       │  ├─ 30-flashcards.css          FE-11 → FE-28
       │  ├─ 31-speech.css              FE-12 → FE-39（v0.5：5 格收音條，無 transition）
@@ -189,18 +241,20 @@ approved_at: 2026-11-02
       │  ├─ 50-decoder.css             FE-15（v0.5 不改、照常打包）
       │  ├─ 60-phrasebank.css          FE-16（v0.5 不改、照常打包）
       │  ├─ 70-sources.css             FE-17
-      │  └─ 90-overrides.css           FE-18 → FE-33 → FE-41  跨頁 RWD 修正（只在整合時發現問題才寫）
+      │  ├─ 80-pwa.css                 FE-50（v0.7 新增）新版提示列（sticky、無動畫）
+      │  └─ 90-overrides.css           FE-18 → FE-33 → FE-41 → FE-44 → FE-53  跨頁 RWD 修正（只在整合時發現問題才寫）
       └─ __tests__/                    （不打包）
-         ├─ goal.test.js               FE-03 → FE-20 → FE-22 → FE-34（v0.5 常數）
+         ├─ goal.test.js               FE-03 → FE-20 → FE-22 → FE-34（v0.5 常數）→ FE-42（v0.6：725、scoreForCard）
          ├─ vocab.test.js、custom.test.js            FE-04
          ├─ similarity.test.js、streak.test.js、quiz.test.js、stats.test.js   FE-05
-         ├─ persist.test.js、backup.test.js          FE-06 → FE-22
-         ├─ store.test.js              FE-07 → FE-25 → FE-30 → FE-37
+         ├─ persist.test.js            FE-06 → FE-22 → FE-42（v0.6：預設 725、既有分數不轉換）
+         ├─ backup.test.js             FE-06 → FE-22 → FE-41
+         ├─ store.test.js              FE-07 → FE-25 → FE-30 → FE-37 → FE-42（v0.6：點卡片 = scoreMax、預設 725、GS-1～GS-8）
          ├─ build.test.js              FE-01 → FE-41（v0.5：MediaRecorder 中止案例）
-         ├─ _fixtures.js               FE-19 → FE-30 → FE-37（如需新增「有學習紀錄」fixture）  共用小型 fixture（底線開頭，不符合 *.test.js，不會被 npm test 當成測試檔）
-         ├─ load-order.test.js         FE-19 → FE-33 → FE-41  依建置順序載入全部 src/app 檔的回歸測試（§4.1 LD-1～LD-3）
-         ├─ dashboard.test.js          FE-19 → FE-22（支援版本字串）→ FE-31 → FE-38
-         ├─ customizer.test.js         FE-19 → FE-27 → FE-32 → FE-40
+         ├─ _fixtures.js               FE-19 → FE-30 → FE-37 → FE-42（如需新增既有分數 fixture）  共用小型 fixture（底線開頭，不符合 *.test.js，不會被 npm test 當成測試檔）
+         ├─ load-order.test.js         FE-19 → FE-33 → FE-41 → FE-44  依建置順序載入全部 src/app 檔的回歸測試（§4.1 LD-1～LD-3）
+         ├─ dashboard.test.js          FE-19 → FE-22（支援版本字串）→ FE-31 → FE-38 → FE-43（v0.6：無目標分數）
+         ├─ customizer.test.js         FE-19 → FE-27 → FE-32 → FE-40 → FE-43（v0.6：分數區隱藏、點卡片、AC-26-05／06）
          ├─ custom-vocab.test.js       FE-19  （FE-10）
          ├─ flashcards.test.js         FE-19 → FE-28 → FE-39
          ├─ speech.test.js             FE-19  （FE-12：tts、stt、speech-panel）→ FE-39
@@ -211,15 +265,21 @@ approved_at: 2026-11-02
          ├─ sources-page.test.js       FE-19  （FE-17）
          ├─ learning.test.js           FE-20（v0.4 新增）
          ├─ interaction.test.js        FE-21（v0.4 新增）
-         ├─ naming.test.js             FE-23（v0.4 新增）R-15 畫面文字靜態檢查 → FE-38（導覽 4 鈕、隱藏頁文字）
+         ├─ naming.test.js             FE-23（v0.4 新增）R-15 畫面文字靜態檢查 → FE-38（導覽 4 鈕、隱藏頁文字）→ FE-43（v0.6：難易度設定說明文字）
          ├─ router-motion.test.js      FE-24 → FE-32（v0.4 新增）換頁、減少動態、CSS 常數一致、首次模式限制 → FE-38（隱藏頁守門）
          ├─ shell.test.js              FE-26（v0.4 新增）導覽順序、文字、內嵌圖示、底部導覽 CSS → FE-38（4 鈕、4 欄）
          ├─ haptics.test.js            FE-29（v0.4 新增）
-         ├─ first-run.test.js          FE-32（v0.4 新增）首次畫面、import-flow 訊息
+         ├─ first-run.test.js          FE-32（v0.4 新增）首次畫面、import-flow 訊息 → FE-43（v0.6：首次預設 725、還原後選中卡片）
          ├─ reinit.test.js             FE-34（v0.5 新增）
          ├─ meter.test.js              FE-35（v0.5 新增）
-         └─ mic.test.js                FE-36（v0.5 新增）
+         ├─ mic.test.js                FE-36（v0.5 新增）
+         ├─ pwa-core.test.js           FE-45（v0.7 新增）常數與契約一致、V-PWA-08 判定表、IN-1／UP-6／UP-3
+         ├─ sw.test.js                 FE-46（v0.7 新增）以 vm 執行注入後的範本：install／activate／fetch／message（V-PWA-05、SW-4～SW-10）
+         ├─ pwa-service.test.js        FE-48（v0.7 新增）替身 navigator／registration／安裝事件：PE-2、HD-2、SW-1、UP-2～UP-5、IN-3～IN-6、V-PWA-09／10、原始碼掃描
+         └─ pwa-notice.test.js         FE-50（v0.7 新增）新版提示列顯示條件、按鈕只觸發一次
 ```
+
+（v0.7）既有測試檔的修改：`build.test.js` FE-01 → FE-41 → **FE-47**（PWA 建置、可重現、白名單）；`store.test.js` … → FE-42 → **FE-49**（`setPwa`、初始 `pwa`）；`shell.test.js` FE-26 → FE-38 → **FE-50**（HD-1、`#pwa-update`）；`dashboard.test.js` … → FE-43 → **FE-51**（NT-1、安裝按鈕）；`sources-page.test.js` FE-19 → **FE-52**；`load-order.test.js` … → FE-44 → **FE-53**。
 
 規則：
 
@@ -233,6 +293,9 @@ approved_at: 2026-11-02
 | D-6 | （v0.4）既有 `done` 任務的 tasks.json 內容不改；v0.4 對既有檔案的修改一律由新任務（FE-20～FE-33）承接，該檔加入新任務的 `paths`，並以 `dependsOn` 串成上方目錄樹「→」所示的順序。同一檔案的兩個新任務不會同批執行（§12.3） |
 | D-8 | （v0.5）同 D-6：v0.5 對既有檔案的修改由 FE-34～FE-41 承接；**FE-34～FE-41 彼此之間沒有任何共用 path**（每個檔案在 v0.5 只屬於一個新任務），與既有 `done` 任務的串接見上方目錄樹「→」 |
 | D-9 | （v0.5）`src/data/` 本版**不改**、不建 CT 任務（契約 DS-06）：`decoder.js`、`phrasebank.js` 格式與內容不變、照常打包（HT-5、AC-20-04、AC-23-04）；收音條與初始化不涉及內容資料 |
+| D-10 | （v0.6）同 D-6、D-8：v0.6 對既有檔案的修改由 FE-42～FE-44 承接；**FE-42～FE-44 彼此之間沒有任何共用 path**，並以 `dependsOn` 串成 FE-42 → FE-43 → FE-44（每批 1 個任務）。`src/data/` 不改、不建 CT 任務（契約 DS-10）；`core/persist.js` 已引用 `C.SCORE_DEFAULT`，**不需修改**（只改其測試）|
+| D-11 | （v0.7）同 D-6、D-8、D-10：v0.7 對既有檔案的修改由 FE-45～FE-53 承接；**FE-45～FE-53 彼此之間沒有任何共用 path**。`src/data/` 不改、不建 CT 任務（契約 DS-18）。`src/app/assets/icons/*.png`、`sources/deploy/ads.txt`、`sources/pwa/README.md`、`.github/workflows/static.yml` 由**主控**放置或修改（tasks.json `manualSteps` MC-01～MC-03），**不屬任何 PG 任務**；PG 只讀取，不得修改（QA 越界檢查請視為授權例外，SD-FB-33） |
+| D-12 | （v0.7）`src/app/pwa/`、`src/app/assets/` 不打包進 HTML（建置只收 §4.1 的 5 層目錄與 `main.js`）；`src/app/pwa/sw.template.js` 不得被任何 `src/app` 模組 `require` 或讀取 |
 | D-7 | （v0.4）`src/data/` 本版**不改**：R-15 更名不涉及內容資料（題型標籤 `PART5_TYPE_LABELS` 與授權文字中的「Part 5」屬題型與授權用語，保留），R-16、R-17 只涉及介面與持久化。因此不建 CT 任務 |
 
 ---
@@ -281,6 +344,8 @@ approved_at: 2026-11-02
 | （v0.4）`index.html` 掛載點與屬性 | `<body data-entry="boot">`：啟動前隱藏導覽列、選單鈕與所有 view，避免首次模式閃現導覽（§7.9）；`body[data-entry]` 由 `main.js`／router 設定，`body[data-tab]` 由 router 設定為目前頁面代碼。`#app-nav` 內 6 個按鈕依 `NAV_TAB_ORDER`，每個含內嵌 `<svg class="app-nav__icon" aria-hidden="true">` 與 `<span class="app-nav__label">`（文字 = `TAB_LABELS`）；頁尾新增 `#footer-first-run-back`（`data-go="customizer"`，文字「返回難易度設定」，只在首次模式且目前為 `sources` 時以 CSS 顯示，AC-25-07）。**`<body>` 屬性不放在 `<html>` 上**，避免動到 B-1 檢查的開頭片段 |
 | （v0.4）`EMT.router` 新增行為 | `go(tabId)`：(1) 首次模式（`body[data-entry="firstRun"]`）只接受 `customizer`、`sources`，其他回 `false`；(2) 換頁動畫依 §7.11；(3) 新頁 `hidden = false` 之後同步 `performance.mark("emt-page-shown")`（QA 量 AC-22-01 的輔助點）；(4) 設 `body.dataset.tab`。`start()` 時訂閱 store：收到 `"entry"` tag 且 `runtime.entryMode === "main"` → `body.dataset.entry = "main"`、`go("dashboard")`（首次「開始學習」與首次還原成功共用此路徑，view 不直接切頁） |
 | （v0.5）`index.html` 導覽 | `#app-nav` 只剩 4 個按鈕，依 `NAV_TAB_ORDER`（主控台、難易度設定、單字卡、模擬測驗）；**刪除** `data-tab="decoder"`、`data-tab="phrasebank"` 兩鈕（含其 SVG）。`#view-decoder`、`#view-phrasebank` 兩個 `<section>` **保留**（空、永遠 `hidden`），但移除 `aria-label`（不在任何可存取名稱中出現「解碼器」「句型庫」），供未來開放時恢復（§7.16） |
+| （v0.7）`main.js` 啟動順序 | `content.load()` → `store.init()` → `banner.render()` → **`services.pwa.start({ onChange: patch => store.actions.setPwa(patch) })`**（同步完成 PE-1 判定；`eligible` 時於回呼內先 `setPwa({ eligible: true, standalone })`、加入 HD-2 連結、綁定安裝事件，SW 註冊延到 `window` `load` 之後，PE-4）→ 設 `body.dataset.entry` → `router.start(…)` → `bottomNav.init()` → **`ui.pwaNotice.init({ onReload: () => services.pwa.requestReload() })`** → `emt-ready`。兩個新步驟各自包在既有 `step()` 內，失敗不影響其他步驟；`file://` 下 `start` 只做 PE-1 第 (1) 步即返回 |
+| （v0.7）`index.html` 新增 | `<head>`：在 `<title>` 之後依序加入 HD-1 的 7 個靜態元素（逐字，見 §5.1 B-12）；其中 `<meta name="emt-build-id" content="@@BUILD_ID@@">` 的佔位由建置替換。`<body>`：`#app-banner` 之後加 `<div id="pwa-update" class="pwa-update" role="status" hidden></div>`（不在 `#app-main` 內，首次模式、boot 皆不受隱藏規則影響）。**不得**寫入任何 `<link rel="manifest">`、`<link rel="apple-touch-icon">` 或其他指向檔案的 `<link>`（HD-3），註解中也不得出現 `<link` 字樣 |
 | （v0.5）`EMT.router` 新增行為 | (1) `go(tabId)`：`tabId` 屬 `HIDDEN_TAB_IDS`（呼叫時取 `EMT.core.constants`）→ 首次模式回 `false`、不切頁；一般模式改為 `go("dashboard")` 並回 `false`。不顯示錯誤、不 `console.error`（HT-3、E-68）。(2) `start()` 綁定 `window` 的 `hashchange`，啟動時也檢查一次 `location.hash`：片段正規化（去 `#`、去開頭 `/`、去開頭 `view-`、轉小寫）後屬 `HIDDEN_TAB_IDS` → 一般模式 `go("dashboard")`、首次模式不動作；其他片段一律忽略（本系統**不使用** hash 路由，不改網址）。(3) 其餘行為不變 |
 
 ### 4.3 Store API（FE-07 提供；views 只能透過它改狀態）
@@ -290,8 +355,8 @@ approved_at: 2026-11-02
 | `store.init()` | 依契約 §5.3 讀取；判定 `storageStatus`；以 `appliedScore` 重算色級；建單字集 | AC-18-02、AC-18-03、AC-18-05 |
 | `store.getState()` | 回傳 `AppState`（唯讀，呼叫端不可改）。（v0.3 補註）結構為 `{ data, runtime }`：`data` = `PersistedData`（目標、自訂字、已掌握、統計、打卡等），`runtime` = `RuntimeState`；抽認卡狀態在 `state.runtime.flashcard`（`{ index, isFlipped, mode, quiz }`），語音狀態在 `state.runtime.speech`。`subscribe` 回呼的 `state` 與 §4.4 子元件 `render(…, state)` 的 `state` 皆為同一結構 | — |
 | `store.subscribe(fn) → unsubscribe` | 每次 action 後呼叫 `fn(state, tags)`；`tags` 為變更範圍字串陣列（如 `["goal"]`、`["studySet"]`、`["flashcard"]`），view 依此只重繪受影響區塊 | AC-22-01～AC-22-04 |
-| `actions.setDraftScore(raw) → { ok, score?, error? }` | 以 `goal.parseScoreInput` 驗證、修正為 5 的倍數、存 `draftScore`（未套用也保存）；`error` 填 `parseScoreInput` 回傳的 `message`（即 `SCORE_INVALID_MESSAGE`，§7.1） | AC-02-02、AC-02-08、AC-02-09 |
-| `actions.clickColor(colorId)` | Q-32 規則調整 `draftScore` | AC-01-05、AC-01-07 |
+| `actions.setDraftScore(raw) → { ok, score?, error? }` | 以 `goal.parseScoreInput` 驗證、修正為 5 的倍數、存 `draftScore`（未套用也保存）；`error` 填 `parseScoreInput` 回傳的 `message`（即 `SCORE_INVALID_MESSAGE`，§7.1）。**（v0.6）程式保留，但畫面已無呼叫路徑**（分數區隱藏且停用，§7.17）；view 不得在「套用」「開始學習」前呼叫 | ~~AC-02-02、AC-02-09~~（v0.10 暫停）、AC-02-08 |
+| `actions.clickColor(colorId)` | ~~Q-32 規則調整 `draftScore`~~ **（v0.6，GS-2）** `draftScore` = `goal.scoreForCard(colorId)`（該色 `scoreMax`），一律設定（含目前選中色級、含藍金）；未知色級 → `draftScore` 不變。回傳形狀沿用現行 `{ score }`。其餘不變（只改 `draftScore`、不觸發 CI-1、一般模式照常寫入、首次模式只改記憶體） | AC-01-05、AC-01-07、AC-02-04、AC-26-02、AC-26-04 |
 | `actions.applyGoal()` | `appliedScore = draftScore`、重算色級、重建單字集、抽認卡回第 1 張正面 | AC-01-02、AC-03-05 |
 | `actions.addCustomWord(fields) → { ok, fieldErrors?, reason?: "duplicate"｜"quota" }` | 驗證、wordKey 去重、容量不足時回滾 | AC-04-02～AC-04-06、AC-18-04 |
 | `actions.deleteCustomWord(id)` | 同步移除已掌握 wordKey（V-ST-06）、調整抽認卡索引（AC-04-08） | AC-04-07、AC-04-08 |
@@ -339,6 +404,24 @@ approved_at: 2026-11-02
 | `actions.setTab(tabId)` | `tabId` 屬 `HIDDEN_TAB_IDS` → 忽略（不改 `currentTab`、不通知），使 `currentTab` 永不為隱藏頁（HT-1）；導向主控台由 router 負責 | AC-20-04 |
 | `importBackup`、`startLearning` | **不**經過初始化判斷（CI-1、AC-32-08）；程式不變 | AC-32-08 |
 
+**v0.6 修改（FE-42；契約 §5.9 GS-1～GS-8、V-ST-16）**
+
+| API | 行為重點 | AC |
+| :--- | :--- | :--- |
+| `actions.clickColor(colorId)` | 見上表 v0.6 列：`draftScore` = `scoreForCard(colorId)`；回傳沿用現行 `{ score }` 形狀（`score` 為設定後的 `draftScore`） | AC-01-05、AC-02-04、V-ST-16 |
+| `store.init()` | 預設值來自 `persist.defaultData()`（已引用 `SCORE_DEFAULT`，現為 725）；localStorage 停用、首次、讀取失敗重設三種情況皆為 725（GS-7）。合法的既有分數（如 600、735）**原值保留**，只依 V-ST-02 重算色級（GS-4） | AC-18-02、AC-18-03、AC-18-05、AC-25-04、AC-26-06 |
+| `requestApplyGoal()`、`applyGoal()`、`startLearning()` | 不變：`appliedScore = draftScore`。未點任何卡片直接套用時寫入原值，不改寫為上限或下限（GS-3） | AC-26-06、AC-25-02、AC-25-03 |
+| `cancelApplyGoal()` | 不變：`draftScore` 還原為 `appliedScore`（GS-8），view 依 `"goal"` tag 把選中卡片切回 Color(`appliedScore`) | AC-32-04 |
+
+**v0.7 新增（FE-49；契約 `RuntimeState.pwa`、PV-1、PV-7）**
+
+| API | 行為重點 | AC |
+| :--- | :--- | :--- |
+| `store.init()` | `initialRuntime` 加 `pwa: core.pwa.initialPwaState()`（7 欄：`eligible`、`standalone`、`installPromptAvailable`、`installSuppressed`、`updateAvailable`、`reloadRequested` 皆 `false`，`lastUpdateCheckAt` `null`）；`init` 本身**不**判定 PE-1（L2 不碰瀏覽器 API），由 `main.js` 經 `setPwa` 寫入 | AC-37-01、AC-37-04 |
+| `actions.setPwa(patch) → { changed: boolean }` | 只接受 `core.pwa.PWA_STATE_KEYS` 中的鍵；布林欄位只收 `true`／`false`，`lastUpdateCheckAt` 只收有限數或 `null`；其他鍵或型別錯誤一律忽略。有任何欄位改變 → 以新物件取代 `runtime.pwa`、`commit(data, runtime, ["pwa"], false)`（**`setItem` 0 次**，首次模式與一般模式相同）；沒有改變 → 不通知、回 `{ changed: false }`。不得接受物件型別的值（`BeforeInstallPromptEvent`、`ServiceWorkerRegistration` 不得進入 `AppState`，PV-7） | AC-34-07～AC-34-10、AC-36-03、AC-36-04、AC-37-06 |
+| 其他 action | 任何 action 重建 `runtime` 時必須保留 `runtime.pwa`（現行只有 `init` 呼叫 `initialRuntime`，其餘以 `assign` 局部更新，FE-49 以測試鎖定：`importBackup`、`confirmApplyGoal`、`startLearning` 前後 `pwa` 不變） | AC-36-04 |
+| 通知 tags（新增） | `"pwa"`：`runtime.pwa` 任一欄位改變 | — |
+
 ### 4.4 抽認卡子元件（FE-11 與 FE-12、FE-13 的介面）
 
 | 介面 | 提供者 | 呼叫者 | 約定 |
@@ -372,6 +455,44 @@ approved_at: 2026-11-02
 | `EMT.core.meter.*`（§7.14 常數與函式表） | FE-35 | services/mic、speech-panel、測試 | 純函式；`THRESHOLDS_DBFS` 凍結 |
 | `EMT.services.mic`（§7.14 API 表） | FE-36 | speech-panel（唯一呼叫者） | Promise 不 reject；所有例外收斂為回傳值；回呼例外被攔下；`create(globalObject)` 供 Node 測試注入替身 |
 
+### 4.7 v0.7 新增的 PWA 模組介面
+
+**`EMT.core.pwa`（FE-45，L1，UMD；Node 下 `module.exports` 同一物件，供 `tools/build.mjs` 以 `createRequire` 讀取）**
+
+| 成員 | 約定 | 契約 |
+| :--- | :--- | :--- |
+| `PWA_APP_NAME`、`PWA_THEME_COLOR`、`PWA_BACKGROUND_COLOR`、`PWA_MANIFEST`、`PWA_DEPLOY_FILES`、`PWA_PRECACHE_URLS`、`PWA_CACHE_PREFIX`、`PWA_BUILD_ID_PATTERN`、`PWA_BUILD_ID_META_NAME`、`PWA_UPDATE_RECHECK_MS`、`PWA_TEXTS` | 與 `data-schema.ts` §12 **逐值相同**、鍵順序相同（`PWA_MANIFEST` 鍵順序決定 manifest 輸出位元組，MF-3）；全部深度凍結。`constants.js` **不重複**定義（單一來源） | §12 全部常數 |
+| `PWA_STATE_KEYS` | `PwaRuntimeState` 7 個鍵名（凍結陣列） | `PwaRuntimeState` |
+| `initialPwaState() → PwaRuntimeState` | 每次回傳新物件，值見 §4.3 v0.7 | `PwaRuntimeState` 註解 |
+| `isEligible(env) → boolean` | `env = { location, isSecureContext, navigator }`；依 PE-1 順序：(1) `protocol === "https:"`，或 `protocol === "http:"` 且 `hostname` ∈ {`localhost`, `127.0.0.1`}；(2) `isSecureContext === true`；(3) `"serviceWorker" in navigator` 且值非 `null`／`undefined`。前一步不成立即回 `false`、**不觸及**後面的屬性（第 (1) 步不成立時連 `navigator` 都不讀）；整段 `try`，例外 → `false` | PE-1、V-PWA-08 |
+| `isStandalone(env) → boolean` | `env = { matchMedia, navigator }`；`matchMedia("(display-mode: standalone)").matches === true` 或 `navigator.standalone === true`；`matchMedia` 不是函式或例外 → 只看 `navigator.standalone`；全部例外 → `false` | IN-2 |
+| `installVisible(state) → boolean` | `p = state.runtime.pwa`：`p.eligible && !p.standalone && p.installPromptAvailable && !p.installSuppressed && state.runtime.entryMode === "main" && state.runtime.currentTab === "dashboard"` | IN-1 |
+| `updateVisible(state) → boolean` | `p.eligible && p.updateAvailable` | UP-6 |
+| `needsRecheck(nowMs, lastMs) → boolean` | `lastMs` 為有限數且 `nowMs − lastMs ≥ PWA_UPDATE_RECHECK_MS` | UP-3 |
+
+**`EMT.services.pwa`（FE-48，L3）**——預設實例綁定 `self`；`create(globalObject)` 回傳獨立實例供 Node 測試注入替身（比照 `services/mic.js`）。物件（安裝事件、registration、worker）只存在實例的閉包變數（PV-7）。
+
+| API | 約定 | 契約 |
+| :--- | :--- | :--- |
+| `start({ onChange }) → { eligible, standalone }` | 只執行一次（再次呼叫回傳第一次的結果、不重複綁定）。以 `core.pwa.isEligible` 判定；`false` → 立即回傳 `{ false, false }`，**不做任何其他事**（PE-2）。`true` → (1) `standalone = isStandalone(…)`；(2) 同步呼叫 `onChange({ eligible: true, standalone })`；(3) 依 HD-2 以 `document.createElement("link")` + `setAttribute` 在 `<head>` 末端加入 manifest、apple-touch-icon 兩個連結（已存在同 `rel` 則不重複加）；(4) 在 `window` 綁定 `beforeinstallprompt`、`appinstalled`（§7.18.6）；(5) `document.readyState === "complete"` → `setTimeout(register, 0)`，否則 `window` 的 `load` 事件（`once`）後註冊（PE-4）。`onChange` 例外一律攔下 | PE-1～PE-4、HD-2、IN-2、IN-3、IN-6 |
+| `requestInstall() → Promise<void>` | IN-5；永不 reject | IN-5、AC-34-09 |
+| `requestReload() → void` | UP-4；`reloadRequested` 已為 `true` 時不做事 | UP-4 |
+| 內部 `register()` | `navigator.serviceWorker.register("./sw.js", { scope: "./", updateViaCache: "none" })`；成功 → §7.18.5；失敗 → 靜默（PE-3），不呼叫 `onChange` | SW-1、PE-3 |
+| 錯誤處理 | 全部 Promise 以 `.catch(function () {})` 收斂；**不得** `console.error`／`console.warn`；不得 `throw` 到呼叫端 | PE-3、AC-37-03 |
+| 禁止 | 不讀寫 `localStorage`／`sessionStorage`、不使用 `caches`、`indexedDB`、`fetch`、`XMLHttpRequest`；`postMessage` 只用於 `{ type: "SKIP_WAITING" }`；原始碼不出現 `<link`、`<script` 字樣（含註解，避免觸發 B-7） | PV-1、PV-2、HD-3 |
+
+**`EMT.ui.pwaNotice`（FE-50，L4）**
+
+| API | 約定 | 契約 |
+| :--- | :--- | :--- |
+| `init({ onReload })` | 只執行一次；取得 `#pwa-update`（不存在則不做事）；以 `core/dom.js` 建立 `<span class="pwa-update__text">`（`PWA_TEXTS.updateNotice`）與 `<button type="button" class="btn btn--primary pwa-update__btn">`（`PWA_TEXTS.updateButton`）；訂閱 store，依 `core.pwa.updateVisible(state)` 切換容器 `hidden`；初次 `init` 時也依目前狀態繪製一次 | UP-6、AC-36-03 |
+| 按鈕 | 點擊 → 設 `disabled`、呼叫 `onReload()`（例外攔下）；之後不再呼叫（防連點） | UP-4 |
+| 樣式 | `80-pwa.css`；無 `transition`、無 `animation`（§9 v0.7） | AC-31-03、AC-27-03 |
+
+**`views/dashboard.js`（FE-51）**——備份區塊結構（由上而下）：`h3`（`TEXT.backupTitle`，不變）→ 既有 `p.dash-backup__hint` → `div.btn-row`（「匯出備份」「匯入備份」）→ **`p.dash-backup__origin`**（`PWA_TEXTS.backupOriginNotice`，常駐、不受 `eligible`／`storageStatus` 影響）→ **`div.dash-backup__install`**（IN-1 成立時才含 `<button type="button" class="btn btn--secondary dash-install" data-action="install-app">安裝 App</button>`；不成立時容器 `hidden` 且無子節點，不佔版面）→ 隱藏的檔案輸入。點擊 → `EMT.services.pwa.requestInstall()`；store 回呼會在 `prompt()` 前同步把 `installPromptAvailable` 設 `false`、`installSuppressed` 設 `true`，訂閱回呼收到 `"pwa"` tag 即移除按鈕。`show()` 時也重繪安裝區。
+
+**`views/sources-page.js`（FE-52）**——既有聲明清單（`src-statements`）在 3 條授權聲明之後新增 1 條：「PWA 圖示與名稱「`PWA_APP_NAME`」為品牌標識，著作權人 `PROJECT_LICENSE.copyrightHolder`（缺漏時用既有保底值 JimmyLin），保留所有權利，不適用 MIT 與 CC BY-SA 4.0」，組字後必須與 PRD AC-23-02 原文逐字相同。`PWA_APP_NAME` 於 render 時取 `EMT.core.pwa`（LD-2；不存在依 LD-3 丟出錯誤）。
+
 ---
 
 ## 5. 建置與打包流程
@@ -384,6 +505,9 @@ approved_at: 2026-11-02
 | `node tools/build.mjs --out <path> [--data <dir>]` | 任務驗證用：輸出到 scratchpad；`--data` 指向 fixture 資料目錄（內容尚未完成時） |
 | `npm test` | `node --test src/app/__tests__/*.test.js`（v0.2：Node 21 起 `node --test` 的參數視為檔案或 glob，傳目錄會失敗；glob 由 Node 自行展開，Windows `cmd.exe` 不展開萬用字元也能執行） |
 | `npm run validate:data` | `node src/data/_tools/validate.mjs --all --stage final` |
+| （v0.7）`npm run build` | 產出 `dist/english-master-track.html` **與**部署目錄 `dist/site/`（§5.1） |
+| （v0.7）`node tools/build.mjs --out <path> [--site <dir> ｜ --no-site] [--ads <file>]` | `--site` 預設為 `<--out 所在目錄>/site`（預設 `--out` 時即 `dist/site`，任務以 `--out` 指到 scratchpad 時部署目錄也自動落在 scratchpad）；`--no-site` 只輸出 HTML（HTML 位元組與完整建置相同）；`--ads` 預設 `sources/deploy/ads.txt` |
+| （v0.7）`npm run serve` | `node tools/serve.mjs`：V-PWA (b) 本機伺服器，預設 `http://localhost:8080/english-master-track/` 提供 `dist/site/`（§10.4） |
 
 Node 版本：`package.json` 的 `engines.node` 訂為 **`>=22`**（v0.2，原 `>=18`）。理由：`node --test` 自行展開 glob 需 Node 21 以上；Node 18、20 在 Windows 會把 `*.test.js` 當字面檔名而失敗；21 為非 LTS 且已停止維護，故以 LTS 22 為下限。本機 v24.15.0 符合。`package.json` 屬 FE-01 的 paths，調整由 §12.1 的 FE-01 補修處理。
 
@@ -416,6 +540,123 @@ Node 版本：`package.json` 的 `engines.node` 訂為 **`>=22`**（v0.2，原 `
 | B-9（備用） | 第 2 層壓縮：只在 B-7 警告時由 FE-18 啟用。把 `MASTER_VOCAB_DATABASE` 改輸出為「欄位名陣列 + 值陣列」並附 10 行以內的還原函式，於其他資料與程式之前還原為契約形狀的 `BuiltinVocabItem[]`（執行期介面不變，契約不需修改） | — |
 
 `index.html` 在開發時不可直接開啟（無資料、無程式）；一律以 `--out` 建到 scratchpad 後開啟。
+
+### 5.1 v0.7 PWA 建置（FE-47；契約 DP、MF、HD、SW-2、SW-3、V-PWA-01～06、DS-11～DS-14）
+
+**執行順序**：B-1 → B-2 → B-3 → B-4 → B-5 → B-6 → **B-10 → B-11 → B-12 → B-13 → B-14 → B-15** → B-7（對**最終** HTML）→ **B-16** → B-8。所有檢查在記憶體完成後才寫任何檔案（中止時 `out` 與部署目錄都不寫、不刪）。
+
+| 步驟 | 動作 | 失敗條件（`BuildError.code`） |
+| :--- | :--- | :--- |
+| B-10 PWA 模式 | 模板中 `@@BUILD_ID@@` 出現次數：恰 1 次且位於 `<meta name="emt-build-id" content="@@BUILD_ID@@">` → **PWA 模式**；0 次 → 非 PWA 模式（只供舊 fixture 測試），此時必須 `site === false`；其他情況中止 | 次數 > 1、位置不符、或 0 次但要求部署目錄 → `PWA_TEMPLATE` |
+| B-11 PWA 輸入 | (1) 常數：以 `createRequire(import.meta.url)` 讀 `PROJECT_ROOT/src/app/core/pwa.js`（**固定**取專案檔，不隨 `--app` 改變）；(2) `sw` 範本 `<app>/pwa/sw.template.js`（去 BOM）；(3) 4 張圖示 `<app>/assets/icons/<檔名>`（檔名 = `PWA_DEPLOY_FILES` 中 PNG 的 `path` 去掉 `icons/`），以 `Buffer` 讀取；V-PWA-03：前 8 bytes 為 PNG 簽章、第一個區塊為 `IHDR`、寬 = 高 = `sizePx`、位元深度 8、色彩類型 2、全部區塊中無 `tRNS`；(4) DS-13：`<app>/styles/00-base.css` 第一個 `--bg:` 宣告值（`#RRGGBB`，不分大小寫）= `PWA_BACKGROUND_COLOR`；(5) `site !== false` 時 `--ads` 檔案必須存在（只檢查存在與可讀，內容原樣） | `PWA_SW_TEMPLATE`、`PWA_ICON`（訊息含檔名與不符項目）、`PWA_BG_COLOR`、`ADS_MISSING` |
+| B-12 HTML head | 對 B-1～B-6 組好的 HTML（仍含佔位，稱 HTML₀）檢查 HD-1 靜態元素各**逐字**恰 1 次：`<meta name="theme-color" content="#2f6fd6">`（值取 `PWA_THEME_COLOR`）、`<meta name="apple-mobile-web-app-title" content="EnglishContext">`（取 `PWA_APP_NAME`）、`<meta name="apple-mobile-web-app-capable" content="yes">`、`<meta name="mobile-web-app-capable" content="yes">`、`<meta name="apple-mobile-web-app-status-bar-style" content="default">`、`<meta name="emt-build-id" content="@@BUILD_ID@@">`、`<link rel="icon" href="data:,">`；且皆位於 `</head>` 之前；`<title>English Master Track</title>` 恰 1 次 | `PWA_HEAD` |
+| B-13 manifest | 位元組 = UTF-8（無 BOM）的 `JSON.stringify(PWA_MANIFEST, null, 2) + "\n"`；自我驗證 V-PWA-02（`JSON.parse` 後與常數深度相等、鍵恰 10 個、`icons[].src` 皆在 `PWA_DEPLOY_FILES`） | `PWA_MANIFEST` |
+| B-14 BUILD_ID | `crypto.createHash("sha256")` 依序 `update` 7 筆紀錄，每筆 = UTF-8 `"<路徑>\n<位元組長度>\n"` + 內容位元組 + `"\n"`；順序與路徑：`index.html`（HTML₀ 的 UTF-8 位元組）→ `manifest.webmanifest` → `icons/icon-192.png` → `icons/icon-512.png` → `icons/icon-maskable-512.png` → `icons/apple-touch-icon-180.png` → `sw.js`（**注入前**範本位元組）。BUILD_ID = `digest("hex").slice(0, 16)`，須符合 `PWA_BUILD_ID_PATTERN`。`ads.txt` 不納入（SW-2） | — |
+| B-15 注入 | (1) 最終 HTML = HTML₀ 中唯一的 `@@BUILD_ID@@` 換成 BUILD_ID；(2) `sw.js` = 範本中唯一的 `@@BUILD_ID@@` 換成 BUILD_ID、唯一的 `/* @@PRECACHE_URLS@@ */` 換成 `PWA_PRECACHE_URLS.map(JSON.stringify).join(", ")`；範本須逐字含 `var CACHE_PREFIX = "english-master-track-pwa-";` 恰 1 次（值 = `PWA_CACHE_PREFIX`）；(3) V-PWA-05 對注入後 `sw.js` 檢查：含 `var BUILD_ID = "<BUILD_ID>";`；不含 `importScripts`、`indexedDB`、`localStorage`、`sessionStorage`、`"push"`、`"sync"`、`periodicsync`、`notificationclick`、`backgroundfetch`、`BroadcastChannel`、`navigationPreload`、`caches.match(`、`http://`、`https://`、`@@`；所有 `addEventListener("<型別>"` 的型別 ⊆ {`install`, `activate`, `fetch`, `message`} 且 4 種各恰 1 次；不含 `self.on` 開頭的事件屬性指派 | `PWA_SW` |
+| B-7（v0.7 修訂） | 對**最終** HTML 執行既有全部檢查，另加：(1) **逐字白名單** `ALLOWED_STATIC_TAGS = ['<link rel="icon" href="data:,">']`：PWA 模式下該字串必須恰 1 次，檢查 `FORBIDDEN_PATTERNS` 前**先把這一個字串從檢查用副本中移除**，`FORBIDDEN_PATTERNS` 本身（含 `<link href>`、`<script src>`）**一條都不放寬**；(2) `FORBIDDEN_PATTERNS` 新增 `{ name: "<link rel=PWA 附屬檔>", re: /<link\b[^>]*\brel=["']?(?:manifest\|apple-touch-icon\|apple-touch-startup-image\|preload\|prefetch\|modulepreload)\b/i }`（HD-3）；(3) 最終 HTML 不得再含 `@@BUILD_ID@@`；`emt-build-id` 的值符合 `PWA_BUILD_ID_PATTERN`。動態加入的連結與 SW 註冊都是 JS 字串（`createElement("link")`、`register("./sw.js", …)`），不含 `<link`／`<script src` 字面，不需任何放寬 | `EXTERNAL_RESOURCE`、`PWA_HEAD` |
+| B-16 輸出 | (1) 寫 `out`（同既有）；(2) `site !== false` 時處理部署目錄：若已存在，遞迴列出內容——只允許 `PWA_DEPLOY_FILES` 的路徑與 `icons/` 目錄，有其他任何檔案或目錄 → **中止且不刪除**（防止 `--site` 誤指到專案目錄）；否則刪除整個目錄後重建，寫入 8 檔：`index.html`（= 最終 HTML，與 `out` 同一字串）、`manifest.webmanifest`、`sw.js`（UTF-8 無 BOM）、4 張 PNG 與 `ads.txt`（`Buffer` 原樣複製）；(3) 寫完回讀驗證 V-PWA-01（檔案集合恰 8 個、大小寫相同；`index.html` 與 `out` 位元組相同；`ads.txt`、PNG 與來源位元組相同） | `SITE_DIR_UNEXPECTED`、`PWA_SITE_VERIFY` |
+| B-8（v0.7 增補） | 報告加：PWA 模式、BUILD_ID、部署目錄路徑與 8 檔各自 bytes | — |
+
+**`build()` 回傳（v0.7）**：既有欄位外加 `buildId`（非 PWA 模式為 `null`）、`site`（`{ dir, files: [{ path, bytes: Buffer }] }`；`site === false` 時為 `null`）。`write: false` 時同樣完整計算並回傳、不寫檔（供 `build.test.js` 比對可重現）。
+
+**命令列（`parseArgs`）**：既有 `--out`、`--data`、`--app` 不變；新增 `--site <dir>`、`--ads <file>`（帶值）、`--no-site`（不帶值）；`--site` 與 `--no-site` 同時出現 → `BAD_ARGS`。
+
+**可重現性檢查（DS-11「現有建置有沒有寫入時間戳或亂數」）**
+
+| 位置 | 檢查結果 | 處理 |
+| :--- | :--- | :--- |
+| `buildLicenseHeader(…, now = new Date())` | 只在 `PROJECT_LICENSE.copyrightYear` 缺漏時以當年代替（並警告）；正式資料 `sources.js` 有此欄 → 不受時間影響 | 維持；PWA 模式下若走到此分支，**升級為中止** `LICENSE_YEAR`（避免跨年 BUILD_ID 改變而不自知）；非 PWA fixture 維持警告 |
+| 程式區段註解 `/* core/x.js */` | 相對 `--app` 的 `/` 分隔路徑，不含絕對路徑 | 不變 |
+| 檔案列舉 | `readdirSync` 後以 `byName` 排序（不受語系、檔案系統順序影響） | 不變 |
+| 資料輸出 | `JSON.stringify`（鍵順序依資料檔原始順序）；字庫依 `rank` 穩定排序 | 不變 |
+| 報告 `log`（含絕對路徑、`toLocaleString`） | 只輸出到主控台，不寫入產物 | 不變 |
+| `Math.random`、`Date.now`、`process.env`、`os.*` | `tools/build.mjs` 目前**未使用** | FE-47 以原始碼掃描測試鎖定：`build.mjs` 不得出現 `Math.random`、`Date.now`、`new Date(`（`buildLicenseHeader` 預設參數除外）、`process.env`、`performance.now` |
+| 換行字元 | 建置原樣讀取原始檔；同一份 checkout 兩次建置相同（AC-36-01 (a) 成立）；但 Windows（`core.autocrlf`）與 CI（LF）的 checkout 位元組可能不同 → 兩地 BUILD_ID 不同 | 不影響 AC；見 T-46、SD-FB-37 |
+
+**`tools/serve.mjs`（FE-47，V-PWA (b)）**
+
+| 項目 | 約定 |
+| :--- | :--- |
+| 參數 | `--dir <dir>`（預設 `dist/site`）、`--port <n>`（預設 8080）、`--base <path>`（預設 `/english-master-track/`，模擬 GitHub Pages 專案子路徑；必須以 `/` 開頭結尾） |
+| 監聽 | 只綁 `127.0.0.1`；只接受 `GET`、`HEAD`（其他 405） |
+| 路由 | `<base>` → `index.html`；`<base>` 去尾斜線 → 301 到 `<base>`；`<base><path>` → `--dir` 下對應檔案（解析後必須仍在 `--dir` 內，否則 404）；`<base>` 以外（如 `/favicon.ico`）→ 404（讓 AC-37-05 的部署目錄外請求在 QA 記錄中可見） |
+| 標頭 | `Content-Type`：`.html` `text/html; charset=utf-8`、`.webmanifest` `application/manifest+json`、`.js` `text/javascript; charset=utf-8`、`.png` `image/png`、`.txt` `text/plain; charset=utf-8`；`Cache-Control: max-age=600`（模擬 GitHub Pages，用來驗證 SW-4 `cache: "reload"` 與 SW-1 `updateViaCache: "none"`） |
+| 檔案不存在 | 404（QA 刪除副本中的 manifest、`sw.js`、圖示驗 AC-37-03） |
+| 每次請求 | 讀檔（不快取在記憶體），QA 換掉 `--dir` 內容即模擬重新部署 |
+
+### 5.2 v0.7 部署 workflow（主控 MC-03；Q-46 授權修改一次；契約 DS-15、AC-36-07）
+
+**相依套件確認**：`package.json` 沒有 `dependencies`／`devDependencies`，專案沒有 `package-lock.json`；`tools/build.mjs` 只用 Node 內建模組（`fs`、`path`、`vm`、`url`、`crypto`、`module`）。因此**不需要也不可執行 `npm ci`**（無 lockfile 時 `npm ci` 直接失敗）。日後 QA 若加入 Playwright 等 devDependencies，部署 workflow 仍不安裝（建置不需要）。
+
+主控將 `.github/workflows/static.yml` **整檔取代**為：
+
+```yaml
+# 建置並部署 PWA 部署目錄 dist/site/ 到 GitHub Pages（architecture.md §5.2；Q-46 授權主控修改一次）
+name: Deploy static content to Pages
+
+on:
+  # push 到 main 時自動部署
+  push:
+    branches: ["main"]
+
+  # 可從 Actions 分頁手動執行
+  workflow_dispatch:
+
+# GITHUB_TOKEN 部署 GitHub Pages 所需權限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同時只跑一個部署；進行中的部署不取消
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # 零相依、無 package-lock.json：不執行 npm ci
+      - name: Build
+        run: npm run build
+      - name: Verify deploy directory
+        run: |
+          set -eu
+          test "$(find dist/site -type f | wc -l)" -eq 8
+          cmp dist/site/index.html dist/english-master-track.html
+          cmp dist/site/ads.txt sources/deploy/ads.txt
+          for f in index.html manifest.webmanifest sw.js ads.txt icons/icon-192.png icons/icon-512.png icons/icon-maskable-512.png icons/apple-touch-icon-180.png; do
+            test -f "dist/site/$f"
+          done
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # 只上傳部署目錄（恰 8 檔），不含 docs/、src/、sources/
+          path: dist/site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
+```
+
+| 要點 | 說明 |
+| :--- | :--- |
+| 與舊版差異 | 新增 Setup Node.js、Build、Verify；刪除 Prepare site（`mkdir _site`、逐檔 `cp`）；上傳路徑 `_site` → `dist/site`。其餘（觸發、權限、concurrency、actions 版本）不變 |
+| CI 建置的前提 | 下列檔案必須已提交到 git：`src/`（含 `src/data/` 全部資料檔與 `src/app/assets/icons/` 4 張 PNG）、`tools/build.mjs`、`package.json`、`sources/deploy/ads.txt`。`dist/` 是否提交不影響部署（CI 重新建置）；建議人類決定是否把 `dist/site/` 加入 `.gitignore`（SD-FB-36） |
+| Node 版本 | `22`（= `engines.node` 下限，`node --test` glob 需要；建置本身 Node 18 起即可） |
+| 失敗行為 | B-7、B-10～B-16 任一檢查失敗 → `npm run build` 結束碼 1 → 不上傳、不部署（舊版網站維持） |
+| 驗證 | push 到 `main` 後由 QA／人類依 AC-36-07 檢查部署網址下 8 個檔案皆 200 且與 CI 產物相同（下載 Actions artifact 比對，或以 `curl` 取回後與本機 `--app` 相同來源的建置比對 BUILD_ID） |
 
 ---
 
@@ -480,11 +721,20 @@ Node 版本：`package.json` 的 `engines.node` 訂為 **`>=22`**（v0.2，原 `
 
 localStorage：v0.5 不新增欄位、不改結構（`schemaVersion` 2）；初始化只會讓資料變小。
 
+### 6.3 v0.7 增量估算
+
+| 項目 | 估算 |
+| :--- | :--- |
+| HTML 內新增：`core/pwa.js`（常數＋純函式）、`services/pwa.js`、`ui/pwa-notice.js`、dashboard／store／main／sources-page 修改、`80-pwa.css`、HD-1 靜態元素 7 個、授權標頭 1 行 | 約 +18 KB；以 FE-44 產物為基準仍遠低於 4.5 MiB 警告門檻（AC-19-04 不受影響） |
+| `dist/site/` 其他檔案（不計入 AC-19-04） | `sw.js` 約 4 KB、`manifest.webmanifest` 約 0.5 KB、4 張 PNG 依主控產出（預估合計 0.1～0.5 MB）、`ads.txt` 58 bytes |
+| Cache Storage（https 版，每個本專案快取） | HTML 以 `./`、`./index.html` 兩鍵各存一份（約 2 × 3.1 MB）＋ manifest ＋ 4 張 PNG ≈ 6.5～7 MB；更新等待期間最多 2 個快取（FB-39）≈ 14 MB。遠低於 Chrome 每來源配額（磁碟可用空間的比例，通常數 GB）；配額不足依 E-76、PE-3 靜默 |
+| localStorage | 不變（PV-1） |
+
 ---
 
 ## 7. 關鍵演算法
 
-### 7.1 分數與試算（`core/goal.js`，FE-03；PRD 色級定義表、Q-12、Q-15、Q-25、Q-28、Q-32）
+### 7.1 分數與試算（`core/goal.js`，FE-03 → FE-42；PRD 色級定義表、Q-12、Q-15、Q-25、Q-28、~~Q-32~~ R-19、Q-39）
 
 | 函式 | 定義 | AC |
 | :--- | :--- | :--- |
@@ -496,9 +746,13 @@ localStorage：v0.5 不新增欄位、不改結構（`schemaVersion` 2）；初�
 | `dailyNewWords(S)` | `COLOR_LEVELS[colorOf(S)].dailyNewWords`（10、10、15、20、20） | AC-02-03 |
 | `targetVocab(S, nB, nG)` | 橘 `N_O`、棕 `nB`、綠 `nG`；藍金 `null`（畫面「待定」）。（v0.3）`nB`、`nG` 不是**大於 0 的有限數**（含 `0`、負數、`NaN`、`null`）時視為資料缺漏 → 回 `null` | AC-02-05、AC-02-10 |
 | `estimate(S, c, nB, nG)` | `T = targetVocab ?? nG`、`W = dailyNewWords(S)`；`weeks = max(0, ⌈(T − c) ÷ (W × 7)⌉)`；`achieved = (開放色級 且 c ≥ T)`；`basedOnGreen = 藍金`。回傳 `{ color, targetVocab, dailyNewWords, weeks, achieved, basedOnGreen }` | AC-02-05、AC-02-06、AC-02-10 |
-| `scoreAfterColorClick(S, colorId)` | `S` 在該色範圍內 → `S`；否則該色 `scoreMin` | AC-01-05、AC-01-07 |
+| ~~`scoreAfterColorClick(S, colorId)`~~ | ~~`S` 在該色範圍內 → `S`；否則該色 `scoreMin`~~（Q-32，v0.6 廢止） | — |
+| （v0.6）`scoreForCard(colorId)` | `levelOf(colorId)?.scoreMax`；未知色級 → `null`。即 橘 215、棕 465、綠 725、藍 855、金 990（契約 `COLOR_LEVELS[].scoreMax`，不另設常數，GS-2、DS-07） | AC-01-05、AC-01-07、AC-02-04、AC-26-02、AC-26-04 |
+| （v0.6）`scoreAfterColorClick(S, colorId)` | **保留匯出名稱以相容既有呼叫端與測試替身**，語意改為 `scoreForCard(colorId) ?? S`（不再看 `S` 是否在範圍內；未知色級回原分數）。store 改呼叫 `scoreForCard` | 同上 |
 | `levelOf(colorId)` | 回傳 `COLOR_LEVELS` 中 `id` 相符的 `ColorLevelDefinition`；找不到 → `null`（v0.2 補登，FE-03 已實作） | AC-02-03、AC-02-04 |
 | `isOpenColor(colorId)` | `levelOf(colorId)?.status === "open"`；未知色級 → `false`（v0.2 補登） | AC-01-01、AC-02-10 |
+
+v0.6 決議（R-19、Q-39、DS-07、DS-08）：(1) Q-32 的「範圍內不變／設為下限」邏輯全部移除，點卡片一律 `scoreMax`；(2) 預設分數只有一個來源 `constants.SCORE_DEFAULT`（725），`persist.defaultData()` 已引用它；程式中**不得**再出現寫死的 600（FE-42 以原始碼掃描 `src/app/{core,state,views,ui,services}` 確認：數字 600 只允許出現在與分數無關處，如 `interaction.js` 的 `ANSWER: 600` 上限常數）；(3) `parseScoreInput`、`normalizeScore`、`SCORE_INVALID_MESSAGE` 保留（暫停 AC 的程式），但畫面無呼叫路徑；資料層驗證仍由 `persist` 的 `isScore` 負責，不四捨五入（GS-5）；(4) `colorOf`、`estimate` 不變，任意合法既有分數（600、735）照常判定色級與試算（GS-1、AC-26-06）。
 
 v0.3 決議（FE-09 #8，字量為 0）：在 `goal.js` **統一處理**，不由各 view 各自轉換。理由：(1) 字庫缺漏時（C-6）`prepareBuiltin` 回 `nB = nG = 0`，若 `estimate` 把 0 當有效字量，會得到「`c ≥ T` → 已達成」的錯誤結論，任何呼叫端（自訂器、主控台、日後新頁面）都會踩到；(2) 純函式內處理才能以單元測試鎖定。規則：`T` 取得方式不變，但 `nB`、`nG` ≤ 0 時視同 `null`（藍金的 `T = nG` 也套用）；`T` 為 `null` → `weeks = null`、`achieved = false`。橘色 `N_O` 為契約常數，不受影響。FE-09 view 現有的「0 轉 null」可保留（結果相同），不需修改。程式補修見 §12.2 R3-1。
 
@@ -686,14 +940,15 @@ schemaVersion = 2：
                                       ▼                       ▼
 ┌──────────────────────── firstRun ────────────────────────┐   main（一般模式；損壞者依 AC-18-05
 │ body[data-entry=firstRun]；currentTab ∈ {customizer, sources} │        重設並提示，AC-25-09）
-│ 畫面：色級大卡片、分數、試算、「開始學習」、「從備份還原」  │
-│ 不顯示：導覽列、選單鈕、自訂單字、範本、狀態列              │
+│ 畫面：色級大卡片、試算、「開始學習」、「從備份還原」        │
+│ 不顯示：導覽列、選單鈕、自訂單字、範本、狀態列、分數區（v0.6）│
 │ 寫入：0 次（FS-2）                                          │
 │                                                              │
-│  [調分數／點卡片]──► 只改記憶體 draftScore（自環）           │
+│  [點卡片]──► 只改記憶體 draftScore = 該色 scoreMax（自環）   │
 │  [頁尾「資料來源與授權」]──► currentTab=sources              │
 │       └─[「返回難易度設定」]──► currentTab=customizer        │
-│  [重新整理／關閉]──► 下次仍 firstRun，回預設 600、綠（AC-25-04）│
+│  [重新整理／關閉]──► 下次仍 firstRun，回預設 SCORE_DEFAULT   │
+│                      （725）、綠（AC-25-04，v0.6）           │
 │  [從備份還原] 取消／format／version／quota／write_failed      │
 │       ──► 留在 firstRun，顯示對應訊息（取消不提示，AC-25-11） │
 │  [開始學習] ──────────────┐   [從備份還原] 成功 ─────┐        │
@@ -711,7 +966,7 @@ schemaVersion = 2：
 | :--- | :--- | :--- |
 | localStorage 停用 | 每次啟動都是 `firstRun` 並顯示「進度將無法保存」；「開始學習」不寫入、直接進入；還原成功只套用記憶體並進入（契約 FB-31 (b)） | AC-25-08、AC-18-03 |
 | 「開始學習」寫入容量不足 | 仍進入主控台並提示「儲存空間不足」；主鍵仍不存在，下次開啟仍是首次畫面（契約 FB-31 (a)） | FS-4 |
-| 首次畫面上已改分數再還原成功 | 以備份為準，`draftScore` 等全部取自備份（E-58） | AC-25-10 |
+| 首次畫面上已點其他卡片再還原成功 | 以備份為準，`draftScore` 等全部取自備份（E-58）；選中卡片 = Color(備份 `draftScore`)，分數不轉換（GS-4，v0.6） | AC-25-10 |
 
 **畫面實作（FE-32）**
 
@@ -719,7 +974,7 @@ schemaVersion = 2：
 | :--- | :--- |
 | 導覽列、選單鈕 | `00-base.css`：`body[data-entry="boot"]` 與 `body[data-entry="firstRun"]` 下 `#app-nav`、`#nav-toggle` 為 `display: none`；`boot` 另隱藏 `#app-main`（JS 失敗時沒有可用功能，與現況相同） |
 | 自訂單字與範本 | `body[data-entry="firstRun"] #customizer-custom { display: none; }`（custom-vocab 模組照常 mount，不需修改） |
-| 難易度設定頁 | `customizer.js` 讀 `runtime.entryMode`：`firstRun` 時標題下加一段引導文字、生效按鈕區顯示「開始學習」（呼叫 `startLearning`）與「從備份還原」（呼叫 `EMT.ui.importFlow.start()`），隱藏「目前目標色級／目前生效色級」狀態列；收到 `"entry"` tag 時切回一般模式（「套用」、狀態列），**只重建按鈕區與狀態列**，不重建卡片與分數區 |
+| 難易度設定頁 | `customizer.js` 讀 `runtime.entryMode`：`firstRun` 時標題下加一段引導文字、生效按鈕區顯示「開始學習」（呼叫 `startLearning`）與「從備份還原」（呼叫 `EMT.ui.importFlow.start()`），隱藏「目前目標色級／目前生效色級」狀態列；收到 `"entry"` tag 時切回一般模式（「套用」、狀態列），**只重建按鈕區與狀態列**，不重建卡片與分數區。（v0.6）分數區在兩種模式都隱藏，見 §7.17 |
 | 資料來源頁返回 | 頁尾 `#footer-first-run-back`：CSS `body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back { display: inline-flex }`，其他情況隱藏；點擊經既有 `[data-go]` 委派導向 `customizer` |
 | 「全螢幕」 | 首次模式隱藏導覽列後，頁首（產品名稱）、警示列、難易度設定頁、頁尾即構成全畫面；不另做覆蓋層 |
 
@@ -987,6 +1242,153 @@ AC-32-02 的畫面結果皆由新資料推導，不另存狀態：主控台 X = 
 | 保留程式與資料 | `views/decoder.js`、`views/phrasebank.js`、`50-decoder.css`、`60-phrasebank.css` 不改、不刪，照常打包並登錄（`EMT.views.register` 仍接受兩個 TabId），但因 router 拒絕進入，永遠不會 `mount`（不建 DOM、不訂閱 store、不排閒置工作）；`RuntimeState.decoder`／`phrasebank` 照常初始化；`src/data/decoder.js`、`phrasebank.js` 照常打包；`index.html` 保留兩個空 `<section hidden>`（去掉 `aria-label`） | HT-4、HT-5、AC-23-04 |
 | 未來開放 | 須先修訂 PRD；再把 id 移回 `NAV_TAB_ORDER`、自 `HIDDEN_TAB_IDS` 移除、恢復 2 個導覽按鈕與 section `aria-label`、底部導覽欄數改回；主控台入口自動推導 | — |
 
+### 7.17 只選色級、不顯示分數（v0.6；constants／goal／store FE-42、customizer／dashboard FE-43；PRD R-19、Q-39、Q-40；契約 §5.9 GS-1～GS-8、V-ST-16、DS-07～DS-10）
+
+**資料流（不改持久化結構，`schemaVersion` 2）**
+
+```
+點卡片 X ──► actions.clickColor(X) ──► draftScore = goal.scoreForCard(X)（X 的 scoreMax）
+                                        ├ main：照常寫入（未套用也保存，AC-02-08）
+                                        └ firstRun：只改記憶體（FS-2）
+          ──► customizer.syncDraft() ──► renderEstimate(draftScore)：試算 3 項 + renderSelected(colorOf(draftScore))
+「套用」──► requestApplyGoal()（不再先讀輸入框）──► appliedScore = draftScore（原值，GS-3）
+「開始學習」──► startLearning()（不再先讀輸入框）
+取消初始化 ──► cancelApplyGoal() ──► draftScore = appliedScore ──► "goal" tag ──► 選中卡片回到 Color(appliedScore)（GS-8）
+啟動／匯入 ──► 既有分數原值保留（600 → 選中綠、735 → 選中藍），只重算色級（GS-4）
+```
+
+**各項修訂（DS-07～DS-09 對照）**
+
+| 項目 | 設計 | 任務 | 契約／AC |
+| :--- | :--- | :--- | :--- |
+| 點卡片設分數 | `goal.scoreForCard(colorId)` = `scoreMax`；store `clickColor` 改呼叫它；`scoreAfterColorClick` 保留名稱、語意改為 `scoreForCard(id) ?? S`。Q-32 邏輯（範圍內不變、設為下限）全部移除 | FE-42 | DS-07、GS-2、AC-01-05、AC-02-04、AC-26-02、AC-26-04、V-ST-16 |
+| 預設分數 | `constants.SCORE_DEFAULT` 600 → 725；`persist.defaultData()`（已引用常數）自動成為 725，涵蓋首次、首次畫面重新整理、讀取失敗重設、localStorage 停用四種情況；測試中「預設值」的斷言一律改為引用 `C.SCORE_DEFAULT` 或寫 725，**不得**留下以 600 代表預設值的斷言（以 600 代表「v0.9 以前的既有分數」的 fixture 可保留，且應保留以驗證 GS-4） | FE-42 | DS-08、GS-7、AC-18-02、AC-25-01、AC-25-04 |
+| 分數區隱藏 | **保留程式**（PRD R-19 允許）：`section.cz-score` 建立時即設 `hidden = true` 並 `setAttribute("inert", "")`，之後任何程式路徑都不得把 `hidden` 改回 `false`；滑桿與數字輸入框另設 `disabled` 與 `tabindex="-1"`。三重保證不可見、不可聚焦：(1) 全域 `[hidden] { display: none !important; }`（`00-base.css` 既有）→ 不渲染、不在 Tab 順序、不在無障礙樹；(2) `inert`；(3) `disabled`（即使未來 CSS 誤改 `display`，也無法聚焦或輸入）。錯誤提示 `#cz-score-error` 位於隱藏區內，且輸入元件停用後不會再觸發 → 「請輸入 10～990 的分數」不會出現 | FE-43 | DS-09、GS-6、AC-25-01、AC-26-05 |
+| 不從輸入框回寫 | `onApply`、`onStartLearning` **刪除**「先以 `parseScoreInput(refs.input.value)` 寫入 `setDraftScore`」的步驟，直接呼叫 `requestApplyGoal`／`startLearning`。理由：隱藏的輸入框不得成為分數來源；未點卡片直接套用必須寫入原值（GS-3，AC-26-06 的 735 不得被任何轉換影響）。`syncDraft` 仍可同步隱藏元件的 `value`（無害） | FE-43 | GS-3、AC-26-06 |
+| 卡片分數範圍 | `buildColorCard` 不再建立 `.cz-color__range` 節點；`cardModels` 移除 `range` 欄位（避免日後誤用）；`20-customizer.css` 刪除 `.cz-color__range` 規則並確認卡片版面（行距、最小高度 ≥ 44px）正常 | FE-43 | AC-01-01、AC-26-01、AC-26-05 |
+| 狀態列目標分數 | 一般頁狀態列不建立「目前目標分數」列（`stScore`）；`statusTexts` 移除 `score` 欄位；狀態列只剩「目前目標色級」「目前生效色級」與綠色上限提示 | FE-43 | GS-6、AC-26-05 (b) |
+| 主控台目標分數 | `dashboard.js` 目標區不建立「目前目標分數」項目（`refs.score`）；`goalInfoOf` 移除 `appliedScore` 欄位（色級仍以 `appliedScore` 推導，邏輯不變）；`TEXT.appliedScore` 刪除。`10-dashboard.css` 只在目標區格線因少一項而跑版時調整 | FE-43 | AC-17-06、AC-25-02、AC-26-05 (c) |
+| 說明文字 | 一般頁 `T.intro` 由「選擇色級或輸入目標分數即時試算，按「套用」後才會更新單字卡的單字集。」改為「**選擇色級即時試算，按「套用」後才會更新單字卡的單字集。**」（不再提及輸入分數；PRD 未定義此句，屬設計層文字）；首次引導文字不變 | FE-43 | GS-6 |
+| 試算區標籤 | 「分數對應色級」標籤**保留**（PRD AC-01-07、AC-02-04、AC-02-10 仍以此稱呼；只顯示色級名稱，不含分數數值） | — | AC-02-04 |
+| 取消確認後卡片回原色級 | 沿用 FE-40 流程：`cancelApplyGoal()` → `syncAll()` → `renderEstimate(draftScore)` → `renderSelected(colorOf(appliedScore))`。FE-43 以測試鎖定：既有 600（綠）、點棕卡片（465）→「套用」→ 取消 → 綠卡 `aria-pressed="true"`、其餘 `false`、試算每日新字量回到 15、store `draftScore` = 600（不轉 725）；寫入失敗（CI-7）路徑同樣回到綠卡 | FE-43 | GS-8、CI-9、AC-32-04 |
+| AC-22-04 量測點 | 由「拖曳滑桿」改為「點色級卡片（未套用）」：點擊 handler 內同步完成 `clickColor` → `renderEstimate`（只改既有節點文字與 `aria-pressed`，不重建 DOM）。量測：`click` 事件起點 → 下一個 `requestAnimationFrame` 時卡片選中與試算 3 項皆已更新，10 次各 ≤ 100ms。FE-44 若有無頭瀏覽器則以 `performance.now()` 量測一輪並回報；正式驗收由 QA | FE-43、FE-44 | AC-22-04、NFR-4 |
+| 鍵盤操作 | Q-40 決議不新增 AC；卡片原本就是 `<button>`（可 Tab、Enter／空白鍵觸發，FE-27），本版不改 | — | Q-40 |
+| 不變的部分 | `persist.js`（已引用常數、資料層驗證不四捨五入）、`backup.js`、`reinit.js`、CI-1～CI-10 流程、`schemaVersion`、`src/data/` | — | DS-10、GS-4、GS-5 |
+
+**原始碼中仍會出現的分數字樣（判定說明，見 SD-FB-29）**：`goal.js` 的 `SCORE_INVALID_MESSAGE`、`customizer.js` 的 `T.invalid`、`T.scoreHeading` 等屬保留程式，仍會在交付檔原始碼中出現；AC-26-05 判定的是**可見畫面、可聚焦元素與可存取名稱**，不以原始碼字串搜尋判定（同 SD-FB-21 的處理）。
+
+### 7.18 PWA（v0.7；core FE-45、sw 範本 FE-46、建置 FE-47、service FE-48、store FE-49、UI FE-50～FE-52；PRD R-20、US-34～US-37、AC-24-12、Q-41～Q-48；契約 §10）
+
+#### 7.18.1 兩種形態的行為對照
+
+| 項目 | `file://`（含只複製 HTML，AC-37-02） | https／`localhost` | 保證機制 |
+| :--- | :--- | :--- | :--- |
+| PE-1 | `false`（第 (1) 步即判定，不讀 `navigator.serviceWorker`） | `true`（支援 SW 時） | `core.pwa.isEligible`；V-PWA-08 判定表 |
+| `<head>` 連結 | 只有靜態 `<link rel="icon" href="data:,">`（不產生請求） | 另由程式加入 manifest、apple-touch-icon | HD-1～HD-3、B-12、B-7 |
+| 網路請求 | 0 | 7 個預先快取網址與 `sw.js` 的同源 GET | PV-3；`services/pwa.js` 禁 `fetch`；`sw.js` 只 `fetch` 預先快取清單 |
+| 安裝按鈕、新版提示 | 永不出現（`eligible` 恆 `false`） | 依 IN-1、UP-6 | `installVisible`、`updateVisible` 第一項即 `eligible` |
+| NT-1 說明 | 顯示 | 顯示 | dashboard 常駐、不看 `eligible` |
+
+#### 7.18.2 BUILD_ID（SW-2；B-14）
+
+```
+HTML₀ = fillTemplate(...)                    ← 含 content="@@BUILD_ID@@"
+records = [ ["index.html", HTML₀], ["manifest.webmanifest", M],
+            ["icons/icon-192.png", P1], ["icons/icon-512.png", P2],
+            ["icons/icon-maskable-512.png", P3], ["icons/apple-touch-icon-180.png", P4],
+            ["sw.js", SW_TEMPLATE] ]
+h = sha256()
+for [path, bytes] of records:  h.update(utf8(path + "\n" + bytes.length + "\n")); h.update(bytes); h.update(utf8("\n"))
+BUILD_ID = h.digest("hex").slice(0, 16)
+```
+
+| 情境（AC-36-01） | 結果 | 理由 |
+| :--- | :--- | :--- |
+| (a) 不改任何檔連續建置 2 次 | HTML、manifest、`sw.js` 逐位元組相同 | 輸入不含時間、亂數、絕對路徑（§5.1 可重現性檢查） |
+| (b) 改 `src/app/` 或 `src/data/` 1 個字元 | HTML₀ 不同 → BUILD_ID 不同 → `sw.js` 不同 | `src/app/` 的 `.js`／`.css`／`index.html`／`license-header.txt` 與 `src/data/` 皆進入 HTML₀；`sw.template.js` 直接入雜湊；`src/app/assets/icons/` 以 P1～P4 入雜湊 |
+| (c) 只換一張 PNG | P1～P4 之一不同 → BUILD_ID 不同 | 同上 |
+| 只改 `tools/build.mjs` | 若改變輸出，則 HTML₀ 或注入結果改變；若只改注入格式而 HTML₀ 不變 → BUILD_ID 不變但 `sw.js` 位元組可能不同 | **規避**：注入只替換**值**（BUILD_ID、預先快取網址），`sw.js` 的程式結構全部在範本內（入雜湊）；T-51 |
+
+#### 7.18.3 `sw.template.js` 結構（FE-46）
+
+| 區段 | 內容 |
+| :--- | :--- |
+| 開頭 | 檔頭註解（繁中；**不得**含任何網址、`@@` 以外的佔位、B-15 禁用字串）；`"use strict";` |
+| 設定（唯一由建置改值的地方） | `var BUILD_ID = "@@BUILD_ID@@";`、`var CACHE_PREFIX = "english-master-track-pwa-";`、`var CACHE_NAME = CACHE_PREFIX + BUILD_ID;`、`var PRECACHE_URLS = [/* @@PRECACHE_URLS@@ */];` |
+| 網址表 | `var PRECACHE_ABS = PRECACHE_URLS.map(function (u) { return new URL(u, self.location.href).href; });`（以 `sw.js` 網址解析，SW-6） |
+| `install` | `event.waitUntil(precache())`；**不呼叫** `skipWaiting`（SW-4） |
+| `precache()` | `caches.open(CACHE_NAME)` → 對 `PRECACHE_URLS` 中 `./` 以外的 6 項各 `fetch(new Request(u, { cache: "reload" }))`；每個回應須 `ok`、`status === 200`、`!redirected`（否則視為失敗）；全部成功後依序 `cache.put`：`./index.html` 的回應另以 `clone()` 同時寫入 `./` 鍵（兩鍵位元組相同，SW-4 的「取一次後 clone」方案；`./` 不另發請求）。任何失敗 → `caches.delete(CACHE_NAME)` 後讓 Promise reject（install 失敗、不留部分快取，AC-35-05） |
+| `activate` | `event.waitUntil(caches.keys().then(刪除「以 CACHE_PREFIX 開頭且 ≠ CACHE_NAME」者).then(() => self.clients.claim()))`（SW-5、SW-9） |
+| `fetch` | 條件全成立才 `respondWith`：`request.method === "GET"`；`new URL(request.url)` 去 `hash` 後的 `href` ∈ `PRECACHE_ABS`（同源由絕對網址比對自然保證，**含查詢字串**）。回應：`caches.open(CACHE_NAME).then(c => c.match(request.url 去 hash, { ignoreVary: true }))`（以網址比對，不受導覽請求與 install 請求的 `Vary` 標頭差異影響；不使用 `ignoreSearch`，查詢字串必須相同）→ 命中回傳；未命中 → `fetch(request)`（不寫入快取，SW-6、SW-7）。導覽請求的 `./` 與 `./index.html` 皆命中各自的鍵 |
+| `message` | `event.data` 為非 `null` 物件、`Object.keys(data)` 恰為 `["type"]`、`data.type === "SKIP_WAITING"` → `self.skipWaiting()`；其他忽略（SW-8） |
+| 禁止 | SW-10 全部；不得 `postMessage`、`clients.matchAll`、`console.*` |
+
+#### 7.18.4 頁面端：啟動與註冊（`services/pwa.js`，FE-48）
+
+```
+start({onChange})
+ ├ eligible = core.pwa.isEligible({location, isSecureContext, navigator}) ── false → return {false,false}（PE-2，什麼都不做）
+ ├ standalone = core.pwa.isStandalone({matchMedia, navigator})
+ ├ onChange({eligible: true, standalone})
+ ├ addLink("manifest", "manifest.webmanifest"); addLink("apple-touch-icon", "icons/apple-touch-icon-180.png", sizes="180x180")
+ ├ window.addEventListener("beforeinstallprompt", onBip); window.addEventListener("appinstalled", onInstalled)
+ └ readyState === "complete" ? setTimeout(register, 0) : addEventListener("load", register, {once: true})
+register()
+ └ navigator.serviceWorker.register("./sw.js", {scope: "./", updateViaCache: "none"})
+     .then(onRegistered).catch(silent)
+```
+
+#### 7.18.5 更新流程（UP-1～UP-9，Q-43 A）
+
+| 時機 | 動作 | `RuntimeState.pwa` 變化 |
+| :--- | :--- | :--- |
+| `onRegistered(reg)` | 存 `reg` 於閉包；`last = performance.now()`；`reg.waiting && navigator.serviceWorker.controller` → 有新版；`reg.addEventListener("updatefound", …)`；`navigator.serviceWorker.addEventListener("controllerchange", onControllerChange)`；`document.addEventListener("visibilitychange", onVisible)` | `lastUpdateCheckAt = last`；有新版時 `updateAvailable = true` |
+| `updatefound` | `w = reg.installing`；`w.addEventListener("statechange", …)`：`w.state === "installed" && controller` → 有新版。`controller` 為 `null`（首次安裝）→ 不設定 | `updateAvailable = true` |
+| `visibilitychange` 為 `visible` 且 `core.pwa.needsRecheck(performance.now(), last)` | `last = now`；`reg.update().catch(silent)` | `lastUpdateCheckAt = now` |
+| `requestReload()` | 已 `reloadRequested` → 不做事；否則 `reloadRequested = true`；`reg && reg.waiting` → `reg.waiting.postMessage({ type: "SKIP_WAITING" })`；否則 `location.reload()` | `reloadRequested = true` |
+| `controllerchange` | 只有 `reloadRequested && !reloaded` 時 `reloaded = true`、`location.reload()`；其他（首次 `clients.claim()`、別的分頁換版）不重新載入 | — |
+| 離線、`update()` 失敗、`register()` 失敗 | 靜默；不設 `updateAvailable` | 不變（UP-9、PE-3） |
+
+AC-36-03「60 秒內顯示」：瀏覽器在導覽時檢查 `sw.js`（`updateViaCache: "none"` 不取 HTTP 快取），V2 安裝時預先快取 7 項（約 3.5 MB）完成後觸發 `statechange: installed` → `updateAvailable`；一般網路下遠低於 60 秒。
+
+#### 7.18.6 安裝按鈕狀態機（IN-1～IN-8）
+
+```
+                 beforeinstallprompt（有 prompt 函式、未 suppressed、非 standalone）
+  [hidden] ─────────────────────────────────────────────────────► [available]
+     ▲   preventDefault()、事件存閉包、installPromptAvailable = true │
+     │                                                             │ 點「安裝 App」：取出並清空閉包事件、
+     │                                                             │ installPromptAvailable = false、installSuppressed = true
+     │                                                             │ （先 onChange → 按鈕消失）→ e.prompt() → await e.userChoice
+     │                                                             ▼
+     └──────────── appinstalled（任何狀態）：清空閉包、available = false、suppressed = true ─── [suppressed：本頁不再顯示]
+```
+
+| 規則 | 實作 |
+| :--- | :--- |
+| 防連點（AC-34-09 (c)） | 閉包事件在 `prompt()` **之前**取出並清空；第二次點擊時閉包為 `null` → 直接 `return Promise.resolve()`；且按鈕已因 `"pwa"` tag 被移除 |
+| 錯誤 | `prompt()` 同步例外或回傳 Promise reject、`userChoice` reject → 靜默；狀態維持 suppressed |
+| 替身事件（FB-42） | `typeof e.prompt !== "function"` → 忽略（不 `preventDefault`、不顯示） |
+| 不存 | 事件物件只在閉包（PV-7）；不寫 localStorage（IN-8） |
+
+#### 7.18.7 畫面配置
+
+| 元素 | 位置與樣式 | AC |
+| :--- | :--- | :--- |
+| NT-1 說明 `p.dash-backup__origin` | 主控台備份區塊按鈕列之後的**下一個兄弟節點**（「匯出備份」與「匯入備份」同一列，SD-FB-34）；一般段落文字（`font-size` 同 `.dash-backup__hint`、`overflow-wrap: anywhere`），不截斷、不設 `white-space: nowrap`；位於頁面流內，底部導覽以既有 `body` 底部留白避讓 | AC-24-12、AC-27-03 |
+| 「安裝 App」 | NT-1 之後的 `div.dash-backup__install` 內；`min-height`／`min-width` ≥ `var(--touch)`（44px）；`hidden` 時 `display: none`（全域 `[hidden]` 規則） | AC-34-07、AC-34-08 |
+| 新版提示 `#pwa-update` | 頁首之後、`#app-banner` 之後的頁面流元素，`position: sticky; top: 0; z-index` 低於對話框與 toast、高於一般內容；`display: flex; flex-wrap: wrap; gap`，文字與按鈕在 375px 不截斷；背景 `--surface`、上下邊框 `--border`；**無** `transition`／`animation`（減少動態下自然無動畫）；在頁面頂端，不可能被底部導覽遮住 | AC-36-03、AC-27-03、AC-31-03 |
+
+#### 7.18.8 隱私與禁止事項對照（PV、AC-37-05、AC-21-03）
+
+| 檢查 | 位置 | 方法 |
+| :--- | :--- | :--- |
+| `navigator.serviceWorker`、`beforeinstallprompt`、`appinstalled` 只出現在 `services/pwa.js` | `src/app`（`__tests__`、`pwa/` 除外） | `pwa-service.test.js` 原始碼掃描（比照 haptics） |
+| `caches` 只出現在 `pwa/sw.template.js` | `src/app` | 同上 |
+| `services/pwa.js` 不含 `localStorage`、`sessionStorage`、`indexedDB`、`fetch(`、`XMLHttpRequest`、`sendBeacon`、`<link`、`<script` | 原始碼 | 同上 |
+| `sw.js` 禁用字串與監聽種類 | 建置產物 | B-15（建置中止）＋ `sw.test.js` |
+| manifest 鍵集合封閉 | 建置產物 | B-13 |
+
 ---
 
 ## 8. 內容製作設計（pg-content）
@@ -1150,7 +1552,7 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | 斷點 | 行動優先；`min-width: 768px`（平板）、`min-width: 1200px`（桌機）；內容區 `max-width: 960px` 置中 | AC-20-01 |
 | 防水平捲軸 | 全域 `box-sizing: border-box`；長字串 `overflow-wrap: anywhere`；表格與 MIT 全文用 `overflow-x: auto` 的**元素內**容器（頁面本身不得出現水平捲軸）；圖片無 | AC-20-01 |
 | 導覽 | < 768px：頁首「選單」按鈕展開 2 欄 × 3 列按鈕格（6 個功能區）；≥ 768px：單列頁籤；「資料來源與授權」入口在主控台與頁尾 | AC-20-03、AC-23-02 |
-| 觸控 | 按鈕、選項、滑桿把手最小 44 × 44 px；滑桿 `input[type=range]` 原生元件；不依賴 hover | AC-20-02 |
+| 觸控 | 按鈕、選項、滑桿把手最小 44 × 44 px；滑桿 `input[type=range]` 原生元件；不依賴 hover。（v0.6）滑桿已隱藏，不在 AC-20-02 檢查範圍 | AC-20-02 |
 | 色彩 | `00-base.css` 定義變數：色級 5 色（橘 `#e8833a`、棕 `#8b5a2b`、綠 `#2e9e5b`、藍 `#2f6fd6`、金 `#c9a227`）；語法 4 色系（主詞藍 `#1d4ed8`／`#dbeafe`、動詞紅 `#b91c1c`／`#fee2e2`、受詞綠 `#15803d`／`#dcfce7`、修飾紫 `#7e22ce`／`#f3e8ff`）；燈號綠黃紅；對錯綠紅 | AC-12-01、AC-08-06 |
 | 字型 | 系統字型堆疊（`system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif`；IPA 用 `"Segoe UI", "Lucida Sans Unicode", "Arial Unicode MS"`）；**不載入外部字型** | AC-19-01 |
 | 類名 | 每頁固定前綴：`db-`、`cz-`、`cv-`、`fc-`、`sp-`、`qz-`、`p5-`、`dc-`、`pb-`、`src-`；共用 `btn`、`card`、`field`、`toast`、`dialog` | — |
@@ -1159,8 +1561,9 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | QA 判定（v0.3） | 上列例外按鈕：有 `aria-disabled="true"` 與非空 `title`、**沒有** `disabled` 屬性；點擊後出現 toast（AC-08-02 文字逐字相符），不開始朗讀或聆聽，不拋未處理例外。其他停用按鈕：有 `disabled` 屬性。兩種寫法都不得出現 `aria-disabled="true"` 但點擊仍執行動作的情況 | AC-07-04、AC-08-02 |
 | （v0.4）導覽 | **取代上方「導覽」列的 < 768px 部分**：≤ 640px 為固定底部導覽列（§9.1）；641～767px 維持既有「選單」按鈕展開 2 欄 × 3 列；≥ 768px 維持單列頁籤。首次模式三種寬度都不顯示導覽。**（v0.5）導覽只剩 4 項**：底部導覽 4 欄、641～767px 選單 2 欄 × 2 列、≥ 768px 單列 4 個頁籤（§7.16） | AC-20-03、AC-27-01、AC-27-04、AC-25-01、AC-20-04 |
 | （v0.5）收音條 | `31-speech.css`：`.sp-meter` 為 `inline-flex`、固定總寬（約 5 × 6px + 4 × 3px）與高度（約 18px），垂直置中於麥克風按鈕旁；`.sp-meter__bar` 暗色用 `--border`、亮色用 `--correct`，5 格等寬、高度由左到右遞增（純裝飾，不影響判定）；**一律** `transition: none; animation: none`（§7.11 A-6）。不只靠顏色：亮格另加 `is-on` class 供測試，`aria-label`「收音音量」 | AC-33-03、AC-33-08 |
-| （v0.4）色級大卡片 | `20-customizer.css`：卡片為 `<button>`（整張可點、`aria-pressed` 表示選中）；版面 ≤ 640px 單欄、641～1199px 2 欄（第 5 張橫跨或靠左）、≥ 1200px 5 欄；每張 `min-height` ≥ 44px（實際約 120px）；選中樣式 = 色級色 3px 外框 + 淺底，不只靠顏色（另有「已選擇」文字給螢幕閱讀器，`aria-pressed`） | AC-26-01、AC-26-02 |
+| （v0.4）色級大卡片 | `20-customizer.css`：卡片為 `<button>`（整張可點、`aria-pressed` 表示選中）；版面 ≤ 640px 單欄、641～1199px 2 欄（第 5 張橫跨或靠左）、≥ 1200px 5 欄；每張 `min-height` ≥ 44px（實際約 120px）；選中樣式 = 色級色 3px 外框 + 淺底，不只靠顏色（另有「已選擇」文字給螢幕閱讀器，`aria-pressed`）。（v0.6）卡片內容移除分數範圍列（`.cz-color__range`），其餘不變 | AC-26-01、AC-26-02、AC-26-05 |
 | （v0.4）動畫類名 | `view--entering`（換頁）、`fc-face--flip-in`、`fc-card--in-next`、`fc-card--in-prev`、`qz-opt--pop`、`qz-opt--shake`、`p5-opt--pop`、`p5-opt--shake`；主控台環形圖 `db-ring`、`db-ring--done`（金色）、長條圖 `db-bars` | §7.11 |
+| （v0.7）PWA 元素 | `80-pwa.css`：`.pwa-update`（sticky 頂端文字列，§7.18.7，無 transition／animation）；`10-dashboard.css`：`.dash-backup__origin`（同 `.dash-backup__hint` 字級、`overflow-wrap: anywhere`）、`.dash-backup__install`、`.dash-install`（≥ 44 × 44 px）。色彩只用既有變數；`--bg` 仍為 `#f6f7f9`（= `PWA_BACKGROUND_COLOR`，建置 B-11 比對，DS-13）、`--primary` 仍為 `#2f6fd6`（= `PWA_THEME_COLOR`）。日後改這兩個變數須同步提契約小修 | AC-24-12、AC-34-04、AC-34-07、AC-36-03 |
 | （v0.4）色彩 | 主環形圖達成時沿用既有 `--color-gold`（`#c9a227`）；未達成用 `--primary`；小環形圖用 `--correct`；空環用 `--border`。底部導覽目前項目沿用既有 `aria-current="page"` 樣式 | AC-30-05 |
 
 ### 9.1 底部導覽列（FE-26；PRD US-27、Q-33）
@@ -1313,6 +1716,94 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | V-MIC-5（AC-33-05、AC-33-06） | 拔除 USB 麥克風（或於 Windows 裝置管理員停用）後按麥克風 →「找不到麥克風裝置」；聆聽中拔除 → 聆聽結束、收音條全暗、顯示錯誤提示 |
 | 結果判定 | AC-33-01 若實測出現第 2 次詢問：QA 開 BUG 並附瀏覽器版本，由人類判斷是否接受為瀏覽器限制（PRD R-18 二） |
 
+### 10.3 v0.6 測試範圍（PRD v0.10）
+
+命令與規則同 §10.1（只有 FE-44 執行 `npm run build`）。三個任務依序執行（不平行），每個任務收尾時 `npm test` 只允許出現下表「暫時失敗」所列、且屬後續任務 paths 的失敗。
+
+**中間狀態的已知失敗（依相依順序自然修復，不得為此跳過或刪除測試）**
+
+| 改動任務 | 暫時失敗的測試（不在該任務 paths） | 修復任務 |
+| :--- | :--- | :--- |
+| FE-42（`SCORE_DEFAULT` 725、`scoreAfterColorClick` 語意改變） | `customizer.test.js`：以 `_fixtures.makeStore()` 預設資料（現為 725）斷言輸入框／滑桿為 "600" 的 FE-40 案例；測試替身 store 以 `scoreAfterColorClick` 斷言「300 點綠 → 470」的案例 | FE-43 |
+| 其他 | 預期無：`dashboard.test.js`、`load-order.test.js`、`backup.test.js`、`reinit.test.js` 的 600 皆為明示的 fixture 分數，不依賴預設值。若實際出現本表以外的失敗且檔案不在該任務 paths → 該任務標 `blocked` 回報主控 | — |
+
+**新增與修改的單元測試**
+
+| 檔案 | 任務 | 必含案例 |
+| :--- | :--- | :--- |
+| `goal.test.js`（改） | FE-42 | `C.SCORE_DEFAULT === 725` 且 = 綠色 `scoreMax`（兩處：第 56 行附近與 vm 載入段）；`scoreForCard`：5 色 → 215、465、725、855、990，未知 → `null`；`scoreAfterColorClick(S, id)` 對任意合法 `S`（10、300、600、725、735、990）皆回該色 `scoreMax`，未知色級回 `S`；刪除 Q-32 案例（300 點綠 → 470、500 點綠 → 500、600 點藍 → 730／金 → 860），改為 AC-01-05 (a)(b)（300 → 725、600 → 725）、AC-01-07（藍 855、金 990，`effectiveColorOf` 為綠）；AC-02-04 依序點 5 色 → `colorOf(scoreForCard(id)) === id`；AC-26-06 的 12 個分數 `colorOf`／`dailyNewWords` 依序為 PRD 所列 |
+| `persist.test.js`（改） | FE-42 | `defaultData()` 的 `goal` = `{ 725, 725, "green", "green" }`（以 `C.SCORE_DEFAULT` 表示）；與 `storage-schema.json` 範例一致（契約 v0.10 範例已為 725，修改前此案例即失敗）；GS-4：`draftScore`／`appliedScore` 為 600、735 的 v2 紀錄與 v1 紀錄（MG-2）讀取後分數原值保留、色級依 V-ST-02 重算；GS-5：`723`、`"600"`、`600.5` 仍為 unreadable（不四捨五入） |
+| `store.test.js`（改） | FE-42 | 預設值相關案例（首次啟動、localStorage 停用、讀取失敗重設、AC-25-04 首次重新整理、`startLearning` 未點卡片）的 600 改為 725；「clickColor 依 Q-32」改寫為 GS-2：既有 600 點綠 → 725（AC-01-05 (b)）、300 點綠 → 725、點藍 855、點金 990、再點目前選中色級仍為上限；一般模式點卡片使分數改變時照常寫入（`setItem` ≥ 1 次，沿用現行 `setDraft` 行為）、首次模式 0 次；V-ST-16：每次點卡片後 `draftScore ∈ {215, 465, 725, 855, 990}`；GS-3／AC-26-06：12 個分數各以 `draftScore = appliedScore = 值` 預寫（FB-36）→ init 後 `colorOf(draftScore)` 為 PRD 所列、不點卡片 `requestApplyGoal()` 後 `appliedScore` 與 localStorage 皆為原值、`schemaVersion` 2、重建 store 讀回仍為原值；AC-32-01／02／04～07 中「將分數改為 300」「600 → 650／730／860」的步驟改為點卡片（棕 465、綠 725、藍 855、金 990），預期值依 PRD v0.10（如 AC-32-02 確定後 `appliedScore` 465；AC-32-04 取消後 `draftScore` 600）；以 600 代表「v0.9 既有分數」的 fixture 保留 |
+| `_fixtures.js`（改，如需要） | FE-42 | 若需新增「既有分數」fixture（如 `makeStore({ goalScore: 735 })`），以選項加入，不改變預設行為 |
+| `customizer.test.js`（改） | FE-43 | `cardModels` 不含 `range` 欄位；卡片 DOM 文字不含 `/\d+～\d+/` 與「分」字尾的範圍文字；`statusTexts` 不含 `score`；狀態列 DOM 無「目前目標分數」；分數區 `section.cz-score` 存在但 `hidden === true` 且有 `inert`，滑桿與輸入框 `disabled` 且 `tabindex="-1"`（AC-26-05 (a)(b) 的單元層代理）；首次與一般模式皆同；依序點 5 張卡片後 `#cz-score-error` 仍 `hidden`、無「請輸入 10～990 的分數」可見節點；原有以輸入框／滑桿建立狀態的案例改為點卡片（如「300 → 點綠」改為「預寫 300（棕）→ 點綠 → 725、只有綠卡選中」）；AC-26-06：預寫 735 → 選中藍、試算每日新字量 20，不點卡片按「套用」→ `requestApplyGoal` 前 `setDraftScore` 呼叫 0 次；「開始學習」改為「不讀輸入框、直接 `startLearning`」；FE-40 的 AC-32-04 案例改以選中卡片判定：既有 600（綠）、點棕 →「套用」→ 取消 → 綠卡 `aria-pressed="true"`、試算每日新字量 15、store `draftScore` 600；確定但寫入失敗同樣回到綠卡；原以預設 600 斷言輸入框值的案例改為斷言選中卡片與 `draftScore === C.SCORE_DEFAULT`；暫停 AC（AC-02-01、02、09、AC-26-03）專用的滑桿／輸入框同步案例可保留並在名稱加註「v0.10 暫停，程式保留」，或刪除（二擇一，回報註明） |
+| `dashboard.test.js`（改） | FE-43 | `goalInfoOf` 回傳物件不含 `appliedScore` 鍵（`"appliedScore" in g === false`）；目標色級、生效色級、每日新字量案例不變（藍 855／金 990 → 生效「綠（內建上限）」、15 字/天）；原始碼掃描 `dashboard.js` 不含「目前目標分數」 |
+| `naming.test.js`（改） | FE-43 | 難易度設定說明文字改為「選擇色級即時試算，按「套用」後才會更新單字卡的單字集。」；其餘不變（單字卡空狀態提示不在本版範圍，見 SD-FB-28） |
+| `first-run.test.js`（改，如需要） | FE-43 | 確認首次相關案例不依賴 600；如以 `setDraftScore` 構造「首次畫面上未生效的選擇」，改為 `clickColor`（如點金 → 990），預期值隨之調整 |
+| `load-order.test.js`（改） | FE-44 | 依建置順序載入後 `EMT.core.constants.SCORE_DEFAULT === 725`、`EMT.core.goal.scoreForCard("green") === 725` |
+
+**E2E 與人工（QA，`/qa-verify` 時新增；SD 建議範圍）**
+
+| 範圍 | 建議方法 | AC |
+| :--- | :--- | :--- |
+| 不顯示分數 | 375、1366 寬；首次畫面、一般頁、主控台：`page.getByRole("slider")`、`input[type=range]`、`#cz-score-input` 皆不可見；`page.keyboard.press("Tab")` 逐一走完，`document.activeElement` 從未是滑桿或輸入框；可見文字不含 `/\d+～\d+ 分/`、「目前目標分數」、「請輸入 10～990 的分數」；監聽 `pageerror` 與 `console` error 為 0 | AC-26-05、AC-25-01、AC-01-01、AC-26-01、AC-17-06 |
+| 點卡片與預設 | 清空 localStorage → 首次畫面選中綠、localStorage 無主鍵；按「開始學習」後主鍵 `goal` 為 725；點 5 色後套用，依序檢查 localStorage 215、465、725、855、990 | AC-18-02、AC-25-04、AC-02-04、AC-01-05 |
+| 既有分數 | 依 FB-36 預寫 `draftScore = appliedScore` = 12 個值；檢查選中卡片、試算每日新字量、不點卡片按「套用」後主控台色級與 localStorage 原值 | AC-26-06 |
+| 取消回原色級 | 預寫 600（綠）+ 學習紀錄 → 點棕 →「套用」→ 取消／Esc／點背景 → 綠卡選中、每日新字量 15、localStorage `draftScore` 600 | AC-32-04 |
+| 效能 | 點卡片 10 次量 click → 下一個 `requestAnimationFrame`，含 4 倍降速 | AC-22-04 |
+
+### 10.4 v0.7 測試範圍（PRD v0.11；契約 V-PWA-01～12、DS-17）
+
+命令同 §10.1；新增 `npm run serve`。FE-45～FE-52 收尾時只跑 `npm test` 與 `node tools/build.mjs --out <scratchpad>/t.html`（FE-47 完成後此命令也會在 `<scratchpad>/site/` 產生部署目錄；圖示與 `ads.txt` 由第 0 批 MC-01、MC-02 先放好）；只有 FE-53 執行 `npm run build`。
+
+**中間狀態的已知失敗**：預期無。理由：(1) FE-47 把 `build.test.js` 既有 fixture 一律加 `site: false`，舊模板（無 `@@BUILD_ID@@`）走非 PWA 模式，行為不變；(2) FE-50 在 `index.html` 加入佔位後、FE-47 完成前，舊建置會把 `@@BUILD_ID@@` 原樣留在 HTML（不觸發任何檢查），只影響 scratchpad 產物；(3) `store.test.js`、`dashboard.test.js` 若有「`runtime` 鍵集合完全相等」類斷言，由同檔所屬的 FE-49、FE-51 更新。若實際出現不在該任務 paths 的失敗 → 該任務標 `blocked` 回報主控。
+
+**單元測試（`npm test`，Node，無瀏覽器）**
+
+| 檔案 | 任務 | 必含案例 | AC／契約 |
+| :--- | :--- | :--- | :--- |
+| `pwa-core.test.js`（新） | FE-45 | 11 個常數與 `docs/02-contract/data-schema.ts` §12 逐值相同（期望值在測試內由契約原文逐字複製，以 `deepStrictEqual` 比對；測試不讀 `docs/`）；`PWA_MANIFEST` 鍵順序為契約順序、鍵恰 10 個；深度凍結；V-PWA-08 七列判定表全部（含 getter 拋例外、`file:` 時 `navigator` getter **未被讀取**）；`isStandalone` 4 種（matchMedia 真、`navigator.standalone` 真、皆假、例外）；`installVisible` 逐一把 6 個條件設為不成立皆 `false`；`updateVisible`；`needsRecheck`（`null`、差 3,599,999、3,600,000）；`initialPwaState` 每次新物件且鍵 = `PWA_STATE_KEYS` | V-PWA-08、IN-1、UP-6、UP-3、AC-37-04、AC-34-08 |
+| `sw.test.js`（新） | FE-46 | 讀範本、以測試內小函式做與 B-15 相同的兩個替換，在 `vm` 沙箱執行（替身 `self`、`caches`、`fetch`、`Request`、`URL`、`clients`；`self.location.href = "https://u.github.io/p/sw.js"`）：install 時 `fetch` 6 次且每次 `cache: "reload"`、`./` 與 `./index.html` 兩鍵內容相同、快取名 = `english-master-track-pwa-<id>`；任一回應 404 → `caches.delete(CACHE_NAME)` 且 `waitUntil` 的 Promise reject；install 不呼叫 `skipWaiting`；activate 刪 `english-master-track-pwa-old`、保留 `other-project-cache` 與目前快取，之後 `clients.claim()`；fetch：7 個網址 GET → `respondWith`、POST、跨來源、`?x=1`、`/p/sw.js`、`/p/ads.txt`、`/favicon.ico` → 不呼叫；命中回快取、未命中 `fetch` 且不 `put`；message：`{type:"SKIP_WAITING"}` → `skipWaiting` 1 次，`{type:"SKIP_WAITING", x:1}`、字串、`null` → 0 次；原始碼掃描 B-15 禁用字串（V-PWA-05） | SW-1～SW-11、AC-35-01、AC-35-05、AC-36-05、AC-37-05 |
+| `build.test.js`（改） | FE-47 | 既有案例加 `site: false` 後全部通過；新增 PWA fixture（模板含 HD-1、佔位；`pwa/sw.template.js`；4 張以測試內函式產生的最小 RGB PNG；`00-base.css`；`ads.txt`）：(1) 部署目錄恰 8 檔、`index.html` = `out`、`ads.txt`／PNG 位元組相同（V-PWA-01）；(2) manifest 深度相等（V-PWA-02）；(3) PNG 色彩類型 6、含 `tRNS`、尺寸不符、缺檔 → `PWA_ICON`（V-PWA-03）；(4) HD-1 缺任一、靜態 `<link rel="manifest" href=…>`、`<link rel="apple-touch-icon" …>`、第二個 `data:,` 連結 → 中止（V-PWA-04、HD-3）；(5) `sw.js` 的 BUILD_ID = HTML meta、`CACHE_NAME` 前綴、預先快取 7 項；範本含 `importScripts` 或 `addEventListener("push"` → `PWA_SW`（V-PWA-05）；(6) **V-PWA-06**：同 fixture `write: false` 建 2 次三檔位元組相同；改資料 1 字、改 app 1 字、換 1 張 PNG、改 `sw` 範本 1 字 → BUILD_ID 各不同；只改 `ads.txt` → BUILD_ID 不變；(7) `--bg` 不符 → `PWA_BG_COLOR`；(8) 部署目錄內有多餘檔案 → `SITE_DIR_UNEXPECTED` 且原檔仍在；(9) 中止時 `out` 與部署目錄都未寫；(10) `parseArgs` 的 `--site`、`--no-site`、`--ads` 與衝突；(11) 原始碼掃描 `build.mjs` 無 `Math.random`、`Date.now`、`process.env`；(12) `serve.mjs` 以真實 `http` 在隨機埠啟動：MIME、`Cache-Control`、base 外 404、路徑穿越 404、POST 405 | AC-36-01、AC-36-02、AC-36-07、AC-34-01、AC-34-04、AC-37-01、AC-19-01、AC-23-06 |
+| `pwa-service.test.js`（新） | FE-48 | `create(fakeGlobal)`：(a) `file:`／`http://192.168.0.2` → `start` 回 `{false,false}`、`onChange` 0 次、`register` 0 次、`addEventListener("beforeinstallprompt")` 0 次、`<head>` 無新節點（PE-2，V-PWA-07 單元代理）；(b) https → `onChange({eligible:true, standalone:false})`、head 加 2 個連結（`rel`、`href`、`sizes` 正確，相對路徑）、`load` 前不註冊、`load` 後 `register("./sw.js", {scope:"./", updateViaCache:"none"})` 1 次；`readyState === "complete"` 時下一輪註冊；(c) `register` reject → 無 `onChange`、無未處理 rejection、`console.error` 0 次（PE-3）；(d) V-PWA-10：首次（`controller` null）安裝不設 `updateAvailable`；有 `waiting`＋`controller` → 設定；`updatefound`→`installed` 且有 controller → 設定；`requestReload` 連按 2 次 → `postMessage` 恰 1 次且內容恰 `{type:"SKIP_WAITING"}`；`controllerchange` 2 次 → `reload` 1 次；未按時 `controllerchange` → 0 次；無 `waiting` 時 `requestReload` → 直接 `reload`；(e) UP-3：`visibilitychange` 未滿 1 小時不 `update`、滿 1 小時 `update` 1 次且更新 `lastUpdateCheckAt`；`update` reject 靜默；(f) V-PWA-09：無 `prompt` 的事件忽略；有效事件 → `preventDefault` 1 次、`installPromptAvailable:true`；`requestInstall` 連呼 2 次 → `prompt` 1 次，且 `onChange({installPromptAvailable:false, installSuppressed:true})` 早於 `prompt`；之後再來事件 → 忽略；`appinstalled` → suppressed；`standalone` 時事件忽略；`prompt` 拋例外靜默；(g) 原始碼掃描（§7.18.8 前三列） | AC-34-06～AC-34-10、AC-35-01、AC-36-03、AC-36-06、AC-37-01～AC-37-04 |
+| `store.test.js`（改） | FE-49 | 初始 `runtime.pwa` 等於 `initialPwaState()`；`setPwa` 合法 patch → 通知 `["pwa"]`、`setItem` 0 次（一般與首次模式各一次）；相同值 → 不通知；未知鍵、字串 `"true"`、物件值 → 忽略；`importBackup`、`confirmApplyGoal`、`startLearning` 後 `pwa` 保持；`exportBackup` 的 JSON 不含 `pwa`；localStorage 鍵集合與 `StorageRecord` 欄位在 `setPwa` 前後相同（V-PWA-11 單元代理） | AC-36-04、AC-37-06 |
+| `shell.test.js`（改） | FE-50 | `index.html`：HD-1 7 個元素逐字各 1 次、在 `</head>` 前；無 HD-3 禁止元素、無 `<link` 其他寫法；`#pwa-update` 在 `#app-banner` 之後、`#app-main` 之外、預設 `hidden`、`role="status"`；`<title>` 不變 | AC-34-04、AC-34-05、AC-36-02、AC-37-01 |
+| `pwa-notice.test.js`（新） | FE-50 | 替身 store：`updateVisible` 假 → `hidden`；真 → 顯示，文字逐字「有新版本，重新整理」「重新整理」；首次模式也顯示；點擊 2 次 → `onReload` 1 次且按鈕 `disabled`；`80-pwa.css` 中 `.pwa-update` 規則無 `transition`／`animation`；`main.js` 原始碼依序含 `pwa.start` 於 `router.start` 前、`pwaNotice.init` 於其後 | AC-36-03、AC-31-03 |
+| `dashboard.test.js`（改） | FE-51 | NT-1 文字逐字、為按鈕列的下一個兄弟、`eligible` 真假皆存在；安裝區：`installVisible` 假 → 無按鈕且容器 `hidden`；真 → 1 個按鈕文字「安裝 App」、`data-action="install-app"`；點擊呼叫替身 `services.pwa.requestInstall` 1 次；收到 `"pwa"` tag 後依新狀態增刪；`show()` 時重繪 | AC-24-12、AC-34-07～AC-34-10 |
+| `sources-page.test.js`（改） | FE-52 | 聲明清單多 1 條，逐字等於 AC-23-02 品牌標識聲明；`copyrightHolder` 缺漏時仍為 JimmyLin | AC-23-02 |
+| `load-order.test.js`（改） | FE-53 | `EMT.core.pwa`、`EMT.services.pwa`、`EMT.ui.pwaNotice` 依建置順序載入不拋例外且存在；`EMT.core.pwa.PWA_TEXTS.installButton === "安裝 App"` | LD-1、LD-2 |
+
+**E2E（QA；本機 V-PWA (b)，Playwright Chromium）**——http `localhost` 為安全環境，**不需要 https 憑證**。
+
+| 步驟 | 指令／做法 |
+| :--- | :--- |
+| 準備 V1 | `npm run build` → `npm run serve`（`http://localhost:8080/english-master-track/`）。Playwright `browser.newContext({ serviceWorkers: "allow" })` |
+| 準備 V2（AC-36-01 (b)、AC-36-03） | 不得改 `src/`：把 `src/app` 複製到 scratchpad、改 1 個字 → `node tools/build.mjs --app <scratch>/app --out <scratch>/v2/t.html`（部署目錄在 `<scratch>/v2/site`）→ 停止伺服器、以 `--dir <scratch>/v2/site` 同埠重啟（同來源，模擬重新部署） |
+| 離線 | `context.setOffline(true)` 後 `page.reload()`；或停止伺服器（更接近真實斷網） |
+| 404 情境（AC-37-03） | 把 `dist/site` 複製到 scratchpad、刪除 manifest／`sw.js`／圖示後以 `--dir` 提供 |
+| 安裝事件（AC-34-07～10） | Chromium 自動化環境不一定觸發 `beforeinstallprompt`；以 `page.evaluate` 派送附 `prompt()`、`userChoice` 的替身事件（FB-42） |
+| 請求記錄（AC-37-05、AC-21-01） | `context.on("request")`（含 SW 發出的請求，需 `serviceWorkers: "allow"`）；斷言全部為 `http://localhost:8080/english-master-track/` 下 7 個預先快取網址或 `sw.js`、方法 GET、無跨來源 |
+
+| 範圍 | 建議方法 | AC |
+| :--- | :--- | :--- |
+| `file://` 不受影響 | 以 `file://` 開 `dist/english-master-track.html` 與「只複製 HTML 到空資料夾」：`navigator.serviceWorker.getRegistrations()` 為空、DOM 無 manifest／apple-touch-icon 連結、請求 0、`console` error／warning 0、無 `#pwa-update` 顯示、無安裝按鈕、NT-1 顯示；既有 AC-19-*、AC-22-05 照常 | AC-37-01、AC-37-02、AC-24-12 |
+| manifest 與圖示 | DOM 有 2 個動態連結；直接 GET manifest：JSON 合法、與契約常數相等；GET 4 張圖示 200、`image/png`、實際尺寸（讀 PNG IHDR 寬高） | AC-34-01、AC-34-04、AC-34-05（連結部分） |
+| 註冊與快取 | 等待 `navigator.serviceWorker.ready`（≤ 10 秒）：`registration.scope` = 部署目錄網址；`caches.keys()` 只有 1 個本專案快取、`keys()` 恰 7 項 | AC-35-01、AC-37-05 |
+| 離線開啟 | 離線後重新載入 `./` 與 `./index.html`：主控台可用、請求由 SW 回應；量 5 次載入時間 | AC-35-02、AC-35-04 |
+| 快取寫入失敗 | 以 404 的圖示讓 install 失敗：線上功能正常、無 pageerror、無提示 | AC-35-05、AC-37-03 |
+| 更新 | V1 → V2：60 秒內出現提示；按「重新整理」→ 重新載入 1 次、`meta[name=emt-build-id]` = V2；不按時關閉全部分頁重開為 V2；V2 啟用後 `caches.keys()` 只剩 V2、手動建立的 `other-cache` 仍在；離線時不提示 | AC-36-03、AC-36-05、AC-36-06 |
+| 資料不變 | 更新前後與 PWA 啟用前後 localStorage 鍵與內容相同；首次畫面者仍無主鍵 | AC-36-04、AC-37-06 |
+| 安裝按鈕 | 替身事件：只在主控台出現、位置在 NT-1 之後、44px、375／1366 不截斷；點擊後消失、`prompt` 1 次 | AC-34-07～AC-34-10 |
+
+**人工驗收（人類，V-PWA (a) 正式網址；比照 V-MIC）**
+
+| 編號 | 環境 | 項目 | AC |
+| :--- | :--- | :--- | :--- |
+| V-PWA-H1 | Windows 11 Chrome、Edge | 網址列原生安裝、安裝名稱與開始功能表名稱「EnglishContext」、獨立視窗、DevTools Manifest 面板無錯誤與「無法安裝」警告、maskable 安全區預覽 | AC-34-01～AC-34-03 |
+| V-PWA-H2 | Android Chrome | 「安裝應用程式」、主畫面圖示圓形遮罩不切字、啟動畫面背景色、飛航模式從主畫面啟動 | AC-34-02、AC-34-03、AC-35-03 |
+| V-PWA-H3 | iOS Safari | 分享 → 加入主畫面：預設名稱、圖示無灰邊、從主畫面啟動無網址列（動態 `apple-touch-icon` 是否被採用見 FB-43、T-47） | AC-34-05 |
+| V-PWA-H4 | GitHub Pages | push 後 Actions 成功；8 個網址 200 且內容同 CI 產物；網站不含 `docs/`、`src/`、`sources/` | AC-36-07 |
+| V-PWA-H5 | 已安裝 App | 重新部署後重開 App 60 秒內提示、按下更新；背景 ≥ 1 小時切回前景觸發檢查 | AC-36-03 |
+
 ---
 
 ## 11. 技術風險與對策
@@ -1358,6 +1849,21 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | T-37 | （v0.5）離開頁面未經 router（例如瀏覽器返回、分頁切換） | 麥克風使用中圖示持續 | 本系統無 history 路由，離開單字卡頁只能經 router（會呼叫 `hide`）；重新整理與關閉以 `pagehide` 釋放；切到其他瀏覽器分頁不釋放（Q-36 只要求離開單字卡頁），列為已知行為 |
 | T-38 | （v0.5）初始化寫入成功但畫面只更新一部分（某 view 漏聽 tag） | AC-32-02 主控台或模擬測驗頁仍顯示舊值 | `confirmApplyGoal` 發出 `goal`、`studySet`、`flashcard`、`quiz`、`speech`、`stats`、`streak`、`part5`、`learning` 等 tags；各頁 `show()` 時一律依最新狀態重繪；E2E 依 AC-32-02 逐項檢查 |
 | T-39 | （v0.5）QA 或使用者以原始碼搜尋「解碼器」「句型庫」判定 AC-20-04 失敗 | 誤判 | 程式碼依 HT-4、HT-5 必須保留（`TAB_LABELS`、views），原始碼不可能為 0；AC-20-04 判定的是「畫面導覽與入口」。見 SD-FB-21 |
+| T-40 | （v0.6）隱藏的分數區因 CSS 覆寫 `display` 而重新出現，或仍可被 Tab 聚焦 | AC-26-05 不成立 | 三重保證（`hidden` + 全域 `[hidden] !important`、`inert`、`disabled` + `tabindex="-1"`，§7.17）；FE-43 單元測試鎖定屬性、FE-44 以無頭瀏覽器 Tab 走一輪；QA E2E 再驗 |
+| T-41 | （v0.6）隱藏的輸入框仍被當成分數來源（「套用」「開始學習」前讀 `input.value`），使既有分數被改寫或 735 被四捨五入以外的路徑影響 | AC-26-06、GS-3 | §7.17 刪除回寫步驟；`customizer.test.js` 斷言按「套用」「開始學習」時 `setDraftScore` 呼叫 0 次 |
+| T-42 | （v0.6）測試把「預設值」與「v0.9 既有分數」都寫成 600，改常數後一併被改成 725，失去 GS-4（既有分數不轉換）的回歸保護 | 回歸漏測 | §10.3 規定：預設值斷言改引用 `C.SCORE_DEFAULT`；明示為既有分數的 600 fixture 保留，並新增 600／735 原值保留案例 |
+| T-43 | （v0.6）已上線使用者的 `draftScore` 與 `appliedScore` 不同（v0.9 時調了分數未套用），重新載入後選中卡片 ≠ 生效色級 | 使用者困惑 | 契約 GS-1 定義選中卡片 = Color(`draftScore`)，屬既有「未套用」語意（AC-01-03、FB-35），不另處理；QA 構造 AC-26-06 時依 FB-36 兩欄同值 |
+| T-44 | （v0.6）QA 既有 E2E（`tests/e2e/`）以 `#cz-score-input`／滑桿設定分數、或以畫面讀取「目前目標分數」 | 回歸測試大量失敗 | 屬 QA 負責、PG 不得修改；SD-FB-30 知會 QA 改為點卡片並以 localStorage 驗證分數 |
+| T-45 | （v0.7）`file://` 下仍產生 manifest／SW 相關請求或 Console 警告（例如誤寫靜態 `<link rel="manifest">`、或 PE-1 先讀 `navigator.serviceWorker`） | AC-37-01 不成立 | HD-3 由 B-7 新規則中止建置；PE-1 第 (1) 步在前且 `pwa-core.test.js` 斷言 `file:` 時不讀 `navigator`；QA 以 `file://` 實測 Console |
+| T-46 | （v0.7）Windows checkout（`core.autocrlf`）與 CI（LF）原始檔換行不同 → 本機與 CI 的 BUILD_ID、HTML 位元組不同 | 本機 `dist/` 與部署內容不一致（不影響 AC：AC-36-01 是同環境兩次建置） | 部署一律以 CI 建置為準；建議人類加 `.gitattributes`（`* text=auto eol=lf`、`*.png binary`），見 SD-FB-37 |
+| T-47 | （v0.7）iOS Safari 不採用載入後才加入的 `apple-touch-icon`（契約 FB-43） | AC-34-05 圖示不正確 | V-PWA-H3 實機驗證；不成立時依 FB-43 改為靜態連結（契約小修、主控代核；`file://` 下 Chrome／Edge 不讀此標籤）並同步 B-7 白名單 |
+| T-48 | （v0.7）`beforeinstallprompt` 在已安裝後以分頁開啟時仍觸發（契約 FB-40） | AC-34-08 (e) 按鈕出現 | 依賴 Chromium 行為；無可靠偵測（禁止 `related_applications`）；屬瀏覽器行為，QA 依 FB-40 判定 |
+| T-49 | （v0.7）GitHub Pages `Cache-Control: max-age=600` 使 SW 安裝時取到舊 HTML，新快取存入舊版 | 更新後仍顯示舊版（AC-36-03） | SW-4 `cache: "reload"`；SW-1 `updateViaCache: "none"`；`serve.mjs` 以相同標頭模擬，E2E 驗證 V2 快取中的 meta 為 V2 |
+| T-50 | （v0.7）`--site` 誤指向專案目錄，建置清空部署目錄時刪除原始碼 | 原始碼遺失 | B-16：目錄內有 `PWA_DEPLOY_FILES` 以外的任何檔案即中止、**不刪除**；`build.test.js` 鎖定 |
+| T-51 | （v0.7）只修改 `tools/build.mjs` 的注入格式，HTML₀ 不變 → BUILD_ID 不變但 `sw.js` 位元組改變；新舊 SW 使用同名快取，install 覆寫使用中的快取 | 新舊版混用 | 注入只替換值、程式結構全在範本（§7.18.2）；FE-47 以測試鎖定注入只動兩個佔位；日後修改注入邏輯的任務須同時改範本（使其入雜湊） |
+| T-52 | （v0.7）SW 快取 HTML 兩鍵約 6 MB，低容量裝置或嚴格配額下 install 失敗 | 無法離線（E-76） | 失敗時刪除該快取、線上照常（SW-4、PE-3）；AC-35-05 已接受；不做部分快取 |
+| T-53 | （v0.7）`beforeinstallprompt` 被 `preventDefault` 後，Android Chrome 不再自動顯示迷你橫幅（R-20 風險 (4)） | 使用者找不到安裝入口 | 主控台「安裝 App」按鈕與瀏覽器選單並存（AC-34-02、AC-34-07）；屬已接受取捨 |
+| T-54 | （v0.7）主控產出的 PNG 為 RGBA（含 alpha）或尺寸不符 | 建置中止，FE-53 無法完成 | MC-02 doneWhen 以 V-PWA-03 同一規則自檢；B-11 錯誤訊息列出檔名與不符項目，FE-53 遇到時標 `blocked` 回報主控重產 |
 
 ---
 
@@ -1458,6 +1964,67 @@ FE-19 與 FE-18 的先後（v0.3）：**FE-19 在前**。理由：FE-18 的 done
 說明：(1) 第 1 批結束後 `naming.test.js`、`shell.test.js` 會暫時失敗，第 2 批 FE-38 修復（§10.2）；(2) 若主控希望縮短路徑，FE-38 與 FE-36、FE-37 無相依，也可提前與第 1 批之後的任何批次並行；(3) FE-39 只依賴 FE-35、FE-36，可與 FE-37、FE-38 同時開始（若主控採「依 dependsOn 即時派發」而非固定批次）。
 
 任務數（全專案）：pg-content 23、pg-frontend 41（FE-01～FE-41），共 64 個。
+
+### 12.5 v0.6 增量任務與執行批次（PRD v0.10、契約 v0.10）
+
+既有 64 個任務全部 `done`，內容不變。v0.6 新增 3 個 pg-frontend 任務；**不新增 pg-content 任務**（DS-10）。**FE-42～FE-44 彼此沒有任何共用 path**（D-10）。
+
+| ID | 標題 | dependsOn | paths |
+| :--- | :--- | :--- | :--- |
+| FE-42 | 核心與 store：點卡片 = 該色上限、預設 725、既有分數不轉換 | — | `core/constants.js`、`core/goal.js`、`state/store.js`、`__tests__/goal.test.js`、`__tests__/persist.test.js`、`__tests__/store.test.js`、`__tests__/_fixtures.js` |
+| FE-43 | 畫面：隱藏分數輸入、卡片與主控台不顯示分數、取消回原色級 | FE-42 | `views/customizer.js`、`views/dashboard.js`、`styles/20-customizer.css`、`styles/10-dashboard.css`、`__tests__/customizer.test.js`、`__tests__/dashboard.test.js`、`__tests__/naming.test.js`、`__tests__/first-run.test.js` |
+| FE-44 | v0.10 整合建置、重新產出 dist/ 與自檢 | FE-42、FE-43 | `dist/english-master-track.html`、`__tests__/load-order.test.js`、`styles/90-overrides.css` |
+
+（paths 皆省略前綴 `src/app/`，`dist/` 除外。）
+
+| 批次 | 任務 | 前置 |
+| :--- | :--- | :--- |
+| v0.6 第 1 批 | FE-42 | 無（既有任務皆已 done） |
+| v0.6 第 2 批 | FE-43 | FE-42 |
+| v0.6 第 3 批 | FE-44 | FE-42、FE-43 |
+
+說明：(1) 範圍小，刻意不平行：FE-43 的測試替身直接使用 `goal.scoreAfterColorClick`，且 FE-40 案例依賴 `_fixtures` 預設值，FE-42 完成後才有穩定基準；(2) FE-42 收尾時 `customizer.test.js` 會有 §10.3 所列的暫時失敗，由 FE-43 修復；(3) FE-44 為交付關卡，`npm test` 必須全數通過。
+
+任務數（全專案）：pg-content 23、pg-frontend 44（FE-01～FE-44），共 67 個。
+
+### 12.6 v0.7 增量任務與執行批次（PRD v0.11、契約 v0.11）
+
+既有 67 個任務全部 `done`，內容不變。v0.7 新增 9 個 pg-frontend 任務；**不新增 pg-content 任務**（DS-18）。**FE-45～FE-53 彼此沒有任何共用 path**（D-11）。
+
+| ID | 標題 | dependsOn | paths |
+| :--- | :--- | :--- | :--- |
+| FE-45 | PWA 核心：契約常數與純函式 | — | `core/pwa.js`、`__tests__/pwa-core.test.js` |
+| FE-46 | service worker 範本 | FE-45 | `pwa/sw.template.js`、`__tests__/sw.test.js` |
+| FE-47 | 建置 PWA 階段、部署目錄、本機伺服器、授權標頭品牌聲明 | FE-45、FE-46 | `tools/build.mjs`、`tools/serve.mjs`、`package.json`、`license-header.txt`、`__tests__/build.test.js` |
+| FE-48 | PWA 服務：啟用判定、連結、註冊、更新、安裝事件 | FE-45 | `services/pwa.js`、`__tests__/pwa-service.test.js` |
+| FE-49 | store：`RuntimeState.pwa` 與 `setPwa` | FE-45 | `state/store.js`、`__tests__/store.test.js` |
+| FE-50 | 殼層：HD-1、建置識別碼佔位、新版提示列、啟動接線 | FE-45、FE-48、FE-49 | `index.html`、`main.js`、`ui/pwa-notice.js`、`styles/80-pwa.css`、`__tests__/shell.test.js`、`__tests__/pwa-notice.test.js` |
+| FE-51 | 主控台：不互通說明與「安裝 App」按鈕 | FE-45、FE-48、FE-49 | `views/dashboard.js`、`styles/10-dashboard.css`、`__tests__/dashboard.test.js` |
+| FE-52 | 資料來源與授權頁：品牌標識聲明 | FE-45 | `views/sources-page.js`、`__tests__/sources-page.test.js` |
+| FE-53 | v0.11 整合建置、產出 `dist/` 與部署目錄、交付前自檢 | FE-45～FE-52；**MC-01、MC-02** | `dist/english-master-track.html`、`dist/site/` 下 8 檔、`__tests__/load-order.test.js`、`styles/90-overrides.css` |
+
+（paths 皆省略前綴 `src/app/`，`dist/`、`tools/`、`package.json` 除外。）
+
+**主控執行項目（不派給 PG；tasks.json `manualSteps`）**
+
+| ID | 內容 | 時機 | 完成條件 |
+| :--- | :--- | :--- | :--- |
+| MC-01 | 把 `dist/ads.txt` **複製**為 `sources/deploy/ads.txt`（逐位元組相同，檔名小寫）；`dist/ads.txt` 暫時保留（舊 workflow 仍引用，避免 MC-03 之前的 push 部署失敗） | v0.7 第 1 批之前 | 兩檔 SHA-256 相同；內容為 1 行 `google.com, pub-4051803210893105, DIRECT, f08c47fec0942fa0`（DP-6） |
+| MC-02 | 把已產好的 4 張 PNG 放到 `src/app/assets/icons/`（檔名 `icon-192.png`、`icon-512.png`、`icon-maskable-512.png`、`apple-touch-icon-180.png`）；在 `sources/pwa/README.md` 記錄產生方式（來源檔、裁切範圍、補色值、maskable 縮放 78%、工具與參數）（Q-45、DP-5） | v0.7 第 1 批之前 | 以 V-PWA-03 同規則自檢 4 檔：PNG 簽章、寬 = 高 = 192／512／512／180、位元深度 8、色彩類型 2（RGB）、無 `tRNS`；maskable 以 DevTools 遮罩預覽或目視確認文字在 80% 圓內 |
+| MC-03 | 依 §5.2 整檔取代 `.github/workflows/static.yml`；同次提交刪除 `dist/ads.txt`；確認 §5.2「CI 建置的前提」檔案皆已提交；push 到 `main` | FE-53 `done` 之後 | GitHub Actions 成功；交人類／QA 執行 V-PWA-H4（AC-36-07） |
+
+| 批次 | 任務（可平行） | 前置 |
+| :--- | :--- | :--- |
+| v0.7 第 0 批（主控） | MC-01、MC-02 | 無 |
+| v0.7 第 1 批 | FE-45 | MC-01、MC-02（第 3 批起 FE-47 與 FE-50 的成果合在一起後，任何以專案 `src/app` 建置的驗證都需要圖示與 `ads.txt`；為了讓每個任務都能用同一條建置指令自驗，主控先完成第 0 批） |
+| v0.7 第 2 批 | FE-46、FE-48、FE-49、FE-52 | 皆 ← FE-45 |
+| v0.7 第 3 批 | FE-47、FE-50、FE-51 | FE-47 ← FE-45、FE-46；FE-50、FE-51 ← FE-45、FE-48、FE-49 |
+| v0.7 第 4 批 | FE-53 | FE-45～FE-52、MC-01、MC-02 |
+| v0.7 收尾（主控） | MC-03 | FE-53 |
+
+說明：(1) 同批任務 paths 互不重疊；(2) FE-47 的 `build.test.js` 只用 fixture，不斷言專案 `index.html` 的 PWA 元素（那是 FE-50 的 `shell.test.js`），因此與 FE-50 平行無衝突；(3) 若主控採「依 dependsOn 即時派發」，FE-52 可與第 2 批任何任務同時、FE-47 只需等 FE-46；(4) FE-53 為交付關卡，`npm test` 必須全數通過、`npm run build` 產出 `dist/site/` 8 檔。
+
+任務數（全專案）：pg-content 23、pg-frontend 53（FE-01～FE-53），共 76 個；另有主控項目 MC-01～MC-03（不計入任務數）。
 
 ---
 
@@ -1745,6 +2312,101 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 
 **v0.9 暫停（隱藏）的 16 個 AC**：AC-12-01～03、AC-13-01～04、AC-14-01～02、AC-15-01～03、AC-16-01～04——**本版不驗收**；程式由既有 FE-15、FE-16 保留、資料由既有 CT-21、CT-22 保留，v0.5 不改、不刪（HT-5）。AC-23-04（原創標示，含長難句與句型）**仍驗收**，由既有對照任務涵蓋，FE-41 另確認兩份資料仍在產物中。QA 測試計畫應列為「不適用（v0.9 暫停）」。
 
+### 13.3 v0.6 追加對照（PRD v0.10：214 個 AC，本版應驗收 192 個）
+
+§13、§13.1、§13.2 仍有效；下表列出 v0.10 新增的 2 個 AC，以及 v0.10 改寫的 AC 所**追加**的 v0.6 任務。**本版應驗收的 192 個 AC 全部涵蓋，未涵蓋：無。**
+
+**新增 AC（2）**
+
+| AC | 任務 | 設計位置 |
+| :--- | :--- | :--- |
+| AC-26-05 | FE-43、FE-44 | §7.17「分數區隱藏」「卡片分數範圍」「狀態列目標分數」「主控台目標分數」 |
+| AC-26-06 | FE-42、FE-43 | §7.17 資料流、§4.3 v0.6、GS-3～GS-5 |
+
+**v0.10 改寫的 AC（追加任務）**
+
+| AC | 改寫重點 | 追加任務 |
+| :--- | :--- | :--- |
+| AC-01-01 | 卡片不顯示分數範圍 | FE-43 |
+| AC-01-03 | 只點卡片未套用 | FE-42、FE-43 |
+| AC-01-04 | 棕套用後 localStorage 465 | FE-42 |
+| AC-01-05 | 點卡片一律該色上限（300、600 → 725） | FE-42、FE-43 |
+| AC-01-07 | 藍 855、金 990 | FE-42、FE-43 |
+| AC-02-03 | 依點選卡片取每日新字量 | FE-43 |
+| AC-02-04 | 點 5 色後套用 215～990 | FE-42、FE-43 |
+| AC-02-05、AC-02-06 | 由點卡片觸發試算（算式不變） | FE-43 |
+| AC-02-08 | 藍套用後重新載入 855 | FE-42 |
+| AC-02-10 | 點藍金試算 | FE-42、FE-43 |
+| AC-17-06 | 主控台不顯示目標分數 | FE-43 |
+| AC-18-02 | 預設 725、不顯示 | FE-42、FE-43 |
+| AC-20-02 | 滑桿不在檢查範圍 | FE-43、FE-44 |
+| AC-22-04 | 量測點改為點卡片 | FE-43、FE-44 |
+| AC-25-01 | 首次畫面不顯示分數輸入、預設 725 | FE-42、FE-43、FE-44 |
+| AC-25-02 | 點棕後開始學習 465；主控台無目標分數 | FE-42、FE-43 |
+| AC-25-03 | 點藍後開始學習 855 | FE-42、FE-43 |
+| AC-25-04 | 首次重新整理回 725 | FE-42 |
+| AC-25-10 | 還原後分數 300 不轉換、選中棕 | FE-42、FE-43 |
+| AC-26-01 | 卡片不顯示分數範圍 | FE-43 |
+| AC-26-02 | 300 點綠 → 725 | FE-42、FE-43 |
+| AC-26-04 | 點藍金 855／990 | FE-42、FE-43 |
+| AC-30-02 | 套用藍色卡片時 D = 15（用語改寫，行為不變） | FE-42（回歸） |
+| AC-32-01 | 點棕後套用跳視窗 | FE-42、FE-43 |
+| AC-32-02 | 確定後 465 | FE-42、FE-43 |
+| AC-32-04 | 取消後卡片回綠、分數仍 600 | FE-42、FE-43 |
+| AC-32-05 | 600 → 點綠 725 → 藍 855 → 金 990 → 綠 725 皆不跳視窗 | FE-42 |
+| AC-32-06 | 預設 725 後點棕不跳視窗 | FE-42 |
+| AC-32-07 | 6 種狀態點棕皆跳視窗 | FE-42 |
+
+**v0.10 暫停（分數輸入隱藏）的 6 個 AC**：AC-01-06、AC-02-01、AC-02-02、AC-02-07、AC-02-09、AC-26-03——**本版不驗收**；相關程式（`parseScoreInput`、`normalizeScore`、`setDraftScore`、customizer 的滑桿／輸入框 handler）保留但無畫面路徑（§7.17）。AC-02-07 的 100ms 要求由 AC-22-04 承接。連同 v0.9 暫停的 16 個，共 22 個；QA 測試計畫應列為「不適用（v0.10 暫停）」。
+
+### 13.4 v0.7 追加對照（PRD v0.11：243 個 AC，本版應驗收 221 個）
+
+§13～§13.3 仍有效；下表列出 v0.11 新增的 29 個 AC，以及 v0.11 修改的 5 個 AC 所**追加**的 v0.7 任務。**本版應驗收的 221 個 AC 全部涵蓋，未涵蓋：無。**「人工」= 需人類實機或正式網址（§10.4 V-PWA-H1～H5），任務只負責實作與可自動化的部分。
+
+**新增 AC（29）**
+
+| AC | 任務 | 設計位置 | 驗收方式 |
+| :--- | :--- | :--- | :--- |
+| AC-24-12 | FE-45、FE-51、FE-53 | §4.7 dashboard、§7.18.7 | 單元＋E2E（`file://` 與 (b)） |
+| AC-34-01 | FE-45、FE-47、FE-48、FE-53 | §5.1 B-13、§7.18.4 | 單元＋E2E (b)＋人工 H1 |
+| AC-34-02 | FE-45、FE-47、FE-48、FE-53 | MF、§7.18.4 | 人工 H1、H2 |
+| AC-34-03 | FE-47、FE-53（MC-02 產圖） | §5.1 B-11 (3) | 建置檢查 (a)(b)＋人工 H1、H2 |
+| AC-34-04 | FE-47、FE-50、FE-53 | §5.1 B-11 (4)、B-12、§9 v0.7 | 單元＋E2E |
+| AC-34-05 | FE-47、FE-48、FE-50、FE-53 | HD-1、HD-2、T-47 | 人工 H3（iOS） |
+| AC-34-06 | FE-48、FE-51、FE-53 | PE-3、§7.18.6 | 單元＋E2E |
+| AC-34-07 | FE-45、FE-48、FE-49、FE-51、FE-53 | IN-1、§7.18.6、§7.18.7 | 單元＋E2E（替身事件） |
+| AC-34-08 | FE-45、FE-48、FE-51、FE-53 | IN-1、IN-2、PE-2 | 單元＋E2E |
+| AC-34-09 | FE-48、FE-49、FE-51 | IN-5、§7.18.6 | 單元＋E2E |
+| AC-34-10 | FE-48、FE-51 | IN-7 | 單元（再次觸發事件）＋人工 |
+| AC-35-01 | FE-46、FE-47、FE-48、FE-53 | SW-1、SW-4、§7.18.3 | 單元＋E2E (b) |
+| AC-35-02 | FE-46、FE-53 | SW-6、§7.18.3 | E2E (b) |
+| AC-35-03 | FE-46、FE-53 | 同上 | 人工 H2 |
+| AC-35-04 | FE-48、FE-53 | PE-4（`load` 後註冊） | E2E (b) 量測 |
+| AC-35-05 | FE-46、FE-48、FE-53 | SW-4、PE-3、T-52 | 單元＋E2E (b) |
+| AC-36-01 | FE-47、FE-53 | §5.1 B-14、§7.18.2 | 單元（V-PWA-06） |
+| AC-36-02 | FE-47、FE-50、FE-53 | B-14、B-15、HD-1 | 單元＋E2E |
+| AC-36-03 | FE-45、FE-46、FE-48、FE-49、FE-50、FE-53 | §7.18.5、§7.18.7 | 單元＋E2E (b)＋人工 H5 |
+| AC-36-04 | FE-48、FE-49、FE-53 | UP-8、PV-1 | 單元＋E2E |
+| AC-36-05 | FE-46、FE-53 | SW-5、SW-9 | 單元＋E2E (b) |
+| AC-36-06 | FE-46、FE-48、FE-53 | UP-9 | 單元＋E2E (b) |
+| AC-36-07 | FE-47、FE-53（MC-01、MC-03） | §5.1 B-16、§5.2 | 單元＋人工 H4 |
+| AC-37-01 | FE-45、FE-47、FE-48、FE-50、FE-53 | PE-1、PE-2、HD-3、B-7 | 單元＋E2E `file://` |
+| AC-37-02 | FE-45、FE-48、FE-53 | 同上 | E2E `file://` |
+| AC-37-03 | FE-48、FE-53 | PE-3 | 單元＋E2E (b) 404 |
+| AC-37-04 | FE-45、FE-48 | PE-1 | 單元（V-PWA-08）＋E2E |
+| AC-37-05 | FE-46、FE-47、FE-48、FE-50、FE-53 | SW-6、SW-10、HD-4、§7.18.8 | 單元＋E2E (b) |
+| AC-37-06 | FE-48、FE-49、FE-53 | PV-1、§4.3 v0.7 | 單元＋E2E |
+
+**v0.11 修改的 AC（追加任務）**
+
+| AC | 修改重點 | 追加任務 |
+| :--- | :--- | :--- |
+| AC-19-01 | 允許同目錄相對路徑的 PWA 附屬檔；`file://` 不得產生請求 | FE-47（B-7 白名單、HD-3）、FE-53 |
+| AC-21-01 | https 版只允許同源 GET | FE-48、FE-50（HD-4 `data:,` favicon）、FE-53 |
+| AC-21-03 | Cache Storage 只含 PWA 靜態檔 | FE-46、FE-48、FE-53 |
+| AC-23-02 | 資料來源頁加品牌標識聲明 | FE-52 |
+| AC-23-06 | HTML 開頭註解加品牌標識聲明 | FE-47（`license-header.txt`）、FE-53 |
+
 ---
 
 ## 14. 回應契約 §9 指名 SD 的回饋
@@ -1768,7 +2430,21 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | DS-04（v0.5） | 確認視窗沿用 `ui/dialog.js`（Esc、點背景 = 取消；背景不可操作；無淡入）；「先建新物件、成功才替換記憶體」位於 `store.confirmApplyGoal`，純規則在 `core/reinit.js`；V-ST-14 列入 FE-34、FE-37、FE-40 | §7.15、§4.3 |
 | DS-05（v0.5） | 導覽常數改用 `NAV_TAB_ORDER`／`HIDDEN_TAB_IDS`；主控台入口由 `NAV_TAB_ORDER` 推導；本系統無 hash 路由，另加 `hashchange` 守門使隱藏頁片段導向主控台；解碼器、句型庫的程式與資料保留並打包 | §7.13、§7.16、FE-38 |
 | DS-06（v0.5） | 同意：不新增 CT 任務、不新增遷移任務 | D-9、§12.4 |
+| DS-07（v0.6） | 新增 `goal.scoreForCard(id)` = `COLOR_LEVELS[].scoreMax`（不新增常數）；store `clickColor` 改用它；Q-32 邏輯移除，`scoreAfterColorClick` 只保留名稱 | §7.1、§7.17、FE-42 |
+| DS-08（v0.6） | 程式中唯一寫死 600 的預設值是 `constants.SCORE_DEFAULT`，改為 725；`persist.defaultData()` 已引用常數，首次、重設、停用三種預設自動跟進；FE-42 以原始碼掃描確認無其他寫死預設；既有資料不遷移、不轉換 | §7.1、§7.17、D-10 |
+| DS-09（v0.6） | 分數區保留程式、整區 `hidden` + `inert`、輸入元件 `disabled` + `tabindex="-1"`；卡片不建分數範圍節點；狀態列與主控台不建目標分數節點；「套用」「開始學習」不再讀輸入框；AC-22-04 量測點改為點卡片 | §7.17、FE-43 |
+| DS-10（v0.6） | 同意：不需 CT、不需遷移任務；FE-42 的 `covers`／`contractRefs` 列 V-ST-16、AC-26-06，FE-43、FE-44 列 AC-26-05 | §12.5、D-10 |
+| FB-36（v0.6，知會） | 單元測試構造 AC-26-06 狀態時同樣把 `draftScore` 與 `appliedScore` 設為同值（§10.3） | §10.3、FE-42 |
 | FB-33～FB-35（v0.5，知會） | 依契約定案實作：(e) 不看 today（FB-33）；初始化寫入的任何例外皆顯示「儲存空間不足，未套用」（FB-34）；取消時不寫入、`draftScore` 只還原記憶體（FB-35） | §7.15、§4.3 |
+| DS-11（v0.7） | 部署目錄 = `dist/site/`（`--site` 預設為 `--out` 同目錄下的 `site/`）；`dist/english-master-track.html` **保留**（`file://` 用，與 `dist/site/index.html` 位元組相同）。`build.mjs` 新增 B-10～B-16（manifest、BUILD_ID、HTML meta 與 `sw.js` 注入、複製圖示與 `ads.txt`、V-PWA-01～06 建置期檢查）。現有建置**沒有**寫入時間戳、亂數或絕對路徑；唯一的時間來源（授權年份保底）在 PWA 模式下升級為中止 | §5.1、§7.18.2、FE-47 |
+| DS-12（v0.7） | `ads.txt` 唯一來源 = `sources/deploy/ads.txt`（非 PG 目錄，主控 MC-01 由 `dist/ads.txt` 複製；`dist/ads.txt` 於 MC-03 刪除）；建置 `--ads` 預設此路徑，缺檔中止 | §3、§5.1 B-11、B-16、§12.6 |
+| DS-13（v0.7） | 建置 B-11 讀 `00-base.css` 第一個 `--bg` 與 `PWA_BACKGROUND_COLOR` 比對，不同即中止 `PWA_BG_COLOR` | §5.1、§9 v0.7 |
+| DS-14（v0.7） | 圖示目錄 = `src/app/assets/icons/`（主控 MC-02 放入，PG 不修改）；建置只複製並依 V-PWA-03 檢查 | §3、D-11、§5.1 B-11 |
+| DS-15（v0.7） | 新 workflow 全文見 §5.2：Node 22、`npm run build`（不執行 `npm ci`：零相依、無 lockfile）、驗證 8 檔、整個上傳 `dist/site` | §5.2、MC-03 |
+| DS-16（v0.7） | 模組 `services/pwa.js`（L3）於 `main.js` 在 `store.init` 後、`router.start` 前 `start()`；SW 在 `window` `load` 後註冊（PE-4）；新版提示為頁首下的 sticky 文字列 `#pwa-update`（`ui/pwa-notice.js`）；NT-1 與安裝按鈕在主控台備份區按鈕列之後 | §4.2 v0.7、§4.7、§7.18.4～§7.18.7 |
+| DS-17（v0.7） | 單元：PE-1 判定表、IN 狀態機（替身事件）、UP 流程（替身 registration）、`sw.js`（vm）、建置 AC-36-01 三情境；V-PWA (b) 以 `tools/serve.mjs`（`npm run serve`，http `localhost` 即安全環境，不需憑證） | §10.4 |
+| DS-18（v0.7） | 同意：不需 CT、不需遷移任務；FE 任務 covers 列 AC-34～AC-37、AC-24-12、AC-23-02、AC-23-06 | §12.6、§13.4、D-11 |
+| FB-37～FB-43（v0.7，知會） | 依契約定案實作：HTML 靜態 `data:,` favicon，B-7 以逐字白名單允許（FB-37）；manifest／apple-touch-icon 只以程式加入，原始檔不含（FB-38）；等待期間 2 個快取屬正常（FB-39）；不偵測「已安裝但在分頁」（FB-40，T-48）；`theme_color` `#2f6fd6`（FB-41）；只接受具 `prompt` 的安裝事件（FB-42）；iOS 動態連結風險列 T-47，不成立時改靜態連結並同步 B-7 白名單（FB-43） | §5.1、§7.18、§11 |
 | FB-27～FB-31（v0.4，知會） | 依契約定案實作：匯入捨棄的歷史項目不計入略過數（FB-27）、`date` 字串格式錯視為「不是今天」（FB-28）、不提供降版（FB-29）、今天歷史與 X 一致（FB-30）、首次「開始學習」寫入失敗與停用時還原的行為（FB-31，另見 SD-FB-19） | §7.7、§7.8、§7.9 |
 
 ---
@@ -1804,6 +2480,17 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | SD-FB-25 | （v0.5）收音條只在**單字卡模式**的語音面板顯示（AC-33-03 的 Given 即為單字卡模式；測驗模式沒有語音面板）。切到測驗模式時停止聆聽與音量分析，但**不釋放**音軌（AC-33-01 允許期間切測驗模式再切回仍不詢問） | QA | 待辦（知會） | — |
 | SD-FB-26 | （v0.5）store 保留 `applyGoal()` 原行為（直接套用、不判斷初始化），另新增 `requestApplyGoal`／`confirmApplyGoal`／`cancelApplyGoal`；初始化判斷由「view 只能呼叫 `requestApplyGoal`」保證（以 `customizer.test.js` 原始碼掃描鎖定），目的是不讓既有已驗收測試大量改寫 | QA、人類 | 待辦（知會） | QA 以畫面操作驗收 US-32；若希望 store 層強制，可另開任務改 `applyGoal` 並一併改寫既有測試 |
 | SD-FB-27 | （v0.5）初始化寫入失敗時，store **不**更新 `writeStatus`（避免 banner 另跳一次「儲存空間不足」與 view 的「儲存空間不足，未套用」重複）；初始化失敗不影響之後一般寫入的提示 | QA | 待辦（知會） | AC-32-11 (b) 畫面只出現一則「儲存空間不足，未套用」 |
+| SD-FB-28 | （v0.6）單字卡頁空狀態提示「請到難易度設定套用目標分數，或新增自訂單字、注入領域範本。」（`flashcards.js`，AC 未定義此文字）仍提到「目標分數」，但 v0.10 畫面已無法設定分數。AC-26-05 只涵蓋首次畫面、難易度設定頁、主控台，本版**不改**此文字 | PM | 待辦（知會） | 若希望改為「請到難易度設定選擇色級並套用，…」，請 PM 補充文字後另開小任務（`flashcards.js`、`naming.test.js`） |
+| SD-FB-29 | （v0.6）R-19 允許保留分數輸入程式，因此交付檔**原始碼**仍含「請輸入 10～990 的分數」「目標分數滑桿」等字樣（`goal.js`、`customizer.js`）；分數區 DOM 也仍存在（隱藏、停用）。AC-26-05 判定範圍為可見畫面、Tab 焦點與可存取名稱 | QA | 待辦（知會） | QA 以可見性、焦點與無障礙樹判定，不以原始碼字串或「DOM 中存在元素」判定（同 SD-FB-21） |
+| SD-FB-30 | （v0.6）QA 既有 E2E 若以 `#cz-score-input`／滑桿設定分數、以畫面讀「目前目標分數」、或假設首次預設 600，會失敗；這些腳本屬 QA 負責 | QA | 待辦（知會） | 改為點色級卡片，分數以 localStorage 或匯出備份驗證（PRD v0.10 色級定義「驗證方式」列）；AC-26-06 構造狀態依 FB-36 |
+| SD-FB-31 | （v0.7）maskable 圖示縮放比例：PRD AC-34-03、Q-41 決議與契約 DP-4(d) 寫「圖案約縮至 85%」，主控實際產出為 **78%**（文字在 80% 安全圓內）。可判定的條件是「對話框與字樣完整位於直徑 80% 的圓內」，78% 符合且更保守 | PM、SA、QA | 待辦（知會） | 不需改設計；建議下次修訂時把 AC-34-03 與 DP-4(d) 的括號說明改為「約 78%」或「以安全區為準」，QA 以安全區判定，不以縮放比例判定 |
+| SD-FB-32 | （v0.7）tasks.json 的 `owner` 值域只有 `pg-content`、`pg-frontend`；主控要求把搬 `ads.txt`、放 PNG、改 workflow 標示為主控執行。SD 將其放在 tasks.json 頂層 `manualSteps`（MC-01～MC-03，`owner: "主控"`），不放入 `tasks`，FE 任務以 `manualPrereqs` 引用 | 主控、人類 | 待辦（知會） | 核准即同意；`/pg-run` 不派發 `manualSteps`；主控的 tasks 驗證工具若檢查 `dependsOn`，MC 項目不在其中 |
+| SD-FB-33 | （v0.7）`src/app/assets/icons/*.png` 位於 pg-frontend 目錄，但依 Q-45 由主控放置；`sources/deploy/ads.txt` 為新增的非 PG 目錄 | QA | 待辦（知會） | QA 越界檢查視為授權例外（D-11）；PG 任務不得修改這些檔案 |
+| SD-FB-34 | （v0.7）AC-24-12／NT-1「緊接『匯出備份』按鈕」：現行「匯出備份」與「匯入備份」同一按鈕列，SD 把說明放在**按鈕列的下一個元素**（不插在兩個按鈕之間，避免拆散同組操作） | PM、QA | 待辦（知會） | QA 以「同一區塊、按鈕列之後、中間無其他元素」判定；若 PM 要求緊貼「匯出備份」單一按鈕，請補註 |
+| SD-FB-35 | （v0.7）SW-4 允許兩種寫法，SD 採「只請求 `./index.html` 一次、`clone()` 寫入 `./` 與 `./index.html` 兩鍵」；因此 install 階段的網路請求為 6 個（`./` 不另請求），Cache Storage 項目仍為 7 個 | QA | 待辦（知會） | QA 驗 AC-35-01、AC-37-05 時以快取項目 7 個、請求網址皆屬預先快取清單判定，不要求 install 請求 7 次 |
+| SD-FB-36 | （v0.7）`dist/site/` 由 CI 重新建置部署；本機 `dist/` 是否提交 git 不影響部署 | 人類 | 待辦（確認） | 建議把 `dist/site/` 加入 `.gitignore`（避免本機與 CI 產物不同造成困惑，見 T-46）；`dist/english-master-track.html` 是否繼續提交由人類決定 |
+| SD-FB-37 | （v0.7）Windows checkout 換行可能為 CRLF，CI 為 LF，兩地 BUILD_ID 不同（不違反 AC-36-01） | 人類 | 待辦（確認） | 建議在專案根目錄加 `.gitattributes`：`* text=auto eol=lf`、`*.png binary`（非 PG 目錄，需人類或主控執行）；不加也不影響功能 |
+| SD-FB-38 | （v0.7）部署 workflow 不執行 `npm ci`／`npm install`（無 lockfile、零相依）。若 QA 日後在 `package.json` 加 devDependencies，部署仍不安裝；但若有人加入**建置期**相依，需同步修改 workflow（屬再次修改 `static.yml`，超出 Q-46 一次授權，須問人類） | QA、人類 | 待辦（知會） | 建置維持零相依（§1） |
 
 ---
 
@@ -1818,3 +2505,5 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | 0.4（核准） | 2026-10-30 | 主控 | 主控代核：持久化結構變更已由人類於契約 v0.8 核准，本版只實作該契約，不改 PRD、不另改持久化結構；tasks.json v0.3 經 check_tasks 驗證，AC 192/192 涵蓋，新任務彼此無共用 paths。 |
 | 0.4（主控代核補記） | 2026-10-30 | 主控 | /pg-run 中授權一次性擴充 paths（不改 PRD、不改持久化結構）：FE-26 修改 `src/app/__tests__/naming.test.js` 導覽按鈕比對（按鈕內含 svg）；FE-30 修改 `src/app/__tests__/_fixtures.js`：`makeStore()` 預設預寫 v2 主鍵，`opts.firstRun: true` 才模擬首次（首次模式 FS-2 不寫入導致既有測試失敗）。 |
 | 0.5 | 2026-11-02 | sd-agent | 修訂已核准的 v0.4（主控代核），原因：PRD v0.9（approved，JimmyLin，2026-11-02；R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（README、data-schema.ts approved，主控代核；storage-schema.json 維持 v0.8）。status 改為 `in-review`、核准欄位清空。增量內容：(1) **推翻**「不直接存取麥克風音訊」限制：允許 `getUserMedia` + `AnalyserNode` 只讀即時音量，仍禁止 `MediaRecorder`、音訊輸出、網路傳送與保存；新增 §7.14（隱私限制、收音條常數與可調範圍 DS-01、麥克風生命週期與只在單字卡頁保留 Q-36／DS-02、`services/mic.js` API、錯誤對照 DS-03、speech-panel 修改）；修訂 §7.6 STT 列與 `audio-capture` 對照、§7.11 新增 A-6（收音條非動畫、無 transition）、A-7（確認視窗無淡入）、§10 靜態檢查（AC-21-03 改為只禁 `MediaRecorder` 並限制 `getUserMedia` 位置）、§5 B-7 擋 `MediaRecorder`；(2) 新增 §7.15 切換難易度初始化（流程、視窗文字、`core/reinit.js`、原子寫入位置 DS-04）與 §4.3 store 新 API；(3) 新增 §7.16 隱藏頁（導覽 4 項、主控台入口、router 與 hashchange 守門、store `setTab` 守門、保留程式與資料 DS-05），§7.13、§9、§9.1、§4.2 同步；(4) §1、§2、§3（新檔 `core/meter.js`、`core/reinit.js`、`services/mic.js` 與 3 個新測試檔；D-8 新任務間無共用 path、D-9 不改 `src/data/`）、§4.4、§4.6、§6.2；(5) §10.2 測試範圍、中間狀態已知失敗、E2E 建議與 **V-MIC** 實機驗證（Windows 11、Chrome 與 Edge 以 `file://` 開啟）；(6) §11 新增 T-32～T-39；(7) §12.4 新任務 FE-34～FE-41 與 4 個批次；(8) §13.2 新增 20 個 AC 與修改 AC 對照（應驗收 196 個全部涵蓋）、16 個暫停 AC 的處理；(9) §14 回應 DS-01～DS-06、FB-33～FB-35；§15 新增 SD-FB-20～SD-FB-27。tasks.json 同步升為 v0.4（只新增 FE-34～FE-41，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2） |
+| 0.6 | 2026-11-02 | sd-agent | 修訂已核准的 v0.5（JimmyLin 核准），原因：PRD v0.10（approved，JimmyLin，2026-11-02；R-19「只選色級、不顯示分數」、Q-39 預設 725、Q-40 不新增鍵盤 AC、新增 AC-26-05／AC-26-06、改寫 AC-22-04 等、暫停 6 條分數輸入 AC）與契約 v0.10（三檔 approved，主控代核；§5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §7.1 新增 `scoreForCard`、移除 Q-32 邏輯、`scoreAfterColorClick` 改語意；預設分數只引用 `SCORE_DEFAULT`（725）；(2) 新增 §7.17（資料流、分數區以 `hidden`＋`inert`＋`disabled`／`tabindex=-1` 隱藏且保留程式、「套用」「開始學習」不再讀輸入框、卡片無分數範圍、狀態列與主控台無目標分數、取消初始化確認後卡片回原色級、AC-22-04 量測點改為點卡片）；(3) §1、§3（D-10）、§4.3 v0.6、§7.9 狀態機、§9 同步；(4) §10.3 測試範圍、中間狀態已知失敗、E2E 建議；(5) §11 新增 T-40～T-44；(6) §12.5 新任務 FE-42～FE-44 與 3 個批次（依序執行）；(7) §13.3 新增 2 個 AC 與改寫 AC 對照（應驗收 192 個全部涵蓋）、6 個暫停 AC 的處理；(8) §14 回應 DS-07～DS-10、FB-36；§15 新增 SD-FB-28～SD-FB-30。tasks.json 同步升為 v0.5（只新增 FE-42～FE-44，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）、不改 `src/data/` |
+| 0.7 | 2026-11-02 | sd-agent | 修訂已核准的 v0.6（JimmyLin 核准），原因：PRD v0.11（approved，JimmyLin，2026-11-02；R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48，修改 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）與契約 v0.11（三檔 approved，主控代核；§10 DP／MF／HD／PE／SW／UP／IN／NT／PV、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §1 新增 6 列（交付形態、PWA 啟用、service worker、建置識別碼、部署、PWA 畫面）；§2 新模組層別與 PWA 流程圖；(2) §3 目錄：部署目錄 `dist/site/`（8 檔）、`dist/english-master-track.html` 保留、`sources/deploy/ads.txt`（DS-12）、`src/app/assets/icons/`（DS-14）、`src/app/pwa/sw.template.js`、`core/pwa.js`、`services/pwa.js`、`ui/pwa-notice.js`、`styles/80-pwa.css`、`tools/serve.mjs`、4 個新測試檔；D-11、D-12；(3) §4.2 v0.7 啟動順序與 `index.html`、§4.3 `setPwa`、§4.7 PWA 模組介面；(4) §5 新命令、§5.1 建置 B-10～B-16 與 B-7 逐字白名單（不放寬既有禁止規則）、`build()` 回傳與參數、可重現性檢查（現有建置無時間戳與亂數）、`serve.mjs`；§5.2 新 workflow 全文（Node 22、不執行 `npm ci`、上傳 `dist/site`）；(5) §6.3 大小與 Cache Storage 估算；(6) §7.18 PWA 設計（兩種形態、BUILD_ID、`sw` 範本、啟動與註冊、更新流程、安裝狀態機、畫面配置、隱私對照）；(7) §9 v0.7 樣式；(8) §10.4 單元測試、E2E（localhost）與人工 V-PWA-H1～H5；(9) §11 新增 T-45～T-54；(10) §12.6 新任務 FE-45～FE-53、主控項目 MC-01～MC-03 與 5 個批次；(11) §13.4 新增 29 個 AC 與修改 5 個 AC 的對照（應驗收 221 個全部涵蓋）；(12) §14 回應 DS-11～DS-18、FB-37～FB-43；§15 新增 SD-FB-31～SD-FB-38。tasks.json 同步升為 v0.6（只新增 FE-45～FE-53 與 `manualSteps`，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）、不改 `src/data/` |

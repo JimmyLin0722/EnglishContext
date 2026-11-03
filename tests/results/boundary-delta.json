@@ -1,0 +1,315 @@
+{
+  "since": "2026-11-02T07:40:00.000Z",
+  "minFe": 45,
+  "rows": [
+    {
+      "file": ".gitattributes",
+      "mtime": "2026-11-03T00:26:23.153Z",
+      "owner": [
+        "（主控授權例外）"
+      ]
+    },
+    {
+      "file": ".github/workflows/static.yml",
+      "mtime": "2026-11-02T09:04:21.612Z",
+      "owner": [
+        "（主控修改，PRD R-20 記載）"
+      ]
+    },
+    {
+      "file": ".gitignore",
+      "mtime": "2026-11-03T00:26:23.152Z",
+      "owner": [
+        "（主控授權例外）"
+      ]
+    },
+    {
+      "file": "dist/english-master-track.html",
+      "mtime": "2026-11-03T00:48:19.899Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "dist/site/ads.txt",
+      "mtime": "2026-11-03T00:48:19.907Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "dist/site/icons/apple-touch-icon-180.png",
+      "mtime": "2026-11-03T00:48:19.907Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "dist/site/icons/icon-192.png",
+      "mtime": "2026-11-03T00:48:19.906Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "dist/site/icons/icon-512.png",
+      "mtime": "2026-11-03T00:48:19.906Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "dist/site/icons/icon-maskable-512.png",
+      "mtime": "2026-11-03T00:48:19.906Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "dist/site/index.html",
+      "mtime": "2026-11-03T00:48:19.904Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "dist/site/manifest.webmanifest",
+      "mtime": "2026-11-03T00:48:19.905Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "dist/site/sw.js",
+      "mtime": "2026-11-03T00:48:19.905Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "package.json",
+      "mtime": "2026-11-03T00:56:10.478Z",
+      "owner": [
+        "FE-47"
+      ]
+    },
+    {
+      "file": "sources/deploy/ads.txt",
+      "mtime": "2026-11-03T00:26:11.267Z",
+      "owner": [
+        "（主控授權例外）"
+      ]
+    },
+    {
+      "file": "sources/pwa/PWA_Icon.jpg",
+      "mtime": "2026-11-02T08:58:59.139Z",
+      "owner": [
+        "（主控授權例外）"
+      ]
+    },
+    {
+      "file": "sources/pwa/README.md",
+      "mtime": "2026-11-03T00:26:23.125Z",
+      "owner": [
+        "（主控授權例外）"
+      ]
+    },
+    {
+      "file": "src/app/assets/icons/apple-touch-icon-180.png",
+      "mtime": "2026-11-03T00:26:11.378Z",
+      "owner": [
+        "（主控授權例外）"
+      ]
+    },
+    {
+      "file": "src/app/assets/icons/icon-192.png",
+      "mtime": "2026-11-03T00:26:11.396Z",
+      "owner": [
+        "（主控授權例外）"
+      ]
+    },
+    {
+      "file": "src/app/assets/icons/icon-512.png",
+      "mtime": "2026-11-03T00:26:11.418Z",
+      "owner": [
+        "（主控授權例外）"
+      ]
+    },
+    {
+      "file": "src/app/assets/icons/icon-maskable-512.png",
+      "mtime": "2026-11-03T00:26:11.434Z",
+      "owner": [
+        "（主控授權例外）"
+      ]
+    },
+    {
+      "file": "src/app/core/pwa.js",
+      "mtime": "2026-11-03T00:28:14.152Z",
+      "owner": [
+        "FE-45"
+      ]
+    },
+    {
+      "file": "src/app/index.html",
+      "mtime": "2026-11-03T00:44:01.006Z",
+      "owner": [
+        "FE-50"
+      ]
+    },
+    {
+      "file": "src/app/license-header.txt",
+      "mtime": "2026-11-03T00:39:27.111Z",
+      "owner": [
+        "FE-47"
+      ]
+    },
+    {
+      "file": "src/app/main.js",
+      "mtime": "2026-11-03T00:44:01.011Z",
+      "owner": [
+        "FE-50"
+      ]
+    },
+    {
+      "file": "src/app/pwa/sw.template.js",
+      "mtime": "2026-11-03T00:30:07.660Z",
+      "owner": [
+        "FE-46"
+      ]
+    },
+    {
+      "file": "src/app/services/pwa.js",
+      "mtime": "2026-11-03T00:32:05.334Z",
+      "owner": [
+        "FE-48"
+      ]
+    },
+    {
+      "file": "src/app/state/store.js",
+      "mtime": "2026-11-03T00:34:11.697Z",
+      "owner": [
+        "FE-49"
+      ]
+    },
+    {
+      "file": "src/app/styles/10-dashboard.css",
+      "mtime": "2026-11-03T00:46:38.823Z",
+      "owner": [
+        "FE-51"
+      ]
+    },
+    {
+      "file": "src/app/styles/80-pwa.css",
+      "mtime": "2026-11-03T00:44:21.346Z",
+      "owner": [
+        "FE-50"
+      ]
+    },
+    {
+      "file": "src/app/ui/pwa-notice.js",
+      "mtime": "2026-11-03T00:44:32.204Z",
+      "owner": [
+        "FE-50"
+      ]
+    },
+    {
+      "file": "src/app/views/dashboard.js",
+      "mtime": "2026-11-03T00:46:38.817Z",
+      "owner": [
+        "FE-51"
+      ]
+    },
+    {
+      "file": "src/app/views/sources-page.js",
+      "mtime": "2026-11-03T00:35:04.874Z",
+      "owner": [
+        "FE-52"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/build.test.js",
+      "mtime": "2026-11-03T00:43:22.277Z",
+      "owner": [
+        "FE-47"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/dashboard.test.js",
+      "mtime": "2026-11-03T00:47:22.630Z",
+      "owner": [
+        "FE-51"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/load-order.test.js",
+      "mtime": "2026-11-03T00:47:49.496Z",
+      "owner": [
+        "FE-53"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/pwa-core.test.js",
+      "mtime": "2026-11-03T00:29:00.867Z",
+      "owner": [
+        "FE-45"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/pwa-notice.test.js",
+      "mtime": "2026-11-03T00:45:31.777Z",
+      "owner": [
+        "FE-50"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/pwa-service.test.js",
+      "mtime": "2026-11-03T00:33:22.779Z",
+      "owner": [
+        "FE-48"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/shell.test.js",
+      "mtime": "2026-11-03T00:44:55.112Z",
+      "owner": [
+        "FE-50"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/sources-page.test.js",
+      "mtime": "2026-11-03T00:43:22.280Z",
+      "owner": [
+        "FE-52"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/store.test.js",
+      "mtime": "2026-11-03T00:43:22.279Z",
+      "owner": [
+        "FE-49"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/sw.test.js",
+      "mtime": "2026-11-03T00:30:49.660Z",
+      "owner": [
+        "FE-46"
+      ]
+    },
+    {
+      "file": "tools/build.mjs",
+      "mtime": "2026-11-03T00:43:22.276Z",
+      "owner": [
+        "FE-47"
+      ]
+    },
+    {
+      "file": "tools/serve.mjs",
+      "mtime": "2026-11-03T00:39:53.075Z",
+      "owner": [
+        "FE-47"
+      ]
+    }
+  ],
+  "outside": []
+}

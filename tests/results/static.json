@@ -4,14 +4,14 @@
     "tc": "TC-S01",
     "ac": "AC-19-01",
     "result": "通過",
-    "note": "dist 檔案：english-master-track.html；<style> 區塊 1；外部資源樣式命中：無；程式網路 API：無"
+    "note": "dist 建置產物：english-master-track.html＋PWA 部署目錄 site（人類自放檔案 ads.txt 不列入）；白名單 data: 圖示連結 1 次；<style> 區塊 1；外部資源樣式命中：無；程式網路 API：無"
   },
   {
     "suite": "static",
     "tc": "TC-S02",
     "ac": "AC-19-04",
     "result": "通過",
-    "note": "3,047,158 bytes（上限 5,242,880）"
+    "note": "3,278,334 bytes（上限 5,242,880）"
   },
   {
     "suite": "static",
@@ -32,14 +32,14 @@
     "tc": "TC-S05",
     "ac": "AC-21-03（程式面）",
     "result": "通過",
-    "note": "命中：無"
+    "note": "(1) MediaRecorder：產物 0 次、src/app 0 檔；(2) getUserMedia 出現於：src/app/services/mic.js；產物 8 次 = mic.js 8 次：true；(3) mic.js 禁用字串命中：無；(4) speech-panel store action：setSttStatus(s)、setSttResult(null)、setSttResult(res)、recordSttScored()、acknowledgeSttNotice()；含音量參數 0"
   },
   {
     "suite": "static",
     "tc": "TC-S06",
     "ac": "AC-23-06",
     "result": "通過",
-    "note": "開頭註解含 MIT 全文與 Copyright=true；CC BY-SA 聲明與網址=true；<meta charset> 結束於第 70 byte"
+    "note": "開頭註解含 MIT 全文與 Copyright=true；CC BY-SA 聲明與網址=true；品牌標識聲明（v0.11）=true；<meta charset> 結束於第 70 byte"
   },
   {
     "suite": "static",
@@ -57,9 +57,16 @@
   },
   {
     "suite": "static",
+    "tc": "TC-S10",
+    "ac": "AC-31-04",
+    "result": "通過",
+    "note": "外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,278,334 bytes（AC-19-01 外部資源見 TC-S01）"
+  },
+  {
+    "suite": "static",
     "tc": "TC-S09",
     "ac": "AC-19-01（交付物可追溯）",
     "result": "通過",
-    "note": "重建產物 3,047,158 bytes；與 dist 位元組相同=true"
+    "note": "重建產物 3,278,334 bytes；與 dist 位元組相同=true"
   }
 ]

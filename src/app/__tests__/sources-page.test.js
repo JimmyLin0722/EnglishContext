@@ -103,4 +103,92 @@ describe("sources-page.test.js", () => {
     assert.equal(P.TEXT.originalLicense, "原創內容（例句、解析、Part 5 題目、長難句、句型）以 CC BY-SA 4.0 授權，著作權人 JimmyLin");
     assert.equal(P.TEXT.ecdictPhonetic, "音標改寫為美式 IPA，標為原創，不屬 ECDICT");
   });
+
+  // ── （v0.11，FE-52）PWA 圖示與名稱的品牌標識聲明（AC-23-02、Q-48） ──
+
+  /** PRD AC-23-02 品牌標識聲明原文（逐字複製） */
+  const BRAND = "PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin，保留所有權利，不適用 MIT 與 CC BY-SA 4.0";
+
+  test("（FE-52）brandStatement 逐字等於 AC-23-02；copyrightHolder 缺漏時仍為 JimmyLin", () => {
+    const pwa = require("../core/pwa.js");
+    assert.equal(P.brandStatement(pwa.PWA_APP_NAME, "JimmyLin"), BRAND);
+    assert.equal(P.brandStatement(pwa.PWA_APP_NAME, undefined), BRAND);
+    assert.equal(P.brandStatement(pwa.PWA_APP_NAME, ""), BRAND);
+  });
+
+  /** 最小假 DOM（只支援 core/dom.js 用到的介面） */
+  function fakeDocument() {
+    function node(tag) {
+      const n = {
+        nodeType: tag === "#text" ? 3 : 1,
+        tagName: tag.toUpperCase(),
+        className: "",
+        attrs: {},
+        childNodes: [],
+        _text: "",
+        setAttribute(k, v) { this.attrs[k] = String(v); },
+        getAttribute(k) { return this.attrs[k]; },
+        addEventListener() {},
+        appendChild(c) { this.childNodes.push(c); c.parentNode = this; return c; },
+        removeChild(c) { this.childNodes.splice(this.childNodes.indexOf(c), 1); return c; },
+        get firstChild() { return this.childNodes[0] || null; },
+        get textContent() { return this.nodeType === 3 ? this._text : this._text + this.childNodes.map((c) => c.textContent).join(""); },
+        set textContent(v) { this.childNodes = []; this._text = String(v); }
+      };
+      return n;
+    }
+    return {
+      createElement: (t) => node(t),
+      createTextNode: (t) => { const n = node("#text"); n._text = t; return n; },
+      createElementNS: (ns, t) => node(t)
+    };
+  }
+
+  function findAll(n, pred, out = []) {
+    if (pred(n)) out.push(n);
+    for (const c of n.childNodes || []) findAll(c, pred, out);
+    return out;
+  }
+
+  /** 依建置方式（無 module）在 vm 載入 core/dom、core/pwa 與本頁，render 授權區 */
+  function renderInSandbox(license) {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const vm = require("node:vm");
+    const sandbox = { console: { warn() {}, error() {}, log() {} } };
+    sandbox.self = sandbox;
+    vm.createContext(sandbox);
+    for (const rel of ["core/dom.js", "core/pwa.js", "views/sources-page.js"]) {
+      vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox, { filename: rel });
+    }
+    sandbox.EMT.core.dom.setDocument(fakeDocument());
+    const rootEl = fakeDocument().createElement("section");
+    sandbox.EMT.views.sourcesPage.render(rootEl, { sources: REG, builtin: F.builtin(), license });
+    return rootEl;
+  }
+
+  test("（FE-52）render：聲明清單 4 條，第 4 條逐字為品牌標識聲明，既有 3 條不變；copyrightHolder 缺漏仍為 JimmyLin", () => {
+    for (const license of [F.license(), Object.assign(F.license(), { copyrightHolder: undefined }), undefined]) {
+      const rootEl = renderInSandbox(license);
+      const ul = findAll(rootEl, (n) => n.className === "src-statements")[0];
+      assert.ok(ul);
+      const items = ul.childNodes.map((li) => li.textContent);
+      assert.deepEqual(items, [P.TEXT.codeLicense, P.TEXT.dataLicense, P.TEXT.originalLicense, BRAND]);
+    }
+  });
+
+  test("（FE-52）core/pwa 未載入時 render 丟出含模組名稱的錯誤（LD-3）", () => {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const vm = require("node:vm");
+    const sandbox = { console: { warn() {}, error() {}, log() {} } };
+    sandbox.self = sandbox;
+    vm.createContext(sandbox);
+    for (const rel of ["core/dom.js", "views/sources-page.js"]) {
+      vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox);
+    }
+    sandbox.EMT.core.dom.setDocument(fakeDocument());
+    const rootEl = fakeDocument().createElement("section");
+    assert.throws(() => sandbox.EMT.views.sourcesPage.render(rootEl, { sources: REG, builtin: F.builtin() }), /EMT\.core\.pwa/);
+  });
 });

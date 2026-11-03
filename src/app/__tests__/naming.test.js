@@ -233,9 +233,12 @@ describe("naming.test.js", () => {
     const czLits = stringLiterals(read(path.join(VIEWS_DIR, "customizer.js")));
     const fcLits = stringLiterals(read(path.join(VIEWS_DIR, "flashcards.js")));
     assert.ok(czLits.includes("難易度設定"));
-    assert.ok(czLits.includes("選擇色級或輸入目標分數即時試算，按「套用」後才會更新單字卡的單字集。"));
+    // （v0.10，FE-43；R-19）說明文字不再引導輸入或查看目標分數
+    assert.ok(czLits.includes("選擇色級即時試算，按「套用」後才會更新單字卡的單字集。"));
+    assert.ok(!czLits.includes("選擇色級或輸入目標分數即時試算，按「套用」後才會更新單字卡的單字集。"));
     assert.ok(fcLits.includes("單字卡"));
-    assert.ok(fcLits.includes("請到難易度設定套用目標分數，或新增自訂單字、注入領域範本。"));
+    assert.ok(fcLits.includes("請到難易度設定選擇色級並按「套用」，或新增自訂單字、注入領域範本。"));
+    assert.ok(!fcLits.some((s) => s.includes("目標分數")), "單字卡畫面文字不提目標分數");
     assert.ok(fcLits.includes("前往難易度設定"));
     assert.ok(stringLiterals(p5src).includes("模擬測驗"));
     if (P5 && P5.TEXT) {

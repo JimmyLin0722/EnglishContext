@@ -1,6 +1,8 @@
 /*
  * EMT.core.goal — 分數、色級與試算（FE-03；architecture.md §7.1）
- * 依據：PRD 色級定義表、Q-12、Q-15、Q-25、Q-28、Q-32；契約常數 COLOR_LEVELS、SCORE_*、N_O。
+ * 依據：PRD 色級定義表、Q-12、Q-15、Q-25、Q-28、R-19；契約常數 COLOR_LEVELS、SCORE_*、N_O。
+ * （FE-42）v0.10 R-19：點色級卡片 = 該色 scoreMax（scoreForCard，契約 GS-2、DS-07），取代 Q-32 規則；
+ * parseScoreInput、normalizeScore、SCORE_INVALID_MESSAGE 為暫停 AC 的保留程式（畫面已無呼叫路徑）。
  * 本模組為純函式，不碰 DOM、不讀 window 全域資料、不讀 localStorage；
  * N_B、N_G 由呼叫端依實際資料計算後以參數傳入（V-VOC-12，不得寫死）。
  * Node 以 require 載入，瀏覽器掛到 EMT.core.goal（需先載入 EMT.core.constants）。
@@ -197,19 +199,28 @@
   }
 
   /**
-   * 點擊色級按鈕後的分數（AC-01-05、AC-01-07；Q-15、Q-32）：
-   * 目前分數已在該色範圍內 → 不變；否則設為該色 scoreMin。未知色級回傳原分數。
+   * 點色級卡片後的分數（v0.10 R-19；契約 GS-2、DS-07；AC-01-05、AC-01-07、AC-02-04、AC-26-02、AC-26-04）：
+   * 一律為該色 scoreMax（橘 215、棕 465、綠 725、藍 855、金 990），與目前分數無關。
+   * 未知色級回傳 null。
+   * @param {string} colorId
+   * @returns {number|null}
+   */
+  function scoreForCard(colorId) {
+    var level = levelOf(colorId);
+    return level ? level.scoreMax : null;
+  }
+
+  /**
+   * （相容用）點擊色級後的分數。v0.10 起語意改為 scoreForCard(colorId) ?? S：
+   * 已知色級一律回該色 scoreMax（不再看 S 是否在範圍內，Q-32 規則廢止）；未知色級回傳原分數。
+   * 保留匯出名稱以相容既有呼叫端與測試替身；store 已改呼叫 scoreForCard。
    * @param {number} S
    * @param {string} colorId
    * @returns {number}
    */
   function scoreAfterColorClick(S, colorId) {
-    var level = levelOf(colorId);
-    if (!level) { return S; }
-    if (S >= level.scoreMin && S <= level.scoreMax) {
-      return S;
-    }
-    return level.scoreMin;
+    var score = scoreForCard(colorId);
+    return score !== null ? score : S;
   }
 
   return Object.freeze({
@@ -223,6 +234,7 @@
     dailyNewWords: dailyNewWords,
     targetVocab: targetVocab,
     estimate: estimate,
+    scoreForCard: scoreForCard,
     scoreAfterColorClick: scoreAfterColorClick
   });
 });

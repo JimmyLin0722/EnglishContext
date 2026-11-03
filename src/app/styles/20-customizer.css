@@ -2,6 +2,8 @@
  * 20-customizer.css — 難易度設定頁（FE-09；色級大卡片 FE-27）
  * 依據：architecture.md §9 RWD；色彩變數沿用 00-base.css（--color-orange 等）。
  * 375／768／1366 寬度皆不得出現水平捲軸：格線使用 minmax(0, 1fr)，文字可斷行。
+ * （v0.10，FE-43）卡片不再顯示分數範圍（刪除 .cz-color__range）；分數區 .cz-score 以 [hidden] 隱藏（00-base.css），
+ * 其規則保留但不會渲染。卡片最小高度仍為 var(--touch)（44px）。
  */
 
 .cz {
@@ -195,10 +197,6 @@
 
 .cz-lock path {
   fill: none;
-}
-
-.cz-color__range {
-  font-weight: 600;
 }
 
 .cz-color__vocab,

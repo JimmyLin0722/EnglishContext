@@ -1,4 +1,4 @@
-// QA E2E 套件 4：Part 5（US-10、US-11）、解碼器（US-12～US-14）、句型庫（US-15、US-16）、
+// QA E2E 套件 4：模擬測驗（US-10、US-11）、解碼器與句型庫（第 3 輪：暫停，記不適用）、
 // 資料來源與授權頁（AC-23-02）、主控台統計（AC-17-01、AC-17-04）
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeClipboard } from "./lib/inits.mjs";
@@ -94,97 +94,13 @@ await R.check("TC-17-01", "AC-17-01", async () => {
   return { ok: s.length === 3 && s[0].startsWith("連續打卡天數") && s[1].startsWith("單字掌握數") && s[2].startsWith("模擬測驗正確率") && !/NaN|Infinity|undefined/.test(s.join()), note: s.join("；") };
 });
 
-// ═════════ 解碼器 ═════════
-await p.go("decoder");
-const hueOf = (rgb) => { const m = rgb.match(/\d+(\.\d+)?/g); if (!m) return null; const [r, g, b] = m.slice(0, 3).map(Number); const mx = Math.max(r, g, b), mn = Math.min(r, g, b); if (mx - mn < 15) return null; let h; if (mx === r) h = ((g - b) / (mx - mn)) % 6; else if (mx === g) h = (b - r) / (mx - mn) + 2; else h = (r - g) / (mx - mn) + 4; h *= 60; if (h < 0) h += 360; return Math.round(h); };
-const family = (h) => h === null ? "灰" : (h < 20 || h >= 340) ? "紅" : h < 70 ? "橙黃" : h < 170 ? "綠" : h < 255 ? "藍" : "紫";
-await R.check("TC-12-01", "AC-12-01、AC-12-02、AC-12-03", async () => {
-  const legend = await p.ev(`[...document.querySelectorAll(".dc-legend__item")].map((e) => e.innerText.replace(/\\n/g, ""))`);
-  const all = []; const bad = []; let count = 0; const fams = { subject: new Set(), verb: new Set(), object: new Set(), modifier: new Set() };
-  const total = Number((await p.text(".dc-pos")).match(/\/ (\d+)/)[1]);
-  for (let i = 0; i < total; i++) {
-    const r = await p.ev(`(() => { const segs = [...document.querySelectorAll(".dc-sentence .seg")]; const role = (s) => (s.className.match(/seg--(subject|verb|object|modifier)/) || [])[1];
-      return { pos: document.querySelector(".dc-pos").textContent, segs: segs.filter(role).map((s) => { const cs = getComputedStyle(s); return { role: role(s), color: cs.color, bg: cs.backgroundColor, border: cs.borderBottomColor || cs.textDecorationColor }; }) }; })()`);
-    count++;
-    const roles = r.segs.map((s) => s.role);
-    if (!roles.includes("subject") || !roles.includes("verb")) bad.push(r.pos + " 缺主詞或動詞");
-    for (const s of r.segs) { const f = family(hueOf(s.color)); const fb = family(hueOf(s.bg)); fams[s.role].add(f + "/" + fb); }
-    if (i < total - 1) await p.click(".dc-next");
-  }
-  const famOk = [...fams.subject].every((x) => x.split("/").every((y) => y === "藍")) && [...fams.verb].every((x) => x.split("/").every((y) => y === "紅")) && [...fams.object].every((x) => x.split("/").every((y) => y === "綠")) && [...fams.modifier].every((x) => x.split("/").every((y) => y === "紫"));
-  const noInput = await p.ev(`document.querySelectorAll("#view-decoder textarea, #view-decoder input[type=text], #view-decoder [contenteditable=true]").length === 0`);
-  return { ok: total >= 50 && count === total && bad.length === 0 && famOk && legend.length === 4 && noInput, note: `例句 ${total} 句逐一切換檢查；缺主詞/動詞 ${bad.length}；色系（文字/底色）主詞 ${[...fams.subject]}、動詞 ${[...fams.verb]}、受詞 ${[...fams.object]}、修飾 ${[...fams.modifier]}；圖例 ${legend.join("、")}；任意句輸入框不存在=${noInput}` };
-});
-const dimState = () => p.ev(`(() => { const out = { mod: [], core: [] }; for (const s of document.querySelectorAll(".dc-sentence .seg")) { const cs = getComputedStyle(s); const o = { op: cs.opacity, f: cs.filter };
-  if (s.classList.contains("seg--modifier")) out.mod.push(o); else if (/seg--(subject|verb|object)/.test(s.className)) out.core.push(o); }
-  const b = document.querySelector(".dc-dim"); out.btn = b.textContent; out.pressed = b.getAttribute("aria-pressed"); out.pos = document.querySelector(".dc-pos").textContent; return out; })()`);
-await R.check("TC-13-01", "AC-13-01、AC-13-02、AC-13-03、AC-13-04", async () => {
-  await p.click(".dc-prev");
-  const s0 = await dimState();
-  await p.click(".dc-dim"); const a = await dimState();
-  await p.click(".dc-prev"); const c = await dimState();
-  await p.click(".dc-dim"); const b = await dimState();
-  const okA = a.mod.length > 0 && a.mod.every((m) => m.op === "0.3" && /grayscale\(1\)/.test(m.f)) && a.core.every((m) => m.op === "1");
-  const okC = c.pos !== a.pos && c.mod.every((m) => m.op === "0.3" && /grayscale/.test(m.f));
-  const okB = b.mod.every((m) => m.op === "1" && !/grayscale\((1|100%)\)/.test(m.f));
-  const okBtn = s0.btn !== a.btn || s0.pressed !== a.pressed;
-  return { ok: okA && okB && okC && okBtn, note: `淡化：修飾語 ${a.mod.length} 段 opacity ${[...new Set(a.mod.map((m) => m.op))]}、filter ${[...new Set(a.mod.map((m) => m.f))]}、主幹 opacity ${[...new Set(a.core.map((m) => m.op))]}；切換到 ${c.pos} 仍淡化=${okC}；還原：opacity ${[...new Set(b.mod.map((m) => m.op))]}、filter ${[...new Set(b.mod.map((m) => m.f))]}；按鈕「${s0.btn}」(${s0.pressed}) → 「${a.btn}」(${a.pressed})` };
-});
-await R.check("TC-14-01", "AC-14-01", async () => {
-  const r = await p.ev(`[...document.querySelectorAll(".dc-strategy")].map((d) => ({ t: d.querySelector("summary").textContent, tips: [...d.querySelectorAll("li")].map((l) => l.textContent.trim()).filter(Boolean).length }))`);
-  return { ok: r.map((x) => x.t).join("|") === "Abstract 摘要|方法論|文獻回顧（Research Gap）" && r.every((x) => x.tips > 0), note: r.map((x) => `${x.t}（${x.tips} 則）`).join("、") };
-});
-
-// ═════════ 句型庫 ═════════
-await p.go("phrasebank");
-const pb = () => p.ev(`(() => { const items = [...document.querySelectorAll(".pb-item")].filter((li) => !li.hidden && li.getClientRects().length > 0); const e = document.querySelector(".pb-empty");
-  return { n: items.length, cats: [...new Set(items.map((i) => i.dataset.category))], ids: items.map((i) => i.dataset.id), empty: e && !e.hidden ? e.textContent : "", count: document.querySelector(".pb-count").textContent }; })()`);
-await R.check("TC-15-01", "AC-15-01", async () => {
-  const f = await p.ev(`[...document.querySelectorAll(".pb-filter__btn")].map((b) => b.textContent)`);
-  return { ok: f.join("|") === "全部|研究空白 Gap|研究目的 Aim|研究結果 Findings|研究限制 Limitations", note: f.join("、") };
-});
-await R.check("TC-15-02", "AC-15-02、AC-15-03", async () => {
-  const out = {};
-  for (const c of ["gap", "aim", "findings", "limitations"]) { await p.click(`.pb-filter__btn[data-category="${c}"]`); out[c] = await pb(); }
-  await p.click('.pb-filter__btn[data-category="all"]'); const all = await pb();
-  const ok = Object.entries(out).every(([c, r]) => r.cats.length === 1 && r.cats[0] === c && r.n >= 25) && all.n === 100;
-  return { ok, note: Object.entries(out).map(([c, r]) => `${c} ${r.n} 則（類別 ${r.cats}）`).join("；") + `；回到全部 ${all.n} 則` };
-});
-await R.check("TC-16-01", "AC-16-01", async () => {
-  // 真實按鍵逐字輸入 gap，並與「研究目的 Aim」分類同時成立
-  await p.click('.pb-filter__btn[data-category="all"]');
-  const exp = (kw, cat) => p.ev(`ACADEMIC_PHRASEBANK.filter((x) => (cat === "all" || x.category === cat) && (x.template + "\\n" + x.descriptionZh).toLowerCase().includes(${JSON.stringify(kw)}.toLowerCase())).map((x) => x.id)`.replace("cat ===", `${JSON.stringify(cat)} ===`).replace("x.category === cat", `x.category === ${JSON.stringify(cat)}`));
-  await p.type("#pb-search", "");
-  const out = []; let ok = true;
-  for (const [i, ch] of ["g", "a", "p"].entries()) {
-    await p.send("Input.dispatchKeyEvent", { type: "keyDown", key: ch, text: ch, code: "Key" + ch.toUpperCase(), windowsVirtualKeyCode: ch.toUpperCase().charCodeAt(0) });
-    await p.send("Input.dispatchKeyEvent", { type: "keyUp", key: ch, code: "Key" + ch.toUpperCase(), windowsVirtualKeyCode: ch.toUpperCase().charCodeAt(0) });
-    await sleep(20);
-    const kw = "gap".slice(0, i + 1); const r = await pb(); const e = await exp(kw, "all");
-    const good = JSON.stringify(r.ids) === JSON.stringify(e); ok = ok && good; out.push(`「${kw}」${r.n} 則${good ? "" : "（預期 " + e.length + "）"}`);
-  }
-  const upper = await (async () => { await p.type("#pb-search", "GAP"); const r = await pb(); const e = await exp("gap", "all"); return JSON.stringify(r.ids) === JSON.stringify(e); })();
-  const zh = await (async () => { await p.type("#pb-search", "缺口"); const r = await pb(); const e = await exp("缺口", "all"); return [r.n, JSON.stringify(r.ids) === JSON.stringify(e)]; })();
-  await p.type("#pb-search", "gap"); await p.click('.pb-filter__btn[data-category="aim"]');
-  const both = await pb(); const eb = await exp("gap", "aim");
-  const okBoth = JSON.stringify(both.ids) === JSON.stringify(eb);
-  // 每次按鍵到清單更新的時間
-  const times = await p.ev(`(async () => { const el = document.getElementById("pb-search"); el.value = ""; el.dispatchEvent(new Event("input", { bubbles: true })); const out = [];
-    for (const kw of ["r", "re", "res", "rese", "resea", "resear", "researc", "research", "research ", "research g"]) { const t0 = performance.now(); el.value = kw; el.dispatchEvent(new Event("input", { bubbles: true }));
-      await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0))); out.push(+(performance.now() - t0).toFixed(1)); } return out; })()`);
-  await p.type("#pb-search", ""); await p.click('.pb-filter__btn[data-category="all"]');
-  return { ok: ok && upper && zh[1] && okBoth && Math.max(...times) <= 100, note: `逐字：${out.join("、")}；大寫 GAP 相同=${upper}；中文「缺口」${zh[0]} 則、相符=${zh[1]}；gap + Aim 分類 ${both.n} 則、相符=${okBoth}；10 次按鍵更新 ms：${times.join("、")}` };
-});
-await R.check("TC-16-02", "AC-16-02", async () => {
-  await p.type("#pb-search", "zzqqxxnotfound"); const r = await pb(); await p.type("#pb-search", "");
-  return { ok: r.n === 0 && r.empty === "找不到符合的句型", note: `${r.n} 則、提示「${r.empty}」` };
-});
-await R.check("TC-16-03", "AC-16-03", async () => {
-  const n = await p.ev(`window.__qaToasts.length`);
-  await p.click(".pb-item__copy", 3); await sleep(150);
-  const r = await p.ev(`({ w: window.__qaClip.written.slice(-1)[0], tpl: document.querySelectorAll(".pb-item")[3].querySelector(".pb-item__template").textContent, data: ACADEMIC_PHRASEBANK[3].template, t: window.__qaToasts.slice(${n}).map((x) => x.text) })`);
-  return { ok: r.w === r.data && r.w === r.tpl && r.t.includes("已複製"), note: `剪貼簿「${r.w}」與模板相同=${r.w === r.data}；提示 ${JSON.stringify(r.t)}` };
-});
+// ═════════ 解碼器、句型庫（PRD v0.9 R-18 三：暫停（隱藏），本版不驗收）═════════
+// 第 3 輪：原 TC-12-01～TC-16-04 的頁面已無入口，改記為「不適用（暫停）」；畫面不可到達另由 e2e-hidden.mjs（AC-20-04）驗證。
+{
+  const why = "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04";
+  for (const [tc, ac] of [["TC-12-01", "AC-12-01、AC-12-02、AC-12-03"], ["TC-13-01", "AC-13-01、AC-13-02、AC-13-03、AC-13-04"], ["TC-14-01", "AC-14-01"],
+    ["TC-15-01", "AC-15-01"], ["TC-15-02", "AC-15-02、AC-15-03"], ["TC-16-01", "AC-16-01"], ["TC-16-02", "AC-16-02"], ["TC-16-03", "AC-16-03"], ["TC-16-04a", "AC-16-04"], ["TC-16-04b", "AC-16-04"]]) R.na(tc, ac, why);
+}
 
 // ═════════ 資料來源與授權頁 ═════════
 await R.check("TC-23-02", "AC-23-02", async () => {
@@ -204,18 +120,5 @@ await R.check("TC-23-02", "AC-23-02", async () => {
 
 await R.check("TC-X-content", "（全套件）無未處理例外", async () => ({ ok: p.log.exceptions.length === 0, note: JSON.stringify(p.log.exceptions).slice(0, 300) }));
 await p.close();
-
-// ═════════ 剪貼簿不可用 ═════════
-for (const mode of ["reject", "missing"]) {
-  const q = await launch();
-  await q.addInitScript(TOAST_RECORDER); await q.addInitScript(fakeClipboard(mode));
-  await q.viewport(1366, 900); await q.goto(); await q.go("phrasebank");
-  await R.check(`TC-16-04${mode === "reject" ? "a" : "b"}`, "AC-16-04", async () => {
-    await q.click(".pb-item__copy", 2); await sleep(200);
-    const r = await q.ev(`({ t: window.__qaToasts.map((x) => x.text), sel: String(window.getSelection()), tpl: ACADEMIC_PHRASEBANK[2].template })`);
-    return { ok: r.t.includes("複製失敗，請手動選取") && r.sel.trim() === r.tpl && q.log.exceptions.length === 0, note: `剪貼簿${mode === "reject" ? "拒絕" : "不存在"}：提示 ${JSON.stringify(r.t)}；反白文字與模板相同=${r.sel.trim() === r.tpl}；未處理例外 ${q.log.exceptions.length}` };
-  });
-  await q.close();
-}
 
 R.save(resultPath("e2e-content"));

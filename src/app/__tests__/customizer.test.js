@@ -3,7 +3,11 @@
  * 受測：views/customizer.js 匯出的 helpers（formatInt、cardModels、estimateTexts、statusTexts）；FE-27 色級大卡片
  * 依據：architecture.md v0.3 §7.1（v0.3 決議：字量 nB／nG ≤ 0 視為資料缺漏，由 goal.js 統一處理，R3-1）
  * 涵蓋：AC-01-01、AC-01-07、AC-02-05、AC-02-06、AC-02-10、AC-26-01～AC-26-04、AC-22-04、C-6（字庫缺漏）；
- *       （FE-40）US-32、AC-32-01、AC-32-02、AC-32-04、AC-32-08、AC-32-11、AC-01-02、AC-03-05、AC-25-02
+ *       （FE-40）US-32、AC-32-01、AC-32-02、AC-32-04、AC-32-08、AC-32-11、AC-01-02、AC-03-05、AC-25-02；
+ *       （FE-43，architecture.md v0.6 §7.17、§10.3；契約 v0.10 GS-1～GS-8）AC-26-05、AC-26-06、AC-32-04（取消回原色級）、
+ *       AC-01-05、AC-02-04、AC-22-04（點卡片不重建 DOM）
+ * v0.10：分數區隱藏且停用，畫面以點卡片設定分數（GS-2：該色 scoreMax）；原「輸入框／滑桿建立狀態」的案例已改為點卡片，
+ *       滑桿與輸入框同步案例只留一則並標註「v0.10 暫停，程式保留」。
  */
 "use strict";
 
@@ -27,12 +31,14 @@ describe("customizer.test.js", () => {
     assert.equal(H.formatInt(1234567), "1,234,567");
   });
 
-  test("cardModels：5 張順序、分數範圍、內建字數與本系統建議字量（AC-01-01、AC-26-01）", () => {
+  test("cardModels：5 張順序、內建字數與本系統建議字量；不含分數範圍（AC-01-01、AC-26-01、AC-26-05）", () => {
     const M = H.cardModels(C.N_O, NB, NG, 600);
     assert.equal(M.length, 5);
     assert.deepEqual(M.map((x) => x.id), ["orange", "brown", "green", "blue", "gold"]);
     assert.deepEqual(M.map((x) => x.name), ["橘", "棕", "綠", "藍", "金"]);
-    assert.deepEqual(M.map((x) => x.range), ["10～215 分", "220～465 分", "470～725 分", "730～855 分", "860～990 分"]);
+    // （v0.10）模型不含 range 欄位，任何文字欄位也不含「數字～數字」的分數範圍
+    assert.ok(M.every((x) => !("range" in x)), "cardModels 無 range");
+    assert.ok(!/\d+～\d+/.test(JSON.stringify(M)), "模型文字不含分數範圍");
     // 橘棕綠為 N_O、nB、nG 實際數字（不寫死：換一組值結果跟著變）；藍金「待定」
     assert.deepEqual(M.map((x) => x.vocab), ["1,000 字", "2,809 字", "6,000 字", "待定", "待定"]);
     assert.deepEqual(H.cardModels(C.N_O, 2500, 5620, 600).map((x) => x.vocab), ["1,000 字", "2,500 字", "5,620 字", "待定", "待定"]);
@@ -144,18 +150,27 @@ describe("customizer.test.js", () => {
     }
   });
 
-  test("statusTexts（AC-01-07）", () => {
-    assert.deepEqual(H.statusTexts(G, { appliedScore: 730, appliedColor: "blue", effectiveColor: "green" }),
-      { target: "藍", effective: "綠（內建上限）", score: "730", greenCap: true });
+  test("statusTexts（AC-01-07）：不含目標分數（AC-26-05 (b)）", () => {
+    assert.deepEqual(H.statusTexts(G, { appliedScore: 855, appliedColor: "blue", effectiveColor: "green" }),
+      { target: "藍", effective: "綠（內建上限）", greenCap: true });
     assert.deepEqual(H.statusTexts(G, { appliedScore: 600, appliedColor: "green", effectiveColor: "green" }),
-      { target: "綠", effective: "綠", score: "600", greenCap: false });
+      { target: "綠", effective: "綠", greenCap: false });
+    assert.ok(!("score" in H.statusTexts(G, { appliedScore: 600, appliedColor: "green", effectiveColor: "green" })));
+  });
+
+  test("畫面文字：一般說明不再提及輸入分數；狀態列與卡片不使用「目前目標分數」與分數單位（GS-6）", () => {
+    assert.equal(H.TEXT.intro, "選擇色級即時試算，按「套用」後才會更新單字卡的單字集。");
+    assert.ok(!("statusScore" in H.TEXT));
+    assert.ok(!("scoreUnit" in H.TEXT));
+    // （FE-43／FE-44 修正）試算區標題不含「分數」字樣
+    assert.equal(H.TEXT.estColor, "對應色級");
+    assert.ok(!H.TEXT.estColor.includes("分數"));
   });
 
   test("statusTexts：資料缺漏不拋例外", () => {
     const t = H.statusTexts(G, null);
     assert.equal(t.target, "—");
     assert.equal(t.effective, "—");
-    assert.equal(t.score, "—");
     assert.equal(t.greenCap, false);
   });
 });
@@ -193,8 +208,10 @@ describe("customizer.test.js：閒置預建", () => {
     };
   }
   /** 假的 window：可手動觸發 load 與閒置回呼 */
-  function fakeRoot({ ready = true, entryMode, store: realStore, applyStatus = "applied", confirmResult = { ok: true, write: "ok" } } = {}) {
-    const counter = { nodes: 0, subscribe: 0, startLearning: 0, restore: 0,
+  // score：測試替身 store 的既有分數（draftScore = appliedScore），預設 600 代表「v0.9 以前的既有分數」fixture（GS-4），
+  // 不代表預設值（預設值為 C.SCORE_DEFAULT，見真實 store 案例）
+  function fakeRoot({ ready = true, entryMode, store: realStore, applyStatus = "applied", confirmResult = { ok: true, write: "ok" }, score = 600 } = {}) {
+    const counter = { nodes: 0, subscribe: 0, startLearning: 0, restore: 0, setDraftScore: 0, clickColor: 0,
       applyGoal: 0, requestApplyGoal: 0, confirmApplyGoal: 0, cancelApplyGoal: 0 };
     // （FE-40）假 ui.dialog、ui.toast：dialog.confirm 回傳的 Promise 由測試手動 resolve
     const dialogCalls = [];
@@ -204,7 +221,8 @@ describe("customizer.test.js：閒置預建", () => {
     const idleQueue = [];
     const loadHandlers = [];
     const htmlAttrs = { "data-ready": ready ? "1" : null };
-    const state = { data: { goal: { draftScore: 600, appliedScore: 600, appliedColor: "green", effectiveColor: "green" }, masteredWordKeys: [] } };
+    const c0 = G.colorOf(score);
+    const state = { data: { goal: { draftScore: score, appliedScore: score, appliedColor: c0, effectiveColor: G.effectiveColorOf(c0) }, masteredWordKeys: [] } };
     // （FE-32）entryMode 有指定時才放 runtime（既有案例維持「無 runtime → 一般模式」）
     if (entryMode) state.runtime = { entryMode };
     const notify = (tags) => subs.slice().forEach((fn) => fn(state, tags));
@@ -215,15 +233,16 @@ describe("customizer.test.js：閒置預建", () => {
         store: {
           getState: () => state,
           subscribe: (fn) => { counter.subscribe++; subs.push(fn); return () => {}; },
-          // 與 store 相同語意的最小實作（setDraftScore、clickColor；AC-01-05、AC-01-07）
+          // 與 store 相同語意的最小實作（setDraftScore、clickColor；v0.10 GS-2：點卡片 = 該色 scoreMax）
           actions: {
             setDraftScore(raw) {
+              counter.setDraftScore++;
               const r = G.parseScoreInput(raw);
               if (!r.ok) return { ok: false, error: r.message };
               state.data.goal.draftScore = r.score;
               return { ok: true, score: r.score };
             },
-            clickColor(id) { state.data.goal.draftScore = G.scoreAfterColorClick(state.data.goal.draftScore, id); },
+            clickColor(id) { counter.clickColor++; state.data.goal.draftScore = G.scoreAfterColorClick(state.data.goal.draftScore, id); },
             applyGoal() { counter.applyGoal++; },
             // （FE-40）與 store 相同語意的最小實作（architecture.md §4.3 v0.5）
             requestApplyGoal() {
@@ -289,6 +308,9 @@ describe("customizer.test.js：閒置預建", () => {
       // 真實 store 的通知也要送到本頁：subscribe 交給真實 store，計數照記
       const sub = realStore.subscribe;
       realStore.subscribe = (fn) => { counter.subscribe++; return sub(fn); };
+      // setDraftScore 呼叫計數（GS-3：「套用」「開始學習」不得從輸入框回寫）
+      const setDraft = realStore.actions.setDraftScore;
+      realStore.actions.setDraftScore = (raw) => { counter.setDraftScore++; return setDraft(raw); };
     }
     return {
       root, host, counter, htmlAttrs, state, notify, dialogCalls, toasts,
@@ -406,51 +428,130 @@ describe("customizer.test.js：閒置預建", () => {
     assert.ok(t.every((x) => !x.includes("官方門檻") && !/Tier/i.test(x)));
   });
 
-  test("卡片：初始選中 = colorOf(draftScore)；輸入 300、滑桿 730 只切換選中，不建立新節點（AC-26-03、AC-22-04）", () => {
-    const { f, cards, byId, pressed, selClass } = mounted();
+  const card = (m, id) => m.cards.find((b) => b.getAttribute("data-color") === id);
+  /** 可見節點：自身與所有祖先皆非 hidden（模擬全域 [hidden] { display: none }） */
+  function visibleNodes(node, out = []) {
+    if (node.hidden) return out;
+    out.push(node);
+    for (const c of node.children || []) visibleNodes(c, out);
+    return out;
+  }
+  const visibleText = (node) => visibleNodes(node).map((x) => x.textContent || "").join("");
+  const estDailyOf = (m) => walk(m.f.host).find((x) => / cz-est-daily( |$)/.test(x.className || "")).textContent;
+
+  test("卡片：初始選中 = colorOf(draftScore)；依序點卡片只切換選中，不建立新節點（AC-26-03、AC-22-04）", () => {
+    const { f, cards, pressed, selClass } = mounted();
     assert.deepEqual(pressed(), ["green"]);
     assert.deepEqual(selClass(), ["green"]);
+    const m = { cards };
+    const nodes = f.counter.nodes;
+    card(m, "brown").on.click();
+    assert.deepEqual(pressed(), ["brown"]);
+    assert.deepEqual(selClass(), ["brown"]);
+    card(m, "blue").on.click();
+    assert.deepEqual(pressed(), ["blue"]);
+    assert.deepEqual(selClass(), ["blue"]);
+    assert.equal(f.counter.nodes, nodes, "點卡片不建立任何節點");
+    assert.equal(f.host.appendCount, 1, "不重建頁面");
+    assert.equal(cards.length, 5);
+  });
+
+  test("卡片：預寫 300（棕）→ 點綠 → 725、只有綠卡選中；點藍 855、點金 990 不阻擋（GS-2、AC-01-05、AC-01-07、AC-26-02、AC-26-04）", () => {
+    const m = mounted({ score: 300 });
+    assert.deepEqual(m.pressed(), ["brown"]);
+    const nodes = m.f.counter.nodes;
+    card(m, "green").on.click();
+    assert.equal(m.f.state.data.goal.draftScore, 725);
+    assert.deepEqual(m.pressed(), ["green"]);
+    card(m, "green").on.click();
+    assert.equal(m.f.state.data.goal.draftScore, 725, "再點目前選中色級仍為上限");
+    card(m, "blue").on.click();
+    assert.equal(m.f.state.data.goal.draftScore, 855);
+    assert.deepEqual(m.pressed(), ["blue"]);
+    card(m, "gold").on.click();
+    assert.equal(m.f.state.data.goal.draftScore, 990);
+    assert.deepEqual(m.pressed(), ["gold"]);
+    assert.equal(m.f.counter.setDraftScore, 0, "點卡片不經 setDraftScore");
+    assert.equal(m.f.counter.nodes, nodes, "點卡片不建立任何節點");
+  });
+
+  test("卡片：依序點 5 色 → draftScore 為 215、465、725、855、990，選中卡片 = 所點色級（AC-02-04、V-ST-16）", () => {
+    const m = mounted();
+    const ids = ["orange", "brown", "green", "blue", "gold"];
+    const got = ids.map((id) => { card(m, id).on.click(); assert.deepEqual(m.pressed(), [id]); return m.f.state.data.goal.draftScore; });
+    assert.deepEqual(got, [215, 465, 725, 855, 990]);
+  });
+
+  test("（v0.10 暫停，程式保留）滑桿與輸入框 handler 仍可同步 draftScore 與選中卡片（AC-02-01、AC-02-02、AC-02-09、AC-26-03）", () => {
+    const { f, byId, pressed } = mounted();
     const nodes = f.counter.nodes;
     const input = byId("cz-score-input");
     input.value = "300";
     input.on.input();
     assert.deepEqual(pressed(), ["brown"]);
-    assert.deepEqual(selClass(), ["brown"]);
     const slider = byId("cz-score-range");
     slider.value = "730";
     slider.on.input();
     assert.deepEqual(pressed(), ["blue"]);
     assert.equal(input.value, "730");
-    // 無效輸入：試算維持上一個有效值，選中不變
     input.value = "abc";
     input.on.input();
-    assert.deepEqual(pressed(), ["blue"]);
-    assert.equal(f.counter.nodes, nodes, "分數變更不建立任何節點");
-    assert.equal(f.host.appendCount, 1, "不重建頁面");
-    assert.equal(cards.length, 5);
+    assert.deepEqual(pressed(), ["blue"], "無效輸入：選中不變");
+    assert.equal(f.counter.nodes, nodes);
   });
 
-  test("卡片：點綠卡（分數 300 → 470）只有綠卡選中；點藍、金不阻擋（AC-26-02、AC-26-04、AC-01-05、AC-01-07）", () => {
-    const { f, cards, byId, pressed } = mounted();
-    f.state.data.goal.draftScore = 300;
-    byId("cz-score-input").value = "300";
-    byId("cz-score-input").on.input();
-    const card = (id) => cards.find((b) => b.getAttribute("data-color") === id);
-    const nodes = f.counter.nodes;
-    card("green").on.click();
-    assert.equal(f.state.data.goal.draftScore, 470);
-    assert.deepEqual(pressed(), ["green"]);
-    assert.equal(byId("cz-score-input").value, "470");
-    assert.equal(byId("cz-score-range").value, "470");
-    card("green").on.click();
-    assert.equal(f.state.data.goal.draftScore, 470, "已在範圍內不變（Q-32）");
-    card("blue").on.click();
-    assert.equal(f.state.data.goal.draftScore, 730);
-    assert.deepEqual(pressed(), ["blue"]);
-    card("gold").on.click();
-    assert.equal(f.state.data.goal.draftScore, 860);
-    assert.deepEqual(pressed(), ["gold"]);
-    assert.equal(f.counter.nodes, nodes, "點卡片不建立任何節點");
+  // ── FE-43 AC-26-05：分數區隱藏且不可聚焦、卡片與狀態列無分數（單元層代理；正式驗收見 QA E2E） ──
+  for (const opt of [{ entryMode: "firstRun" }, undefined, { entryMode: "main" }]) {
+    const label = opt && opt.entryMode === "firstRun" ? "首次模式" : "一般模式";
+    test("AC-26-05（" + label + "）：分數區 hidden 且 inert；滑桿、輸入框 disabled 且 tabindex=-1", () => {
+      const m = mounted(opt);
+      const sec = m.all.filter((x) => x.tag === "section" && / ?cz-score( |$)/.test(x.className || "") && /(^| )card( |$)/.test(x.className || ""));
+      assert.equal(sec.length, 1, "分數區存在（程式保留）");
+      assert.equal(sec[0].hidden, true);
+      assert.equal(sec[0].getAttribute("inert"), "");
+      for (const id of ["cz-score-range", "cz-score-input"]) {
+        const el = m.byId(id);
+        assert.ok(el, id);
+        assert.notEqual(el.getAttribute("disabled"), null, id + " disabled");
+        assert.equal(el.getAttribute("tabindex"), "-1", id);
+      }
+      // 錯誤提示在隱藏區內
+      assert.ok(walk(sec[0]).includes(m.byId("cz-score-error")));
+      const vis = visibleNodes(m.f.host);
+      assert.ok(!vis.some((x) => x.getAttribute("id") === "cz-score-range" || x.getAttribute("id") === "cz-score-input"), "無可見的滑桿或輸入框");
+    });
+
+    test("AC-26-05（" + label + "）：依序點 5 張卡片後分數區仍隱藏、無可見「請輸入 10～990 的分數」；卡片無分數範圍、可見文字無目標分數", () => {
+      const m = mounted(opt);
+      const sec = m.all.find((x) => x.tag === "section" && / cz-score( |$)/.test(x.className || ""));
+      for (const id of ["orange", "brown", "green", "blue", "gold"]) card(m, id).on.click();
+      // 各種 store 通知與重新顯示後仍不改回可見
+      m.f.notify(["goal"]);
+      m.f.notify(["init"]);
+      m.view.show();
+      assert.equal(sec.hidden, true);
+      assert.equal(m.byId("cz-score-error").hidden, true);
+      const text = visibleText(m.f.host);
+      assert.ok(!text.includes("請輸入 10～990 的分數"));
+      assert.ok(!text.includes("目前目標分數"));
+      assert.ok(!/\d+～\d+/.test(text), "可見文字無分數範圍");
+      for (const b of m.cards) assert.ok(!/\d+～\d+/.test(textOf(b)) && !/\d+ 分/.test(textOf(b)), b.getAttribute("data-color"));
+      assert.ok(!m.all.some((x) => / ?cz-color__range( |$)/.test(x.className || "")), "不建立 .cz-color__range");
+    });
+  }
+
+  test("AC-26-05 (b)：狀態列只有「目前目標色級」「目前生效色級」，無「目前目標分數」", () => {
+    const m = mounted();
+    const slot = m.all.find((x) => x.className === "cz-status-slot");
+    const labels = walk(slot).filter((x) => x.tag === "dt").map((x) => x.textContent);
+    assert.deepEqual(labels, ["目前目標色級", "目前生效色級"]);
+    assert.ok(!textOf(slot).includes("目前目標分數"));
+    assert.ok(!m.all.some((x) => / ?cz-st-score( |$)/.test(x.className || "")));
+  });
+
+  test("說明文字：一般頁 intro 為「選擇色級即時試算，按「套用」後才會更新單字卡的單字集。」", () => {
+    const m = mounted();
+    assert.equal(m.all.find((x) => / ?cz-intro( |$)/.test(x.className || "")).textContent, "選擇色級即時試算，按「套用」後才會更新單字卡的單字集。");
   });
 
   test("狀態列與「套用」各在獨立容器（.cz-status-slot、.cz-actions，供 FE-32）", () => {
@@ -477,7 +578,7 @@ describe("customizer.test.js：閒置預建", () => {
   }
 
   test("首次模式：按鈕區為「開始學習」（主要按鈕）與「從備份還原」，無「套用」；狀態列隱藏；顯示引導文字（AC-25-01）", () => {
-    const m = mounted({ entryMode: "firstRun" });
+    const m = mounted({ entryMode: "firstRun", score: C.SCORE_DEFAULT });
     const p = parts(m);
     assert.deepEqual(p.buttons.map((b) => b.text), ["開始學習", "從備份還原"]);
     assert.deepEqual(p.buttons.map((b) => b.id), ["cz-start", "cz-restore"]);
@@ -488,7 +589,7 @@ describe("customizer.test.js：閒置預建", () => {
     assert.equal(p.guide.hidden, false);
     assert.equal(p.guide.textContent, "先選擇你的目標難易度，按「開始學習」後進入主控台。");
     assert.equal(p.intro.hidden, true, "一般說明（提到「套用」）不顯示");
-    // 卡片、分數、試算照常（AC-26-*）：600 → 綠
+    // 卡片與試算照常（AC-26-*）：預設 SCORE_DEFAULT（725）→ 綠
     assert.deepEqual(m.pressed(), ["green"]);
     assert.equal(m.cards.length, 5);
   });
@@ -505,40 +606,38 @@ describe("customizer.test.js：閒置預建", () => {
     }
   });
 
-  test("首次模式：卡片與分數操作和一般模式相同，且不建立新節點（AC-26-02、AC-26-03、AC-22-04）", () => {
-    const m = mounted({ entryMode: "firstRun" });
+  test("首次模式：點卡片和一般模式相同（藍 855、綠 725），且不建立新節點（AC-26-02、AC-26-03、AC-22-04）", () => {
+    const m = mounted({ entryMode: "firstRun", score: C.SCORE_DEFAULT });
     const nodes = m.f.counter.nodes;
-    const card = (id) => m.cards.find((b) => b.getAttribute("data-color") === id);
-    card("blue").on.click();
-    assert.equal(m.f.state.data.goal.draftScore, 730);
+    card(m, "blue").on.click();
+    assert.equal(m.f.state.data.goal.draftScore, 855);
     assert.deepEqual(m.pressed(), ["blue"]);
-    const input = m.byId("cz-score-input");
-    input.value = "720";
-    input.on.input();
+    card(m, "green").on.click();
+    assert.equal(m.f.state.data.goal.draftScore, 725);
     assert.deepEqual(m.pressed(), ["green"]);
     assert.equal(m.f.counter.nodes, nodes);
   });
 
-  test("「開始學習」：先寫入輸入框的有效分數再呼叫 startLearning；收到 entry tag 後只重建按鈕區、狀態列顯示（AC-25-02）", () => {
-    const m = mounted({ entryMode: "firstRun" });
-    const input = m.byId("cz-score-input");
-    input.value = "720";
-    input.on.input();
+  test("「開始學習」：不讀輸入框（setDraftScore 0 次）、直接 startLearning；收到 entry tag 後只重建按鈕區、狀態列顯示（AC-25-02、GS-3）", () => {
+    const m = mounted({ entryMode: "firstRun", score: C.SCORE_DEFAULT });
+    card(m, "brown").on.click();
+    // 隱藏的輸入框即使有值也不得成為分數來源
+    m.byId("cz-score-input").value = "990";
     const cardsBefore = m.cards.slice();
     const sliderBefore = m.byId("cz-score-range");
     const nodes = m.f.counter.nodes;
     const start = walk(m.f.host).find((x) => x.getAttribute("id") === "cz-start");
     start.on.click();
     assert.equal(m.f.counter.startLearning, 1);
-    assert.equal(m.f.state.data.goal.appliedScore, 720);
+    assert.equal(m.f.counter.setDraftScore, 0, "setDraftScore 0 次");
+    assert.equal(m.f.state.data.goal.appliedScore, 465);
     const p = parts(m);
     assert.deepEqual(p.buttons.map((b) => b.text), ["套用"]);
     assert.equal(p.slot.hidden, false);
     assert.equal(p.guide.hidden, true);
     assert.equal(p.intro.hidden, false);
-    // 狀態列已更新為套用後的值
-    const st = walk(m.f.host).find((x) => cls(x, "cz-st-score"));
-    assert.equal(st.textContent, "720");
+    // 狀態列已更新為套用後的色級
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-target")).textContent, "棕");
     // 卡片與分數區未重建：同一批節點，只新增「套用」1 個按鈕
     const after = walk(m.f.host).filter((x) => x.tag === "button" && x.getAttribute("data-color"));
     assert.deepEqual(after, cardsBefore);
@@ -557,14 +656,14 @@ describe("customizer.test.js：閒置預建", () => {
     assert.throws(() => btn.on.click(), /EMT\.ui\.importFlow/);
   });
 
-  test("還原成功的通知（entry + goal，非本頁發起）→ 切回一般模式並同步為備份的分數（AC-25-10、E-58）", () => {
+  test("還原成功的通知（entry + goal，非本頁發起）→ 切回一般模式並同步為備份的色級（AC-25-10、E-58）", () => {
     const m = mounted({ entryMode: "firstRun" });
     m.f.state.data.goal = { draftScore: 300, appliedScore: 300, appliedColor: "brown", effectiveColor: "brown" };
     m.f.state.runtime.entryMode = "main";
     m.f.notify(["goal", "studySet", "flashcard", "stats", "entry"]);
     assert.deepEqual(parts(m).buttons.map((b) => b.text), ["套用"]);
     assert.deepEqual(m.pressed(), ["brown"]);
-    assert.equal(m.byId("cz-score-input").value, "300");
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-target")).textContent, "棕");
     // 模式未變的後續通知不重建按鈕區
     const nodes = m.f.counter.nodes;
     m.f.notify(["entry"]);
@@ -572,28 +671,41 @@ describe("customizer.test.js：閒置預建", () => {
     assert.equal(m.f.counter.nodes, nodes);
   });
 
-  // ── FE-40 切換難易度初始化確認視窗（architecture.md §7.15、§10.2 customizer.test.js 列） ──
+  // ── FE-43 AC-26-06：既有分數原值保留，不點卡片「套用」不從輸入框回寫（GS-3） ──
+  test("AC-26-06：預寫 735 → 選中藍、試算每日新字量 20；不點卡片按「套用」→ setDraftScore 0 次、appliedScore 735", () => {
+    const m = mounted({ score: 735 });
+    assert.deepEqual(m.pressed(), ["blue"]);
+    assert.equal(estDailyOf(m), "20 字/天");
+    m.byId("cz-score-input").value = "600";   // 隱藏輸入框的值不得影響套用
+    applyBtn(m).on.click();
+    assert.equal(m.f.counter.setDraftScore, 0);
+    assert.equal(m.f.counter.requestApplyGoal, 1);
+    assert.equal(m.f.state.data.goal.appliedScore, 735);
+    assert.equal(m.f.state.data.goal.draftScore, 735);
+    assert.deepEqual(m.pressed(), ["blue"]);
+  });
+
+  // ── FE-40 切換難易度初始化確認視窗（architecture.md §7.15、§10.2；v0.10 改以點卡片建立狀態、以選中卡片判定） ──
   const tick = () => new Promise((r) => setImmediate(r));
-  const applyBtn = (m) => walk(m.f.host).find((x) => x.getAttribute("id") === "cz-apply");
-  /** 一般模式掛載後把分數改成 score（輸入框 input 事件），回傳 mounted 物件 */
-  function mountedAt(score, opt) {
+  function applyBtn(m) { return walk(m.f.host).find((x) => x.getAttribute("id") === "cz-apply"); }
+  /** 一般模式掛載（既有 600，綠）後點 colorId 卡片，回傳 mounted 物件 */
+  function mountedAt(colorId, opt) {
     const m = mounted(opt);
-    const input = m.byId("cz-score-input");
-    input.value = String(score);
-    input.on.input();
+    card(m, colorId).on.click();
     return m;
   }
 
   test("FE-40：requestApplyGoal 回 \"confirm\" → 開視窗一次，參數同 reinitDialogOptions；開啟中再按「套用」不重複開窗（AC-32-01）", async () => {
-    const m = mountedAt(300, { applyStatus: "confirm" });
+    const m = mountedAt("brown", { applyStatus: "confirm" });
     applyBtn(m).on.click();
     assert.equal(m.f.counter.requestApplyGoal, 1);
     assert.equal(m.f.counter.applyGoal, 0, "view 不直接呼叫 applyGoal");
+    assert.equal(m.f.counter.setDraftScore, 0, "「套用」不從輸入框回寫（GS-3）");
     assert.equal(m.f.dialogCalls.length, 1);
     assert.deepEqual(m.f.dialogCalls[0].opts, H.reinitDialogOptions());
-    // 視窗開啟期間：狀態未改（生效色級仍綠），輸入框仍顯示使用者選的 300
+    // 視窗開啟期間：狀態未改（生效色級仍綠），選中卡片仍為使用者選的棕
     assert.equal(m.f.state.data.goal.appliedScore, 600);
-    assert.equal(m.byId("cz-score-input").value, "300");
+    assert.deepEqual(m.pressed(), ["brown"]);
     applyBtn(m).on.click();
     applyBtn(m).on.click();
     assert.equal(m.f.dialogCalls.length, 1, "不重複開窗");
@@ -602,43 +714,45 @@ describe("customizer.test.js：閒置預建", () => {
     m.f.dialogCalls[0].resolve(false);
     await tick();
     // 關閉後可再開
-    m.byId("cz-score-input").value = "300";
-    m.byId("cz-score-input").on.input();
+    card(m, "brown").on.click();
     applyBtn(m).on.click();
     assert.equal(m.f.dialogCalls.length, 2);
   });
 
-  test("FE-40：確定 → confirmApplyGoal 一次；成功時狀態列與分數區更新為新分數、不顯示失敗訊息（AC-32-02、AC-03-05）", async () => {
-    const m = mountedAt(300, { applyStatus: "confirm" });
+  test("FE-40：確定 → confirmApplyGoal 一次；成功時狀態列與選中卡片更新為棕、不顯示失敗訊息（AC-32-02、AC-03-05）", async () => {
+    const m = mountedAt("brown", { applyStatus: "confirm" });
     applyBtn(m).on.click();
     m.f.dialogCalls[0].resolve(true);
     await tick();
     assert.equal(m.f.counter.confirmApplyGoal, 1);
     assert.equal(m.f.counter.cancelApplyGoal, 0);
     assert.equal(m.f.counter.applyGoal, 0);
-    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-score")).textContent, "300");
+    assert.equal(m.f.state.data.goal.appliedScore, 465);
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-target")).textContent, "棕");
     assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-effective")).textContent, "棕");
     assert.deepEqual(m.pressed(), ["brown"]);
     assert.ok(!m.f.toasts.some((t) => t.text === "儲存空間不足，未套用"));
   });
 
-  test("FE-40：確定但寫入失敗（quota、error）→ toast「儲存空間不足，未套用」（kind error）；分數區回到 600（AC-32-11 (b)）", async () => {
+  test("FE-40：確定但寫入失敗（quota、error）→ toast「儲存空間不足，未套用」（kind error）；選中卡片回到綠、draftScore 600（AC-32-11 (b)、GS-8）", async () => {
     for (const reason of ["quota", "error"]) {
-      const m = mountedAt(300, { applyStatus: "confirm", confirmResult: { ok: false, reason } });
+      const m = mountedAt("brown", { applyStatus: "confirm", confirmResult: { ok: false, reason } });
       applyBtn(m).on.click();
       m.f.dialogCalls[0].resolve(true);
       await tick();
       assert.equal(m.f.counter.confirmApplyGoal, 1, reason);
       assert.deepEqual(m.f.toasts, [{ text: "儲存空間不足，未套用", kind: "error" }], reason);
-      assert.equal(m.byId("cz-score-input").value, "600", reason);
-      assert.equal(m.byId("cz-score-range").value, "600", reason);
+      assert.equal(m.f.state.data.goal.draftScore, 600, reason);
       assert.deepEqual(m.pressed(), ["green"], reason);
+      assert.equal(estDailyOf(m), "15 字/天", reason);
       assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-effective")).textContent, "綠", reason);
     }
   });
 
-  test("FE-40：取消（Esc、點視窗外同樣 resolve(false)）→ cancelApplyGoal；輸入框、滑桿、選中卡片、試算回到 600（AC-32-04）", async () => {
-    const m = mountedAt(300, { applyStatus: "confirm" });
+  test("FE-40 + FE-43（AC-32-04、GS-8）：既有 600 點棕 →「套用」→ 取消 → 綠卡 aria-pressed=true、其餘 false、每日新字量 15、draftScore 600", async () => {
+    const m = mountedAt("brown", { applyStatus: "confirm" });
+    assert.equal(m.f.state.data.goal.draftScore, 465);
+    assert.equal(estDailyOf(m), "10 字/天");
     const estColor = walk(m.f.host).find((x) => cls(x, "cz-est-color"));
     assert.equal(estColor.textContent, "棕");
     const nodes = m.f.counter.nodes;
@@ -647,38 +761,27 @@ describe("customizer.test.js：閒置預建", () => {
     await tick();
     assert.equal(m.f.counter.cancelApplyGoal, 1);
     assert.equal(m.f.counter.confirmApplyGoal, 0);
-    assert.equal(m.f.state.data.goal.draftScore, 600);
-    assert.equal(m.byId("cz-score-input").value, "600");
-    assert.equal(m.byId("cz-score-range").value, "600");
-    assert.deepEqual(m.pressed(), ["green"]);
+    assert.equal(m.f.state.data.goal.draftScore, 600, "回到原值 600（不轉 725）");
+    assert.deepEqual(m.cards.map((b) => b.getAttribute("aria-pressed")), ["false", "false", "true", "false", "false"]);
+    assert.equal(estDailyOf(m), "15 字/天");
     assert.equal(estColor.textContent, "綠");
     assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-effective")).textContent, "綠");
     assert.equal(m.f.toasts.length, 0);
     assert.equal(m.f.counter.nodes, nodes, "不建立新節點");
   });
 
-  test("FE-40：輸入框打字中（未 blur）就按「套用」再取消 → 輸入框仍被覆寫回 600（AC-32-04）", async () => {
-    const m = mounted({ applyStatus: "confirm" });
-    const input = m.byId("cz-score-input");
-    input.value = "723";
-    input.on.input();
-    applyBtn(m).on.click();
-    assert.equal(input.value, "725", "開窗時顯示修正後的分數");
-    m.f.dialogCalls[0].resolve(false);
-    await tick();
-    assert.equal(input.value, "600");
-  });
-
   test("FE-40：\"applied\" 不開窗、toast「已套用目標」；\"ignored\" 不開窗（AC-01-02、AC-32-05～AC-32-07）", async () => {
-    const m = mountedAt(300, { applyStatus: "applied" });
+    const m = mountedAt("brown", { applyStatus: "applied" });
     applyBtn(m).on.click();
     await tick();
     assert.equal(m.f.dialogCalls.length, 0);
     assert.equal(m.f.counter.requestApplyGoal, 1);
     assert.equal(m.f.counter.applyGoal, 0);
+    assert.equal(m.f.counter.setDraftScore, 0);
     assert.deepEqual(m.f.toasts, [{ text: "已套用目標", kind: "success" }]);
-    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-score")).textContent, "300");
-    const n = mountedAt(300, { applyStatus: "ignored" });
+    assert.equal(m.f.state.data.goal.appliedScore, 465);
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-target")).textContent, "棕");
+    const n = mountedAt("brown", { applyStatus: "ignored" });
     applyBtn(n).on.click();
     await tick();
     assert.equal(n.f.dialogCalls.length, 0);
@@ -691,36 +794,44 @@ describe("customizer.test.js：閒置預建", () => {
     walk(m.f.host).find((x) => x.getAttribute("id") === "cz-start").on.click();
     assert.equal(m.f.counter.startLearning, 1);
     assert.equal(m.f.counter.requestApplyGoal, 0);
+    assert.equal(m.f.counter.setDraftScore, 0);
     assert.equal(m.f.dialogCalls.length, 0);
   });
 
-  test("FE-40：缺少 EMT.ui.dialog → 丟出含模組名稱的 Error（LD-3），草稿已還原", () => {
-    const m = mountedAt(300, { applyStatus: "confirm" });
+  test("FE-40：缺少 EMT.ui.dialog → 丟出含模組名稱的 Error（LD-3），草稿已還原、選中卡片回綠", () => {
+    const m = mountedAt("brown", { applyStatus: "confirm" });
     delete m.f.root.EMT.ui.dialog;
     assert.throws(() => applyBtn(m).on.click(), /EMT\.ui\.dialog/);
     assert.equal(m.f.counter.cancelApplyGoal, 1);
-    assert.equal(m.byId("cz-score-input").value, "600");
+    assert.equal(m.f.state.data.goal.draftScore, 600);
+    assert.deepEqual(m.pressed(), ["green"]);
   });
 
-  // ── FE-40 與真實 store 整合（有學習紀錄、600 → 300） ──
+  // ── FE-40／FE-43 與真實 store 整合（有學習紀錄、既有 600 綠 → 點棕 465） ──
   const F = require("./_fixtures.js");
   const P = require("../core/persist.js");
   const KEY = "englishMasterTrack:state";
-  function learnedStore() {
+  /** 既有分數 score（v0.9 以前的 600 等，GS-4）+ 學習紀錄 */
+  function learnedStore(score = 600) {
     const d = P.defaultData();
+    const c = G.colorOf(score);
+    d.goal = { draftScore: score, appliedScore: score, appliedColor: c, effectiveColor: G.effectiveColorOf(c) };
     d.masteredWordKeys = ["word1", "word2", "word3", "word4", "word5"];
     d.part5 = Object.assign({}, d.part5, { totalAnswered: 10, totalCorrect: 6 });
     const storage = F.fakeStorage({ [KEY]: JSON.stringify(P.buildRecord(d, new Date("2026-10-29T00:00:00Z"))) });
     return F.makeStore({ storage });
   }
 
-  test("FE-40 整合：真實 store，取消 → setItem 0 次、localStorage 與學習紀錄不變、輸入框回 600（AC-32-01、AC-32-04）", async () => {
+  test("FE-40 整合：真實 store，取消 → setItem 0 次、localStorage 與學習紀錄不變、綠卡選中、draftScore 600（AC-32-01、AC-32-04、GS-8）", async () => {
     const s = learnedStore();
-    const m = mountedAt(300, { store: s.store });
-    // 「按套用前」的 localStorage（調分數本來就會寫入 draftScore；取消依 CI-9 不寫入，契約 FB-35）
+    assert.equal(s.store.getState().data.goal.draftScore, 600, "既有分數原值保留（GS-4）");
+    const m = mountedAt("brown", { store: s.store });
+    assert.equal(s.store.getState().data.goal.draftScore, 465);
+    // 「按套用前」的 localStorage（點卡片本來就會寫入 draftScore；取消依 CI-9 不寫入，契約 FB-35）
     const raw = s.storage.map.get(KEY);
     const calls = s.storage.setCalls.length;
     applyBtn(m).on.click();
+    assert.equal(m.f.counter.setDraftScore, 0, "「套用」不從輸入框回寫");
     assert.equal(m.f.dialogCalls.length, 1, "有學習紀錄且生效色級改變 → 開窗");
     assert.equal(s.store.getState().data.goal.effectiveColor, "green");
     assert.equal(s.storage.setCalls.length, calls, "開窗期間 setItem 0 次");
@@ -730,17 +841,18 @@ describe("customizer.test.js：閒置預建", () => {
     assert.equal(s.storage.map.get(KEY), raw);
     assert.equal(s.store.getState().data.goal.draftScore, 600);
     assert.equal(s.store.getState().data.masteredWordKeys.length, 5);
-    assert.equal(m.byId("cz-score-input").value, "600");
-    assert.deepEqual(m.pressed(), ["green"]);
+    assert.deepEqual(m.cards.map((b) => b.getAttribute("aria-pressed")), ["false", "false", "true", "false", "false"]);
+    assert.equal(estDailyOf(m), "15 字/天");
   });
 
-  test("FE-40 整合：真實 store，確定 → 學習紀錄初始化、生效色級棕；quota 時 toast 失敗且 localStorage 不變（AC-32-02、AC-32-11）", async () => {
+  test("FE-40 整合：真實 store，確定 → 學習紀錄初始化、生效色級棕；quota 時 toast 失敗、localStorage 不變、綠卡選中（AC-32-02、AC-32-11）", async () => {
     const s = learnedStore();
-    const m = mountedAt(300, { store: s.store });
+    const m = mountedAt("brown", { store: s.store });
     applyBtn(m).on.click();
     m.f.dialogCalls[0].resolve(true);
     await tick();
     const d = s.store.getState().data;
+    assert.equal(d.goal.appliedScore, 465);
     assert.equal(d.goal.effectiveColor, "brown");
     assert.equal(d.masteredWordKeys.length, 0);
     assert.equal(d.part5.totalAnswered, 0);
@@ -748,7 +860,7 @@ describe("customizer.test.js：閒置預建", () => {
     assert.ok(!m.f.toasts.some((t) => t.kind === "error"));
 
     const q = learnedStore();
-    const n = mountedAt(300, { store: q.store });
+    const n = mountedAt("brown", { store: q.store });
     const raw = q.storage.map.get(KEY);
     q.storage.quota = true;
     applyBtn(n).on.click();
@@ -757,8 +869,34 @@ describe("customizer.test.js：閒置預建", () => {
     assert.deepEqual(n.f.toasts, [{ text: "儲存空間不足，未套用", kind: "error" }]);
     assert.equal(q.storage.map.get(KEY), raw);
     assert.equal(q.store.getState().data.goal.effectiveColor, "green");
+    assert.equal(q.store.getState().data.goal.draftScore, 600);
     assert.equal(q.store.getState().data.masteredWordKeys.length, 5);
-    assert.equal(n.byId("cz-score-input").value, "600");
+    assert.deepEqual(n.pressed(), ["green"]);
+  });
+
+  test("AC-26-06 整合：真實 store 預寫 735 → 選中藍、每日新字量 20；不點卡片「套用」→ setDraftScore 0 次、appliedScore 與 localStorage 皆 735", () => {
+    const P2 = require("../core/persist.js");
+    const d = P2.defaultData();
+    d.goal = { draftScore: 735, appliedScore: 735, appliedColor: "blue", effectiveColor: "green" };
+    const storage = F.fakeStorage({ [KEY]: JSON.stringify(P2.buildRecord(d, new Date("2026-10-29T00:00:00Z"))) });
+    const s = F.makeStore({ storage });
+    const m = mounted({ store: s.store });
+    assert.deepEqual(m.pressed(), ["blue"]);
+    assert.equal(estDailyOf(m), "20 字/天");
+    applyBtn(m).on.click();
+    assert.equal(m.f.counter.setDraftScore, 0);
+    assert.equal(s.store.getState().data.goal.appliedScore, 735);
+    assert.equal(JSON.parse(storage.map.get(KEY)).data.goal.appliedScore, 735);
+  });
+
+  test("真實 store 預設資料：選中綠、draftScore === C.SCORE_DEFAULT（AC-18-02、GS-7）", () => {
+    const s = F.makeStore();
+    const m = mounted({ store: s.store });
+    assert.equal(s.store.getState().data.goal.draftScore, C.SCORE_DEFAULT);
+    assert.deepEqual(m.pressed(), ["green"]);
+    const f = F.makeStore({ firstRun: true });
+    const n = mounted({ store: f.store });
+    assert.equal(f.store.getState().data.goal.draftScore, C.SCORE_DEFAULT);
     assert.deepEqual(n.pressed(), ["green"]);
   });
 });
@@ -831,5 +969,22 @@ describe("customizer.test.js：初始化確認視窗（FE-40）", () => {
     const src = fs.readFileSync(path.join(__dirname, "..", "views", "customizer.js"), "utf8");
     assert.ok(!/\.applyGoal\s*\(/.test(src));
     assert.ok(/\.requestApplyGoal\s*\(/.test(src));
+  });
+
+  test("原始碼掃描（FE-43，GS-3、GS-6）：分數區只在建立時設 hidden = true；「套用」「開始學習」不讀輸入框", () => {
+    const src = fs.readFileSync(path.join(__dirname, "..", "views", "customizer.js"), "utf8");
+    assert.ok(/scoreSection\.hidden\s*=\s*true/.test(src));
+    assert.ok(!/scoreSection\.hidden\s*=\s*false/.test(src), "不得把分數區改回可見");
+    assert.ok(!/cz-color__range/.test(src), "卡片不建立分數範圍節點");
+    const body = (name) => {
+      const i = src.indexOf("function " + name + "(");
+      const j = src.indexOf("\n    }\n", i);
+      assert.ok(i >= 0 && j > i, name);
+      return src.slice(i, j);
+    };
+    for (const fn of ["onApply", "onStartLearning"]) {
+      const b = body(fn);
+      assert.ok(!/refs\.input/.test(b) && !/setDraftScore/.test(b) && !/parseScoreInput/.test(b), fn + " 不讀輸入框");
+    }
   });
 });

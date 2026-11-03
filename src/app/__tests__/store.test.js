@@ -11,6 +11,9 @@
  *       FS-1～FS-7、V-ST-13、V-IMP-01。makeStore 未指定 storage 時預寫一般模式主鍵；首次模式以 firstRun: true 建立
  * （v0.9，FE-37）切換難易度初始化與隱藏頁：AC-32-01～AC-32-11、AC-01-02、AC-01-07、AC-03-05、AC-17-02、AC-20-04、
  *       契約 §5.7 CI-1～CI-10、§5.8 HT-1、V-ST-14（以計數假 storage 斷言 setItem 次數）
+ * （v0.10，FE-42）R-19、Q-39：預設分數 725（一律以 C.SCORE_DEFAULT 斷言，GS-7）；點卡片 = 該色 scoreMax（GS-2、V-ST-16）；
+ *       既有分數不轉換（GS-3、GS-4、AC-26-06，依 FB-36 以 draftScore = appliedScore 預寫）；US-32 案例改為點卡片。
+ *       以 600 代表「v0.9 以前既有分數」的 fixture（learnedData、existingStore(600)）刻意保留，不得改成 725（T-42）。
  */
 "use strict";
 const test = require("node:test");
@@ -20,6 +23,8 @@ const path = require("node:path");
 const S = require("../state/store.js");
 const VOCAB = require("../core/vocab.js");
 const P = require("../core/persist.js");
+const C = require("../core/constants.js");
+const G = require("../core/goal.js");
 
 const KEY = "englishMasterTrack:state";
 const UNREADABLE = "englishMasterTrack:unreadable";
@@ -152,6 +157,22 @@ function recordOf(data) {
   return JSON.stringify(P.buildRecord(data, new Date("2026-10-29T00:00:00Z")));
 }
 
+/**
+ * （v0.10，FE-42）既有分數的資料：draftScore = appliedScore = score（FB-36），色級依 V-ST-02 計算。
+ * 用來代表 v0.9 以前留下的分數（如 600、735），不得以預設值取代（GS-4）。
+ */
+function goalData(score) {
+  const d = P.defaultData();
+  const color = G.colorOf(score);
+  d.goal = { draftScore: score, appliedScore: score, appliedColor: color, effectiveColor: G.effectiveColorOf(color) };
+  return d;
+}
+
+/** （v0.10，FE-42）以既有分數建立一般模式 store */
+function existingStore(score) {
+  return makeStore({ initial: { [KEY]: recordOf(goalData(score)) } });
+}
+
 function backupText(data, extra) {
   return JSON.stringify(Object.assign({
     format: "english-master-track-backup", schemaVersion: 1, exportedAt: "2026-10-30T01:00:00.000Z",
@@ -161,11 +182,12 @@ function backupText(data, extra) {
 
 // ════════════════════════════ 啟動（§5.3） ════════════════════════════
 
-test("首次啟動：預設值 600／green／green、單字集 = 1～N_G、entryMode firstRun、首頁 customizer、setItem 0 次（AC-18-02、AC-25-01、FS-1）", () => {
+test("首次啟動：預設值 725（C.SCORE_DEFAULT）／green／green、單字集 = 1～N_G、entryMode firstRun、首頁 customizer、setItem 0 次（AC-18-02、AC-25-01、FS-1、GS-7）", () => {
   const { store, storage } = makeStore({ firstRun: true });
   const st = store.getState();
   assert.equal(st.runtime.entryMode, "firstRun");
-  assert.deepEqual(st.data.goal, { draftScore: 600, appliedScore: 600, appliedColor: "green", effectiveColor: "green" });
+  assert.equal(C.SCORE_DEFAULT, 725);
+  assert.deepEqual(st.data.goal, { draftScore: C.SCORE_DEFAULT, appliedScore: C.SCORE_DEFAULT, appliedColor: "green", effectiveColor: "green" });
   assert.equal(st.data.goal.appliedColor, "green");
   assert.equal(st.data.goal.effectiveColor, "green");
   assert.equal(st.runtime.storageStatus, "ok");
@@ -176,13 +198,14 @@ test("首次啟動：預設值 600／green／green、單字集 = 1～N_G、entry
   assert.equal(storage.setCalls.length, 0);
 });
 
-test("getItem 拋例外 → unavailable、預設值，之後任何操作都不寫入（AC-18-03）", () => {
+test("getItem 拋例外 → unavailable、預設值 725，之後任何操作都不寫入（AC-18-03、GS-7）", () => {
   const storage = fakeStorage();
   storage.getThrows = true;
   const { store, a } = makeStore({ storage });
   assert.equal(store.getState().runtime.storageStatus, "unavailable");
   assert.equal(store.getStartup().status, "unavailable");
-  assert.equal(store.getState().data.goal.appliedScore, 600);
+  assert.equal(store.getState().data.goal.appliedScore, C.SCORE_DEFAULT);
+  assert.equal(store.getState().data.goal.draftScore, C.SCORE_DEFAULT);
   a.setDraftScore("300");
   a.applyGoal();
   assert.equal(a.addCustomWord({ word: "Monetization", meaning: "營利化" }).ok, true);
@@ -202,15 +225,17 @@ test("storage 未提供 → unavailable", () => {
   assert.equal(store.getState().runtime.storageStatus, "unavailable");
 });
 
-test("損壞資料 → 預設值、unreadable 鍵保存原字串、提示狀態 unreadable（AC-18-05）", () => {
+test("損壞資料 → 預設值 725、unreadable 鍵保存原字串、提示狀態 unreadable（AC-18-05、GS-7）", () => {
   const bad = "{not json";
   const { store, storage } = makeStore({ initial: { [KEY]: bad } });
   assert.equal(store.getStartup().status, "unreadable");
   assert.equal(storage.map.get(UNREADABLE), bad);
-  assert.equal(store.getState().data.goal.appliedScore, 600);
+  assert.equal(store.getState().data.goal.appliedScore, C.SCORE_DEFAULT);
+  assert.equal(store.getState().data.goal.draftScore, C.SCORE_DEFAULT);
   assert.equal(store.getState().runtime.storageStatus, "ok");
   // 主鍵已重設為合法預設值
   assert.equal(P.parseStored(storage.map.get(KEY)).kind, "ok");
+  assert.equal(storedData(storage).goal.appliedScore, C.SCORE_DEFAULT);
 });
 
 test("違反 V-ST-03（customVocab wordKey 重複）啟動時視為無法讀取（IM-1 不適用於啟動）", () => {
@@ -237,7 +262,7 @@ test("unreadable 鍵寫入失敗時不覆蓋主鍵（保留原值供救回）", 
   const { store } = makeStore({ storage });
   assert.equal(store.getStartup().status, "unreadable");
   assert.equal(storage.map.get(KEY), "garbage");
-  assert.equal(store.getState().data.goal.appliedScore, 600);
+  assert.equal(store.getState().data.goal.appliedScore, C.SCORE_DEFAULT);
 });
 
 test("成功讀取：以 appliedScore 重算色級（V-ST-02）、part5 超出題庫重設（V-ST-05）（AC-01-04、AC-11-05）", () => {
@@ -278,7 +303,7 @@ test("尚未 init 就呼叫 action → 先讀取既有資料，不以預設值�
 test("每個變更 PersistedData 的 action 後 setItem 只呼叫一次，寫入整筆 StorageRecord（savedAt 為 ISO）（AC-18-01）", async () => {
   const { store, storage, a } = makeStore();
   const steps = [
-    ["setDraftScore", () => a.setDraftScore("723")],
+    ["setDraftScore", () => a.setDraftScore("733")], // → 735（與預設 725 不同才會寫入）
     ["clickColor", () => a.clickColor("brown")],
     ["applyGoal", () => a.applyGoal()],
     ["addCustomWord", () => a.addCustomWord({ word: "Monetization", meaning: "營利化" })],
@@ -340,8 +365,8 @@ test("subscribe 收到 tags；unsubscribe 後不再通知", () => {
 
 // ════════════════════════════ 目標 ════════════════════════════
 
-test("setDraftScore：有效值修正為 5 的倍數並保存；無效回 error 訊息（AC-02-02、AC-02-08、AC-02-09）", () => {
-  const { store, storage, a } = makeStore();
+test("setDraftScore（v0.10 暫停 AC 的保留程式）：有效值修正為 5 的倍數並保存；無效回 error 訊息（AC-02-02、AC-02-08、AC-02-09）", () => {
+  const { store, storage, a } = existingStore(600); // v0.9 既有分數
   assert.deepEqual(a.setDraftScore(" 723 "), { ok: true, score: 725 });
   assert.equal(storedData(storage).goal.draftScore, 725);
   assert.equal(store.getState().data.goal.appliedScore, 600); // 未套用
@@ -358,19 +383,113 @@ test("draftScore 735 重新載入後仍為 735（AC-02-08）", () => {
   assert.equal(again.store.getState().data.goal.draftScore, 735);
 });
 
-test("clickColor 依 Q-32；藍色套用後生效色級為綠（AC-01-05、AC-01-07）", () => {
-  const { store, a } = makeStore();
-  a.setDraftScore(300);
-  assert.equal(a.clickColor("green").score, 470);
-  a.setDraftScore(500);
-  assert.equal(a.clickColor("green").score, 500);
-  a.setDraftScore(600);
-  assert.equal(a.clickColor("blue").score, 730);
+const CARD_MAX = { orange: 215, brown: 465, green: 725, blue: 855, gold: 990 };
+
+test("GS-2、AC-01-05：點卡片 = 該色上限；既有 600 點綠 → 725 (b)、300 點綠 → 725 (a)，皆寫入", () => {
+  // (b) v0.9 既有分數 600（已在綠範圍內）
+  const b = existingStore(600);
+  assert.equal(b.store.getState().data.goal.draftScore, 600);
+  let n = writesDuring(b.storage, () => { assert.deepEqual(b.a.clickColor("green"), { score: 725 }); });
+  assert.ok(n >= 1, "一般模式點卡片使分數改變時照常寫入（AC-02-08）");
+  assert.equal(storedData(b.storage).goal.draftScore, 725);
+  assert.equal(b.store.getState().data.goal.appliedScore, 600, "未套用");
+  b.a.applyGoal();
+  assert.equal(storedData(b.storage).goal.appliedScore, 725);
+  // (a) 既有分數 300（棕）
+  const s = existingStore(300);
+  n = writesDuring(s.storage, () => { assert.deepEqual(s.a.clickColor("green"), { score: 725 }); });
+  assert.ok(n >= 1);
+  s.a.applyGoal();
+  assert.equal(s.store.getState().data.goal.appliedColor, "green");
+  assert.equal(storedData(s.storage).goal.appliedScore, 725);
+});
+
+test("GS-2、AC-01-07、AC-26-04：點藍 855、點金 990；再點目前選中色級仍為上限；套用後生效色級為綠", () => {
+  const { store, storage, a } = existingStore(600);
+  assert.equal(a.clickColor("blue").score, 855);
+  assert.equal(a.clickColor("blue").score, 855, "再點同色仍為上限");
   a.applyGoal();
-  const g = store.getState().data.goal;
-  assert.equal(g.appliedColor, "blue");
-  assert.equal(g.effectiveColor, "green");
+  let g = store.getState().data.goal;
+  assert.deepEqual(g, { draftScore: 855, appliedScore: 855, appliedColor: "blue", effectiveColor: "green" });
   assert.equal(store.getState().runtime.studySet.length, 21);
+  assert.equal(storedData(storage).goal.appliedScore, 855);
+  assert.equal(a.clickColor("gold").score, 990);
+  a.applyGoal();
+  g = store.getState().data.goal;
+  assert.deepEqual(g, { draftScore: 990, appliedScore: 990, appliedColor: "gold", effectiveColor: "green" });
+  assert.equal(storedData(storage).goal.appliedScore, 990);
+  // 既有 735（藍範圍內、非上限）點藍 → 855
+  const t = existingStore(735);
+  assert.equal(t.a.clickColor("blue").score, 855);
+  // 預設 725 再點綠：仍為 725，分數未變不寫入
+  const d = makeStore();
+  assert.equal(writesDuring(d.storage, () => { assert.equal(d.a.clickColor("green").score, 725); }), 0);
+});
+
+test("clickColor：未知色級 → draftScore 不變、不寫入；store 不再呼叫 scoreAfterColorClick", () => {
+  const { store, storage, a } = existingStore(600);
+  for (const bad of ["red", "", null, undefined]) {
+    assert.equal(writesDuring(storage, () => { assert.deepEqual(a.clickColor(bad), { score: 600 }); }), 0, String(bad));
+    assert.equal(store.getState().data.goal.draftScore, 600);
+  }
+  const src = fs.readFileSync(path.join(__dirname, "..", "state", "store.js"), "utf8");
+  assert.equal(/scoreAfterColorClick/.test(src), false);
+  assert.ok(/GOAL\.scoreForCard\(/.test(src));
+});
+
+test("V-ST-16、AC-02-04：依序點 5 色（各自套用）後 draftScore ∈ {215,465,725,855,990}，localStorage 依序 215、465、725、855、990", () => {
+  const allowed = new Set(Object.values(CARD_MAX));
+  for (const start of [10, 300, 600, 725, 735, 990]) {
+    const { store, storage, a } = existingStore(start);
+    const applied = [];
+    for (const id of ["orange", "brown", "green", "blue", "gold", "green", "green", "orange"]) {
+      a.clickColor(id);
+      const ds = store.getState().data.goal.draftScore;
+      assert.ok(allowed.has(ds), start + " 點 " + id + " → " + ds);
+      assert.equal(ds, CARD_MAX[id]);
+      assert.equal(G.colorOf(ds), id);
+      if (applied.length < 5) {
+        a.applyGoal();
+        applied.push(storedData(storage).goal.appliedScore);
+      }
+    }
+    assert.deepEqual(applied, [215, 465, 725, 855, 990], String(start));
+  }
+  // 首次模式同樣成立，且 setItem 0 次
+  const f = makeStore({ firstRun: true });
+  for (const id of Object.keys(CARD_MAX)) {
+    f.a.clickColor(id);
+    assert.ok(allowed.has(f.store.getState().data.goal.draftScore));
+  }
+  assert.equal(f.storage.setCalls.length, 0);
+});
+
+const AC_26_06 = [
+  [10, "orange", 10], [215, "orange", 10], [220, "brown", 10], [465, "brown", 10], [470, "green", 15], [725, "green", 15],
+  [730, "blue", 20], [855, "blue", 20], [860, "gold", 20], [990, "gold", 20], [600, "green", 15], [735, "blue", 20]
+];
+
+test("GS-3、GS-4、AC-26-06：12 個既有分數（draftScore = appliedScore，FB-36）→ 色級依 PRD、不點卡片套用後原值保留、schemaVersion 2、重建讀回仍為原值", () => {
+  for (const [score, color, words] of AC_26_06) {
+    const { store, storage, a } = existingStore(score);
+    let g = store.getState().data.goal;
+    assert.equal(g.draftScore, score, String(score));
+    assert.equal(G.colorOf(g.draftScore), color, score + " 選中色級");
+    assert.equal(G.dailyNewWords(g.draftScore), words, score + " 每日新字量");
+    // 無學習紀錄 → 直接套用（不點卡片）
+    assert.deepEqual(a.requestApplyGoal(), { status: "applied" }, String(score));
+    g = store.getState().data.goal;
+    const eff = G.effectiveColorOf(color);
+    assert.deepEqual(g, { draftScore: score, appliedScore: score, appliedColor: color, effectiveColor: eff }, String(score));
+    const rec = JSON.parse(storage.map.get(KEY));
+    assert.equal(rec.schemaVersion, 2, String(score));
+    assert.equal(rec.data.goal.appliedScore, score, score + " localStorage 原值");
+    assert.equal(rec.data.goal.draftScore, score, String(score));
+    // 重新載入
+    const again = makeStore({ storage });
+    assert.deepEqual(again.store.getState().data.goal, g, score + " 重新載入");
+    assert.equal(JSON.parse(storage.map.get(KEY)).data.goal.appliedScore, score);
+  }
 });
 
 test("applyGoal：重建單字集，flashcard.index 為 0、正面；模式保持並重新出題（AC-01-02、AC-03-05）", () => {
@@ -1375,7 +1494,7 @@ test("FS-2、V-ST-13：首次模式 setDraftScore、clickColor、setTab(\"source
   assert.equal(storage.map.get(UNREADABLE), "舊的壞資料");
   // 記憶體有變、writeStatus 不變、無 storage tag
   assert.equal(store.getState().data.goal.draftScore, clicked);
-  assert.notEqual(clicked, 600);
+  assert.equal(clicked, 465, "點棕 = 棕色上限（GS-2）");
   assert.equal(store.getState().runtime.entryMode, "firstRun");
   assert.equal(store.getWriteStatus(), "ok");
   assert.equal(log.flat().includes("storage"), false);
@@ -1414,13 +1533,16 @@ test("setTab：首次模式只接受 customizer、sources，其他值忽略（AC
   assert.equal(store.getState().runtime.currentTab, "sources");
 });
 
-test("AC-25-04：首次模式改分數後重新整理 → 仍為 firstRun、回預設 600／綠", () => {
-  const { storage, a } = makeStore({ firstRun: true });
-  a.setDraftScore(300);
+test("AC-25-04：首次模式點過其他卡片後重新整理 → 仍為 firstRun、回預設 725／綠（GS-7）", () => {
+  const { store, storage, a } = makeStore({ firstRun: true });
+  a.clickColor("gold");
   a.clickColor("orange");
+  assert.equal(store.getState().data.goal.draftScore, 215);
   const again = makeStore({ storage });
   assert.equal(again.store.getState().runtime.entryMode, "firstRun");
-  assert.equal(again.store.getState().data.goal.draftScore, 600);
+  assert.equal(again.store.getState().data.goal.draftScore, C.SCORE_DEFAULT);
+  assert.equal(again.store.getState().data.goal.appliedScore, C.SCORE_DEFAULT);
+  assert.equal(again.store.getState().data.goal.draftScore, 725);
   assert.equal(again.store.getState().data.goal.appliedColor, "green");
   assert.equal(storage.setCalls.length, 0);
 });
@@ -1457,11 +1579,12 @@ test("startLearning：恰 1 次 setItem、schemaVersion 2、goal 套用目前分
   assert.equal(again.store.getState().data.goal.appliedScore, 300);
 });
 
-test("startLearning：未改分數 → 以預設 600／綠寫入第一筆（AC-18-02）", () => {
+test("startLearning：未點卡片 → 以預設 725（C.SCORE_DEFAULT）／綠寫入第一筆（AC-18-02、GS-7）", () => {
   const { store, storage, a } = makeStore({ firstRun: true });
   assert.deepEqual(a.startLearning(), { ok: true, write: "ok" });
   assert.equal(storage.setCalls.length, 1);
-  assert.deepEqual(storedData(storage).goal, { draftScore: 600, appliedScore: 600, appliedColor: "green", effectiveColor: "green" });
+  assert.deepEqual(storedData(storage).goal, { draftScore: C.SCORE_DEFAULT, appliedScore: C.SCORE_DEFAULT, appliedColor: "green", effectiveColor: "green" });
+  assert.equal(storedData(storage).goal.appliedScore, 725);
   assert.equal(store.getState().runtime.entryMode, "main");
 });
 
@@ -1631,14 +1754,16 @@ test("跨午夜後非學習 action 寫出的 todayLearned 已以今天正規化�
 // ════════════════════════════ （v0.9，FE-37）切換難易度初始化（§5.7 CI-1～CI-10） ════════════════════════════
 
 const REINIT = require("../core/reinit.js");
-const C = require("../core/constants.js");
 
 /** 預設時鐘的今天（clock() = 2026-10-30T10:00 本地） */
 const TODAY = "2026-10-30";
 
-/** 已掌握、四選一、模擬測驗、今日已學、歷史、打卡 (a)～(f) 全部成立的資料（600、綠），含 2 個自訂單字與 STT 已讀 */
+/**
+ * 已掌握、四選一、模擬測驗、今日已學、歷史、打卡 (a)～(f) 全部成立的資料（600、綠），含 2 個自訂單字與 STT 已讀。
+ * （v0.10，FE-42）600 為 PRD AC-32-01 的「v0.9 以前留下的既有分數」，明確預寫，不依賴預設值（T-42、GS-4）。
+ */
 function learnedData() {
-  const d = P.defaultData();
+  const d = goalData(600);
   d.customVocab = [customItem("c_1", "zeta", "2026-10-28T08:00:00.000Z"), customItem("c_2", "Bootstrap")];
   d.masteredWordKeys = ["word1", "zeta"];
   d.vocabQuiz = { answered: 5, correct: 3 };
@@ -1662,9 +1787,9 @@ function learningPart(data) {
   return out;
 }
 
-test("CI-1、AC-32-01：生效色級改變且有學習紀錄 → \"confirm\"；setItem 0 次、state 為同一物件、effectiveColor 仍綠、無通知", () => {
+test("CI-1、AC-32-01：既有 600（綠）點棕卡片 → 生效色級改變且有學習紀錄 → \"confirm\"；setItem 0 次、state 為同一物件、effectiveColor 仍綠、無通知", () => {
   const { store, storage, a } = storeWith(learnedData());
-  a.setDraftScore(300);
+  assert.equal(a.clickColor("brown").score, 465);
   const before = store.getState();
   const log = tagLog(store);
   let r;
@@ -1677,13 +1802,15 @@ test("CI-1、AC-32-01：生效色級改變且有學習紀錄 → \"confirm\"；s
   assert.equal(log.length, 0);
 });
 
-test("AC-32-05、AC-01-07：有學習紀錄時 650 → 730（藍）→ 860（金）→ 600 四步皆 \"applied\"，學習欄位不變", () => {
-  const { store, a } = storeWith(learnedData());
+test("AC-32-05、AC-01-07：有學習紀錄、既有 600 時點綠 725 → 藍 855 → 金 990 → 綠 725 四步皆 \"applied\"，學習欄位不變", () => {
+  const { store, storage, a } = storeWith(learnedData());
+  assert.equal(store.getState().data.goal.appliedScore, 600);
   const fields = learningPart(store.getState().data);
-  const steps = [[650, "green"], [730, "blue"], [860, "gold"], [600, "green"]];
-  for (const [score, color] of steps) {
-    a.setDraftScore(score);
+  const steps = [["green", 725, "green"], ["blue", 855, "blue"], ["gold", 990, "gold"], ["green", 725, "green"]];
+  for (const [card, score, color] of steps) {
+    assert.equal(a.clickColor(card).score, score, card);
     assert.deepEqual(a.requestApplyGoal(), { status: "applied" }, String(score));
+    assert.equal(storedData(storage).goal.appliedScore, score, String(score));
     const g = store.getState().data.goal;
     assert.equal(g.appliedScore, score, String(score));
     assert.equal(g.appliedColor, color, String(score));
@@ -1692,18 +1819,20 @@ test("AC-32-05、AC-01-07：有學習紀錄時 650 → 730（藍）→ 860（金
   }
 });
 
-test("AC-32-06、AC-01-02：(a)～(f) 皆不成立（只換卡）→ 300 直接 \"applied\"，生效色級棕、單字集重建", () => {
+test("AC-32-06、AC-01-02：預設 725、(a)～(f) 皆不成立（只換卡）→ 點棕 465 直接 \"applied\"，生效色級棕、單字集重建", () => {
   const { store, a } = makeStore();
+  assert.equal(store.getState().data.goal.appliedScore, C.SCORE_DEFAULT);
   a.gotoCard(2);
-  a.setDraftScore(300);
+  assert.equal(a.clickColor("brown").score, 465);
   assert.deepEqual(a.requestApplyGoal(), { status: "applied" });
   const st = store.getState();
+  assert.equal(st.data.goal.appliedScore, 465);
   assert.equal(st.data.goal.effectiveColor, "brown");
   assert.equal(st.runtime.studySet.length, 12);
   assert.equal(st.runtime.flashcard.index, 0);
 });
 
-test("AC-32-07：6 種狀態各只讓 (a)～(f) 其中一項成立 → 改 300 皆 \"confirm\"、setItem 0 次", () => {
+test("AC-32-07：6 種狀態各只讓 (a)～(f) 其中一項成立 → 點棕卡片皆 \"confirm\"、setItem 0 次", () => {
   const states = {
     a: (d) => { d.masteredWordKeys = ["word3"]; },
     b: (d) => { d.vocabQuiz = { answered: 1, correct: 0 }; },
@@ -1719,7 +1848,7 @@ test("AC-32-07：6 種狀態各只讓 (a)～(f) 其中一項成立 → 改 300 �
     const { store, storage, a } = storeWith(d);
     const fl = REINIT.recordFlags(store.getState().data, store.today());
     assert.deepEqual(Object.keys(fl).filter((k) => fl[k]), [flag], flag);
-    a.setDraftScore(300);
+    a.clickColor("brown");
     let r;
     assert.equal(writesDuring(storage, () => { r = a.requestApplyGoal(); }), 0, flag);
     assert.deepEqual(r, { status: "confirm" }, flag);
@@ -1731,7 +1860,7 @@ test("confirmApplyGoal 成功（AC-32-02、AC-32-03、AC-32-10、AC-03-05、CI-4
   a.gotoCard(3);
   a.setSttResult({ targetText: "word4", transcript: "word four", score: 80 });
   assert.equal(a.setFlashcardMode("quiz").ok, true);
-  a.setDraftScore(300);
+  a.clickColor("brown");
   assert.equal(a.requestApplyGoal().status, "confirm");
   const before = store.getState();
   const keysBefore = Array.from(storage.map.keys()).sort();
@@ -1750,7 +1879,8 @@ test("confirmApplyGoal 成功（AC-32-02、AC-32-03、AC-32-10、AC-03-05、CI-4
     assert.deepEqual(rec.data[k], defaults[k], k);
     assert.deepEqual(store.getState().data[k], defaults[k], k);
   }
-  const goal = { draftScore: 300, appliedScore: 300, appliedColor: "brown", effectiveColor: "brown" };
+  // AC-32-02：確定後目標分數 465（棕上限，v0.10）
+  const goal = { draftScore: 465, appliedScore: 465, appliedColor: "brown", effectiveColor: "brown" };
   assert.deepEqual(rec.data.goal, goal);
   assert.deepEqual(store.getState().data.goal, goal);
   assert.deepEqual(rec.data.customVocab, before.data.customVocab);
@@ -1789,7 +1919,7 @@ test("confirmApplyGoal 成功（AC-32-02、AC-32-03、AC-32-10、AC-03-05、CI-4
 
 test("AC-32-09、AC-17-02：確定後同一天再把 A 翻到背面 → X = 1、歷史今天 = 1、連續打卡 = 1", () => {
   const { store, a } = storeWith(learnedData());
-  a.setDraftScore(300);
+  a.clickColor("brown");
   assert.equal(a.requestApplyGoal().status, "confirm");
   assert.equal(a.confirmApplyGoal().ok, true);
   assert.equal(xOf(store), 0);
@@ -1806,7 +1936,7 @@ test("CI-7、AC-32-11 (b)：寫入遇容量不足與一般例外 → 回 { ok: f
   for (const [reason, prep] of [["quota", (s) => { s.quota = true; }], ["error", (s) => { s.otherError = true; }]]) {
     const { store, storage, a } = storeWith(learnedData());
     a.gotoCard(2);
-    a.setDraftScore(300);
+    a.clickColor("brown");
     assert.equal(a.requestApplyGoal().status, "confirm", reason);
     const before = store.getState();
     const stored = storage.map.get(KEY);
@@ -1820,7 +1950,7 @@ test("CI-7、AC-32-11 (b)：寫入遇容量不足與一般例外 → 回 { ok: f
     assert.equal(st.data.customVocab, before.data.customVocab, reason);
     assert.equal(st.data.goal.appliedScore, 600, reason);
     assert.equal(st.data.goal.effectiveColor, "green", reason);
-    assert.equal(st.data.goal.draftScore, 600, reason);
+    assert.equal(st.data.goal.draftScore, 600, reason + "：還原為既有 600，不轉 725（GS-8）");
     assert.equal(storage.map.get(KEY), stored, reason);
     assert.equal(st.runtime.studySet, before.runtime.studySet, reason);
     assert.equal(st.runtime.flashcard.index, 2, reason);
@@ -1840,7 +1970,7 @@ test("CI-6、AC-32-11 (a)：storage 停用時 confirmApplyGoal 不寫入（setIt
   assert.equal(a.startLearning().write, "disabled");
   a.flipCard();
   assert.equal(xOf(store), 1);
-  a.setDraftScore(300);
+  a.clickColor("brown");
   assert.equal(a.requestApplyGoal().status, "confirm");
   let r;
   assert.equal(writesDuring(storage, () => { r = a.confirmApplyGoal(); }), 0);
@@ -1855,10 +1985,10 @@ test("CI-6、AC-32-11 (a)：storage 停用時 confirmApplyGoal 不寫入（setIt
   assert.equal(storage.setCalls.length, 0);
 });
 
-test("CI-9、AC-32-04：cancelApplyGoal → setItem 0 次、draftScore 還原 600、tag goal、單字卡位置與其他欄位不變", () => {
+test("CI-9、AC-32-04、GS-8：既有 600 點棕 → 取消 → setItem 0 次、draftScore 還原 600（不轉 725）、tag goal、單字卡位置與其他欄位不變", () => {
   const { store, storage, a } = storeWith(learnedData());
   a.gotoCard(4);
-  a.setDraftScore(300);
+  assert.equal(a.clickColor("brown").score, 465);
   assert.equal(a.requestApplyGoal().status, "confirm");
   const before = store.getState();
   const stored = storage.map.get(KEY);
@@ -1866,6 +1996,7 @@ test("CI-9、AC-32-04：cancelApplyGoal → setItem 0 次、draftScore 還原 60
   assert.equal(writesDuring(storage, () => a.cancelApplyGoal()), 0);
   const st = store.getState();
   assert.equal(st.data.goal.draftScore, 600);
+  assert.equal(G.colorOf(st.data.goal.draftScore), "green", "選中卡片回到綠");
   assert.deepEqual(st.data.goal, Object.assign({}, before.data.goal, { draftScore: 600 }));
   for (const k of C.LEARNING_PROGRESS_FIELDS) { assert.equal(st.data[k], before.data[k], k); }
   assert.equal(st.runtime, before.runtime);
@@ -1944,4 +2075,126 @@ test("HT-1、AC-20-04：一般模式 setTab(\"decoder\")、setTab(\"phrasebank\"
     a.setTab(t);
     assert.notEqual(store.getState().runtime.currentTab, t);
   }
+});
+
+// ════════════════════════════ （v0.11，FE-49）runtime.pwa 與 setPwa（契約 RuntimeState.pwa、PV-1、PV-7、V-PWA-11） ════════════════════════════
+
+const PWA = require("../core/pwa.js");
+
+/** 一組改變全部 7 欄的合法 patch */
+function fullPwaPatch() {
+  return {
+    eligible: true, standalone: true, installPromptAvailable: true, installSuppressed: true,
+    updateAvailable: true, reloadRequested: true, lastUpdateCheckAt: 1234.5
+  };
+}
+
+test("FE-49：初始 runtime.pwa 深度等於 initialPwaState()（一般與首次模式）", () => {
+  assert.deepEqual(makeStore().store.getState().runtime.pwa, PWA.initialPwaState());
+  assert.deepEqual(makeStore({ firstRun: true }).store.getState().runtime.pwa, PWA.initialPwaState());
+  assert.deepEqual(Object.keys(makeStore().store.getState().runtime.pwa), [...PWA.PWA_STATE_KEYS]);
+});
+
+for (const mode of ["main", "firstRun"]) {
+  test(`FE-49：setPwa 合法 patch → 通知 ["pwa"]、setItem 0 次、以新物件取代（${mode}，PV-1、AC-37-06）`, () => {
+    const { store, storage, a } = makeStore({ firstRun: mode === "firstRun" });
+    const before = store.getState().runtime.pwa;
+    const log = tagLog(store);
+    let r;
+    assert.equal(writesDuring(storage, () => { r = a.setPwa({ eligible: true, standalone: false }); }), 0);
+    assert.deepEqual(r, { changed: true });
+    assert.deepEqual(log, [["pwa"]]);
+    const after = store.getState().runtime.pwa;
+    assert.notEqual(after, before);
+    assert.equal(before.eligible, false, "舊物件不被就地修改");
+    assert.equal(after.eligible, true);
+    assert.equal(store.getState().runtime.entryMode, mode);
+    assert.equal(writesDuring(storage, () => { a.setPwa(fullPwaPatch()); }), 0);
+    assert.deepEqual(store.getState().runtime.pwa, fullPwaPatch());
+    assert.equal(log.length, 2);
+  });
+}
+
+test("FE-49：setPwa 相同值 → 不通知、changed false；lastUpdateCheckAt 可回到 null", () => {
+  const { store, a } = makeStore();
+  const log = tagLog(store);
+  assert.deepEqual(a.setPwa({ eligible: false, lastUpdateCheckAt: null }), { changed: false });
+  assert.deepEqual(a.setPwa({}), { changed: false });
+  assert.deepEqual(a.setPwa(null), { changed: false });
+  assert.deepEqual(a.setPwa("eligible"), { changed: false });
+  assert.equal(log.length, 0);
+  a.setPwa({ lastUpdateCheckAt: 5 });
+  assert.deepEqual(a.setPwa({ lastUpdateCheckAt: 5 }), { changed: false });
+  assert.deepEqual(a.setPwa({ lastUpdateCheckAt: null }), { changed: true });
+  assert.equal(store.getState().runtime.pwa.lastUpdateCheckAt, null);
+  assert.equal(log.length, 2);
+});
+
+test("FE-49：未知鍵、字串 \"true\"、數字 1、物件值、非有限數 → 忽略（PV-7）", () => {
+  const { store, a } = makeStore();
+  const log = tagLog(store);
+  const fakeEvent = { prompt() {}, userChoice: Promise.resolve() };
+  const r = a.setPwa({
+    foo: true, eligible: "true", standalone: 1, installPromptAvailable: fakeEvent, updateAvailable: {},
+    reloadRequested: null, lastUpdateCheckAt: NaN, registration: { waiting: null }, deferredPrompt: fakeEvent
+  });
+  assert.deepEqual(r, { changed: false });
+  assert.equal(log.length, 0);
+  assert.deepEqual(store.getState().runtime.pwa, PWA.initialPwaState());
+  assert.deepEqual(a.setPwa({ lastUpdateCheckAt: Infinity }), { changed: false });
+  assert.deepEqual(a.setPwa({ lastUpdateCheckAt: "12" }), { changed: false });
+  // 混合：合法欄位照收、不合法欄位忽略
+  assert.deepEqual(a.setPwa({ eligible: true, standalone: "yes", extra: 1 }), { changed: true });
+  assert.deepEqual(Object.keys(store.getState().runtime.pwa), [...PWA.PWA_STATE_KEYS]);
+  assert.equal(store.getState().runtime.pwa.standalone, false);
+});
+
+test("FE-49：importBackup、confirmApplyGoal、startLearning、setTab 前後 runtime.pwa 不變（AC-36-04）", async () => {
+  // startLearning（首次模式）
+  {
+    const { store, a } = makeStore({ firstRun: true });
+    a.setPwa(fullPwaPatch());
+    a.startLearning();
+    assert.deepEqual(store.getState().runtime.pwa, fullPwaPatch());
+  }
+  // importBackup（一般與首次模式）
+  for (const firstRun of [false, true]) {
+    const { store, a } = makeStore({ firstRun });
+    a.setPwa(fullPwaPatch());
+    const r = await a.importBackup(brownBackupText(), () => true);
+    assert.equal(r.ok, true);
+    assert.deepEqual(store.getState().runtime.pwa, fullPwaPatch());
+  }
+  // confirmApplyGoal、setTab、gotoCard
+  {
+    const { store, a } = storeWith(learnedData());
+    a.setPwa(fullPwaPatch());
+    a.clickColor("brown");
+    assert.equal(a.requestApplyGoal().status, "confirm");
+    assert.equal(a.confirmApplyGoal().ok, true);
+    a.setTab("flashcards");
+    a.gotoCard(1);
+    a.flipCard();
+    assert.deepEqual(store.getState().runtime.pwa, fullPwaPatch());
+  }
+});
+
+test("FE-49：exportBackup JSON 不含 pwa；setPwa 前後 localStorage 鍵集合與 StorageRecord 欄位相同、schemaVersion 2（V-PWA-11 單元代理）", () => {
+  const { storage, a } = makeStore();
+  a.setDraftScore(300); // 寫入一次，確保主鍵為本版格式
+  const keysBefore = Array.from(storage.map.keys()).sort();
+  const recBefore = JSON.parse(storage.map.get(KEY));
+  a.setPwa(fullPwaPatch());
+  a.setDraftScore(305); // 之後的一般寫入也不帶 pwa
+  const rec = JSON.parse(storage.map.get(KEY));
+  assert.deepEqual(Array.from(storage.map.keys()).sort(), keysBefore);
+  assert.deepEqual(Object.keys(rec).sort(), Object.keys(recBefore).sort());
+  assert.deepEqual(Object.keys(rec.data).sort(), Object.keys(recBefore.data).sort());
+  assert.equal(rec.schemaVersion, 2);
+  assert.ok(!storage.map.get(KEY).includes("pwa"));
+  assert.ok(!storage.map.get(KEY).includes("installPromptAvailable"));
+  const exp = a.exportBackup();
+  assert.ok(!exp.json.includes("\"pwa\""));
+  assert.ok(!exp.json.includes("installPromptAvailable"));
+  assert.ok(!exp.json.includes("lastUpdateCheckAt"));
 });

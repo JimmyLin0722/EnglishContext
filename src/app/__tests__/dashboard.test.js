@@ -48,21 +48,22 @@ describe("dashboard.test.js", () => {
 
   // ── 目標資訊 ──
 
-  test("目標：600 綠", () => {
+  test("目標：600 綠（既有分數 fixture）；回傳不含 appliedScore（AC-17-06、AC-26-05 (c)）", () => {
     const g = D.goalInfoOf(base.goal);
-    assert.equal(g.appliedScore, "600");
+    assert.equal("appliedScore" in g, false);
     assert.equal(g.appliedColor, "綠");
     assert.equal(g.effectiveColor, "綠");
     assert.equal(g.daily, "15 字/天");
   });
 
-  test("目標：730 藍 → 生效「綠（內建上限）」；860 金；每日新字量依生效色級（R6-2）", () => {
-    let g = D.goalInfoOf({ draftScore: 730, appliedScore: 730, appliedColor: "blue", effectiveColor: "green" });
+  test("目標：855 藍 → 生效「綠（內建上限）」；990 金；每日新字量依生效色級（R6-2）", () => {
+    let g = D.goalInfoOf({ draftScore: 855, appliedScore: 855, appliedColor: "blue", effectiveColor: "green" });
+    assert.equal("appliedScore" in g, false);
     assert.equal(g.appliedColor, "藍");
     assert.equal(g.effectiveColor, "綠（內建上限）");
     assert.equal(g.effectiveColorId, "green");
     assert.equal(g.daily, "15 字/天");
-    g = D.goalInfoOf({ draftScore: 860, appliedScore: 860, appliedColor: "gold", effectiveColor: "green" });
+    g = D.goalInfoOf({ draftScore: 990, appliedScore: 990, appliedColor: "gold", effectiveColor: "green" });
     assert.equal(g.appliedColor, "金");
     assert.equal(g.effectiveColor, "綠（內建上限）");
     assert.equal(g.daily, "15 字/天");
@@ -74,8 +75,19 @@ describe("dashboard.test.js", () => {
     assert.equal(D.goalInfoOf({ appliedScore: 100 }).daily, "10 字/天");
     assert.equal(D.goalInfoOf({ appliedScore: 725 }).daily, "15 字/天");
     const g = D.goalInfoOf(null);
-    assert.equal(g.appliedScore, "—");
+    assert.equal("appliedScore" in g, false);
+    assert.equal(g.appliedColor, "—");
     assert.equal(g.effectiveColor, "—");
+  });
+
+  test("（v0.10，FE-43）原始碼掃描：dashboard.js 不含「目前目標分數」，TEXT 無 appliedScore（AC-17-06、AC-26-05 (c)）", () => {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const src = fs.readFileSync(path.join(__dirname, "..", "views", "dashboard.js"), "utf8");
+    assert.ok(!src.includes("目前目標分數"));
+    assert.equal("appliedScore" in D.TEXT, false);
+    // 色級仍由 appliedScore 推導（欄位值與分數不一致時以分數為準）
+    assert.equal(D.goalInfoOf({ appliedScore: 300, appliedColor: "green", effectiveColor: "green" }).appliedColor, "棕");
   });
 
   // ── 匯入訊息（AC-24-03～AC-24-09、IM-3、IM-5、IM-6） ──
@@ -374,5 +386,218 @@ describe("dashboard.test.js", () => {
     const { env, log } = fakeEnv({ throwClick: true });
     assert.equal(DL.create(env).saveText("a.json", "{}"), false);
     assert.ok(log.includes("revoke:blob:x"));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// （v0.11，FE-51）備份區塊的不互通說明（NT-1）與「安裝 App」按鈕（IN-1、IN-4、IN-5）
+// 依據：architecture.md v0.7 §4.7「views/dashboard.js」段、§7.18.6、§7.18.7、§10.4「dashboard.test.js」列
+// 涵蓋：AC-24-12、AC-34-07～AC-34-10
+// 做法：極簡假 DOM ＋ node:vm 依瀏覽器方式載入 core 模組與 views/dashboard.js；store 用 _fixtures 的真實 store（Node 版）
+// ─────────────────────────────────────────────────────────────
+
+describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const vm = require("node:vm");
+  const F = require("./_fixtures.js");
+  const PWA = require("../core/pwa.js");
+  const APP_DIR = path.join(__dirname, "..");
+  const read = (rel) => fs.readFileSync(path.join(APP_DIR, rel), "utf8");
+
+  const NT1 = "學習紀錄只存在目前的瀏覽器與網址；檔案版、網頁版、主畫面 App 彼此不互通，可用匯出備份／匯入轉移";
+
+  /** 極簡假節點：hidden 屬性與 hidden 特性同步 */
+  function makeNode(tag) {
+    const listeners = {};
+    const classes = new Set();
+    const n = {
+      nodeType: tag === "#text" ? 3 : 1,
+      tagName: tag.toUpperCase(),
+      attrs: {},
+      childNodes: [],
+      style: {},
+      disabled: false,
+      _text: "",
+      listeners,
+      parentNode: null,
+      classList: {
+        add: (c) => classes.add(c),
+        remove: (c) => classes.delete(c),
+        contains: (c) => classes.has(c),
+        toggle: (c, force) => {
+          const on = force === undefined ? !classes.has(c) : !!force;
+          if (on) classes.add(c); else classes.delete(c);
+          return on;
+        }
+      },
+      get className() { return [...classes].join(" "); },
+      set className(v) { classes.clear(); String(v).split(/\s+/).filter(Boolean).forEach((c) => classes.add(c)); },
+      get hidden() { return Object.prototype.hasOwnProperty.call(this.attrs, "hidden"); },
+      set hidden(v) { if (v) this.attrs.hidden = ""; else delete this.attrs.hidden; },
+      setAttribute(k, v) { if (k === "class") this.className = v; else this.attrs[k] = String(v); },
+      getAttribute(k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; },
+      removeAttribute(k) { delete this.attrs[k]; },
+      addEventListener(t, fn) { (listeners[t] = listeners[t] || []).push(fn); },
+      appendChild(c) { this.childNodes.push(c); c.parentNode = this; return c; },
+      removeChild(c) { this.childNodes.splice(this.childNodes.indexOf(c), 1); c.parentNode = null; return c; },
+      get firstChild() { return this.childNodes[0] || null; },
+      get nextElementSibling() {
+        const p = this.parentNode;
+        if (!p) return null;
+        const sib = p.childNodes.filter((c) => c.nodeType === 1);
+        return sib[sib.indexOf(this) + 1] || null;
+      },
+      get textContent() { return this.nodeType === 3 ? this._text : this._text + this.childNodes.map((c) => c.textContent).join(""); },
+      set textContent(v) { this.childNodes = []; this._text = String(v); },
+      click() { if (!this.disabled) (listeners.click || []).forEach((fn) => fn({ type: "click", target: this })); }
+    };
+    return n;
+  }
+
+  function findAll(n, pred, out = []) {
+    if (n.nodeType === 1 && pred(n)) out.push(n);
+    for (const c of n.childNodes || []) findAll(c, pred, out);
+    return out;
+  }
+  const byClass = (root, cls) => findAll(root, (n) => n.classList.contains(cls));
+
+  /**
+   * 載入 dashboard 並 mount。
+   * @param {{ pwa?: object, tab?: string, firstRun?: boolean, noService?: boolean }} [o]
+   */
+  function setup(o = {}) {
+    const document = {
+      createElement: (t) => makeNode(t),
+      createElementNS: (ns, t) => makeNode(t),
+      createTextNode: (t) => { const n = makeNode("#text"); n._text = t; return n; }
+    };
+    const sandbox = { document, console: { log() {}, warn() {}, error() {} } };
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    for (const rel of ["core/constants.js", "core/wordkey.js", "core/dom.js", "core/goal.js", "core/streak.js",
+      "core/stats.js", "core/learning.js", "core/pwa.js"]) {
+      vm.runInContext(read(rel), sandbox, { filename: rel });
+    }
+    const views = {};
+    sandbox.EMT.views = { register: (tab, m) => { views[tab] = m; } };
+    const calls = { install: 0 };
+    if (!o.noService) {
+      sandbox.EMT.services = { pwa: { requestInstall: () => { calls.install++; return Promise.resolve(); } } };
+    }
+    const { store, a } = F.makeStore({ firstRun: o.firstRun });
+    if (o.pwa) a.setPwa(o.pwa);
+    if (o.tab) a.setTab(o.tab);
+    sandbox.EMT.store = store;
+    vm.runInContext(read("views/dashboard.js"), sandbox, { filename: "views/dashboard.js" });
+    const view = views.dashboard;
+    const rootEl = makeNode("section");
+    view.mount(rootEl);
+    const backup = byClass(rootEl, "dash-section").find((s) => s.textContent.includes("匯出備份"));
+    return { sandbox, store, a, view, rootEl, backup, calls };
+  }
+
+  const installBox = (s) => byClass(s.rootEl, "dash-backup__install")[0];
+  const installButtons = (s) => findAll(s.rootEl, (n) => n.getAttribute("data-action") === "install-app");
+  const AVAILABLE = { eligible: true, standalone: false, installPromptAvailable: true, installSuppressed: false };
+
+  test("NT-1：文字逐字、為按鈕列（匯出／匯入）的下一個兄弟節點；eligible 真假皆存在（AC-24-12）", () => {
+    for (const pwa of [undefined, { eligible: true }]) {
+      const s = setup({ pwa });
+      const origin = byClass(s.backup, "dash-backup__origin");
+      assert.equal(origin.length, 1);
+      assert.equal(origin[0].tagName, "P");
+      assert.equal(origin[0].textContent, NT1);
+      assert.equal(origin[0].textContent, PWA.PWA_TEXTS.backupOriginNotice);
+      const row = byClass(s.backup, "btn-row")[0];
+      assert.ok(row.textContent.includes("匯出備份") && row.textContent.includes("匯入備份"));
+      assert.equal(row.nextElementSibling, origin[0]);
+      // 安裝區在 NT-1 之後
+      assert.equal(origin[0].nextElementSibling, installBox(s));
+    }
+  });
+
+  test("installVisible 假（初始、file://）：容器 hidden 且無子節點、無按鈕", () => {
+    const s = setup();
+    assert.equal(installBox(s).hidden, true);
+    assert.equal(installBox(s).childNodes.length, 0);
+    assert.equal(installButtons(s).length, 0);
+  });
+
+  test("installVisible 真：恰 1 個「安裝 App」按鈕（class、type、data-action）；點擊呼叫 requestInstall 1 次", () => {
+    const s = setup({ pwa: AVAILABLE });
+    const btns = installButtons(s);
+    assert.equal(btns.length, 1);
+    assert.equal(installBox(s).hidden, false);
+    assert.equal(btns[0].textContent, "安裝 App");
+    assert.equal(btns[0].tagName, "BUTTON");
+    assert.equal(btns[0].getAttribute("type"), "button");
+    assert.equal(btns[0].className, "btn btn--secondary dash-install");
+    btns[0].click();
+    assert.equal(s.calls.install, 1);
+  });
+
+  test("\"pwa\" tag 後依狀態增刪：事件到達 → 出現；requestInstall 前 suppressed → 消失；不重複建立", () => {
+    const s = setup({ pwa: { eligible: true } });
+    assert.equal(installButtons(s).length, 0);
+    s.a.setPwa({ installPromptAvailable: true });
+    assert.equal(installButtons(s).length, 1);
+    s.a.setPwa({ lastUpdateCheckAt: 5 }); // 其他 pwa 欄位改變：按鈕不重複
+    assert.equal(installButtons(s).length, 1);
+    s.a.setPwa({ installPromptAvailable: false, installSuppressed: true });
+    assert.equal(installButtons(s).length, 0);
+    assert.equal(installBox(s).hidden, true);
+    assert.equal(installBox(s).childNodes.length, 0);
+  });
+
+  test("standalone、installSuppressed、非主控台頁、首次模式 → 不顯示", () => {
+    assert.equal(installButtons(setup({ pwa: Object.assign({}, AVAILABLE, { standalone: true }) })).length, 0);
+    assert.equal(installButtons(setup({ pwa: Object.assign({}, AVAILABLE, { installSuppressed: true }) })).length, 0);
+    assert.equal(installButtons(setup({ pwa: AVAILABLE, tab: "flashcards" })).length, 0);
+    assert.equal(installButtons(setup({ pwa: AVAILABLE, firstRun: true })).length, 0);
+  });
+
+  test("show() 重繪：切到其他頁時事件到達，回主控台 show() 後出現", () => {
+    const s = setup({ pwa: { eligible: true }, tab: "flashcards" });
+    s.a.setPwa({ installPromptAvailable: true });
+    assert.equal(installButtons(s).length, 0);
+    s.a.setTab("dashboard");
+    s.view.show();
+    assert.equal(installButtons(s).length, 1);
+  });
+
+  test("services.pwa 不存在時點擊不做事、不拋例外；點擊不換頁、不改學習資料", () => {
+    const s = setup({ pwa: AVAILABLE, noService: true });
+    const before = JSON.stringify(s.store.getState().data);
+    assert.doesNotThrow(() => installButtons(s)[0].click());
+    assert.equal(s.store.getState().runtime.currentTab, "dashboard");
+    assert.equal(JSON.stringify(s.store.getState().data), before);
+  });
+
+  test("原始碼：不自動 prompt、無安裝橫幅或 iOS 說明（IN-4）；文字取 PWA_TEXTS", () => {
+    const src = read("views/dashboard.js");
+    assert.ok(!/\.prompt\(/.test(src));
+    assert.ok(!src.includes("beforeinstallprompt"));
+    assert.ok(src.includes("PWA_TEXTS.installButton"));
+    assert.ok(src.includes("PWA_TEXTS.backupOriginNotice"));
+    assert.deepEqual([...D.INSTALL_TAGS].includes("pwa"), true);
+    assert.equal(D.installAffected(["pwa"]), true);
+    assert.equal(D.installAffected(["flashcard"]), false);
+  });
+
+  test("10-dashboard.css：.dash-backup__origin 同 .dash-backup__hint 字級、overflow-wrap: anywhere、無 nowrap；.dash-install ≥ 44px", () => {
+    const css = read("styles/10-dashboard.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    const rule = (sel) => {
+      const m = new RegExp(sel.replace(/[.]/g, "\\.") + "\\s*\\{([^}]*)\\}").exec(css);
+      assert.ok(m, sel);
+      return m[1];
+    };
+    const fz = (r) => (/font-size:\s*([^;]+);/.exec(r) || [])[1];
+    assert.equal(fz(rule(".dash-backup__origin")), fz(rule(".dash-backup__hint")));
+    assert.match(rule(".dash-backup__origin"), /overflow-wrap:\s*anywhere/);
+    assert.doesNotMatch(rule(".dash-backup__origin"), /nowrap|text-overflow/);
+    assert.match(rule(".dash-install"), /min-height:\s*var\(--touch\)/);
+    assert.match(rule(".dash-install"), /min-width:\s*var\(--touch\)/);
   });
 });

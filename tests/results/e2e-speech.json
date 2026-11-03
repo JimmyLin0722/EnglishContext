@@ -4,7 +4,7 @@
     "tc": "TC-08-13",
     "ac": "AC-08-13",
     "result": "通過",
-    "note": "常駐標示「需要連網」；首次按下說明「語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統不保存、不上傳錄音」[我知道了/取消]；取消後 starts 0→0、狀態 idle、已讀 false；再按仍顯示說明=true；我知道了 → starts 1、狀態 listening、localStorage 已讀 true；之後再按顯示說明=false"
+    "note": "常駐標示「需要連網」；首次按下說明「語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統只即時讀取音量以顯示收音條，不錄音、不保存、不上傳錄音。停留在單字卡頁期間，瀏覽器可能持續顯示麥克風使用中圖示，離開單字卡頁即停止使用麥克風」[我知道了/取消]；取消後 starts 0→0、getUserMedia 呼叫 0、狀態 idle、已讀 false；「我知道了」後 getUserMedia 1；再按仍顯示說明=true；我知道了 → starts 1、狀態 listening、localStorage 已讀 true；之後再按顯示說明=false"
   },
   {
     "suite": "e2e-speech",
@@ -25,7 +25,7 @@
     "tc": "TC-08-01",
     "ac": "AC-08-01",
     "result": "通過",
-    "note": "lang=en-US、interimResults=false；按鈕狀態 listening、文字「聆聽中」"
+    "note": "lang=en-US、interimResults=false；按鈕狀態 listening、文字「聆聽中」；收音條 待機 00000 → 聆聽中（替身 −25 dBFS）11100"
   },
   {
     "suite": "e2e-speech",
@@ -74,7 +74,7 @@
     "tc": "TC-08-09",
     "ac": "AC-08-09（含 §7.6 錯誤對照表）",
     "result": "通過",
-    "note": "not-allowed：「需要麥克風權限  開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。」、idle；service-not-allowed：「需要麥克風權限  開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。」、idle；audio-capture：「需要麥克風權限  請確認裝置已連接麥克風；並點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許。」、idle；network：「語音辨識需要網路連線」、idle；no-speech：「未偵測到語音，請再試一次」、idle；aborted：「語音辨識發生錯誤，請稍後再試一次」、idle；language-not-supported：「語音辨識發生錯誤，請稍後再試一次」、idle"
+    "note": "not-allowed：「需要麥克風權限  開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。」、idle、收音條 00000；service-not-allowed：「需要麥克風權限  開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。」、idle、收音條 00000；audio-capture：「找不到麥克風裝置  請確認裝置已連接麥克風後再按一次」、idle、收音條 00000；network：「語音辨識需要網路連線」、idle、收音條 00000；no-speech：「未偵測到語音，請再試一次」、idle、收音條 00000；aborted：「語音辨識發生錯誤，請稍後再試一次」、idle、收音條 00000；language-not-supported：「語音辨識發生錯誤，請稍後再試一次」、idle、收音條 00000"
   },
   {
     "suite": "e2e-speech",
@@ -88,7 +88,7 @@
     "tc": "TC-22-03",
     "ac": "AC-22-03",
     "result": "通過",
-    "note": "onresult → 徽章繪製 ms：13.8、9.8、7.3、5.6、5.8、2.5、17.3、17.2、13.1、7.9（無頭 Chrome、未降速）"
+    "note": "onresult → 徽章繪製 ms：3.4、14.4、9.1、4.3、15.8、9.7、3.9、15.4、10.3、5.2；中位數 9.1、p90 15.4、最大 15.8（無頭 Chrome、未降速）"
   },
   {
     "suite": "e2e-speech",
@@ -102,7 +102,7 @@
     "tc": "TC-08-14",
     "ac": "AC-08-14",
     "result": "通過",
-    "note": "離線 navigator.onLine=false：「語音辨識需要網路連線」、idle、未開始辨識=true、顯示分數=false；辨識中 network 錯誤：「語音辨識需要網路連線」、idle、顯示分數=false"
+    "note": "離線 navigator.onLine=false：「語音辨識需要網路連線」、idle、收音條 00000、未開始辨識=true、顯示分數=false；辨識中 network 錯誤：「語音辨識需要網路連線」、idle、收音條 00000、顯示分數=false"
   },
   {
     "suite": "e2e-speech",
@@ -130,7 +130,7 @@
     "tc": "TC-08-02",
     "ac": "AC-08-02",
     "result": "通過",
-    "note": "麥克風 aria-disabled=true、title「建議使用 Google Chrome / Edge」、disabled 屬性=false；toast [\"建議使用 Google Chrome / Edge\"]；狀態 idle"
+    "note": "麥克風 aria-disabled=true、title「建議使用 Google Chrome / Edge」、disabled 屬性=false；toast [\"建議使用 Google Chrome / Edge\"]；狀態 idle；getUserMedia 呼叫 0（應 0）；收音條 00000"
   },
   {
     "suite": "e2e-speech",

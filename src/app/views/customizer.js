@@ -4,13 +4,21 @@
  *       契約 COLOR_LEVELS、GoalState、SCORE_MIN、SCORE_MAX、SCORE_STEP、N_O；PRD 色級定義表、Q-15、Q-28、Q-32。
  * 涵蓋：AC-01-01～AC-01-03、AC-01-05～AC-01-07、AC-02-01、AC-02-02、AC-02-05～AC-02-10、AC-03-03、AC-22-04、
  *       AC-26-01～AC-26-04、AC-25-06（一般頁）；（FE-32）US-25、AC-25-01～AC-25-03、AC-25-10、AC-25-11、AC-18-02；
- *       （FE-40）US-32、AC-32-01、AC-32-02、AC-32-04、AC-32-08、AC-32-11、AC-01-02、AC-03-05
+ *       （FE-40）US-32、AC-32-01、AC-32-02、AC-32-04、AC-32-08、AC-32-11、AC-01-02、AC-03-05；
+ *       （FE-43，PRD v0.10 R-19、契約 v0.10 §5.9 GS-1～GS-8）AC-26-05、AC-26-06、AC-32-04（取消回原色級）
+ *
+ * （v0.10，FE-43；architecture.md v0.6 §7.17）只選色級、不顯示分數：
+ * - 分數區（滑桿、輸入框、錯誤提示）程式保留（R-19 允許），但建立時即 hidden + inert，任何路徑都不改回可見；
+ *   滑桿與輸入框另加 disabled、tabindex="-1"（不可見、不可聚焦，AC-26-05）
+ * - 卡片不顯示分數範圍；狀態列不顯示「目前目標分數」；目標分數只存在資料中
+ * - 「套用」「開始學習」不讀輸入框，直接以 store 的 draftScore 套用（GS-3、AC-26-06）
  *
  * 版面（掛在 #customizer-goal）：
  * - 狀態列（.cz-status-slot）：「目前目標色級」「目前生效色級」（藍、金套用後生效顯示「綠（內建上限）」）
  * - 色級區：橘、棕、綠、藍、金 5 張大卡片（整張為 <button>，aria-pressed 表示選中）；點擊呼叫 actions.clickColor
- *   選中卡片 = colorOf(draftScore)；分數變更時只切換 aria-pressed 與選中 class，不重建卡片（AC-26-03、AC-22-04）
- * - 分數區：滑桿與數字輸入框雙向同步；每次有效變更呼叫 actions.setDraftScore
+ *   （GS-2：draftScore = 該色 scoreMax）；選中卡片 = colorOf(draftScore)；只切換 aria-pressed 與選中 class，
+ *   不重建卡片（AC-26-03、AC-22-04）
+ * - 分數區（v0.10 隱藏且停用）：滑桿與數字輸入框雙向同步；每次有效變更呼叫 actions.setDraftScore
  * - 試算區：對應色級、建議總字量、每日新字量、預計週數與提示
  * - 「套用」按鈕（.cz-actions）：呼叫 actions.requestApplyGoal（未套用離開頁面不改生效色級）
  *   （v0.5，FE-40；architecture.md §7.15）回 "confirm" 時開初始化確認視窗（EMT.ui.dialog.confirm）：
@@ -60,10 +68,9 @@
   // ── 畫面文字（PRD 以「」標出者逐字使用）──
   var T = {
     title: "難易度設定",
-    intro: "選擇色級或輸入目標分數即時試算，按「套用」後才會更新單字卡的單字集。",
+    intro: "選擇色級即時試算，按「套用」後才會更新單字卡的單字集。",
     statusTarget: "目前目標色級",
     statusEffective: "目前生效色級",
-    statusScore: "目前目標分數",
     builtinCap: "（內建上限）",
     colorHeading: "色級",
     vocabNote: "本系統建議字量",
@@ -78,7 +85,7 @@
     scoreInput: "目標分數",
     invalid: "請輸入 10～990 的分數",
     estimateHeading: "試算結果",
-    estColor: "分數對應色級",
+    estColor: "對應色級", // （FE-43／FE-44 修正）不含「分數」字樣
     estTarget: "建議總字量",
     estDaily: "每日新字量",
     estWeeks: "預計週數",
@@ -102,8 +109,7 @@
     unknown: "—",
     wordsUnit: " 字",
     dailyUnit: " 字/天",
-    weeksUnit: " 週",
-    scoreUnit: " 分"
+    weeksUnit: " 週"
   };
 
   // ── 純函式（不碰 DOM）──
@@ -144,6 +150,7 @@
 
   /**
    * 5 張色級卡片的顯示模型（AC-01-01、AC-26-01、AC-26-03）。順序同契約 COLOR_LEVELS（橘、棕、綠、藍、金）。
+   * - （v0.10，AC-26-05）不含分數範圍（scoreMin／scoreMax 不顯示）
    * - 內建字數：橘 nO、棕 nB、綠 nG 的實際數字（非正數視為資料缺漏，顯示「—」）；藍、金「待定」
    * - 每日新字量：取自 core/goal.js dailyNewWords（橘 10、棕 10、綠 15、藍金 20）；藍、金加註「僅供試算」
    * - 選中：colorOf(draftScore)；分數無效時沒有卡片選中
@@ -151,7 +158,7 @@
    * @param {number} nB 棕色建議字量（實際資料計算）
    * @param {number} nG 綠色建議字量（實際資料計算）
    * @param {number} draftScore 目前草稿分數
-   * @returns {Array<{id: string, name: string, range: string, vocab: string, vocabNote: string, daily: string,
+   * @returns {Array<{id: string, name: string, vocab: string, vocabNote: string, daily: string,
    *          dailyNote: string, scenario: string, locked: boolean, badge: string, selected: boolean}>}
    */
   function cardModels(nO, nB, nG, draftScore) {
@@ -172,7 +179,6 @@
       return {
         id: level.id,
         name: level.nameZh,
-        range: level.scoreMin + "～" + level.scoreMax + T.scoreUnit,
         vocab: vocab,
         vocabNote: T.vocabNote,
         daily: daily === null ? T.unknown : formatInt(daily) + T.dailyUnit,
@@ -215,10 +221,10 @@
   }
 
   /**
-   * 狀態列文字（AC-01-02、AC-01-06、AC-01-07）。
+   * 狀態列文字（AC-01-02、AC-01-06、AC-01-07）。（v0.10，AC-26-05 (b)）不含目標分數。
    * @param {object} G core/goal.js
-   * @param {{appliedScore: number, appliedColor: string, effectiveColor: string}} goal
-   * @returns {{target: string, effective: string, score: string, greenCap: boolean}}
+   * @param {{appliedColor: string, effectiveColor: string}} goal
+   * @returns {{target: string, effective: string, greenCap: boolean}}
    */
   function statusTexts(G, goal) {
     var applied = goal && goal.appliedColor;
@@ -229,7 +235,6 @@
     return {
       target: lvApplied ? lvApplied.nameZh : T.unknown,
       effective: lvEff ? (capped ? lvEff.nameZh + T.builtinCap : lvEff.nameZh) : T.unknown,
-      score: goal && typeof goal.appliedScore === "number" ? String(goal.appliedScore) : T.unknown,
       greenCap: capped
     };
   }
@@ -367,7 +372,6 @@
         on: { click: function () { onColorClick(m.id); } }
       }, [
         D.el("span", { className: "cz-color__head" }, head),
-        D.el("span", { className: "cz-color__range", text: m.range }),
         D.el("span", { className: "cz-color__vocab" }, [
           D.el("span", { text: T.vocabLabel + "：" }),
           D.el("strong", { text: m.vocab }),
@@ -385,16 +389,18 @@
       var ct = content();
       var levels = cardModels(C.N_O, ct.nB, ct.nG, goalState().draftScore).map(buildColorCard);
 
+      // （v0.10，AC-26-05）滑桿與輸入框停用（disabled）且移出 Tab 順序（tabindex="-1"）：
+      // 即使日後 CSS 誤改分數區的 display，也無法聚焦或輸入（architecture.md §7.17 三重保證之 (3)）
       var slider = D.el("input", {
         className: "cz-score__range",
         attrs: { type: "range", id: "cz-score-range", min: String(C.SCORE_MIN), max: String(C.SCORE_MAX),
-          step: String(C.SCORE_STEP), "aria-label": T.scoreSlider },
+          step: String(C.SCORE_STEP), "aria-label": T.scoreSlider, disabled: true, tabindex: "-1" },
         on: { input: onSliderInput, change: onSliderInput }
       });
       var input = D.el("input", {
         className: "cz-score__input",
         attrs: { type: "text", id: "cz-score-input", inputmode: "numeric", autocomplete: "off",
-          "aria-describedby": "cz-score-error", maxlength: "10" },
+          "aria-describedby": "cz-score-error", maxlength: "10", disabled: true, tabindex: "-1" },
         on: { input: onNumberInput, change: onNumberCommit, blur: onNumberCommit }
       });
       var error = D.el("p", { className: "field__error cz-score__error", attrs: { id: "cz-score-error", role: "alert" } });
@@ -429,8 +435,7 @@
       var status = D.el("section", { className: "card cz-status", attrs: { "aria-label": "目前目標狀態" } }, [
         D.el("dl", { className: "cz-rows cz-rows--status" }, [
           row(T.statusTarget, "stTarget", "cz-st-target"),
-          row(T.statusEffective, "stEffective", "cz-st-effective"),
-          row(T.statusScore, "stScore", "cz-st-score")
+          row(T.statusEffective, "stEffective", "cz-st-effective")
         ]),
         statusCap
       ]);
@@ -443,6 +448,22 @@
       refs.guide = D.el("p", { className: "cz-guide", attrs: { id: "cz-guide" }, text: T.firstRunGuide });
       refs.intro = D.el("p", { className: "cz-intro", text: T.intro });
 
+      // （v0.10，FE-43；GS-6、AC-26-05）分數區程式保留，但建立時即 hidden + inert；之後任何路徑都不改回可見。
+      // 錯誤提示 #cz-score-error 在此區內，輸入元件停用後也不會再觸發
+      var scoreSection = D.el("section", { className: "card cz-score", attrs: { "aria-labelledby": "cz-score-title", inert: "" } }, [
+        D.el("h3", { className: "cz-heading", attrs: { id: "cz-score-title" }, text: T.scoreHeading }),
+        D.el("div", { className: "cz-score__controls" }, [
+          slider,
+          D.el("div", { className: "field cz-score__field" }, [
+            D.el("label", { className: "field__label", attrs: { "for": "cz-score-input" }, text: T.scoreInput + "（" + C.SCORE_MIN + "～" + C.SCORE_MAX + "）" }),
+            input
+          ])
+        ]),
+        error
+      ]);
+      scoreSection.hidden = true;
+      refs.scoreSection = scoreSection;
+
       var page = D.el("div", { className: "cz" }, [
         D.el("h2", { className: "cz-title", text: T.title }),
         refs.guide,
@@ -452,17 +473,7 @@
           D.el("h3", { className: "cz-heading", attrs: { id: "cz-colors-title" }, text: T.colorHeading }),
           D.el("div", { className: "cz-colors" }, levels)
         ]),
-        D.el("section", { className: "card cz-score", attrs: { "aria-labelledby": "cz-score-title" } }, [
-          D.el("h3", { className: "cz-heading", attrs: { id: "cz-score-title" }, text: T.scoreHeading }),
-          D.el("div", { className: "cz-score__controls" }, [
-            slider,
-            D.el("div", { className: "field cz-score__field" }, [
-              D.el("label", { className: "field__label", attrs: { "for": "cz-score-input" }, text: T.scoreInput + "（" + C.SCORE_MIN + "～" + C.SCORE_MAX + "）" }),
-              input
-            ])
-          ]),
-          error
-        ]),
+        scoreSection,
         estimate,
         // 按鈕區內容依進入模式建立（renderMode）
         refs.actions = D.el("div", { className: "btn-row cz-actions" })
@@ -551,12 +562,11 @@
       refs.intro.hidden = !m.showIntro;
     }
 
-    /** 狀態列：目前目標色級、目前生效色級 */
+    /** 狀態列：目前目標色級、目前生效色級（v0.10 不顯示目標分數） */
     function renderStatus() {
       var t = statusTexts(G, goalState());
       D.setText(refs.stTarget, t.target);
       D.setText(refs.stEffective, t.effective);
-      D.setText(refs.stScore, t.score);
       refs.statusCap.hidden = !t.greenCap;
     }
 
@@ -576,7 +586,7 @@
       refs.input.setAttribute("aria-invalid", "true");
     }
 
-    /** 依 store 的 draftScore 同步滑桿、輸入框與試算區 */
+    /** 依 store 的 draftScore 同步滑桿、輸入框（v0.10 已隱藏，同步無害）、試算區與選中卡片 */
     function syncDraft() {
       var score = goalState().draftScore;
       refs.slider.value = String(score);
@@ -627,7 +637,10 @@
       // 無效值保留原字與提示，讓使用者修正；試算維持上一個有效值
     }
 
-    /** 色級卡片（Q-32：已在範圍內不變，否則設為下限；藍、金不阻擋，AC-01-07） */
+    /**
+     * 色級卡片（v0.10，GS-2：draftScore = 該色 scoreMax；藍、金不阻擋，AC-01-07）。
+     * 在 handler 內同步完成 clickColor → renderEstimate，只改既有節點文字與 aria-pressed，不重建 DOM（AC-22-04）。
+     */
     function onColorClick(colorId) {
       typing = false;
       act(function (a) { a.clickColor(colorId); });
@@ -641,7 +654,7 @@
       }
     }
 
-    /** 依 store 同步分數區、試算、卡片選中與狀態列（AC-32-04：輸入框、滑桿也回到 draftScore） */
+    /** 依 store 同步分數區、試算、卡片選中與狀態列（AC-32-04、GS-8：取消後選中卡片回到 Color(appliedScore)） */
     function syncAll() {
       typing = false;
       syncDraft();
@@ -651,19 +664,15 @@
     /**
      * 套用（AC-01-02、AC-01-07；v0.5 FE-40：AC-32-01、AC-32-04、AC-32-05～AC-32-07）。
      * 一律經 requestApplyGoal；需要初始化時先開確認視窗（architecture.md §7.15 流程）。
+     * （v0.10，GS-3、AC-26-06）不讀隱藏的輸入框：直接以 store 的 draftScore 套用（未點卡片時即為原值）。
      */
     function onApply() {
       typing = false;
       if (pending) { return; }   // 視窗開啟中再按忽略（背景本已被遮罩攔截，此為保險）
-      // 輸入框若有尚未修正的有效值，套用前先寫入
-      var r = G.parseScoreInput(refs.input.value);
-      var res = act(function (a) {
-        if (r.ok) { a.setDraftScore(r.score); }
-        return a.requestApplyGoal();
-      });
+      var res = act(function (a) { return a.requestApplyGoal(); });
       var status = res && res.status;
       if (status === "confirm") {
-        // 尚未改任何狀態（CI-10）；分數區顯示使用者選的分數直到視窗關閉
+        // 尚未改任何狀態（CI-10）；選中卡片維持使用者選的色級直到視窗關閉
         syncDraft();
         openReinitDialog();
         return;
@@ -716,12 +725,12 @@
       });
     }
 
-    /** （FE-32）首次畫面「開始學習」（AC-25-02、AC-25-03、AC-18-02；契約 FS-4） */
+    /**
+     * （FE-32）首次畫面「開始學習」（AC-25-02、AC-25-03、AC-18-02；契約 FS-4）。
+     * （v0.10，GS-3）不讀隱藏的輸入框，直接以 store 的 draftScore 開始。
+     */
     function onStartLearning() {
       typing = false;
-      // 輸入框若有尚未修正的有效值，先寫入 draftScore（同「套用」）
-      var r = G.parseScoreInput(refs.input.value);
-      if (r.ok) { act(function (a) { a.setDraftScore(r.score); }); }
       // 不包在 act 內：store 以 "entry"、"goal" tag 通知，本頁切回一般模式、router 切到主控台
       var a = store().actions;
       if (a && typeof a.startLearning === "function") { a.startLearning(); }

@@ -3,6 +3,7 @@
  * 依據：architecture.md §9（行動優先 RWD；斷點 768px）、v0.4 §7.11 環形圖列、§9 色彩與類名（db-ring、db-ring--done、db-bars）
  * 涵蓋：AC-17-01、AC-17-06、AC-20-01（無水平捲軸）、AC-20-02（觸控尺寸 ≥ 44px）、
  *       AC-30-01、AC-30-05、AC-30-08、AC-30-10、AC-31-03（減少動態由 05-motion.css 全域關閉 transition）
+ * （v0.10，FE-43）目標區只剩色級與每日新字量 3 項（AC-17-06、AC-26-05 (c)）
  */
 
 .dash-title {
@@ -82,6 +83,24 @@
 
 .dash-entry {
   width: 100%;
+}
+
+/* （v0.11，FE-51）NT-1 不互通說明：同 .dash-backup__hint 字級、可任意斷行、不截斷（AC-24-12、architecture §7.18.7） */
+.dash-backup__origin {
+  margin: var(--gap) 0 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* （v0.11，FE-51）「安裝 App」：NT-1 之後；hidden 時由全域 [hidden] 規則不佔版面（IN-1） */
+.dash-backup__install {
+  margin-top: var(--gap);
+}
+
+.dash-install {
+  min-height: var(--touch);
+  min-width: var(--touch);
 }
 
 .dash-backup__hint {
@@ -291,9 +310,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .dash-stats--goal {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  /* （v0.10，FE-43）目標區移除「目前目標分數」後剩 3 項：沿用 .dash-stats 的 3 欄，不再另設 4 欄（避免右側空一格） */
 
   .dash-entries {
     grid-template-columns: repeat(3, minmax(0, 1fr));

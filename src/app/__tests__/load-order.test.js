@@ -3,6 +3,7 @@
  * 依據：architecture.md v0.3 §4.1 模組取用時機 LD-1～LD-3、「回歸測試位置：全部模組」；§5 建置串接順序
  * 做法：以 tools/build.mjs 的 listAppFiles 取得實際串接順序，在只有 self／window／console 的 node:vm 沙箱
  *       （沒有 module、require、document、localStorage、資料全域變數）依序載入 src/app 全部 .js（不含 main.js、__tests__）。
+ * （FE-44）v0.10：新增 SCORE_DEFAULT 725 與 scoreForCard 斷言。
  * 背景：R6-1（backup.js 早於 persist.js 載入，載入時取用 EMT.core.persist 得到 undefined）在 Node 單元測試中
  *       因 require 不受順序影響而測不到；本檔對全部模組做同樣的瀏覽器環境模擬。
  */
@@ -165,6 +166,21 @@ describe("load-order.test.js", () => {
     assert.equal(typeof sandbox.navigator, "undefined");
   });
 
+  test("v0.10（FE-44）：依建置順序載入後 SCORE_DEFAULT 為 725、goal.scoreForCard(\"green\") 為 725（契約 GS-2、GS-7）", async () => {
+    const { files } = await appFiles();
+    const { sandbox, logs } = makeSandbox();
+    vm.createContext(sandbox);
+    const failures = loadAll(sandbox, files);
+    assert.deepEqual(failures, [], "載入時拋出例外");
+    assert.deepEqual(logs.error, [], "載入時輸出 console.error");
+    const EMT = sandbox.EMT;
+    assert.equal(EMT.core.constants.SCORE_DEFAULT, 725);
+    assert.equal(typeof EMT.core.goal.scoreForCard, "function", "缺少 EMT.core.goal.scoreForCard");
+    assert.equal(EMT.core.goal.scoreForCard("green"), 725);
+    // 預設分數即綠色上限（點綠卡與預設值一致）
+    assert.equal(EMT.core.goal.scoreForCard("green"), EMT.core.constants.SCORE_DEFAULT);
+  });
+
   test("LD-2、HT-5：views 載入時只登錄頁面（主控台與 6 個功能區共 7 個頁籤皆經 EMT.views.register 登錄；隱藏頁 decoder、phrasebank 仍登錄）", async () => {
     const { files } = await appFiles();
     const { sandbox } = makeSandbox();
@@ -249,5 +265,54 @@ describe("load-order.test.js", () => {
     }
     assert.ok(error, "應丟出例外，實際回傳：" + JSON.stringify(result));
     assert.match(String(error.message), /persist/);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// （v0.11，FE-53）PWA 模組依建置順序載入（architecture §10.4「load-order.test.js」列；LD-1、LD-2）
+// ─────────────────────────────────────────────────────────────
+
+describe("load-order.test.js：PWA 模組（v0.11，FE-53）", () => {
+  const APP_DIR = path.join(__dirname, "..");
+  const BUILD_MJS = path.join(APP_DIR, "..", "..", "tools", "build.mjs");
+
+  test("EMT.core.pwa、EMT.services.pwa、EMT.ui.pwaNotice 依建置順序載入不拋例外且存在；PWA_TEXTS.installButton === \"安裝 App\"", async () => {
+    const build = await import(pathToFileURL(BUILD_MJS).href);
+    const files = build.listAppFiles(APP_DIR).filter((f) => f !== "main.js");
+    for (const f of ["core/pwa.js", "services/pwa.js", "ui/pwa-notice.js"]) assert.ok(files.includes(f), "建置清單缺少 " + f);
+    // sw 範本不打包（D-12）
+    assert.ok(!files.some((f) => f.startsWith("pwa/")), "pwa/sw.template.js 不得被串接");
+    assert.ok(files.indexOf("core/pwa.js") < files.findIndex((f) => f.startsWith("state/")));
+    assert.ok(files.indexOf("services/pwa.js") < files.findIndex((f) => f.startsWith("ui/")));
+
+    const errors = [];
+    const sandbox = { console: { log() {}, info() {}, debug() {}, warn: (...a) => errors.push(a), error: (...a) => errors.push(a) } };
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    // 載入時不得讀取 navigator、location、document（PE-2、LD-2）
+    for (const name of ["navigator", "location", "document", "caches"]) {
+      Object.defineProperty(sandbox, name, { configurable: true, get() { throw new Error("載入時讀取 " + name); } });
+    }
+    vm.createContext(sandbox);
+    const failures = [];
+    for (const rel of files) {
+      try {
+        vm.runInContext(fs.readFileSync(path.join(APP_DIR, rel), "utf8"), sandbox, { filename: rel });
+      } catch (e) {
+        failures.push(rel + "：" + e.message);
+      }
+    }
+    assert.deepEqual(failures, []);
+    assert.deepEqual(errors, []);
+    const EMT = sandbox.EMT;
+    assert.equal(typeof EMT.core.pwa, "object");
+    assert.equal(typeof EMT.services.pwa, "object");
+    assert.equal(typeof EMT.services.pwa.start, "function");
+    assert.equal(typeof EMT.services.pwa.requestInstall, "function");
+    assert.equal(typeof EMT.services.pwa.requestReload, "function");
+    assert.equal(typeof EMT.ui.pwaNotice, "object");
+    assert.equal(typeof EMT.ui.pwaNotice.init, "function");
+    assert.equal(EMT.core.pwa.PWA_TEXTS.installButton, "安裝 App");
+    assert.equal(typeof EMT.store.actions.setPwa, "function");
   });
 });

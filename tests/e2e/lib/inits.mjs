@@ -173,3 +173,48 @@ export function fakeVibrate(mode = "stub") {
 })();
 `;
 }
+
+/**
+ * （第 3 輪，v0.9 US-33）麥克風替身：覆寫 navigator.mediaDevices.getUserMedia（architecture §10.2「收音條（替身音源）」）。
+ * 屬 QA 測試腳本，不在產品程式中。mode：
+ *  "ok"（回傳 Web Audio 1 kHz 正弦波串流，音量以 window.__qaMic.setDb(dBFS) 或 setDb(null)=靜音 調整）、
+ *  "denied"（NotAllowedError）、"notfound"（NotFoundError）、"notreadable"（NotReadableError）、
+ *  "missing"（navigator.mediaDevices 不存在）、"nogum"（mediaDevices 存在但無 getUserMedia）。
+ * 執行中可改 window.__qaMic.mode（"ok"／"denied"／"notfound"／"notreadable"）。
+ * window.__qaMic.calls：getUserMedia 呼叫次數；tracks：曾交付的音軌；unplug()：停止目前音軌並觸發 ended（模擬拔除）。
+ */
+export function fakeMic(mode = "ok", initialDb = -25) {
+  return `
+(() => {
+  const M = window.__qaMic = { mode: ${JSON.stringify(mode)}, calls: 0, args: [], tracks: [], db: ${JSON.stringify(initialDb)}, ctx: null, gain: null };
+  if (M.mode === "missing") { try { Object.defineProperty(navigator, "mediaDevices", { value: undefined, configurable: true }); } catch (e) {} return; }
+  if (M.mode === "nogum") { try { Object.defineProperty(navigator, "mediaDevices", { value: { enumerateDevices: () => Promise.resolve([]) }, configurable: true }); } catch (e) {} return; }
+  const amp = (db) => (db === null ? 0 : Math.SQRT2 * Math.pow(10, db / 20));
+  M.setDb = (db) => { M.db = db; if (M.gain) M.gain.gain.setValueAtTime(amp(db), M.ctx.currentTime); };
+  M.unplug = () => { for (const t of M.tracks) { if (t.readyState === "live") { t.stop(); t.dispatchEvent(new Event("ended")); } } };
+  M.live = () => M.tracks.filter((t) => t.readyState === "live").length;
+  const err = (name) => new DOMException("qa " + name, name);
+  const gum = function (c) {
+    M.calls++; M.args.push(JSON.stringify(c));
+    if (M.mode === "denied") return Promise.reject(err("NotAllowedError"));
+    if (M.mode === "notfound") return Promise.reject(err("NotFoundError"));
+    if (M.mode === "notreadable") return Promise.reject(err("NotReadableError"));
+    if (!M.ctx) {
+      M.ctx = new AudioContext();
+      const osc = M.ctx.createOscillator(); osc.type = "sine"; osc.frequency.value = 1000;
+      M.gain = M.ctx.createGain(); M.gain.gain.value = amp(M.db);
+      osc.connect(M.gain); osc.start();
+    }
+    try { M.ctx.resume(); } catch (e) {}
+    const dest = M.ctx.createMediaStreamDestination();
+    M.gain.connect(dest);
+    const s = dest.stream;
+    for (const t of s.getAudioTracks()) M.tracks.push(t);
+    return Promise.resolve(s);
+  };
+  const md = navigator.mediaDevices || {};
+  try { Object.defineProperty(md, "getUserMedia", { value: gum, configurable: true, writable: true }); } catch (e) { md.getUserMedia = gum; }
+  if (!navigator.mediaDevices) { try { Object.defineProperty(navigator, "mediaDevices", { value: md, configurable: true }); } catch (e) {} }
+})();
+`;
+}

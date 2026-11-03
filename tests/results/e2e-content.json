@@ -52,57 +52,71 @@
     "suite": "e2e-content",
     "tc": "TC-12-01",
     "ac": "AC-12-01、AC-12-02、AC-12-03",
-    "result": "通過",
-    "note": "例句 50 句逐一切換檢查；缺主詞/動詞 0；色系（文字/底色）主詞 藍/藍、動詞 紅/紅、受詞 綠/綠、修飾 紫/紫；圖例 主主詞、動核心動詞、受受詞／補語、修修飾語／子句／插入語；任意句輸入框不存在=true"
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
   },
   {
     "suite": "e2e-content",
     "tc": "TC-13-01",
     "ac": "AC-13-01、AC-13-02、AC-13-03、AC-13-04",
-    "result": "通過",
-    "note": "淡化：修飾語 2 段 opacity 0.3、filter grayscale(1)、主幹 opacity 1；切換到 第 48 / 50 句 仍淡化=true；還原：opacity 1、filter none；按鈕「淡化修飾語」(false) → 「還原修飾語」(true)"
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
   },
   {
     "suite": "e2e-content",
     "tc": "TC-14-01",
     "ac": "AC-14-01",
-    "result": "通過",
-    "note": "Abstract 摘要（5 則）、方法論（5 則）、文獻回顧（Research Gap）（5 則）"
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
   },
   {
     "suite": "e2e-content",
     "tc": "TC-15-01",
     "ac": "AC-15-01",
-    "result": "通過",
-    "note": "全部、研究空白 Gap、研究目的 Aim、研究結果 Findings、研究限制 Limitations"
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
   },
   {
     "suite": "e2e-content",
     "tc": "TC-15-02",
     "ac": "AC-15-02、AC-15-03",
-    "result": "通過",
-    "note": "gap 25 則（類別 gap）；aim 25 則（類別 aim）；findings 25 則（類別 findings）；limitations 25 則（類別 limitations）；回到全部 100 則"
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
   },
   {
     "suite": "e2e-content",
     "tc": "TC-16-01",
     "ac": "AC-16-01",
-    "result": "通過",
-    "note": "逐字：「g」65 則、「ga」13 則、「gap」9 則；大寫 GAP 相同=true；中文「缺口」4 則、相符=true；gap + Aim 分類 1 則、相符=true；10 次按鍵更新 ms：4、4.8、16.9、17.9、14.4、17.6、16.6、16.1、17.7、16.2"
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
   },
   {
     "suite": "e2e-content",
     "tc": "TC-16-02",
     "ac": "AC-16-02",
-    "result": "通過",
-    "note": "0 則、提示「找不到符合的句型」"
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
   },
   {
     "suite": "e2e-content",
     "tc": "TC-16-03",
     "ac": "AC-16-03",
-    "result": "通過",
-    "note": "剪貼簿「Evidence on [topic] comes almost entirely from [region], so it is unclear whether the findings hold elsewhere.」與模板相同=true；提示 [\"已複製\"]"
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-16-04a",
+    "ac": "AC-16-04",
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
+  },
+  {
+    "suite": "e2e-content",
+    "tc": "TC-16-04b",
+    "ac": "AC-16-04",
+    "result": "不適用（暫停）",
+    "note": "PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收；頁面不可到達見 TC-20-04"
   },
   {
     "suite": "e2e-content",
@@ -117,19 +131,5 @@
     "ac": "（全套件）無未處理例外",
     "result": "通過",
     "note": "[]"
-  },
-  {
-    "suite": "e2e-content",
-    "tc": "TC-16-04a",
-    "ac": "AC-16-04",
-    "result": "通過",
-    "note": "剪貼簿拒絕：提示 [\"複製失敗，請手動選取\"]；反白文字與模板相同=true；未處理例外 0"
-  },
-  {
-    "suite": "e2e-content",
-    "tc": "TC-16-04b",
-    "ac": "AC-16-04",
-    "result": "通過",
-    "note": "剪貼簿不存在：提示 [\"複製失敗，請手動選取\"]；反白文字與模板相同=true；未處理例外 0"
   }
 ]

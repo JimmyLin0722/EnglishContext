@@ -5,6 +5,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, storageMode } from "./lib/inits.mjs";
+import { stateRecord, seed, readState, scoreVisibility } from "./lib/state.mjs";
+// 第 3 輪（PRD v0.10 R-19、Q-39）：首次預設 725、只點卡片；導覽 4 項（v0.9 R-18 三）
 
 const R = recorder("e2e-firstrun");
 const KEY = "englishMasterTrack:state";
@@ -51,12 +53,14 @@ async function pickFile(p, content, name, { confirm = true, trigger = "#cz-resto
   return dlg;
 }
 
-// 先產生一份「v0.8 匯出的合法備份」（目標 300 棕、自訂 10 字、學習紀錄）與一份 v1 備份（v0.7 格式）
+// 先產生一份「本程式匯出的合法備份」（目標 300 棕、自訂 10 字、學習紀錄）與一份 v1 備份（v0.7 格式）
+// 第 3 輪（v0.10）：畫面無法輸入 300，改以既有狀態（draftScore = appliedScore = 300，FB-36）啟動後再操作與匯出
 let BACKUP_V2, BACKUP_V1;
 {
   const p = await open();
   await p.goto(); await p.startLearning();
-  await p.go("customizer"); await p.type("#cz-score-input", "300"); await p.click("#cz-apply");
+  await seed(p, stateRecord(300));
+  await p.go("customizer");
   await p.click('[data-template="cs"]'); await sleep(100);
   await p.go("flashcards"); await p.click(".fc-flip"); await p.click(".fc-next"); await sleep(400); await p.click(".fc-flip");
   await p.go("part5"); await p.click("[data-p5=option]", 0);
@@ -76,19 +80,19 @@ let BACKUP_V2, BACKUP_V1;
     await p.viewport(375, 667); await sleep(150);
     const m = await firstRunInfo(p);
     await p.viewport(1366, 900); await sleep(100);
-    const ok = key === null && a.entry === "firstRun" && a.tab === "customizer" && a.cards === "orange,brown,green,blue,gold" && a.pressed === "green" && a.input === "600" && a.slider && a.estimate && a.start && a.restore && !a.apply
+    const ok = key === null && a.entry === "firstRun" && a.tab === "customizer" && a.cards === "orange,brown,green,blue,gold" && a.pressed === "green" && a.input === null && !a.slider && a.estimate && a.start && a.restore && !a.apply
       && !a.nav && a.navBtns === 0 && !a.toggle && !a.dashboard && a.entries === 0 && !a.custom && !a.form && a.templates === 0 && a.footerSources
       && !m.nav && m.navBtns === 0 && !m.toggle && m.start;
     return { ok, note: `1366：${JSON.stringify(a)}；375：導覽可見=${m.nav}、可見導覽鈕 ${m.navBtns}、選單鈕=${m.toggle}；狀態鍵=${key === null ? "無" : "有"}` };
   });
   await R.check("TC-25-04", "AC-25-04", async () => {
-    await p.click('.cz-color[data-color="orange"]'); await p.type("#cz-score-input", "455"); await p.key("Tab", "Tab", 9);
-    const changed = await firstRunInfo(p);
-    await p.reload(); const a = await firstRunInfo(p); const k1 = await stored(p);
+    await p.click('.cz-color[data-color="brown"]'); await p.click('.cz-color[data-color="orange"]');
+    const changed = await firstRunInfo(p); const d0 = await p.ev(`EMT.store.getState().data.goal.draftScore`);
+    await p.reload(); const a = await firstRunInfo(p); const k1 = await stored(p); const d1 = await p.ev(`EMT.store.getState().data.goal.draftScore`);
     await p.goto("about:blank", { waitReady: false }); await sleep(300); await p.goto();
-    const b = await firstRunInfo(p); const k2 = await stored(p);
-    const ok = changed.input === "455" && a.entry === "firstRun" && a.input === "600" && a.pressed === "green" && k1 === null && b.entry === "firstRun" && b.input === "600" && b.pressed === "green" && k2 === null;
-    return { ok, note: `改分數後 ${changed.input}/${changed.pressed}；重新整理 → ${a.entry}、${a.input}、選中 ${a.pressed}、狀態鍵 ${k1 === null ? "無" : "有"}；關閉重開 → ${b.entry}、${b.input}、選中 ${b.pressed}、狀態鍵 ${k2 === null ? "無" : "有"}` };
+    const b = await firstRunInfo(p); const k2 = await stored(p); const d2 = await p.ev(`EMT.store.getState().data.goal.draftScore`);
+    const ok = changed.pressed === "orange" && d0 === 215 && a.entry === "firstRun" && a.pressed === "green" && d1 === 725 && k1 === null && b.entry === "firstRun" && b.pressed === "green" && d2 === 725 && k2 === null;
+    return { ok, note: `點棕再點橘後 選中 ${changed.pressed}、記憶體 draftScore ${d0}；重新整理 → ${a.entry}、選中 ${a.pressed}、draftScore ${d1}、狀態鍵 ${k1 === null ? "無" : "有"}；關閉重開 → ${b.entry}、選中 ${b.pressed}、draftScore ${d2}、狀態鍵 ${k2 === null ? "無" : "有"}` };
   });
   await R.check("TC-25-07", "AC-25-07、AC-23-02（任一頁面）", async () => {
     await p.click('.cz-color[data-color="brown"]');
@@ -151,14 +155,15 @@ let BACKUP_V2, BACKUP_V1;
   const p = await open();
   await p.goto();
   await R.check("TC-25-02", "AC-25-02", async () => {
-    await p.type("#cz-score-input", "720"); await p.key("Tab", "Tab", 9);
+    await p.click('.cz-color[data-color="brown"]');
     const pre = await firstRunInfo(p);
     await p.click("#cz-start"); await sleep(400);
     const a = await firstRunInfo(p); const g = await goalTexts(p); const k = JSON.parse(await stored(p) || "null");
     const total = await p.ev(`EMT.store.getState().runtime.studySet.length`);
-    const ok = pre.pressed === "green" && a.entry === "main" && a.tab === "dashboard" && a.dashboard && a.nav && a.navBtns === 6 && g.includes("目前目標分數=720") && g.includes("目前生效色級=綠") && g.includes("每日新字量=15 字/天")
-      && k && k.schemaVersion === 2 && k.data.goal.appliedScore === 720 && k.data.goal.effectiveColor === "green" && total === 5620;
-    return { ok, note: `720 選中 ${pre.pressed}；按「開始學習」→ ${a.entry}/${a.tab}、導覽 ${a.navBtns} 鈕；主控台 ${g}；單字集 ${total}；寫入 schemaVersion ${k && k.schemaVersion}、goal ${k && JSON.stringify(k.data.goal)}` };
+    const dlg = await p.ev(`!!document.querySelector(".dialog")`);
+    const ok = pre.pressed === "brown" && !dlg && a.entry === "main" && a.tab === "dashboard" && a.dashboard && a.nav && a.navBtns === 4 && g.includes("目前目標色級=棕") && g.includes("目前生效色級=棕") && g.includes("每日新字量=10 字/天") && !g.includes("分數")
+      && k && k.schemaVersion === 2 && k.data.goal.appliedScore === 465 && k.data.goal.effectiveColor === "brown" && total === 2809;
+    return { ok, note: `點棕 → 選中 ${pre.pressed}；按「開始學習」→ 確認視窗=${dlg}、${a.entry}/${a.tab}、導覽 ${a.navBtns} 鈕；主控台 ${g}；單字集 ${total}；寫入 schemaVersion ${k && k.schemaVersion}、goal ${k && JSON.stringify(k.data.goal)}` };
   });
   await R.check("TC-25-06", "AC-25-06", async () => {
     await p.go("customizer"); await sleep(300);
@@ -178,11 +183,12 @@ let BACKUP_V2, BACKUP_V1;
   await p.goto();
   await R.check("TC-25-03", "AC-25-03、AC-26-04（首次畫面）", async () => {
     await p.click('.cz-color[data-color="blue"]');
-    const pre = await p.ev(`({ input: document.getElementById("cz-score-input").value, cap: [...document.querySelectorAll(".cz-warning")].some((e) => !e.hidden && e.getClientRects().length && e.textContent === "目前內建字庫到綠色為止"), pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((b) => b.dataset.color).join() })`);
+    const pre = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, cap: [...document.querySelectorAll(".cz-warning")].some((e) => !e.hidden && e.getClientRects().length && e.textContent === "目前內建字庫到綠色為止"), pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((b) => b.dataset.color).join() })`);
     await p.click("#cz-start"); await sleep(400);
-    const g = await goalTexts(p);
-    const ok = pre.input === "730" && pre.cap && pre.pressed === "blue" && g.includes("目前目標分數=730") && g.includes("目前目標色級=藍") && g.includes("目前生效色級=綠（內建上限）") && g.includes("每日新字量=15 字/天");
-    return { ok, note: `點藍 → ${JSON.stringify(pre)}；開始學習後主控台 ${g}` };
+    const g = await goalTexts(p); const k = JSON.parse(await stored(p) || "null");
+    const ok = pre.draft === 855 && pre.cap && pre.pressed === "blue" && g.includes("目前目標色級=藍") && g.includes("目前生效色級=綠（內建上限）") && g.includes("每日新字量=15 字/天") && !g.includes("分數")
+      && k && k.data.goal.appliedScore === 855 && k.data.goal.effectiveColor === "green";
+    return { ok, note: `點藍 → ${JSON.stringify(pre)}；開始學習後主控台 ${g}；localStorage goal ${k && JSON.stringify(k.data.goal)}` };
   });
   await p.close();
 }
@@ -220,17 +226,20 @@ let BACKUP_V2, BACKUP_V1;
   });
   await p.reload();
   await R.check("TC-25-10", "AC-25-10、AC-24-03", async () => {
-    await p.click('.cz-color[data-color="gold"]'); // 首次畫面上尚未生效的選擇（860）
+    await p.click('.cz-color[data-color="gold"]'); // 首次畫面上尚未生效的選擇（990）
     const n = (await toasts(p)).length;
     const dlg = await pickFile(p, BACKUP_V2, "restore.json");
     await sleep(300);
     const a = await firstRunInfo(p); const g = await goalTexts(p); const t = await toasts(p, n);
     const exp = JSON.parse(BACKUP_V2).data;
-    const now = await p.ev(`EMT.store.getState().data`);
-    await p.reload(); const b = await firstRunInfo(p); const g2 = await goalTexts(p);
-    const ok = !!dlg && a.entry === "main" && a.tab === "dashboard" && a.nav && g.includes("目前目標分數=300") && g.includes("目前生效色級=棕") && t.some((x) => x.startsWith("已匯入，略過 0 筆"))
-      && JSON.stringify(now.goal) === JSON.stringify(exp.goal) && now.customVocab.length === exp.customVocab.length && b.entry === "main" && g2.includes("目前目標分數=300");
-    return { ok, note: `首次畫面點金（860）後還原 300 棕備份：確認框=${!!dlg}、提示 ${JSON.stringify(t)} → ${a.entry}/${a.tab}、導覽=${a.nav}；主控台 ${g}；goal ${JSON.stringify(now.goal)}；重新載入 → ${b.entry}、${g2}` };
+    const now = await p.ev(`EMT.store.getState().data`); const k1 = JSON.parse(await stored(p) || "null");
+    const reinitDlg = await p.ev(`!!document.querySelector(".dialog")`);
+    await p.reload(); const b = await firstRunInfo(p); const g2 = await goalTexts(p); const k2 = JSON.parse(await stored(p) || "null");
+    await p.go("customizer"); await sleep(250); const pressedAfter = await p.ev(`[...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join()`);
+    const ok = !!dlg && !reinitDlg && a.entry === "main" && a.tab === "dashboard" && a.nav && g.includes("目前目標色級=棕") && g.includes("目前生效色級=棕") && t.some((x) => x.startsWith("已匯入，略過 0 筆"))
+      && JSON.stringify(now.goal) === JSON.stringify(exp.goal) && exp.goal.appliedScore === 300 && k1.data.goal.appliedScore === 300 && now.customVocab.length === exp.customVocab.length
+      && b.entry === "main" && g2.includes("目前生效色級=棕") && k2.data.goal.appliedScore === 300 && pressedAfter === "brown";
+    return { ok, note: `首次畫面點金（990）後還原 300 棕備份：匯入確認框=${!!dlg}、初始化確認視窗=${reinitDlg}、提示 ${JSON.stringify(t)} → ${a.entry}/${a.tab}、導覽=${a.nav}；主控台 ${g}；goal ${JSON.stringify(now.goal)}；localStorage appliedScore ${k1.data.goal.appliedScore}；重新載入 → ${b.entry}、${g2}、localStorage ${k2.data.goal.appliedScore}；難易度設定選中 ${pressedAfter}` };
   });
   await p.close();
 }
@@ -286,7 +295,7 @@ let BACKUP_V2, BACKUP_V1;
 {
   const p = await open();
   await p.goto(); await p.startLearning();
-  const cards = () => p.ev(`[...document.querySelectorAll(".cz-colors .cz-color")].map((b) => { const r = b.getBoundingClientRect(); return { c: b.dataset.color, tag: b.tagName, name: b.querySelector(".cz-color__name").textContent, range: b.querySelector(".cz-color__range").textContent,
+  const cards = () => p.ev(`[...document.querySelectorAll(".cz-colors .cz-color")].map((b) => { const r = b.getBoundingClientRect(); return { c: b.dataset.color, tag: b.tagName, name: b.querySelector(".cz-color__name").textContent, range: (b.innerText.match(/\\d+\\s*[～~－-]\\s*\\d+|\\d+\\s*分/g) || []).join(""),
     vocab: b.querySelector(".cz-color__vocab strong").textContent, daily: b.querySelector(".cz-color__daily").textContent, scen: b.querySelector(".cz-color__scenario").textContent, lock: !!b.querySelector("svg"), soon: b.textContent.includes("即將開放"),
     pressed: b.getAttribute("aria-pressed"), w: Math.round(r.width), h: Math.round(r.height) }; })`);
   await R.check("TC-26-01", "AC-26-01、AC-01-01", async () => {
@@ -294,56 +303,103 @@ let BACKUP_V2, BACKUP_V1;
     for (const [w, h] of [[375, 667], [768, 1024], [1366, 900]]) {
       await p.viewport(w, h); await p.go("customizer"); await sleep(300);
       const cs = await cards(); const it = Object.fromEntries(cs.map((x) => [x.c, x]));
-      const good = cs.map((x) => x.c).join() === "orange,brown,green,blue,gold" && cs.every((x) => x.tag === "BUTTON" && x.w >= 44 && x.h >= 44 && x.name && x.range && x.scen)
+      const good = cs.map((x) => x.c).join() === "orange,brown,green,blue,gold" && cs.every((x) => x.tag === "BUTTON" && x.w >= 44 && x.h >= 44 && x.name && !x.range && x.scen)
         && it.orange.vocab === "1,000 字" && it.brown.vocab === "2,809 字" && it.green.vocab === "5,620 字" && it.blue.vocab === "待定" && it.gold.vocab === "待定"
         && /10 字\/天/.test(it.orange.daily) && /10 字\/天/.test(it.brown.daily) && /15 字\/天/.test(it.green.daily) && /20 字\/天.*僅供試算/.test(it.blue.daily) && /20 字\/天.*僅供試算/.test(it.gold.daily) && !/僅供試算/.test(it.green.daily)
         && it.blue.lock && it.gold.lock && it.blue.soon && it.gold.soon && !it.orange.lock && !it.green.soon;
-      ok = ok && good; out.push(`${w}px：${cs.map((x) => `${x.name} ${x.range} ${x.vocab} ${x.daily.replace(/\s+/g, "")} ${x.w}×${x.h}${x.lock ? " 鎖" : ""}`).join("／")}`);
+      ok = ok && good; out.push(`${w}px：${cs.map((x) => `${x.name} ${x.vocab} ${x.daily.replace(/\s+/g, "")} ${x.w}×${x.h}${x.lock ? " 鎖" : ""}${x.range ? " 範圍「" + x.range + "」" : ""}`).join("／")}`);
     }
-    // 整張卡片可點：點卡片右下角（非文字區）
-    await p.type("#cz-score-input", "300"); await p.key("Tab", "Tab", 9);
+    // 整張卡片可點：既有 300（棕）時點綠卡右下角（非文字區）
+    await p.viewport(1366, 900); await seed(p, stateRecord(300)); await p.go("customizer"); await sleep(250);
     const pt = await p.ev(`(() => { const b = document.querySelector('.cz-color[data-color="green"]'); b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); return { x: r.right - 6, y: r.bottom - 6 }; })()`);
     for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) await p.send("Input.dispatchMouseEvent", { type, x: pt.x, y: pt.y, button: "left", clickCount: 1 });
     await sleep(80);
-    const after = await p.ev(`document.getElementById("cz-score-input").value`);
+    const after = await p.ev(`[EMT.store.getState().data.goal.draftScore, [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join()]`);
     const forbidden = await p.ev(`/官方門檻|Tier\\s*[1-4]/.test(document.body.innerText)`);
-    ok = ok && after === "470" && !forbidden;
-    return { ok, note: out.join("｜") + `；點綠卡右下角 → 分數 ${after}；官方門檻/Tier 字樣=${forbidden}` };
+    ok = ok && after[0] === 725 && after[1] === "green" && !forbidden;
+    return { ok, note: out.join("｜") + `；點綠卡右下角 → 選中 ${after[1]}、draftScore ${after[0]}；官方門檻/Tier 字樣=${forbidden}` };
   });
   await R.check("TC-26-02", "AC-26-02", async () => {
-    await p.go("customizer"); await p.click('.cz-color[data-color="green"]'); await p.click("#cz-apply"); // 生效綠
-    await p.type("#cz-score-input", "300"); await p.key("Tab", "Tab", 9);
+    // 既有 300（棕）且有學習紀錄：點卡片本身不跳視窗
+    await seed(p, stateRecord(300, { masteredWordKeys: ["the"], vocabQuiz: { answered: 1, correct: 1 } }));
+    await p.go("customizer"); await sleep(200);
     const a = await cards();
     await p.click('.cz-color[data-color="green"]');
     const b = await cards();
-    const e = await p.ev(`({ input: document.getElementById("cz-score-input").value, color: document.querySelector(".cz-est-color").textContent, daily: document.querySelector(".cz-est-daily").textContent, eff: document.querySelector(".cz-st-effective").textContent, n: EMT.store.getState().runtime.studySet.length, eff2: EMT.store.getState().data.goal.effectiveColor })`);
-    // 生效色級不變：改點橘（未套用）後檢查
+    const e = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, color: document.querySelector(".cz-est-color").textContent, daily: document.querySelector(".cz-est-daily").textContent, eff: document.querySelector(".cz-st-effective").textContent, n: EMT.store.getState().runtime.studySet.length, eff2: EMT.store.getState().data.goal.effectiveColor, dialog: !!document.querySelector(".dialog") })`);
     await p.click('.cz-color[data-color="orange"]');
-    const c = await p.ev(`({ eff: EMT.store.getState().data.goal.effectiveColor, n: EMT.store.getState().runtime.studySet.length, pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join() })`);
-    const ok = a.filter((x) => x.pressed === "true").map((x) => x.c).join() === "brown" && b.filter((x) => x.pressed === "true").map((x) => x.c).join() === "green" && e.input === "470" && e.color === "綠" && e.daily === "15 字/天"
-      && c.eff === "green" && c.n === 5620 && c.pressed === "orange";
-    return { ok, note: `300 → 選中 ${a.filter((x) => x.pressed === "true").map((x) => x.c)}；點綠 → 選中 ${b.filter((x) => x.pressed === "true").map((x) => x.c)}、分數 ${e.input}、試算 ${e.color}/${e.daily}；再點橘（未套用）→ 選中 ${c.pressed}、生效 ${c.eff}、單字集 ${c.n}` };
-  });
-  await R.check("TC-26-03", "AC-26-03", async () => {
-    await p.type("#cz-score-input", "600"); await p.key("Tab", "Tab", 9);
-    await p.type("#cz-score-input", "300"); await p.key("Tab", "Tab", 9);
-    const a = await p.ev(`[...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join()`);
-    await p.type("#cz-score-input", "600"); await p.key("Tab", "Tab", 9);
-    await p.ev(`(() => { const s = document.getElementById("cz-score-range"); s.value = "300"; s.dispatchEvent(new Event("input", { bubbles: true })); })()`);
-    const b = await p.ev(`[[...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join(), document.getElementById("cz-score-input").value]`);
-    await p.click('.cz-color[data-color="gold"]'); const c = await p.ev(`[document.getElementById("cz-score-range").value, document.getElementById("cz-score-input").value]`);
-    return { ok: a === "brown" && b[0] === "brown" && b[1] === "300" && c[0] === "860" && c[1] === "860", note: `輸入 300 → 選中 ${a}；滑桿 300 → 選中 ${b[0]}、輸入框 ${b[1]}；點金卡 → 滑桿/輸入框 ${c.join("/")}（交互使用）` };
+    const c = await p.ev(`({ eff: EMT.store.getState().data.goal.effectiveColor, n: EMT.store.getState().runtime.studySet.length, pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join(), dialog: !!document.querySelector(".dialog") })`);
+    const ok = a.filter((x) => x.pressed === "true").map((x) => x.c).join() === "brown" && b.filter((x) => x.pressed === "true").map((x) => x.c).join() === "green" && e.draft === 725 && e.color === "綠" && e.daily === "15 字/天"
+      && e.eff === "棕" && e.eff2 === "brown" && e.n === 2809 && !e.dialog && c.eff === "brown" && c.n === 2809 && c.pressed === "orange" && !c.dialog;
+    return { ok, note: `既有 300 → 選中 ${a.filter((x) => x.pressed === "true").map((x) => x.c)}；點綠 → 選中 ${b.filter((x) => x.pressed === "true").map((x) => x.c)}、draftScore ${e.draft}、試算 ${e.color}/${e.daily}、生效仍 ${e.eff}、單字集 ${e.n}、確認視窗=${e.dialog}；再點橘（未套用）→ 選中 ${c.pressed}、生效 ${c.eff}、單字集 ${c.n}、確認視窗=${c.dialog}` };
   });
   await R.check("TC-26-04", "AC-26-04、AC-01-07", async () => {
     const out = []; let ok = true;
-    for (const [c, s] of [["blue", "730"], ["gold", "860"]]) {
-      await p.type("#cz-score-input", "600"); await p.key("Tab", "Tab", 9);
+    for (const [c, s] of [["blue", 855], ["gold", 990]]) {
+      await seed(p, stateRecord(600)); await p.go("customizer"); await sleep(200);
       await p.click(`.cz-color[data-color="${c}"]`);
-      const r = await p.ev(`({ input: document.getElementById("cz-score-input").value, color: document.querySelector(".cz-est-color").textContent, cap: [...document.querySelectorAll(".cz-estimate .cz-warning")].some((e) => !e.hidden && e.textContent === "目前內建字庫到綠色為止"), applyEnabled: !document.getElementById("cz-apply").disabled })`);
-      const good = r.input === s && r.cap && r.applyEnabled && r.color.includes("即將開放"); ok = ok && good; out.push(`${c}：${JSON.stringify(r)}`);
+      const r = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join(), color: document.querySelector(".cz-est-color").textContent, cap: [...document.querySelectorAll(".cz-estimate .cz-warning")].some((e) => !e.hidden && e.textContent === "目前內建字庫到綠色為止"), applyEnabled: !document.getElementById("cz-apply").disabled })`);
+      const good = r.draft === s && r.pressed === c && r.cap && r.applyEnabled && r.color.includes("即將開放"); ok = ok && good; out.push(`${c}：${JSON.stringify(r)}`);
     }
     return { ok, note: out.join("；") };
   });
+  await p.close();
+}
+
+R.na("TC-26-03", "AC-26-03", "PRD v0.10 標「v0.10 暫停（分數輸入隱藏）」，本版不驗收（分數滑桿與輸入框已隱藏；隱藏與不可聚焦另由 TC-26-05 驗證）");
+
+// ═════════ AC-26-05：不顯示分數（畫面可見性、Tab 焦點、無障礙樹） ═════════
+{
+  const out = []; let ok = true;
+  const p = await open();
+  await p.send("Accessibility.enable").catch(() => {});
+  const axScore = async () => {
+    const t = await p.send("Accessibility.getFullAXTree");
+    const nodes = (t.nodes || []).filter((n) => !n.ignored);
+    const role = (n) => (n.role && n.role.value) || "";
+    const name = (n) => (n.name && n.name.value) || "";
+    return nodes.filter((n) => ["slider", "spinbutton"].includes(role(n)) || (["textbox", "searchbox"].includes(role(n)) && /分數/.test(name(n))) || /目標分數|請輸入 10～990 的分數|\d+\s*[～~]\s*\d+\s*分/.test(name(n))).map((n) => `${role(n)}:${name(n)}`);
+  };
+  const tabWalk = async () => {
+    await p.ev(`document.activeElement && document.activeElement.blur(); window.scrollTo(0, 0)`);
+    const seen = new Set(); let hit = [];
+    for (let i = 0; i < 80; i++) {
+      await p.key("Tab", "Tab", 9);
+      const a = await p.ev(`(() => { const e = document.activeElement; if (!e || e === document.body) return null; return { id: e.id, tag: e.tagName, type: e.type || "", cls: e.className && e.className.baseVal === undefined ? e.className : "", text: (e.innerText || e.getAttribute("aria-label") || "").trim().slice(0, 16) }; })()`);
+      if (!a) continue;
+      const k = `${a.tag}#${a.id}.${a.cls}@${a.text}`; seen.add(k);
+      if (a.id === "cz-score-range" || a.id === "cz-score-input" || a.type === "range" || a.type === "number") hit.push(k);
+    }
+    return { visited: seen.size, hit };
+  };
+  for (const [w, h] of [[375, 667], [1366, 900]]) {
+    await p.viewport(w, h);
+    // (a) 首次畫面
+    await p.ev(`localStorage.clear()`).catch(() => {}); p.autoStart = false; await p.goto();
+    const screens = [];
+    const check = async (label) => {
+      const v = await scoreVisibility(p); const ax = await axScore(); const tw = await tabWalk();
+      const good = v.sliders === 0 && v.inputs === 0 && v.rangeText.length === 0 && !v.targetScore && !v.invalidMsg && ax.length === 0 && tw.hit.length === 0;
+      ok = ok && good; screens.push(`${label}：滑桿 ${v.sliders}、輸入框 ${v.inputs}、範圍文字 ${JSON.stringify(v.rangeText)}、「目標分數」${v.targetScore}、錯誤提示 ${v.invalidMsg}、無障礙樹分數元件 ${JSON.stringify(ax)}、Tab ${tw.visited} 個焦點中分數元件 ${tw.hit.length}`);
+    };
+    await check("(a) 首次畫面");
+    for (const c of ["orange", "brown", "green", "blue", "gold"]) await p.click(`.cz-color[data-color="${c}"]`);
+    await p.click("#cz-start"); await sleep(400);
+    // (c) 主控台
+    await check("(c) 主控台");
+    // (b) 一般難易度設定頁
+    await p.go("customizer"); await sleep(300);
+    await check("(b) 一般頁");
+    for (const c of ["orange", "brown", "green", "blue", "gold"]) await p.click(`.cz-color[data-color="${c}"]`);
+    await p.click("#cz-apply"); await sleep(200);
+    await check("(b) 一般頁點 5 卡並套用後");
+    await p.go("dashboard"); await sleep(250);
+    await check("(c) 主控台（套用金後）");
+    out.push(`${w}px｜${screens.join("｜")}`);
+    p.autoStart = true;
+  }
+  const err = p.log.exceptions.length + p.log.console.filter((c) => c.type === "error").length;
+  R[ok && err === 0 ? "pass" : "fail"]("TC-26-05", "AC-26-05", out.join(" ／ ") + `；未處理錯誤 ${err}`);
   await p.close();
 }
 
@@ -365,10 +421,10 @@ let BACKUP_V2, BACKUP_V1;
       await p.ev(`window.scrollTo(0, document.documentElement.scrollHeight)`); await sleep(100); const c = await navState();
       const reach = [];
       for (const it of a.items) { await p.click(`#app-nav [data-tab="${it.tab}"]`); await sleep(80); reach.push((await p.ev(`EMT.router.current()`)) === it.tab); }
-      const good = a.position === "fixed" && a.bottom === a.vh && b.top === a.top && c.top === a.top && a.items.map((x) => x.text).join("、") === "主控台、難易度設定、單字卡、模擬測驗、解碼器、句型庫"
+      const good = a.position === "fixed" && a.bottom === a.vh && b.top === a.top && c.top === a.top && a.items.map((x) => x.text).join("、") === "主控台、難易度設定、單字卡、模擬測驗"
         && a.items.every((x) => x.icon && !x.clipped) && reach.every(Boolean) && a.toggle === "none";
       ok = ok && good;
-      out.push(`${w}px：position=${a.position}、導覽 top ${a.top}/${b.top}/${c.top}（捲動前/中/底）、bottom=${a.bottom}/視窗 ${a.vh}、項目 ${a.items.map((x) => `${x.text}${x.icon ? "+圖示" : ""}${x.clipped ? "(裁切)" : ""}`).join("、")}、點擊到達 ${reach.filter(Boolean).length}/6、選單鈕 display=${a.toggle}`);
+      out.push(`${w}px：position=${a.position}、導覽 top ${a.top}/${b.top}/${c.top}（捲動前/中/底）、bottom=${a.bottom}/視窗 ${a.vh}、項目 ${a.items.map((x) => `${x.text}${x.icon ? "+圖示" : ""}${x.clipped ? "(裁切)" : ""}`).join("、")}、點擊到達 ${reach.filter(Boolean).length}/${a.items.length}、選單鈕 display=${a.toggle}`);
     }
     return { ok, note: out.join("｜") };
   });
@@ -381,8 +437,8 @@ let BACKUP_V2, BACKUP_V1;
     const out = []; let ok = true;
     for (const w of [375, 640]) {
       await p.viewport(w, 667); await sleep(200);
-      for (const tab of ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources"]) {
-        await p.ev(`EMT.router.go(${JSON.stringify(tab)})`); await sleep(tab === "phrasebank" ? 1500 : 300); // 句型庫分批補齊完成後再捲到底
+      for (const tab of ["dashboard", "customizer", "flashcards", "part5", "sources"]) {
+        await p.ev(`EMT.router.go(${JSON.stringify(tab)})`); await sleep(300);
         await p.ev(`window.scrollTo(0, document.documentElement.scrollHeight)`); await sleep(150);
         await p.ev(`window.scrollTo(0, document.documentElement.scrollHeight)`); await sleep(150);
         const r = await p.ev(`(() => { const nav = document.getElementById("app-nav").getBoundingClientRect(); const all = [...document.querySelectorAll("#app-main *, #app-footer *")].filter((e) => { const s = getComputedStyle(e); if (s.display === "none" || s.visibility === "hidden" || e.closest("[hidden]") || e.closest(".visually-hidden")) return false; const d = e.closest("details:not([open])"); if (d && !e.closest("summary")) return false; const rr = e.getBoundingClientRect(); return rr.width > 0 && rr.height > 0; });
@@ -410,9 +466,9 @@ let BACKUP_V2, BACKUP_V1;
       await p.viewport(w, h); await p.reload(); await sleep(200);
       const a = await navState();
       const reach = [];
-      for (const tab of ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank"]) { await p.go(tab); reach.push((await p.ev(`EMT.router.current()`)) === tab); }
-      const good = a.position !== "fixed" && reach.every(Boolean) && a.items.every((x) => !x.icon); ok = ok && good;
-      out.push(`${w}px：position=${a.position}、圖示顯示=${a.items.some((x) => x.icon)}、選單鈕 display=${a.toggle}、到達 ${reach.filter(Boolean).length}/6`);
+      for (const tab of ["dashboard", "customizer", "flashcards", "part5"]) { await p.go(tab); reach.push((await p.ev(`EMT.router.current()`)) === tab); }
+      const good = a.position !== "fixed" && reach.every(Boolean) && a.items.length === 4 && a.items.every((x) => !x.icon); ok = ok && good;
+      out.push(`${w}px：position=${a.position}、圖示顯示=${a.items.some((x) => x.icon)}、選單鈕 display=${a.toggle}、導覽項目 ${a.items.map((x) => x.text.trim()).join("、")}、到達 ${reach.filter(Boolean).length}/4`);
     }
     return { ok, note: out.join("；") };
   });
@@ -429,7 +485,7 @@ let BACKUP_V2, BACKUP_V1;
       xmlns: ics.some((s) => s.outerHTML.includes("http")), fonts: [...document.fonts].length }; })()`);
     const reqs = p.log.requests.filter((x) => !x.url.startsWith("file://") && !/^(blob|data):/.test(x.url));
     const errs = p.log.logEntries.filter((e) => e.level === "error");
-    return { ok: r.n === 6 && r.shown === 6 && r.ext === 0 && !r.xmlns && reqs.length === 0 && errs.length === 0, note: `離線 375px：內嵌 SVG 圖示 ${r.n} 個、顯示 ${r.shown}；外部圖示元素 ${r.ext}；SVG 含 http 字串=${r.xmlns}；外部請求 ${reqs.length}；Console 錯誤 ${errs.length}；document.fonts ${r.fonts}` };
+    return { ok: r.n === 4 && r.shown === 4 && r.ext === 0 && !r.xmlns && reqs.length === 0 && errs.length === 0, note: `離線 375px：內嵌 SVG 圖示 ${r.n} 個、顯示 ${r.shown}；外部圖示元素 ${r.ext}；SVG 含 http 字串=${r.xmlns}；外部請求 ${reqs.length}；Console 錯誤 ${errs.length}；document.fonts ${r.fonts}` };
   });
   await p.close();
 }

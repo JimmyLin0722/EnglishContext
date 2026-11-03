@@ -1,5 +1,7 @@
 // 建置腳本 tools/build.mjs 的單元測試（FE-01；architecture.md §5 B-1～B-8）
 // 以 os.tmpdir() 下的 fixture 目錄測試，不寫入 dist/。
+// （v0.7，FE-47）既有 fixture 的 opts 一律 site: false（舊模板無 @@BUILD_ID@@，走非 PWA 模式，既有斷言不變）；
+// 新增 PWA 建置（B-10～B-16、V-PWA-01～V-PWA-06、AC-36-01 三情境）與 tools/serve.mjs 測試，見檔尾。
 "use strict";
 
 const test = require("node:test");
@@ -61,6 +63,7 @@ function fixture(files) {
       app: path.join(dir, "app"),
       data: path.join(dir, "data"),
       out: path.join(dir, "out", "t.html"),
+      site: false,
       log: () => {},
       warn: () => {},
     },
@@ -434,6 +437,12 @@ test("AC-23-06：專案 license-header.txt 含 MIT 全文與 CC BY-SA 4.0 聲明
     )
   );
   assert.ok(txt.includes("https://creativecommons.org/licenses/by-sa/4.0/"));
+  // （v0.11，FE-47）品牌標識聲明逐字一行（AC-23-06、Q-48）
+  assert.ok(
+    txt.split(/\r?\n/).includes(
+      "PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin，保留所有權利，不適用 MIT 與 CC BY-SA 4.0。"
+    )
+  );
 });
 
 // ─── B-8 報告 ───
@@ -466,7 +475,7 @@ test("CLI：--out、--data、--app 參數；成功結束碼 0，中止結束碼 
   try {
     const ok = spawnSync(
       process.execPath,
-      [BUILD, "--out", fx.opts.out, "--data", fx.opts.data, "--app", fx.opts.app],
+      [BUILD, "--out", fx.opts.out, "--data", fx.opts.data, "--app", fx.opts.app, "--no-site"],
       { encoding: "utf8" }
     );
     assert.equal(ok.status, 0, ok.stderr);
@@ -477,7 +486,7 @@ test("CLI：--out、--data、--app 參數；成功結束碼 0，中止結束碼 
     fs.writeFileSync(path.join(fx.opts.app, "index.html"), TEMPLATE.replace("<!-- @@DATA@@ -->", ""));
     const bad = spawnSync(
       process.execPath,
-      [BUILD, `--out=${fx.opts.out}`, `--data=${fx.opts.data}`, `--app=${fx.opts.app}`],
+      [BUILD, `--out=${fx.opts.out}`, `--data=${fx.opts.data}`, `--app=${fx.opts.app}`, "--no-site"],
       { encoding: "utf8" }
     );
     assert.equal(bad.status, 1);
@@ -489,4 +498,574 @@ test("CLI：--out、--data、--app 參數；成功結束碼 0，中止結束碼 
   } finally {
     fx.cleanup();
   }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// （v0.7，FE-47）PWA 建置 B-10～B-16、V-PWA-01～V-PWA-06、AC-36-01、tools/serve.mjs
+// 依據：architecture.md v0.7 §5.1、§7.18.2、§10.4「build.test.js」列 (1)～(12)
+// PNG 以測試內函式產生（不讀 src/app/assets）；常數取專案 core/pwa.js（與建置相同來源）
+// ═══════════════════════════════════════════════════════════════
+
+const zlib = require("node:zlib");
+const http = require("node:http");
+const PWA = require("../core/pwa.js");
+
+/** CRC-32（PNG 區塊用） */
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(buf) {
+  let c = 0xffffffff;
+  for (const b of buf) c = CRC_TABLE[(c ^ b) & 0xff] ^ (c >>> 8);
+  return (c ^ 0xffffffff) >>> 0;
+}
+function chunk(type, data) {
+  const len = Buffer.alloc(4);
+  len.writeUInt32BE(data.length);
+  const td = Buffer.concat([Buffer.from(type, "latin1"), data]);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(td));
+  return Buffer.concat([len, td, crc]);
+}
+
+/**
+ * 產生最小 PNG。
+ * @param {number} size 邊長
+ * @param {{ colorType?: number, trns?: boolean, height?: number, shade?: number }} [o]
+ */
+function makePng(size, o = {}) {
+  const colorType = o.colorType === undefined ? 2 : o.colorType;
+  const height = o.height || size;
+  const channels = colorType === 6 ? 4 : 3;
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(size, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8;
+  ihdr[9] = colorType;
+  const row = Buffer.alloc(1 + size * channels, o.shade || 0x40);
+  row[0] = 0;
+  const raw = Buffer.concat(Array.from({ length: height }, () => row));
+  const parts = [Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk("IHDR", ihdr)];
+  if (o.trns) parts.push(chunk("tRNS", Buffer.from([0, 0, 0, 0, 0, 0])));
+  parts.push(chunk("IDAT", zlib.deflateSync(raw)), chunk("IEND", Buffer.alloc(0)));
+  return Buffer.concat(parts);
+}
+
+/** HD-1 的 7 個靜態元素（逐字） */
+const HD1 = [
+  '<meta name="theme-color" content="#2f6fd6">',
+  '<meta name="apple-mobile-web-app-title" content="EnglishContext">',
+  '<meta name="apple-mobile-web-app-capable" content="yes">',
+  '<meta name="mobile-web-app-capable" content="yes">',
+  '<meta name="apple-mobile-web-app-status-bar-style" content="default">',
+  '<meta name="emt-build-id" content="@@BUILD_ID@@">',
+  '<link rel="icon" href="data:,">',
+];
+
+const PWA_TEMPLATE_HTML = [
+  "<!DOCTYPE html>",
+  '<html lang="zh-Hant-TW">',
+  "<head>",
+  '<meta charset="utf-8">',
+  "<!-- @@LICENSE@@ -->",
+  '<meta name="viewport" content="width=device-width, initial-scale=1">',
+  "<title>English Master Track</title>",
+  ...HD1,
+  "<style>/* @@STYLES@@ */</style>",
+  "</head>",
+  "<body>",
+  "<!-- @@DATA@@ -->",
+  "<!-- @@APP@@ -->",
+  "</body>",
+  "</html>",
+  "",
+].join("\n");
+
+const SW_TEMPLATE_REAL = fs.readFileSync(path.join(__dirname, "..", "pwa", "sw.template.js"), "utf8");
+const ADS = "google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0\n";
+
+/** PWA fixture 的預設檔案（{ 相對路徑: 內容 }；Buffer 原樣寫入） */
+function pwaFiles(over = {}) {
+  return Object.assign(
+    {
+      "app/index.html": PWA_TEMPLATE_HTML,
+      "app/license-header.txt": LICENSE,
+      "app/pwa/sw.template.js": SW_TEMPLATE_REAL,
+      "app/styles/00-base.css": ":root {\n  --primary: #2f6fd6;\n  --bg: #f6f7f9;\n}\nbody { background: var(--bg); }\n",
+      "app/core/a.js": "/* APP_A */ var a = 1;\n",
+      "app/assets/icons/icon-192.png": makePng(192),
+      "app/assets/icons/icon-512.png": makePng(512),
+      "app/assets/icons/icon-maskable-512.png": makePng(512, { shade: 0x50 }),
+      "app/assets/icons/apple-touch-icon-180.png": makePng(180),
+      "data/sources.js": 'window.PROJECT_LICENSE = { "copyrightHolder": "JimmyLin", "copyrightYear": 2026 };',
+      "data/part5.js": 'window.PART5_QUESTION_BANK = [{ "id": "p5-001" }];',
+      "ads.txt": ADS,
+    },
+    over
+  );
+}
+
+/** 建立 PWA fixture（site 預設 = out 所在目錄下的 site；ads 指向 fixture 的 ads.txt） */
+function pwaFixture(over) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "emt-pwa-"));
+  for (const [rel, content] of Object.entries(pwaFiles(over))) {
+    if (content === null) continue;
+    const abs = path.join(dir, rel);
+    fs.mkdirSync(path.dirname(abs), { recursive: true });
+    fs.writeFileSync(abs, content);
+  }
+  fs.mkdirSync(path.join(dir, "data"), { recursive: true });
+  const out = path.join(dir, "out", "t.html");
+  return {
+    dir,
+    out,
+    siteDir: path.join(dir, "out", "site"),
+    opts: {
+      app: path.join(dir, "app"),
+      data: path.join(dir, "data"),
+      out,
+      ads: path.join(dir, "ads.txt"),
+      log: () => {},
+      warn: () => {},
+    },
+    cleanup: () => fs.rmSync(dir, { recursive: true, force: true }),
+  };
+}
+
+/** 以 PWA fixture 建置（extra 覆寫 opts）；回傳結果與 fixture（呼叫端負責 cleanup） */
+async function pwaBuild(over, extra) {
+  const { build } = await loadBuild();
+  const fx = pwaFixture(over);
+  const res = build(Object.assign({}, fx.opts, extra));
+  return { res, fx };
+}
+
+/** 斷言 PWA 建置中止、錯誤代碼相符、out 與部署目錄都未寫 */
+async function expectPwaAbort(over, code, extra) {
+  const { build } = await loadBuild();
+  const fx = pwaFixture(over);
+  try {
+    assert.throws(() => build(Object.assign({}, fx.opts, extra)), (err) => {
+      assert.equal(err.name, "BuildError");
+      assert.equal(err.code, code, err.message);
+      return true;
+    });
+    assert.equal(fs.existsSync(fx.out), false, "中止時不得寫出產物");
+    assert.equal(fs.existsSync(fx.siteDir), false, "中止時不得建立部署目錄");
+  } finally {
+    fx.cleanup();
+  }
+}
+
+/** 遞迴列出檔案（相對路徑，/ 分隔） */
+function listFiles(dir, rel = "") {
+  const out = [];
+  for (const d of fs.readdirSync(path.join(dir, rel), { withFileTypes: true })) {
+    const r = rel ? `${rel}/${d.name}` : d.name;
+    if (d.isDirectory()) out.push(...listFiles(dir, r));
+    else out.push(r);
+  }
+  return out.sort();
+}
+
+test("PWA (1) V-PWA-01：部署目錄恰 8 檔、大小寫相同；index.html = out；ads.txt、PNG 與來源位元組相同；build() 回傳 buildId、site", async () => {
+  const { res, fx } = await pwaBuild();
+  try {
+    const files = listFiles(fx.siteDir);
+    assert.deepEqual(files, PWA.PWA_DEPLOY_FILES.map((f) => f.path).sort());
+    assert.equal(files.length, 8);
+    const outBytes = fs.readFileSync(fx.out);
+    assert.ok(fs.readFileSync(path.join(fx.siteDir, "index.html")).equals(outBytes));
+    assert.ok(fs.readFileSync(path.join(fx.siteDir, "ads.txt")).equals(fs.readFileSync(fx.opts.ads)));
+    for (const f of PWA.PWA_DEPLOY_FILES.filter((x) => x.sizePx)) {
+      const src = path.join(fx.opts.app, "assets", "icons", f.path.replace("icons/", ""));
+      assert.ok(fs.readFileSync(path.join(fx.siteDir, f.path)).equals(fs.readFileSync(src)), f.path);
+    }
+    assert.match(res.buildId, new RegExp(PWA.PWA_BUILD_ID_PATTERN));
+    assert.equal(res.site.dir, fx.siteDir);
+    assert.deepEqual(res.site.files.map((f) => f.path), PWA.PWA_DEPLOY_FILES.map((f) => f.path));
+    assert.equal(res.html, outBytes.toString("utf8"));
+    // 文字檔 UTF-8 無 BOM（DP-7）
+    for (const n of ["index.html", "manifest.webmanifest", "sw.js"]) {
+      const b = fs.readFileSync(path.join(fx.siteDir, n));
+      assert.ok(!(b[0] === 0xef && b[1] === 0xbb && b[2] === 0xbf), n);
+    }
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("PWA (1b) 部署目錄已存在且只含部署檔（上一次建置）→ 重建成功；--no-site 的 HTML 與完整建置位元組相同", async () => {
+  const { build } = await loadBuild();
+  const fx = pwaFixture();
+  try {
+    const a = build(fx.opts);
+    fs.writeFileSync(path.join(fx.siteDir, "sw.js"), "舊內容");
+    const b = build(fx.opts);
+    assert.equal(b.buildId, a.buildId);
+    assert.ok(fs.readFileSync(path.join(fx.siteDir, "sw.js")).equals(a.site.files.find((f) => f.path === "sw.js").bytes));
+    const out2 = path.join(fx.dir, "only", "t.html");
+    const c = build(Object.assign({}, fx.opts, { out: out2, site: false }));
+    assert.equal(c.site, null);
+    assert.equal(c.buildId, a.buildId);
+    assert.ok(fs.readFileSync(out2).equals(fs.readFileSync(fx.out)));
+    assert.equal(fs.existsSync(path.join(fx.dir, "only", "site")), false);
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("PWA (2) V-PWA-02：manifest 與 PWA_MANIFEST 深度相等、鍵恰 10 個、UTF-8 無 BOM、格式固定", async () => {
+  const { fx } = await pwaBuild();
+  try {
+    const text = fs.readFileSync(path.join(fx.siteDir, "manifest.webmanifest"), "utf8");
+    assert.equal(text, JSON.stringify(PWA.PWA_MANIFEST, null, 2) + "\n");
+    const m = JSON.parse(text);
+    assert.deepStrictEqual(m, JSON.parse(JSON.stringify(PWA.PWA_MANIFEST)));
+    assert.equal(Object.keys(m).length, 10);
+    assert.ok(!text.includes("@@"));
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("PWA (3) V-PWA-03：PNG 色彩類型 6、含 tRNS、尺寸不符、非正方形、非 PNG、缺檔 → PWA_ICON", async () => {
+  const cases = [
+    { "app/assets/icons/icon-192.png": makePng(192, { colorType: 6 }) },
+    { "app/assets/icons/icon-512.png": makePng(512, { trns: true }) },
+    { "app/assets/icons/icon-maskable-512.png": makePng(256) },
+    { "app/assets/icons/apple-touch-icon-180.png": makePng(180, { height: 179 }) },
+    { "app/assets/icons/icon-192.png": Buffer.from("not a png at all, just text bytes......") },
+    { "app/assets/icons/apple-touch-icon-180.png": null },
+  ];
+  for (const c of cases) await expectPwaAbort(c, "PWA_ICON");
+  const { checkPng } = await loadBuild();
+  assert.deepEqual(checkPng(makePng(192), 192), []);
+  assert.ok(checkPng(makePng(192, { colorType: 6 }), 192).some((p) => p.includes("色彩類型 6")));
+  assert.ok(checkPng(makePng(192, { trns: true }), 192).some((p) => p.includes("tRNS")));
+});
+
+test("PWA (4) V-PWA-04、HD-3：HD-1 缺任一 → PWA_HEAD；靜態 manifest／apple-touch-icon 連結、第二個 data:, 連結 → 中止", async () => {
+  for (const e of HD1) {
+    await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace(e + "\n", "") }, e.includes("@@BUILD_ID@@") ? "PWA_TEMPLATE" : "PWA_HEAD");
+  }
+  // HD-1 元素不在 </head> 之前
+  await expectPwaAbort(
+    { "app/index.html": PWA_TEMPLATE_HTML.replace(HD1[2] + "\n", "").replace("<body>", "<body>\n" + HD1[2]) },
+    "PWA_HEAD"
+  );
+  // <title> 改變
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<title>English Master Track</title>", "<title>EnglishContext</title>") }, "PWA_HEAD");
+  // 靜態 manifest、apple-touch-icon（無論 href 在前或在後、或無 href）
+  for (const tag of [
+    '<link rel="manifest" href="manifest.webmanifest">',
+    '<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180.png">',
+    '<link href="manifest.webmanifest" rel="manifest">',
+    "<link rel=manifest>",
+    '<link rel="preload" as="image">',
+  ]) {
+    await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("</head>", tag + "\n</head>") }, "EXTERNAL_RESOURCE");
+  }
+  // 第二個 data:, 連結
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("</head>", HD1[6] + "\n</head>") }, "PWA_HEAD");
+  // 程式碼中出現白名單字串（第二次）也中止
+  await expectPwaAbort({ "app/core/z.js": "var s = '" + HD1[6] + "';\n" }, "PWA_HEAD");
+  // 指向檔案的 icon 連結：既有 <link href> 規則照常中止
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("</head>", '<link rel="icon" href="icons/icon-192.png">\n</head>') }, "EXTERNAL_RESOURCE");
+});
+
+test("PWA (4b) B-7 白名單：只有 1 個逐字字串；FORBIDDEN_PATTERNS 既有 10 條未刪改", async () => {
+  const { ALLOWED_STATIC_TAGS, FORBIDDEN_PATTERNS } = await loadBuild();
+  assert.deepEqual([...ALLOWED_STATIC_TAGS], ['<link rel="icon" href="data:,">']);
+  const expected = [
+    ["<script src>", "/<script[^>]*\\ssrc=/i"],
+    ["<link href>", "/<link[^>]*\\shref=/i"],
+    ["@import", "/@import/i"],
+    ["url(http…)", "/url\\(\\s*['\"]?https?:/i"],
+    ["<img", "/<img/i"],
+    ["<iframe", "/<iframe/i"],
+    ["cdn.", "/cdn\\./i"],
+    ["fonts.googleapis", "/fonts\\.googleapis/i"],
+    ["cdn.tailwindcss.com", "/cdn\\.tailwindcss\\.com/i"],
+    ["MediaRecorder", "/MediaRecorder/"],
+  ];
+  assert.deepEqual(FORBIDDEN_PATTERNS.slice(0, 10).map((p) => [p.name, String(p.re)]), expected);
+  assert.equal(FORBIDDEN_PATTERNS.length, 11);
+  assert.equal(FORBIDDEN_PATTERNS[10].name, "<link rel=PWA 附屬檔>");
+});
+
+test("PWA (5) V-PWA-05：sw.js 的 BUILD_ID = HTML meta、CACHE_NAME 前綴、預先快取 7 項；範本違規 → PWA_SW／PWA_SW_TEMPLATE", async () => {
+  const { res, fx } = await pwaBuild();
+  try {
+    const sw = fs.readFileSync(path.join(fx.siteDir, "sw.js"), "utf8");
+    const html = fs.readFileSync(fx.out, "utf8");
+    const meta = /<meta name="emt-build-id" content="([0-9a-f]{16})">/.exec(html)[1];
+    assert.equal(meta, res.buildId);
+    assert.ok(sw.includes(`var BUILD_ID = "${res.buildId}";`));
+    assert.ok(sw.includes('var CACHE_PREFIX = "english-master-track-pwa-";'));
+    assert.ok(sw.includes("var CACHE_NAME = CACHE_PREFIX + BUILD_ID;"));
+    const list = /var PRECACHE_URLS = \[([^\]]*)\];/.exec(sw)[1];
+    assert.deepEqual(JSON.parse("[" + list + "]"), [...PWA.PWA_PRECACHE_URLS]);
+    assert.ok(!sw.includes("@@"));
+    assert.ok(!html.includes("@@BUILD_ID@@"));
+  } finally {
+    fx.cleanup();
+  }
+  const bad = (s) => ({ "app/pwa/sw.template.js": s });
+  await expectPwaAbort(bad(SW_TEMPLATE_REAL + "\nimportScripts('x.js');\n"), "PWA_SW");
+  await expectPwaAbort(bad(SW_TEMPLATE_REAL + '\nself.addEventListener("push", function () {});\n'), "PWA_SW");
+  await expectPwaAbort(bad(SW_TEMPLATE_REAL + '\nself.addEventListener("fetch", function () {});\n'), "PWA_SW");
+  await expectPwaAbort(bad(SW_TEMPLATE_REAL + "\nself.onmessage = null;\n"), "PWA_SW");
+  await expectPwaAbort(bad(SW_TEMPLATE_REAL + "\n// see https://example.com\n"), "PWA_SW");
+  await expectPwaAbort(bad(SW_TEMPLATE_REAL.replace('var CACHE_PREFIX = "english-master-track-pwa-";', 'var CACHE_PREFIX = "x-";')), "PWA_SW");
+  await expectPwaAbort(bad(SW_TEMPLATE_REAL + "\n// @@BUILD_ID@@\n"), "PWA_SW_TEMPLATE");
+  await expectPwaAbort(bad(SW_TEMPLATE_REAL.replace("/* @@PRECACHE_URLS@@ */", "")), "PWA_SW_TEMPLATE");
+  await expectPwaAbort({ "app/pwa/sw.template.js": null }, "PWA_SW_TEMPLATE");
+});
+
+test("PWA (6) V-PWA-06、AC-36-01：write: false 連續 2 次三檔相同；改資料、app、PNG、sw 範本 1 字 → BUILD_ID 不同；只改 ads.txt → 不變", async () => {
+  const { build } = await loadBuild();
+  const three = (r) => ({
+    html: r.html,
+    manifest: r.site.files.find((f) => f.path === "manifest.webmanifest").bytes.toString("utf8"),
+    sw: r.site.files.find((f) => f.path === "sw.js").bytes.toString("utf8"),
+  });
+  const once = (over) => {
+    const fx = pwaFixture(over);
+    try {
+      const r = build(Object.assign({}, fx.opts, { write: false }));
+      assert.equal(fs.existsSync(fx.out), false, "write: false 不寫檔");
+      assert.equal(fs.existsSync(fx.siteDir), false, "write: false 不建部署目錄");
+      return r;
+    } finally {
+      fx.cleanup();
+    }
+  };
+  const a = once();
+  const b = once();
+  assert.deepEqual(three(a), three(b));
+  assert.equal(a.buildId, b.buildId);
+
+  const variants = {
+    data: { "data/part5.js": 'window.PART5_QUESTION_BANK = [{ "id": "p5-002" }];' },
+    app: { "app/core/a.js": "/* APP_A */ var a = 2;\n" },
+    css: { "app/styles/00-base.css": pwaFiles()["app/styles/00-base.css"] + ".x{}\n" },
+    png: { "app/assets/icons/icon-512.png": makePng(512, { shade: 0x41 }) },
+    sw: { "app/pwa/sw.template.js": SW_TEMPLATE_REAL.replace("清除舊的本專案快取", "清除舊的本專案快取。") },
+    license: { "app/license-header.txt": LICENSE + "x\n" },
+  };
+  const ids = new Set([a.buildId]);
+  for (const [name, over] of Object.entries(variants)) {
+    const r = once(over);
+    assert.notEqual(r.buildId, a.buildId, name);
+    assert.notEqual(three(r).sw, three(a).sw, name + "：sw.js 不同");
+    ids.add(r.buildId);
+  }
+  assert.equal(ids.size, Object.keys(variants).length + 1, "各變更的 BUILD_ID 互不相同");
+  const adsOnly = once({ "ads.txt": "google.com, pub-1111111111111111, DIRECT, f08c47fec0942fa0\n" });
+  assert.equal(adsOnly.buildId, a.buildId);
+  assert.deepEqual(three(adsOnly), three(a));
+});
+
+test("PWA (7) DS-13：00-base.css 的 --bg 不符或缺漏 → PWA_BG_COLOR；大小寫不同視為相同", async () => {
+  await expectPwaAbort({ "app/styles/00-base.css": ":root { --bg: #ffffff; }\n" }, "PWA_BG_COLOR");
+  await expectPwaAbort({ "app/styles/00-base.css": ":root { --primary: #2f6fd6; }\n" }, "PWA_BG_COLOR");
+  await expectPwaAbort({ "app/styles/00-base.css": null }, "PWA_BG_COLOR");
+  const { fx } = await pwaBuild({ "app/styles/00-base.css": ":root { --bg: #F6F7F9; }\n" });
+  fx.cleanup();
+});
+
+test("PWA (8) 部署目錄已有多餘檔案或目錄 → SITE_DIR_UNEXPECTED，未刪除任何檔案、out 未寫", async () => {
+  const { build } = await loadBuild();
+  for (const extra of ["notes.md", "icons/extra.png", "sub/x.txt", "ICONS/icon-192.png"]) {
+    const fx = pwaFixture();
+    try {
+      const abs = path.join(fx.siteDir, ...extra.split("/"));
+      fs.mkdirSync(path.dirname(abs), { recursive: true });
+      fs.writeFileSync(abs, "keep");
+      fs.writeFileSync(path.join(fx.siteDir, "index.html"), "old");
+      assert.throws(() => build(fx.opts), (e) => e.code === "SITE_DIR_UNEXPECTED");
+      assert.equal(fs.readFileSync(abs, "utf8"), "keep", extra);
+      assert.equal(fs.readFileSync(path.join(fx.siteDir, "index.html"), "utf8"), "old");
+      assert.equal(fs.existsSync(fx.out), false);
+    } finally {
+      fx.cleanup();
+    }
+  }
+  // --site 指到一般檔案
+  const fx = pwaFixture();
+  try {
+    const f = path.join(fx.dir, "afile");
+    fs.writeFileSync(f, "x");
+    assert.throws(() => build(Object.assign({}, fx.opts, { site: f })), (e) => e.code === "SITE_DIR_UNEXPECTED");
+    assert.equal(fs.readFileSync(f, "utf8"), "x");
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("PWA (9) 中止時 out 與部署目錄都未寫：ADS_MISSING、LICENSE_YEAR、PWA_TEMPLATE", async () => {
+  await expectPwaAbort({ "ads.txt": null }, "ADS_MISSING");
+  // --no-site 時不需要 ads.txt
+  const { fx } = await pwaBuild({ "ads.txt": null }, { site: false });
+  assert.ok(fs.existsSync(fx.out));
+  fx.cleanup();
+  // PWA 模式缺 copyrightYear：升級為中止
+  await expectPwaAbort({ "data/sources.js": 'window.PROJECT_LICENSE = { "copyrightHolder": "JimmyLin" };' }, "LICENSE_YEAR");
+  await expectPwaAbort({ "data/sources.js": null }, "LICENSE_YEAR");
+  // 佔位 2 次、位置不符
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<body>", "<body>\n<!-- @@BUILD_ID@@ -->") }, "PWA_TEMPLATE");
+  await expectPwaAbort(
+    { "app/index.html": PWA_TEMPLATE_HTML.replace('<meta name="emt-build-id" content="@@BUILD_ID@@">', '<meta name="x" content="@@BUILD_ID@@">') },
+    "PWA_TEMPLATE"
+  );
+  // 程式含佔位字串
+  await expectPwaAbort({ "app/core/z.js": "var p = '@@BUILD_ID@@';\n" }, "PWA_TEMPLATE");
+  // 舊模板（無佔位）卻要求部署目錄
+  await expectPwaAbort({ "app/index.html": TEMPLATE }, "PWA_TEMPLATE");
+});
+
+test("PWA (10) parseArgs：--site、--no-site、--ads 與衝突", async () => {
+  const { parseArgs } = await loadBuild();
+  assert.deepEqual(parseArgs(["--out", "a.html", "--site", "s", "--ads", "x.txt"]), { out: "a.html", site: "s", ads: "x.txt" });
+  assert.deepEqual(parseArgs(["--site=s2", "--ads=y.txt"]), { site: "s2", ads: "y.txt" });
+  assert.deepEqual(parseArgs(["--no-site", "--out", "b.html"]), { out: "b.html", site: false });
+  assert.deepEqual(parseArgs([]), {});
+  assert.throws(() => parseArgs(["--site", "s", "--no-site"]), (e) => e.code === "BAD_ARGS");
+  assert.throws(() => parseArgs(["--no-site", "--site=s"]), (e) => e.code === "BAD_ARGS");
+  assert.throws(() => parseArgs(["--site"]), (e) => e.code === "BAD_ARGS");
+  assert.throws(() => parseArgs(["--ads"]), (e) => e.code === "BAD_ARGS");
+  assert.throws(() => parseArgs(["--no-site=1"]), (e) => e.code === "BAD_ARGS");
+});
+
+test("PWA (10b) CLI：預設部署目錄 = --out 所在目錄下的 site；報告含 BUILD_ID 與 8 檔 bytes", () => {
+  const fx = pwaFixture();
+  try {
+    const r = spawnSync(
+      process.execPath,
+      [BUILD, "--out", fx.out, "--data", fx.opts.data, "--app", fx.opts.app, "--ads", fx.opts.ads],
+      { encoding: "utf8" }
+    );
+    assert.equal(r.status, 0, r.stderr);
+    assert.match(r.stdout, /BUILD_ID：[0-9a-f]{16}/);
+    for (const f of PWA.PWA_DEPLOY_FILES) assert.ok(r.stdout.includes(`${f.path}：`), f.path);
+    assert.equal(listFiles(fx.siteDir).length, 8);
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("PWA (11) 原始碼掃描：build.mjs 無 Math.random、Date.now、process.env、performance.now；new Date( 只在 buildLicenseHeader 預設參數", () => {
+  const src = fs.readFileSync(BUILD, "utf8");
+  for (const w of ["Math.random", "Date.now", "process.env", "performance.now"]) assert.ok(!src.includes(w), w);
+  const dates = src.split("\n").filter((l) => l.includes("new Date("));
+  assert.equal(dates.length, 1);
+  assert.match(dates[0], /export function buildLicenseHeader\(text, license, warn, now = new Date\(\)\)/);
+  // 只用 Node 內建模組
+  const imports = [...src.matchAll(/^import .* from "([^"]+)";/gm)].map((m) => m[1]);
+  const allowed = ["node:fs", "node:path", "node:vm", "node:url", "node:crypto", "node:module"];
+  for (const m of imports) assert.ok(allowed.includes(m), m);
+});
+
+// ─── (12) tools/serve.mjs ───
+
+const SERVE = path.join(ROOT, "tools", "serve.mjs");
+
+function request(port, method, urlPath) {
+  return new Promise((resolve, reject) => {
+    const req = http.request({ host: "127.0.0.1", port, method, path: urlPath }, (res) => {
+      const chunks = [];
+      res.on("data", (c) => chunks.push(c));
+      res.on("end", () => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) }));
+    });
+    req.on("error", reject);
+    req.end();
+  });
+}
+
+test("PWA (12) serve.mjs：MIME、Cache-Control、base 外 404、路徑穿越 404、POST 405、301、每次請求讀檔", async () => {
+  const serve = await import(pathToFileURL(SERVE).href);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "emt-serve-"));
+  const site = path.join(dir, "site");
+  fs.mkdirSync(path.join(site, "icons"), { recursive: true });
+  fs.writeFileSync(path.join(site, "index.html"), "<p>v1</p>");
+  fs.writeFileSync(path.join(site, "manifest.webmanifest"), "{}");
+  fs.writeFileSync(path.join(site, "sw.js"), "/* sw */");
+  fs.writeFileSync(path.join(site, "ads.txt"), "ads");
+  fs.writeFileSync(path.join(site, "icons", "icon-192.png"), makePng(4));
+  fs.writeFileSync(path.join(dir, "secret.txt"), "secret");
+  const s = await serve.startServer({ dir: site, port: 0, base: "/english-master-track/" });
+  try {
+    const B = "/english-master-track/";
+    const mime = {
+      "": "text/html; charset=utf-8",
+      "index.html": "text/html; charset=utf-8",
+      "manifest.webmanifest": "application/manifest+json",
+      "sw.js": "text/javascript; charset=utf-8",
+      "icons/icon-192.png": "image/png",
+      "ads.txt": "text/plain; charset=utf-8",
+    };
+    for (const [rel, type] of Object.entries(mime)) {
+      const r = await request(s.port, "GET", B + rel);
+      assert.equal(r.status, 200, rel);
+      assert.equal(r.headers["content-type"], type, rel);
+      assert.equal(r.headers["cache-control"], "max-age=600", rel);
+    }
+    // 查詢字串不影響檔案對應
+    assert.equal((await request(s.port, "GET", B + "index.html?x=1")).status, 200);
+    // HEAD 無本文
+    const head = await request(s.port, "HEAD", B + "sw.js");
+    assert.equal(head.status, 200);
+    assert.equal(head.body.length, 0);
+    // base 外 404
+    for (const p of ["/favicon.ico", "/", "/index.html", "/english-master-trackx/index.html"]) {
+      assert.equal((await request(s.port, "GET", p)).status, 404, p);
+    }
+    // 路徑穿越 404
+    for (const p of [B + "../secret.txt", B + "%2e%2e/secret.txt", B + "..%2fsecret.txt", B + "..%5csecret.txt", B + "icons/..%2f..%2fsecret.txt"]) {
+      const r = await request(s.port, "GET", p);
+      assert.equal(r.status, 404, p);
+      assert.ok(!r.body.toString().includes("secret"), p);
+    }
+    // 不存在 404；目錄 404
+    assert.equal((await request(s.port, "GET", B + "nope.png")).status, 404);
+    assert.equal((await request(s.port, "GET", B + "icons/")).status, 404);
+    // 非 GET/HEAD 405
+    for (const m of ["POST", "PUT", "DELETE"]) {
+      const r = await request(s.port, m, B + "index.html");
+      assert.equal(r.status, 405, m);
+      assert.equal(r.headers.allow, "GET, HEAD");
+    }
+    // base 去尾斜線 → 301
+    const r301 = await request(s.port, "GET", "/english-master-track");
+    assert.equal(r301.status, 301);
+    assert.equal(r301.headers.location, B);
+    // 每次請求讀檔：換掉內容即生效
+    fs.writeFileSync(path.join(site, "index.html"), "<p>v2</p>");
+    assert.equal((await request(s.port, "GET", B)).body.toString(), "<p>v2</p>");
+    // 只綁 127.0.0.1
+    assert.equal(s.server.address().address, "127.0.0.1");
+  } finally {
+    await s.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("PWA (12b) serve.mjs：參數解析與 base 格式", async () => {
+  const serve = await import(pathToFileURL(SERVE).href);
+  assert.deepEqual(serve.parseServeArgs(["--dir", "d", "--port", "0", "--base", "/x/"]), { dir: "d", port: 0, base: "/x/" });
+  assert.deepEqual(serve.parseServeArgs([]), {});
+  assert.throws(() => serve.parseServeArgs(["--port", "abc"]));
+  assert.throws(() => serve.parseServeArgs(["--base", "x/"]));
+  assert.throws(() => serve.parseServeArgs(["--base", "/x"]));
+  assert.throws(() => serve.parseServeArgs(["--nope"]));
+  assert.equal(serve.SERVE_DEFAULTS.port, 8080);
+  assert.equal(serve.SERVE_DEFAULTS.base, "/english-master-track/");
+  assert.equal(serve.SERVE_DEFAULTS.host, "127.0.0.1");
 });

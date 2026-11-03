@@ -4,6 +4,7 @@
  * （FE-20）v0.8 新增 TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS；
  * （FE-22）v0.8 持久化升版：CURRENT_SCHEMA_VERSION 1 → 2、SUPPORTED_SCHEMA_VERSIONS [1] → [1, 2]（契約 README §5.3）。
  * （FE-34）v0.9：NAV_TAB_ORDER 6 項 → 4 項（R-18 三）；新增 HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS（US-32）；TAB_LABELS 不變（HT-4）。
+ * （FE-42）v0.10：SCORE_DEFAULT 600 → 725（= 綠色 scoreMax；PRD Q-39、契約 GS-7、DS-08）。
  * 契約變更時必須同步更新本檔與 src/app/__tests__/goal.test.js 的字面值斷言。
  * 本模組不碰 DOM；Node 以 require 載入，瀏覽器掛到 EMT.core.constants。
  */
@@ -39,11 +40,11 @@
     { id: "gold",   nameZh: "金", scoreMin: 860, scoreMax: 990, status: "locked", dailyNewWords: 20, vocabTarget: null,  scenarioZh: "專業熟練者、近母語水準" }
   ];
 
-  // §1 分數規則（Q-12）
+  // §1 分數規則（Q-12；預設分數 v0.10 Q-39 改為 725，為程式中唯一的預設分數來源）
   var SCORE_MIN = 10;
   var SCORE_MAX = 990;
   var SCORE_STEP = 5;
-  var SCORE_DEFAULT = 600;
+  var SCORE_DEFAULT = 725;
 
   // §1 橘色建議字量（Q-29）；N_B、N_G 由資料計算，不設常數
   var N_O = 1000;

@@ -379,3 +379,64 @@ describe("shell.test.js：main.js 啟動順序", () => {
     assert.match(src, /EMT\.ui && EMT\.ui\.bottomNav && typeof EMT\.ui\.bottomNav\.init === "function"/);
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+// （v0.7，FE-50）PWA head 靜態元素與新版提示容器（契約 HD-1、HD-3、HD-4、HD-5；architecture §4.2 v0.7、§5.1 B-12）
+// ─────────────────────────────────────────────────────────────
+
+describe("shell.test.js：PWA（v0.7，FE-50）", () => {
+  const raw = read("index.html");
+  const HD1 = [
+    '<meta name="theme-color" content="#2f6fd6">',
+    '<meta name="apple-mobile-web-app-title" content="EnglishContext">',
+    '<meta name="apple-mobile-web-app-capable" content="yes">',
+    '<meta name="mobile-web-app-capable" content="yes">',
+    '<meta name="apple-mobile-web-app-status-bar-style" content="default">',
+    '<meta name="emt-build-id" content="@@BUILD_ID@@">',
+    '<link rel="icon" href="data:,">',
+  ];
+
+  test("HD-1：7 個靜態元素逐字各 1 次、依序在 <title> 之後、</head> 之前（AC-34-04、AC-34-05、AC-36-02）", () => {
+    const headEnd = raw.indexOf("</head>");
+    let prev = raw.indexOf("<title>English Master Track</title>");
+    assert.ok(prev > 0);
+    for (const e of HD1) {
+      assert.equal(raw.split(e).length - 1, 1, e);
+      const at = raw.indexOf(e);
+      assert.ok(at > prev && at < headEnd, e + " 位置");
+      prev = at;
+    }
+    // theme-color 與 manifest 常數一致（AC-34-04）
+    const pwa = require("../core/pwa.js");
+    assert.ok(raw.includes(`<meta name="theme-color" content="${pwa.PWA_THEME_COLOR}">`));
+    assert.ok(raw.includes(`<meta name="apple-mobile-web-app-title" content="${pwa.PWA_APP_NAME}">`));
+    assert.ok(raw.includes(`<meta name="${pwa.PWA_BUILD_ID_META_NAME}" content="@@BUILD_ID@@">`));
+  });
+
+  test("<title> 不變；@@BUILD_ID@@ 恰 1 次（HD-5）", () => {
+    assert.equal(raw.split("<title>English Master Track</title>").length - 1, 1);
+    assert.equal(raw.split("@@BUILD_ID@@").length - 1, 1);
+  });
+
+  test("HD-3：不含靜態 manifest／apple-touch-icon／其他 <link>；原始檔（含註解）的 <link 只有 data:, 圖示 1 個；無 <script src", () => {
+    const links = raw.match(/<link\b[^>]*>/gi) || [];
+    assert.deepEqual(links, ['<link rel="icon" href="data:,">']);
+    assert.equal((raw.match(/<link/gi) || []).length, 1);
+    assert.doesNotMatch(raw, /rel=["']?(?:manifest|apple-touch-icon|apple-touch-startup-image|preload|prefetch|modulepreload)\b/i);
+    assert.doesNotMatch(raw, /<script[^>]*\ssrc=/i);
+  });
+
+  test("#pwa-update：在 #app-banner 之後、#app-main 之外、預設 hidden、role=status、class=pwa-update", () => {
+    const m = raw.match(/<div id="pwa-update"([^>]*)><\/div>/);
+    assert.ok(m, "找不到 #pwa-update");
+    assert.match(m[1], /\bclass="pwa-update"/);
+    assert.match(m[1], /\brole="status"/);
+    assert.match(m[1], /\shidden(?:\s|$)/);
+    const iBanner = raw.indexOf('<div id="app-banner"');
+    const iNotice = raw.indexOf('<div id="pwa-update"');
+    const iMainOpen = raw.indexOf('<main id="app-main"');
+    const iMainClose = raw.indexOf("</main>");
+    assert.ok(iBanner >= 0 && iNotice > iBanner, "在 #app-banner 之後");
+    assert.ok(iNotice < iMainOpen || iNotice > iMainClose, "不在 #app-main 內");
+  });
+});

@@ -3,13 +3,27 @@
   "$id": "https://english-master-track.local/contract/storage-schema.json",
   "meta": {
     "doc": "CONTRACT-STORAGE",
-    "version": "0.8",
+    "version": "0.11",
     "status": "approved",
     "author": "sa-agent",
-    "approved_by": "JimmyLin",
-    "approved_at": "2026-10-30",
-    "upstream": "docs/01-PRD.md v0.8（approved，JimmyLin，2026-10-30）",
-    "covers": ["FR-6.1", "FR-6.2", "AC-08-13", "AC-09-04", "AC-11-05", "AC-11-07", "AC-17-02", "AC-17-03", "AC-17-05", "AC-18-01", "AC-18-02", "AC-18-05", "AC-24-02", "AC-24-05", "AC-24-06", "AC-24-08", "AC-24-10", "AC-24-11", "AC-25-01", "AC-25-04", "AC-25-09", "AC-30-03", "AC-30-06", "AC-30-07", "AC-30-09", "AC-30-11", "AC-30-12", "AC-30-13", "R-17"],
+    "approved_by": "JimmyLin（授權主控代核）",
+    "approved_at": "2026-11-02",
+    "upstream": "docs/01-PRD.md v0.11（approved，JimmyLin，2026-11-02）",
+    "covers": ["FR-6.1", "FR-6.2", "AC-08-13", "AC-09-04", "AC-11-05", "AC-11-07", "AC-17-02", "AC-17-03", "AC-17-05", "AC-18-01", "AC-18-02", "AC-18-05", "AC-24-02", "AC-24-05", "AC-24-06", "AC-24-08", "AC-24-10", "AC-24-11", "AC-25-01", "AC-25-04", "AC-25-09", "AC-30-03", "AC-30-06", "AC-30-07", "AC-30-09", "AC-30-11", "AC-30-12", "AC-30-13", "R-17", "AC-26-06", "R-19", "Q-39", "AC-21-03", "AC-35-01", "AC-36-04", "AC-36-05", "AC-37-05", "AC-37-06", "R-20"],
+    "browserStoragePolicy": {
+      "description": "（v0.11，PRD R-20、AC-21-03）本系統在瀏覽器各種儲存區允許存放的內容。只是說明（JSON Schema 不驗證 meta），不改變下方任何結構關鍵字。PWA 不新增任何 localStorage 鍵或欄位，schemaVersion 維持 2。詳細規則見 README §10.10 PV-1～PV-7。",
+      "localStorage": {
+        "file": "鍵只有 englishMasterTrack:state（本檔根結構，schemaVersion 2）與 englishMasterTrack:unreadable（原始字串）；與 v0.10 相同。",
+        "https": "與 file:// 相同（鍵名、欄位集合、schemaVersion 2 皆不變，AC-36-04、AC-37-06）。PWA 狀態（安裝按鈕、新版提示、更新檢查時間）只在記憶體，不寫入 localStorage。不同來源（file://、GitHub Pages、iOS Safari、iOS 主畫面 App）各自一份，不同步（AC-24-12、E-81）。"
+      },
+      "cacheStorage": {
+        "file": "本系統建立的快取數 = 0（不註冊 service worker、不呼叫 caches API，AC-37-01、AC-21-03）。",
+        "https": "只有名稱符合 ^english-master-track-pwa-[0-9a-f]{16}$ 的本專案快取；service worker 啟用後恰為 1 個（AC-35-01、AC-36-05）。新版已安裝但尚未啟用（等待使用者按「重新整理」，AC-36-03）期間可暫時有 2 個（舊版使用中 + 新版等待中），新版啟用時刪除舊版。每個快取的項目恰為預先快取清單 7 個同源 GET 網址（./、./index.html、./manifest.webmanifest、./icons/icon-192.png、./icons/icon-512.png、./icons/icon-maskable-512.png、./icons/apple-touch-icon-180.png，相對於 sw.js 解析）的伺服器回應；不含 sw.js、ads.txt、備份檔、音訊、音量值、localStorage 內容或任何使用者資料（AC-21-03、AC-37-05）。名稱不以本前綴開頭的快取（同網域其他專案）不得讀取、修改或刪除（AC-36-05、E-80）。"
+      },
+      "indexedDB": "file:// 與 https 皆不建立任何資料庫（AC-21-03、AC-37-05）。",
+      "sessionStorage": "不使用。",
+      "serviceWorkerRegistration": "file:// = 0 個；https = 恰 1 個，腳本 ./sw.js、scope = 部署目錄（README SW-1）。註冊不是使用者資料，列出只為說明 AC-35-01、AC-37-01 的檢查對象。"
+    },
     "notes": "根結構描述 localStorage 鍵 englishMasterTrack:state 的值（StorageRecord，schemaVersion 2）。schemaVersion 1 的紀錄只作為遷移輸入（README §5.3 MG-1～MG-4），遷移後再以本根結構驗證。備份檔結構見 $defs/BackupFile。鍵 englishMasterTrack:unreadable 存原始字串，不受本 schema 約束（README §5.3 RS-1～RS-4）。todayLearned、learnedHistory 分兩層：$defs/TodayLearnedState、$defs/LearnedHistory 為『結構（shape）』，不符 = 整個欄位型別錯誤（讀 localStorage 只重設該欄、匯入則格式錯誤）；$defs/TodayLearnedStateNormalized、$defs/LearnedHistoryNormalized 為正規化後的值，程式寫出（localStorage、匯出備份）必須符合，QA 可用 $defs/PersistedDataWritten 驗證匯出檔。本檔無法表達的規則（今天的日期範圍、一致性、correct ≤ answered 等）列於 README §7 V-ST-xx。",
     "changelog": [
       { "version": "0.1", "date": "2026-10-29", "author": "sa-agent", "note": "初版：StorageRecord（schemaVersion 1）與 BackupFile。" },
@@ -19,7 +33,9 @@
       { "version": "0.5", "date": "2026-10-30", "author": "sa-agent", "note": "修訂已核准的 v0.4（/pg-run 階段回饋，README §9.1）；status 改回 draft 並與 README、data-schema.ts 同步。只改 description：BackupFile 匯入檢查順序補上頂層欄位檢查與 customVocab 重複的匯入例外（IM-1、IM-2）；date-time 註明為強制檢查。properties、required、additionalProperties、const／enum 皆未改動；schemaVersion 維持 1，不需遷移。" },
       { "version": "0.6", "date": "2026-10-30", "author": "sa-agent", "note": "修訂已核准的 v0.5（/pg-run 後段回饋，README §9.2 DF-07～DF-10）；status 改回 draft 並與 README、data-schema.ts 同步。本檔只改 meta（版本、狀態、變更紀錄）與 notes 補充 unreadable 鍵的重設時機（README §5.3 RS-1～RS-4）。執行期錯誤碼 write_failed（IM-6）不持久化，本檔不涉及。properties、required、additionalProperties、const／enum 皆未改動；schemaVersion 維持 1，不需遷移。" },
       { "version": "0.7", "date": "2026-10-30", "author": "sa-agent", "note": "修訂已核准的 v0.6，依人類決議（JimmyLin，2026-10-30）FB-24（write_failed 文字定案）、FB-25（PartOfSpeech 新增 \"pref.\"）；status 改回 draft，三檔同步。兩者皆不涉及持久化：PartOfSpeech 只用於內建字庫 BuiltinVocabItem.pos（內容資料檔）；本檔 CustomVocabItem.pos 為自由字串 { \"type\": \"string\" }，已再確認不受影響；write_failed 為執行期錯誤碼不持久化。本檔只改 meta（版本、狀態、變更紀錄）；properties、required、additionalProperties、const／enum 皆未改動；schemaVersion 維持 1，不需遷移。" },
-      { "version": "0.8", "date": "2026-10-30", "author": "sa-agent", "note": "修訂已核准的 v0.7，依 PRD v0.8 R-17（人類已同意持久化結構變更）。status 改回 draft，三檔同步；本版為持久化結構變更，須由人類核准（不適用主控代核）。(1) 根 schemaVersion const 1 → 2；(2) PersistedData 新增必填 todayLearned、learnedHistory（required 7 → 9 欄）；(3) 新增 $defs/TodayLearnedState、TodayLearnedStateNormalized、LearnedHistory、LearnedHistoryNormalized、PersistedDataWritten；(4) BackupFile.schemaVersion enum [1] → [1, 2]，頂層 5 欄不變；(5) Part5Progress 說明改用畫面名稱「模擬測驗」（R-15），識別字不變。v1 → v2 遷移：data 補 todayLearned = {date:null, wordKeys:[]}、learnedHistory = {}，其餘欄位不變（README MG-1～MG-4）。" }
+      { "version": "0.8", "date": "2026-10-30", "author": "sa-agent", "note": "修訂已核准的 v0.7，依 PRD v0.8 R-17（人類已同意持久化結構變更）。status 改回 draft，三檔同步；本版為持久化結構變更，須由人類核准（不適用主控代核）。(1) 根 schemaVersion const 1 → 2；(2) PersistedData 新增必填 todayLearned、learnedHistory（required 7 → 9 欄）；(3) 新增 $defs/TodayLearnedState、TodayLearnedStateNormalized、LearnedHistory、LearnedHistoryNormalized、PersistedDataWritten；(4) BackupFile.schemaVersion enum [1] → [1, 2]，頂層 5 欄不變；(5) Part5Progress 說明改用畫面名稱「模擬測驗」（R-15），識別字不變。v1 → v2 遷移：data 補 todayLearned = {date:null, wordKeys:[]}、learnedHistory = {}，其餘欄位不變（README MG-1～MG-4）。" },
+      { "version": "0.10", "date": "2026-11-02", "author": "sa-agent", "note": "修訂已核准的 v0.8（v0.9 契約未改本檔），依 PRD v0.10 R-19、Q-39；status 改回 draft、核准欄位清空，上游改為 PRD v0.10。只改 description 與 examples：(1) GoalState 預設分數 600 → 725（Q-39 決議 B，綠色上限）；(2) draftScore 說明由「滑桿／輸入框」改為「選中卡片的分數，點卡片設為該色上限」；(3) Score 說明註明只用於資料層驗證、不四捨五入、既有分數不轉換（R-19 六）；(4) examples 第 1 筆（預設狀態）goal 改為 725，第 2 筆保留 600 作為 v0.9 以前既有分數的合法範例。properties、required、additionalProperties、type、minimum、maximum、multipleOf、const／enum 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" },
+      { "version": "0.11", "date": "2026-11-02", "author": "sa-agent", "note": "修訂已核准的 v0.10（主控代核），依 PRD v0.11 R-20（PWA）、US-34～US-37、AC-21-03 修訂；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.11。只改 meta：(1) 版本、狀態、上游、covers 補 AC-21-03、AC-35-01、AC-36-04、AC-36-05、AC-37-05、AC-37-06、R-20；(2) 新增 meta.browserStoragePolicy，說明 localStorage、Cache Storage、IndexedDB 在 file:// 與 https 兩種版本下允許的內容（AC-21-03）。$defs、properties、required、additionalProperties、type、const／enum 與 examples 皆未改動；PWA 不寫入 localStorage，持久化結構不變，schemaVersion 維持 2，不需遷移。" }
     ]
   },
   "title": "StorageRecord（localStorage: englishMasterTrack:state，schemaVersion 2）",
@@ -50,7 +66,7 @@
       "enum": ["orange", "brown", "green"]
     },
     "Score": {
-      "description": "多益目標分數：10～990，5 的倍數（Q-12）。",
+      "description": "多益目標分數：10～990，5 的倍數（Q-12）。（v0.10，R-19）本規則只用於資料層：讀 localStorage 不符 → 整筆無法讀取（AC-18-05、E-11）；匯入備份不符 → 格式錯誤（AC-24-05、E-31）；不做四捨五入。符合本規則的任意分數（如 600、735）一律原值保留，不轉換為色級上限（R-19 六、AC-26-06）。",
       "type": "integer",
       "minimum": 10,
       "maximum": 990,
@@ -74,12 +90,12 @@
       "enum": [0, 1, 2, 3]
     },
     "GoalState": {
-      "description": "目標設定（AC-01-04、AC-02-08、AC-17-06）。預設 draftScore 600、appliedScore 600、appliedColor green、effectiveColor green（AC-18-02）。",
+      "description": "目標設定（AC-01-04、AC-02-08、AC-17-06）。預設 draftScore 725、appliedScore 725、appliedColor green、effectiveColor green（AC-18-02；v0.10 依 Q-39 由 600 改為 725）。畫面不顯示分數數值（R-19），QA 以本結構驗證。",
       "type": "object",
       "required": ["draftScore", "appliedScore", "appliedColor", "effectiveColor"],
       "additionalProperties": false,
       "properties": {
-        "draftScore": { "$ref": "#/$defs/Score", "description": "滑桿／輸入框目前的有效分數（未套用也保存）。" },
+        "draftScore": { "$ref": "#/$defs/Score", "description": "難易度設定頁目前選中的分數（未套用也保存）；選中卡片 = Color(draftScore)。v0.10 起由點選色級卡片設為該色上限（橘 215、棕 465、綠 725、藍 855、金 990）；v0.9 以前的任意合法分數不轉換。" },
         "appliedScore": { "$ref": "#/$defs/Score", "description": "最近一次按「套用」（首次畫面為「開始學習」）的分數。" },
         "appliedColor": { "$ref": "#/$defs/ColorLevel", "description": "目前目標色級 = Color(appliedScore)。冗餘，讀取時重算覆蓋。" },
         "effectiveColor": { "$ref": "#/$defs/OpenColorLevel", "description": "目前生效色級。冗餘，讀取時重算覆蓋。" }
@@ -252,7 +268,7 @@
       "schemaVersion": 2,
       "savedAt": "2026-10-30T08:30:00.000Z",
       "data": {
-        "goal": { "draftScore": 600, "appliedScore": 600, "appliedColor": "green", "effectiveColor": "green" },
+        "goal": { "draftScore": 725, "appliedScore": 725, "appliedColor": "green", "effectiveColor": "green" },
         "customVocab": [],
         "masteredWordKeys": [],
         "vocabQuiz": { "answered": 0, "correct": 0 },

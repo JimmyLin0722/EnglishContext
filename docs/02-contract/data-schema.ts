@@ -1,7 +1,7 @@
 /**
  * ---
  * doc: CONTRACT-SCHEMA
- * version: 0.9
+ * version: 0.11
  * status: approved
  * author: sa-agent
  * approved_by: JimmyLin（授權主控代核）
@@ -10,7 +10,13 @@
  *
  * English Master Track — 資料契約（型別定義）
  *
- * 上游：docs/01-PRD.md v0.9（approved，JimmyLin，2026-11-02），以第 6 章「人類決議」與 R-15～R-18 為準。
+ * 上游：docs/01-PRD.md v0.11（approved，JimmyLin，2026-11-02），以第 6 章「人類決議」與 R-15～R-20 為準。
+ * v0.11（PRD R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48）**不改**持久化結構：schemaVersion 維持 2，
+ *   PersistedData／StorageRecord／BackupFile 欄位不變，localStorage 鍵數維持 2；PWA 不寫入 localStorage 任何資料。
+ *   新增 §12 PWA（manifest、部署目錄、service worker 與快取、頁面端記憶體狀態），RuntimeState 新增 pwa 欄位（不持久化）。
+ *   規則見 README §10（DP、MF、HD、PE、SW、UP、IN、PV 各組規則與 V-PWA 驗證規則）。
+ * v0.10（PRD R-19、Q-39）**不改**持久化結構：schemaVersion 維持 2，GoalState 欄位不變；只改首次預設分數常數（600 → 725）
+ *   與註解（點卡片 = 該色 scoreMax、既有分數不轉換、分數驗證只用於資料層、畫面不顯示分數），規則見 README §5.9 GS-1～GS-8。
  * v0.8 含 localStorage 持久化結構變更（schemaVersion 1 → 2，PRD R-17 人類已同意），依 PRD R-17 須由人類核准，不適用主控代核。
  * v0.9（PRD R-18）**不改**持久化結構：schemaVersion 維持 2，PersistedData／StorageRecord／BackupFile 欄位不變，storage-schema.json 未修改。
  * 畫面名稱（R-15）：「抽認卡」→「單字卡」、「Part 5」（本系統功能）→「模擬測驗」、「自訂器」→「難易度設定」。
@@ -21,7 +27,7 @@
  *           docs/02-contract/README.md（總覽、驗證規則 V-xx、授權確認紀錄、回饋上游）。
  *
  * 本檔是「規格」不是實作：
- * - pg-content 依 §2～§7 產出 src/data/ 的資料檔；pg-frontend 依 §1、§8～§11 實作 src/app/。
+ * - pg-content 依 §2～§7 產出 src/data/ 的資料檔；pg-frontend 依 §1、§8～§12 實作 src/app/（v0.11 §12 PWA 含建置輸出）。
  * - 兩方都不得自創欄位；欄位變更必須先改本契約（版本遞增）。
  * - 下方的 export const 是契約常數（值本身就是規格），pg-frontend 實作時須使用相同數值。
  *
@@ -81,6 +87,25 @@
  * |      |            |          | (3) 收音條（R-18 二、US-33）：RuntimeState 禁放清單補 MediaStream、AudioContext、AnalyserNode 與音量數值；
  * |      |            |          |     門檻 T1～T5 屬架構常數，契約不定義（README §9.3 DS-01）。
  * |      |            |          | 型別數 59 不變；契約常數 18 → 20；localStorage 鍵數維持 2；持久化結構不變，schemaVersion 維持 2。 |
+ * | 0.10 | 2026-11-02 | sa-agent | 修訂已核准的 v0.9（主控代核），依 PRD v0.10（R-19、Q-39，JimmyLin 2026-11-02 核准）。status 改回 draft、核准欄位清空。
+ * | 0.10 | 2026-11-02 | 主控 | 主控代核：只改預設常數與規則說明，未改持久化結構（schemaVersion 維持 2）。 |
+ * |      |            |          | (1) SCORE_DEFAULT 600 → 725（Q-39 決議 B，= 綠色 scoreMax）；GoalState 預設值註解同步。
+ * |      |            |          | (2) 點色級卡片的分數 = 該色 COLOR_LEVELS[].scoreMax（橘 215、棕 465、綠 725、藍 855、金 990），取代 Q-32；
+ * |      |            |          |     以既有欄位推導，不新增常數（ColorLevelDefinition.scoreMax、COLOR_LEVELS 註解）。
+ * |      |            |          | (3) SCORE_MIN／SCORE_MAX／SCORE_STEP 註明只用於資料層驗證（localStorage 讀取、備份匯入），畫面不再使用；
+ * |      |            |          |     步進四捨五入只屬已暫停的 AC-02-09，資料層不做四捨五入。契約本來就沒有分數輸入錯誤訊息常數。
+ * |      |            |          | (4) GoalState.draftScore／appliedScore 註解改寫：畫面不顯示分數、選中卡片 = Color(draftScore)、既有分數不轉換（R-19 六）。
+ * |      |            |          | 型別數 59、契約常數 20、localStorage 鍵數 2 皆不變；PersistedData／StorageRecord／BackupFile 欄位不變，schemaVersion 維持 2，不需遷移。 |
+ * | 0.11 | 2026-11-02 | sa-agent | 修訂已核准的 v0.10（主控代核），依 PRD v0.11（R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48，JimmyLin 2026-11-02 核准）。
+ * |      |            |          | status 改為 in-review、核准欄位清空，三檔同步。
+ * |      |            |          | (1) 新增 §12 PWA：型別 PwaIconPurpose、PwaManifestIcon、PwaManifest、PwaDeployFileRole、PwaDeployFile、
+ * |      |            |          |     PwaPageToSwMessage、PwaRuntimeState（7 個：interface 4、type 3）。
+ * |      |            |          | (2) 新增契約常數 PWA_APP_NAME、PWA_THEME_COLOR、PWA_BACKGROUND_COLOR、PWA_MANIFEST、PWA_DEPLOY_FILES、
+ * |      |            |          |     PWA_PRECACHE_URLS、PWA_CACHE_PREFIX、PWA_BUILD_ID_PATTERN、PWA_BUILD_ID_META_NAME、PWA_UPDATE_RECHECK_MS、PWA_TEXTS（11 個）。
+ * |      |            |          | (3) RuntimeState 新增 pwa: PwaRuntimeState（記憶體，不持久化）；BeforeInstallPromptEvent、ServiceWorkerRegistration
+ * |      |            |          |     等瀏覽器物件不得進入 AppState（同 SpeechRecognition 的禁放規則）。
+ * |      |            |          | 型別數 59 → 66（interface 32、type 34）；契約常數 20 → 31；localStorage 鍵數維持 2；
+ * |      |            |          | PersistedData／StorageRecord／BackupFile 欄位不變，schemaVersion 維持 2，不需遷移。內容資料檔（src/data/）格式不變。 |
  */
 
 // ════════════════════════════════════════════════════════════════════
@@ -122,7 +147,11 @@ export interface ColorLevelDefinition {
   nameZh: "橘" | "棕" | "綠" | "藍" | "金";
   /** 必填。分數下限（含），5 的倍數。例：470。 */
   scoreMin: number;
-  /** 必填。分數上限（含），5 的倍數。例：725。 */
+  /**
+   * 必填。分數上限（含），5 的倍數。例：725。
+   * （v0.10，R-19 二）同時是「色級上限分數」：點選該色卡片時 goal.draftScore 一律設為本值
+   * （含目前已選中的色級、含鎖定的藍／金），取代 Q-32「已在範圍內則不變，否則設為下限」（README §5.9 GS-2）。
+   */
   scoreMax: number;
   /** 必填。本版開放狀態。 */
   status: ColorLevelStatus;
@@ -138,6 +167,9 @@ export interface ColorLevelDefinition {
  * 色級定義表（契約常數，值依 PRD 色級定義表）。
  * 判定規則：Color(S) = scoreMin ≤ S ≤ scoreMax 的那一列。
  * 生效色級 = Color(S) 為藍或金時取 "green"，否則同 Color(S)（PRD 名詞定義）。
+ * （v0.10，R-19）點卡片的目標分數 scoreForCard(id) = COLOR_LEVELS.find(c => c.id === id).scoreMax，
+ *   即 橘 215、棕 465、綠 725、藍 855、金 990（PRD「色級上限分數」）；不另設常數，避免與本表數值不一致。
+ *   scoreMin／scoreMax 只用於內部判定 Color(S) 與上述推導，畫面不得顯示分數範圍（AC-01-01、AC-26-01、AC-26-05）。
  */
 export const COLOR_LEVELS: readonly ColorLevelDefinition[] = [
   { id: "orange", nameZh: "橘", scoreMin: 10,  scoreMax: 215, status: "open",   dailyNewWords: 10, vocabTarget: "N_O", scenarioZh: "入門：最高頻的生活基礎字彙" },
@@ -147,11 +179,20 @@ export const COLOR_LEVELS: readonly ColorLevelDefinition[] = [
   { id: "gold",   nameZh: "金", scoreMin: 860, scoreMax: 990, status: "locked", dailyNewWords: 20, vocabTarget: null,  scenarioZh: "專業熟練者、近母語水準" },
 ] as const;
 
-/** 分數規則（Q-12）：範圍 10～990、步進 5、預設 600；非 5 的倍數四捨五入到最近的 5 的倍數（AC-02-09）。 */
+/**
+ * 分數規則（Q-12；v0.10 依 R-19、Q-39 修訂）。
+ * - SCORE_MIN／SCORE_MAX／SCORE_STEP：**只用於資料層驗證**——localStorage 讀取（§5.3，不合法 → AC-18-05 重設，E-11）
+ *   與備份匯入（§6.2 步驟 5，不合法 → format，E-31）。值須為 10～990 的整數且為 5 的倍數（storage-schema.json $defs/Score）。
+ *   資料層**不做四捨五入**：非 5 的倍數一律視為不合法，不修正。
+ * - 畫面不再使用（R-19 一、七）：無分數滑桿與輸入框；「非 5 的倍數四捨五入」（AC-02-09）、
+ *   「請輸入 10～990 的分數」（AC-02-02）皆屬 v0.10 暫停的 AC，不得出現在畫面（AC-26-05）。契約不定義該提示文字常數。
+ * - SCORE_DEFAULT：首次使用、重設（AC-18-05）的預設分數 = 725（綠色 scoreMax；v0.10 依 Q-39 決議 B 由 600 改為 725）。
+ *   只影響新產生的預設值；localStorage／備份中已存的分數（如 600）不轉換（R-19 六、README §5.9 GS-4）。
+ */
 export const SCORE_MIN = 10;
 export const SCORE_MAX = 990;
 export const SCORE_STEP = 5;
-export const SCORE_DEFAULT = 600;
+export const SCORE_DEFAULT = 725;
 
 /** 橘色建議字量 N_O（Q-29 定案）。N_B（紀錄值 2,809）、N_G（紀錄值 5,620）由資料計算，不設常數，見 §2 VocabManifest 與 README §4.2。 */
 export const N_O = 1000;
@@ -669,12 +710,22 @@ export const STORAGE_KEYS = {
 
 /**
  * 目標設定。對應：FR-1.1、FR-1.2、AC-01-03、AC-01-04、AC-01-06、AC-01-07、AC-02-08、AC-17-06、AC-18-02。
- * 預設：{ draftScore: 600, appliedScore: 600, appliedColor: "green", effectiveColor: "green" }。
+ * （v0.10）另對應 AC-01-05、AC-25-04、AC-26-02、AC-26-05、AC-26-06、AC-32-04；規則見 README §5.9 GS-1～GS-8。
+ * 預設：{ draftScore: 725, appliedScore: 725, appliedColor: "green", effectiveColor: "green" }（v0.10 由 600 改為 725，Q-39）。
+ * 畫面不顯示 draftScore、appliedScore 的數值（R-19 一、四；AC-17-06、AC-26-05），QA 以 localStorage 或匯出備份驗證。
  */
 export interface GoalState {
-  /** 必填。滑桿／輸入框目前的有效分數（未套用也保存，AC-02-08）。10～990 且為 5 的倍數。 */
+  /**
+   * 必填。難易度設定頁目前選中的分數（未套用也保存，AC-02-08；首次畫面只存在記憶體，FS-2）。10～990 且為 5 的倍數。
+   * （v0.10）選中卡片 = Color(draftScore)；點卡片時設為該色 scoreMax（GS-2）；取消初始化確認時還原為 appliedScore（CI-9）。
+   * v0.9 以前由滑桿／輸入框設定，可能是任意合法分數（如 600、735），讀取時不轉換（GS-4）。
+   */
   draftScore: number;
-  /** 必填。最近一次按「套用」的分數（「目前目標分數」，AC-17-06）。10～990 且為 5 的倍數。 */
+  /**
+   * 必填。最近一次按「套用」（首次畫面為「開始學習」）的分數，即 PRD「目標分數」。10～990 且為 5 的倍數。
+   * 套用時 = draftScore；未點卡片直接套用時維持原值，不改寫為色級上限或下限（R-19 六、AC-26-06）。
+   * （v0.10）主控台不再顯示本值（AC-17-06）。
+   */
   appliedScore: number;
   /** 必填。目前目標色級 = Color(appliedScore)，可為 blue／gold（AC-01-07）。冗餘欄位，讀取時以 appliedScore 重新計算覆蓋。 */
   appliedColor: ColorLevel;
@@ -1105,6 +1156,12 @@ export interface RuntimeState {
    * 啟動時 false；不持久化。只控制學習紀錄（LR-7）的提示，不影響新增自訂單字等其他寫入的提示（AC-18-04）。
    */
   learningQuotaNoticeShown: boolean;
+  /**
+   * （v0.11，R-20）PWA 的頁面端狀態（安裝按鈕、新版提示）。只存在記憶體，不寫入 localStorage、備份檔或任何儲存。
+   * 啟動時依 README §10.5 PE-1 判定 eligible；其餘欄位初始值見 PwaRuntimeState 註解。
+   * BeforeInstallPromptEvent、ServiceWorkerRegistration、ServiceWorker 物件不得放入本欄，只能放在 src/app 模組內部變數。
+   */
+  pwa: PwaRuntimeState;
 }
 
 /** 應用程式狀態 = 持久化資料 + 執行期狀態。對應：規格書 2.2 AppState（已依 PRD 改寫）。 */
@@ -1145,5 +1202,259 @@ declare global {
     ACADEMIC_PHRASEBANK?: PhraseTemplate[];
   }
 }
+// （v0.11）PWA 不新增任何 window 全域變數；pg-content 無 PWA 工作，src/data/ 格式不變。
+
+// ════════════════════════════════════════════════════════════════════
+// §12 PWA（v0.11，PRD R-20、US-34～US-37、AC-24-12、Q-41～Q-48）
+//     提供者：契約常數 → pg-frontend（建置程式產生 manifest、service worker、部署目錄；頁面端註冊與 UI）
+//             圖示 PNG → 主控（Q-45 決議 A，預先產生，建置只複製）
+//     使用者：瀏覽器、QA（V-PWA）
+//     本節全部「不持久化」：不寫入 localStorage、備份檔、IndexedDB；Cache Storage 只放 PWA_PRECACHE_URLS 的回應。
+//     規則：README §10（DP 部署目錄、MF manifest、HD HTML head、PE 啟用條件、SW service worker、UP 更新、IN 安裝按鈕、PV 隱私）。
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * PWA 安裝名稱（manifest name／short_name、iOS apple-mobile-web-app-title 共用）。
+ * 只用於 PWA 安裝名稱；HTML <title>「English Master Track」與 App 內所有既有文字不變（Q-42 決議）。
+ * 對應：AC-34-01、AC-34-02、AC-34-05、AC-34-09、AC-23-02、AC-23-06（品牌標識聲明中的名稱）。
+ */
+export const PWA_APP_NAME = "EnglishContext";
+
+/**
+ * manifest theme_color 與 HTML <meta name="theme-color"> 的值（兩者必須逐字相同，AC-34-04）。
+ * 格式 #RRGGBB（小寫 hex）。SA 定案取 App 主色 --primary（src/app/styles/00-base.css）；PRD 未指定色值（README FB-41）。
+ * 對應：AC-34-01、AC-34-04。
+ */
+export const PWA_THEME_COLOR = "#2f6fd6";
+
+/**
+ * manifest background_color。必須等於首次畫面 body 計算後的背景色（AC-34-04），
+ * 目前為 CSS 變數 --bg = #f6f7f9（rgb(246, 247, 249)）。若日後 --bg 改變，本常數須同步修訂（README DS-13）。
+ * 格式 #RRGGBB（小寫 hex）。對應：AC-34-01、AC-34-02（Android 啟動畫面背景）、AC-34-04。
+ */
+export const PWA_BACKGROUND_COLOR = "#f6f7f9";
+
+/** 圖示用途。"any" = 一般圖示（滿版不透明正方形）；"maskable" = 可套遮罩圖示（主要圖案在中央 80% 圓形安全區內）。AC-34-01、AC-34-03。 */
+export type PwaIconPurpose = "any" | "maskable";
+
+/**
+ * manifest icons 的一筆。對應：AC-34-01、AC-34-03。
+ * 每筆只能有一個 purpose（不得寫 "any maskable" 合併值，AC-34-01「3 筆獨立項目」）。
+ */
+export interface PwaManifestIcon {
+  /** 必填。相對於 manifest 檔的路徑（不以 "/" 或協定開頭），例 "icons/icon-192.png"。必須是 PWA_DEPLOY_FILES 中 role 為 "icon" 的 path。 */
+  src: string;
+  /** 必填。"<寬>x<高>"，必須與 PNG 實際像素相同，例 "192x192"。 */
+  sizes: "192x192" | "512x512";
+  /** 必填。固定 "image/png"。 */
+  type: "image/png";
+  /** 必填。單一值。 */
+  purpose: PwaIconPurpose;
+}
+
+/**
+ * Web App Manifest 的完整內容（建置輸出 manifest.webmanifest = JSON.stringify(PWA_MANIFEST) 的結果，見 README MF-1）。
+ * 欄位集合**封閉**：只允許下列 10 個鍵，不得加入 shortcuts、share_target、protocol_handlers、file_handlers、
+ * related_applications、prefer_related_applications、screenshots、scope_extensions 等（隱私與範圍，PV-4）。
+ * 對應：AC-34-01、AC-34-02、AC-34-04、R-20 PM 判斷 (a)。
+ */
+export interface PwaManifest {
+  /** 必填。= PWA_APP_NAME。 */
+  name: "EnglishContext";
+  /** 必填。= PWA_APP_NAME（14 字元，部分手機會截斷，屬 Q-42 已接受的取捨）。 */
+  short_name: "EnglishContext";
+  /** 必填。相對路徑 "./"；瀏覽器以 start_url 解析後 = 部署目錄網址（例 https://<帳號>.github.io/<專案>/）。 */
+  id: "./";
+  /** 必填。相對路徑 "./"，以 manifest 網址解析 = 部署目錄；不得是 "/"（網域根目錄，GitHub Pages 專案網站會 404）。 */
+  start_url: "./";
+  /** 必填。相對路徑 "./"，同上。 */
+  scope: "./";
+  /** 必填。固定 "standalone"（獨立視窗，無網址列與分頁列，AC-34-02）。 */
+  display: "standalone";
+  /** 必填。固定 "zh-Hant-TW"。 */
+  lang: "zh-Hant-TW";
+  /** 必填。= PWA_THEME_COLOR。 */
+  theme_color: string;
+  /** 必填。= PWA_BACKGROUND_COLOR。 */
+  background_color: string;
+  /** 必填。恰好 3 筆，順序固定：192 any、512 any、512 maskable。 */
+  icons: readonly [PwaManifestIcon, PwaManifestIcon, PwaManifestIcon];
+}
+
+/** manifest 內容（契約常數；建置程式須輸出與此深度相等的 JSON）。 */
+export const PWA_MANIFEST: PwaManifest = {
+  name: "EnglishContext",
+  short_name: "EnglishContext",
+  id: "./",
+  start_url: "./",
+  scope: "./",
+  display: "standalone",
+  lang: "zh-Hant-TW",
+  theme_color: "#2f6fd6",
+  background_color: "#f6f7f9",
+  icons: [
+    { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+    { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+    { src: "icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+  ],
+};
+
+/**
+ * 部署目錄中檔案的角色。
+ * "page" = index.html；"manifest" = manifest.webmanifest；"serviceWorker" = sw.js；
+ * "icon" = manifest 參照的圖示；"appleTouchIcon" = iOS 主畫面圖示（不在 manifest 內）；"adsTxt" = ads.txt。
+ */
+export type PwaDeployFileRole = "page" | "manifest" | "serviceWorker" | "icon" | "appleTouchIcon" | "adsTxt";
+
+/**
+ * 部署目錄中的一個檔案。對應：AC-36-07、AC-34-01、AC-34-05、AC-35-01、Q-45、Q-46。
+ * 部署目錄本身的名稱與位置（如 dist/site/）由 SD 決定；path 為相對於部署目錄根的路徑，部署後即相對於網址 …/<專案>/。
+ */
+export interface PwaDeployFile {
+  /** 必填。相對路徑，只用小寫英數、"-"、"."、"/"；區分大小寫（GitHub Pages 執行環境區分大小寫）。例 "icons/icon-192.png"。 */
+  path: string;
+  /** 必填。角色。 */
+  role: PwaDeployFileRole;
+  /** 必填。部署伺服器應回應的 MIME（QA 檢查用；GitHub Pages 依副檔名決定）。 */
+  mime: "text/html" | "application/manifest+json" | "text/javascript" | "image/png" | "text/plain";
+  /** 必填。是否在預先快取清單（PWA_PRECACHE_URLS）中。sw.js 與 ads.txt 為 false。 */
+  precached: boolean;
+  /** PNG 必填，其他省略。正方形邊長（像素），實際像素必須相同。 */
+  sizePx?: 180 | 192 | 512;
+  /** role = "icon" 必填，其他省略。 */
+  purpose?: PwaIconPurpose;
+  /** 必填。產生方式：build = 建置程式產生；copy = 建置原樣複製（逐位元組相同）。 */
+  producedBy: "build" | "copy";
+}
+
+/**
+ * 部署目錄檔案清單（契約常數，恰好 8 個檔案，不多不少；AC-36-07）。
+ * 圖示 PNG 共通規格（README DP-4）：PNG、正方形、不含透明度通道（色彩類型 RGB），四角無灰色或透明殘留（Q-41 決議 A）。
+ */
+export const PWA_DEPLOY_FILES: readonly PwaDeployFile[] = [
+  { path: "index.html", role: "page", mime: "text/html", precached: true, producedBy: "build" },
+  { path: "manifest.webmanifest", role: "manifest", mime: "application/manifest+json", precached: true, producedBy: "build" },
+  { path: "sw.js", role: "serviceWorker", mime: "text/javascript", precached: false, producedBy: "build" },
+  { path: "icons/icon-192.png", role: "icon", mime: "image/png", precached: true, sizePx: 192, purpose: "any", producedBy: "copy" },
+  { path: "icons/icon-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "any", producedBy: "copy" },
+  { path: "icons/icon-maskable-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "maskable", producedBy: "copy" },
+  { path: "icons/apple-touch-icon-180.png", role: "appleTouchIcon", mime: "image/png", precached: true, sizePx: 180, producedBy: "copy" },
+  { path: "ads.txt", role: "adsTxt", mime: "text/plain", precached: false, producedBy: "copy" },
+];
+
+/**
+ * 預先快取清單（PRD V-PWA 名詞「預先快取清單」；契約常數，恰好 7 項，順序不拘）。
+ * 每項為相對於 sw.js 的網址；"./" 與 "./index.html" 是同一份 HTML 的兩個快取鍵（兩者內容逐位元組相同）。
+ * 不含 sw.js（PRD 定義）與 ads.txt。service worker 只攔截、只回應這 7 個網址的同源 GET（SW-6）。
+ * 對應：AC-35-01、AC-35-02、AC-37-05、AC-21-03。
+ */
+export const PWA_PRECACHE_URLS: readonly string[] = [
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+  "./icons/icon-maskable-512.png",
+  "./icons/apple-touch-icon-180.png",
+];
+
+/**
+ * 本專案快取名稱前綴（PRD 名詞「本專案快取」）。快取名稱 = PWA_CACHE_PREFIX + BUILD_ID，
+ * 例 "english-master-track-pwa-3fa9c01d77e2b6a4"。清除舊快取時只刪除以此前綴開頭、且不等於目前名稱者（SW-9，AC-36-05）。
+ * 同一 <帳號>.github.io 網域下其他專案共用來源，因此前綴必須含專案識別（R-20 PM 判斷 (b)）。
+ */
+export const PWA_CACHE_PREFIX = "english-master-track-pwa-";
+
+/**
+ * 建置識別碼 BUILD_ID 的格式：16 個小寫十六進位字元。
+ * 由建置程式依檔案內容自動計算（README SW-2：SHA-256 摘要取前 16 字元），不得手動填寫、不得含時間戳或隨機值（AC-36-01）。
+ * 同一個 BUILD_ID 同時出現在：HTML <meta name="emt-build-id">、sw.js 的快取名稱（AC-36-02）。
+ */
+export const PWA_BUILD_ID_PATTERN = "^[0-9a-f]{16}$";
+
+/**
+ * HTML 中記錄建置識別碼的 <meta> name。寫法：<meta name="emt-build-id" content="<BUILD_ID>">（畫面不顯示）。
+ * file:// 版與 https 版是同一份 HTML，兩者都有此 meta（不產生請求）。對應：AC-36-02、AC-36-03（V-PWA 版本識別）。
+ */
+export const PWA_BUILD_ID_META_NAME = "emt-build-id";
+
+/**
+ * 頁面回到前景時，距上次更新檢查達此毫秒數即呼叫 registration.update()（1 小時，AC-36-03 情境 (2)）。
+ * 只用於記憶體中的時間比較，不持久化。
+ */
+export const PWA_UPDATE_RECHECK_MS = 3_600_000;
+
+/** PWA 相關畫面文字（契約常數，逐字使用）。 */
+export const PWA_TEXTS = {
+  /** 主控台「匯出備份」區塊內的安裝按鈕文字（AC-34-07，Q-44）。 */
+  installButton: "安裝 App",
+  /** 新版提示文字（AC-36-03，Q-43 決議 A）。 */
+  updateNotice: "有新版本，重新整理",
+  /** 新版提示中的按鈕文字（AC-36-03）。 */
+  updateButton: "重新整理",
+  /** 「匯出備份」按鈕旁的固定說明（AC-24-12，Q-47 決議 B）；file:// 與 https 兩種開啟方式文字相同。 */
+  backupOriginNotice: "學習紀錄只存在目前的瀏覽器與網址；檔案版、網頁版、主畫面 App 彼此不互通，可用匯出備份／匯入轉移",
+} as const;
+
+/**
+ * 頁面 → service worker 的 postMessage 訊息（唯一一種）。對應：AC-36-03、AC-37-05。
+ * - 頁面只在使用者按下「重新整理」時，對 registration.waiting 送出 { type: "SKIP_WAITING" }（UP-4）。
+ * - service worker 只接受 event.data 為物件、且 type 恰為 "SKIP_WAITING"、且不含其他鍵的訊息，收到後呼叫 self.skipWaiting()；
+ *   其他任何訊息一律忽略（不回覆、不報錯）。
+ * - service worker → 頁面：**不送任何訊息**；頁面以 navigator.serviceWorker 的 "controllerchange" 事件得知已換版（UP-5）。
+ * - 訊息不得攜帶任何學習資料或 localStorage 內容（PV-2）。
+ */
+export type PwaPageToSwMessage = { type: "SKIP_WAITING" };
+
+/**
+ * PWA 頁面端狀態（RuntimeState.pwa；只存在記憶體，不持久化，重新載入即回到初始值）。
+ * 理由：安裝按鈕是否顯示由瀏覽器每次重新觸發 beforeinstallprompt 決定（AC-34-09 (b)、AC-34-10），
+ *       新版提示由 service worker 狀態推導（AC-36-03），兩者都不需要、也不得寫入 localStorage（R-20 (4)、AC-37-06）。
+ * 對應：AC-34-06～AC-34-10、AC-36-03、AC-36-06、AC-37-01、AC-37-03、AC-37-04。
+ */
+export interface PwaRuntimeState {
+  /**
+   * 是否啟用 PWA 功能（README PE-1）。啟動時判定一次，本工作階段不再變更。
+   * false 時：不註冊 service worker、不加入 manifest 與 apple-touch-icon 連結、不監聽 beforeinstallprompt、
+   * 其餘欄位恆為初始值（安裝按鈕與新版提示永不顯示，AC-34-08 (a)、AC-37-01～AC-37-04）。
+   */
+  eligible: boolean;
+  /**
+   * 是否以已安裝的獨立視窗執行（README IN-2：display-mode standalone，或 iOS navigator.standalone === true）。
+   * 啟動時判定一次。true 時安裝按鈕永不顯示（AC-34-08 (d)）。
+   */
+  standalone: boolean;
+  /**
+   * 是否持有可用的安裝事件（README IN-3）：收到 beforeinstallprompt 且已呼叫 preventDefault()、事件物件存在模組變數中時為 true。
+   * 初始 false。按下「安裝 App」、收到 appinstalled 時設為 false。
+   */
+  installPromptAvailable: boolean;
+  /**
+   * 本次頁面期間是否不再顯示安裝按鈕（README IN-5、IN-6）。初始 false。
+   * 按下「安裝 App」（不論接受、拒絕或出錯）或收到 appinstalled 後設為 true，之後同一頁面期間再收到 beforeinstallprompt 也忽略
+   * （AC-34-09 (a)(b)）。重新載入回到 false。
+   */
+  installSuppressed: boolean;
+  /**
+   * 是否有已安裝完成、等待啟用的新版 service worker（README UP-2）：registration.waiting 存在
+   * 且 navigator.serviceWorker.controller 不為 null 時為 true。初始 false。true 時顯示新版提示（AC-36-03）。
+   */
+  updateAvailable: boolean;
+  /**
+   * 使用者是否已按「重新整理」（README UP-4、UP-5）。初始 false。只有為 true 時，"controllerchange" 才觸發 location.reload()，
+   * 且整個頁面期間至多重新載入 1 次（首次安裝時 clients.claim() 造成的 controllerchange 不得重新載入）。
+   */
+  reloadRequested: boolean;
+  /**
+   * 上次呼叫 registration.update() 或註冊完成的時間（performance.now() 毫秒）；尚未註冊為 null。
+   * 用於 PWA_UPDATE_RECHECK_MS 比較（UP-3）。不持久化。
+   */
+  lastUpdateCheckAt: number | null;
+}
+
+// 安裝按鈕是否顯示（推導值，不另存；README IN-1）：
+//   eligible && !standalone && installPromptAvailable && !installSuppressed
+//   && entryMode === "main" && currentTab === "dashboard"
+// 新版提示是否顯示（推導值；README UP-6）：eligible && updateAvailable（任何 entryMode、任何頁面）。
 
 export {};

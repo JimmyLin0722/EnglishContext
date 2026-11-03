@@ -12,10 +12,16 @@
  *   顯示值全部由純函式 progressModel(state, today) 計算，view 只依模型繪製；
  *   環形以內嵌 SVG（core/dom.js 的 svg()）繪製，長條以 div 繪製，文字一律 textContent。
  * - 統計區：連續打卡天數、單字掌握數、模擬測驗正確率（訂閱 store，只重繪本區）。
- * - 目標區：目前目標分數、目前目標色級、目前生效色級、每日新字量（顯示頁面與匯入成功時更新）。
+ * - 目標區：目前目標色級、目前生效色級、每日新字量（顯示頁面與匯入成功時更新）。
+ *   （v0.10，FE-43；PRD R-19、AC-17-06、AC-26-05 (c)）不顯示目標分數；色級仍由 appliedScore 推導。
  * - 入口：導覽模組（NAV_TAB_ORDER 去掉 dashboard）與「資料來源與授權」，以 data-go 交給 router 切換。
  *   （v0.5，FE-38）入口由 NAV_TAB_ORDER 推導，不含隱藏頁（AC-17-06、AC-20-04、契約 §5.8 HT-2）。
  * - 備份：匯出（store.actions.exportBackup → services/download）、匯入（FileReader → store.actions.importBackup）。
+ *   （v0.11，FE-51；architecture §4.7、§7.18.6、§7.18.7）按鈕列之後依序：
+ *   p.dash-backup__origin（PWA_TEXTS.backupOriginNotice，常駐，不看 eligible／storageStatus；NT-1、AC-24-12）、
+ *   div.dash-backup__install（EMT.core.pwa.installVisible 成立時只含 1 個「安裝 App」按鈕，不成立時 hidden 且無子節點；IN-1）。
+ *   按下 → EMT.services.pwa.requestInstall()（呼叫時取用；不存在時不做事）；不自動 prompt、不做安裝橫幅或 iOS 說明（IN-4）。
+ *   訂閱回呼收到 "pwa"（及 "tab"、"entry"）tag 時、show() 時重繪安裝區。
  * 所有文字以 textContent 呈現（經 core/dom.js）。
  *
  * 寫法：純邏輯（summaryOf、goalInfoOf、importMessage、progressModel、ringGeometry）以 module.exports 匯出供 Node 測試；
@@ -53,6 +59,30 @@
     return coreCache;
   }
 
+  /** （v0.11，FE-51）取得 core/pwa（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function pwaCore() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../core/pwa.js");
+    } else {
+      m = root.EMT && root.EMT.core && root.EMT.core.pwa;
+    }
+    if (!m) throw new Error("EMT.core.pwa 未載入（views/dashboard.js）");
+    return m;
+  }
+
+  /** （v0.11，FE-51）會影響「安裝 App」按鈕顯示條件（IN-1）的 tags */
+  var INSTALL_TAGS = ["pwa", "tab", "entry", "init"];
+
+  /** tags 是否含會影響安裝按鈕的項目；tags 缺漏時視為需要重繪 */
+  function installAffected(tags) {
+    if (!Array.isArray(tags)) return true;
+    for (var i = 0; i < tags.length; i++) {
+      if (INSTALL_TAGS.indexOf(tags[i]) !== -1) return true;
+    }
+    return false;
+  }
+
   // ── 畫面文字（AC 引號內文案逐字使用）──
   var TEXT = {
     title: "學習主控台",
@@ -61,7 +91,6 @@
     mastered: "單字掌握數",
     accuracy: "模擬測驗正確率",
     goalTitle: "目前目標",
-    appliedScore: "目前目標分數",
     appliedColor: "目前目標色級",
     effectiveColor: "目前生效色級",
     daily: "每日新字量",
@@ -160,8 +189,9 @@
    * 目標區顯示文字（AC-17-06、AC-01-07）。
    * 目標色級為藍、金時，生效色級顯示「綠（內建上限）」；其餘兩者相同。
    * 每日新字量取生效色級的 dailyNewWords（藍、金顯示綠的 15）。
+   * （v0.10）回傳不含 appliedScore（目標分數只存在資料中，畫面不顯示）。
    * @param {object|null} goal GoalState
-   * @returns {{ appliedScore: string, appliedColor: string, appliedColorId: (string|null),
+   * @returns {{ appliedColor: string, appliedColorId: (string|null),
    *             effectiveColor: string, effectiveColorId: (string|null), daily: string }}
    */
   function goalInfoOf(goal) {
@@ -182,7 +212,6 @@
     // 每日新字量依「生效色級」顯示（人類決議 R6-2，2026-10-30）：藍、金生效為綠 → 15
     var daily = effective && typeof effective.dailyNewWords === "number" ? effective.dailyNewWords : null;
     return {
-      appliedScore: score !== null ? String(score) : TEXT.empty,
       appliedColor: applied ? applied.nameZh : TEXT.empty,
       appliedColorId: applied ? applied.id : null,
       effectiveColor: effectiveText,
@@ -582,7 +611,6 @@
       var D = dom();
       var data = currentData();
       var info = goalInfoOf(data ? data.goal : null);
-      D.setText(refs.score, info.appliedScore);
       D.setText(refs.appliedColor, info.appliedColor);
       D.setText(refs.effectiveColor, info.effectiveColor);
       D.setText(refs.daily, info.daily);
@@ -677,6 +705,39 @@
       }
     }
 
+    /** （v0.11，FE-51）「安裝 App」：交給 services/pwa（IN-5）；Promise 錯誤靜默、不顯示任何訊息 */
+    function onInstallClick() {
+      var svc = EMT.services && EMT.services.pwa;
+      if (!svc || typeof svc.requestInstall !== "function") return;
+      try {
+        var p = svc.requestInstall();
+        if (p && typeof p.then === "function") p.then(null, function () {});
+      } catch (e) {
+        // 靜默（PE-3）
+      }
+    }
+
+    /** （v0.11，FE-51）依 IN-1 重繪安裝區：成立時恰 1 個按鈕；不成立時 hidden 且無子節點（不佔版面） */
+    function renderInstall() {
+      if (!refs || !refs.installBox) return;
+      var box = refs.installBox;
+      var visible = pwaCore().installVisible(currentState()) === true;
+      if (!visible) {
+        dom().clear(box);
+        box.hidden = true;
+        return;
+      }
+      if (!box.firstChild) {
+        box.appendChild(dom().el("button", {
+          className: "btn btn--secondary dash-install",
+          attrs: { type: "button", "data-action": "install-app" },
+          text: pwaCore().PWA_TEXTS.installButton,
+          on: { click: onInstallClick }
+        }));
+      }
+      box.hidden = false;
+    }
+
     function onImportClick() {
       if (busy || !refs) return;
       refs.fileInput.click();
@@ -690,7 +751,6 @@
       var ma = statItem(TEXT.mastered);
       var ac = statItem(TEXT.accuracy);
 
-      var score = statItem(TEXT.appliedScore);
       var applied = statItem(TEXT.appliedColor, "dash-color");
       var effective = statItem(TEXT.effectiveColor, "dash-color");
       var daily = statItem(TEXT.daily);
@@ -722,6 +782,9 @@
         on: { click: onImportClick }
       });
 
+      // （v0.11，FE-51）安裝區（IN-1）；內容由 renderInstall 依狀態增刪
+      var installBox = D.el("div", { className: "dash-backup__install", attrs: { hidden: true } });
+
       var progress = buildProgress();
 
       var page = D.el("div", { className: "dashboard" }, [
@@ -733,7 +796,7 @@
         ]),
         D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-goal-h" } }, [
           D.el("h3", { className: "dash-section__title", attrs: { id: "dash-goal-h" }, text: TEXT.goalTitle }),
-          D.el("div", { className: "dash-stats dash-stats--goal" }, [score.item, applied.item, effective.item, daily.item])
+          D.el("div", { className: "dash-stats dash-stats--goal" }, [applied.item, effective.item, daily.item])
         ]),
         D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-entries-h" } }, [
           D.el("h3", { className: "dash-section__title", attrs: { id: "dash-entries-h" }, text: TEXT.entriesTitle }),
@@ -743,6 +806,9 @@
           D.el("h3", { className: "dash-section__title", attrs: { id: "dash-backup-h" }, text: TEXT.backupTitle }),
           D.el("p", { className: "dash-backup__hint", text: TEXT.backupHint }),
           D.el("div", { className: "btn-row" }, [exportBtn, importBtn]),
+          // （v0.11，FE-51）NT-1：按鈕列的下一個兄弟節點，常駐（AC-24-12）
+          D.el("p", { className: "dash-backup__origin", text: pwaCore().PWA_TEXTS.backupOriginNotice }),
+          installBox,
           fileInput
         ])
       ]);
@@ -752,19 +818,20 @@
         streak: st.value,
         mastered: ma.value,
         accuracy: ac.value,
-        score: score.value,
         appliedColor: applied.value,
         effectiveColor: effective.value,
         daily: daily.value,
         exportBtn: exportBtn,
         importBtn: importBtn,
-        fileInput: fileInput
+        fileInput: fileInput,
+        installBox: installBox
       };
 
       // 先在未掛上文件前繪製初值：進度圈不會從空環播放 transition（只在數值改變時播放，§7.11）
       renderProgress();
       renderStats();
       renderGoal();
+      renderInstall();
 
       D.clear(rootEl);
       rootEl.appendChild(page);
@@ -775,6 +842,7 @@
         unsubscribe = s.subscribe(function (state, tags) {
           renderStats();
           if (progressAffected(tags)) renderProgress();
+          if (installAffected(tags)) renderInstall();
         });
       }
     }
@@ -784,6 +852,7 @@
       renderProgress();
       renderStats();
       renderGoal();
+      renderInstall();
     }
 
     function hide() {
@@ -804,6 +873,8 @@
     ringGeometry: ringGeometry,
     PROGRESS_TAGS: PROGRESS_TAGS,
     progressAffected: progressAffected,
+    INSTALL_TAGS: INSTALL_TAGS,
+    installAffected: installAffected,
     createView: createView
   };
 });

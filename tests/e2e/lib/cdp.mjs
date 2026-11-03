@@ -37,6 +37,8 @@ export async function launch({ browser = process.env.QA_BROWSER || "chrome", tmp
     "--no-first-run", "--no-default-browser-check", "--disable-extensions", "--disable-gpu",
     "--disable-background-networking", "--disable-component-update", "--disable-sync",
     "--allow-file-access-from-files",
+    // （第 3 輪）麥克風替身以 Web Audio 產生測試音源，避免無頭模式的自動播放政策讓 AudioContext 停在 suspended
+    "--autoplay-policy=no-user-gesture-required",
     "about:blank",
   ], { stdio: "ignore" });
 
@@ -110,7 +112,7 @@ export async function launch({ browser = process.env.QA_BROWSER || "chrome", tmp
     },
     /**
      * （v0.8，SD-FB-13）空 storage 開啟會進首次畫面（PRD US-25）。page.autoStart 為 true（預設）時，
-     * goto 後若處於首次模式即按「開始學習」以預設值（600、綠）進入主控台，等同 v0.7 的「首次使用」狀態。
+     * goto 後若處於首次模式即按「開始學習」以預設值（v0.10 起為 725、綠，Q-39）進入主控台，等同 v0.7 的「首次使用」狀態。
      * 測首次流程的腳本設 page.autoStart = false 自行操作。
      */
     autoStart: true,
@@ -201,7 +203,9 @@ export async function launch({ browser = process.env.QA_BROWSER || "chrome", tmp
     async toasts() { return page.ev(`[...document.querySelectorAll("#toast-root *")].map((e) => e.textContent).filter(Boolean).join(" | ")`); },
     async clearToasts() { await page.ev(`(() => { const r = document.getElementById("toast-root"); if (r) r.textContent = ""; })()`); },
     async close() {
-      try { await send("Browser.close"); } catch { /* 已關閉 */ }
+      // （第 3 輪）可重複呼叫；Browser.close 最多等 2 秒（連線已斷時 send 不會回應）
+      if (page._closed) return; page._closed = true;
+      try { await Promise.race([send("Browser.close"), sleep(2000)]); } catch { /* 已關閉 */ }
       try { ws.close(); } catch { /* 忽略 */ }
       await sleep(300);
       try { proc.kill(); } catch { /* 忽略 */ }
@@ -220,6 +224,8 @@ export function recorder(suite) {
     pass(tc, ac, note = "") { results.push({ suite, tc, ac, result: "通過", note }); console.log(`  PASS ${tc} ${ac} ${note}`); },
     fail(tc, ac, note) { results.push({ suite, tc, ac, result: "失敗", note }); console.log(`  FAIL ${tc} ${ac} ${note}`); },
     manual(tc, ac, note) { results.push({ suite, tc, ac, result: "待人工", note }); console.log(`  MANUAL ${tc} ${ac} ${note}`); },
+    /** （第 3 輪）PRD 標「暫停」的 AC：不執行，記為「不適用（暫停）」 */
+    na(tc, ac, note) { results.push({ suite, tc, ac, result: "不適用（暫停）", note }); console.log(`  N/A ${tc} ${ac} ${note}`); },
     async check(tc, ac, fn) {
       try {
         const r = await fn();

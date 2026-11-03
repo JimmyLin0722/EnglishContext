@@ -1,6 +1,6 @@
 ---
 doc: TEST-REPORT
-version: 0.3
+version: 0.5
 status: in-review
 author: qa-agent
 approved_by:
@@ -9,9 +9,48 @@ approved_at:
 
 # English Master Track — 測試報告（第 5 階段驗收）
 
-> 依據：`docs/04-qa/test-plan.md` v0.3；PRD v0.7、契約 v0.7、architecture v0.3、tasks.json v0.2。受測物（v0.2，退回修正第 1 輪）`dist/english-master-track.html` 3,030,574 bytes（QA 以 `tools/build.mjs --out` 重建後與 `dist/` 位元組相同）；初版受測物 3,022,217 bytes。（v0.3，退回修正第 2 輪）受測物 3,047,158 bytes，只驗證 BUG-002 並回歸 AC-01-*、AC-02-*、AC-04-*、AC-05-*、AC-16-*、AC-20-02、AC-22-*，詳見 §12。執行日期 2026-10-30。v0.2 範圍只驗證 BUG-001、BUG-002，並回歸 AC-08-*、AC-15-*、AC-16-*、AC-20-02、AC-22-*、靜態與越界檢查，詳見 §11；其餘 TC 沿用 v0.1 結果（本輪 `npm run test:e2e` 全套重跑，其餘 TC 結果不變）。
+> **第 4 輪（v0.5）依據**：`docs/04-qa/test-plan.md` v0.5；PRD v0.11、契約 v0.11、architecture v0.7、tasks.json（FE-45～FE-53 done）；受測物 `dist/english-master-track.html` 3,278,334 bytes＋`dist/site/` 8 檔（BUG-003 修正後 BUILD_ID `5b5ae7a6d4bd0164`；初測 `d7085fd3fb24c46f`）；結論見 §0、詳情見 §15（BUG-003 複驗見 §15.11）。
+>
+> **第 3 輪（v0.4）依據**：`docs/04-qa/test-plan.md` v0.4；PRD v0.10、契約 v0.10、architecture v0.6、tasks.json v0.5；受測物 3,241,023 bytes；結論見 §0、詳情見 §14。
+>
+> （第 1～2 輪）依據：`docs/04-qa/test-plan.md` v0.3；PRD v0.7、契約 v0.7、architecture v0.3、tasks.json v0.2。受測物（v0.2，退回修正第 1 輪）`dist/english-master-track.html` 3,030,574 bytes（QA 以 `tools/build.mjs --out` 重建後與 `dist/` 位元組相同）；初版受測物 3,022,217 bytes。（v0.3，退回修正第 2 輪）受測物 3,047,158 bytes，只驗證 BUG-002 並回歸 AC-01-*、AC-02-*、AC-04-*、AC-05-*、AC-16-*、AC-20-02、AC-22-*，詳見 §12。執行日期 2026-10-30。v0.2 範圍只驗證 BUG-001、BUG-002，並回歸 AC-08-*、AC-15-*、AC-16-*、AC-20-02、AC-22-*、靜態與越界檢查，詳見 §11；其餘 TC 沿用 v0.1 結果（本輪 `npm run test:e2e` 全套重跑，其餘 TC 結果不變）。
 
-## 1. 摘要
+## 0. 目前有效結論（第 4 輪，PRD v0.11，2026-11-03）
+
+> 本節與 §15 為第 4 輪（PRD v0.11，新增 PWA）的結論，取代第 3 輪結論（保留於 §0.1、§14）。
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 受測物 | `dist/english-master-track.html` 3,278,334 bytes、`dist/site/` 8 檔（BUILD_ID `5b5ae7a6d4bd0164`，BUG-003 修正後重建）；QA 連續建置 2 次與 `dist/` 逐位元組相同；雙擊開啟的 HTML 與 `dist/site/index.html` 逐位元組相同（TC-36-01a、TC-PS-01、TC-S09） |
+| TC 總數 | 311（自動化 284、QA 檢視 7、人工 20） |
+| TC 結果 | 通過 272、失敗 0、待人工 20、不適用（暫停）19（BUG-003 複驗後；初測 TC-34-03a 失敗）；Edge 冒煙 40 項：通過 35、不適用 5、失敗 0 |
+| AC 覆蓋率 | 應驗收 221 個 AC 全部有對應 TC（221 / 221 = 100%）；暫停 22 個標「不適用（暫停）」 |
+| AC 判定 | 通過 212（其中 47 個另待人工確認）、待人工 9、失敗 0、不適用（暫停）22 |
+| 待人工的 9 個 AC | AC-34-02、AC-34-03、AC-34-05、AC-35-03、AC-36-07（第 4 輪：實機安裝與圖示外觀、iOS、正式部署；AC-34-03 自動化已通過）；AC-33-01、AC-33-02、AC-23-04、AC-27-03（沿用第 3 輪） |
+| 缺陷 | BUG-003（minor，owner 主控 MC-01，`icon-512.png` 底邊灰線）：主控修正 1 次後複驗通過，**verified**（retries 0）；BUG-001、BUG-002 維持 verified；目前無 open 缺陷 |
+| 越界檢查 | 通過：第 4 輪修改的 `src/`、`tools/`、`dist/` 檔案皆在 FE-45～FE-53 paths 內（超出 0）；授權例外 9 個、主控修改 `static.yml` 1 個；不屬於任何任務 0 |
+| 安全檢查 | 通過：`file://` 請求 0、無 service worker、Console 無錯誤；https 版環境層請求（含 service worker）全部為同源、部署目錄內 GET；跨來源 0；快取只有預先快取 7 項；IndexedDB 0；PWA 文字以 `textContent` 呈現 |
+| MC-03 模擬 | 依 architecture §5.2 新 workflow，在 LF 複本建置並執行 Verify 步驟：`dist/site/` 恰 8 檔，通過（TC-36-07a）；但 CI 所需 12 個檔案尚未被 git 追蹤（§15.8 H-4-2） |
+| 需要人類 | 見 §15.8、彙整清單見 §15.12 |
+
+### 0.1 第 3 輪結論（歷史，PRD v0.10，2026-11-02）
+
+> 本節與 §14 為第 3 輪（範圍 v0.8 + v0.9 + v0.10，依據 test-plan v0.4）的結論，取代 §1～§12 的第 1～2 輪結果（PRD v0.7）。§1～§12 保留為歷史紀錄。
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 受測物 | `dist/english-master-track.html` 3,241,023 bytes；QA 重建後位元組相同（TC-S09） |
+| TC 總數 | 264（自動化 242、QA 檢視 7、人工 15） |
+| TC 結果 | 通過 230、失敗 0、待人工 15、不適用（暫停）19 |
+| AC 覆蓋率 | 應驗收 192 個 AC 全部有對應 TC（192 / 192 = 100%）；暫停 22 個標「不適用（暫停）」 |
+| AC 判定 | 通過 188（其中 37 個自動化通過、另待人工確認）、待人工 4、失敗 0、不適用（暫停）22 |
+| 待人工的 4 個 AC | AC-33-01（V-MIC-1）、AC-33-02（V-MIC-2）、AC-23-04（TC-M08 原創性搜尋）、AC-27-03（TC-M09 實機虛擬鍵盤） |
+| 缺陷 | 本輪新開 0 張；BUG-001、BUG-002 維持 verified |
+| 越界檢查 | 通過：不屬於任何任務的檔案 0；第 3 輪增量修改的 36 個檔案皆在 FE-34～FE-44 paths 內；`src/data/`、`sources/`、`english_master_track.md` 未被修改 |
+| 安全檢查 | 通過：XSS 以純文字呈現、禁用 DOM API 0、外部資源 0、完整操作網路請求 0；麥克風音訊只接到 `AnalyserNode`，無 `MediaRecorder`；使用收音條後 localStorage、IndexedDB、Cache Storage 無音訊或音量資料 |
+| 需要人類 | 見 §14.8 |
+
+## 1. 摘要（第 1～2 輪，PRD v0.7，歷史）
 
 | 項目 | 結果 |
 | :--- | :--- |
@@ -588,10 +627,619 @@ FE-10 切到自訂器時先把首屏外的 `#customizer-custom` 設為 hidden，
 | `docs/` | 除 QA 文件外只有 `docs/03-design/tasks.json`（主控同步狀態） |
 | 安全 | 3 個 view 檔仍無 `innerHTML`／`outerHTML`／`insertAdjacentHTML`／`document.write`，也沒有外部網址；新增程式只切換 `hidden`、class 與數值樣式。產物無外部資源（TC-S01）、操作期間網路請求 0（TC-21-01） |
 
-## 13. 變更紀錄
+## 14. 第 3 輪驗收（PRD v0.10：v0.8 + v0.9 + v0.10）
+
+範圍：all。PRD v0.10（33 個 US、214 個 AC；應驗收 192、暫停 22）、契約 v0.10、architecture v0.6、tasks.json v0.5（67 個任務全部 done）。本輪原為 v0.8 驗收（2026-10-30 暫停），2026-11-02 接續並擴大範圍。執行日期 2026-11-02。
+
+### 14.1 執行紀錄
+
+| 項目 | 指令 | 結果（QA 自行執行） |
+| :--- | :--- | :--- |
+| PG 單元測試 | `npm test` | 836 / 836 通過、fail 0、todo 0（參考，非驗收依據） |
+| 資料自驗 | `npm run validate:data` | 錯誤 0、警告 61（與第 1 輪相同；`src/data/` 本輪未修改） |
+| 靜態與越界 | `tests/static/static-check.mjs`、`boundary-check.mjs`、`boundary-delta.mjs`（皆含於 run-all） | TC-S01～TC-S10 10 / 10 通過；不屬於任何任務 0；增量超出 paths 0 |
+| 驗收全套 | `npm run test:e2e`（2026-11-02 15:20 完成） | 250 項：通過 228、**失敗 1（TC-22-01m）**、待人工 8（舊 qa-review）、不適用 13；Edge 27 / 27；19 個子程序結束碼皆 0 |
+| 效能套件單獨重跑 | `node tests/e2e/e2e-env.mjs` × 2（其他程式未執行時） | 兩次皆 18 / 18 通過、不適用 3；TC-22-01m 判定通過（見 §14.3） |
+| 補記不適用 | `node tests/e2e/e2e-goal.mjs`（Chrome、Edge）、`e2e-firstrun.mjs` | 把 v0.10 暫停的 6 個 TC 記為「不適用（暫停）」後重跑；goal 22 通過 + 5 不適用、Edge 同、firstrun 25 通過 + 1 不適用 |
+| QA 檢視 | `node tests/tools/qa-review-r3.mjs` | 寫入 `tests/results/qa-review.json`（TC-D18～D20、TC-B01～B03、TC-X-edge、人工 TC 15 個） |
+| 彙整 | `node tests/tools/rebuild-summary.mjs`、`ac-matrix.mjs` | 最終 264 項：通過 230、失敗 0、待人工 15、不適用 19（`tests/results/summary.json`、`ac-matrix.json`） |
+
+各套件最終結果：
+
+| 套件 | 通過 | 失敗 | 待人工 | 不適用 |
+| :--- | :--- | :--- | :--- | :--- |
+| 資料 data-check | 17 | 0 | 0 | 0 |
+| 靜態 static-check | 10 | 0 | 0 | 0 |
+| e2e-goal（改寫） | 22 | 0 | 0 | 5 |
+| e2e-cards | 37 | 0 | 0 | 0 |
+| e2e-speech | 20 | 0 | 0 | 0 |
+| e2e-content | 9 | 0 | 0 | 10 |
+| e2e-env | 18 | 0 | 0 | 3 |
+| e2e-persist | 1 | 0 | 0 | 0 |
+| e2e-firstrun | 25 | 0 | 0 | 1 |
+| e2e-progress | 18 | 0 | 0 | 0 |
+| e2e-mic（新） | 11 | 0 | 0 | 0 |
+| e2e-hidden（新） | 5 | 0 | 0 | 0 |
+| e2e-reinit（新） | 15 | 0 | 0 | 0 |
+| e2e-motion（新） | 15 | 0 | 0 | 0 |
+| qa-review | 7 | 0 | 15 | 0 |
+| **合計** | **230** | **0** | **15** | **19** |
+
+### 14.2 測試程式更新（QA）
+
+| 檔案 | 異動 |
+| :--- | :--- |
+| `tests/static/static-check.mjs` | TC-S05 改依 architecture §10 v0.5：`MediaRecorder` 在產物與 `src/app`（`__tests__` 除外）0 次；`getUserMedia` 只在 `services/mic.js`（產物 8 次 = mic.js 8 次）；`mic.js` 不含 `destination`、`Blob`、`createObjectURL`、`FileReader`、`fetch`、`XMLHttpRequest`、`WebSocket`、`sendBeacon`、`localStorage`、`indexedDB`、`caches`；speech-panel 的 store action 不帶音量參數。TC-S01 排除人類自放的 `dist/ads.txt`（不分大小寫）。新增 TC-S10（AC-31-04） |
+| `tests/static/boundary-check.mjs`、`boundary-delta.mjs`（新） | 人類自放檔另列；新增增量越界檢查 |
+| `tests/e2e/lib/cdp.mjs` | 加 `--autoplay-policy=no-user-gesture-required`；`close()` 可重複呼叫；結果新增「不適用（暫停）」 |
+| `tests/e2e/lib/inits.mjs` | 新增 `fakeMic`（麥克風替身） |
+| `tests/e2e/lib/state.mjs`（新） | 構造 `schemaVersion` 2 狀態（FB-36）、點卡片、套用與確認視窗、試算與主控台讀取、分數元件可見性 |
+| `e2e-goal.mjs` | 改寫：只點卡片、預設 725、分數以 localStorage 驗證；新增 TC-26-06、TC-22-04（點卡片）；有學習紀錄時的確認視窗（TC-03-05）；5 個分數輸入 TC 記不適用 |
+| `e2e-speech.mjs` | 加麥克風替身；按麥克風後等待進入聆聽中；AC-08-13 說明改 v0.9 全文；audio-capture 改「找不到麥克風裝置」；收音條檢查 |
+| `e2e-cards.mjs`、`e2e-persist.mjs`、`e2e-progress.mjs`、`e2e-env.mjs` | 點卡片取代輸入分數；導覽 4 項；麥克風替身；解碼器、句型庫步驟移除；效能 10 個切頁位置改為 4 個功能區與資料來源頁；AC-22-04 改量點卡片；第二次量測前只重設學習紀錄 6 欄（避免初始化確認視窗干擾套用量測，保留 30 個自訂單字使條件與第 2 輪相同） |
+| `e2e-content.mjs` | 解碼器、句型庫 TC 記不適用 |
+| `e2e-firstrun.mjs` | 首次預設 725、只點卡片、導覽 4 項；新增 TC-26-05（可見性、Tab 焦點、無障礙樹）；TC-26-03 記不適用 |
+| `e2e-mic.mjs`、`e2e-hidden.mjs`、`e2e-reinit.mjs`、`e2e-motion.mjs`（新） | US-33、AC-20-04、US-32、US-28／US-29／US-31 |
+| `tests/run-all.mjs` | 加入新套件、Edge 冒煙改跑 e2e-goal 與 e2e-hidden、彙整「不適用（暫停）」、保留 qa-review.json |
+| `tests/tools/`（新） | `ac-matrix.mjs`、`tc-list.mjs`、`tc-desc.json`、`qa-review-r3.mjs`、`rebuild-summary.mjs` |
+| `tests/e2e/perf-phrasebank.mjs` | **移除**：量測對象句型庫頁已隱藏（AC-16-01 暫停），不再有意義 |
+| `tests/e2e/diag-start-button.mjs`（新） | 診斷：首次畫面「開始學習」在各寬度是否需捲動（觀察事項 O-7） |
+| 專案根目錄 `(a[r.result]` | 0 bytes，2026-10-30 14:51 由 QA 第 2 輪執行指令時誤建的空檔，已刪除 |
+
+### 14.3 失敗與重跑說明（TC-22-01m，AC-22-01 減少動態模式）
+
+AC-22-01（v0.8）規定減少動態模式下量到「新頁面完成繪製」。TC-22-01m 以 `prefers-reduced-motion: reduce` + 4 倍降速、嚴格量法、7 輪，依 test-plan §2.3 多輪判定。10 個位置中只有第 1 個（重新載入後第一次切到難易度設定，自訂單字 30 筆）接近上限：
+
+| 執行 | 第 1 位置 7 輪原始值（ms） | 第 1 位置中位數 | 全部 70 筆 p90 | > 100ms | 判定 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 全套（15:02～15:13） | 126.5、154.6、61.6、66.5、62.4、116、193.1 | **116** | 102 | 9 | 不符 |
+| 單獨重跑 1 | 154.3、76、87.8、68.7、97.3、149.3、119.1 | 97.3 | 87.8 | 5 | 符合 |
+| 單獨重跑 2（最終） | 60.1、64.9、96.4、86.5、60.9、63.9、94.9 | 64.9 | 65.9 | 1 | 符合 |
+
+判定：**通過（自動化參考，邊緣）**，不開缺陷。理由：(1) 3 次執行中 2 次符合規則；(2) 全套執行時 QA 於 15:11 同時執行診斷腳本（另一個 Chrome），第 6、7 輪的一般與降速量測同步偏高，該次結果受干擾；(3) 依人類決議（JimmyLin 2026-10-30「偶爾失敗沒關係」）採多輪判定。但此位置的中位數在 65～116ms 之間擺動、餘裕很小，與 BUG-002 是同一位置（第一次切到難易度設定），請 TC-M07 在基準環境以減少動態 + 4 倍降速特別量測；若基準環境超標，再開缺陷給 pg-frontend（FE-09／FE-10／FE-43）。
+
+非減少動態（換頁動畫第一個影格，TC-22-01）三次皆符合：4 倍降速各位置中位數最大 64.8、p90 57.1。
+
+### 14.4 AC 判定
+
+判定欄：「通過」= 自動化通過；「通過（另待人工確認）」= 模擬環境通過，但 AC 含真機才能完整確認的部分（§14.6）；「待人工」= 核心部分只能由人類實機或人工判讀；「不適用（暫停）」= PRD 標暫停、本版不驗收。
+
+| 判定 | AC 數 |
+| :--- | :--- |
+| 通過 | 151 |
+| 通過（另待人工確認） | 37 |
+| 待人工 | 4 |
+| 失敗 | 0 |
+| 不適用（暫停） | 22 |
+| 合計 | 214 |
+
+| AC | 判定 | 對應 TC |
+| :--- | :--- | :--- |
+| AC-01-01 | 通過 | TC-26-01、TC-01-01 |
+| AC-01-02 | 通過 | TC-01-02 |
+| AC-01-03 | 通過 | TC-01-03 |
+| AC-01-04 | 通過 | TC-01-04 |
+| AC-01-05 | 通過 | TC-01-05 |
+| AC-01-06 | 不適用（暫停） | TC-01-06 |
+| AC-01-07 | 通過 | TC-26-04、TC-01-07 |
+| AC-02-01 | 不適用（暫停） | TC-02-01 |
+| AC-02-02 | 不適用（暫停） | TC-02-02 |
+| AC-02-03 | 通過 | TC-02-03 |
+| AC-02-04 | 通過 | TC-02-04 |
+| AC-02-05 | 通過 | TC-02-05a、TC-02-05b |
+| AC-02-06 | 通過 | TC-02-06 |
+| AC-02-07 | 不適用（暫停） | TC-02-07 |
+| AC-02-08 | 通過 | TC-02-08 |
+| AC-02-09 | 不適用（暫停） | TC-02-09 |
+| AC-02-10 | 通過 | TC-02-10a、TC-02-10b |
+| AC-03-01 | 通過 | TC-03-06 |
+| AC-03-02 | 通過 | TC-03-06 |
+| AC-03-03 | 通過 | TC-01-07 |
+| AC-03-04 | 通過 | TC-03-06 |
+| AC-03-05 | 通過 | TC-03-05 |
+| AC-03-06 | 通過 | TC-D01、TC-03-06 |
+| AC-03-07 | 通過 | TC-D02 |
+| AC-03-08 | 通過 | TC-D03 |
+| AC-03-09 | 通過 | TC-D04 |
+| AC-04-01 | 通過 | TC-04-01 |
+| AC-04-02 | 通過 | TC-04-02 |
+| AC-04-03 | 通過 | TC-04-03 |
+| AC-04-04 | 通過 | TC-04-04、TC-S07 |
+| AC-04-05 | 通過 | TC-04-05 |
+| AC-04-06 | 通過 | TC-04-06 |
+| AC-04-07 | 通過 | TC-04-07 |
+| AC-04-08 | 通過 | TC-04-08、TC-04-08b |
+| AC-04-09 | 通過 | TC-S03 |
+| AC-05-01 | 通過 | TC-D11、TC-05-01 |
+| AC-05-02 | 通過 | TC-D11、TC-05-02 |
+| AC-05-03 | 通過 | TC-D11、TC-05-03 |
+| AC-05-04 | 通過 | TC-05-02 |
+| AC-05-05 | 通過 | TC-05-05 |
+| AC-06-01 | 通過 | TC-D06、TC-06-01 |
+| AC-06-02 | 通過 | TC-D06、TC-D07、TC-06-02 |
+| AC-06-03 | 通過 | TC-06-02 |
+| AC-06-04 | 通過 | TC-06-04 |
+| AC-06-05 | 通過 | TC-06-04 |
+| AC-06-06 | 通過 | TC-06-06、TC-04-08b |
+| AC-06-07 | 通過 | TC-D06、TC-06-07 |
+| AC-06-08 | 通過 | TC-D05 |
+| AC-07-01 | 通過（另待人工確認） | TC-07-01、TC-M02 |
+| AC-07-02 | 通過（另待人工確認） | TC-07-01、TC-M02 |
+| AC-07-03 | 通過（另待人工確認） | TC-07-03、TC-M02 |
+| AC-07-04 | 通過（另待人工確認） | TC-07-04、TC-M02 |
+| AC-07-05 | 通過（另待人工確認） | TC-07-05、TC-M02 |
+| AC-08-01 | 通過（另待人工確認） | TC-08-01、TC-M01 |
+| AC-08-02 | 通過 | TC-08-02 |
+| AC-08-03 | 通過 | TC-08-03 |
+| AC-08-04 | 通過 | TC-08-04 |
+| AC-08-05 | 通過 | TC-08-05 |
+| AC-08-06 | 通過 | TC-08-06 |
+| AC-08-07 | 通過 | TC-08-06 |
+| AC-08-08 | 通過 | TC-08-06 |
+| AC-08-09 | 通過（另待人工確認） | TC-08-09b、TC-08-09、TC-M01、TC-MIC-4 |
+| AC-08-10 | 通過 | TC-08-10 |
+| AC-08-11 | 通過 | TC-08-11 |
+| AC-08-12 | 通過 | TC-08-12 |
+| AC-08-13 | 通過（另待人工確認） | TC-08-13、TC-M01 |
+| AC-08-14 | 通過（另待人工確認） | TC-08-14、TC-08-14b、TC-M01 |
+| AC-09-01 | 通過 | TC-09-01 |
+| AC-09-02 | 通過 | TC-D17、TC-09-02 |
+| AC-09-03 | 通過 | TC-09-03 |
+| AC-09-04 | 通過 | TC-09-04 |
+| AC-09-05 | 通過 | TC-09-05 |
+| AC-09-06 | 通過 | TC-09-06 |
+| AC-09-07 | 通過 | TC-09-07 |
+| AC-10-01 | 通過 | TC-D12 |
+| AC-10-02 | 通過 | TC-D12、TC-10-02 |
+| AC-11-01 | 通過 | TC-11-01、TC-D20 |
+| AC-11-02 | 通過 | TC-D12、TC-11-01 |
+| AC-11-03 | 通過 | TC-11-01 |
+| AC-11-04 | 通過 | TC-11-04 |
+| AC-11-05 | 通過 | TC-11-05 |
+| AC-11-06 | 通過 | TC-11-01 |
+| AC-11-07 | 通過 | TC-11-04 |
+| AC-12-01 | 不適用（暫停） | TC-12-01 |
+| AC-12-02 | 不適用（暫停） | TC-D13、TC-12-01 |
+| AC-12-03 | 不適用（暫停） | TC-D13、TC-12-01 |
+| AC-13-01 | 不適用（暫停） | TC-13-01 |
+| AC-13-02 | 不適用（暫停） | TC-13-01 |
+| AC-13-03 | 不適用（暫停） | TC-13-01 |
+| AC-13-04 | 不適用（暫停） | TC-13-01 |
+| AC-14-01 | 不適用（暫停） | TC-D14、TC-14-01 |
+| AC-14-02 | 不適用（暫停） | TC-14-02 |
+| AC-15-01 | 不適用（暫停） | TC-15-01 |
+| AC-15-02 | 不適用（暫停） | TC-D15、TC-15-02 |
+| AC-15-03 | 不適用（暫停） | TC-15-02 |
+| AC-16-01 | 不適用（暫停） | TC-16-01、TC-16-01b、TC-16-01c |
+| AC-16-02 | 不適用（暫停） | TC-16-02 |
+| AC-16-03 | 不適用（暫停） | TC-16-03 |
+| AC-16-04 | 不適用（暫停） | TC-16-04a、TC-16-04b |
+| AC-17-01 | 通過 | TC-17-01 |
+| AC-17-02 | 通過 | TC-17-02、TC-30-03 |
+| AC-17-03 | 通過 | TC-09-03 |
+| AC-17-04 | 通過 | TC-17-04a、TC-17-04b |
+| AC-17-05 | 通過 | TC-17-05 |
+| AC-17-06 | 通過 | TC-17-06 |
+| AC-18-01 | 通過（另待人工確認） | TC-18-01、TC-M04 |
+| AC-18-02 | 通過 | TC-18-02 |
+| AC-18-03 | 通過 | TC-18-03、TC-25-08 |
+| AC-18-04 | 通過 | TC-18-04 |
+| AC-18-05 | 通過 | TC-18-05、TC-25-09 |
+| AC-18-06 | 通過 | TC-21-01 |
+| AC-24-01 | 通過（另待人工確認） | TC-24-01、TC-18-03、TC-M06 |
+| AC-24-02 | 通過 | TC-24-01、TC-24-02b |
+| AC-24-03 | 通過（另待人工確認） | TC-24-03、TC-25-10、TC-M06 |
+| AC-24-04 | 通過 | TC-24-04 |
+| AC-24-05 | 通過 | TC-24-05、TC-24-11 |
+| AC-24-06 | 通過 | TC-24-06 |
+| AC-24-07 | 通過 | TC-24-07、TC-S07 |
+| AC-24-08 | 通過 | TC-24-08 |
+| AC-24-09 | 通過 | TC-24-09、TC-25-11d |
+| AC-24-10 | 通過 | TC-24-10 |
+| AC-24-11 | 通過 | TC-24-11 |
+| AC-23-01 | 通過 | TC-23-01 |
+| AC-23-02 | 通過 | TC-D10、TC-23-02、TC-23-02b、TC-25-07、TC-D18 |
+| AC-23-03 | 通過 | TC-D08、TC-D18、TC-D19 |
+| AC-23-04 | 待人工（TC-M08） | TC-D16、TC-M08 |
+| AC-23-05 | 通過 | TC-D09 |
+| AC-23-06 | 通過 | TC-S06 |
+| AC-19-01 | 通過 | TC-27-05、TC-S01、TC-S08、TC-S09 |
+| AC-19-02 | 通過（另待人工確認） | TC-19-02a、TC-X-edge、TC-M03 |
+| AC-19-03 | 通過（另待人工確認） | TC-21-01、TC-M04 |
+| AC-19-04 | 通過 | TC-S02 |
+| AC-20-01 | 通過（另待人工確認） | TC-20-01、TC-27-01、TC-M05 |
+| AC-20-02 | 通過（另待人工確認） | TC-20-02、TC-M05 |
+| AC-20-03 | 通過（另待人工確認） | TC-20-03、TC-25-01、TC-27-04、TC-20-04a、TC-M05 |
+| AC-20-04 | 通過 | TC-20-04a、TC-20-04b、TC-20-04c、TC-20-04d |
+| AC-21-01 | 通過（另待人工確認） | TC-21-01、TC-M01 |
+| AC-21-02 | 通過 | TC-S04 |
+| AC-21-03 | 通過（另待人工確認） | TC-21-03b、TC-21-03、TC-M01、TC-S05 |
+| AC-22-01 | 通過（另待人工確認） | TC-22-01、TC-22-01m、TC-22-01r、TC-M07 |
+| AC-22-02 | 通過（另待人工確認） | TC-22-02b、TC-22-02、TC-M07 |
+| AC-22-03 | 通過（另待人工確認） | TC-22-03b、TC-22-03、TC-M07 |
+| AC-22-04 | 通過（另待人工確認） | TC-22-04b、TC-22-04、TC-M07 |
+| AC-22-05 | 通過（另待人工確認） | TC-22-05a、TC-22-05b、TC-M07 |
+| AC-25-01 | 通過 | TC-22-05b、TC-25-01 |
+| AC-25-02 | 通過 | TC-25-02 |
+| AC-25-03 | 通過 | TC-25-03 |
+| AC-25-04 | 通過 | TC-25-04 |
+| AC-25-05 | 通過 | TC-25-05 |
+| AC-25-06 | 通過 | TC-25-06 |
+| AC-25-07 | 通過 | TC-25-07 |
+| AC-25-08 | 通過 | TC-25-08 |
+| AC-25-09 | 通過 | TC-25-09 |
+| AC-25-10 | 通過 | TC-25-10 |
+| AC-25-11 | 通過 | TC-25-11、TC-25-11d |
+| AC-26-01 | 通過（另待人工確認） | TC-26-01、TC-M05 |
+| AC-26-02 | 通過 | TC-26-02 |
+| AC-26-03 | 不適用（暫停） | TC-26-03 |
+| AC-26-04 | 通過 | TC-25-03、TC-26-04 |
+| AC-26-05 | 通過 | TC-26-05 |
+| AC-26-06 | 通過 | TC-26-06 |
+| AC-27-01 | 通過（另待人工確認） | TC-27-01、TC-M05 |
+| AC-27-02 | 通過（另待人工確認） | TC-27-02、TC-M05 |
+| AC-27-03 | 待人工（TC-M09（虛擬鍵盤）） | TC-27-03、TC-M09 |
+| AC-27-04 | 通過 | TC-27-04 |
+| AC-27-05 | 通過 | TC-27-05 |
+| AC-28-01 | 通過 | TC-28-01 |
+| AC-28-02 | 通過 | TC-28-02 |
+| AC-28-03 | 通過（另待人工確認） | TC-28-03、TC-M05 |
+| AC-28-04 | 通過（另待人工確認） | TC-28-04、TC-M05 |
+| AC-28-05 | 通過（另待人工確認） | TC-28-05、TC-M05 |
+| AC-28-06 | 通過（另待人工確認） | TC-28-06、TC-M05 |
+| AC-28-07 | 通過 | TC-28-07 |
+| AC-28-08 | 通過 | TC-28-08 |
+| AC-29-01 | 通過 | TC-29-01 |
+| AC-29-02 | 通過（另待人工確認） | TC-29-02、TC-M10 |
+| AC-29-03 | 通過（另待人工確認） | TC-29-03、TC-M10 |
+| AC-30-01 | 通過 | TC-30-01 |
+| AC-30-02 | 通過 | TC-30-02 |
+| AC-30-03 | 通過 | TC-30-03 |
+| AC-30-04 | 通過 | TC-30-04 |
+| AC-30-05 | 通過 | TC-30-05 |
+| AC-30-06 | 通過 | TC-30-06 |
+| AC-30-07 | 通過 | TC-30-07、TC-30-07c |
+| AC-30-08 | 通過 | TC-30-08 |
+| AC-30-09 | 通過 | TC-30-09 |
+| AC-30-10 | 通過 | TC-30-10、TC-30-10b |
+| AC-30-11 | 通過 | TC-30-11 |
+| AC-30-12 | 通過 | TC-30-12 |
+| AC-30-13 | 通過 | TC-30-13、TC-30-07c |
+| AC-30-14 | 通過 | TC-30-14 |
+| AC-31-01 | 通過 | TC-31-01 |
+| AC-31-02 | 通過 | TC-31-02 |
+| AC-31-03 | 通過 | TC-22-01m、TC-33-08、TC-31-03、TC-31-03d |
+| AC-31-04 | 通過 | TC-S10 |
+| AC-32-01 | 通過 | TC-32-01 |
+| AC-32-02 | 通過 | TC-32-02 |
+| AC-32-03 | 通過 | TC-32-03 |
+| AC-32-04 | 通過 | TC-03-05、TC-32-04、TC-32-04obs |
+| AC-32-05 | 通過 | TC-32-05 |
+| AC-32-06 | 通過 | TC-32-06 |
+| AC-32-07 | 通過 | TC-32-07 |
+| AC-32-08 | 通過 | TC-32-08 |
+| AC-32-09 | 通過 | TC-32-09 |
+| AC-32-10 | 通過 | TC-32-10 |
+| AC-32-11 | 通過 | TC-32-11a、TC-32-11b |
+| AC-33-01 | 待人工（V-MIC-1） | TC-33-01a、TC-MIC-1 |
+| AC-33-02 | 待人工（V-MIC-2） | TC-33-02a、TC-MIC-2 |
+| AC-33-03 | 通過（另待人工確認） | TC-33-03、TC-MIC-3 |
+| AC-33-04 | 通過 | TC-33-04 |
+| AC-33-05 | 通過（另待人工確認） | TC-33-05、TC-MIC-5 |
+| AC-33-06 | 通過（另待人工確認） | TC-33-06、TC-MIC-5 |
+| AC-33-07 | 通過 | TC-33-07 |
+| AC-33-08 | 通過（另待人工確認） | TC-33-08、TC-MIC-3 |
+
+### 14.5 新增與修改 AC 的重點結果
+
+| 範圍 | 結果 |
+| :--- | :--- |
+| 只選色級（R-19） | 卡片與主控台不顯示分數範圍與目標分數；點 5 張卡片後 localStorage 依序 215、465、725、855、990；首次預設 725；既有 600、735 等 12 個分數不轉換、選中卡片與試算正確（TC-26-06）；首次畫面、一般頁、主控台在 375／1366 寬皆無可見或可 Tab 聚焦的分數元件、無障礙樹無滑桿或數字輸入（TC-26-05） |
+| 切換難易度初始化（US-32） | 視窗兩行文字逐字相符、只有 2 個按鈕、背景不可操作；確定後 6 欄回到與「清除網站資料後按開始學習」相同的值，自訂單字與 STT 已讀保留；取消／Esc／點視窗外三者相同；(a)～(f) 各 1 項成立皆跳視窗；綠 ↔ 藍 ↔ 金不跳；寫入失敗時畫面與 localStorage 都不變（TC-32-01～TC-32-11b） |
+| 麥克風與收音條（US-33） | 替身音源 −55～−5 dBFS 亮格 0～5、靜音 0；同頁 5 次按下 getUserMedia 只呼叫 1 次；離開單字卡頁 121～139ms 內音軌全部 ended；拔除、找不到、權限被拒、API 不存在各分支正確；減少動態下收音條無過渡、「聆聽中」不閃爍（TC-33-01a～TC-33-08、TC-08-09b） |
+| 隱藏頁（AC-20-04） | 375／1366 寬 5 個可到達頁面的畫面、入口、Tab 焦點、無障礙樹皆無解碼器與句型庫；7 種網址片段、以片段開啟、重新載入、匯入備份後都只顯示主控台；交付檔仍含長難句 50、閱讀策略 3、句型 100（TC-20-04a～d） |
+| 手勢、回饋、換頁（v0.8 US-28、US-29、US-31） | 翻卡 360ms、作答動畫 480ms、換頁 240ms 皆在上限內；滑動門檻 50px、垂直為主不換卡；測驗模式滑動不作答；震動 40ms／160ms（含停頓）；減少動態下全部直接顯示最終狀態且震動仍呼叫（TC-28-01～TC-31-03） |
+
+### 14.6 人工驗收清單（待人類）
+
+詳細步驟與通過條件見 test-plan v0.4 §6。第 1～2 輪的 TC-M01～TC-M08 尚未有人工結果，本輪依 PRD v0.10 改寫後仍列待人工。
+
+| TC | 對應 AC | 重點 |
+| :--- | :--- | :--- |
+| **TC-MIC-1（V-MIC-1）** | **AC-33-01** | Windows 11 的 Chrome 與 Edge 以 `file://` 雙擊開啟，停留單字卡頁按 5 次麥克風，權限詢問只出現 1 次。若出現第 2 次，QA 依 PRD 開 BUG 附瀏覽器版本，由人類判斷是否接受為瀏覽器限制 |
+| **TC-MIC-2（V-MIC-2）** | **AC-33-02** | 由導覽、主控台入口離開，及 F5、關閉分頁：1 秒內使用中圖示消失、`EMT.services.mic.tracks()` 全為 `ended` |
+| TC-MIC-3（V-MIC-3） | AC-33-03、AC-33-08 | 真實說話時 5 格點亮；Windows 動畫效果關閉後無漸變、不閃爍 |
+| TC-MIC-4（V-MIC-4） | AC-08-09 | 權限「封鎖」的訊息與再試 |
+| TC-MIC-5（V-MIC-5） | AC-33-05、AC-33-06 | 拔除 USB 麥克風 |
+| TC-M01 | AC-08-01、AC-08-09、AC-08-13、AC-08-14、AC-21-01、AC-21-03 | 真實麥克風流程與 DevTools 檢查不留存音訊 |
+| TC-M02 | AC-07-01～AC-07-05 | 真實 TTS |
+| TC-M03 | AC-19-02 | 實際斷網 |
+| TC-M04 | AC-19-03、AC-18-01 | 雙擊開啟、關閉重開 |
+| TC-M05 | AC-20-01～AC-20-03、AC-26-01、AC-27-01、AC-27-02、AC-28-03～AC-28-06 | Android 實機觸控與滑動 |
+| TC-M06 | AC-24-01、AC-24-03 | 跨裝置匯出匯入 |
+| TC-M07 | AC-22-01～AC-22-05 | 基準環境效能；**請特別量減少動態 + 4 倍降速下第一次切到難易度設定（§14.3）** |
+| TC-M08 | AC-23-04 | §6.2 的 20 筆精確片語搜尋 |
+| TC-M09 | AC-27-03 | Android 虛擬鍵盤不遮輸入欄 |
+| TC-M10 | AC-29-02、AC-29-03 | Android 實機震動、iOS Safari 不震動不報錯 |
+
+自動化參考值（本機無頭 Chrome，最終執行；非基準環境）：
+
+| 量測 | 一般 | 4 倍降速 | 上限 |
+| :--- | :--- | :--- | :--- |
+| 切頁到動畫第一個影格（AC-22-01，7 輪 × 10） | 各位置中位數最大 47.8、最大 50.6 | 中位數最大 64.8、p90 57.1、最大 103.2（1/70 筆 > 100） | 100 ms（中位數、p90） |
+| 減少動態切頁到完成繪製（AC-22-01） | — | 中位數最大 64.9、p90 65.9（另兩次執行見 §14.3） | 同上 |
+| 套用最大單字集 5,650 張（AC-22-02） | 最大 17.8 | 最大 73.2 | 每筆 100 ms |
+| STT `onresult` → 徽章（AC-22-03） | 最大 22.5 | 最大 44 | 每筆 100 ms |
+| 點卡片到試算繪製（AC-22-04） | 中位數最大 18.1、最大 21.5 | 中位數最大 30、p90 40.3、最大 51.9 | 100 ms（中位數、p90） |
+| 開啟到可點擊（AC-22-05，7 輪 × 5） | 主控台 p90 113、最大 117；首次畫面 p90 111、最大 114 | 主控台 p90 621、最大 640；首次畫面 p90 635、最大 700 | 3,000／6,000 ms |
+| 滑動換卡：手指離開到新卡（AC-28-03） | 1.2～1.4 | — | 100 ms |
+| 作答到顯示顏色（AC-29-01） | 5.2～12.7 | — | 100 ms |
+| 收音條讀取間隔（AC-33-03） | 中位數 46.8、最大 61.9；結束後歸暗 0.3～67.4 | — | 100 ms |
+
+### 14.7 觀察事項（不構成缺陷）
+
+| # | 事項 | 判定與建議 |
+| :--- | :--- | :--- |
+| O-7 | 375 寬首次畫面的「開始學習」要往下捲才看得到：375×667 需捲 695px、375×812 需捲 550px、390×844 需 518px、412×915 需 447px；768、1366 寬不需捲動。按鈕區為一般排版（`position: static`），位於 5 張卡片與試算區之後（`tests/results/diag/start-button.json`） | PRD 沒有規定「開始學習」須免捲動可見，AC-25-01 只要求顯示，**不違反 AC**。是否改為固定在畫面底部，請人類決定；若要改，需回 PM 補 AC 再由 SD／PG 實作 |
+| O-8 | 一般難易度設定頁「點棕 →『套用』→ 取消」後，**在任何寫入前重新整理**，選中卡片為棕（試算 10 字/天），但生效色級仍為綠、單字集不變；localStorage 為 `draftScore` 465／`appliedScore` 600（TC-32-04obs） | 依契約 CI-9（取消不寫入，維持 AC-32-04「localStorage 與按套用前完全相同」）、FB-35、SD T-43 的設計結果。AC-32-04 只規範取消當下（選中回綠、目標分數 600），重新整理後的狀態屬 AC-01-03「點卡片未套用」語意，**不違反 AC**。使用者可能困惑「選中棕卻沒生效」，列人類判斷是否接受 |
+| O-9 | 減少動態 + 4 倍降速下，重新載入後第一次切到難易度設定的時間餘裕小（中位數 65～116ms，§14.3） | 自動化 2/3 次符合多輪判定；請 TC-M07 在基準環境確認 |
+| O-10 | 專案中有 3 個非 PG、非建置產物的檔案：`dist/ads.txt`（AdSense，58 bytes；本輪 QA 期間由 `Ads.txt` 更名為小寫，dist 目錄修改時間 14:38）、`LICENSE`（11:02）、`.github/workflows/static.yml`（11:28，把 `dist/english-master-track.html` 部署為 GitHub Pages 的 `index.html`） | 依主控指示不列缺陷、未修改。提醒：若之後頁面要實際載入 AdSense 廣告，會產生網路請求，與 AC-21-01（頁面請求 0）、NFR-3 衝突，須先修訂 PRD |
+| O-11 | 一般難易度設定頁點卡片會立即把 `draftScore` 寫入 localStorage（未按套用）；重新載入後選中卡片保留 | 符合契約 GS 與 AC-02-08 既有語意（O-8 的成因），只記錄 |
+| O-12 | AC-30-10 的 PRD 例子為單字集 200 字／已掌握 50 字；正式資料最小單字集 1,000，改以 1,000／250 同比例驗證（25%） | 與第 3 輪暫停前的判斷相同，通過 |
+| O-13 | TC-22-01 嚴格量法在第 2 輪的觀察（O-1～O-6）中，O-1（解碼器註解片段）隨解碼器暫停不再適用；O-2（toast 蓋住底部操作）本輪未再出現於自動化觸控測試（TC-20-02 等待 toast 消失後操作），仍建議實機觀察 | — |
+
+### 14.8 需要人類決定的事項
+
+| # | 事項 | 選項 |
+| :--- | :--- | :--- |
+| H-1 | V-MIC-1～V-MIC-5 實機測試（AC-33-01、AC-33-02 的判定依此） | 請在 Windows 11 以 Chrome、Edge 由 `file://` 執行 test-plan §6 TC-MIC-1～5，並記錄瀏覽器版本；AC-33-01 若出現第 2 次詢問，QA 開 BUG 後由人類判斷是否接受為瀏覽器限制 |
+| H-2 | 第 1～3 輪累積的人工 TC（TC-M01～TC-M10） | 安排實機與基準環境驗收；TC-M07 請加量減少動態模式（O-9） |
+| H-3 | 375 寬「開始學習」需捲動（O-7） | (A) 維持現狀；(B) 改為固定在畫面底部（需 PM 補 AC） |
+| H-4 | 取消確認視窗後重新整理，選中卡片與生效色級不一致（O-8） | (A) 接受（契約 FB-35 現行設計）；(B) 取消時也把 `draftScore` 還原寫入（需 PM 修 AC-32-04「localStorage 與按套用前完全相同」的文字，SA 改 CI-9） |
+| H-5 | `dist/ads.txt`、`LICENSE`、`.github/workflows/static.yml`（O-10） | 確認為人類自行加入；若要投放廣告，需先修訂 PRD（AC-21-01、NFR-3） |
+
+### 14.9 越界與安全（本輪）
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 檔案歸屬（TC-B01） | 232 個檔案：屬於任務 140、人類／上游文件 38、QA `tests/` 51、人類自放 3（`dist/ads.txt`、`LICENSE`、`.github/workflows/static.yml`）、**不屬於任何任務 0**；`src/app/styles/90-overrides.css` 仍未建立（非缺陷） |
+| 增量（TC-B03） | 2026-10-30 18:20 之後修改的 `src/`、`tools/`、`dist/`、`sources/` 檔案 36 個，**全部在 FE-34～FE-44 的 paths 內**。主控授權的 FE-41 `backup.test.js`、FE-43 `views/flashcards.js`、`flashcards.test.js` 已列在 tasks.json paths；FE-26 `naming.test.js`、FE-30 `_fixtures.js` 屬第 3 輪暫停前的授權，同樣在 paths 內。`src/data/` 未修改 |
+| 上游與原始需求（TC-B02） | `english_master_track.md` 最後修改 2026-10-29；`sources/` 無變更；`docs/` 的修改只有 PRD v0.10、契約 v0.10、architecture v0.6、tasks.json v0.5（上游角色與主控，皆 approved）與 `docs/04-qa/`（QA）；bug-reports 未被 PG 修改 |
+| 建置產物（TC-S09） | QA 以 `tools/build.mjs --out` 重建，與 `dist/english-master-track.html` 位元組相同 |
+| XSS | 自訂單字表單與匯入備份的 `<img src=x onerror=…>`、`<script>` 皆以純文字呈現（TC-04-04、TC-24-07、TC-S07） |
+| 禁用 API（TC-S03） | `src/app`（不含 `__tests__`）與產物：`innerHTML`、`outerHTML`、`insertAdjacentHTML`、`document.write`、`eval`、`new Function`、`on*` 屬性字串皆 0 |
+| 外部資源（TC-S01、TC-S10、TC-27-05） | 產物無 `<script src>`、`<link href>`、`@import`、外部 `url()`、`<img>`、`<iframe>`、`@font-face`、CDN；無外部動畫／圖表／手勢函式庫；導覽圖示為內嵌 SVG |
+| 網路請求（TC-21-01、TC-32-10、TC-21-03b） | 完整操作（含收音條、初始化確認、匯出）整個工作階段只有 `file://` 主檔 1 筆 |
+| 錄音與音訊（TC-S05、TC-21-03b） | `MediaRecorder` 0；`getUserMedia` 只在 `mic.js`，只連到 `AnalyserNode`、不接 `destination`；使用後 localStorage 只有 `englishMasterTrack:state`（9 欄，無音量值）、IndexedDB 與 Cache Storage 空、無下載 |
+| 金鑰與 SDK（TC-S04） | 無付費金鑰、無第三方語音 SDK |
+
+### 14.10 回饋上游
+
+| 編號 | 事項 | 對象 | 建議 |
+| :--- | :--- | :--- | :--- |
+| QA-FB-03 | AC-32-04「目標分數仍為 600（以 localStorage 驗證）」與同條「localStorage 與按『套用』前完全相同」並存時，localStorage 的 `draftScore` 會是點卡片時寫入的 465，只有 `appliedScore` 是 600。QA 以 `appliedScore` 判定 | PM、SA | 下次修訂 PRD 時把「目標分數」寫明為「目前目標分數（最近一次套用）」，或採 H-4 (B) |
+| QA-FB-04 | V-MIC 項目（AC-33-01、AC-33-02）依決議無法自動化，QA 以替身做代理驗證（getUserMedia 呼叫次數、音軌 `readyState`）；最終判定仰賴人類實機 | SD | 架構 §10.2 可註明自動化代理項目與 TC 編號（TC-33-01a、TC-33-02a），方便人類對照 |
+
+## 15. 第 4 輪驗收（PRD v0.11：PWA）
+
+範圍：PRD v0.11（37 個 US、243 個 AC；應驗收 221、暫停 22），重點為 v0.11 新增的 29 個 AC（US-34～US-37、AC-24-12）與修訂的 5 個 AC（AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06），並全套回歸。契約 v0.11、architecture v0.7、tasks.json（FE-45～FE-53 done；MC-01、MC-02 done；MC-03 未執行）。執行日期 2026-11-03。
+
+### 15.1 執行紀錄
+
+| 項目 | 指令 | 結果（QA 自行執行） |
+| :--- | :--- | :--- |
+| PG 單元測試 | `npm test` | 963 / 963 通過、fail 0（參考，非驗收依據） |
+| 資料自驗 | `npm run validate:data` | 錯誤 0、警告 61（與前幾輪相同；`src/data/` 自 2026-10-30 12:15 未修改） |
+| 建置可重現 | `node tools/build.mjs --out <暫存>` × 2 | HTML、manifest、sw.js 與部署目錄 8 檔逐位元組相同，且與 `dist/` 相同；BUILD_ID `d7085fd3fb24c46f` |
+| 靜態 | `tests/static/static-check.mjs` | TC-S01～TC-S10 10 / 10 通過（TC-S01、TC-S06 依 v0.11 更新） |
+| PWA 靜態與建置 | `tests/static/pwa-static.mjs` | 12 通過、待人工 1（TC-PWA-H4） |
+| 越界 | `boundary-check.mjs`、`boundary-delta.mjs` | 不屬於任何任務 0；第 4 輪增量 44 檔、超出 FE-45～FE-53 paths 0 |
+| 驗收全套（第 2 次，最終） | `npm run test:e2e`（2026-11-03 09:41 完成） | 23 個子程序結束碼皆 0；彙整後 311 項：通過 271、失敗 1（TC-34-03a）、待人工 20、不適用 19；Edge 40 項全部通過或不適用 |
+| 驗收全套（第 1 次） | 同上（第 4 輪測試程式調整前） | TC-06-06、TC-30-10b：無內建資料 fixture 建置失敗（測試程式問題，見 §15.2）；TC-22-01m：效能邊緣（QA 同時執行建置檢查造成 CPU 競爭；第 2 次通過，判定規則同 §14.3） |
+| QA 檢視 | `node tests/tools/qa-review-r4.mjs` | 寫入 `tests/results/qa-review.json`（TC-D18～D20、TC-B01～B03、TC-X-edge、人工 TC 18 個） |
+| 彙整 | `rebuild-summary.mjs`、`ac-matrix.mjs`、`tc-list.mjs` | `tests/results/summary.json`、`ac-matrix.json`；test-plan §5、§7 |
+
+各套件結果（第 2 次全套＋QA 檢視）：
+
+| 套件 | 通過 | 失敗 | 待人工 | 不適用 |
+| :--- | :--- | :--- | :--- | :--- |
+| 資料 data-check | 17 | 0 | 0 | 0 |
+| 靜態 static-check | 10 | 0 | 0 | 0 |
+| PWA 靜態與建置 pwa-static（新） | 12 | 0 | 1 | 0 |
+| e2e-goal | 22 | 0 | 0 | 5 |
+| e2e-cards | 37 | 0 | 0 | 0 |
+| e2e-speech | 20 | 0 | 0 | 0 |
+| e2e-content | 9 | 0 | 0 | 10 |
+| e2e-env | 18 | 0 | 0 | 3 |
+| e2e-persist | 1 | 0 | 0 | 0 |
+| e2e-firstrun | 25 | 0 | 0 | 1 |
+| e2e-progress | 18 | 0 | 0 | 0 |
+| e2e-mic | 11 | 0 | 0 | 0 |
+| e2e-hidden | 5 | 0 | 0 | 0 |
+| e2e-reinit | 15 | 0 | 0 | 0 |
+| e2e-motion | 15 | 0 | 0 | 0 |
+| e2e-pwa（新） | 22 | 1 | 0 | 0 |
+| e2e-pwa-update（新） | 7 | 0 | 1 | 0 |
+| qa-review | 7 | 0 | 18 | 0 |
+| **合計** | **271** | **1** | **20** | **19** |
+| BUG-003 複驗後合計（§15.11） | **272** | **0** | **20** | **19** |
+
+Edge 冒煙：e2e-goal 22 通過＋5 不適用、e2e-hidden 5 通過、e2e-pwa 冒煙子集 8 通過（file:// 3 項、AC-24-12、manifest、註冊與快取、離線、安裝按鈕）。
+
+### 15.2 測試程式更新（QA）
+
+| 檔案 | 異動 |
+| :--- | :--- |
+| `package.json`、`package-lock.json`（新）、`node_modules/` | 新增 devDependency `playwright-core` 1.64.1（`--save-exact`）。不下載瀏覽器，使用本機 Chrome、Edge（`channel`）。建置與部署 workflow 不需要 |
+| `tests/e2e/lib/pwa-env.mjs`（新） | Playwright 啟動、`tools/serve.mjs` 啟停（埠 8080，只關閉自己啟動的程序）、context 層請求記錄（含 service worker）、CDP `Log`／`Audits`、替身安裝事件（FB-42）、版面遮擋檢查、PNG 解碼與產生 |
+| `tests/e2e/e2e-pwa.mjs`（新） | file:// 相容、manifest 與圖示、安裝按鈕、註冊與快取、離線、404、啟用條件、隱私、加入 PWA 前使用者、AC-24-12、AC-23-02 品牌聲明；`QA_BROWSER=edge` 跑冒煙子集 |
+| `tests/e2e/e2e-pwa-update.mjs`（新） | V1 → V2 更新（V2 以 `src/app` 複本改 1 字建置，不改 `src/`）、離線時已部署 V2、首次畫面使用者、不按重新整理 |
+| `tests/static/pwa-static.mjs`（新） | V-PWA-01～06、MC-03 新 workflow 本機模擬 |
+| `tests/static/static-check.mjs` | TC-S01：`dist/site/` 為 PWA 部署目錄、`<link rel="icon" href="data:,">` 逐字白名單（恰 1 次，其餘樣式不放寬）；TC-S06：加驗 Q-48 品牌標識聲明 |
+| `tests/static/boundary-check.mjs`、`boundary-delta.mjs` | 授權例外（`src/app/assets/icons/`、`sources/`、`.gitignore`、`.gitattributes`）與主控修改的 `static.yml` 另列；delta 預設改為第 3 輪結束後、FE-45 起；略過 `node_modules` |
+| `tests/run-all.mjs` | 加入 pwa-static、e2e-pwa（Chrome、Edge）、e2e-pwa-update；無內建資料 fixture 改為「只含 `sources.js` 的資料目錄＋`--no-site`」（PWA 模式下資料目錄全空會 `LICENSE_YEAR` 中止，屬 architecture §5.1 的設計，非缺陷） |
+| `tests/tools/qa-review-r4.mjs`（新）、`ac-matrix.mjs`、`tc-list.mjs`、`tc-desc.json` | 第 4 輪 QA 檢視、人工必要 AC（AC-34-02、AC-34-03、AC-34-05、AC-35-03、AC-36-07）、新 TC 說明 |
+| `tests/e2e/diag-install-button.mjs`（新，不列入 run-all） | 「安裝 App」按鈕四角命中元素：圓角外側命中自身容器 `.dash-backup__install`，不算遮住 |
+| 既有 E2E | 不需修改：既有腳本以 `dist/english-master-track.html`（file://）為受測物，路徑不變；檔案大小只有 AC-19-04 上限 5 MiB（3,278,334 bytes 仍符合） |
+
+### 15.3 新增與修訂 AC 的判定（BUG-003 複驗後）
+
+| AC | 判定 | 對應 TC |
+| :--- | :--- | :--- |
+| AC-24-12 | 通過 | TC-37-01a、TC-37-02、TC-24-12a、TC-24-12b |
+| AC-23-02 | 通過 | TC-D10、TC-23-02、TC-23-02b、TC-25-07、TC-23-02c、TC-D18 |
+| AC-23-06 | 通過 | TC-S06 |
+| AC-19-01 | 通過 | TC-27-05、TC-PS-01、TC-PS-04、TC-PS-06、TC-S01、TC-S08、TC-S09 |
+| AC-21-01 | 通過（另待人工確認） | TC-21-01、TC-37-05b、TC-37-01a、TC-37-01b、TC-37-05a、TC-M01 |
+| AC-21-03 | 通過（另待人工確認） | TC-21-03b、TC-37-01a、TC-35-01、TC-37-05a、TC-21-03、TC-M01、TC-S05 |
+| AC-34-01 | 通過（另待人工確認） | TC-34-01、TC-PS-02、TC-PS-03、TC-X-edge、TC-PWA-H1 |
+| AC-34-02 | 待人工（TC-PWA-H1／H2） | TC-PWA-H1、TC-PWA-H2 |
+| AC-34-03 | 待人工（TC-PWA-H1／H2） | TC-34-03a、TC-PS-03、TC-PWA-H1、TC-PWA-H2 |
+| AC-34-04 | 通過 | TC-34-04、TC-PS-04 |
+| AC-34-05 | 待人工（TC-PWA-H3（iOS）） | TC-34-05a、TC-PS-03、TC-PS-04、TC-PWA-H3 |
+| AC-34-06 | 通過（另待人工確認） | TC-34-08、TC-37-03、TC-PWA-H1 |
+| AC-34-07 | 通過（另待人工確認） | TC-34-07、TC-PWA-H1 |
+| AC-34-08 | 通過（另待人工確認） | TC-37-01a、TC-37-01b、TC-34-07、TC-34-08、TC-PWA-H3 |
+| AC-34-09 | 通過（另待人工確認） | TC-34-09a、TC-34-09b、TC-34-09c、TC-PWA-H1 |
+| AC-34-10 | 通過（另待人工確認） | TC-34-09b、TC-PWA-H1 |
+| AC-35-01 | 通過 | TC-36-03a、TC-35-01、TC-PS-05、TC-X-edge |
+| AC-35-02 | 通過 | TC-35-02、TC-X-edge |
+| AC-35-03 | 待人工（TC-PWA-H2） | TC-PWA-H2 |
+| AC-35-04 | 通過（另待人工確認） | TC-35-04、TC-M07 |
+| AC-35-05 | 通過 | TC-35-05 |
+| AC-36-01 | 通過 | TC-36-01a、TC-36-01b、TC-36-01c、TC-36-01obs |
+| AC-36-02 | 通過 | TC-PS-04、TC-PS-05、TC-36-01b、TC-36-02 |
+| AC-36-03 | 通過（另待人工確認） | TC-36-03a、TC-36-03b、TC-36-03c、TC-36-04b、TC-36-03d、TC-PWA-H5 |
+| AC-36-04 | 通過 | TC-36-03c、TC-36-04b、TC-36-03d |
+| AC-36-05 | 通過（另待人工確認） | TC-36-03c、TC-PWA-H5 |
+| AC-36-06 | 通過 | TC-36-06 |
+| AC-36-07 | 待人工（TC-PWA-H4（MC-03 後）） | TC-PS-01、TC-36-07a、TC-PWA-H4 |
+| AC-37-01 | 通過（另待人工確認） | TC-37-01a、TC-37-01b、TC-PS-04、TC-X-edge、TC-M03 |
+| AC-37-02 | 通過 | TC-37-02 |
+| AC-37-03 | 通過 | TC-37-03 |
+| AC-37-04 | 通過 | TC-37-04 |
+| AC-37-05 | 通過 | TC-37-05b、TC-37-05a、TC-PS-05 |
+| AC-37-06 | 通過 | TC-37-06 |
+
+重點結果：
+
+| 情境 | 結果 |
+| :--- | :--- |
+| 安裝（manifest、圖示、按鈕） | manifest 與契約常數深度相等、10 鍵、相對路徑解析為部署目錄；3 個圖示 200、`image/png`、尺寸相符；一般設定檔 DevTools 可安裝性錯誤 0、Manifest 錯誤 0（Playwright 無痕 context 回報 `in-incognito`，屬環境因素）。替身事件（附 `prompt()`、`userChoice`）：事件前不顯示；事件後只在主控台、NT-1 之後、101×44、375／1366 不裁切不遮住；首次畫面與其他頁不顯示；接受、拒絕、連點皆 `prompt` 1 次；standalone 與 iOS `navigator.standalone` 不顯示 |
+| 離線開啟 | 伺服器停止＋離線：`./`、`./index.html` 皆由 service worker 回應，主控台與各模組可用，資源錯誤 0；離線重新載入到模組入口可點擊：一般 106～120 ms、4 倍降速 509～722 ms（本機參考值，門檻 3 秒／6 秒） |
+| 更新提示（兩個版本） | V1 `d7085fd3fb24c46f` → V2 `75b90e5430e53f1a`：重新載入後約 2 秒顯示「有新版本，重新整理」；V2 快取的 HTML 識別碼為 V2（伺服器 `max-age=600` 下仍取自伺服器）；按下後重新載入 1 次並為 V2；舊本專案快取刪除、`other-project-cache` 保留；localStorage 逐字不變；不按時維持 V1、關閉全部分頁重開為 V2；首次畫面使用者仍無狀態鍵；離線時以 V1 開啟、不提示 |
+| file:// 相容 | Chrome、Edge，連網與斷網、只有 HTML 的空資料夾：`getRegistrations()` 以 `SecurityError` 拒絕（無註冊）、DOM 無 manifest／apple-touch-icon、頁面網路請求 0、Console 錯誤與警告 0、替身安裝事件未被監聽、無按鈕與提示、NT-1 顯示、Cache Storage 與 IndexedDB 空；完整操作含 STT 替身、匯出入備份 |
+| 隱私 | https 版環境層請求（含 service worker 發出 7 筆）只有 `./`、`sw.js` 與預先快取 6 個網址，全部 GET、同源、無查詢字串；載入後學習操作請求 0；經過 1 次更新仍符合；無 `/favicon.ico`；快取只含預先快取 7 項（不含 `sw.js`、`ads.txt`） |
+| 建置可重現 | 兩次建置逐位元組相同；改 `src/app` 1 字、改 `src/data` 內容 1 字、換 1 張圖示 → BUILD_ID 與 sw.js 皆改變；只改 `ads.txt` → 不變 |
+| 加入 PWA 前的使用者（AC-37-06） | 以 git HEAD 的 `dist`（目前 GitHub Pages 部署版）學習後換成 PWA 版：鍵、欄位、內容完全相同，`schemaVersion` 2 |
+
+### 15.4 失敗項目
+
+| TC | AC | 結果 | 缺陷 |
+| :--- | :--- | :--- | :--- |
+| TC-34-03a | AC-34-03 | `icon-512.png` 最下方 1 列平均色 (172,186,204)（上一列 (33,100,173)），左下、右下角 (182,193,208)：來源圖灰色外框殘留。`icon-192`、`apple-touch-icon-180` 底邊偏淡但仍為藍色調；maskable 正常（白、橘像素最遠 203.8px，小於安全圓 204.8px） | BUG-003（minor，owner 主控 MC-01） |
+
+### 15.5 人工驗收清單（待人類）
+
+步驟見 test-plan §6.1。
+
+| TC | 內容 | 對應 AC |
+| :--- | :--- | :--- |
+| TC-PWA-H4 | MC-03 後 push：Actions 成功、正式網址 8 檔 200 且與 artifact 相同、不含 docs／src／sources | AC-36-07 |
+| TC-PWA-H1 | Windows Chrome、Edge 原生與畫面內安裝、名稱、獨立視窗、Manifest 面板、maskable 預覽、解除安裝；Firefox 無按鈕 | AC-34-01～03、AC-34-06、AC-34-07、AC-34-09、AC-34-10 |
+| TC-PWA-H2 | Android Chrome 安裝、圓形遮罩、啟動畫面、飛航模式啟動 | AC-34-02、AC-34-03、AC-35-03 |
+| TC-PWA-H3 | iOS Safari 加入主畫面 | AC-34-05、AC-34-08 (b) |
+| TC-PWA-H5 | 正式網址已安裝 App 重新部署後更新、背景 ≥ 1 小時、同網域其他快取保留 | AC-36-03、AC-36-05 |
+| TC-M03、TC-M06、TC-M07 | v0.11 加項：file:// 版 Application 面板無 service worker；file:// 版 → 網址版以備份轉移；V-PWA 離線重新載入 5 次 | AC-37-01、E-81、AC-35-04 |
+| 沿用第 3 輪 | TC-M01～TC-M10、TC-MIC-1～5（尚未回報） | 見 §14.6 |
+
+### 15.6 觀察事項（不構成缺陷）
+
+| 編號 | 內容 |
+| :--- | :--- |
+| O-4-1 | AC-36-01 (b)：只改 `src/data` 的**註解**時，資料以 JSON 重新序列化、註解不進入交付 HTML，BUILD_ID 不變（TC-36-01obs）。交付物未變、不需要更新，QA 判定不違反 AC 目的；PRD「任一處」的字面可再釐清（§15.10） |
+| O-4-2 | 首次畫面時若瀏覽器已觸發 `beforeinstallprompt`，事件會被保留；按「開始學習」進入主控台即顯示「安裝 App」。符合 IN-1、IN-3 |
+| O-4-3 | 附屬檔 404 時 Chrome 自動記錄「A bad HTTP response code (404) was received when fetching the script.」，屬 AC-37-03 允許的瀏覽器 404 訊息；無未處理例外 |
+| O-4-4 | 圖示四角補色以「同列往內第一個藍色」逐列填入，放大可見細微水平條紋（皆為藍色調，非灰色），不違反 AC-34-03；可與 BUG-003 一併由主控評估 |
+| O-4-5 | file:// 下 `navigator.serviceWorker.getRegistrations()` 由瀏覽器以 `SecurityError` 拒絕（不是空陣列）；AC-37-01 的目的（沒有任何註冊）成立。產品程式依 PE-2 在 file:// 不呼叫此 API |
+| O-4-6 | Edge 下載備份時，瀏覽器自身的下載中樞（`edge://downloads-hub`）在 context 層產生約 48 筆內部請求；不是頁面請求，已排除並另列 |
+| O-4-7 | 本機 CRLF 工作目錄與 LF 複本（模擬 CI）的 BUILD_ID 不同（`d7085fd3fb24c46f` 與 `08b6190f9940c8f4`），屬已知事項 SD-FB-37 |
+| O-4-8 | 第 1 次全套的 TC-22-01m（減少動態＋4 倍降速）不符多輪規則（QA 同時執行建置檢查造成 CPU 競爭）；第 2 次全套通過（最大中位數 71.1、p90 79.3）。與 §14.3 同一位置，仍請 TC-M07 於基準環境量測 |
+
+### 15.7 越界與安全（本輪）
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 第 4 輪增量（TC-B03） | 2026-11-02 15:40（第 3 輪驗收結束）之後修改的 `src/`、`tools/`、`dist/`、`sources/`、`package.json`、`.git*`、`.github/` 共 44 檔：34 檔在 FE-45～FE-53 paths 內；授權例外 9 檔（`src/app/assets/icons/` 4、`sources/` 3、`.gitignore`、`.gitattributes`）；主控修改 `.github/workflows/static.yml` 1 檔（PRD R-20 風險 (3) 記載的 `Ads.txt` → `ads.txt`；MC-03 整檔取代尚未執行）；**超出 0**。檢查在 QA 安裝 devDependency 前執行；之後 `package.json` 的修改時間屬 QA |
+| 檔案歸屬（TC-B01） | 不屬於任何任務 0；`src/app/styles/90-overrides.css` 仍不存在（只在發現問題時才寫，非缺陷） |
+| 上游與資料（TC-B02） | `src/data/`、`english_master_track.md` 未修改；`docs/` 只有上游文件與 QA 文件；`tests/` 在第 3 輪結束到本輪開始之間未被他人修改；PG 未寫 `tests/`、`docs/04-qa/` |
+| XSS | NT-1、「安裝 App」、新版提示皆為常數，以 `textContent` 寫入；禁用 DOM API 0（TC-S03） |
+| 外部資源 | HTML 唯一 `<link>` 為 `data:` 圖示；無 `<script src>`、外部網址；動態連結只有同目錄 `manifest.webmanifest`、`icons/apple-touch-icon-180.png`；`sw.js` 無 `http(s)://`、`importScripts`（TC-S01、TC-PS-04～06） |
+| 學習資料 | `sw.js` 無 `localStorage`、`indexedDB`、`postMessage`；頁面只送 `{ type: "SKIP_WAITING" }`；manifest 無 `share_target` 等外部資料欄位；PWA 模組無 `console.*` 輸出 |
+
+### 15.8 需要人類決定或執行的事項
+
+| 編號 | 事項 |
+| :--- | :--- |
+| H-4-1 | ~~BUG-003~~：主控已重新產生圖示，複驗通過（verified）；剩實機目視（TC-PWA-H1／H2） |
+| H-4-2 | **MC-03 與提交**：依 §5.2 取代 `static.yml` 後，CI 只能取得已提交的檔案。目前以下 12 個 CI 建置必要檔尚未被 git 追蹤，須一併提交，否則 Actions 建置失敗：`src/app/assets/icons/` 4 張 PNG、`sources/deploy/ads.txt`、`src/app/core/pwa.js`、`src/app/pwa/sw.template.js`、`src/app/services/pwa.js`、`src/app/ui/pwa-notice.js`、`src/app/styles/80-pwa.css`、`tools/serve.mjs`、`.gitattributes`。另外，工作目錄中第 2 輪誤建、第 3 輪已刪除的空檔 `(a[r.result]` 在 git 中仍存在，提交時會一併刪除 |
+| H-4-3 | **QA 新增的開發相依**：`package.json` 加入 `devDependencies.playwright-core`，並新增 `package-lock.json` 與 `node_modules/`。`.gitignore` 目前只有 `dist/site/`，請決定是否加入 `node_modules/`（建議加入）；是否提交 `package-lock.json` 由人類決定（workflow 不執行 `npm ci`，不受影響） |
+| H-4-4 | 實機人工驗收：TC-PWA-H1～H5（§15.5、test-plan §6.1）；以及第 3 輪尚未回報的 V-MIC、TC-M01～M10 |
+| H-4-5 | O-4-1：AC-36-01 (b) 只改資料檔註解不觸發更新，是否接受（QA 建議接受） |
+
+### 15.9 缺陷
+
+| BUG | 嚴重度 | owner | 任務 | AC | 狀態 | 一句話 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| BUG-003 | minor | 主控（MC-01） | MC-01 | AC-34-03 | verified（第 1 次來回修正後複驗通過） | `icon-512.png` 最下方 1 列與左下、右下角殘留來源圖灰色外框 |
+
+### 15.10 回饋上游
+
+| 對象 | 內容 |
+| :--- | :--- |
+| PM（PRD AC-36-01 (b)） | 「只改 1 個字（`src/app/` 或 `src/data/` 中任一處）」可改為「任一會進入交付 HTML 的字元」，避免資料檔註解被誤判（O-4-1） |
+| SD（architecture §10.4） | (1) 無內建資料 fixture 在 PWA 模式需保留 `sources.js`（`LICENSE_YEAR`），建議在 §10 註明；(2) Playwright 一般 context 為無痕，`Page.getInstallabilityErrors` 會回報 `in-incognito`，可安裝性需用 `launchPersistentContext`；(3) §5.2「CI 建置的前提」所列檔案目前未提交，MC-03 執行時需一併處理 |
+| 主控（MC-01） | BUG-003；`sources/pwa/README.md` 步驟 1 的裁切範圍與四角補色方式 |
+
+### 15.11 BUG-003 複驗（第 1 次來回，2026-11-03）
+
+主控重新產生 4 張圖示並重建（BUILD_ID `5b5ae7a6d4bd0164`，`npm test` 963 / 963）。QA 複驗：
+
+| 項目 | 結果 |
+| :--- | :--- |
+| TC-34-03a | 通過：4 張圖示外圈 2px 非藍 0、灰 0；`icon-512.png` 底列 (20,92,171)、四角皆藍；maskable 圓外白 0、橘 0，最遠 203.8px < 204.8px |
+| 靜態與建置 | static-check 10 / 10；pwa-static 12 通過＋1 待人工（TC-PWA-H4），含 PNG 規格、與來源位元組相同、可重現、MC-03 模擬 |
+| 雙擊開啟 HTML 與部署 HTML | `dist/english-master-track.html` 與 `dist/site/index.html` 逐位元組相同；QA 重建與 `dist/` 相同 |
+| 抽測 E2E | e2e-pwa Chrome 23 / 23、Edge 8 / 8；e2e-pwa-update 7 通過＋1 待人工（V1 `5b5ae7a6d4bd0164` → V2 `a7e3c5d36ac92bd9`） |
+| 最終統計 | 311 個 TC：通過 272、失敗 0、待人工 20、不適用 19；AC：通過 212（47 另待人工確認）、待人工 9、失敗 0、不適用 22 |
+
+BUG-003 改為 verified。AC-34-03 自動化通過，但圖示在實機上的外觀屬必要人工項目，因此判定為「待人工」（TC-PWA-H1／H2）。
+
+### 15.12 觀察事項與待決事項清單
+
+| 類別 | 編號 | 內容 | 處理者 |
+| :--- | :--- | :--- | :--- |
+| 待決 | H-4-2 | MC-03 取代 `static.yml` 時，須一併提交 12 個尚未追蹤的 CI 建置必要檔（4 張圖示、`sources/deploy/ads.txt`、PWA 程式 5 檔、`tools/serve.mjs`、`.gitattributes`）；`(a[r.result]` 的刪除也會一併提交 | 主控／人類 |
+| 待決 | H-4-3 | QA 新增的 devDependency `playwright-core`：`.gitignore` 是否加入 `node_modules/`（建議加入）、是否提交 `package-lock.json` | 人類 |
+| 待決 | H-4-4 | 實機人工：TC-PWA-H1～H5；第 3 輪的 V-MIC、TC-M01～M10 尚未回報 | 人類 |
+| 待決 | H-4-5 | AC-36-01 (b)：只改資料檔註解不觸發更新，是否接受（QA 建議接受；回饋 PM 修字面） | 人類／PM |
+| 待決 | H-4-6 | 2 個前次 QA 執行殘留的無頭 Chrome（PID 41376、40576，建立於 2026-11-02 14:42），本輪未啟動、未關閉 | 主控 |
+| 觀察 | O-4-1 | 資料檔只改註解時交付 HTML 與 BUILD_ID 不變 | — |
+| 觀察 | O-4-2 | 首次畫面收到 `beforeinstallprompt` 會保留，進入主控台即顯示按鈕（符合 IN-1、IN-3） | — |
+| 觀察 | O-4-3 | 附屬檔 404 時 Chrome 自動記錄 404 訊息（AC-37-03 允許） | — |
+| 觀察 | O-4-4 | 圖示四角逐列補色，放大可見細微藍色水平條紋（非灰色） | 主控（可選） |
+| 觀察 | O-4-5 | file:// 下 `getRegistrations()` 以 `SecurityError` 拒絕，仍屬無註冊 | — |
+| 觀察 | O-4-6 | Edge 下載中樞的內部請求不屬頁面請求，已排除 | — |
+| 觀察 | O-4-7 | 本機 CRLF 與 CI LF 的 BUILD_ID 不同（SD-FB-37） | — |
+| 觀察 | O-4-8 | TC-22-01m 減少動態效能邊緣，請 TC-M07 於基準環境量測 | 人類 |
+| 回饋上游 | §15.10 | PM：AC-36-01 (b) 字面；SD：無資料 fixture 需 `sources.js`、Playwright 無痕可安裝性、CI 前提檔未提交 | PM／SD |
+
+## 16. 變更紀錄
 
 | 版本 | 日期 | 作者 | 說明 |
 | :--- | :--- | :--- | :--- |
 | 0.1 | 2026-10-30 | qa-agent | 初版：範圍 all；158 個 TC，通過 148、失敗 2、待人工 8；AC 覆蓋 141/141；開立 BUG-001、BUG-002 |
 | 0.2 | 2026-10-30 | qa-agent | 退回修正第 1 輪驗證（§11）：BUG-001 verified；BUG-002 維持 open、retries 1（新增回歸 AC-16-01）；新增 TC-16-01c；冷啟動判定不列入自動化、改列 TC-M07 (7)；159 個 TC，通過 148、失敗 3、待人工 8 |
 | 0.3 | 2026-10-30 | qa-agent | 退回修正第 2 輪驗證（§12）：依人類決議（JimmyLin「偶爾失敗沒關係」）TC-22-01、TC-16-01b、TC-16-01c 改用多輪判定（test-plan v0.3 §2.3）；TC-22-01 改採嚴格量法並新增 TC-22-01r；BUG-002 verified；TC-M07 新增 (9) 句型庫捲軸觀察、(10) 自訂器延後顯示觀察；160 個 TC，通過 152、失敗 0、待人工 8 |
+| 0.4 | 2026-11-02 | qa-agent | 第 3 輪驗收（§0、§14）：範圍 PRD v0.10（v0.8 + v0.9 + v0.10），192 個 AC 應驗收、22 個不適用（暫停）。264 個 TC：通過 230、失敗 0、待人工 15、不適用 19；AC 通過 188（其中 37 另待人工確認）、待人工 4、失敗 0；新開缺陷 0。更新與新增測試程式（§14.2）；TC-22-01m 全套執行 1 次不符、單獨重跑 2 次符合，判定通過並列觀察（§14.3）；新增觀察 O-7～O-13、需人類決定 H-1～H-5、回饋上游 QA-FB-03、QA-FB-04。原 §13 變更紀錄改為 §15 |
+| 0.5 | 2026-11-03 | qa-agent | 第 4 輪驗收（§0、§15）：範圍 PRD v0.11（新增 PWA），221 個 AC 應驗收、22 個不適用（暫停）。311 個 TC：通過 271、失敗 1、待人工 20、不適用 19；AC 通過 212（47 個另待人工確認）、待人工 8、失敗 1（AC-34-03）。新開 BUG-003（minor，主控 MC-01）。新增 Playwright（devDependency `playwright-core`）與 PWA 測試；第 3 輪結論移至 §0.1；變更紀錄改為 §16 ；同日 BUG-003 複驗通過改 verified（§15.11），最終 TC 通過 272、失敗 0、待人工 20、不適用 19，AC 通過 212（47 另待人工）、待人工 9、失敗 0；新增 §15.12 清單 |

@@ -5,6 +5,13 @@
 <!-- @@LICENSE@@ -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>English Master Track</title>
+<meta name="theme-color" content="#2f6fd6">
+<meta name="apple-mobile-web-app-title" content="EnglishContext">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="emt-build-id" content="@@BUILD_ID@@">
+<link rel="icon" href="data:,">
 <style>/* @@STYLES@@ */</style>
 </head>
 <body data-entry="boot">
@@ -17,6 +24,8 @@
   </div>
 </header>
 <div id="app-banner" class="app-banner"></div>
+<!-- （v0.7，FE-50）新版提示（UP-6）：由 ui/pwa-notice.js 依 runtime.pwa 切換 hidden；不在 #app-main 內，任何進入模式皆可顯示 -->
+<div id="pwa-update" class="pwa-update" role="status" hidden></div>
 <nav id="app-nav" class="app-nav" aria-label="功能區">
   <!-- （v0.5，FE-38）只留 4 鈕，依 NAV_TAB_ORDER；（v0.4，FE-26）每個按鈕：內嵌 SVG 圖示（單一 path、不寫命名空間屬性）＋ 文字（TAB_LABELS）；≥ 641px 以 CSS 隱藏圖示 -->
   <button type="button" class="app-nav__btn" data-tab="dashboard"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M2 17a10 10 0 0 1 20 0h-2.5a7.5 7.5 0 0 0-15 0zm9.3-.7 5-6 1.4 1.4-5 6zM14 17a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM2 19h20v2H2z"/></svg><span class="app-nav__label">主控台</span></button>

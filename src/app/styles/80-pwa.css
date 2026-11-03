@@ -1,0 +1,29 @@
+/* ─── PWA 新版提示列（FE-50；architecture.md v0.7 §7.18.7、§9 v0.7；契約 UP-6） ─── */
+/* 頁首之後、#app-banner 之後的頁面流元素；sticky 頂端，不可能被底部導覽列遮住（AC-27-03）。
+ * z-index 低於 toast（1000）、對話框（1100），高於一般內容；無 transition／animation（減少動態下自然無動畫，AC-31-03）。
+ * 隱藏時由全域 [hidden] 規則 display: none（00-base.css）。 */
+
+.pwa-update {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.pwa-update__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pwa-update__btn {
+  min-height: var(--touch);
+  min-width: var(--touch);
+}

@@ -33,10 +33,19 @@ SOFTWARE.
 單字資料與原創內容（例句、解析、Part 5 題目、長難句、句型）以 CC BY-SA 4.0 授權，原創內容著作權人 JimmyLin。
 條款網址：https://creativecommons.org/licenses/by-sa/4.0/
 
+PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin，保留所有權利，不適用 MIT 與 CC BY-SA 4.0。
+
 外部字表與辭典資料的出處與授權，請見程式內「資料來源與授權」頁。
 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>English Master Track</title>
+<meta name="theme-color" content="#2f6fd6">
+<meta name="apple-mobile-web-app-title" content="EnglishContext">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="emt-build-id" content="5b5ae7a6d4bd0164">
+<link rel="icon" href="data:,">
 <style>
 /* 00-base.css */
 /*
@@ -692,6 +701,7 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
  * 依據：architecture.md §9（行動優先 RWD；斷點 768px）、v0.4 §7.11 環形圖列、§9 色彩與類名（db-ring、db-ring--done、db-bars）
  * 涵蓋：AC-17-01、AC-17-06、AC-20-01（無水平捲軸）、AC-20-02（觸控尺寸 ≥ 44px）、
  *       AC-30-01、AC-30-05、AC-30-08、AC-30-10、AC-31-03（減少動態由 05-motion.css 全域關閉 transition）
+ * （v0.10，FE-43）目標區只剩色級與每日新字量 3 項（AC-17-06、AC-26-05 (c)）
  */
 
 .dash-title {
@@ -771,6 +781,24 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
 
 .dash-entry {
   width: 100%;
+}
+
+/* （v0.11，FE-51）NT-1 不互通說明：同 .dash-backup__hint 字級、可任意斷行、不截斷（AC-24-12、architecture §7.18.7） */
+.dash-backup__origin {
+  margin: var(--gap) 0 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* （v0.11，FE-51）「安裝 App」：NT-1 之後；hidden 時由全域 [hidden] 規則不佔版面（IN-1） */
+.dash-backup__install {
+  margin-top: var(--gap);
+}
+
+.dash-install {
+  min-height: var(--touch);
+  min-width: var(--touch);
 }
 
 .dash-backup__hint {
@@ -980,9 +1008,7 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .dash-stats--goal {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+  /* （v0.10，FE-43）目標區移除「目前目標分數」後剩 3 項：沿用 .dash-stats 的 3 欄，不再另設 4 欄（避免右側空一格） */
 
   .dash-entries {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -994,6 +1020,8 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
  * 20-customizer.css — 難易度設定頁（FE-09；色級大卡片 FE-27）
  * 依據：architecture.md §9 RWD；色彩變數沿用 00-base.css（--color-orange 等）。
  * 375／768／1366 寬度皆不得出現水平捲軸：格線使用 minmax(0, 1fr)，文字可斷行。
+ * （v0.10，FE-43）卡片不再顯示分數範圍（刪除 .cz-color__range）；分數區 .cz-score 以 [hidden] 隱藏（00-base.css），
+ * 其規則保留但不會渲染。卡片最小高度仍為 var(--touch)（44px）。
  */
 
 .cz {
@@ -1187,10 +1215,6 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
 
 .cz-lock path {
   fill: none;
-}
-
-.cz-color__range {
-  font-weight: 600;
 }
 
 .cz-color__vocab,
@@ -3067,6 +3091,37 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
 .src-attrib {
   margin: 12px 0;
 }
+
+/* 80-pwa.css */
+/* ─── PWA 新版提示列（FE-50；architecture.md v0.7 §7.18.7、§9 v0.7；契約 UP-6） ─── */
+/* 頁首之後、#app-banner 之後的頁面流元素；sticky 頂端，不可能被底部導覽列遮住（AC-27-03）。
+ * z-index 低於 toast（1000）、對話框（1100），高於一般內容；無 transition／animation（減少動態下自然無動畫，AC-31-03）。
+ * 隱藏時由全域 [hidden] 規則 display: none（00-base.css）。 */
+
+.pwa-update {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.pwa-update__text {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pwa-update__btn {
+  min-height: var(--touch);
+  min-width: var(--touch);
+}
 </style>
 </head>
 <body data-entry="boot">
@@ -3079,6 +3134,8 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   </div>
 </header>
 <div id="app-banner" class="app-banner"></div>
+<!-- （v0.7，FE-50）新版提示（UP-6）：由 ui/pwa-notice.js 依 runtime.pwa 切換 hidden；不在 #app-main 內，任何進入模式皆可顯示 -->
+<div id="pwa-update" class="pwa-update" role="status" hidden></div>
 <nav id="app-nav" class="app-nav" aria-label="功能區">
   <!-- （v0.5，FE-38）只留 4 鈕，依 NAV_TAB_ORDER；（v0.4，FE-26）每個按鈕：內嵌 SVG 圖示（單一 path、不寫命名空間屬性）＋ 文字（TAB_LABELS）；≥ 641px 以 CSS 隱藏圖示 -->
   <button type="button" class="app-nav__btn" data-tab="dashboard"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M2 17a10 10 0 0 1 20 0h-2.5a7.5 7.5 0 0 0-15 0zm9.3-.7 5-6 1.4 1.4-5 6zM14 17a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM2 19h20v2H2z"/></svg><span class="app-nav__label">主控台</span></button>
@@ -3125,6 +3182,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * （FE-20）v0.8 新增 TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS；
  * （FE-22）v0.8 持久化升版：CURRENT_SCHEMA_VERSION 1 → 2、SUPPORTED_SCHEMA_VERSIONS [1] → [1, 2]（契約 README §5.3）。
  * （FE-34）v0.9：NAV_TAB_ORDER 6 項 → 4 項（R-18 三）；新增 HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS（US-32）；TAB_LABELS 不變（HT-4）。
+ * （FE-42）v0.10：SCORE_DEFAULT 600 → 725（= 綠色 scoreMax；PRD Q-39、契約 GS-7、DS-08）。
  * 契約變更時必須同步更新本檔與 src/app/__tests__/goal.test.js 的字面值斷言。
  * 本模組不碰 DOM；Node 以 require 載入，瀏覽器掛到 EMT.core.constants。
  */
@@ -3160,11 +3218,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     { id: "gold",   nameZh: "金", scoreMin: 860, scoreMax: 990, status: "locked", dailyNewWords: 20, vocabTarget: null,  scenarioZh: "專業熟練者、近母語水準" }
   ];
 
-  // §1 分數規則（Q-12）
+  // §1 分數規則（Q-12；預設分數 v0.10 Q-39 改為 725，為程式中唯一的預設分數來源）
   var SCORE_MIN = 10;
   var SCORE_MAX = 990;
   var SCORE_STEP = 5;
-  var SCORE_DEFAULT = 600;
+  var SCORE_DEFAULT = 725;
 
   // §1 橘色建議字量（Q-29）；N_B、N_G 由資料計算，不設常數
   var N_O = 1000;
@@ -4204,7 +4262,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 /* core/goal.js */
 /*
  * EMT.core.goal — 分數、色級與試算（FE-03；architecture.md §7.1）
- * 依據：PRD 色級定義表、Q-12、Q-15、Q-25、Q-28、Q-32；契約常數 COLOR_LEVELS、SCORE_*、N_O。
+ * 依據：PRD 色級定義表、Q-12、Q-15、Q-25、Q-28、R-19；契約常數 COLOR_LEVELS、SCORE_*、N_O。
+ * （FE-42）v0.10 R-19：點色級卡片 = 該色 scoreMax（scoreForCard，契約 GS-2、DS-07），取代 Q-32 規則；
+ * parseScoreInput、normalizeScore、SCORE_INVALID_MESSAGE 為暫停 AC 的保留程式（畫面已無呼叫路徑）。
  * 本模組為純函式，不碰 DOM、不讀 window 全域資料、不讀 localStorage；
  * N_B、N_G 由呼叫端依實際資料計算後以參數傳入（V-VOC-12，不得寫死）。
  * Node 以 require 載入，瀏覽器掛到 EMT.core.goal（需先載入 EMT.core.constants）。
@@ -4401,19 +4461,28 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
-   * 點擊色級按鈕後的分數（AC-01-05、AC-01-07；Q-15、Q-32）：
-   * 目前分數已在該色範圍內 → 不變；否則設為該色 scoreMin。未知色級回傳原分數。
+   * 點色級卡片後的分數（v0.10 R-19；契約 GS-2、DS-07；AC-01-05、AC-01-07、AC-02-04、AC-26-02、AC-26-04）：
+   * 一律為該色 scoreMax（橘 215、棕 465、綠 725、藍 855、金 990），與目前分數無關。
+   * 未知色級回傳 null。
+   * @param {string} colorId
+   * @returns {number|null}
+   */
+  function scoreForCard(colorId) {
+    var level = levelOf(colorId);
+    return level ? level.scoreMax : null;
+  }
+
+  /**
+   * （相容用）點擊色級後的分數。v0.10 起語意改為 scoreForCard(colorId) ?? S：
+   * 已知色級一律回該色 scoreMax（不再看 S 是否在範圍內，Q-32 規則廢止）；未知色級回傳原分數。
+   * 保留匯出名稱以相容既有呼叫端與測試替身；store 已改呼叫 scoreForCard。
    * @param {number} S
    * @param {string} colorId
    * @returns {number}
    */
   function scoreAfterColorClick(S, colorId) {
-    var level = levelOf(colorId);
-    if (!level) { return S; }
-    if (S >= level.scoreMin && S <= level.scoreMax) {
-      return S;
-    }
-    return level.scoreMin;
+    var score = scoreForCard(colorId);
+    return score !== null ? score : S;
   }
 
   return Object.freeze({
@@ -4427,6 +4496,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     dailyNewWords: dailyNewWords,
     targetVocab: targetVocab,
     estimate: estimate,
+    scoreForCard: scoreForCard,
     scoreAfterColorClick: scoreAfterColorClick
   });
 });
@@ -5770,6 +5840,269 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   });
 });
 
+/* core/pwa.js */
+/*
+ * EMT.core.pwa — PWA 契約常數與純函式（FE-45）
+ * 依據：architecture.md v0.7 §4.7「EMT.core.pwa」、§7.18.1；契約 data-schema.ts §12、README §10.5 PE-1、
+ *       §10.7 UP-3、UP-6、§10.8 IN-1、IN-2、§10.11 V-PWA-08
+ * 涵蓋：AC-24-12、AC-34-01、AC-34-02、AC-34-07、AC-34-08、AC-36-03、AC-37-01、AC-37-02、AC-37-04
+ *
+ * - 11 個 PWA_* 常數與 data-schema.ts §12 逐值相同、鍵順序相同（PWA_MANIFEST 的鍵順序決定 manifest 輸出位元組，MF-3），
+ *   全部深度凍結；PWA 常數的單一來源在本檔（core/constants.js 不重複定義）。
+ * - 純函式：不碰 DOM、不呼叫任何瀏覽器 API；所需的環境物件一律由呼叫端以參數傳入。
+ * - 本檔同時由 tools/build.mjs 以 createRequire 讀取（FE-47）：Node 下 module.exports 即同一個 api 物件，
+ *   不得依賴 window、document。factory 無任何依賴（LD-1）。
+ */
+(function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.core = root.EMT.core || {};
+    root.EMT.core.pwa = api;
+  }
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // 深層凍結：物件與其中所有子物件、陣列都不可再修改
+  function deepFreeze(obj) {
+    Object.getOwnPropertyNames(obj).forEach(function (name) {
+      var value = obj[name];
+      if (value && typeof value === "object") {
+        deepFreeze(value);
+      }
+    });
+    return Object.freeze(obj);
+  }
+
+  // ── data-schema.ts §12 常數（逐字複製，不得自行修改）──
+
+  /** PWA 安裝名稱（manifest name／short_name、apple-mobile-web-app-title 共用；Q-42） */
+  var PWA_APP_NAME = "EnglishContext";
+
+  /** manifest theme_color 與 <meta name="theme-color"> 的值（= --primary，AC-34-04） */
+  var PWA_THEME_COLOR = "#2f6fd6";
+
+  /** manifest background_color（= --bg，DS-13、AC-34-04） */
+  var PWA_BACKGROUND_COLOR = "#f6f7f9";
+
+  /** manifest 內容；鍵順序即輸出順序（MF-1、MF-3） */
+  var PWA_MANIFEST = {
+    name: "EnglishContext",
+    short_name: "EnglishContext",
+    id: "./",
+    start_url: "./",
+    scope: "./",
+    display: "standalone",
+    lang: "zh-Hant-TW",
+    theme_color: "#2f6fd6",
+    background_color: "#f6f7f9",
+    icons: [
+      { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" }
+    ]
+  };
+
+  /** 部署目錄檔案清單（恰 8 檔，DP-1） */
+  var PWA_DEPLOY_FILES = [
+    { path: "index.html", role: "page", mime: "text/html", precached: true, producedBy: "build" },
+    { path: "manifest.webmanifest", role: "manifest", mime: "application/manifest+json", precached: true, producedBy: "build" },
+    { path: "sw.js", role: "serviceWorker", mime: "text/javascript", precached: false, producedBy: "build" },
+    { path: "icons/icon-192.png", role: "icon", mime: "image/png", precached: true, sizePx: 192, purpose: "any", producedBy: "copy" },
+    { path: "icons/icon-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "any", producedBy: "copy" },
+    { path: "icons/icon-maskable-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "maskable", producedBy: "copy" },
+    { path: "icons/apple-touch-icon-180.png", role: "appleTouchIcon", mime: "image/png", precached: true, sizePx: 180, producedBy: "copy" },
+    { path: "ads.txt", role: "adsTxt", mime: "text/plain", precached: false, producedBy: "copy" }
+  ];
+
+  /** 預先快取清單（恰 7 項；相對於 sw.js 的網址，SW-6） */
+  var PWA_PRECACHE_URLS = [
+    "./",
+    "./index.html",
+    "./manifest.webmanifest",
+    "./icons/icon-192.png",
+    "./icons/icon-512.png",
+    "./icons/icon-maskable-512.png",
+    "./icons/apple-touch-icon-180.png"
+  ];
+
+  /** 本專案快取名稱前綴（SW-9） */
+  var PWA_CACHE_PREFIX = "english-master-track-pwa-";
+
+  /** BUILD_ID 格式：16 個小寫十六進位字元（SW-2） */
+  var PWA_BUILD_ID_PATTERN = "^[0-9a-f]{16}$";
+
+  /** HTML 中記錄建置識別碼的 meta name（SW-2、HD-1） */
+  var PWA_BUILD_ID_META_NAME = "emt-build-id";
+
+  /** 回到前景時重新檢查更新的間隔（毫秒，1 小時；UP-3） */
+  var PWA_UPDATE_RECHECK_MS = 3600000;
+
+  /** PWA 相關畫面文字（逐字使用） */
+  var PWA_TEXTS = {
+    installButton: "安裝 App",
+    updateNotice: "有新版本，重新整理",
+    updateButton: "重新整理",
+    backupOriginNotice: "學習紀錄只存在目前的瀏覽器與網址；檔案版、網頁版、主畫面 App 彼此不互通，可用匯出備份／匯入轉移"
+  };
+
+  /** PwaRuntimeState 的 7 個鍵（契約介面順序） */
+  var PWA_STATE_KEYS = [
+    "eligible",
+    "standalone",
+    "installPromptAvailable",
+    "installSuppressed",
+    "updateAvailable",
+    "reloadRequested",
+    "lastUpdateCheckAt"
+  ];
+
+  // ── 純函式 ──
+
+  /**
+   * PwaRuntimeState 初始值（每次回傳新物件；6 個布林 false、lastUpdateCheckAt null）。
+   * @returns {{eligible: boolean, standalone: boolean, installPromptAvailable: boolean,
+   *            installSuppressed: boolean, updateAvailable: boolean, reloadRequested: boolean,
+   *            lastUpdateCheckAt: (number|null)}}
+   */
+  function initialPwaState() {
+    return {
+      eligible: false,
+      standalone: false,
+      installPromptAvailable: false,
+      installSuppressed: false,
+      updateAvailable: false,
+      reloadRequested: false,
+      lastUpdateCheckAt: null
+    };
+  }
+
+  /**
+   * PE-1 判定式。依序檢查，前一步不成立即回 false、不再讀取後面的屬性：
+   * (1) protocol 為 "https:"，或 "http:" 且 hostname 為 localhost／127.0.0.1（不成立時連 env.navigator 都不讀）；
+   * (2) isSecureContext === true；
+   * (3) "serviceWorker" in navigator 且值不是 null／undefined。
+   * 整段 try，任何例外 → false。
+   * @param {{location: object, isSecureContext: boolean, navigator: object}} env
+   * @returns {boolean}
+   */
+  function isEligible(env) {
+    try {
+      if (!env) { return false; }
+      var loc = env.location;
+      if (!loc) { return false; }
+      var protocol = loc.protocol;
+      if (protocol === "http:") {
+        var host = loc.hostname;
+        if (host !== "localhost" && host !== "127.0.0.1") { return false; }
+      } else if (protocol !== "https:") {
+        return false;
+      }
+      if (env.isSecureContext !== true) { return false; }
+      var nav = env.navigator;
+      if (!nav || (typeof nav !== "object" && typeof nav !== "function")) { return false; }
+      if (!("serviceWorker" in nav)) { return false; }
+      var sw = nav.serviceWorker;
+      return sw !== null && sw !== undefined;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /**
+   * IN-2 standalone 判定：matchMedia("(display-mode: standalone)").matches === true，
+   * 或 navigator.standalone === true（iOS）。matchMedia 不是函式或拋例外 → 只看 navigator.standalone；全部例外 → false。
+   * 注意：呼叫端傳入的 matchMedia 須已綁定 window（瀏覽器中未綁定呼叫會拋例外）。
+   * @param {{matchMedia: function, navigator: object}} env
+   * @returns {boolean}
+   */
+  function isStandalone(env) {
+    try {
+      if (!env) { return false; }
+      var byMedia = false;
+      try {
+        if (typeof env.matchMedia === "function") {
+          var mq = env.matchMedia("(display-mode: standalone)");
+          byMedia = !!mq && mq.matches === true;
+        }
+      } catch (e) {
+        byMedia = false;
+      }
+      if (byMedia) { return true; }
+      var nav = env.navigator;
+      return !!nav && nav.standalone === true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /** 取得 state.runtime.pwa；結構不符時回 null */
+  function pwaOf(state) {
+    var rt = state && state.runtime;
+    var p = rt && rt.pwa;
+    return p && typeof p === "object" ? p : null;
+  }
+
+  /**
+   * IN-1「安裝 App」按鈕是否顯示（推導值，不另存）。
+   * @param {{runtime: {pwa: object, entryMode: string, currentTab: string}}} state
+   * @returns {boolean}
+   */
+  function installVisible(state) {
+    var p = pwaOf(state);
+    if (!p) { return false; }
+    return p.eligible === true && p.standalone !== true && p.installPromptAvailable === true &&
+      p.installSuppressed !== true && state.runtime.entryMode === "main" &&
+      state.runtime.currentTab === "dashboard";
+  }
+
+  /**
+   * UP-6 新版提示是否顯示：eligible && updateAvailable（任何 entryMode、任何頁面）。
+   * @param {{runtime: {pwa: object}}} state
+   * @returns {boolean}
+   */
+  function updateVisible(state) {
+    var p = pwaOf(state);
+    if (!p) { return false; }
+    return p.eligible === true && p.updateAvailable === true;
+  }
+
+  /**
+   * UP-3：距上次更新檢查是否已達 PWA_UPDATE_RECHECK_MS。lastMs 不是有限數（含 null）→ false。
+   * @param {number} nowMs performance.now()
+   * @param {number|null} lastMs
+   * @returns {boolean}
+   */
+  function needsRecheck(nowMs, lastMs) {
+    if (typeof lastMs !== "number" || !isFinite(lastMs)) { return false; }
+    if (typeof nowMs !== "number" || !isFinite(nowMs)) { return false; }
+    return nowMs - lastMs >= PWA_UPDATE_RECHECK_MS;
+  }
+
+  return deepFreeze({
+    PWA_APP_NAME: PWA_APP_NAME,
+    PWA_THEME_COLOR: PWA_THEME_COLOR,
+    PWA_BACKGROUND_COLOR: PWA_BACKGROUND_COLOR,
+    PWA_MANIFEST: PWA_MANIFEST,
+    PWA_DEPLOY_FILES: PWA_DEPLOY_FILES,
+    PWA_PRECACHE_URLS: PWA_PRECACHE_URLS,
+    PWA_CACHE_PREFIX: PWA_CACHE_PREFIX,
+    PWA_BUILD_ID_PATTERN: PWA_BUILD_ID_PATTERN,
+    PWA_BUILD_ID_META_NAME: PWA_BUILD_ID_META_NAME,
+    PWA_UPDATE_RECHECK_MS: PWA_UPDATE_RECHECK_MS,
+    PWA_TEXTS: PWA_TEXTS,
+    PWA_STATE_KEYS: PWA_STATE_KEYS,
+    initialPwaState: initialPwaState,
+    isEligible: isEligible,
+    isStandalone: isStandalone,
+    installVisible: installVisible,
+    updateVisible: updateVisible,
+    needsRecheck: needsRecheck
+  });
+});
+
 /* core/quiz.js */
 /*
  * core/quiz.js — 單字四選一出題（FE-05）
@@ -6664,6 +6997,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   一次 setItem，成功（或 storage 停用）才替換記憶體；失敗（quota／error）只還原記憶體 draftScore。
  *   cancelApplyGoal 只還原記憶體 draftScore、不寫入（CI-9）。setTab 忽略 HIDDEN_TAB_IDS（HT-1）。
  *
+ * - （v0.11，FE-49）runtime.pwa（PwaRuntimeState，契約 PV-1、PV-7）：初始值取 core/pwa.initialPwaState()；
+ *   只能經 actions.setPwa 更新（tag "pwa"，不寫入 localStorage、不進備份）；其他 action 以 assign 局部更新時保留原值。
+ *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
  */
@@ -6698,17 +7034,25 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         P: require("../core/persist.js"),
         BACKUP: require("../core/backup.js"),
         LEARN: require("../core/learning.js"),
-        REINIT: require("../core/reinit.js")
+        REINIT: require("../core/reinit.js"),
+        PWA: require("../core/pwa.js")
       };
     } else {
       var c = root.EMT.core;
       coreCache = {
         C: c.constants, WK: c.wordkey, GOAL: c.goal, VOCAB: c.vocab, CUSTOM: c.custom,
         STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning,
-        REINIT: c.reinit
+        REINIT: c.reinit, PWA: c.pwa
       };
     }
     return coreCache;
+  }
+
+  /** （v0.11，FE-49）取得 core/pwa（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function pwaCore() {
+    var m = core().PWA;
+    if (!m) { throw new Error("EMT.core.pwa 未載入（state/store.js）"); }
+    return m;
   }
 
   // 契約列舉（data-schema.ts §7、§10）
@@ -6949,7 +7293,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         // （v0.8）本工作階段是否已提示過學習紀錄容量不足（LR-7）
         learningQuotaNoticeShown: false,
         // （v0.8）首次進入判定結果（FS-1）；本工作階段只會 firstRun → main
-        entryMode: entryMode === "firstRun" ? "firstRun" : "main"
+        entryMode: entryMode === "firstRun" ? "firstRun" : "main",
+        // （v0.11，FE-49）PWA 頁面端狀態（只在記憶體，不持久化，PV-1）；PE-1 由 main.js 經 setPwa 寫入
+        pwa: pwaCore().initialPwaState()
       };
     }
 
@@ -7204,13 +7550,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
 
     /**
-     * 點色級按鈕（Q-32、AC-01-05、AC-01-07）。
+     * 點色級卡片（v0.10 R-19；契約 GS-2、V-ST-16；AC-01-05、AC-01-07、AC-02-04、AC-26-02）：
+     * draftScore = 該色 scoreMax（goal.scoreForCard），含目前選中色級與藍、金；未知色級 → draftScore 不變。
+     * 寫入行為沿用 setDraft（一般模式照常寫入、首次模式只改記憶體；不觸發 CI-1）。
      * @param {string} colorId
      * @returns {{score: number}}
      */
     function clickColor(colorId) {
       ensureInit();
-      var score = core().GOAL.scoreAfterColorClick(state.data.goal.draftScore, colorId);
+      var score = core().GOAL.scoreForCard(colorId);
+      if (score === null) { return { score: state.data.goal.draftScore }; }
       setDraft(score);
       return { score: state.data.goal.draftScore };
     }
@@ -7713,6 +8062,38 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       commit(state.data, assign(rt, { currentTab: tabId }), ["tab"], false);
     }
 
+    // ── actions：PWA（v0.11，FE-49）──
+
+    /**
+     * 更新 runtime.pwa（architecture §4.3 v0.7、契約 RuntimeState.pwa、PV-1、PV-7）。
+     * 只接受 PWA_STATE_KEYS 的鍵；布林欄位只收 true／false，lastUpdateCheckAt 只收有限數或 null；
+     * 其他鍵、型別錯誤、物件值（安裝事件、registration 等）一律忽略。
+     * 有改變 → 以新物件取代 runtime.pwa 並通知 ["pwa"]；不寫入 localStorage（setItem 0 次，首次與一般模式相同）。
+     * @param {object} patch
+     * @returns {{changed: boolean}}
+     */
+    function setPwa(patch) {
+      ensureInit();
+      if (!patch || typeof patch !== "object") { return { changed: false }; }
+      var P = pwaCore();
+      var rt = state.runtime;
+      var cur = rt.pwa && typeof rt.pwa === "object" ? rt.pwa : P.initialPwaState();
+      var next = null;
+      P.PWA_STATE_KEYS.forEach(function (k) {
+        if (!hasOwn(patch, k)) { return; }
+        var v = patch[k];
+        var ok = k === "lastUpdateCheckAt"
+          ? v === null || (typeof v === "number" && isFinite(v))
+          : v === true || v === false;
+        if (!ok || cur[k] === v) { return; }
+        if (!next) { next = assign(cur, {}); }
+        next[k] = v;
+      });
+      if (!next) { return { changed: false }; }
+      commit(state.data, assign(rt, { pwa: next }), ["pwa"], false);
+      return { changed: true };
+    }
+
     // ── actions：備份 ──
 
     /**
@@ -7834,6 +8215,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         setPhraseCategory: setPhraseCategory,
         setPhraseKeyword: setPhraseKeyword,
         setTab: setTab,
+        setPwa: setPwa,
         exportBackup: exportBackup,
         importBackup: importBackup
       }
@@ -8565,6 +8947,388 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     release: instance.release,
     tracks: instance.tracks,
     reasonOfError: reasonOfError,
+    create: create
+  };
+});
+
+/* services/pwa.js */
+/*
+ * services/pwa.js — PWA 頁面端服務（FE-48）
+ * 依據：architecture.md v0.7 §4.7「EMT.services.pwa」、§7.18.4～§7.18.6、§7.18.8；
+ *       契約 README §10.4 HD-2、§10.5 PE-1～PE-4、§10.6 SW-1、§10.7 UP-1～UP-9、§10.8 IN-2～IN-8、§10.10 PV-1、PV-2、PV-7、
+ *       FB-40、FB-42
+ * 涵蓋：AC-21-01、AC-21-03、AC-34-01、AC-34-02、AC-34-05～AC-34-10、AC-35-01、AC-35-04、AC-35-05、
+ *       AC-36-03、AC-36-04、AC-36-06、AC-37-01～AC-37-06
+ *
+ * 提供 EMT.services.pwa：
+ * - start({ onChange }) → { eligible, standalone }：只執行一次（再次呼叫回傳第一次的結果、不重複綁定）。
+ *     以 EMT.core.pwa.isEligible 判定 PE-1；false → 立即回傳、不做任何其他事（PE-2：不碰 service worker、
+ *     不加連結、不監聽安裝事件）。true → 判定 standalone、同步 onChange({ eligible: true, standalone })、
+ *     在 head 末端加入 manifest 與 apple-touch-icon 兩個相對路徑連結（HD-2）、綁定安裝事件、
+ *     於 window 的 load 之後（已 complete 則下一輪）註冊 ./sw.js（SW-1、PE-4）。
+ * - requestInstall() → Promise<void>（永不 reject）：IN-5；先清空閉包事件並 onChange 隱藏按鈕，再呼叫一次 prompt()。
+ * - requestReload()：UP-4；已要求過則不做事；有 waiting worker 時只送 { type: "SKIP_WAITING" }，否則直接重新載入。
+ * - create(globalObject)：以指定的全域物件建立獨立實例（Node 測試注入替身，比照 services/mic.js）。
+ *
+ * 規則：
+ * - 安裝事件、registration、worker 只存在實例閉包（PV-7），不進入 AppState；狀態只經 onChange 回報（store.setPwa）。
+ * - 所有 Promise 錯誤靜默、不以主控台輸出錯誤或警告（PE-3）；onChange 例外一律攔下。
+ * - 不讀寫任何瀏覽器儲存、不發出任何網路請求（註冊 ./sw.js 由瀏覽器取得）；對 worker 只送 SKIP_WAITING（PV-1、PV-2）。
+ * - 載入時只建立預設實例的區域變數，不呼叫任何瀏覽器 API、不讀取其他模組（LD-2）。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.services = root.EMT.services || {};
+    root.EMT.services.pwa = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (defaultGlobal) {
+  "use strict";
+
+  /** SW-1 註冊參數 */
+  var SW_URL = "./sw.js";
+  var SW_SCOPE = "./";
+
+  /** HD-2 動態連結（相對路徑，DP-3） */
+  var HEAD_LINKS = [
+    { rel: "manifest", href: "manifest.webmanifest" },
+    { rel: "apple-touch-icon", href: "icons/apple-touch-icon-180.png", sizes: "180x180" }
+  ];
+
+  function noop() {}
+
+  /** 吞掉可能回傳 Promise 的呼叫結果中的例外（PE-3） */
+  function swallow(result) {
+    try {
+      if (result && typeof result.then === "function") { result.then(null, noop); }
+    } catch (e) {
+      /* 忽略 */
+    }
+  }
+
+  /**
+   * 以指定全域物件建立實例。
+   * @param {object} g 全域物件（瀏覽器為 self／window）
+   */
+  function create(g) {
+    var started = null;       // 第一次 start 的結果 { eligible, standalone }
+    var onChange = null;
+    var eligible = false;
+    var standalone = false;
+    var registerScheduled = false;
+    var registration = null;  // ServiceWorkerRegistration（只在閉包，PV-7）
+    var deferredPrompt = null; // BeforeInstallPromptEvent（只在閉包，PV-7）
+    var installSuppressed = false;
+    var updateAvailable = false;
+    var reloadRequested = false;
+    var reloaded = false;
+    var lastCheck = null;
+
+    /** 取得 core/pwa（LD-1：於呼叫時取用）。不存在時視為組裝錯誤（LD-3）。 */
+    function core() {
+      var m = null;
+      if (typeof require === "function" && typeof module === "object") {
+        m = require("../core/pwa.js");
+      } else {
+        m = g && g.EMT && g.EMT.core && g.EMT.core.pwa;
+      }
+      if (!m) { throw new Error("EMT.core.pwa 未載入（services/pwa.js）"); }
+      return m;
+    }
+
+    /** 回報狀態變更；回呼例外攔下（不輸出主控台） */
+    function emit(patch) {
+      if (typeof onChange !== "function") { return; }
+      try {
+        onChange(patch);
+      } catch (e) {
+        /* 忽略（PE-3） */
+      }
+    }
+
+    /** 目前時間（performance.now()）；不可用時回 null（之後不做 UP-3 重新檢查） */
+    function now() {
+      try {
+        var t = g.performance.now();
+        return typeof t === "number" && isFinite(t) ? t : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    /** service worker 容器（只在 eligible 後才會被呼叫） */
+    function container() {
+      try {
+        return g.navigator.serviceWorker || null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    /** 目前頁面是否已由某個 service worker 控制 */
+    function hasController() {
+      var c = container();
+      try {
+        return !!(c && c.controller);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /** 安全綁定事件 */
+    function listen(target, type, fn, opts) {
+      try {
+        if (target && typeof target.addEventListener === "function") {
+          if (opts) { target.addEventListener(type, fn, opts); } else { target.addEventListener(type, fn); }
+          return true;
+        }
+      } catch (e) {
+        /* 忽略 */
+      }
+      return false;
+    }
+
+    // ── HD-2：head 動態連結 ──
+
+    function addHeadLinks() {
+      try {
+        var doc = g.document;
+        var head = doc && (doc.head || (doc.getElementsByTagName && doc.getElementsByTagName("head")[0]));
+        if (!head) { return; }
+        HEAD_LINKS.forEach(function (spec) {
+          try {
+            if (typeof head.querySelector === "function" && head.querySelector('link[rel="' + spec.rel + '"]')) { return; }
+            var el = doc.createElement("link");
+            el.setAttribute("rel", spec.rel);
+            if (spec.sizes) { el.setAttribute("sizes", spec.sizes); }
+            el.setAttribute("href", spec.href);
+            head.appendChild(el);
+          } catch (e) {
+            /* 忽略 */
+          }
+        });
+      } catch (e) {
+        /* 忽略 */
+      }
+    }
+
+    // ── 安裝按鈕（IN-3～IN-6）──
+
+    function onBeforeInstallPrompt(e) {
+      if (installSuppressed || standalone) { return; }
+      // 替身或不支援的事件：沒有 prompt 函式 → 忽略（FB-42）
+      if (!e || typeof e.prompt !== "function") { return; }
+      try {
+        if (typeof e.preventDefault === "function") { e.preventDefault(); }
+      } catch (x) {
+        /* 忽略 */
+      }
+      deferredPrompt = e;
+      emit({ installPromptAvailable: true });
+    }
+
+    function onAppInstalled() {
+      deferredPrompt = null;
+      installSuppressed = true;
+      emit({ installPromptAvailable: false, installSuppressed: true });
+    }
+
+    /**
+     * IN-5：按下「安裝 App」。閉包無事件 → 不做事（防連點）；有事件 → 先取出並清空、隱藏按鈕，再呼叫一次 prompt()，
+     * 等待 userChoice；錯誤一律靜默。
+     * @returns {Promise<void>} 永不 reject
+     */
+    function requestInstall() {
+      var e = deferredPrompt;
+      if (!e) { return Promise.resolve(); }
+      deferredPrompt = null;
+      installSuppressed = true;
+      emit({ installPromptAvailable: false, installSuppressed: true });
+      return new Promise(function (resolve) {
+        function done() { resolve(); }
+        var r;
+        try {
+          r = e.prompt();
+        } catch (x) {
+          done();
+          return;
+        }
+        Promise.resolve(r).then(function () { return e.userChoice; }).then(done, done);
+      });
+    }
+
+    // ── 更新流程（UP-2～UP-5）──
+
+    function markUpdate() {
+      if (updateAvailable) { return; }
+      updateAvailable = true;
+      emit({ updateAvailable: true });
+    }
+
+    function onUpdateFound() {
+      var w = null;
+      try {
+        w = registration && registration.installing;
+      } catch (e) {
+        w = null;
+      }
+      if (!w) { return; }
+      listen(w, "statechange", function () {
+        var state = null;
+        try { state = w.state; } catch (e) { state = null; }
+        // 首次安裝（沒有 controller）不提示（UP-2）
+        if (state === "installed" && hasController()) { markUpdate(); }
+      });
+    }
+
+    function doReload() {
+      if (reloaded) { return; }
+      reloaded = true;
+      try {
+        g.location.reload();
+      } catch (e) {
+        /* 忽略 */
+      }
+    }
+
+    function onControllerChange() {
+      // 只有使用者按過「重新整理」才重新載入，且至多 1 次（UP-5）
+      if (reloadRequested && !reloaded) { doReload(); }
+    }
+
+    function onVisibilityChange() {
+      try {
+        if (!registration || g.document.visibilityState !== "visible") { return; }
+        var t = now();
+        if (t === null || !core().needsRecheck(t, lastCheck)) { return; }
+        lastCheck = t;
+        emit({ lastUpdateCheckAt: t });
+        swallow(registration.update());
+      } catch (e) {
+        /* 忽略（PE-3） */
+      }
+    }
+
+    function onRegistered(reg) {
+      if (!reg) { return; }
+      registration = reg;
+      lastCheck = now();
+      var patch = { lastUpdateCheckAt: lastCheck };
+      var waiting = null;
+      try { waiting = reg.waiting; } catch (e) { waiting = null; }
+      if (waiting && hasController()) {
+        updateAvailable = true;
+        patch.updateAvailable = true;
+      }
+      emit(patch);
+      listen(reg, "updatefound", onUpdateFound);
+      listen(container(), "controllerchange", onControllerChange);
+      listen(g.document, "visibilitychange", onVisibilityChange);
+    }
+
+    /** SW-1 註冊；失敗靜默（PE-3），不呼叫 onChange */
+    function register() {
+      try {
+        var c = container();
+        if (!c || typeof c.register !== "function") { return; }
+        var p = c.register(SW_URL, { scope: SW_SCOPE, updateViaCache: "none" });
+        Promise.resolve(p).then(onRegistered).then(null, noop);
+      } catch (e) {
+        /* 忽略 */
+      }
+    }
+
+    /** 在 load 之後註冊（PE-4）；只排程一次 */
+    function scheduleRegister() {
+      if (registerScheduled) { return; }
+      registerScheduled = true;
+      var ready = null;
+      try { ready = g.document.readyState; } catch (e) { ready = null; }
+      if (ready === "complete") {
+        try {
+          (typeof g.setTimeout === "function" ? g.setTimeout : setTimeout).call(g, register, 0);
+        } catch (e) {
+          /* 忽略 */
+        }
+      } else {
+        listen(g, "load", register, { once: true });
+      }
+    }
+
+    /**
+     * UP-4：按「重新整理」。
+     */
+    function requestReload() {
+      if (!eligible || reloadRequested) { return; }
+      reloadRequested = true;
+      emit({ reloadRequested: true });
+      var w = null;
+      try { w = registration && registration.waiting; } catch (e) { w = null; }
+      if (w) {
+        try {
+          w.postMessage({ type: "SKIP_WAITING" });
+        } catch (e) {
+          /* 忽略 */
+        }
+      } else {
+        // 已被其他分頁啟用（無 waiting）→ 直接重新載入
+        doReload();
+      }
+    }
+
+    /**
+     * 啟動（只執行一次）。
+     * @param {{onChange?: function(object): void}} [opts]
+     * @returns {{eligible: boolean, standalone: boolean}}
+     */
+    function start(opts) {
+      if (started) { return { eligible: started.eligible, standalone: started.standalone }; }
+      var pwa = core();
+      onChange = opts && typeof opts.onChange === "function" ? opts.onChange : null;
+
+      // PE-1：以 getter 延後讀取，第 (1) 步不成立時不觸及 navigator
+      var env = {
+        get location() { return g.location; },
+        get isSecureContext() { return g.isSecureContext; },
+        get navigator() { return g.navigator; }
+      };
+      eligible = pwa.isEligible(env) === true;
+      if (!eligible) {
+        started = { eligible: false, standalone: false };
+        return { eligible: false, standalone: false };
+      }
+
+      standalone = pwa.isStandalone({
+        matchMedia: function (q) { return g.matchMedia(q); },
+        get navigator() { return g.navigator; }
+      }) === true;
+      started = { eligible: true, standalone: standalone };
+
+      emit({ eligible: true, standalone: standalone });
+      addHeadLinks();
+      listen(g, "beforeinstallprompt", onBeforeInstallPrompt);
+      listen(g, "appinstalled", onAppInstalled);
+      scheduleRegister();
+      return { eligible: true, standalone: standalone };
+    }
+
+    return {
+      start: start,
+      requestInstall: requestInstall,
+      requestReload: requestReload
+    };
+  }
+
+  // 預設實例：建立時只設定區域變數，不呼叫任何瀏覽器 API（LD-2）
+  var instance = create(defaultGlobal);
+
+  return {
+    start: instance.start,
+    requestInstall: instance.requestInstall,
+    requestReload: instance.requestReload,
     create: create
   };
 });
@@ -9769,6 +10533,108 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   };
 })(typeof self !== "undefined" ? self : this);
 
+/* ui/pwa-notice.js */
+/*
+ * ui/pwa-notice.js — PWA 新版提示列（FE-50）
+ * 依據：architecture.md v0.7 §4.7「EMT.ui.pwaNotice」、§7.18.5、§7.18.7；契約 README §10.7 UP-4、UP-6、PWA_TEXTS
+ * 涵蓋：AC-36-03、AC-27-03、AC-31-03、AC-37-01
+ *
+ * EMT.ui.pwaNotice.init({ onReload })
+ * - 只執行一次；取得 #pwa-update（不存在則不做事）。
+ * - 以 core/dom.js 建立文字 <span class="pwa-update__text">（PWA_TEXTS.updateNotice）與
+ *   <button type="button" class="btn btn--primary pwa-update__btn">（PWA_TEXTS.updateButton）。
+ * - 訂閱 store，依 EMT.core.pwa.updateVisible(state)（eligible && updateAvailable）切換容器 hidden；
+ *   init 時也依目前狀態繪製一次。任何進入模式、任何頁面皆可顯示（UP-6）。
+ * - 按鈕點擊 → 設 disabled、呼叫 onReload()（例外攔下）；之後不再呼叫（防連點，UP-4）。
+ * - 純文字、非彈出視窗、不阻擋操作；樣式見 styles/80-pwa.css（無 transition、animation）。
+ * 載入時只做登錄，不操作 DOM、不讀取其他模組（LD-2）。
+ */
+(function (root) {
+  "use strict";
+
+  var EMT = (root.EMT = root.EMT || {});
+  EMT.ui = EMT.ui || {};
+
+  var inited = false;
+  var host = null;
+  var button = null;
+  var clicked = false;
+  var onReloadFn = null;
+
+  /** 取得 core/pwa（呼叫時取用）；不存在時視為組裝錯誤（LD-3） */
+  function pwaCore() {
+    var m = EMT.core && EMT.core.pwa;
+    if (!m) throw new Error("EMT.core.pwa 未載入（ui/pwa-notice.js）");
+    return m;
+  }
+
+  /** 依狀態切換提示列 */
+  function paint(state) {
+    if (!host) return;
+    var visible = false;
+    try {
+      visible = pwaCore().updateVisible(state) === true;
+    } catch (e) {
+      visible = false;
+    }
+    host.hidden = !visible;
+  }
+
+  function onClick() {
+    if (clicked) return;
+    clicked = true;
+    if (button) {
+      button.disabled = true;
+      button.setAttribute("aria-disabled", "true");
+    }
+    if (typeof onReloadFn === "function") {
+      try {
+        onReloadFn();
+      } catch (e) {
+        /* 忽略（PE-3：不顯示錯誤） */
+      }
+    }
+  }
+
+  /**
+   * 啟動時呼叫（main.js，bottomNav.init 之後）。
+   * @param {{ onReload?: function(): void }} [opts]
+   */
+  function init(opts) {
+    if (inited) return;
+    inited = true;
+    host = document.getElementById("pwa-update");
+    if (!host) return;
+    onReloadFn = opts && typeof opts.onReload === "function" ? opts.onReload : null;
+    var dom = EMT.core.dom;
+    var texts = pwaCore().PWA_TEXTS;
+    button = dom.el("button", {
+      className: "btn btn--primary pwa-update__btn",
+      attrs: { type: "button" },
+      text: texts.updateButton,
+      on: { click: onClick }
+    });
+    dom.clear(host);
+    dom.append(host, [
+      dom.el("span", { className: "pwa-update__text", text: texts.updateNotice }),
+      button
+    ]);
+    var store = EMT.store;
+    if (store && typeof store.getState === "function") {
+      paint(store.getState());
+      if (typeof store.subscribe === "function") {
+        store.subscribe(function (state, tags) {
+          if (!tags || tags.indexOf("pwa") !== -1 || tags.indexOf("init") !== -1) paint(state);
+        });
+      }
+    } else {
+      host.hidden = true;
+    }
+  }
+
+  EMT.ui.pwaNotice = { init: init };
+})(typeof self !== "undefined" ? self : this);
+
 /* ui/router.js */
 /*
  * ui/router.js — 頁面登錄與頁籤路由（FE-02）
@@ -10898,13 +11764,21 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *       契約 COLOR_LEVELS、GoalState、SCORE_MIN、SCORE_MAX、SCORE_STEP、N_O；PRD 色級定義表、Q-15、Q-28、Q-32。
  * 涵蓋：AC-01-01～AC-01-03、AC-01-05～AC-01-07、AC-02-01、AC-02-02、AC-02-05～AC-02-10、AC-03-03、AC-22-04、
  *       AC-26-01～AC-26-04、AC-25-06（一般頁）；（FE-32）US-25、AC-25-01～AC-25-03、AC-25-10、AC-25-11、AC-18-02；
- *       （FE-40）US-32、AC-32-01、AC-32-02、AC-32-04、AC-32-08、AC-32-11、AC-01-02、AC-03-05
+ *       （FE-40）US-32、AC-32-01、AC-32-02、AC-32-04、AC-32-08、AC-32-11、AC-01-02、AC-03-05；
+ *       （FE-43，PRD v0.10 R-19、契約 v0.10 §5.9 GS-1～GS-8）AC-26-05、AC-26-06、AC-32-04（取消回原色級）
+ *
+ * （v0.10，FE-43；architecture.md v0.6 §7.17）只選色級、不顯示分數：
+ * - 分數區（滑桿、輸入框、錯誤提示）程式保留（R-19 允許），但建立時即 hidden + inert，任何路徑都不改回可見；
+ *   滑桿與輸入框另加 disabled、tabindex="-1"（不可見、不可聚焦，AC-26-05）
+ * - 卡片不顯示分數範圍；狀態列不顯示「目前目標分數」；目標分數只存在資料中
+ * - 「套用」「開始學習」不讀輸入框，直接以 store 的 draftScore 套用（GS-3、AC-26-06）
  *
  * 版面（掛在 #customizer-goal）：
  * - 狀態列（.cz-status-slot）：「目前目標色級」「目前生效色級」（藍、金套用後生效顯示「綠（內建上限）」）
  * - 色級區：橘、棕、綠、藍、金 5 張大卡片（整張為 <button>，aria-pressed 表示選中）；點擊呼叫 actions.clickColor
- *   選中卡片 = colorOf(draftScore)；分數變更時只切換 aria-pressed 與選中 class，不重建卡片（AC-26-03、AC-22-04）
- * - 分數區：滑桿與數字輸入框雙向同步；每次有效變更呼叫 actions.setDraftScore
+ *   （GS-2：draftScore = 該色 scoreMax）；選中卡片 = colorOf(draftScore)；只切換 aria-pressed 與選中 class，
+ *   不重建卡片（AC-26-03、AC-22-04）
+ * - 分數區（v0.10 隱藏且停用）：滑桿與數字輸入框雙向同步；每次有效變更呼叫 actions.setDraftScore
  * - 試算區：對應色級、建議總字量、每日新字量、預計週數與提示
  * - 「套用」按鈕（.cz-actions）：呼叫 actions.requestApplyGoal（未套用離開頁面不改生效色級）
  *   （v0.5，FE-40；architecture.md §7.15）回 "confirm" 時開初始化確認視窗（EMT.ui.dialog.confirm）：
@@ -10954,10 +11828,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   // ── 畫面文字（PRD 以「」標出者逐字使用）──
   var T = {
     title: "難易度設定",
-    intro: "選擇色級或輸入目標分數即時試算，按「套用」後才會更新單字卡的單字集。",
+    intro: "選擇色級即時試算，按「套用」後才會更新單字卡的單字集。",
     statusTarget: "目前目標色級",
     statusEffective: "目前生效色級",
-    statusScore: "目前目標分數",
     builtinCap: "（內建上限）",
     colorHeading: "色級",
     vocabNote: "本系統建議字量",
@@ -10972,7 +11845,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     scoreInput: "目標分數",
     invalid: "請輸入 10～990 的分數",
     estimateHeading: "試算結果",
-    estColor: "分數對應色級",
+    estColor: "對應色級", // （FE-43／FE-44 修正）不含「分數」字樣
     estTarget: "建議總字量",
     estDaily: "每日新字量",
     estWeeks: "預計週數",
@@ -10996,8 +11869,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     unknown: "—",
     wordsUnit: " 字",
     dailyUnit: " 字/天",
-    weeksUnit: " 週",
-    scoreUnit: " 分"
+    weeksUnit: " 週"
   };
 
   // ── 純函式（不碰 DOM）──
@@ -11038,6 +11910,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   /**
    * 5 張色級卡片的顯示模型（AC-01-01、AC-26-01、AC-26-03）。順序同契約 COLOR_LEVELS（橘、棕、綠、藍、金）。
+   * - （v0.10，AC-26-05）不含分數範圍（scoreMin／scoreMax 不顯示）
    * - 內建字數：橘 nO、棕 nB、綠 nG 的實際數字（非正數視為資料缺漏，顯示「—」）；藍、金「待定」
    * - 每日新字量：取自 core/goal.js dailyNewWords（橘 10、棕 10、綠 15、藍金 20）；藍、金加註「僅供試算」
    * - 選中：colorOf(draftScore)；分數無效時沒有卡片選中
@@ -11045,7 +11918,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * @param {number} nB 棕色建議字量（實際資料計算）
    * @param {number} nG 綠色建議字量（實際資料計算）
    * @param {number} draftScore 目前草稿分數
-   * @returns {Array<{id: string, name: string, range: string, vocab: string, vocabNote: string, daily: string,
+   * @returns {Array<{id: string, name: string, vocab: string, vocabNote: string, daily: string,
    *          dailyNote: string, scenario: string, locked: boolean, badge: string, selected: boolean}>}
    */
   function cardModels(nO, nB, nG, draftScore) {
@@ -11066,7 +11939,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       return {
         id: level.id,
         name: level.nameZh,
-        range: level.scoreMin + "～" + level.scoreMax + T.scoreUnit,
         vocab: vocab,
         vocabNote: T.vocabNote,
         daily: daily === null ? T.unknown : formatInt(daily) + T.dailyUnit,
@@ -11109,10 +11981,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
-   * 狀態列文字（AC-01-02、AC-01-06、AC-01-07）。
+   * 狀態列文字（AC-01-02、AC-01-06、AC-01-07）。（v0.10，AC-26-05 (b)）不含目標分數。
    * @param {object} G core/goal.js
-   * @param {{appliedScore: number, appliedColor: string, effectiveColor: string}} goal
-   * @returns {{target: string, effective: string, score: string, greenCap: boolean}}
+   * @param {{appliedColor: string, effectiveColor: string}} goal
+   * @returns {{target: string, effective: string, greenCap: boolean}}
    */
   function statusTexts(G, goal) {
     var applied = goal && goal.appliedColor;
@@ -11123,7 +11995,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return {
       target: lvApplied ? lvApplied.nameZh : T.unknown,
       effective: lvEff ? (capped ? lvEff.nameZh + T.builtinCap : lvEff.nameZh) : T.unknown,
-      score: goal && typeof goal.appliedScore === "number" ? String(goal.appliedScore) : T.unknown,
       greenCap: capped
     };
   }
@@ -11261,7 +12132,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         on: { click: function () { onColorClick(m.id); } }
       }, [
         D.el("span", { className: "cz-color__head" }, head),
-        D.el("span", { className: "cz-color__range", text: m.range }),
         D.el("span", { className: "cz-color__vocab" }, [
           D.el("span", { text: T.vocabLabel + "：" }),
           D.el("strong", { text: m.vocab }),
@@ -11279,16 +12149,18 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var ct = content();
       var levels = cardModels(C.N_O, ct.nB, ct.nG, goalState().draftScore).map(buildColorCard);
 
+      // （v0.10，AC-26-05）滑桿與輸入框停用（disabled）且移出 Tab 順序（tabindex="-1"）：
+      // 即使日後 CSS 誤改分數區的 display，也無法聚焦或輸入（architecture.md §7.17 三重保證之 (3)）
       var slider = D.el("input", {
         className: "cz-score__range",
         attrs: { type: "range", id: "cz-score-range", min: String(C.SCORE_MIN), max: String(C.SCORE_MAX),
-          step: String(C.SCORE_STEP), "aria-label": T.scoreSlider },
+          step: String(C.SCORE_STEP), "aria-label": T.scoreSlider, disabled: true, tabindex: "-1" },
         on: { input: onSliderInput, change: onSliderInput }
       });
       var input = D.el("input", {
         className: "cz-score__input",
         attrs: { type: "text", id: "cz-score-input", inputmode: "numeric", autocomplete: "off",
-          "aria-describedby": "cz-score-error", maxlength: "10" },
+          "aria-describedby": "cz-score-error", maxlength: "10", disabled: true, tabindex: "-1" },
         on: { input: onNumberInput, change: onNumberCommit, blur: onNumberCommit }
       });
       var error = D.el("p", { className: "field__error cz-score__error", attrs: { id: "cz-score-error", role: "alert" } });
@@ -11323,8 +12195,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var status = D.el("section", { className: "card cz-status", attrs: { "aria-label": "目前目標狀態" } }, [
         D.el("dl", { className: "cz-rows cz-rows--status" }, [
           row(T.statusTarget, "stTarget", "cz-st-target"),
-          row(T.statusEffective, "stEffective", "cz-st-effective"),
-          row(T.statusScore, "stScore", "cz-st-score")
+          row(T.statusEffective, "stEffective", "cz-st-effective")
         ]),
         statusCap
       ]);
@@ -11337,6 +12208,22 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       refs.guide = D.el("p", { className: "cz-guide", attrs: { id: "cz-guide" }, text: T.firstRunGuide });
       refs.intro = D.el("p", { className: "cz-intro", text: T.intro });
 
+      // （v0.10，FE-43；GS-6、AC-26-05）分數區程式保留，但建立時即 hidden + inert；之後任何路徑都不改回可見。
+      // 錯誤提示 #cz-score-error 在此區內，輸入元件停用後也不會再觸發
+      var scoreSection = D.el("section", { className: "card cz-score", attrs: { "aria-labelledby": "cz-score-title", inert: "" } }, [
+        D.el("h3", { className: "cz-heading", attrs: { id: "cz-score-title" }, text: T.scoreHeading }),
+        D.el("div", { className: "cz-score__controls" }, [
+          slider,
+          D.el("div", { className: "field cz-score__field" }, [
+            D.el("label", { className: "field__label", attrs: { "for": "cz-score-input" }, text: T.scoreInput + "（" + C.SCORE_MIN + "～" + C.SCORE_MAX + "）" }),
+            input
+          ])
+        ]),
+        error
+      ]);
+      scoreSection.hidden = true;
+      refs.scoreSection = scoreSection;
+
       var page = D.el("div", { className: "cz" }, [
         D.el("h2", { className: "cz-title", text: T.title }),
         refs.guide,
@@ -11346,17 +12233,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           D.el("h3", { className: "cz-heading", attrs: { id: "cz-colors-title" }, text: T.colorHeading }),
           D.el("div", { className: "cz-colors" }, levels)
         ]),
-        D.el("section", { className: "card cz-score", attrs: { "aria-labelledby": "cz-score-title" } }, [
-          D.el("h3", { className: "cz-heading", attrs: { id: "cz-score-title" }, text: T.scoreHeading }),
-          D.el("div", { className: "cz-score__controls" }, [
-            slider,
-            D.el("div", { className: "field cz-score__field" }, [
-              D.el("label", { className: "field__label", attrs: { "for": "cz-score-input" }, text: T.scoreInput + "（" + C.SCORE_MIN + "～" + C.SCORE_MAX + "）" }),
-              input
-            ])
-          ]),
-          error
-        ]),
+        scoreSection,
         estimate,
         // 按鈕區內容依進入模式建立（renderMode）
         refs.actions = D.el("div", { className: "btn-row cz-actions" })
@@ -11445,12 +12322,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       refs.intro.hidden = !m.showIntro;
     }
 
-    /** 狀態列：目前目標色級、目前生效色級 */
+    /** 狀態列：目前目標色級、目前生效色級（v0.10 不顯示目標分數） */
     function renderStatus() {
       var t = statusTexts(G, goalState());
       D.setText(refs.stTarget, t.target);
       D.setText(refs.stEffective, t.effective);
-      D.setText(refs.stScore, t.score);
       refs.statusCap.hidden = !t.greenCap;
     }
 
@@ -11470,7 +12346,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       refs.input.setAttribute("aria-invalid", "true");
     }
 
-    /** 依 store 的 draftScore 同步滑桿、輸入框與試算區 */
+    /** 依 store 的 draftScore 同步滑桿、輸入框（v0.10 已隱藏，同步無害）、試算區與選中卡片 */
     function syncDraft() {
       var score = goalState().draftScore;
       refs.slider.value = String(score);
@@ -11521,7 +12397,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       // 無效值保留原字與提示，讓使用者修正；試算維持上一個有效值
     }
 
-    /** 色級卡片（Q-32：已在範圍內不變，否則設為下限；藍、金不阻擋，AC-01-07） */
+    /**
+     * 色級卡片（v0.10，GS-2：draftScore = 該色 scoreMax；藍、金不阻擋，AC-01-07）。
+     * 在 handler 內同步完成 clickColor → renderEstimate，只改既有節點文字與 aria-pressed，不重建 DOM（AC-22-04）。
+     */
     function onColorClick(colorId) {
       typing = false;
       act(function (a) { a.clickColor(colorId); });
@@ -11535,7 +12414,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
     }
 
-    /** 依 store 同步分數區、試算、卡片選中與狀態列（AC-32-04：輸入框、滑桿也回到 draftScore） */
+    /** 依 store 同步分數區、試算、卡片選中與狀態列（AC-32-04、GS-8：取消後選中卡片回到 Color(appliedScore)） */
     function syncAll() {
       typing = false;
       syncDraft();
@@ -11545,19 +12424,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     /**
      * 套用（AC-01-02、AC-01-07；v0.5 FE-40：AC-32-01、AC-32-04、AC-32-05～AC-32-07）。
      * 一律經 requestApplyGoal；需要初始化時先開確認視窗（architecture.md §7.15 流程）。
+     * （v0.10，GS-3、AC-26-06）不讀隱藏的輸入框：直接以 store 的 draftScore 套用（未點卡片時即為原值）。
      */
     function onApply() {
       typing = false;
       if (pending) { return; }   // 視窗開啟中再按忽略（背景本已被遮罩攔截，此為保險）
-      // 輸入框若有尚未修正的有效值，套用前先寫入
-      var r = G.parseScoreInput(refs.input.value);
-      var res = act(function (a) {
-        if (r.ok) { a.setDraftScore(r.score); }
-        return a.requestApplyGoal();
-      });
+      var res = act(function (a) { return a.requestApplyGoal(); });
       var status = res && res.status;
       if (status === "confirm") {
-        // 尚未改任何狀態（CI-10）；分數區顯示使用者選的分數直到視窗關閉
+        // 尚未改任何狀態（CI-10）；選中卡片維持使用者選的色級直到視窗關閉
         syncDraft();
         openReinitDialog();
         return;
@@ -11610,12 +12485,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       });
     }
 
-    /** （FE-32）首次畫面「開始學習」（AC-25-02、AC-25-03、AC-18-02；契約 FS-4） */
+    /**
+     * （FE-32）首次畫面「開始學習」（AC-25-02、AC-25-03、AC-18-02；契約 FS-4）。
+     * （v0.10，GS-3）不讀隱藏的輸入框，直接以 store 的 draftScore 開始。
+     */
     function onStartLearning() {
       typing = false;
-      // 輸入框若有尚未修正的有效值，先寫入 draftScore（同「套用」）
-      var r = G.parseScoreInput(refs.input.value);
-      if (r.ok) { act(function (a) { a.setDraftScore(r.score); }); }
       // 不包在 act 內：store 以 "entry"、"goal" tag 通知，本頁切回一般模式、router 切到主控台
       var a = store().actions;
       if (a && typeof a.startLearning === "function") { a.startLearning(); }
@@ -11748,10 +12623,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   顯示值全部由純函式 progressModel(state, today) 計算，view 只依模型繪製；
  *   環形以內嵌 SVG（core/dom.js 的 svg()）繪製，長條以 div 繪製，文字一律 textContent。
  * - 統計區：連續打卡天數、單字掌握數、模擬測驗正確率（訂閱 store，只重繪本區）。
- * - 目標區：目前目標分數、目前目標色級、目前生效色級、每日新字量（顯示頁面與匯入成功時更新）。
+ * - 目標區：目前目標色級、目前生效色級、每日新字量（顯示頁面與匯入成功時更新）。
+ *   （v0.10，FE-43；PRD R-19、AC-17-06、AC-26-05 (c)）不顯示目標分數；色級仍由 appliedScore 推導。
  * - 入口：導覽模組（NAV_TAB_ORDER 去掉 dashboard）與「資料來源與授權」，以 data-go 交給 router 切換。
  *   （v0.5，FE-38）入口由 NAV_TAB_ORDER 推導，不含隱藏頁（AC-17-06、AC-20-04、契約 §5.8 HT-2）。
  * - 備份：匯出（store.actions.exportBackup → services/download）、匯入（FileReader → store.actions.importBackup）。
+ *   （v0.11，FE-51；architecture §4.7、§7.18.6、§7.18.7）按鈕列之後依序：
+ *   p.dash-backup__origin（PWA_TEXTS.backupOriginNotice，常駐，不看 eligible／storageStatus；NT-1、AC-24-12）、
+ *   div.dash-backup__install（EMT.core.pwa.installVisible 成立時只含 1 個「安裝 App」按鈕，不成立時 hidden 且無子節點；IN-1）。
+ *   按下 → EMT.services.pwa.requestInstall()（呼叫時取用；不存在時不做事）；不自動 prompt、不做安裝橫幅或 iOS 說明（IN-4）。
+ *   訂閱回呼收到 "pwa"（及 "tab"、"entry"）tag 時、show() 時重繪安裝區。
  * 所有文字以 textContent 呈現（經 core/dom.js）。
  *
  * 寫法：純邏輯（summaryOf、goalInfoOf、importMessage、progressModel、ringGeometry）以 module.exports 匯出供 Node 測試；
@@ -11789,6 +12670,30 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return coreCache;
   }
 
+  /** （v0.11，FE-51）取得 core/pwa（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function pwaCore() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../core/pwa.js");
+    } else {
+      m = root.EMT && root.EMT.core && root.EMT.core.pwa;
+    }
+    if (!m) throw new Error("EMT.core.pwa 未載入（views/dashboard.js）");
+    return m;
+  }
+
+  /** （v0.11，FE-51）會影響「安裝 App」按鈕顯示條件（IN-1）的 tags */
+  var INSTALL_TAGS = ["pwa", "tab", "entry", "init"];
+
+  /** tags 是否含會影響安裝按鈕的項目；tags 缺漏時視為需要重繪 */
+  function installAffected(tags) {
+    if (!Array.isArray(tags)) return true;
+    for (var i = 0; i < tags.length; i++) {
+      if (INSTALL_TAGS.indexOf(tags[i]) !== -1) return true;
+    }
+    return false;
+  }
+
   // ── 畫面文字（AC 引號內文案逐字使用）──
   var TEXT = {
     title: "學習主控台",
@@ -11797,7 +12702,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     mastered: "單字掌握數",
     accuracy: "模擬測驗正確率",
     goalTitle: "目前目標",
-    appliedScore: "目前目標分數",
     appliedColor: "目前目標色級",
     effectiveColor: "目前生效色級",
     daily: "每日新字量",
@@ -11896,8 +12800,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * 目標區顯示文字（AC-17-06、AC-01-07）。
    * 目標色級為藍、金時，生效色級顯示「綠（內建上限）」；其餘兩者相同。
    * 每日新字量取生效色級的 dailyNewWords（藍、金顯示綠的 15）。
+   * （v0.10）回傳不含 appliedScore（目標分數只存在資料中，畫面不顯示）。
    * @param {object|null} goal GoalState
-   * @returns {{ appliedScore: string, appliedColor: string, appliedColorId: (string|null),
+   * @returns {{ appliedColor: string, appliedColorId: (string|null),
    *             effectiveColor: string, effectiveColorId: (string|null), daily: string }}
    */
   function goalInfoOf(goal) {
@@ -11918,7 +12823,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     // 每日新字量依「生效色級」顯示（人類決議 R6-2，2026-10-30）：藍、金生效為綠 → 15
     var daily = effective && typeof effective.dailyNewWords === "number" ? effective.dailyNewWords : null;
     return {
-      appliedScore: score !== null ? String(score) : TEXT.empty,
       appliedColor: applied ? applied.nameZh : TEXT.empty,
       appliedColorId: applied ? applied.id : null,
       effectiveColor: effectiveText,
@@ -12318,7 +13222,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var D = dom();
       var data = currentData();
       var info = goalInfoOf(data ? data.goal : null);
-      D.setText(refs.score, info.appliedScore);
       D.setText(refs.appliedColor, info.appliedColor);
       D.setText(refs.effectiveColor, info.effectiveColor);
       D.setText(refs.daily, info.daily);
@@ -12413,6 +13316,39 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
     }
 
+    /** （v0.11，FE-51）「安裝 App」：交給 services/pwa（IN-5）；Promise 錯誤靜默、不顯示任何訊息 */
+    function onInstallClick() {
+      var svc = EMT.services && EMT.services.pwa;
+      if (!svc || typeof svc.requestInstall !== "function") return;
+      try {
+        var p = svc.requestInstall();
+        if (p && typeof p.then === "function") p.then(null, function () {});
+      } catch (e) {
+        // 靜默（PE-3）
+      }
+    }
+
+    /** （v0.11，FE-51）依 IN-1 重繪安裝區：成立時恰 1 個按鈕；不成立時 hidden 且無子節點（不佔版面） */
+    function renderInstall() {
+      if (!refs || !refs.installBox) return;
+      var box = refs.installBox;
+      var visible = pwaCore().installVisible(currentState()) === true;
+      if (!visible) {
+        dom().clear(box);
+        box.hidden = true;
+        return;
+      }
+      if (!box.firstChild) {
+        box.appendChild(dom().el("button", {
+          className: "btn btn--secondary dash-install",
+          attrs: { type: "button", "data-action": "install-app" },
+          text: pwaCore().PWA_TEXTS.installButton,
+          on: { click: onInstallClick }
+        }));
+      }
+      box.hidden = false;
+    }
+
     function onImportClick() {
       if (busy || !refs) return;
       refs.fileInput.click();
@@ -12426,7 +13362,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var ma = statItem(TEXT.mastered);
       var ac = statItem(TEXT.accuracy);
 
-      var score = statItem(TEXT.appliedScore);
       var applied = statItem(TEXT.appliedColor, "dash-color");
       var effective = statItem(TEXT.effectiveColor, "dash-color");
       var daily = statItem(TEXT.daily);
@@ -12458,6 +13393,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         on: { click: onImportClick }
       });
 
+      // （v0.11，FE-51）安裝區（IN-1）；內容由 renderInstall 依狀態增刪
+      var installBox = D.el("div", { className: "dash-backup__install", attrs: { hidden: true } });
+
       var progress = buildProgress();
 
       var page = D.el("div", { className: "dashboard" }, [
@@ -12469,7 +13407,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         ]),
         D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-goal-h" } }, [
           D.el("h3", { className: "dash-section__title", attrs: { id: "dash-goal-h" }, text: TEXT.goalTitle }),
-          D.el("div", { className: "dash-stats dash-stats--goal" }, [score.item, applied.item, effective.item, daily.item])
+          D.el("div", { className: "dash-stats dash-stats--goal" }, [applied.item, effective.item, daily.item])
         ]),
         D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-entries-h" } }, [
           D.el("h3", { className: "dash-section__title", attrs: { id: "dash-entries-h" }, text: TEXT.entriesTitle }),
@@ -12479,6 +13417,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           D.el("h3", { className: "dash-section__title", attrs: { id: "dash-backup-h" }, text: TEXT.backupTitle }),
           D.el("p", { className: "dash-backup__hint", text: TEXT.backupHint }),
           D.el("div", { className: "btn-row" }, [exportBtn, importBtn]),
+          // （v0.11，FE-51）NT-1：按鈕列的下一個兄弟節點，常駐（AC-24-12）
+          D.el("p", { className: "dash-backup__origin", text: pwaCore().PWA_TEXTS.backupOriginNotice }),
+          installBox,
           fileInput
         ])
       ]);
@@ -12488,19 +13429,20 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         streak: st.value,
         mastered: ma.value,
         accuracy: ac.value,
-        score: score.value,
         appliedColor: applied.value,
         effectiveColor: effective.value,
         daily: daily.value,
         exportBtn: exportBtn,
         importBtn: importBtn,
-        fileInput: fileInput
+        fileInput: fileInput,
+        installBox: installBox
       };
 
       // 先在未掛上文件前繪製初值：進度圈不會從空環播放 transition（只在數值改變時播放，§7.11）
       renderProgress();
       renderStats();
       renderGoal();
+      renderInstall();
 
       D.clear(rootEl);
       rootEl.appendChild(page);
@@ -12511,6 +13453,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         unsubscribe = s.subscribe(function (state, tags) {
           renderStats();
           if (progressAffected(tags)) renderProgress();
+          if (installAffected(tags)) renderInstall();
         });
       }
     }
@@ -12520,6 +13463,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       renderProgress();
       renderStats();
       renderGoal();
+      renderInstall();
     }
 
     function hide() {
@@ -12540,6 +13484,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     ringGeometry: ringGeometry,
     PROGRESS_TAGS: PROGRESS_TAGS,
     progressAffected: progressAffected,
+    INSTALL_TAGS: INSTALL_TAGS,
+    installAffected: installAffected,
     createView: createView
   };
 });
@@ -13923,7 +14869,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
     ui.empty = el("div", { className: "card fc-empty", attrs: { hidden: true } }, [
       el("p", { className: "fc-empty__msg", text: "目前單字集是空的，沒有可以顯示的單字卡。" }),
-      el("p", { className: "fc-empty__hint", text: "請到難易度設定套用目標分數，或新增自訂單字、注入領域範本。" }),
+      // （v0.10，FE-43；AC-06-06、R-19）提示不再提及目標分數：畫面只選色級
+      el("p", { className: "fc-empty__hint", text: "請到難易度設定選擇色級並按「套用」，或新增自訂單字、注入領域範本。" }),
       el("button", {
         className: "btn btn--primary fc-empty__go",
         text: "前往難易度設定",
@@ -15512,7 +16459,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - ECDICT 的 copyrightNotice、licenseText 以 <details> 可摺疊、textContent 顯示（FB-21、L-5）。
  * - 所有文字經 EMT.core.dom（textContent）寫入，不解析 HTML（契約 C-7）。
  *
- * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution）可在 Node 測試；
+ * - （v0.11，FE-52）授權聲明清單在既有 3 條之後加「PWA 圖示與名稱」品牌標識聲明（AC-23-02、Q-48）；
+ *   名稱於 render 時取 EMT.core.pwa.PWA_APP_NAME（LD-2；不存在依 LD-3 丟出錯誤），著作權人取 PROJECT_LICENSE.copyrightHolder。
+ *
+ * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution、brandStatement）可在 Node 測試；
  * 瀏覽器下登錄 EMT.views.register("sources", { mount })。
  */
 (function (root, factory) {
@@ -15680,6 +16630,29 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       "；修改者 " + who + "。";
   }
 
+  /**
+   * （v0.11，FE-52）PWA 圖示與名稱的品牌標識聲明（AC-23-02、AC-23-06、Q-48）。
+   * @param {string} appName PWA_APP_NAME
+   * @param {string} holder 著作權人（PROJECT_LICENSE.copyrightHolder；缺漏時用保底值）
+   * @returns {string}
+   */
+  function brandStatement(appName, holder) {
+    var who = isText(holder) ? holder : LICENSE_FALLBACK.copyrightHolder;
+    return "PWA 圖示與名稱「" + appName + "」為品牌標識，著作權人 " + who + "，保留所有權利，不適用 MIT 與 CC BY-SA 4.0";
+  }
+
+  /** （v0.11）取得 core/pwa（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function pwaCore() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../core/pwa.js");
+    } else {
+      m = root.EMT && root.EMT.core && root.EMT.core.pwa;
+    }
+    if (!m) { throw new Error("EMT.core.pwa 未載入（views/sources-page.js）"); }
+    return m;
+  }
+
   // ─────────────────────────────────────────────────────────────
   // 畫面
   // ─────────────────────────────────────────────────────────────
@@ -15767,7 +16740,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       dom.el("ul", { className: "src-statements" }, [
         dom.el("li", { text: TEXT.codeLicense }),
         dom.el("li", { text: TEXT.dataLicense }),
-        dom.el("li", { text: TEXT.originalLicense })
+        dom.el("li", { text: TEXT.originalLicense }),
+        dom.el("li", { className: "src-statements__brand", text: brandStatement(pwaCore().PWA_APP_NAME, holder) })
       ]),
       dom.el("p", { className: "src-attrib", text: derivedAttribution(wordlists, holder) }),
       dom.el("dl", { className: "src-fields" }, [
@@ -15815,6 +16789,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     formatCount: formatCount,
     countLabel: countLabel,
     derivedAttribution: derivedAttribution,
+    brandStatement: brandStatement,
     render: render,
     mount: mount
   };
@@ -16724,6 +17699,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   → document.body.dataset.entry = runtime.entryMode（v0.4，FE-32；store 不存在時 "main"）
  *   → EMT.router.start(firstRun ? "customizer" : "dashboard")（v0.4，FE-32；AC-25-01、AC-25-05）
  *   → EMT.ui.bottomNav.init()（v0.4，FE-26）
+ * （v0.7，FE-50）banner.render 之後 EMT.services.pwa.start({ onChange → store.actions.setPwa })（PE-1 判定；file:// 只判定即返回，
+ *   service worker 延到 window load 後註冊，PE-4）；bottomNav.init 之後 EMT.ui.pwaNotice.init({ onReload → services.pwa.requestReload })。
  * emt-ready 位置不變：一般模式量到主控台入口可點擊，首次模式量到「開始學習」可點擊（AC-22-05）。
  * 最後 performance.mark("emt-ready")，並設 document.documentElement.dataset.ready = "1"。
  */
@@ -16771,6 +17748,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     step("banner.render", function () {
       if (EMT.ui && EMT.ui.banner && typeof EMT.ui.banner.render === "function") EMT.ui.banner.render();
     });
+    // （v0.7，FE-50）PWA：PE-1 判定、動態連結、安裝事件；狀態經 store.actions.setPwa 寫入 runtime.pwa（不寫 localStorage）
+    step("pwa.start", function () {
+      if (EMT.services && EMT.services.pwa && typeof EMT.services.pwa.start === "function") {
+        EMT.services.pwa.start({
+          onChange: function (p) {
+            if (EMT.store && EMT.store.actions && typeof EMT.store.actions.setPwa === "function") EMT.store.actions.setPwa(p);
+          }
+        });
+      }
+    });
     // （v0.4，FE-32）設定 body[data-entry]，CSS 據此隱藏首次模式的導覽列（§7.9）；須在 router.start 之前，
     // router.go 依此限制首次模式只能到 customizer、sources
     var entryMode = entryModeOf();
@@ -16785,6 +17772,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     // （v0.4，FE-26）手機底部導覽列：輸入時隱藏（architecture.md §4.2 v0.4 啟動順序、§4.5）
     step("bottomNav.init", function () {
       if (EMT.ui && EMT.ui.bottomNav && typeof EMT.ui.bottomNav.init === "function") EMT.ui.bottomNav.init();
+    });
+    // （v0.7，FE-50）新版提示列（UP-4、UP-6）
+    step("pwaNotice.init", function () {
+      if (EMT.ui && EMT.ui.pwaNotice && typeof EMT.ui.pwaNotice.init === "function") {
+        EMT.ui.pwaNotice.init({
+          onReload: function () {
+            if (EMT.services && EMT.services.pwa && typeof EMT.services.pwa.requestReload === "function") EMT.services.pwa.requestReload();
+          }
+        });
+      }
     });
 
     step("emt-ready", function () {

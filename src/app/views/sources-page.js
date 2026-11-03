@@ -13,7 +13,10 @@
  * - ECDICT 的 copyrightNotice、licenseText 以 <details> 可摺疊、textContent 顯示（FB-21、L-5）。
  * - 所有文字經 EMT.core.dom（textContent）寫入，不解析 HTML（契約 C-7）。
  *
- * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution）可在 Node 測試；
+ * - （v0.11，FE-52）授權聲明清單在既有 3 條之後加「PWA 圖示與名稱」品牌標識聲明（AC-23-02、Q-48）；
+ *   名稱於 render 時取 EMT.core.pwa.PWA_APP_NAME（LD-2；不存在依 LD-3 丟出錯誤），著作權人取 PROJECT_LICENSE.copyrightHolder。
+ *
+ * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution、brandStatement）可在 Node 測試；
  * 瀏覽器下登錄 EMT.views.register("sources", { mount })。
  */
 (function (root, factory) {
@@ -181,6 +184,29 @@
       "；修改者 " + who + "。";
   }
 
+  /**
+   * （v0.11，FE-52）PWA 圖示與名稱的品牌標識聲明（AC-23-02、AC-23-06、Q-48）。
+   * @param {string} appName PWA_APP_NAME
+   * @param {string} holder 著作權人（PROJECT_LICENSE.copyrightHolder；缺漏時用保底值）
+   * @returns {string}
+   */
+  function brandStatement(appName, holder) {
+    var who = isText(holder) ? holder : LICENSE_FALLBACK.copyrightHolder;
+    return "PWA 圖示與名稱「" + appName + "」為品牌標識，著作權人 " + who + "，保留所有權利，不適用 MIT 與 CC BY-SA 4.0";
+  }
+
+  /** （v0.11）取得 core/pwa（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function pwaCore() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../core/pwa.js");
+    } else {
+      m = root.EMT && root.EMT.core && root.EMT.core.pwa;
+    }
+    if (!m) { throw new Error("EMT.core.pwa 未載入（views/sources-page.js）"); }
+    return m;
+  }
+
   // ─────────────────────────────────────────────────────────────
   // 畫面
   // ─────────────────────────────────────────────────────────────
@@ -268,7 +294,8 @@
       dom.el("ul", { className: "src-statements" }, [
         dom.el("li", { text: TEXT.codeLicense }),
         dom.el("li", { text: TEXT.dataLicense }),
-        dom.el("li", { text: TEXT.originalLicense })
+        dom.el("li", { text: TEXT.originalLicense }),
+        dom.el("li", { className: "src-statements__brand", text: brandStatement(pwaCore().PWA_APP_NAME, holder) })
       ]),
       dom.el("p", { className: "src-attrib", text: derivedAttribution(wordlists, holder) }),
       dom.el("dl", { className: "src-fields" }, [
@@ -316,6 +343,7 @@
     formatCount: formatCount,
     countLabel: countLabel,
     derivedAttribution: derivedAttribution,
+    brandStatement: brandStatement,
     render: render,
     mount: mount
   };

@@ -1,16 +1,177 @@
 [
-  { "suite": "qa-review", "tc": "TC-D18", "ac": "AC-23-02、AC-23-03（architecture §8.4 紀錄完整性、契約 V-VOC-09／V-VOC-17）", "result": "通過", "note": "tests/data/records-check.mjs 比對 validate.mjs --all --max 100000 全量輸出：V-VOC-17 警告 8 筆、V-VOC-17 清單 179 筆、H-1W 0 筆、V-VOC-09 原創原因 40 筆，_records 缺列 0。QA 逐筆檢視 187 筆上下文用詞的最終 meaning：program/application/driver/script → 程式、file/archive → 檔案、procedure → 程序、quality → 品質、mass → 質量（物理）、level → 水準、menu →（電腦）選單、subway → 地鐵；捷運，皆符合 M-3 台灣用法，判斷錯誤 0" },
-  { "suite": "qa-review", "tc": "TC-D19", "ac": "AC-23-03（契約 V-VOC-18、architecture §8.4 QA 抽查）", "result": "通過", "note": "sample.mjs --ratio 0.05 --min 20 --seed <起始排名+1000> --ecdict-only，15 個分檔共抽 301 筆（vocab-2401 21 筆，其餘各 20 筆），QA 逐筆對照 ecdict_subset_zhtw.csv：簡體或大陸用語 0、新增義項 0、pos 與釋義不一致 0、英式音標 0；各分檔不合格率 0%（門檻 > 5% 退回）。觀察：brake 由 _zhtw「剎車」改為台灣慣用「煞車」、mower 由「刈草機」改為「割草機」，屬 M-3 用詞還原，視為有對應" },
-  { "suite": "qa-review", "tc": "TC-D20", "ac": "AC-11-01（契約 V-P5-05 正解唯一性，architecture §10 建議每題型 10 題）", "result": "通過", "note": "固定種子 20261030 每題型抽 10 題共 40 題（p5-021、029、045、117、129、137、157、161、165、181、014、038、046、078、098、122、162、170、178、194、011、015、027、039、055、135、139、147、163、187、052、068、080、096、112、136、160、168、184、200），QA 逐題判斷：正解唯一且與 correctIndex 一致 40/40" },
-  { "suite": "qa-review", "tc": "TC-B01", "ac": "（越界檢查）", "result": "通過", "note": "tests/static/boundary-check.mjs：專案 168 個檔案中，屬於某任務 paths 120 個、人類／上游文件 34 個、QA tests/ 14 個，不屬於任何任務 0 個；src/app/styles/90-overrides.css 列於 FE-18 paths 但未建立（依 §3「只在發現問題才寫」，非缺陷）" },
-  { "suite": "qa-review", "tc": "TC-B02", "ac": "（越界檢查：sources/、english_master_track.md、docs/）", "result": "通過", "note": "english_master_track.md 最後修改 2026-10-29 14:02；sources/ 全部檔案最後修改 ≤ 2026-10-30 10:06，早於任何 src/ 檔案（最早 10:41）；ecdict_subset*.csv 各 5,616 列、missing 4 行，與 SOURCE.txt 及契約 §3.2 紀錄一致；QA 依字表獨立重算 N_B=2,809、N_G=5,620 與契約一致。docs/ 於實作期間的修改皆為 PRD v0.7（pm-agent）、契約 v0.7（sa-agent）、architecture v0.3（sd-agent）、tasks.json（主控）之版本紀錄，未發現 PG 修改" },
-  { "suite": "qa-review", "tc": "TC-X-edge", "ac": "AC-19-02（Chrome／Edge）跨瀏覽器冒煙", "result": "通過", "note": "以 Microsoft Edge（headless）重跑套件 e2e-goal 全部 25 個 TC：25 通過，結果見 tests/results/e2e-goal-edge.json" },
-  { "suite": "manual", "tc": "TC-M01", "ac": "AC-08-01、AC-08-09、AC-08-13、AC-08-14、AC-21-01", "result": "待人工", "note": "真實麥克風辨識與權限流程" },
-  { "suite": "manual", "tc": "TC-M02", "ac": "AC-07-01～AC-07-05", "result": "待人工", "note": "真實 TTS 語音" },
-  { "suite": "manual", "tc": "TC-M03", "ac": "AC-19-02", "result": "待人工", "note": "實際斷網以 file:// 開啟" },
-  { "suite": "manual", "tc": "TC-M04", "ac": "AC-19-03、AC-18-01", "result": "待人工", "note": "雙擊開啟、關閉分頁後重開" },
-  { "suite": "manual", "tc": "TC-M05", "ac": "AC-20-01～AC-20-03", "result": "待人工", "note": "Android Chrome 實機觸控" },
-  { "suite": "manual", "tc": "TC-M06", "ac": "AC-24-01、AC-24-03", "result": "待人工", "note": "跨裝置匯出匯入" },
-  { "suite": "manual", "tc": "TC-M07", "ac": "AC-22-01～AC-22-05、AC-02-07、AC-16-01", "result": "待人工", "note": "基準環境效能量測" },
-  { "suite": "manual", "tc": "TC-M08", "ac": "AC-23-04", "result": "待人工", "note": "原創性 20 筆精確片語搜尋" }
+  {
+    "suite": "qa-review",
+    "tc": "TC-D18",
+    "ac": "AC-23-02、AC-23-03（architecture §8.4 紀錄完整性）",
+    "result": "通過",
+    "note": "沿用第 1 輪逐筆判讀（V-VOC-17 187 筆、V-VOC-09 原創原因 40 筆、_records 缺列 0）。src/data 自 2026-10-30 12:15 起未修改（第 4 輪確認），records-check 本輪重跑通過"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-D19",
+    "ac": "AC-23-03（V-VOC-18 抽查）",
+    "result": "通過",
+    "note": "沿用第 1 輪抽查 301 筆、不合格 0；資料未修改"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-D20",
+    "ac": "AC-11-01（V-P5-05 正解唯一性）",
+    "result": "通過",
+    "note": "沿用第 1 輪 40 題全數正確；資料未修改"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-B01",
+    "ac": "（越界檢查：檔案歸屬）",
+    "result": "通過",
+    "note": "boundary-check：屬於任務 158、人類／上游文件 41、QA tests/ 49、人類自放或主控授權（非 PG）10［.gitattributes、.github/workflows/static.yml、.gitignore、dist/ads.txt、LICENSE、package-lock.json、src/app/assets/icons/apple-touch-icon-180.png、src/app/assets/icons/icon-192.png、src/app/assets/icons/icon-512.png、src/app/assets/icons/icon-maskable-512.png］、不屬於任何任務 0；任務 paths 中不存在 src/app/styles/90-overrides.css（90-overrides.css 只在發現問題時才寫，非缺陷）"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-B02",
+    "ac": "（越界檢查：sources/、english_master_track.md、docs/、src/data/）",
+    "result": "通過",
+    "note": "english_master_track.md 最後修改 2026-10-29 14:02；src/data/ 最後修改 2026-10-30 12:15（本輪未修改）；sources/ 本輪新增 deploy/ads.txt、pwa/PWA_Icon.jpg、pwa/README.md（主控放置，授權例外 SD-FB-33）；docs/ 本輪修改只有 PRD v0.11、契約 v0.11 三檔、architecture v0.7、tasks.json（上游代理與主控，核准欄位與變更紀錄由主控填寫）與 docs/04-qa（QA）；bug-reports 未被 PG 修改；tests/ 自第 3 輪結束（2026-11-02 15:37）至本輪開始無他人修改"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-B03",
+    "ac": "（越界檢查：第 4 輪增量）",
+    "result": "通過",
+    "note": "boundary-delta：2026-11-02T07:40:00.000Z 之後修改 44 個檔案（QA 安裝 devDependency 前執行），超出 FE-45～FE-53 任務 paths 0 個；授權例外與主控修改 10 個：.gitattributes（主控授權例外）、.github/workflows/static.yml（主控修改，PRD R-20 記載）、.gitignore（主控授權例外）、sources/deploy/ads.txt（主控授權例外）、sources/pwa/PWA_Icon.jpg（主控授權例外）、sources/pwa/README.md（主控授權例外）、src/app/assets/icons/apple-touch-icon-180.png（主控授權例外）、src/app/assets/icons/icon-192.png（主控授權例外）、src/app/assets/icons/icon-512.png（主控授權例外）、src/app/assets/icons/icon-maskable-512.png（主控授權例外）"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-X-edge",
+    "ac": "AC-19-02（Chrome／Edge）跨瀏覽器冒煙、AC-34-01、AC-35-01、AC-35-02、AC-37-01",
+    "result": "通過",
+    "note": "以 Microsoft Edge（headless）重跑：e2e-goal-edge.json：通過 22、不適用（暫停）5、失敗 0（共 27）；e2e-hidden-edge.json：通過 5、不適用（暫停）0、失敗 0（共 5）；e2e-pwa-edge.json：通過 8、不適用（暫停）0、失敗 0（共 8）"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M01",
+    "ac": "AC-08-01、AC-08-09、AC-08-13、AC-08-14、AC-21-01、AC-21-03",
+    "result": "待人工",
+    "note": "真實麥克風辨識、權限、收音條與資料不留存"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M02",
+    "ac": "AC-07-01～AC-07-05",
+    "result": "待人工",
+    "note": "真實 TTS 語音"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M03",
+    "ac": "AC-19-02、AC-37-01",
+    "result": "待人工",
+    "note": "實際斷網以 file:// 開啟（v0.11：另確認 DevTools Application 面板無 service worker、Console 無 manifest／圖示警告）"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M04",
+    "ac": "AC-19-03、AC-18-01",
+    "result": "待人工",
+    "note": "雙擊開啟、關閉後重開"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M05",
+    "ac": "AC-20-01～AC-20-03、AC-26-01、AC-27-01、AC-27-02、AC-28-03～AC-28-06",
+    "result": "待人工",
+    "note": "Android Chrome 實機觸控、底部導覽、滑動換卡"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M06",
+    "ac": "AC-24-01、AC-24-03",
+    "result": "待人工",
+    "note": "跨裝置匯出匯入（v0.11：含 file:// 版 → 網址版轉移，E-81）"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M07",
+    "ac": "AC-22-01～AC-22-05、AC-35-04",
+    "result": "待人工",
+    "note": "基準環境效能量測（v0.11：加量 V-PWA 離線重新載入 5 次）"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M08",
+    "ac": "AC-23-04",
+    "result": "待人工",
+    "note": "原創性 20 筆精確片語搜尋"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M09",
+    "ac": "AC-27-03",
+    "result": "待人工",
+    "note": "實機虛擬鍵盤不遮輸入欄"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-M10",
+    "ac": "AC-29-02、AC-29-03",
+    "result": "待人工",
+    "note": "Android 實機震動、iOS Safari 不震動不報錯"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-MIC-1",
+    "ac": "AC-33-01",
+    "result": "待人工",
+    "note": "V-MIC-1：Chrome、Edge 停留單字卡頁只詢問一次權限"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-MIC-2",
+    "ac": "AC-33-02",
+    "result": "待人工",
+    "note": "V-MIC-2：離開單字卡頁 1 秒內釋放麥克風、使用中圖示消失"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-MIC-3",
+    "ac": "AC-33-03、AC-33-08",
+    "result": "待人工",
+    "note": "V-MIC-3：真實說話時收音條、減少動態"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-MIC-4",
+    "ac": "AC-08-09",
+    "result": "待人工",
+    "note": "V-MIC-4：權限封鎖"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-MIC-5",
+    "ac": "AC-33-05、AC-33-06",
+    "result": "待人工",
+    "note": "V-MIC-5：拔除麥克風"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-PWA-H1",
+    "ac": "AC-34-01、AC-34-02、AC-34-03、AC-34-06、AC-34-07、AC-34-09、AC-34-10",
+    "result": "待人工",
+    "note": "V-PWA-H1：Windows 11 Chrome、Edge 正式網址：原生安裝入口與畫面內「安裝 App」按鈕（真實事件）、安裝名稱與開始功能表名稱 EnglishContext、獨立視窗、Manifest 面板無錯誤與無法安裝警告、maskable 安全區預覽；解除安裝後再開；Firefox 開啟無按鈕無錯誤"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-PWA-H2",
+    "ac": "AC-34-02、AC-34-03、AC-35-03",
+    "result": "待人工",
+    "note": "V-PWA-H2：Android Chrome：安裝應用程式、主畫面圖示圓形遮罩不切字、啟動畫面背景色與圖示、飛航模式從主畫面啟動"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-PWA-H3",
+    "ac": "AC-34-05、AC-34-08",
+    "result": "待人工",
+    "note": "V-PWA-H3：iOS Safari：分享 → 加入主畫面，預設名稱 EnglishContext、圖示無灰邊與黑角、從主畫面啟動無網址列、無安裝按鈕"
+  }
 ]

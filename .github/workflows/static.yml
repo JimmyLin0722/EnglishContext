@@ -1,4 +1,4 @@
-# 部署 dist/english-master-track.html 到 GitHub Pages（發布為 index.html）
+# 建置並部署 PWA 部署目錄 dist/site/ 到 GitHub Pages（architecture.md §5.2；Q-46 授權主控修改一次）
 name: Deploy static content to Pages
 
 on:
@@ -29,17 +29,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # 零相依、無 package-lock.json：不執行 npm ci
+      - name: Build
+        run: npm run build
+      - name: Verify deploy directory
+        run: |
+          set -eu
+          test "$(find dist/site -type f | wc -l)" -eq 8
+          cmp dist/site/index.html dist/english-master-track.html
+          cmp dist/site/ads.txt sources/deploy/ads.txt
+          for f in index.html manifest.webmanifest sw.js ads.txt icons/icon-192.png icons/icon-512.png icons/icon-maskable-512.png icons/apple-touch-icon-180.png; do
+            test -f "dist/site/$f"
+          done
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Prepare site
-        run: |
-          mkdir _site
-          cp dist/english-master-track.html _site/index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 只上傳打包後的成品，不公開 docs/、src/
-          path: '_site'
+          # 只上傳部署目錄（恰 8 檔），不含 docs/、src/、sources/
+          path: dist/site
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5

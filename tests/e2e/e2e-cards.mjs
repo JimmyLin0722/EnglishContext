@@ -4,7 +4,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { launch, recorder, sleep, FILE_URL, resultPath } from "./lib/cdp.mjs";
-import { TOAST_RECORDER, fakeTts, fakeStt, fakeDate } from "./lib/inits.mjs";
+import { TOAST_RECORDER, fakeTts, fakeStt, fakeDate, fakeMic } from "./lib/inits.mjs";
+import { stateRecord, seed, apply as applyGoal, clickCard } from "./lib/state.mjs";
+// 第 3 輪（PRD v0.9／v0.10）：加麥克風替身（按麥克風先取得麥克風）；目標分數改以既有狀態或點卡片設定
 
 const R = recorder("e2e-cards");
 const TMP = process.env.QA_TMP || path.resolve("tests/results/tmp");
@@ -17,6 +19,7 @@ const p = await launch();
 await p.addInitScript(TOAST_RECORDER);
 await p.addInitScript(fakeTts("ok"));
 await p.addInitScript(fakeStt("ok"));
+await p.addInitScript(fakeMic("ok"));
 await p.viewport(1366, 900);
 await p.send("Page.setInterceptFileChooserDialog", { enabled: true });
 let chooser = null;
@@ -165,7 +168,7 @@ await R.check("TC-05-05", "AC-05-05", async () => {
   await p.click(".fc-front .sp-tts__btn", 1); await sleep(150);
   const sp = await p.ev(`window.__qaTts.spoken.slice(${before})`);
   await p.ev(`EMT.store.actions.acknowledgeSttNotice()`);
-  await p.click(".fc-front .sp-mic"); await sleep(80);
+  await p.click(".fc-front .sp-mic"); await sleep(250);
   await p.ev(`window.__qaStt.last.emitResult(${JSON.stringify(c.word)}); window.__qaStt.last.emitEnd()`); await sleep(120);
   const score = await p.ev(`(() => { const r = document.querySelector(".fc-front .sp-result"); return r && !r.hidden ? r.innerText : ""; })()`);
   return { ok: c.attrib.includes("自訂擴充") && sp.length === 1 && sp[0].text === c.word && score.includes("100"), note: `卡片 ${c.word}（${c.pos}）出處「${c.attrib.join("/")}」；0.75x 朗讀 ${JSON.stringify(sp)}；STT 結果「${score.replace(/\n/g, " ")}」` };
@@ -364,7 +367,7 @@ await R.check("TC-09-07", "AC-09-07", async () => {
 });
 
 // ═════════ AC-17-02、AC-17-05 打卡 ═════════
-async function withDate(ymd) { await p.clearInitScripts(); await p.addInitScript(TOAST_RECORDER); await p.addInitScript(fakeTts("ok")); await p.addInitScript(fakeStt("ok")); if (ymd) await p.addInitScript(fakeDate(ymd)); await p.reload(); }
+async function withDate(ymd) { await p.clearInitScripts(); await p.addInitScript(TOAST_RECORDER); await p.addInitScript(fakeTts("ok")); await p.addInitScript(fakeStt("ok")); await p.addInitScript(fakeMic("ok")); if (ymd) await p.addInitScript(fakeDate(ymd)); await p.reload(); }
 const streakText = async () => { await p.go("dashboard"); return p.ev(`[...document.querySelectorAll(".dash-stat")].find((d) => d.textContent.includes("連續打卡天數")).querySelector(".dash-stat__value").textContent`); };
 await R.check("TC-17-02", "AC-17-02", async () => {
   await p.ev(`localStorage.clear()`);
@@ -395,7 +398,8 @@ let exported = null;
 await R.check("TC-24-01", "AC-24-01、AC-24-02", async () => {
   await p.ev(`localStorage.clear()`); await p.reload();
   // 建立學習資料
-  await p.go("customizer"); await p.type("#cz-score-input", "300"); await p.click("#cz-apply");
+  await seed(p, stateRecord(300)); // v0.10：畫面無分數輸入，以既有狀態 300（棕）開始（FB-36）
+  await p.go("customizer");
   await p.click('[data-template="cs"]'); await sleep(80);
   await gotoCard(0); await p.click(".fc-mode-btn"); await sleep(50);
   const q = await quiz(); const m = await meaningOf(q.word); await p.click(".fcq-option", q.opts.findIndex((o) => o.t === m)); await p.click(".fc-mode-btn");
@@ -431,7 +435,8 @@ await R.check("TC-24-03", "AC-24-03", async () => {
   return { ok: same(now, exp) && same(after, exp) && r.dialog && r.dialog.includes("匯入將覆蓋目前所有進度") && r.toasts.some((t) => t.startsWith("已匯入，略過 0 筆")), note: `對話框「${(r.dialog || "").replace(/\n/g, " ")}」；提示 ${JSON.stringify(r.toasts)}；匯入後與匯出內容相同=${same(now, exp)}；重載後相同=${same(after, exp)}` };
 });
 await R.check("TC-24-04", "AC-24-04", async () => {
-  await p.go("customizer"); await p.type("#cz-score-input", "800"); await p.click("#cz-apply");
+  // v0.10：點藍卡套用（有學習紀錄 → 確認視窗按「確定」），使目前資料與備份不同
+  await p.go("customizer"); await clickCard(p, "blue"); await applyGoal(p, "ok");
   const before = await p.ev(`localStorage.getItem(${JSON.stringify(KEY)})`); const mem = JSON.stringify((await state()).data);
   const r = await importFile(exported, { confirm: false });
   const after = await p.ev(`localStorage.getItem(${JSON.stringify(KEY)})`); const mem2 = JSON.stringify((await state()).data);

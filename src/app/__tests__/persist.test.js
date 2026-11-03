@@ -2,6 +2,8 @@
  * persist.test.js — 持久化預設值、StorageRecord 驗證與遷移單元測試（FE-06；FE-22 v0.8 升版）
  * 涵蓋：AC-01-04、AC-11-05、AC-18-01、AC-18-02、AC-18-05、AC-30-09、AC-30-12、AC-30-13、
  *       V-ST-01～03、V-ST-05、V-ST-09～V-ST-11、README §5.2、§5.3（MG-1～MG-4、RD-1、RD-2）
+ * （FE-42）v0.10：預設分數 725（C.SCORE_DEFAULT，Q-39、GS-7）；既有分數 600、735 原值保留（GS-4）；
+ *       723、"600"、600.5 仍為 unreadable（不四捨五入，GS-5）。以 600 代表「v0.9 以前既有分數」的資料刻意保留。
  */
 "use strict";
 const test = require("node:test");
@@ -83,9 +85,11 @@ function expectUnreadable(mutate, label) {
   assert.deepEqual(r.data, P.defaultData(), label + "：以預設值啟動");
 }
 
-test("defaultData：契約 §5.2 預設值（AC-18-02）", () => {
+test("defaultData：契約 §5.2 預設值（AC-18-02；v0.10 預設分數 725 = C.SCORE_DEFAULT）", () => {
+  assert.equal(C.SCORE_DEFAULT, 725);
+  assert.deepEqual(P.defaultData().goal, { draftScore: 725, appliedScore: 725, appliedColor: "green", effectiveColor: "green" });
   assert.deepEqual(P.defaultData(), {
-    goal: { draftScore: 600, appliedScore: 600, appliedColor: "green", effectiveColor: "green" },
+    goal: { draftScore: C.SCORE_DEFAULT, appliedScore: C.SCORE_DEFAULT, appliedColor: "green", effectiveColor: "green" },
     customVocab: [],
     masteredWordKeys: [],
     vocabQuiz: { answered: 0, correct: 0 },
@@ -333,6 +337,59 @@ test("normalizeAfterLoad：以 appliedScore 重算色級（V-ST-02、AC-01-04）
   const g = P.normalizeAfterLoad(gold, 50).goal;
   assert.equal(g.appliedColor, "gold");
   assert.equal(g.effectiveColor, "green");
+});
+
+// ── v0.10（FE-42）：既有分數不轉換（GS-4）、資料層驗證不四捨五入（GS-5） ──
+
+test("GS-4：v2 紀錄的既有分數 600、735 讀取後原值保留，色級依 V-ST-02 重算（AC-26-06）", () => {
+  for (const [score, color, eff] of [[600, "green", "green"], [735, "blue", "green"]]) {
+    const d = sampleData();
+    // 冗餘色級刻意填錯，驗證只重算色級、不動分數
+    d.goal = { draftScore: score, appliedScore: score, appliedColor: "orange", effectiveColor: "orange" };
+    const r = P.parseStored(raw(record(d)));
+    assert.equal(r.kind, "ok", String(score));
+    assert.equal(r.data.goal.draftScore, score);
+    assert.equal(r.data.goal.appliedScore, score);
+    const n = P.normalizeAfterLoad(r.data, 50, "2026-10-30");
+    assert.deepEqual(n.goal, { draftScore: score, appliedScore: score, appliedColor: color, effectiveColor: eff }, String(score));
+    // 寫回後仍為原值（不改寫為色級上限或下限）
+    const rec = P.buildRecord(n, new Date("2026-10-30T01:00:00.000Z"));
+    assert.equal(rec.schemaVersion, 2);
+    assert.equal(rec.data.goal.draftScore, score);
+    assert.equal(rec.data.goal.appliedScore, score);
+    assert.deepEqual(P.parseStored(JSON.stringify(rec)).data.goal, n.goal);
+  }
+});
+
+test("GS-4：v1 紀錄（MG-2 遷移）的既有分數 600、735 原值保留，遷移後一般讀取只重算色級", () => {
+  for (const [score, color] of [[600, "green"], [735, "blue"]]) {
+    const rec = v1Record();
+    rec.data.goal = { draftScore: score, appliedScore: score, appliedColor: "brown", effectiveColor: "brown" };
+    const r = P.parseStored(raw(rec));
+    assert.equal(r.kind, "ok", String(score));
+    assert.equal(r.migrated, true);
+    assert.deepEqual(r.data.goal, rec.data.goal, "MG-2：遷移不動 goal");
+    const n = P.normalizeAfterLoad(r.data, 50, "2026-10-30");
+    assert.deepEqual(n.goal, { draftScore: score, appliedScore: score, appliedColor: color, effectiveColor: "green" });
+  }
+});
+
+test("GS-5：723、\"600\"、600.5 仍為 unreadable（資料層不四捨五入），以預設值 725 啟動", () => {
+  const cases = [
+    [(r, d) => { d.goal.draftScore = 723; }, "draftScore 723"],
+    [(r, d) => { d.goal.appliedScore = 723; }, "appliedScore 723"],
+    [(r, d) => { d.goal.draftScore = "600"; }, "draftScore \"600\""],
+    [(r, d) => { d.goal.appliedScore = "600"; }, "appliedScore \"600\""],
+    [(r, d) => { d.goal.draftScore = 600.5; }, "draftScore 600.5"],
+    [(r, d) => { d.goal.appliedScore = 600.5; }, "appliedScore 600.5"]
+  ];
+  for (const [mutate, label] of cases) {
+    expectUnreadable(mutate, label);
+    const d = sampleData();
+    const rec = record(d);
+    mutate(rec, d);
+    assert.equal(P.parseStored(raw(rec)).data.goal.appliedScore, 725, label);
+  }
 });
 
 test("normalizeAfterLoad：V-ST-05 currentIndex 在範圍內保留（AC-11-05）、超出時重設", () => {

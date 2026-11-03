@@ -31,6 +31,9 @@
  *   一次 setItem，成功（或 storage 停用）才替換記憶體；失敗（quota／error）只還原記憶體 draftScore。
  *   cancelApplyGoal 只還原記憶體 draftScore、不寫入（CI-9）。setTab 忽略 HIDDEN_TAB_IDS（HT-1）。
  *
+ * - （v0.11，FE-49）runtime.pwa（PwaRuntimeState，契約 PV-1、PV-7）：初始值取 core/pwa.initialPwaState()；
+ *   只能經 actions.setPwa 更新（tag "pwa"，不寫入 localStorage、不進備份）；其他 action 以 assign 局部更新時保留原值。
+ *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
  */
@@ -65,17 +68,25 @@
         P: require("../core/persist.js"),
         BACKUP: require("../core/backup.js"),
         LEARN: require("../core/learning.js"),
-        REINIT: require("../core/reinit.js")
+        REINIT: require("../core/reinit.js"),
+        PWA: require("../core/pwa.js")
       };
     } else {
       var c = root.EMT.core;
       coreCache = {
         C: c.constants, WK: c.wordkey, GOAL: c.goal, VOCAB: c.vocab, CUSTOM: c.custom,
         STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning,
-        REINIT: c.reinit
+        REINIT: c.reinit, PWA: c.pwa
       };
     }
     return coreCache;
+  }
+
+  /** （v0.11，FE-49）取得 core/pwa（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function pwaCore() {
+    var m = core().PWA;
+    if (!m) { throw new Error("EMT.core.pwa 未載入（state/store.js）"); }
+    return m;
   }
 
   // 契約列舉（data-schema.ts §7、§10）
@@ -316,7 +327,9 @@
         // （v0.8）本工作階段是否已提示過學習紀錄容量不足（LR-7）
         learningQuotaNoticeShown: false,
         // （v0.8）首次進入判定結果（FS-1）；本工作階段只會 firstRun → main
-        entryMode: entryMode === "firstRun" ? "firstRun" : "main"
+        entryMode: entryMode === "firstRun" ? "firstRun" : "main",
+        // （v0.11，FE-49）PWA 頁面端狀態（只在記憶體，不持久化，PV-1）；PE-1 由 main.js 經 setPwa 寫入
+        pwa: pwaCore().initialPwaState()
       };
     }
 
@@ -571,13 +584,16 @@
     }
 
     /**
-     * 點色級按鈕（Q-32、AC-01-05、AC-01-07）。
+     * 點色級卡片（v0.10 R-19；契約 GS-2、V-ST-16；AC-01-05、AC-01-07、AC-02-04、AC-26-02）：
+     * draftScore = 該色 scoreMax（goal.scoreForCard），含目前選中色級與藍、金；未知色級 → draftScore 不變。
+     * 寫入行為沿用 setDraft（一般模式照常寫入、首次模式只改記憶體；不觸發 CI-1）。
      * @param {string} colorId
      * @returns {{score: number}}
      */
     function clickColor(colorId) {
       ensureInit();
-      var score = core().GOAL.scoreAfterColorClick(state.data.goal.draftScore, colorId);
+      var score = core().GOAL.scoreForCard(colorId);
+      if (score === null) { return { score: state.data.goal.draftScore }; }
       setDraft(score);
       return { score: state.data.goal.draftScore };
     }
@@ -1080,6 +1096,38 @@
       commit(state.data, assign(rt, { currentTab: tabId }), ["tab"], false);
     }
 
+    // ── actions：PWA（v0.11，FE-49）──
+
+    /**
+     * 更新 runtime.pwa（architecture §4.3 v0.7、契約 RuntimeState.pwa、PV-1、PV-7）。
+     * 只接受 PWA_STATE_KEYS 的鍵；布林欄位只收 true／false，lastUpdateCheckAt 只收有限數或 null；
+     * 其他鍵、型別錯誤、物件值（安裝事件、registration 等）一律忽略。
+     * 有改變 → 以新物件取代 runtime.pwa 並通知 ["pwa"]；不寫入 localStorage（setItem 0 次，首次與一般模式相同）。
+     * @param {object} patch
+     * @returns {{changed: boolean}}
+     */
+    function setPwa(patch) {
+      ensureInit();
+      if (!patch || typeof patch !== "object") { return { changed: false }; }
+      var P = pwaCore();
+      var rt = state.runtime;
+      var cur = rt.pwa && typeof rt.pwa === "object" ? rt.pwa : P.initialPwaState();
+      var next = null;
+      P.PWA_STATE_KEYS.forEach(function (k) {
+        if (!hasOwn(patch, k)) { return; }
+        var v = patch[k];
+        var ok = k === "lastUpdateCheckAt"
+          ? v === null || (typeof v === "number" && isFinite(v))
+          : v === true || v === false;
+        if (!ok || cur[k] === v) { return; }
+        if (!next) { next = assign(cur, {}); }
+        next[k] = v;
+      });
+      if (!next) { return { changed: false }; }
+      commit(state.data, assign(rt, { pwa: next }), ["pwa"], false);
+      return { changed: true };
+    }
+
     // ── actions：備份 ──
 
     /**
@@ -1201,6 +1249,7 @@
         setPhraseCategory: setPhraseCategory,
         setPhraseKeyword: setPhraseKeyword,
         setTab: setTab,
+        setPwa: setPwa,
         exportBackup: exportBackup,
         importBackup: importBackup
       }

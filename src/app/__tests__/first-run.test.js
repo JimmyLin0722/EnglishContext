@@ -313,7 +313,7 @@ describe("first-run.test.js：首次畫面還原（真實 store）", () => {
   /** 由一般模式 store 匯出目標 300（棕）的備份 */
   function backupJson(version) {
     const src = F.makeStore();
-    src.a.setDraftScore(300);
+    src.a.setDraftScore(300); // 既有分數 300（棕）的備份 fixture（GS-4：原值保留），非畫面操作
     src.a.applyGoal();
     const json = src.a.exportBackup().json;
     if (version !== 1) return json;
@@ -327,7 +327,7 @@ describe("first-run.test.js：首次畫面還原（真實 store）", () => {
   async function restore(text, storeOpt) {
     const m = F.makeStore(Object.assign({ firstRun: true }, storeOpt || {}));
     assert.equal(m.store.getState().runtime.entryMode, "firstRun");
-    m.a.setDraftScore(800); // 首次畫面上未生效的選擇（E-58：還原成功時捨棄）
+    m.a.clickColor("gold"); // 首次畫面上未生效的選擇（點金 → 990；E-58：還原成功時捨棄；v0.10 FE-43 改為點卡片）
     const tags = [];
     m.store.subscribe((st, t) => tags.push(t.slice()));
     const s = setup({ store: m.store });
@@ -377,7 +377,7 @@ describe("first-run.test.js：首次畫面還原（真實 store）", () => {
       assert.equal(r.error, code);
       const st = m.store.getState();
       assert.equal(st.runtime.entryMode, "firstRun");
-      assert.equal(st.data.goal.draftScore, 800, "記憶體不變");
+      assert.equal(st.data.goal.draftScore, 990, "記憶體不變");
       assert.ok(!m.storage.map.has(MAIN_KEY), "主鍵仍不存在");
       assert.ok(!tags.some((t) => t.includes("entry")));
       const msg = dashboard.importMessage(r);

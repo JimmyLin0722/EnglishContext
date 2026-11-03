@@ -4,7 +4,10 @@
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
-import { TOAST_RECORDER, fakeTts, fakeStt, storageMode, controllableClock } from "./lib/inits.mjs";
+import { TOAST_RECORDER, fakeTts, fakeStt, storageMode, controllableClock, fakeMic } from "./lib/inits.mjs";
+// 第 3 輪（PRD v0.9／v0.10）：主控台目標區 3 項（無目標分數）；改點卡片套用；按麥克風先取得麥克風（fakeMic）
+async function micOn(p) { await p.click(".fc-front .sp-mic"); for (let i = 0; i < 40; i++) { if ((await p.ev(`document.querySelector(".fc-front .sp-mic").dataset.status`)) === "listening") break; await sleep(25); } }
+async function applyCard(p, c) { await p.go("customizer"); await p.click(`.cz-color[data-color="${c}"]`); await p.click("#cz-apply"); await sleep(80); }
 
 const R = recorder("e2e-progress");
 const KEY = "englishMasterTrack:state";
@@ -44,7 +47,7 @@ async function preset(p, mutate) {
 async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); }
 
 {
-  const p = await open([fakeTts("ok"), fakeStt("ok")]);
+  const p = await open([fakeTts("ok"), fakeStt("ok"), fakeMic("ok")]);
   await p.goto();
 
   await R.check("TC-30-01", "AC-30-01", async () => {
@@ -52,14 +55,14 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     const stats = await p.ev(`[...document.querySelectorAll(".dash-stats:not(.dash-stats--goal) .dash-stat__label")].map((e) => e.textContent).join("、")`);
     const goal = await p.ev(`document.querySelectorAll(".dash-stats--goal .dash-stat").length`);
     const ok = r.text === "今日已學 0 / 15 字" && r.minis.map((m) => m.label).join("、") === "目前單字集掌握率、模擬測驗正確率" && r.bars.length === 7 && r.chartTitle && r.bars[6].date === TODAY
-      && stats === "連續打卡天數、單字掌握數、模擬測驗正確率" && goal === 4;
+      && stats === "連續打卡天數、單字掌握數、模擬測驗正確率" && goal === 3;
     return { ok, note: `主環「${r.text}」（中央 ${r.center}）；小環 ${r.minis.map((m) => m.label + "=" + m.value).join("、")}；長條圖「${r.chartTitle}」${r.bars.length} 根（${r.bars.map((b) => b.label + ":" + b.count).join(" ")}）；統計 ${stats}；目標區 ${goal} 項` };
   });
 
   await R.check("TC-30-02", "AC-30-02", async () => {
     const out = [];
-    for (const s of ["100", "600", "730"]) { await p.go("customizer"); await p.type("#cz-score-input", s); await p.key("Tab", "Tab", 9); await p.click("#cz-apply"); out.push(`${s}→${(await progress(p)).text}`); }
-    await p.go("customizer"); await p.type("#cz-score-input", "600"); await p.key("Tab", "Tab", 9); await p.click("#cz-apply");
+    for (const c of ["orange", "green", "blue"]) { await applyCard(p, c); out.push(`${c}→${(await progress(p)).text}`); }
+    await applyCard(p, "green");
     return { ok: out[0].endsWith("/ 10 字") && out[1].endsWith("/ 15 字") && out[2].endsWith("/ 15 字"), note: out.join("；") };
   });
 
@@ -76,7 +79,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     const qa = await quizAnswer(false); seq.push(await X(p));                                             // A 四選一答錯
     await p.go("flashcards"); await p.ev(`EMT.store.actions.gotoCard(11)`); await sleep(40); await p.click(".fc-flip"); await sleep(420); seq.push(await X(p)); // B
     await p.go("flashcards"); await p.ev(`EMT.store.actions.gotoCard(12)`); await sleep(40); await p.ev(`EMT.store.actions.acknowledgeSttNotice()`);
-    const wc = await word(12); await p.click(".fc-front .sp-mic"); await sleep(60); await p.ev(`(() => { const r = window.__qaStt.last; r.emitResult(${JSON.stringify(wc)}); r.emitEnd(); })()`); await sleep(120); seq.push(await X(p)); // C STT
+    const wc = await word(12); await micOn(p); await p.ev(`(() => { const r = window.__qaStt.last; r.emitResult(${JSON.stringify(wc)}); r.emitEnd(); })()`); await sleep(120); seq.push(await X(p)); // C STT
     await p.go("flashcards"); await p.ev(`EMT.store.actions.gotoCard(13)`); await sleep(40); const qe = await quizAnswer(true); seq.push(await X(p)); // E 答對
     const st = await stored(p);
     const wa = await word(10), wb = await word(11), we = await word(13);
@@ -92,11 +95,11 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     await p.ev(`EMT.store.actions.acknowledgeSttNotice()`);
     const sttCases = [];
     for (const [k, fn] of [["逾時 no-speech", `r.emitError("no-speech"); r.emitEnd();`], ["空結果", `r.emitResult(""); r.emitEnd();`], ["權限 not-allowed", `r.emitError("not-allowed"); r.emitEnd();`], ["結束無結果", `r.emitEnd();`]]) {
-      await p.click(".fc-front .sp-mic"); await sleep(60); await p.ev(`(() => { const r = window.__qaStt.last; ${fn} })()`); await sleep(120);
+      await micOn(p); await p.ev(`(() => { const r = window.__qaStt.last; ${fn} })()`); await sleep(120);
       sttCases.push(`${k}:${await p.ev(`(() => { const e = document.querySelector(".fc-front .sp-result"); return e && !e.hidden ? "有分數" : "無分數"; })()`)}`);
     }
     await p.send("Network.emulateNetworkConditions", { offline: true, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
-    await p.click(".fc-front .sp-mic"); await sleep(120); sttCases.push("離線:" + (await p.ev(`EMT.store.getState().runtime.speech.status`)));
+    await p.click(".fc-front .sp-mic"); await sleep(200); sttCases.push("離線:" + (await p.ev(`EMT.store.getState().runtime.speech.status`)));
     await p.send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
     await p.go("part5"); for (let i = 0; i < 3; i++) { await p.click("[data-p5=option]", 0); await p.click("[data-p5=next]"); }
     const x = await X(p); const tl = (await p.ev(`EMT.store.getState().data.todayLearned`));
@@ -158,7 +161,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
 
   await R.check("TC-30-10", "AC-30-10", async () => {
     await fresh(p);
-    await p.go("customizer"); await p.type("#cz-score-input", "100"); await p.key("Tab", "Tab", 9); await p.click("#cz-apply"); // 單字集 1,000
+    await applyCard(p, "orange"); // 單字集 1,000
     const inSet = await wordKeysOfRanks(p, 0, 250); const outSet = await wordKeysOfRanks(p, 2000, 2010);
     await preset(p, (r) => { const k = [...inSet, ...outSet]; r.data.masteredWordKeys = k; r.data.vocabQuiz = { answered: k.length, correct: k.length }; });
     await p.go("part5");
@@ -181,7 +184,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
 
   await R.check("TC-30-12", "AC-30-12、MG-3", async () => {
     await fresh(p);
-    await p.go("customizer"); await p.type("#cz-score-input", "455"); await p.key("Tab", "Tab", 9); await p.click("#cz-apply");
+    await applyCard(p, "brown");
     await p.type("#cv-word", "qamigrate"); await p.type("#cv-meaning", "遷移"); await p.click('.cv-form button[type="submit"]'); await sleep(80);
     await p.go("part5"); await p.click("[data-p5=option]", 0); await p.click("[data-p5=next]");
     await flipAt(p, 3); await p.ev(`EMT.store.actions.acknowledgeSttNotice()`);
@@ -203,7 +206,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     await preset(p, (r) => { r.data.todayLearned = { date: addDays(TODAY, -1), wordKeys: ["the"] };
       r.data.learnedHistory = { "2026-13-40": 3, yesterday: 2, [addDays(TODAY, -1)]: -1, [addDays(TODAY, -2)]: 1.5, [addDays(TODAY, 1)]: 4, [addDays(TODAY, -3)]: 5, [addDays(TODAY, -4)]: "2" }; });
     let r = await progress(p); let t = await toasts(p); const g1 = await p.ev(`EMT.store.getState().data.goal.appliedScore`);
-    let good = r.text.startsWith("今日已學 0 /") && r.bars.map((b) => b.count).join(",") === "0,0,0,5,0,0,0" && !t.some((x) => x.includes("資料讀取失敗")) && g1 === 455;
+    let good = r.text.startsWith("今日已學 0 /") && r.bars.map((b) => b.count).join(",") === "0,0,0,5,0,0,0" && !t.some((x) => x.includes("資料讀取失敗")) && g1 === 465;
     await flipAt(p, 7); const st = (await stored(p)).data;
     good = good && (await X(p)) === 1 && JSON.stringify(Object.keys(st.learnedHistory).sort()) === JSON.stringify([addDays(TODAY, -3), TODAY].sort()) && st.todayLearned.date === TODAY;
     ok = ok && good; out.push(`(1) 無效歷史 + 昨天的今日紀錄：${r.text}、長條 ${r.bars.map((b) => b.count).join(",")}、提示 ${JSON.stringify(t)}、目標 ${g1}；學 1 字後寫出歷史 ${JSON.stringify(st.learnedHistory)}`);
@@ -217,7 +220,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     const n0 = (await toasts(p)).length;
     await preset(p, (r4) => { r4.data.todayLearned = "abc"; r4.data.learnedHistory = [1, 2]; });
     r = await progress(p); t = await toasts(p); const d = await p.ev(`EMT.store.getState().data`); const entry = await p.ev(`document.body.dataset.entry`);
-    good = r.text.startsWith("今日已學 0 /") && d.goal.appliedScore === 455 && d.customVocab.some((c) => c.word === "qamigrate") && !t.some((x) => x.includes("資料讀取失敗")) && entry === "main" && !(await p.ev(`localStorage.getItem("englishMasterTrack:unreadable")`));
+    good = r.text.startsWith("今日已學 0 /") && d.goal.appliedScore === 465 && d.customVocab.some((c) => c.word === "qamigrate") && !t.some((x) => x.includes("資料讀取失敗")) && entry === "main" && !(await p.ev(`localStorage.getItem("englishMasterTrack:unreadable")`));
     ok = ok && good; out.push(`(4) 欄位型別錯誤：${r.text}、目標 ${d.goal.appliedScore}、自訂字保留=${d.customVocab.some((c) => c.word === "qamigrate")}、提示 ${JSON.stringify(t.slice(n0))}、${entry}`);
     return { ok: ok && p.log.exceptions.length === 0, note: out.join("；") };
   });
@@ -240,7 +243,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     const b = await progress(p); const stA = (await stored(p)).data;
     // (b) 再跨一次午夜，不做學習行為：切到其他功能區再回到主控台
     await p.ev(`window.__qaSetClock("${T2}T00:00:20")`);
-    await p.go("decoder"); await sleep(100); await p.go("dashboard"); await sleep(100);
+    await p.go("part5"); await sleep(100); await p.go("dashboard"); await sleep(100);
     const c = await progress(p);
     const okA = a.text.startsWith("今日已學 5 /") && b.text.startsWith("今日已學 1 /") && b.bars[6].date === T1 && b.bars[6].count === 1 && b.bars[5].date === T && b.bars[5].count === 5
       && stA.todayLearned.date === T1 && stA.learnedHistory[T] === 5 && stA.learnedHistory[T1] === 1;
@@ -251,7 +254,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     // 此時時鐘在 T2，記憶體 todayLearned 仍為 T1（尚未有學習事件換日）；以「非學習 action」觸發寫入
     const mem = await p.ev(`EMT.store.getState().data.todayLearned.date`);
     const out = []; let ok = true;
-    for (const [k, fn] of [["改分數並套用", async () => { await p.go("customizer"); await p.type("#cz-score-input", "455"); await p.key("Tab", "Tab", 9); await p.click("#cz-apply"); }], ["模擬測驗作答", async () => { await p.go("part5"); await p.click("[data-p5=option]", 0); }], ["注入範本", async () => { await p.go("customizer"); await p.click('[data-template="cs"]'); await sleep(100); }]]) {
+    for (const [k, fn] of [["點藍卡並套用（生效色級不變，無確認視窗）", async () => { await applyCard(p, "blue"); }], ["模擬測驗作答", async () => { await p.go("part5"); await p.click("[data-p5=option]", 0); }], ["注入範本", async () => { await p.go("customizer"); await p.click('[data-template="cs"]'); await sleep(100); }]]) {
       const saved0 = (await stored(p)).savedAt;
       await fn(); await sleep(80);
       const rec = await stored(p); const st = rec.data; const wrote = rec.savedAt !== saved0;

@@ -1,0 +1,2384 @@
+{
+  "stats": {
+    "total": 243,
+    "paused": 22,
+    "pass": 165,
+    "passManual": 47,
+    "manual": 9,
+    "fail": 0,
+    "uncovered": 0
+  },
+  "rows": [
+    {
+      "ac": "AC-01-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-26-01",
+        "TC-01-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-01-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-01-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-01-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-01-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-01-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-01-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-01-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-01-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-01-06",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-01-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-01-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-26-04",
+        "TC-01-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-01",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-02-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-02",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-02-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-02-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-02-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-02-05a",
+        "TC-02-05b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-02-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-07",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-02-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-02-08"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-09",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-02-09"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-02-10",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-02-10a",
+        "TC-02-10b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-03-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-03-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-03-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-03-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-03-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-01-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-03-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-03-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-03-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-03-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-03-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D01",
+        "TC-03-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-03-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-03-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-03-09",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-04-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-04-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-04-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-04-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-04-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-04-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-04-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-04-04",
+        "TC-S07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-04-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-04-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-04-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-04-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-04-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-04-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-04-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-04-08",
+        "TC-04-08b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-04-09",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-S03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-05-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D11",
+        "TC-05-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-05-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D11",
+        "TC-05-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-05-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D11",
+        "TC-05-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-05-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-05-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-05-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-05-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-06-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D06",
+        "TC-06-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-06-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D06",
+        "TC-D07",
+        "TC-06-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-06-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-06-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-06-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-06-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-06-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-06-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-06-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-06-06",
+        "TC-04-08b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-06-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D06",
+        "TC-06-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-06-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-07-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-07-01",
+        "TC-M02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-07-02",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-07-01",
+        "TC-M02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-07-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-07-03",
+        "TC-M02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-07-04",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-07-04",
+        "TC-M02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-07-05",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-07-05",
+        "TC-M02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-08-01",
+        "TC-M01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-09",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-08-09b",
+        "TC-08-09",
+        "TC-M01",
+        "TC-MIC-4"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-10",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-10"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-11",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-11"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-12",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-08-12"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-13",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-08-13",
+        "TC-M01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-08-14",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-08-14",
+        "TC-08-14b",
+        "TC-M01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-09-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-09-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-09-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D17",
+        "TC-09-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-09-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-09-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-09-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-09-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-09-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-09-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-09-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-09-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-09-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-09-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-10-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D12"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-10-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D12",
+        "TC-10-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-11-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-11-01",
+        "TC-D20"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-11-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D12",
+        "TC-11-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-11-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-11-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-11-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-11-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-11-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-11-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-11-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-11-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-11-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-11-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-12-01",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-12-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-12-02",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-D13",
+        "TC-12-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-12-03",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-D13",
+        "TC-12-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-13-01",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-13-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-13-02",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-13-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-13-03",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-13-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-13-04",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-13-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-14-01",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-D14",
+        "TC-14-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-14-02",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-14-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-15-01",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-15-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-15-02",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-D15",
+        "TC-15-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-15-03",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-15-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-16-01",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-16-01",
+        "TC-16-01b",
+        "TC-16-01c"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-16-02",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-16-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-16-03",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-16-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-16-04",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-16-04a",
+        "TC-16-04b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-17-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-17-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-17-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-17-02",
+        "TC-30-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-17-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-09-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-17-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-17-04a",
+        "TC-17-04b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-17-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-17-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-17-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-17-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-18-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-18-01",
+        "TC-M04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-18-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-18-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-18-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-18-03",
+        "TC-25-08"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-18-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-18-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-18-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-18-05",
+        "TC-25-09"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-18-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-21-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-24-01",
+        "TC-18-03",
+        "TC-M06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-24-01",
+        "TC-24-02b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-24-03",
+        "TC-25-10",
+        "TC-M06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-24-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-24-05",
+        "TC-24-11"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-24-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-24-07",
+        "TC-S07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-24-08"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-09",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-24-09",
+        "TC-25-11d"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-10",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-24-10"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-11",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-24-11"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-24-12",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-37-01a",
+        "TC-37-02",
+        "TC-24-12a",
+        "TC-24-12b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-23-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-23-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-23-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D10",
+        "TC-23-02",
+        "TC-23-02b",
+        "TC-25-07",
+        "TC-23-02c",
+        "TC-D18"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-23-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D08",
+        "TC-D18",
+        "TC-D19"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-23-04",
+      "paused": false,
+      "verdict": "待人工",
+      "tcs": [
+        "TC-D16",
+        "TC-M08"
+      ],
+      "human": "TC-M08"
+    },
+    {
+      "ac": "AC-23-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-D09"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-23-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-S06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-19-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-27-05",
+        "TC-PS-01",
+        "TC-PS-04",
+        "TC-PS-06",
+        "TC-S01",
+        "TC-S08",
+        "TC-S09"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-19-02",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-19-02a",
+        "TC-35-02",
+        "TC-X-edge",
+        "TC-M03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-19-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-21-01",
+        "TC-M04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-19-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-S02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-20-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-20-01",
+        "TC-27-01",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-20-02",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-20-02",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-20-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-20-03",
+        "TC-25-01",
+        "TC-27-04",
+        "TC-20-04a",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-20-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-20-04a",
+        "TC-20-04b",
+        "TC-20-04c",
+        "TC-20-04d"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-21-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-21-01",
+        "TC-37-05b",
+        "TC-37-01a",
+        "TC-37-01b",
+        "TC-37-05a",
+        "TC-M01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-21-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-S04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-21-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-21-03b",
+        "TC-37-01a",
+        "TC-35-01",
+        "TC-37-05a",
+        "TC-21-03",
+        "TC-M01",
+        "TC-S05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-22-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-22-01",
+        "TC-22-01m",
+        "TC-22-01r",
+        "TC-M07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-22-02",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-22-02b",
+        "TC-22-02",
+        "TC-M07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-22-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-22-03b",
+        "TC-22-03",
+        "TC-M07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-22-04",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-22-04b",
+        "TC-22-04",
+        "TC-M07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-22-05",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-22-05a",
+        "TC-22-05b",
+        "TC-M07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-22-05b",
+        "TC-25-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-08"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-09",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-09"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-10",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-10"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-25-11",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-11",
+        "TC-25-11d"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-26-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-26-01",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-26-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-26-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-26-03",
+      "paused": true,
+      "verdict": "不適用（暫停）",
+      "tcs": [
+        "TC-26-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-26-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-25-03",
+        "TC-26-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-26-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-26-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-26-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-26-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-27-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-27-01",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-27-02",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-27-02",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-27-03",
+      "paused": false,
+      "verdict": "待人工",
+      "tcs": [
+        "TC-27-03",
+        "TC-36-03b",
+        "TC-M09"
+      ],
+      "human": "TC-M09（虛擬鍵盤）"
+    },
+    {
+      "ac": "AC-27-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-27-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-27-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-27-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-28-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-28-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-28-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-28-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-28-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-28-03",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-28-04",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-28-04",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-28-05",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-28-05",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-28-06",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-28-06",
+        "TC-M05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-28-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-28-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-28-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-28-08"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-29-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-29-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-29-02",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-29-02",
+        "TC-M10"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-29-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-29-03",
+        "TC-M10"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-07",
+        "TC-30-07c"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-08"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-09",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-09"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-10",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-10",
+        "TC-30-10b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-11",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-11"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-12",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-12"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-13",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-13",
+        "TC-30-07c"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-30-14",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-30-14"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-31-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-31-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-31-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-31-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-31-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-22-01m",
+        "TC-33-08",
+        "TC-31-03",
+        "TC-36-03b",
+        "TC-31-03d"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-31-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-S10"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-03-05",
+        "TC-32-04",
+        "TC-32-04obs"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-08"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-09",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-09"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-10",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-10"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-32-11",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-32-11a",
+        "TC-32-11b"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-33-01",
+      "paused": false,
+      "verdict": "待人工",
+      "tcs": [
+        "TC-33-01a",
+        "TC-MIC-1"
+      ],
+      "human": "V-MIC-1"
+    },
+    {
+      "ac": "AC-33-02",
+      "paused": false,
+      "verdict": "待人工",
+      "tcs": [
+        "TC-33-02a",
+        "TC-MIC-2"
+      ],
+      "human": "V-MIC-2"
+    },
+    {
+      "ac": "AC-33-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-33-03",
+        "TC-MIC-3"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-33-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-33-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-33-05",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-33-05",
+        "TC-MIC-5"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-33-06",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-33-06",
+        "TC-MIC-5"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-33-07",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-33-07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-33-08",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-33-08",
+        "TC-MIC-3"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-34-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-34-01",
+        "TC-PS-02",
+        "TC-PS-03",
+        "TC-X-edge",
+        "TC-PWA-H1"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-34-02",
+      "paused": false,
+      "verdict": "待人工",
+      "tcs": [
+        "TC-PWA-H1",
+        "TC-PWA-H2"
+      ],
+      "human": "TC-PWA-H1／H2"
+    },
+    {
+      "ac": "AC-34-03",
+      "paused": false,
+      "verdict": "待人工",
+      "tcs": [
+        "TC-34-03a",
+        "TC-PS-03",
+        "TC-PWA-H1",
+        "TC-PWA-H2"
+      ],
+      "human": "TC-PWA-H1／H2"
+    },
+    {
+      "ac": "AC-34-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-34-04",
+        "TC-PS-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-34-05",
+      "paused": false,
+      "verdict": "待人工",
+      "tcs": [
+        "TC-34-05a",
+        "TC-PS-03",
+        "TC-PS-04",
+        "TC-PWA-H3"
+      ],
+      "human": "TC-PWA-H3（iOS）"
+    },
+    {
+      "ac": "AC-34-06",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-34-08",
+        "TC-37-03",
+        "TC-PWA-H1"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-34-07",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-34-07",
+        "TC-PWA-H1"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-34-08",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-37-01a",
+        "TC-37-01b",
+        "TC-34-07",
+        "TC-34-08",
+        "TC-PWA-H3"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-34-09",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-34-09a",
+        "TC-34-09b",
+        "TC-34-09c",
+        "TC-PWA-H1"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-34-10",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-34-09b",
+        "TC-PWA-H1"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-35-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-36-03a",
+        "TC-35-01",
+        "TC-PS-05",
+        "TC-X-edge"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-35-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-35-02",
+        "TC-X-edge"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-35-03",
+      "paused": false,
+      "verdict": "待人工",
+      "tcs": [
+        "TC-PWA-H2"
+      ],
+      "human": "TC-PWA-H2"
+    },
+    {
+      "ac": "AC-35-04",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-35-04",
+        "TC-M07"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-35-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-35-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-36-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-36-01a",
+        "TC-36-01b",
+        "TC-36-01c",
+        "TC-36-01obs"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-36-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-PS-04",
+        "TC-PS-05",
+        "TC-36-01b",
+        "TC-36-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-36-03",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-36-03a",
+        "TC-36-03b",
+        "TC-36-03c",
+        "TC-36-04b",
+        "TC-36-03d",
+        "TC-PWA-H5"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-36-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-36-03c",
+        "TC-36-04b",
+        "TC-36-03d"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-36-05",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-36-03c",
+        "TC-PWA-H5"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-36-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-36-06"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-36-07",
+      "paused": false,
+      "verdict": "待人工",
+      "tcs": [
+        "TC-PS-01",
+        "TC-36-07a",
+        "TC-PWA-H4"
+      ],
+      "human": "TC-PWA-H4（MC-03 後）"
+    },
+    {
+      "ac": "AC-37-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-37-01a",
+        "TC-37-01b",
+        "TC-PS-04",
+        "TC-X-edge",
+        "TC-M03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-37-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-37-02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-37-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-37-03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-37-04",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-37-04"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-37-05",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-37-05b",
+        "TC-37-05a",
+        "TC-PS-05"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-37-06",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-37-06"
+      ],
+      "human": ""
+    }
+  ]
+}

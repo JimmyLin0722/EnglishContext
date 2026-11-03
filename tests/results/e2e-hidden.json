@@ -1,0 +1,37 @@
+[
+  {
+    "suite": "e2e-hidden",
+    "tc": "TC-20-04a",
+    "ac": "AC-20-04（畫面入口、Tab、無障礙樹）、AC-20-03",
+    "result": "通過",
+    "note": "375px：導覽 主控台、難易度設定、單字卡、模擬測驗；Tab 11 個焦點落在隱藏頁或其入口 0；1366px：導覽 主控台、難易度設定、單字卡、模擬測驗；Tab 11 個焦點落在隱藏頁或其入口 0；5 個可到達頁面皆無「解碼器／句型庫」文字、入口與無障礙節點"
+  },
+  {
+    "suite": "e2e-hidden",
+    "tc": "TC-20-04b",
+    "ac": "AC-20-04（手動輸入網址片段、重新載入）",
+    "result": "通過",
+    "note": "#decoder→dashboard；#phrasebank→dashboard；#view-decoder→dashboard；#view-phrasebank→dashboard；#/decoder→dashboard；#/phrasebank→dashboard；#DECODER→dashboard；開啟 #phrasebank→dashboard、重新載入→dashboard；開啟 #decoder→dashboard、重新載入→dashboard；未處理錯誤 0"
+  },
+  {
+    "suite": "e2e-hidden",
+    "tc": "TC-20-04c",
+    "ac": "AC-20-04（匯入備份）",
+    "result": "通過",
+    "note": "匯入提示 [\"已匯入，略過 0 筆\"]；之後目前頁 dashboard、文字=false、入口 0、無障礙樹 0"
+  },
+  {
+    "suite": "e2e-hidden",
+    "tc": "TC-20-04d",
+    "ac": "AC-20-04（內容資料保留）",
+    "result": "通過",
+    "note": "交付檔載入後：長難句 50 句、閱讀策略 3 項、句型 100 則"
+  },
+  {
+    "suite": "e2e-hidden",
+    "tc": "TC-X-hidden",
+    "ac": "（全套件）無未處理例外",
+    "result": "通過",
+    "note": "[]"
+  }
+]

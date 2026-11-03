@@ -1,0 +1,74 @@
+[
+  {
+    "viewport": "375x667",
+    "entry": "firstRun",
+    "startTop": 1318,
+    "startBottom": 1362,
+    "vh": 667,
+    "docH": 1519,
+    "visibleWithoutScroll": false,
+    "scrollNeeded": 695,
+    "cardsBottom": 1029,
+    "position": "static"
+  },
+  {
+    "viewport": "375x812",
+    "entry": "firstRun",
+    "startTop": 1318,
+    "startBottom": 1362,
+    "vh": 812,
+    "docH": 1519,
+    "visibleWithoutScroll": false,
+    "scrollNeeded": 550,
+    "cardsBottom": 1029,
+    "position": "static"
+  },
+  {
+    "viewport": "390x844",
+    "entry": "firstRun",
+    "startTop": 1318,
+    "startBottom": 1362,
+    "vh": 844,
+    "docH": 1519,
+    "visibleWithoutScroll": false,
+    "scrollNeeded": 518,
+    "cardsBottom": 1029,
+    "position": "static"
+  },
+  {
+    "viewport": "412x915",
+    "entry": "firstRun",
+    "startTop": 1318,
+    "startBottom": 1362,
+    "vh": 915,
+    "docH": 1519,
+    "visibleWithoutScroll": false,
+    "scrollNeeded": 447,
+    "cardsBottom": 1029,
+    "position": "static"
+  },
+  {
+    "viewport": "768x1024",
+    "entry": "firstRun",
+    "startTop": 975,
+    "startBottom": 1019,
+    "vh": 1024,
+    "docH": 1124,
+    "visibleWithoutScroll": true,
+    "scrollNeeded": 0,
+    "cardsBottom": 686,
+    "position": "static"
+  },
+  {
+    "viewport": "1366x768",
+    "entry": "firstRun",
+    "startTop": 702,
+    "startBottom": 746,
+    "vh": 768,
+    "docH": 859,
+    "visibleWithoutScroll": true,
+    "scrollNeeded": 0,
+    "cardsBottom": 413,
+    "position": "static"
+  }
+]

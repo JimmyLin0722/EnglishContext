@@ -3,6 +3,7 @@
  * 執行：node --test src/app/__tests__/goal.test.js
  * 數值例全部取自 docs/01-PRD.md v0.6 的 AC；nG 6000 為 PRD 例題假設值。
  * （FE-34）v0.9 常數：NAV_TAB_ORDER 4 項、HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS（architecture.md v0.5 §10.2 goal.test.js 列）。
+ * （FE-42）v0.10 R-19、Q-39：SCORE_DEFAULT 725、scoreForCard（點卡片 = 該色 scoreMax）、AC-26-06 既有分數（architecture.md v0.6 §10.3 goal.test.js 列）。
  */
 "use strict";
 
@@ -53,7 +54,9 @@ test("契約常數：其餘 13 個常數字面值相同", () => {
   assert.equal(C.SCORE_MIN, 10);
   assert.equal(C.SCORE_MAX, 990);
   assert.equal(C.SCORE_STEP, 5);
-  assert.equal(C.SCORE_DEFAULT, 600);
+  // v0.10 Q-39：預設分數 725 = 綠色 scoreMax（契約 GS-7、DS-08）
+  assert.equal(C.SCORE_DEFAULT, 725);
+  assert.equal(C.SCORE_DEFAULT, C.COLOR_LEVELS.find((l) => l.id === "green").scoreMax);
   assert.equal(C.N_O, 1000);
   assert.deepEqual({ ...C.POS_LABELS }, {
     "n.": "名詞", "v.": "動詞", "adj.": "形容詞", "adv.": "副詞",
@@ -328,19 +331,67 @@ test("R2-2（§7.1 v0.2）：十進位字串與數字有效並修正", () => {
   assert.deepEqual(G.parseScoreInput(722.5), { ok: true, score: 725 });
 });
 
-test("AC-01-05：300 點綠 → 470；500 點綠 → 500", () => {
-  assert.equal(G.scoreAfterColorClick(300, "green"), 470);
-  assert.equal(G.scoreAfterColorClick(500, "green"), 500);
+// ── v0.10 R-19：點卡片 = 該色 scoreMax（契約 GS-2、DS-07；Q-32 規則廢止） ──
+
+const CARD_MAX = { orange: 215, brown: 465, green: 725, blue: 855, gold: 990 };
+
+test("scoreForCard：5 色 = 215、465、725、855、990（= COLOR_LEVELS scoreMax）；未知色級 → null", () => {
+  for (const lv of C.COLOR_LEVELS) {
+    assert.equal(G.scoreForCard(lv.id), CARD_MAX[lv.id], lv.id);
+    assert.equal(G.scoreForCard(lv.id), lv.scoreMax, lv.id + " 與契約 scoreMax 一致");
+  }
+  for (const bad of ["red", "", null, undefined, "GREEN", 3]) {
+    assert.equal(G.scoreForCard(bad), null, "未知色級：" + String(bad));
+  }
 });
 
-test("AC-01-07：600 點藍 → 730、點金 → 860；生效色級為綠", () => {
-  const blue = G.scoreAfterColorClick(600, "blue");
-  assert.equal(blue, 730);
+test("scoreAfterColorClick（保留名稱）：任意合法 S 皆回該色 scoreMax；未知色級回 S", () => {
+  for (const S of [10, 300, 600, 725, 735, 990]) {
+    for (const id of Object.keys(CARD_MAX)) {
+      assert.equal(G.scoreAfterColorClick(S, id), CARD_MAX[id], S + " 點 " + id);
+    }
+    assert.equal(G.scoreAfterColorClick(S, "red"), S, S + " 點未知色級");
+    assert.equal(G.scoreAfterColorClick(S, null), S);
+  }
+});
+
+test("AC-01-05：(a) 300 點綠 → 725；(b) 600（既有分數，已在綠範圍內）點綠 → 725", () => {
+  assert.equal(G.scoreAfterColorClick(300, "green"), 725);
+  assert.equal(G.scoreAfterColorClick(600, "green"), 725);
+  assert.equal(G.colorOf(G.scoreForCard("green")), "green");
+});
+
+test("AC-01-07：點藍 → 855、點金 → 990；生效色級為綠", () => {
+  const blue = G.scoreAfterColorClick(725, "blue");
+  assert.equal(blue, 855);
   assert.equal(G.colorOf(blue), "blue");
   assert.equal(G.effectiveColorOf(G.colorOf(blue)), "green");
-  const gold = G.scoreAfterColorClick(600, "gold");
-  assert.equal(gold, 860);
+  const gold = G.scoreAfterColorClick(725, "gold");
+  assert.equal(gold, 990);
+  assert.equal(G.colorOf(gold), "gold");
   assert.equal(G.effectiveColorOf(G.colorOf(gold)), "green");
+});
+
+test("AC-02-04：依序點 5 色 → 分數依序 215、465、725、855、990，Color(分數) = 被點的色級", () => {
+  let S = C.SCORE_DEFAULT;
+  const seen = [];
+  for (const id of ["orange", "brown", "green", "blue", "gold"]) {
+    S = G.scoreAfterColorClick(S, id);
+    assert.equal(G.colorOf(G.scoreForCard(id)), id);
+    assert.equal(G.colorOf(S), id);
+    seen.push(S);
+  }
+  assert.deepEqual(seen, [215, 465, 725, 855, 990]);
+});
+
+test("AC-26-06：12 個既有分數的色級與每日新字量依 PRD（不轉換分數）", () => {
+  const scores = [10, 215, 220, 465, 470, 725, 730, 855, 860, 990, 600, 735];
+  assert.deepEqual(scores.map((S) => G.colorOf(S)),
+    ["orange", "orange", "brown", "brown", "green", "green", "blue", "blue", "gold", "gold", "green", "blue"]);
+  assert.deepEqual(scores.map((S) => G.dailyNewWords(S)),
+    [10, 10, 10, 10, 15, 15, 20, 20, 20, 20, 15, 20]);
+  assert.deepEqual(scores.map((S) => G.effectiveColorOf(G.colorOf(S))),
+    ["orange", "orange", "brown", "brown", "green", "green", "green", "green", "green", "green", "green", "green"]);
 });
 
 test("AC-01-06：分數 300 對應棕，開放色級的生效色級不變換", () => {
@@ -427,8 +478,9 @@ test("瀏覽器載入：三檔依序執行後掛到 EMT.core", () => {
     vm.runInContext(src, sandbox, { filename: f });
   }
   const core = sandbox.self.EMT.core;
-  assert.equal(core.constants.SCORE_DEFAULT, 600);
+  assert.equal(core.constants.SCORE_DEFAULT, 725);
   assert.equal(core.wordkey.wordKey(" ABC "), "abc");
   assert.equal(core.goal.estimate(800, 0, NB, NG_EXAMPLE).weeks, 43);
-  assert.equal(core.goal.scoreAfterColorClick(300, "green"), 470);
+  assert.equal(core.goal.scoreForCard("green"), 725);
+  assert.equal(core.goal.scoreAfterColorClick(300, "green"), 725);
 });
