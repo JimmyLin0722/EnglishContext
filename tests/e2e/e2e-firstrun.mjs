@@ -5,8 +5,10 @@ import fs from "node:fs";
 import path from "node:path";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, storageMode } from "./lib/inits.mjs";
-import { stateRecord, seed, readState, scoreVisibility } from "./lib/state.mjs";
+import { stateRecord, seed, readState, scoreVisibility, dashGoal, GOAL_LINE, expandBackup } from "./lib/state.mjs";
 // 第 3 輪（PRD v0.10 R-19、Q-39）：首次預設 725、只點卡片；導覽 4 項（v0.9 R-18 三）
+// 第 5 輪（PRD v0.13）：色級列改精簡列表 .cz-level（AC-26-01）；首次畫面試算結果卡改為固定底部列摘要行（AC-25-01、AC-41-02）；
+// 主控台目標區改為今日任務卡目標行（AC-39-04）；近 7 天無資料為空狀態（AC-24-10、AC-39-07）
 
 const R = recorder("e2e-firstrun");
 const KEY = "englishMasterTrack:state";
@@ -31,11 +33,11 @@ async function open(inits = [], vp = [1366, 900]) {
 const toasts = (p, n = 0) => p.ev(`window.__qaToasts.slice(${n}).map((t) => t.text)`);
 const vis = (p, sel) => p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return false; const s = getComputedStyle(e); if (s.display === "none" || s.visibility === "hidden" || e.closest("[hidden]")) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; })()`);
 const stored = (p) => p.ev(`localStorage.getItem(${JSON.stringify(KEY)})`);
-const goalTexts = (p) => p.ev(`[...document.querySelectorAll(".dash-stats--goal .dash-stat")].map((e) => e.querySelector(".dash-stat__label").textContent + "=" + e.querySelector(".dash-stat__value").textContent).join("｜")`);
+const goalTexts = (p) => dashGoal(p); // 第 5 輪：今日任務卡目標行（AC-39-04）
 const firstRunInfo = (p) => p.ev(`(() => { const v = (sel) => { const e = typeof sel === "string" ? document.querySelector(sel) : sel; if (!e) return false; const s = getComputedStyle(e); if (s.display === "none" || s.visibility === "hidden" || e.closest("[hidden]")) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
-  return { entry: document.body.dataset.entry, tab: EMT.router.current(), cards: [...document.querySelectorAll(".cz-colors .cz-color")].filter(v).map((b) => b.dataset.color).join(","),
-    pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((b) => b.dataset.color).join(","), input: v("#cz-score-input") ? document.getElementById("cz-score-input").value : null,
-    slider: v("#cz-score-range"), estimate: v(".cz-estimate"), start: v("#cz-start"), restore: v("#cz-restore"), apply: !!document.getElementById("cz-apply"),
+  return { entry: document.body.dataset.entry, tab: EMT.router.current(), cards: [...document.querySelectorAll(".cz-levels .cz-level")].filter(v).map((b) => b.dataset.color).join(","),
+    pressed: [...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((b) => b.dataset.color).join(","), input: v("#cz-score-input") ? document.getElementById("cz-score-input").value : null,
+    slider: v("#cz-score-range"), estimate: v(".cz-estimate"), summary: v(".cz-firstbar__summary") ? document.querySelector(".cz-firstbar__summary").textContent : null, start: v("#cz-start"), restore: v("#cz-restore"), apply: !!document.getElementById("cz-apply"),
     nav: v("#app-nav"), navBtns: [...document.querySelectorAll("#app-nav [data-tab]")].filter(v).length, toggle: v("#nav-toggle"), dashboard: v("#view-dashboard"), entries: [...document.querySelectorAll(".dash-entry")].filter(v).length,
     custom: v("#customizer-custom"), form: v(".cv-form"), templates: [...document.querySelectorAll(".cv-templates__btn")].filter(v).length, status: v(".cz-status"), footerSources: v("#footer-sources") }; })()`);
 
@@ -80,13 +82,13 @@ let BACKUP_V2, BACKUP_V1;
     await p.viewport(375, 667); await sleep(150);
     const m = await firstRunInfo(p);
     await p.viewport(1366, 900); await sleep(100);
-    const ok = key === null && a.entry === "firstRun" && a.tab === "customizer" && a.cards === "orange,brown,green,blue,gold" && a.pressed === "green" && a.input === null && !a.slider && a.estimate && a.start && a.restore && !a.apply
+    const ok = key === null && a.entry === "firstRun" && a.tab === "customizer" && a.cards === "orange,brown,green,blue,gold" && a.pressed === "green" && a.input === null && !a.slider && !a.estimate && a.summary === "綠級・每日 15 字　預計 54 週" && a.start && a.restore && !a.apply
       && !a.nav && a.navBtns === 0 && !a.toggle && !a.dashboard && a.entries === 0 && !a.custom && !a.form && a.templates === 0 && a.footerSources
       && !m.nav && m.navBtns === 0 && !m.toggle && m.start;
     return { ok, note: `1366：${JSON.stringify(a)}；375：導覽可見=${m.nav}、可見導覽鈕 ${m.navBtns}、選單鈕=${m.toggle}；狀態鍵=${key === null ? "無" : "有"}` };
   });
   await R.check("TC-25-04", "AC-25-04", async () => {
-    await p.click('.cz-color[data-color="brown"]'); await p.click('.cz-color[data-color="orange"]');
+    await p.click('.cz-level[data-color="brown"]'); await p.click('.cz-level[data-color="orange"]');
     const changed = await firstRunInfo(p); const d0 = await p.ev(`EMT.store.getState().data.goal.draftScore`);
     await p.reload(); const a = await firstRunInfo(p); const k1 = await stored(p); const d1 = await p.ev(`EMT.store.getState().data.goal.draftScore`);
     await p.goto("about:blank", { waitReady: false }); await sleep(300); await p.goto();
@@ -95,7 +97,7 @@ let BACKUP_V2, BACKUP_V1;
     return { ok, note: `點棕再點橘後 選中 ${changed.pressed}、記憶體 draftScore ${d0}；重新整理 → ${a.entry}、選中 ${a.pressed}、draftScore ${d1}、狀態鍵 ${k1 === null ? "無" : "有"}；關閉重開 → ${b.entry}、選中 ${b.pressed}、draftScore ${d2}、狀態鍵 ${k2 === null ? "無" : "有"}` };
   });
   await R.check("TC-25-07", "AC-25-07、AC-23-02（任一頁面）", async () => {
-    await p.click('.cz-color[data-color="brown"]');
+    await p.click('.cz-level[data-color="brown"]');
     await p.click("#footer-sources"); await sleep(350);
     const s = await p.ev(`({ tab: EMT.router.current(), sources: !document.getElementById("view-sources").hidden && document.getElementById("view-sources").innerText.length > 200, entry: document.body.dataset.entry })`);
     const navInSources = await vis(p, "#app-nav"); const back = await vis(p, "#footer-first-run-back");
@@ -155,13 +157,13 @@ let BACKUP_V2, BACKUP_V1;
   const p = await open();
   await p.goto();
   await R.check("TC-25-02", "AC-25-02", async () => {
-    await p.click('.cz-color[data-color="brown"]');
+    await p.click('.cz-level[data-color="brown"]');
     const pre = await firstRunInfo(p);
     await p.click("#cz-start"); await sleep(400);
     const a = await firstRunInfo(p); const g = await goalTexts(p); const k = JSON.parse(await stored(p) || "null");
     const total = await p.ev(`EMT.store.getState().runtime.studySet.length`);
     const dlg = await p.ev(`!!document.querySelector(".dialog")`);
-    const ok = pre.pressed === "brown" && !dlg && a.entry === "main" && a.tab === "dashboard" && a.dashboard && a.nav && a.navBtns === 4 && g.includes("目前目標色級=棕") && g.includes("目前生效色級=棕") && g.includes("每日新字量=10 字/天") && !g.includes("分數")
+    const ok = pre.pressed === "brown" && !dlg && a.entry === "main" && a.tab === "dashboard" && a.dashboard && a.nav && a.navBtns === 4 && g === GOAL_LINE.brown && !g.includes("分數")
       && k && k.schemaVersion === 2 && k.data.goal.appliedScore === 465 && k.data.goal.effectiveColor === "brown" && total === 2809;
     return { ok, note: `點棕 → 選中 ${pre.pressed}；按「開始學習」→ 確認視窗=${dlg}、${a.entry}/${a.tab}、導覽 ${a.navBtns} 鈕；主控台 ${g}；單字集 ${total}；寫入 schemaVersion ${k && k.schemaVersion}、goal ${k && JSON.stringify(k.data.goal)}` };
   });
@@ -182,11 +184,11 @@ let BACKUP_V2, BACKUP_V1;
   const p = await open();
   await p.goto();
   await R.check("TC-25-03", "AC-25-03、AC-26-04（首次畫面）", async () => {
-    await p.click('.cz-color[data-color="blue"]');
-    const pre = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, cap: [...document.querySelectorAll(".cz-warning")].some((e) => !e.hidden && e.getClientRects().length && e.textContent === "目前內建字庫到綠色為止"), pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((b) => b.dataset.color).join() })`);
+    await p.click('.cz-level[data-color="blue"]');
+    const pre = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, cap: [...document.querySelectorAll(".cz-firstbar__locked")].some((e) => !e.hidden && e.getClientRects().length && e.textContent === "目前內建字庫到綠色為止"), summary: (document.querySelector(".cz-firstbar__summary") || {}).textContent, pressed: [...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((b) => b.dataset.color).join() })`);
     await p.click("#cz-start"); await sleep(400);
     const g = await goalTexts(p); const k = JSON.parse(await stored(p) || "null");
-    const ok = pre.draft === 855 && pre.cap && pre.pressed === "blue" && g.includes("目前目標色級=藍") && g.includes("目前生效色級=綠（內建上限）") && g.includes("每日新字量=15 字/天") && !g.includes("分數")
+    const ok = pre.draft === 855 && pre.cap && pre.pressed === "blue" && g === GOAL_LINE.blue && pre.summary === "藍級・每日 20 字　預計 41 週（以綠試算）" && !g.includes("分數")
       && k && k.data.goal.appliedScore === 855 && k.data.goal.effectiveColor === "green";
     return { ok, note: `點藍 → ${JSON.stringify(pre)}；開始學習後主控台 ${g}；localStorage goal ${k && JSON.stringify(k.data.goal)}` };
   });
@@ -226,7 +228,7 @@ let BACKUP_V2, BACKUP_V1;
   });
   await p.reload();
   await R.check("TC-25-10", "AC-25-10、AC-24-03", async () => {
-    await p.click('.cz-color[data-color="gold"]'); // 首次畫面上尚未生效的選擇（990）
+    await p.click('.cz-level[data-color="gold"]'); // 首次畫面上尚未生效的選擇（990）
     const n = (await toasts(p)).length;
     const dlg = await pickFile(p, BACKUP_V2, "restore.json");
     await sleep(300);
@@ -235,10 +237,10 @@ let BACKUP_V2, BACKUP_V1;
     const now = await p.ev(`EMT.store.getState().data`); const k1 = JSON.parse(await stored(p) || "null");
     const reinitDlg = await p.ev(`!!document.querySelector(".dialog")`);
     await p.reload(); const b = await firstRunInfo(p); const g2 = await goalTexts(p); const k2 = JSON.parse(await stored(p) || "null");
-    await p.go("customizer"); await sleep(250); const pressedAfter = await p.ev(`[...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join()`);
-    const ok = !!dlg && !reinitDlg && a.entry === "main" && a.tab === "dashboard" && a.nav && g.includes("目前目標色級=棕") && g.includes("目前生效色級=棕") && t.some((x) => x.startsWith("已匯入，略過 0 筆"))
+    await p.go("customizer"); await sleep(250); const pressedAfter = await p.ev(`[...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((x) => x.dataset.color).join()`);
+    const ok = !!dlg && !reinitDlg && a.entry === "main" && a.tab === "dashboard" && a.nav && g === GOAL_LINE.brown && t.some((x) => x.startsWith("已匯入，略過 0 筆"))
       && JSON.stringify(now.goal) === JSON.stringify(exp.goal) && exp.goal.appliedScore === 300 && k1.data.goal.appliedScore === 300 && now.customVocab.length === exp.customVocab.length
-      && b.entry === "main" && g2.includes("目前生效色級=棕") && k2.data.goal.appliedScore === 300 && pressedAfter === "brown";
+      && b.entry === "main" && g2 === GOAL_LINE.brown && k2.data.goal.appliedScore === 300 && pressedAfter === "brown";
     return { ok, note: `首次畫面點金（990）後還原 300 棕備份：匯入確認框=${!!dlg}、初始化確認視窗=${reinitDlg}、提示 ${JSON.stringify(t)} → ${a.entry}/${a.tab}、導覽=${a.nav}；主控台 ${g}；goal ${JSON.stringify(now.goal)}；localStorage appliedScore ${k1.data.goal.appliedScore}；重新載入 → ${b.entry}、${g2}、localStorage ${k2.data.goal.appliedScore}；難易度設定選中 ${pressedAfter}` };
   });
   await p.close();
@@ -249,19 +251,20 @@ let BACKUP_V2, BACKUP_V1;
   const p = await open();
   await p.goto(); await p.startLearning();
   const importMain = async (content, name, confirm = true) => {
-    await p.go("dashboard"); const n = (await toasts(p)).length;
+    await p.go("dashboard"); await sleep(300); await expandBackup(p); const n = (await toasts(p)).length; // 第 5 輪：先展開「資料備份」（AC-39-08）
     const dlg = await pickFile(p, content, name, { confirm, trigger: '[data-action="import-backup"]' });
     return { dlg, t: await toasts(p, n) };
   };
-  const progress = () => p.ev(`(() => { EMT.router.go("dashboard"); return { text: document.querySelector(".db-today__text").textContent, bars: [...document.querySelectorAll(".db-bars__item")].map((b) => b.querySelector(".db-bars__count").textContent).join(",") }; })()`);
+  const progress = () => p.ev(`(() => { EMT.router.go("dashboard"); return { text: document.querySelector(".db-today__text").textContent, bars: [...document.querySelectorAll(".db-bars__item")].map((b) => b.querySelector(".db-bars__count").textContent).join(","),
+    empty: (() => { const e = document.querySelector(".db-chart__empty"); return e && !e.hidden && e.getClientRects().length ? e.textContent : null; })(), barsShown: (() => { const o = document.querySelector(".db-bars"); return !!o && !o.hidden && o.getClientRects().length > 0; })() }; })()`);
   await R.check("TC-24-10", "AC-24-10", async () => {
     const r = await importMain(BACKUP_V1, "v1.json");
     const d = await p.ev(`EMT.store.getState().data`); const pr = await progress();
     const exp = JSON.parse(BACKUP_V1).data;
     const same = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged"].every((k) => JSON.stringify(d[k]) === JSON.stringify(exp[k]));
     await p.reload(); const k = JSON.parse(await stored(p));
-    const ok = r.t.some((x) => x.startsWith("已匯入，略過 0 筆")) && !r.t.some((x) => /格式錯誤|版本不相容/.test(x)) && same && pr.text.startsWith("今日已學 0 /") && pr.bars === "0,0,0,0,0,0,0" && k.schemaVersion === 2 && !!k.data.todayLearned && !!k.data.learnedHistory;
-    return { ok, note: `v1 備份（無 todayLearned、learnedHistory）匯入：提示 ${JSON.stringify(r.t)}；既有 7 欄還原相同=${same}；${pr.text}、長條 ${pr.bars}；重新載入後 localStorage schemaVersion ${k.schemaVersion}、todayLearned ${JSON.stringify(k.data.todayLearned)}` };
+    const ok = r.t.some((x) => x.startsWith("已匯入，略過 0 筆")) && !r.t.some((x) => /格式錯誤|版本不相容/.test(x)) && same && pr.text.startsWith("今日已學 0 /") && pr.empty === "開始學習後會顯示紀錄" && !pr.barsShown && k.schemaVersion === 2 && !!k.data.todayLearned && !!k.data.learnedHistory;
+    return { ok, note: `v1 備份（無 todayLearned、learnedHistory）匯入：提示 ${JSON.stringify(r.t)}；既有 7 欄還原相同=${same}；${pr.text}、近 7 天空狀態「${pr.empty}」、長條顯示=${pr.barsShown}；重新載入後 localStorage schemaVersion ${k.schemaVersion}、todayLearned ${JSON.stringify(k.data.todayLearned)}` };
   });
   await R.check("TC-24-11", "AC-24-11、AC-24-05", async () => {
     const base = JSON.parse(BACKUP_V2);
@@ -295,40 +298,61 @@ let BACKUP_V2, BACKUP_V1;
 {
   const p = await open();
   await p.goto(); await p.startLearning();
-  const cards = () => p.ev(`[...document.querySelectorAll(".cz-colors .cz-color")].map((b) => { const r = b.getBoundingClientRect(); return { c: b.dataset.color, tag: b.tagName, name: b.querySelector(".cz-color__name").textContent, range: (b.innerText.match(/\\d+\\s*[～~－-]\\s*\\d+|\\d+\\s*分/g) || []).join(""),
-    vocab: b.querySelector(".cz-color__vocab strong").textContent, daily: b.querySelector(".cz-color__daily").textContent, scen: b.querySelector(".cz-color__scenario").textContent, lock: !!b.querySelector("svg"), soon: b.textContent.includes("即將開放"),
-    pressed: b.getAttribute("aria-pressed"), w: Math.round(r.width), h: Math.round(r.height) }; })`);
+  // 第 5 輪（v0.12 AC-26-01）：精簡色級列
+  const cards = () => p.ev(`[...document.querySelectorAll(".cz-levels .cz-level")].map((b) => { const r = b.getBoundingClientRect(); const q = (s) => b.querySelector(s); const t = (s) => (q(s) ? q(s).textContent : null);
+    const clip = (s) => { const e = q(s); return !!e && e.scrollWidth > e.clientWidth + 0.5; }; const desc = q(".cz-level__desc"); const ds = getComputedStyle(desc); const check = q(".cz-level__check");
+    const bar = getComputedStyle(q(".cz-level__bar")).backgroundColor; const cs = getComputedStyle(b);
+    return { c: b.dataset.color, tag: b.tagName, name: q(".cz-level__name").textContent.replace("✓", "").trim(), range: (b.innerText.match(/\\d+\\s*[～~－-]\\s*\\d+|\\d+\\s*分/g) || []).join(""),
+      vocab: t(".cz-level__vocab"), daily: t(".cz-level__daily"), dash: t(".cz-level__dash"), desc: desc.textContent, descOneLine: ds.whiteSpace === "nowrap" && desc.getBoundingClientRect().height <= parseFloat(ds.lineHeight || "20") * 1.5 + 2,
+      lock: !!q(".cz-lock") && q(".cz-lock").getBoundingClientRect().width > 0, soon: b.innerText.includes("即將開放"), opacity: +cs.opacity, text: b.innerText,
+      pressed: b.getAttribute("aria-pressed"), check: !!check && getComputedStyle(check).display !== "none" && check.getBoundingClientRect().width > 0, border: cs.borderTopColor, bg: cs.backgroundColor, bar,
+      clipName: clip(".cz-level__name"), clipSide: clip(".cz-level__side"), sideRight: Math.round(q(".cz-level__side").getBoundingClientRect().right), right: Math.round(r.right), w: Math.round(r.width), h: Math.round(r.height) }; })`);
+  const layoutInfo = () => p.ev(`({ hscroll: document.documentElement.scrollWidth > document.documentElement.clientWidth, note: [...document.querySelectorAll("#view-customizer .cz-vocab-note")].filter((e) => e.getClientRects().length).map((e) => e.textContent), noteCount: (document.getElementById("view-customizer").innerText.match(/本系統建議字量/g) || []).length })`);
+  const LV = { orange: "rgb(232, 131, 58)", brown: "rgb(139, 90, 43)", green: "rgb(46, 158, 91)", blue: "rgb(47, 111, 214)", gold: "rgb(201, 162, 39)" };
+  const judgeRows = (cs) => { const it = Object.fromEntries(cs.map((x) => [x.c, x]));
+    return cs.map((x) => x.c).join() === "orange,brown,green,blue,gold" && cs.every((x) => x.tag === "BUTTON" && x.w >= 44 && x.h >= 44 && x.name && !x.range && !x.clipName && !x.clipSide && x.descOneLine && x.bar === LV[x.c])
+      && it.orange.vocab === "1,000 字" && it.brown.vocab === "2,809 字" && it.green.vocab === "5,620 字" && it.orange.daily === "10 字/天" && it.brown.daily === "10 字/天" && it.green.daily === "15 字/天"
+      && ["orange", "brown", "green"].every((c) => !it[c].lock && it[c].desc !== "即將開放" && it[c].opacity === 1)
+      && ["blue", "gold"].every((c) => it[c].lock && it[c].desc === "即將開放" && it[c].vocab === null && it[c].daily === null && (it[c].dash === "—" || it[c].dash === null) && !/待定|\d|字\/天/.test(it[c].text) && it[c].opacity < 1)
+      && cs.filter((x) => x.pressed === "true").length === 1 && cs.every((x) => (x.pressed === "true") === x.check) && cs.filter((x) => x.pressed === "true").every((x) => x.border === LV[x.c]); };
+  const fmt = (cs) => cs.map((x) => `${x.name}[${x.vocab || x.dash || "—"}/${x.daily || "—"}/「${x.desc.slice(0, 8)}」${x.lock ? " 鎖" : ""} op${x.opacity} ${x.w}×${x.h}${x.pressed === "true" ? " 選中✓=" + x.check + " 框 " + x.border : ""}${x.clipName || x.clipSide ? " 裁切" : ""}]`).join("／");
   await R.check("TC-26-01", "AC-26-01、AC-01-01", async () => {
     const out = []; let ok = true;
-    for (const [w, h] of [[375, 667], [768, 1024], [1366, 900]]) {
+    for (const [w, h] of [[375, 667], [768, 1024], [1366, 768]]) {
       await p.viewport(w, h); await p.go("customizer"); await sleep(300);
-      const cs = await cards(); const it = Object.fromEntries(cs.map((x) => [x.c, x]));
-      const good = cs.map((x) => x.c).join() === "orange,brown,green,blue,gold" && cs.every((x) => x.tag === "BUTTON" && x.w >= 44 && x.h >= 44 && x.name && !x.range && x.scen)
-        && it.orange.vocab === "1,000 字" && it.brown.vocab === "2,809 字" && it.green.vocab === "5,620 字" && it.blue.vocab === "待定" && it.gold.vocab === "待定"
-        && /10 字\/天/.test(it.orange.daily) && /10 字\/天/.test(it.brown.daily) && /15 字\/天/.test(it.green.daily) && /20 字\/天.*僅供試算/.test(it.blue.daily) && /20 字\/天.*僅供試算/.test(it.gold.daily) && !/僅供試算/.test(it.green.daily)
-        && it.blue.lock && it.gold.lock && it.blue.soon && it.gold.soon && !it.orange.lock && !it.green.soon;
-      ok = ok && good; out.push(`${w}px：${cs.map((x) => `${x.name} ${x.vocab} ${x.daily.replace(/\s+/g, "")} ${x.w}×${x.h}${x.lock ? " 鎖" : ""}${x.range ? " 範圍「" + x.range + "」" : ""}`).join("／")}`);
+      const cs = await cards(); const li = await layoutInfo();
+      // 首次畫面同樣式：另開清空狀態的首次畫面比對結構
+      const good = judgeRows(cs) && !li.hscroll && li.noteCount === 1;
+      ok = ok && good; out.push(`${w}px 一般頁：${fmt(cs)}；水平捲軸=${li.hscroll}；說明行 ${li.noteCount} 次「${li.note.join("")}」${good ? "" : "（不符）"}`);
     }
-    // 整張卡片可點：既有 300（棕）時點綠卡右下角（非文字區）
+    // 首次畫面：兩種寬度，與一般頁相同精簡列表
+    for (const [w, h] of [[375, 667], [1366, 768]]) {
+      await p.viewport(w, h); await p.ev(`localStorage.clear()`); await p.goto(); await sleep(250);
+      const cs = await cards(); const li = await layoutInfo(); const entry = await p.ev(`document.body.dataset.entry`);
+      const good = entry === "firstRun" && judgeRows(cs) && !li.hscroll && li.noteCount === 1 && cs.find((x) => x.c === "green").pressed === "true";
+      ok = ok && good; out.push(`${w}px 首次畫面：${fmt(cs)}；水平捲軸=${li.hscroll}${good ? "" : "（不符）"}`);
+      await p.click("#cz-start"); await sleep(350);
+    }
+    // 整列可點：既有 300（棕）時點綠列右下角（非文字區）
     await p.viewport(1366, 900); await seed(p, stateRecord(300)); await p.go("customizer"); await sleep(250);
-    const pt = await p.ev(`(() => { const b = document.querySelector('.cz-color[data-color="green"]'); b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); return { x: r.right - 6, y: r.bottom - 6 }; })()`);
+    const pt = await p.ev(`(() => { const b = document.querySelector('.cz-level[data-color="green"]'); b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); return { x: r.right - 4, y: r.bottom - 4 }; })()`);
     for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) await p.send("Input.dispatchMouseEvent", { type, x: pt.x, y: pt.y, button: "left", clickCount: 1 });
     await sleep(80);
-    const after = await p.ev(`[EMT.store.getState().data.goal.draftScore, [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join()]`);
+    const after = await p.ev(`[EMT.store.getState().data.goal.draftScore, [...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((x) => x.dataset.color).join()]`);
     const forbidden = await p.ev(`/官方門檻|Tier\\s*[1-4]/.test(document.body.innerText)`);
     ok = ok && after[0] === 725 && after[1] === "green" && !forbidden;
-    return { ok, note: out.join("｜") + `；點綠卡右下角 → 選中 ${after[1]}、draftScore ${after[0]}；官方門檻/Tier 字樣=${forbidden}` };
+    return { ok, note: out.join("｜") + `；點綠列右下角 → 選中 ${after[1]}、draftScore ${after[0]}；官方門檻/Tier 字樣=${forbidden}` };
   });
   await R.check("TC-26-02", "AC-26-02", async () => {
     // 既有 300（棕）且有學習紀錄：點卡片本身不跳視窗
     await seed(p, stateRecord(300, { masteredWordKeys: ["the"], vocabQuiz: { answered: 1, correct: 1 } }));
     await p.go("customizer"); await sleep(200);
     const a = await cards();
-    await p.click('.cz-color[data-color="green"]');
+    await p.click('.cz-level[data-color="green"]');
     const b = await cards();
     const e = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, color: document.querySelector(".cz-est-color").textContent, daily: document.querySelector(".cz-est-daily").textContent, eff: document.querySelector(".cz-st-effective").textContent, n: EMT.store.getState().runtime.studySet.length, eff2: EMT.store.getState().data.goal.effectiveColor, dialog: !!document.querySelector(".dialog") })`);
-    await p.click('.cz-color[data-color="orange"]');
-    const c = await p.ev(`({ eff: EMT.store.getState().data.goal.effectiveColor, n: EMT.store.getState().runtime.studySet.length, pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join(), dialog: !!document.querySelector(".dialog") })`);
+    await p.click('.cz-level[data-color="orange"]');
+    const c = await p.ev(`({ eff: EMT.store.getState().data.goal.effectiveColor, n: EMT.store.getState().runtime.studySet.length, pressed: [...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((x) => x.dataset.color).join(), dialog: !!document.querySelector(".dialog") })`);
     const ok = a.filter((x) => x.pressed === "true").map((x) => x.c).join() === "brown" && b.filter((x) => x.pressed === "true").map((x) => x.c).join() === "green" && e.draft === 725 && e.color === "綠" && e.daily === "15 字/天"
       && e.eff === "棕" && e.eff2 === "brown" && e.n === 2809 && !e.dialog && c.eff === "brown" && c.n === 2809 && c.pressed === "orange" && !c.dialog;
     return { ok, note: `既有 300 → 選中 ${a.filter((x) => x.pressed === "true").map((x) => x.c)}；點綠 → 選中 ${b.filter((x) => x.pressed === "true").map((x) => x.c)}、draftScore ${e.draft}、試算 ${e.color}/${e.daily}、生效仍 ${e.eff}、單字集 ${e.n}、確認視窗=${e.dialog}；再點橘（未套用）→ 選中 ${c.pressed}、生效 ${c.eff}、單字集 ${c.n}、確認視窗=${c.dialog}` };
@@ -337,8 +361,8 @@ let BACKUP_V2, BACKUP_V1;
     const out = []; let ok = true;
     for (const [c, s] of [["blue", 855], ["gold", 990]]) {
       await seed(p, stateRecord(600)); await p.go("customizer"); await sleep(200);
-      await p.click(`.cz-color[data-color="${c}"]`);
-      const r = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((x) => x.dataset.color).join(), color: document.querySelector(".cz-est-color").textContent, cap: [...document.querySelectorAll(".cz-estimate .cz-warning")].some((e) => !e.hidden && e.textContent === "目前內建字庫到綠色為止"), applyEnabled: !document.getElementById("cz-apply").disabled })`);
+      await p.click(`.cz-level[data-color="${c}"]`);
+      const r = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, pressed: [...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((x) => x.dataset.color).join(), color: document.querySelector(".cz-est-color").textContent, cap: [...document.querySelectorAll(".cz-estimate .cz-warning")].some((e) => !e.hidden && e.textContent === "目前內建字庫到綠色為止"), applyEnabled: !document.getElementById("cz-apply").disabled })`);
       const good = r.draft === s && r.pressed === c && r.cap && r.applyEnabled && r.color.includes("即將開放"); ok = ok && good; out.push(`${c}：${JSON.stringify(r)}`);
     }
     return { ok, note: out.join("；") };
@@ -383,14 +407,14 @@ R.na("TC-26-03", "AC-26-03", "PRD v0.10 標「v0.10 暫停（分數輸入隱藏�
       ok = ok && good; screens.push(`${label}：滑桿 ${v.sliders}、輸入框 ${v.inputs}、範圍文字 ${JSON.stringify(v.rangeText)}、「目標分數」${v.targetScore}、錯誤提示 ${v.invalidMsg}、無障礙樹分數元件 ${JSON.stringify(ax)}、Tab ${tw.visited} 個焦點中分數元件 ${tw.hit.length}`);
     };
     await check("(a) 首次畫面");
-    for (const c of ["orange", "brown", "green", "blue", "gold"]) await p.click(`.cz-color[data-color="${c}"]`);
+    for (const c of ["orange", "brown", "green", "blue", "gold"]) await p.click(`.cz-level[data-color="${c}"]`);
     await p.click("#cz-start"); await sleep(400);
     // (c) 主控台
     await check("(c) 主控台");
     // (b) 一般難易度設定頁
     await p.go("customizer"); await sleep(300);
     await check("(b) 一般頁");
-    for (const c of ["orange", "brown", "green", "blue", "gold"]) await p.click(`.cz-color[data-color="${c}"]`);
+    for (const c of ["orange", "brown", "green", "blue", "gold"]) await p.click(`.cz-level[data-color="${c}"]`);
     await p.click("#cz-apply"); await sleep(200);
     await check("(b) 一般頁點 5 卡並套用後");
     await p.go("dashboard"); await sleep(250);

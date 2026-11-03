@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <!-- @@LICENSE@@ -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>English Master Track</title>
-<meta name="theme-color" content="#2f6fd6">
+<title>EnglishContext</title>
+<meta name="theme-color" content="#1e9bf0">
 <meta name="apple-mobile-web-app-title" content="EnglishContext">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -19,7 +19,8 @@
 <!-- 應用殼（FE-02；architecture.md §4.2 掛載點、§9 RWD）。各頁內容由 views 於 mount 時以 core/dom.js 建立。 -->
 <header class="app-header">
   <div class="app-header__inner">
-    <h1 class="app-title">English Master Track</h1>
+    <!-- （v0.12，FE-56）標題列：內嵌 SVG 品牌圖示（裝飾、不產生請求）＋ 名稱文字（NM-2、AC-38-05；architecture.md §7.19.3） -->
+    <h1 class="app-title"><svg class="app-logo" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="7" fill="#1e9bf0"/><path fill="#f7893b" d="M8 7h16a3 3 0 0 1 3 3v9a3 3 0 0 1-3 3H13l-5 4v-4a3 3 0 0 1-3-3v-9a3 3 0 0 1 3-3z"/><path fill="#ffffff" d="M9 10.5h5V12h-3.5v2h3v1.5h-3v2H14V19H9zM23.4 12.2A4.25 4.25 0 1 0 23.4 17.3L22.2 16.4A2.75 2.75 0 1 1 22.2 13.1z"/></svg><span class="app-title__text">EnglishContext</span></h1>
     <button type="button" id="nav-toggle" class="btn app-nav-toggle" aria-controls="app-nav" aria-expanded="false">選單</button>
   </div>
 </header>

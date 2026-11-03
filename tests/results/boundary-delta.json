@@ -1,315 +1,1087 @@
 {
-  "since": "2026-11-02T07:40:00.000Z",
-  "minFe": 45,
+  "head": "4fcbb9f",
+  "since": "2026-11-03T02:57:01.000Z",
+  "minFe": 54,
+  "scope": "CT-24、FE-54～FE-62",
   "rows": [
     {
-      "file": ".gitattributes",
-      "mtime": "2026-11-03T00:26:23.153Z",
-      "owner": [
-        "（主控授權例外）"
-      ]
-    },
-    {
-      "file": ".github/workflows/static.yml",
-      "mtime": "2026-11-02T09:04:21.612Z",
-      "owner": [
-        "（主控修改，PRD R-20 記載）"
-      ]
-    },
-    {
-      "file": ".gitignore",
-      "mtime": "2026-11-03T00:26:23.152Z",
-      "owner": [
-        "（主控授權例外）"
-      ]
-    },
-    {
       "file": "dist/english-master-track.html",
-      "mtime": "2026-11-03T00:48:19.899Z",
+      "status": "M",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:29:36.254Z"
     },
     {
       "file": "dist/site/ads.txt",
-      "mtime": "2026-11-03T00:48:19.907Z",
+      "status": "ignored-modified",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:29:36.261Z"
     },
     {
       "file": "dist/site/icons/apple-touch-icon-180.png",
-      "mtime": "2026-11-03T00:48:19.907Z",
+      "status": "ignored-modified",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:29:36.261Z"
     },
     {
       "file": "dist/site/icons/icon-192.png",
-      "mtime": "2026-11-03T00:48:19.906Z",
+      "status": "ignored-modified",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:29:36.259Z"
     },
     {
       "file": "dist/site/icons/icon-512.png",
-      "mtime": "2026-11-03T00:48:19.906Z",
+      "status": "ignored-modified",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:29:36.260Z"
     },
     {
       "file": "dist/site/icons/icon-maskable-512.png",
-      "mtime": "2026-11-03T00:48:19.906Z",
+      "status": "ignored-modified",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:29:36.260Z"
     },
     {
       "file": "dist/site/index.html",
-      "mtime": "2026-11-03T00:48:19.904Z",
+      "status": "ignored-modified",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:29:36.258Z"
     },
     {
       "file": "dist/site/manifest.webmanifest",
-      "mtime": "2026-11-03T00:48:19.905Z",
+      "status": "ignored-modified",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:29:36.259Z"
     },
     {
       "file": "dist/site/sw.js",
-      "mtime": "2026-11-03T00:48:19.905Z",
+      "status": "ignored-modified",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:29:36.259Z"
     },
     {
-      "file": "package.json",
-      "mtime": "2026-11-03T00:56:10.478Z",
+      "file": "docs/01-PRD.md",
+      "status": "M",
       "owner": [
-        "FE-47"
-      ]
+        "（上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）"
+      ],
+      "mtime": "2026-11-03T06:58:07.925Z"
     },
     {
-      "file": "sources/deploy/ads.txt",
-      "mtime": "2026-11-03T00:26:11.267Z",
+      "file": "docs/02-contract/README.md",
+      "status": "M",
       "owner": [
-        "（主控授權例外）"
-      ]
+        "（上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）"
+      ],
+      "mtime": "2026-11-03T06:59:17.389Z"
     },
     {
-      "file": "sources/pwa/PWA_Icon.jpg",
-      "mtime": "2026-11-02T08:58:59.139Z",
+      "file": "docs/02-contract/data-schema.ts",
+      "status": "M",
       "owner": [
-        "（主控授權例外）"
-      ]
+        "（上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）"
+      ],
+      "mtime": "2026-11-03T06:59:17.391Z"
     },
     {
-      "file": "sources/pwa/README.md",
-      "mtime": "2026-11-03T00:26:23.125Z",
+      "file": "docs/02-contract/storage-schema.json",
+      "status": "M",
       "owner": [
-        "（主控授權例外）"
-      ]
+        "（上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）"
+      ],
+      "mtime": "2026-11-03T06:59:17.392Z"
     },
     {
-      "file": "src/app/assets/icons/apple-touch-icon-180.png",
-      "mtime": "2026-11-03T00:26:11.378Z",
+      "file": "docs/03-design/architecture.md",
+      "status": "M",
       "owner": [
-        "（主控授權例外）"
-      ]
+        "（上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）"
+      ],
+      "mtime": "2026-11-03T06:57:32.481Z"
     },
     {
-      "file": "src/app/assets/icons/icon-192.png",
-      "mtime": "2026-11-03T00:26:11.396Z",
+      "file": "docs/03-design/tasks.json",
+      "status": "M",
       "owner": [
-        "（主控授權例外）"
-      ]
+        "（上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）"
+      ],
+      "mtime": "2026-11-03T07:29:41.666Z"
     },
     {
-      "file": "src/app/assets/icons/icon-512.png",
-      "mtime": "2026-11-03T00:26:11.418Z",
+      "file": "docs/mockups/v0.12-layout-demo.html",
+      "status": "??",
       "owner": [
-        "（主控授權例外）"
-      ]
+        "（主控放置樣稿，授權例外）"
+      ],
+      "mtime": "2026-11-03T06:13:12.324Z"
     },
     {
-      "file": "src/app/assets/icons/icon-maskable-512.png",
-      "mtime": "2026-11-03T00:26:11.434Z",
+      "file": "docs/mockups/v0.12-layout-demo.png",
+      "status": "??",
       "owner": [
-        "（主控授權例外）"
-      ]
+        "（主控放置樣稿，授權例外）"
+      ],
+      "mtime": "2026-11-03T06:13:12.362Z"
     },
     {
-      "file": "src/app/core/pwa.js",
-      "mtime": "2026-11-03T00:28:14.152Z",
+      "file": "src/app/__tests__/_fixtures.js",
+      "status": "M",
       "owner": [
-        "FE-45"
-      ]
-    },
-    {
-      "file": "src/app/index.html",
-      "mtime": "2026-11-03T00:44:01.006Z",
-      "owner": [
-        "FE-50"
-      ]
-    },
-    {
-      "file": "src/app/license-header.txt",
-      "mtime": "2026-11-03T00:39:27.111Z",
-      "owner": [
-        "FE-47"
-      ]
-    },
-    {
-      "file": "src/app/main.js",
-      "mtime": "2026-11-03T00:44:01.011Z",
-      "owner": [
-        "FE-50"
-      ]
-    },
-    {
-      "file": "src/app/pwa/sw.template.js",
-      "mtime": "2026-11-03T00:30:07.660Z",
-      "owner": [
-        "FE-46"
-      ]
-    },
-    {
-      "file": "src/app/services/pwa.js",
-      "mtime": "2026-11-03T00:32:05.334Z",
-      "owner": [
-        "FE-48"
-      ]
-    },
-    {
-      "file": "src/app/state/store.js",
-      "mtime": "2026-11-03T00:34:11.697Z",
-      "owner": [
-        "FE-49"
-      ]
-    },
-    {
-      "file": "src/app/styles/10-dashboard.css",
-      "mtime": "2026-11-03T00:46:38.823Z",
-      "owner": [
-        "FE-51"
-      ]
-    },
-    {
-      "file": "src/app/styles/80-pwa.css",
-      "mtime": "2026-11-03T00:44:21.346Z",
-      "owner": [
-        "FE-50"
-      ]
-    },
-    {
-      "file": "src/app/ui/pwa-notice.js",
-      "mtime": "2026-11-03T00:44:32.204Z",
-      "owner": [
-        "FE-50"
-      ]
-    },
-    {
-      "file": "src/app/views/dashboard.js",
-      "mtime": "2026-11-03T00:46:38.817Z",
-      "owner": [
-        "FE-51"
-      ]
-    },
-    {
-      "file": "src/app/views/sources-page.js",
-      "mtime": "2026-11-03T00:35:04.874Z",
-      "owner": [
-        "FE-52"
-      ]
+        "FE-60"
+      ],
+      "mtime": "2026-11-03T07:23:10.536Z"
     },
     {
       "file": "src/app/__tests__/build.test.js",
-      "mtime": "2026-11-03T00:43:22.277Z",
+      "status": "M",
       "owner": [
-        "FE-47"
-      ]
+        "FE-56"
+      ],
+      "mtime": "2026-11-03T07:04:06.215Z"
+    },
+    {
+      "file": "src/app/__tests__/customizer.test.js",
+      "status": "M",
+      "owner": [
+        "FE-57"
+      ],
+      "mtime": "2026-11-03T07:13:26.223Z"
     },
     {
       "file": "src/app/__tests__/dashboard.test.js",
-      "mtime": "2026-11-03T00:47:22.630Z",
+      "status": "M",
       "owner": [
-        "FE-51"
-      ]
+        "FE-58"
+      ],
+      "mtime": "2026-11-03T07:19:56.876Z"
+    },
+    {
+      "file": "src/app/__tests__/first-run.test.js",
+      "status": "M",
+      "owner": [
+        "FE-57"
+      ],
+      "mtime": "2026-11-03T07:13:48.011Z"
+    },
+    {
+      "file": "src/app/__tests__/layout.test.js",
+      "status": "??",
+      "owner": [
+        "FE-54"
+      ],
+      "mtime": "2026-11-03T06:59:57.150Z"
     },
     {
       "file": "src/app/__tests__/load-order.test.js",
-      "mtime": "2026-11-03T00:47:49.496Z",
+      "status": "M",
       "owner": [
-        "FE-53"
-      ]
+        "FE-62"
+      ],
+      "mtime": "2026-11-03T07:26:02.820Z"
+    },
+    {
+      "file": "src/app/__tests__/naming.test.js",
+      "status": "M",
+      "owner": [
+        "FE-58"
+      ],
+      "mtime": "2026-11-03T07:19:41.970Z"
+    },
+    {
+      "file": "src/app/__tests__/part5.test.js",
+      "status": "M",
+      "owner": [
+        "FE-61"
+      ],
+      "mtime": "2026-11-03T07:25:26.785Z"
     },
     {
       "file": "src/app/__tests__/pwa-core.test.js",
-      "mtime": "2026-11-03T00:29:00.867Z",
+      "status": "M",
       "owner": [
-        "FE-45"
-      ]
-    },
-    {
-      "file": "src/app/__tests__/pwa-notice.test.js",
-      "mtime": "2026-11-03T00:45:31.777Z",
-      "owner": [
-        "FE-50"
-      ]
-    },
-    {
-      "file": "src/app/__tests__/pwa-service.test.js",
-      "mtime": "2026-11-03T00:33:22.779Z",
-      "owner": [
-        "FE-48"
-      ]
+        "FE-56",
+        "FE-58"
+      ],
+      "mtime": "2026-11-03T07:17:10.143Z"
     },
     {
       "file": "src/app/__tests__/shell.test.js",
-      "mtime": "2026-11-03T00:44:55.112Z",
+      "status": "M",
       "owner": [
-        "FE-50"
-      ]
+        "FE-56"
+      ],
+      "mtime": "2026-11-03T07:04:37.631Z"
     },
     {
       "file": "src/app/__tests__/sources-page.test.js",
-      "mtime": "2026-11-03T00:43:22.280Z",
+      "status": "M",
       "owner": [
-        "FE-52"
-      ]
+        "FE-60"
+      ],
+      "mtime": "2026-11-03T07:23:27.411Z"
     },
     {
       "file": "src/app/__tests__/store.test.js",
-      "mtime": "2026-11-03T00:43:22.279Z",
+      "status": "M",
       "owner": [
-        "FE-49"
-      ]
+        "FE-55"
+      ],
+      "mtime": "2026-11-03T07:01:39.209Z"
     },
     {
-      "file": "src/app/__tests__/sw.test.js",
-      "mtime": "2026-11-03T00:30:49.660Z",
+      "file": "src/app/__tests__/tokens.test.js",
+      "status": "??",
       "owner": [
-        "FE-46"
-      ]
+        "FE-56"
+      ],
+      "mtime": "2026-11-03T07:05:42.153Z"
+    },
+    {
+      "file": "src/app/core/layout.js",
+      "status": "??",
+      "owner": [
+        "FE-54"
+      ],
+      "mtime": "2026-11-03T06:59:12.227Z"
+    },
+    {
+      "file": "src/app/core/pwa.js",
+      "status": "M",
+      "owner": [
+        "FE-56",
+        "FE-58"
+      ],
+      "mtime": "2026-11-03T07:16:53.868Z"
+    },
+    {
+      "file": "src/app/index.html",
+      "status": "M",
+      "owner": [
+        "FE-56"
+      ],
+      "mtime": "2026-11-03T07:03:29.614Z"
+    },
+    {
+      "file": "src/app/license-header.txt",
+      "status": "M",
+      "owner": [
+        "FE-56"
+      ],
+      "mtime": "2026-11-03T07:03:19.245Z"
+    },
+    {
+      "file": "src/app/state/store.js",
+      "status": "M",
+      "owner": [
+        "FE-55"
+      ],
+      "mtime": "2026-11-03T07:01:08.513Z"
+    },
+    {
+      "file": "src/app/styles/00-base.css",
+      "status": "M",
+      "owner": [
+        "FE-56"
+      ],
+      "mtime": "2026-11-03T07:03:06.351Z"
+    },
+    {
+      "file": "src/app/styles/10-dashboard.css",
+      "status": "M",
+      "owner": [
+        "FE-58"
+      ],
+      "mtime": "2026-11-03T07:21:24.812Z"
+    },
+    {
+      "file": "src/app/styles/20-customizer.css",
+      "status": "M",
+      "owner": [
+        "FE-57"
+      ],
+      "mtime": "2026-11-03T07:11:26.011Z"
+    },
+    {
+      "file": "src/app/styles/21-custom-vocab.css",
+      "status": "M",
+      "owner": [
+        "FE-57"
+      ],
+      "mtime": "2026-11-03T07:11:46.595Z"
+    },
+    {
+      "file": "src/app/styles/30-flashcards.css",
+      "status": "M",
+      "owner": [
+        "FE-59"
+      ],
+      "mtime": "2026-11-03T07:22:22.596Z"
+    },
+    {
+      "file": "src/app/styles/31-speech.css",
+      "status": "M",
+      "owner": [
+        "FE-59"
+      ],
+      "mtime": "2026-11-03T07:22:22.601Z"
+    },
+    {
+      "file": "src/app/styles/40-part5.css",
+      "status": "M",
+      "owner": [
+        "FE-61"
+      ],
+      "mtime": "2026-11-03T07:24:40.425Z"
+    },
+    {
+      "file": "src/app/styles/70-sources.css",
+      "status": "M",
+      "owner": [
+        "FE-60"
+      ],
+      "mtime": "2026-11-03T07:23:10.467Z"
+    },
+    {
+      "file": "src/app/styles/80-pwa.css",
+      "status": "M",
+      "owner": [
+        "FE-59"
+      ],
+      "mtime": "2026-11-03T07:22:22.601Z"
+    },
+    {
+      "file": "src/app/views/customizer.js",
+      "status": "M",
+      "owner": [
+        "FE-57"
+      ],
+      "mtime": "2026-11-03T07:10:50.102Z"
+    },
+    {
+      "file": "src/app/views/dashboard.js",
+      "status": "M",
+      "owner": [
+        "FE-58"
+      ],
+      "mtime": "2026-11-03T07:17:00.826Z"
+    },
+    {
+      "file": "src/app/views/part5.js",
+      "status": "M",
+      "owner": [
+        "FE-61"
+      ],
+      "mtime": "2026-11-03T07:24:14.294Z"
+    },
+    {
+      "file": "src/app/views/sources-page.js",
+      "status": "M",
+      "owner": [
+        "FE-60"
+      ],
+      "mtime": "2026-11-03T07:23:41.486Z"
+    },
+    {
+      "file": "src/data/_records/CT-24.md",
+      "status": "??",
+      "owner": [
+        "CT-24"
+      ],
+      "mtime": "2026-11-03T06:59:02.421Z"
+    },
+    {
+      "file": "src/data/_tools/lib.mjs",
+      "status": "M",
+      "owner": [
+        "CT-24"
+      ],
+      "mtime": "2026-11-03T06:57:55.444Z"
+    },
+    {
+      "file": "src/data/sources.js",
+      "status": "M",
+      "owner": [
+        "CT-24"
+      ],
+      "mtime": "2026-11-03T06:57:55.373Z"
+    },
+    {
+      "file": "tests/e2e/diag-r5-dom.mjs",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:33:09.523Z"
+    },
+    {
+      "file": "tests/e2e/diag-r5-footer.mjs",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:35:43.533Z"
+    },
+    {
+      "file": "tests/e2e/diag-r5-p5clip.mjs",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:00:37.679Z"
+    },
+    {
+      "file": "tests/e2e/diag-r5-tab.mjs",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:57:33.608Z"
+    },
+    {
+      "file": "tests/e2e/e2e-cards.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:36:55.072Z"
+    },
+    {
+      "file": "tests/e2e/e2e-content.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:37:16.557Z"
+    },
+    {
+      "file": "tests/e2e/e2e-env.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:37:58.890Z"
+    },
+    {
+      "file": "tests/e2e/e2e-firstrun.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:40:59.127Z"
+    },
+    {
+      "file": "tests/e2e/e2e-goal.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:35:59.895Z"
+    },
+    {
+      "file": "tests/e2e/e2e-hidden.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:42:56.240Z"
+    },
+    {
+      "file": "tests/e2e/e2e-layout.mjs",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:42.206Z"
+    },
+    {
+      "file": "tests/e2e/e2e-persist.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:42:50.808Z"
+    },
+    {
+      "file": "tests/e2e/e2e-progress.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:43:34.458Z"
+    },
+    {
+      "file": "tests/e2e/e2e-pwa-update.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:42:50.889Z"
+    },
+    {
+      "file": "tests/e2e/e2e-pwa.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:49:56.568Z"
+    },
+    {
+      "file": "tests/e2e/e2e-reinit.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:45:13.990Z"
+    },
+    {
+      "file": "tests/e2e/lib/layout-probe.mjs",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:51:34.967Z"
+    },
+    {
+      "file": "tests/e2e/lib/state.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:34:04.248Z"
+    },
+    {
+      "file": "tests/results/ac-matrix.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/boundary-delta.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/boundary.json",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:07:54.873Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-customizer.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:49.515Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-dashboard.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:49.015Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-firstrun.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:47.867Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-flashcards.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:49.996Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-part5.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:50.479Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-sources.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:50.983Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-customizer.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:45.894Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-dashboard.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:45.428Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-firstrun.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:44.230Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-flashcards.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:46.359Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-part5.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:46.807Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-sources.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:03:47.277Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-1366.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:04:53.780Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-1920.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:04:54.286Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-375.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:04:53.291Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-1366x768.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:29.344Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-1920x1080.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:30.649Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-375x667.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:24.189Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-390x844.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:25.459Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-412x915.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:26.743Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-768x1024.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:28.037Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-fc-v011-1366.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:04:22.161Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-fc-v011-375.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:04:20.924Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-fc-v012-1366.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:04:26.060Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-fc-v012-375.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:04:24.821Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-1366x768.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:54.729Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-1920x1080.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:55.334Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-375-bottom.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:57.959Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-375x667.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:52.327Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-375x812.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:55.946Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-390x844.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:52.960Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-412x915.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:53.546Z"
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-768x1024.png",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:05:54.141Z"
+    },
+    {
+      "file": "tests/results/e2e-cards.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-content.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-env.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-firstrun.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-goal-edge.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-goal.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-hidden-edge.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-hidden.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-mic.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-motion.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-persist.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-progress.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-pwa-edge.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-pwa-update.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-pwa.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-reinit.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/e2e-speech.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/pwa-static.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/static.json",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:07:54.773Z"
+    },
+    {
+      "file": "tests/results/summary.json",
+      "status": "D",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "（已刪除）"
+    },
+    {
+      "file": "tests/results/tmp/r5-npmtest.txt",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:32:21.886Z"
+    },
+    {
+      "file": "tests/results/tmp/r5-run-all.txt",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:07:54.885Z"
+    },
+    {
+      "file": "tests/results/tmp/r5-validate.txt",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:32:39.623Z"
+    },
+    {
+      "file": "tests/run-all.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:07:35.623Z"
+    },
+    {
+      "file": "tests/static/boundary-r5.mjs",
+      "status": "??",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:06:55.031Z"
+    },
+    {
+      "file": "tests/static/pwa-static.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T07:46:52.749Z"
+    },
+    {
+      "file": "tests/static/static-check.mjs",
+      "status": "M",
+      "owner": [
+        "（QA 自有）"
+      ],
+      "mtime": "2026-11-03T08:07:24.081Z"
     },
     {
       "file": "tools/build.mjs",
-      "mtime": "2026-11-03T00:43:22.276Z",
+      "status": "M",
       "owner": [
-        "FE-47"
-      ]
-    },
-    {
-      "file": "tools/serve.mjs",
-      "mtime": "2026-11-03T00:39:53.075Z",
-      "owner": [
-        "FE-47"
-      ]
+        "FE-56"
+      ],
+      "mtime": "2026-11-03T07:03:44.302Z"
     }
   ],
-  "outside": []
+  "outside": [],
+  "untouched": [
+    "src/app/styles/32-quiz.css",
+    "src/app/styles/90-overrides.css"
+  ]
 }

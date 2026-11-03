@@ -48,7 +48,9 @@
     dataLicense: "單字資料以 CC BY-SA 4.0 授權",
     originalLicense: "原創內容（例句、解析、Part 5 題目、長難句、句型）以 CC BY-SA 4.0 授權，著作權人 JimmyLin",
     codeLicenseUrlLabel: "MIT 條款網址",
-    dataLicenseUrlLabel: "CC BY-SA 4.0 條款網址"
+    dataLicenseUrlLabel: "CC BY-SA 4.0 條款網址",
+    // （v0.12，FE-60；NM-3、SD-FB-49）原創內容來源一行的前綴；名稱取 registry 中 ORIGINAL 的 fullName，不寫死
+    originalSource: "原創內容來源："
   };
 
   /** 欄位標籤 */
@@ -283,14 +285,36 @@
     return dom.el("article", { className: "card src-card", attrs: { "data-source": String(e.code || "") } }, children);
   }
 
+  /**
+   * （v0.12，FE-60；契約 NM-3、§4.3）原創內容來源名稱：DATA_SOURCE_REGISTRY 中 code = "ORIGINAL" 項目的 fullName。
+   * 無該項目、fullName 非字串或空白 → null（不顯示該行）。
+   * @param {Array<object>} registry DATA_SOURCE_REGISTRY（可為空或非陣列）
+   * @returns {string|null}
+   */
+  function originalSourceName(registry) {
+    var reg = Array.isArray(registry) ? registry : [];
+    for (var i = 0; i < reg.length; i++) {
+      var e = reg[i];
+      if (e && e.code === "ORIGINAL") {
+        return isText(e.fullName) && e.fullName.trim() !== "" ? e.fullName : null;
+      }
+    }
+    return null;
+  }
+
   /** 本系統授權聲明區 */
-  function licenseSection(dom, wordlists, license) {
+  function licenseSection(dom, wordlists, license, registry) {
     var lic = license || {};
     var holder = isText(lic.copyrightHolder) ? lic.copyrightHolder : LICENSE_FALLBACK.copyrightHolder;
     var codeUrl = isText(lic.codeLicenseUrl) ? lic.codeLicenseUrl : LICENSE_FALLBACK.codeLicenseUrl;
     var dataUrl = isText(lic.dataLicenseUrl) ? lic.dataLicenseUrl : LICENSE_FALLBACK.dataLicenseUrl;
+    // （v0.12，FE-60）聲明清單之前一行「原創內容來源：{fullName}」；名稱缺漏時不建節點（NM-3）
+    var originalName = originalSourceName(registry);
+    var original = originalName === null ? null
+      : dom.el("p", { className: "src-original", text: TEXT.originalSource + originalName });
     return dom.el("section", { className: "card src-project", attrs: { "aria-labelledby": "src-license-heading" } }, [
       dom.el("h3", { className: "src-card__title", attrs: { id: "src-license-heading" }, text: TEXT.licenseHeading }),
+      original,
       dom.el("ul", { className: "src-statements" }, [
         dom.el("li", { text: TEXT.codeLicense }),
         dom.el("li", { text: TEXT.dataLicense }),
@@ -328,7 +352,7 @@
       dom.el("p", { className: "src-muted", text: TEXT.intro }),
       dom.el("h3", { className: "src-section-title", text: TEXT.externalHeading }),
       dom.el("div", { className: "src-list" }, list),
-      licenseSection(dom, picked.wordlists, content.license)
+      licenseSection(dom, picked.wordlists, content.license, content.sources)
     ]));
   }
 
@@ -340,6 +364,7 @@
   return {
     TEXT: TEXT,
     selectEntries: selectEntries,
+    originalSourceName: originalSourceName,
     formatCount: formatCount,
     countLabel: countLabel,
     derivedAttribution: derivedAttribution,

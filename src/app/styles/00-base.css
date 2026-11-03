@@ -35,25 +35,45 @@
   --wrong: #b91c1c;
   --wrong-bg: #fee2e2;
 
-  /* 介面 */
-  --bg: #f6f7f9;
+  /* 介面（v0.12，FE-56：architecture.md §7.19.1；--bg = PWA_BACKGROUND_COLOR，B-11 比對本檔第一個 --bg） */
+  --bg: #eef4fa;
   --surface: #ffffff;
   --text: #1f2937;
   --text-muted: #5b6472;
+  /* --border 只留給輸入框、作答選項、收音條暗格；按鈕與區塊卡片不得使用 */
   --border: #d5d9e0;
-  --primary: #2f6fd6;
-  --primary-hover: #2459ad;
+  /* 品牌主色：只用於主環形圖進度、模擬測驗進度條、選中導覽指示、標題列圖示；不得作文字色與白字底（VC-1） */
+  --brand: #1e9bf0;
+  /* 深品牌色：白字按鈕底、品牌色文字、連結、選中導覽文字（VC-2） */
+  --brand-deep: #0866ad;
+  /* 沿用名稱，值 = --brand-deep；與藍色級 --color-blue 從此不同值（DS-21） */
+  --primary: #0866ad;
+  --primary-hover: #06558e;
   --primary-text: #ffffff;
-  --focus: #f59e0b;
+  /* 強調橘：只出現在 .btn--accent 底色與 .db-stat__icon 填色（VC-3） */
+  --accent: #f7893b;
+  --accent-text: #1f2937;
+  --tint: #e6f0fa;
+  --track: #dbe7f3;
+  --chart-bar: #9cc3e6;
+  --line: #e3e8ef;
+  --focus: #0866ad;
   --danger: #b91c1c;
   --warning-bg: #fef3c7;
   --warning-text: #7c4a03;
 
   --radius: 8px;
+  --radius-cta: 12px;
+  --radius-card: 16px;
   --gap: 12px;
   --touch: 44px;
   --content-max: 960px;
+  /* 主控台、模擬測驗、難易度設定內容寬（= layout.UI_LAYOUT.CONTENT_NARROW_PX） */
+  --content-narrow: 720px;
   --shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+  --shadow-card: 0 1px 3px rgba(16, 40, 80, 0.08), 0 4px 14px rgba(16, 40, 80, 0.06);
+  /* 首次畫面固定底部列預留高度（= layout.UI_LAYOUT.FIRSTBAR_RESERVE_PX，§7.19.5） */
+  --emt-firstbar-h: 184px;
 
   --font: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
   --font-ipa: "Segoe UI", "Lucida Sans Unicode", "Arial Unicode MS", sans-serif;
@@ -81,6 +101,8 @@ body {
   line-height: 1.6;
   overflow-wrap: anywhere;
   word-break: normal;
+  /* （v0.12）全域等寬數字（AC-38-07） */
+  font-variant-numeric: tabular-nums;
 }
 
 h1, h2, h3, h4, p, ul, ol, figure {
@@ -140,7 +162,7 @@ pre {
 /* ─── 版面 ─── */
 .app-header {
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 var(--line);
 }
 
 .app-header__inner {
@@ -153,11 +175,25 @@ pre {
   padding: 8px 16px;
 }
 
+/* （v0.12，FE-56）標題列：內嵌圖示 + 名稱（§7.19.3；NM-2、AC-38-05） */
 .app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   font-size: 1.15rem;
   line-height: 1.3;
   min-width: 0;
+}
+
+.app-logo {
+  flex: none;
+  width: 32px;
+  height: 32px;
+}
+
+.app-title__text {
+  white-space: nowrap;
 }
 
 .app-banner:empty {
@@ -184,7 +220,7 @@ pre {
   max-width: var(--content-max);
   margin: 0 auto;
   padding: 16px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
   text-align: center;
   color: var(--text-muted);
 }
@@ -198,21 +234,22 @@ pre {
   margin: 0 auto;
   padding: 8px 16px;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--line);
 }
 
 .app-nav.is-open {
   display: grid;
 }
 
+/* （v0.12）641～767px 選單按鈕：--tint 底、無可見邊框（保留 1px 透明邊框維持幾何） */
 .app-nav__btn {
   min-height: var(--touch);
   min-width: 0;
   padding: 8px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--text);
+  background: var(--tint);
+  color: var(--brand-deep);
   font: inherit;
   cursor: pointer;
   touch-action: manipulation;
@@ -220,7 +257,7 @@ pre {
 
 .app-nav__btn[aria-current="page"] {
   background: var(--primary);
-  border-color: var(--primary);
+  border-color: transparent;
   color: var(--primary-text);
   font-weight: 600;
 }
@@ -242,7 +279,7 @@ pre {
     gap: 4px;
     padding: 0 16px;
     background: transparent;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--line);
   }
 
   .app-nav__btn {
@@ -251,12 +288,14 @@ pre {
     border-bottom: 3px solid transparent;
     border-radius: 0;
     background: transparent;
+    color: var(--text);
   }
 
+  /* 選中頁籤：文字 --brand-deep、底線 --brand（--brand 不作文字色，VC-1） */
   .app-nav__btn[aria-current="page"] {
     background: transparent;
-    color: var(--primary);
-    border-bottom-color: var(--primary);
+    color: var(--brand-deep);
+    border-bottom-color: var(--brand);
   }
 
   .app-title {
@@ -270,7 +309,7 @@ pre {
   }
 }
 
-/* ─── 按鈕 ─── */
+/* ─── 按鈕（v0.12，FE-56：§7.19.2；保留 1px 透明邊框，單字卡頁按鈕幾何不變，AC-38-08） ─── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -280,10 +319,10 @@ pre {
   min-width: var(--touch);
   max-width: 100%;
   padding: 8px 16px;
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--text);
+  background: var(--tint);
+  color: var(--brand-deep);
   font: inherit;
   line-height: 1.3;
   text-align: center;
@@ -293,24 +332,38 @@ pre {
 
 .btn--primary {
   background: var(--primary);
-  border-color: var(--primary);
+  border-color: transparent;
   color: var(--primary-text);
 }
 
 .btn--secondary {
-  background: var(--surface);
+  background: var(--tint);
 }
 
 .btn--danger {
   background: var(--danger);
-  border-color: var(--danger);
+  border-color: transparent;
   color: #ffffff;
 }
 
+/* 強調橘按鈕：只用於「開始今日學習」「開始學習」（VC-3；深色字 6.0:1，Q-53） */
+.btn--accent {
+  min-height: 48px;
+  padding: 12px 20px;
+  border-color: transparent;
+  border-radius: var(--radius-cta);
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .btn--link {
+  min-height: var(--touch);
+  min-width: var(--touch);
   border-color: transparent;
   background: transparent;
-  color: var(--primary);
+  color: var(--brand-deep);
   text-decoration: underline;
 }
 
@@ -324,6 +377,25 @@ pre {
   .btn--primary:hover:not(:disabled) {
     background: var(--primary-hover);
   }
+
+  /* hover 不換底色（避免第三種橘），只加陰影 */
+  .btn--accent:hover:not(:disabled) {
+    box-shadow: 0 2px 8px rgba(16, 40, 80, 0.18);
+  }
+}
+
+/* ─── 標題（v0.12，FE-56） ─── */
+.page-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 8px;
 }
 
 .btn-row {
@@ -383,13 +455,14 @@ input[type="radio"] {
   height: 24px;
 }
 
-/* ─── 卡片 ─── */
+/* ─── 卡片（v0.12，FE-56：白底、無邊框、圓角 16px、柔和陰影；AC-38-06） ─── */
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 0;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
   padding: 16px;
-  margin-bottom: var(--gap);
+  margin-bottom: 12px;
   min-width: 0;
 }
 
@@ -505,7 +578,7 @@ body.has-dialog {
     margin: 0;
     padding: 0 0 env(safe-area-inset-bottom, 0px);
     background: var(--surface);
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--line);
     border-bottom: 0;
   }
 
@@ -521,6 +594,15 @@ body.has-dialog {
     border: 0;
     border-radius: 0;
     background: transparent;
+    color: var(--text-muted);
+  }
+
+  /* （v0.12）選中項：文字 --brand-deep、上緣 --brand 指示（VC-1） */
+  .app-nav__btn[aria-current="page"] {
+    background: transparent;
+    color: var(--brand-deep);
+    font-weight: 700;
+    box-shadow: inset 0 3px 0 var(--brand);
   }
 
   .app-nav__icon {

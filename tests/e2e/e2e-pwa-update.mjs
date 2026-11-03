@@ -128,7 +128,7 @@ await R.check("TC-37-05b", "AC-37-05、AC-21-01（經過 1 次更新）", async 
 await R.check("TC-36-04b", "AC-36-04（首次畫面）、AC-36-03（不按重新整理）", async () => {
   await Bf.page.reload(); const n = await waitNotice(Bf.page, 60000);
   const e1 = await Bf.page.evaluate(() => document.body.dataset.entry); const id1 = await pageBuildId(Bf.page);
-  await Bf.page.click('.cz-color[data-color="brown"]').catch(() => {}); await sleep(300);
+  await Bf.page.click('.cz-level[data-color="brown"]').catch(() => {}); await sleep(300);
   await Bf.page.close(); await sleep(1500);
   const p2 = await Bf.env.newPage(); await p2.goto(BASE); await sleep(1500);
   const id2 = await pageBuildId(p2); const e2 = await p2.evaluate(() => document.body.dataset.entry); const st = await readStore(p2); const n2 = await notice(p2);

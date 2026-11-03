@@ -489,3 +489,100 @@ describe("first-run.test.js：應用殼與樣式", () => {
     assert.match(src, /return "main";/);
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+// （v0.12，FE-57）首次畫面固定底部列樣式（architecture.md §7.19.5；契約 FT-2；AC-41-03、AC-41-04）
+// ─────────────────────────────────────────────────────────────
+
+describe("first-run.test.js：20-customizer.css 固定底部列（v0.12，FE-57）", () => {
+  const css = source("styles/20-customizer.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  const base = source("styles/00-base.css").replace(/\/\*[\s\S]*?\*\//g, "");
+
+  /** 取出 @media (max-width: 640px) 區塊內容（串接） */
+  function narrow(src) {
+    const out = [];
+    let from = 0;
+    for (;;) {
+      const at = src.indexOf("@media (max-width: 640px)", from);
+      if (at < 0) break;
+      const open = src.indexOf("{", at);
+      let depth = 0;
+      let i = open;
+      for (; i < src.length; i++) {
+        if (src[i] === "{") depth++;
+        else if (src[i] === "}") { depth--; if (depth === 0) break; }
+      }
+      out.push(src.slice(open + 1, i));
+      from = i + 1;
+    }
+    return out.join("\n");
+  }
+  /** 區塊中選擇器完全相同的規則宣告 */
+  function decls(block, sel) {
+    const out = [];
+    for (const m of block.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const sels = m[1].split(",").map((x) => x.trim().replace(/\s+/g, " "));
+      if (sels.includes(sel)) out.push(m[2]);
+    }
+    return out.join(";");
+  }
+  function val(d, prop) {
+    const m = [...d.matchAll(new RegExp("(?:^|;|\\s)" + prop + "\\s*:\\s*([^;]+)", "g"))];
+    return m.length ? m[m.length - 1][1].trim() : null;
+  }
+
+  test("≤ 640px：.cz-firstbar position: fixed、貼底、z-index 800（< 底部導覽 900、< 對話框 1100）", () => {
+    const d = decls(narrow(css), ".cz-firstbar");
+    assert.equal(val(d, "position"), "fixed");
+    assert.equal(val(d, "bottom"), "0");
+    assert.equal(val(d, "left"), "0");
+    assert.equal(val(d, "right"), "0");
+    assert.equal(val(d, "z-index"), "800");
+    assert.match(val(d, "padding"), /env\(safe-area-inset-bottom/);
+  });
+
+  test("> 640px：.cz-firstbar 不固定（頂層規則無 position: fixed）", () => {
+    const top = css.replace(/@media[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, "");
+    const d = decls(top, ".cz-firstbar");
+    assert.ok(d, "有頂層 .cz-firstbar 規則");
+    assert.notEqual(val(d, "position"), "fixed");
+    assert.equal(val(d, "display"), "grid");
+  });
+
+  test("≤ 640px：body[data-entry=firstRun][data-tab=customizer] 底部留白與 Toast 上移引用 --emt-firstbar-h（AC-41-04、E-93）", () => {
+    const n = narrow(css);
+    const body = decls(n, 'body[data-entry="firstRun"][data-tab="customizer"]');
+    assert.match(val(body, "padding-bottom"), /var\(--emt-firstbar-h\)/);
+    assert.match(val(body, "padding-bottom"), /env\(safe-area-inset-bottom/);
+    const toast = decls(n, 'body[data-entry="firstRun"][data-tab="customizer"] .toast-root');
+    assert.match(val(toast, "bottom"), /var\(--emt-firstbar-h\)/);
+    // 預留高度 184px 定義在 00-base.css（= layout.UI_LAYOUT.FIRSTBAR_RESERVE_PX）
+    const layout = require(path.join(APP_DIR, "core", "layout.js"));
+    assert.match(base, new RegExp("--emt-firstbar-h:\\s*" + layout.UI_LAYOUT.FIRSTBAR_RESERVE_PX + "px"));
+  });
+
+  test("#view-customizer 內容寬 720px 置中（--content-narrow）", () => {
+    const d = decls(css, "#view-customizer");
+    assert.equal(val(d, "max-width"), "var(--content-narrow)");
+    assert.equal(val(d, "margin-inline"), "auto");
+  });
+
+  test("色級列：min-height 56px、鎖定列 opacity 0.85 且文字 --text；說明一行截斷", () => {
+    assert.equal(val(decls(css, ".cz-level"), "min-height"), "56px");
+    assert.equal(val(decls(css, ".cz-level.is-locked"), "opacity"), "0.85");
+    for (const sel of [".cz-level.is-locked .cz-level__name", ".cz-level.is-locked .cz-level__desc", ".cz-level.is-locked .cz-level__side"]) {
+      assert.equal(val(decls(css, sel), "color"), "var(--text)", sel);
+    }
+    const desc = decls(css, ".cz-level__desc");
+    assert.equal(val(desc, "white-space"), "nowrap");
+    assert.equal(val(desc, "text-overflow"), "ellipsis");
+    // ✓ 只在選中時顯示
+    assert.equal(val(decls(css, ".cz-level__check"), "display"), "none");
+    assert.equal(val(decls(css, '.cz-level[aria-pressed="true"] .cz-level__check'), "display"), "inline");
+  });
+
+  test("不得有 color: var(--brand)、var(--accent) 只經 .btn--accent（20-customizer.css 不直接使用）", () => {
+    assert.doesNotMatch(css, /(?<![-\w])color\s*:\s*var\(--brand\)/);
+    assert.doesNotMatch(css, /var\(--accent\)/);
+  });
+});

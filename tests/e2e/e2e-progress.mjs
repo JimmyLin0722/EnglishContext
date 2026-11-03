@@ -6,8 +6,10 @@ import { pathToFileURL } from "node:url";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeTts, fakeStt, storageMode, controllableClock, fakeMic } from "./lib/inits.mjs";
 // 第 3 輪（PRD v0.9／v0.10）：主控台目標區 3 項（無目標分數）；改點卡片套用；按麥克風先取得麥克風（fakeMic）
+// 第 5 輪（PRD v0.13）：主控台改版（US-39）：主環形圖中央只顯示 X（SD-FB-40）、2 個小環形圖改為 3 格數據的數字（AC-30-01、AC-30-10）、
+// 近 7 天全 0 改顯示空狀態「開始學習後會顯示紀錄」（AC-30-12、AC-39-07）
 async function micOn(p) { await p.click(".fc-front .sp-mic"); for (let i = 0; i < 40; i++) { if ((await p.ev(`document.querySelector(".fc-front .sp-mic").dataset.status`)) === "listening") break; await sleep(25); } }
-async function applyCard(p, c) { await p.go("customizer"); await p.click(`.cz-color[data-color="${c}"]`); await p.click("#cz-apply"); await sleep(80); }
+async function applyCard(p, c) { await p.go("customizer"); await p.click(`.cz-level[data-color="${c}"]`); await p.click("#cz-apply"); await sleep(80); }
 
 const R = recorder("e2e-progress");
 const KEY = "englishMasterTrack:state";
@@ -25,14 +27,15 @@ async function open(inits = [], vp = [1366, 900]) {
   return p;
 }
 const toasts = (p, n = 0) => p.ev(`window.__qaToasts.slice(${n}).map((t) => t.text)`);
-const progress = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const q = (s) => document.querySelector(s);
+const progress = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const q = (s) => document.querySelector("#view-dashboard " + s);
   const ratio = (bar) => { const c = parseFloat(bar.getAttribute("stroke-dasharray")); const o = parseFloat(bar.getAttribute("stroke-dashoffset")); return Math.round((1 - o / c) * 1000) / 10; };
-  const main = q(".db-ring--main"); const minis = [...document.querySelectorAll(".db-mini")];
-  return { text: q(".db-today__text").textContent, center: q(".db-ring-wrap--main .db-ring__value").textContent, done: main.classList.contains("db-ring--done"), doneText: q(".db-today__done").hidden ? "" : q(".db-today__done").textContent,
+  const main = q(".db-ring"); const shown = (e) => !!e && !e.hidden && e.getClientRects().length > 0; const tx = (s) => (q(s) ? q(s).textContent : null);
+  return { text: tx(".db-today__text"), center: tx(".db-ring__value"), done: main.classList.contains("db-ring--done"), doneText: q(".db-today__done").hidden ? "" : q(".db-today__done").textContent,
     mainRatio: ratio(main.querySelector(".db-ring__bar")), mainStroke: getComputedStyle(main.querySelector(".db-ring__bar")).stroke,
-    minis: minis.map((m) => ({ label: m.querySelector(".db-mini__label").textContent, value: m.querySelector(".db-ring__value").textContent, ratio: ratio(m.querySelector(".db-ring__bar")), empty: m.querySelector(".db-ring").classList.contains("db-ring--empty") })),
-    chartTitle: (q(".db-bars__title") || {}).textContent,
-    bars: [...document.querySelectorAll(".db-bars__item")].filter((b) => !b.hidden).map((b) => ({ date: b.dataset.date, label: b.querySelector(".db-bars__label").textContent, count: Number(b.querySelector(".db-bars__count").textContent), h: parseFloat(b.querySelector(".db-bars__fill").style.height) || 0 })) }; })()`);
+    rings: document.querySelectorAll("#view-dashboard svg.db-ring, #view-dashboard .db-mini").length,
+    stats: { labels: [...document.querySelectorAll("#view-dashboard .db-stat__label")].map((e) => e.textContent).join("、"), mastery: tx(".db-stat--mastery .db-stat__value"), sub: tx(".db-stat--mastery .db-stat__sub"), accuracy: tx(".db-stat--accuracy .db-stat__value"), streak: tx(".db-stat--streak .db-stat__num") },
+    chartTitle: tx("#db-chart-h"), empty: shown(q(".db-chart__empty")) ? q(".db-chart__empty").textContent : null, barsShown: shown(q(".db-bars")),
+    bars: [...document.querySelectorAll("#view-dashboard .db-bars__item")].filter((b) => !b.hidden).map((b) => ({ date: b.dataset.date, label: b.querySelector(".db-bars__label").textContent, count: Number(b.querySelector(".db-bars__count").textContent), h: parseFloat(b.querySelector(".db-bars__fill").style.height) || 0 })) }; })()`);
 const X = async (p) => { const r = await progress(p); const m = r.text.match(/今日已學 (\d+) \/ (\d+) 字/); return m ? Number(m[1]) : NaN; };
 const stored = async (p) => JSON.parse(await p.ev(`localStorage.getItem(${JSON.stringify(KEY)})`) || "null");
 const flipAt = async (p, i) => { await p.go("flashcards"); await p.ev(`EMT.store.actions.gotoCard(${i})`); await sleep(30); await p.click(".fc-flip"); await sleep(420); await p.click(".fc-flip"); await sleep(420); };
@@ -51,12 +54,12 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
   await p.goto();
 
   await R.check("TC-30-01", "AC-30-01", async () => {
+    // v0.12：主環形圖 1 個；3 格數據以數字顯示（不使用小環形圖）；近 7 天無資料時為空狀態（AC-39-07）
     const r = await progress(p);
-    const stats = await p.ev(`[...document.querySelectorAll(".dash-stats:not(.dash-stats--goal) .dash-stat__label")].map((e) => e.textContent).join("、")`);
-    const goal = await p.ev(`document.querySelectorAll(".dash-stats--goal .dash-stat").length`);
-    const ok = r.text === "今日已學 0 / 15 字" && r.minis.map((m) => m.label).join("、") === "目前單字集掌握率、模擬測驗正確率" && r.bars.length === 7 && r.chartTitle && r.bars[6].date === TODAY
-      && stats === "連續打卡天數、單字掌握數、模擬測驗正確率" && goal === 3;
-    return { ok, note: `主環「${r.text}」（中央 ${r.center}）；小環 ${r.minis.map((m) => m.label + "=" + m.value).join("、")}；長條圖「${r.chartTitle}」${r.bars.length} 根（${r.bars.map((b) => b.label + ":" + b.count).join(" ")}）；統計 ${stats}；目標區 ${goal} 項` };
+    const goal = await p.ev(`document.querySelectorAll("#view-dashboard .dash-stats--goal, #view-dashboard .dash-stat").length`);
+    const ok = r.text === "今日已學 0 / 15 字" && r.rings === 1 && r.stats.labels === "連續打卡天數、單字掌握率、模擬測驗正確率" && r.stats.mastery === "0%" && r.stats.sub === "已掌握 0 字" && r.stats.accuracy === "—"
+      && r.chartTitle && r.bars.length === 7 && r.bars[6].date === TODAY && r.empty === "開始學習後會顯示紀錄" && !r.barsShown && goal === 0;
+    return { ok, note: `主環「${r.text}」（中央 ${r.center}）；環形圖 ${r.rings} 個；3 格 ${r.stats.labels}：${r.stats.streak}／${r.stats.mastery}（${r.stats.sub}）／${r.stats.accuracy}；圖表「${r.chartTitle}」空狀態「${r.empty}」、長條顯示=${r.barsShown}；舊目標區元素 ${goal}` };
   });
 
   await R.check("TC-30-02", "AC-30-02", async () => {
@@ -117,7 +120,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     const gold = "rgb(201, 162, 39)";
     const ok = a.text === "今日已學 14 / 15 字" && !a.done && a.mainStroke !== gold && Math.abs(a.mainRatio - 93.3) <= 1
       && b.text === "今日已學 15 / 15 字" && b.done && b.doneText === "今日目標達成" && b.mainRatio === 100 && b.mainStroke === gold
-      && c.text === "今日已學 18 / 15 字" && c.center === "18 / 15" && c.done && c.mainRatio === 100 && c.mainStroke === gold;
+      && c.text === "今日已學 18 / 15 字" && c.center === "18" && c.done && c.mainRatio === 100 && c.mainStroke === gold;
     return { ok, note: `X=14：「${a.text}」比例 ${a.mainRatio}%、色 ${a.mainStroke}；X=15：「${b.text}」滿圈 ${b.mainRatio}%、金色=${b.mainStroke === gold}、「${b.doneText}」；X=18：「${c.text}」中央「${c.center}」、${c.mainRatio}%、金色=${c.mainStroke === gold}` };
   });
 
@@ -167,9 +170,9 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     await p.go("part5");
     for (let i = 0; i < 10; i++) { const ci = await p.ev(`PART5_QUESTION_BANK[${i}].correctIndex`); await p.click("[data-p5=option]", i < 7 ? ci : (ci + 1) % 4); await p.click("[data-p5=next]"); }
     const r = await progress(p); const n = await p.ev(`EMT.store.getState().runtime.studySet.length`);
-    const [m, a] = r.minis;
-    const ok = n === 1000 && m.value === "25%" && Math.abs(m.ratio - 25) <= 1 && a.value === "70%" && Math.abs(a.ratio - 70) <= 1 && !/NaN|Infinity/.test(JSON.stringify(r));
-    return { ok, note: `單字集 ${n} 字、已掌握 260（集內 250、集外 10）→「${m.label}」${m.value}（環 ${m.ratio}%）；模擬測驗 10 題對 7 →「${a.label}」${a.value}（環 ${a.ratio}%）。PRD 範例為 200 字/50 字，正式資料最小單字集為 1,000，故以同比例 250/1,000 驗證` };
+    const s = r.stats; // v0.12：3 格數據（AC-30-10：掌握率 = 集內 ÷ 單字集；小字「已掌握 N 字」含集外）
+    const ok = n === 1000 && s.mastery === "25%" && s.sub === "已掌握 260 字" && s.accuracy === "70%" && r.rings === 1 && !/NaN|Infinity/.test(JSON.stringify(r));
+    return { ok, note: `單字集 ${n} 字、已掌握 260（集內 250、集外 10）→ 單字掌握率「${s.mastery}」、小字「${s.sub}」；模擬測驗 10 題對 7 → 正確率「${s.accuracy}」；環形圖 ${r.rings} 個（只有主環）。PRD 範例為 200 字/50 字，正式資料最小單字集為 1,000，故以同比例 250/1,000 驗證` };
   });
 
   await R.check("TC-30-11", "AC-30-11", async () => {
@@ -195,9 +198,9 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     const t = await toasts(p); const d = await p.ev(`EMT.store.getState().data`); const r = await progress(p); const st = await stored(p);
     const fields = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged"];
     const same = fields.every((k) => JSON.stringify(d[k]) === JSON.stringify(before[k]));
-    const ok = entry === "main" && tab === "dashboard" && same && !t.some((x) => x.includes("資料讀取失敗")) && r.text.startsWith("今日已學 0 /") && r.bars.every((b) => b.count === 0)
+    const ok = entry === "main" && tab === "dashboard" && same && !t.some((x) => x.includes("資料讀取失敗")) && r.text.startsWith("今日已學 0 /") && r.bars.every((b) => b.count === 0) && r.empty === "開始學習後會顯示紀錄" && !r.barsShown
       && st.schemaVersion === 2 && JSON.stringify(st.data.todayLearned) === JSON.stringify({ date: null, wordKeys: [] }) && JSON.stringify(st.data.learnedHistory) === "{}" && !(await p.ev(`localStorage.getItem("englishMasterTrack:unreadable")`));
-    return { ok, note: `v1 狀態開啟 → ${entry}/${tab}；7 欄不變=${same}；提示 ${JSON.stringify(t)}；${r.text}、長條 ${r.bars.map((b) => b.count).join(",")}；localStorage 已寫回 schemaVersion ${st.schemaVersion}、todayLearned ${JSON.stringify(st.data.todayLearned)}、learnedHistory ${JSON.stringify(st.data.learnedHistory)}（t0=${t0}）` };
+    return { ok, note: `v1 狀態開啟 → ${entry}/${tab}；7 欄不變=${same}；提示 ${JSON.stringify(t)}；${r.text}、長條 ${r.bars.map((b) => b.count).join(",")}、空狀態「${r.empty}」；localStorage 已寫回 schemaVersion ${st.schemaVersion}、todayLearned ${JSON.stringify(st.data.todayLearned)}、learnedHistory ${JSON.stringify(st.data.learnedHistory)}（t0=${t0}）` };
   });
 
   await R.check("TC-30-13", "AC-30-13、RD-1、V-ST-09～V-ST-11", async () => {
@@ -296,8 +299,8 @@ if (FIX && fs.existsSync(FIX)) {
   await p.goto(pathToFileURL(FIX).href);
   await R.check("TC-30-10b", "AC-30-10、E-48", async () => {
     const r = await progress(p);
-    const ok = r.minis.every((m) => m.value === "—" && m.empty && m.ratio === 0) && !/NaN|Infinity|undefined/.test(JSON.stringify(r)) && r.text === "今日已學 0 / 15 字";
-    return { ok, note: `單字集 0、答題 0：${r.minis.map((m) => `${m.label}=${m.value}（空環=${m.empty}、比例 ${m.ratio}%）`).join("；")}；主環「${r.text}」` };
+    const ok = r.stats.mastery === "—" && r.stats.accuracy === "—" && !/NaN|Infinity|undefined/.test(JSON.stringify(r)) && r.text === "今日已學 0 / 15 字";
+    return { ok, note: `單字集 0、答題 0：單字掌握率「${r.stats.mastery}」（${r.stats.sub}）、模擬測驗正確率「${r.stats.accuracy}」；主環「${r.text}」` };
   });
   await p.close();
 } else {

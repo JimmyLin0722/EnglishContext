@@ -1,6 +1,6 @@
 ---
 doc: TEST-PLAN
-version: 0.5
+version: 0.6
 status: in-review
 author: qa-agent
 approved_by:
@@ -9,6 +9,8 @@ approved_at:
 
 # English Master Track — 測試計畫（第 5 階段驗收）
 
+> **v0.6（第 5 輪，2026-11-03）**：範圍擴大為 PRD v0.13（版面風格調整：新增 US-38～US-41 共 27 個 AC，修改 30 個 AC；AC-38-01 依 v0.13 以標題列品牌圖示為例外）。新增 §1.2、§2.5、§4.2、§6.2，§5、§7 依第 5 輪結果重新產生。第 4 輪以前的內容保留。
+>
 > **v0.5（第 4 輪，2026-11-03）**：範圍擴大為 PRD v0.11（新增 PWA：US-34～US-37、AC-24-12，修訂 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）。新增 §1.1、§2.4、§4.1、§6.1，§5、§7 依第 4 輪結果重新產生。第 3 輪以前的內容保留。
 >
 > v0.4（第 3 輪，2026-11-02）：範圍由 PRD v0.7 擴大為 PRD v0.10（含 v0.8、v0.9、v0.10 增量）。v0.3 以前的 TC、判定規則與歷史紀錄保留在本檔，已不適用的部分以「（第 3 輪：…）」註明。
@@ -33,6 +35,19 @@ approved_at:
 | 回歸 | `npm test`、`npm run validate:data`、靜態檢查、越界檢查、既有 E2E 全套 |
 | 已知事項（不列缺陷） | maskable 圖案縮放 78%（SD-FB-31，判定標準：文字在 80% 安全圓內）；按「重新整理」前本專案快取暫有 2 份（FB-39）；本機與 CI 的 BUILD_ID 可能因 CRLF 不同（SD-FB-37） |
 | 授權例外（不算越界） | `src/app/assets/icons/`、`sources/`（主控，SD-FB-33）；`.gitignore`、`.gitattributes`（主控依人類決定）；`docs/01-PRD.md`、`docs/02-contract/`、`docs/03-design/` 的核准欄位與變更紀錄 |
+
+### 1.2 第 5 輪範圍（PRD v0.13，版面與視覺）
+
+| 項目 | 內容 |
+| :--- | :--- |
+| 驗收範圍 | PRD v0.13 共 41 個 US、270 個 AC；應驗收 **36 個 US、248 個 AC**；暫停 22 個維持「不適用（暫停）」 |
+| 新增 AC（27） | AC-38-01～10、AC-39-01～10、AC-40-01～03、AC-41-01～04 |
+| 修改 AC（30） | AC-01-01、AC-01-02、AC-01-07、AC-17-01、AC-17-06、AC-22-05、AC-35-04、AC-23-02、AC-24-01、AC-24-12、AC-34-07、AC-24-10、AC-30-12、AC-32-02、AC-25-01、AC-25-02、AC-25-03、AC-25-06、AC-25-10、AC-26-06、AC-26-01、AC-30-01、AC-30-10、AC-33-02、AC-34-01、AC-34-02（R-21）；AC-36-01、AC-34-03、AC-34-05、AC-34-08（上一版回饋）；AC-38-01 再於 v0.13 修改（SD-FB-39） |
+| 參考文件 | 契約 v0.13（README §11 NM／VC／DB／FT／MT、V-LAY-01～08；data-schema.ts §13）；architecture v0.8（§7.19 設計細節、§10.5 QA 分工、§15 SD-FB-39～49）；tasks.json v0.7（CT-24、FE-54～FE-62 done）。樣稿 `docs/mockups/v0.12-layout-demo.html` 只供參考，與 AC 不一致時以 AC 為準 |
+| 受測物 | `dist/english-master-track.html` 3,308,145 bytes＋`dist/site/` 8 檔（BUILD_ID `962e0f286c63e9e6`）；QA 以 `tools/build.mjs --out` 重建與 `dist/` 逐位元組相同（TC-S09） |
+| v0.11 對照版 | git 提交 `4fcbb9f`（v0.11 交付）的 `dist/english-master-track.html`，以 `git show` 取出到暫存目錄（AC-38-03、AC-38-08、AC-38-10 (2)）；AC-37-06 的「加入 PWA 前版本」改取提交 `e9372f2` |
+| 回歸 | `npm test`、`npm run validate:data`、靜態檢查、越界檢查、`npm run test:e2e` 全套（含 PWA，`tools/serve.mjs` 埠 8080） |
+| 授權例外（不算越界） | `docs/mockups/`（主控放置）；`docs/01-PRD.md`、`docs/02-contract/`、`docs/03-design/` 的核准欄位與變更紀錄（主控填寫） |
 
 ## 2. 測試方式
 
@@ -117,6 +132,22 @@ approved_at:
 | 必須實機的 AC | AC-34-02、AC-34-03、AC-35-03（實機安裝）、AC-34-05（iOS）、AC-36-07（MC-03 後正式部署）：自動化只做代理驗證，AC 判定「待人工」 |
 | 正式網址才完整的 AC | AC-34-01、AC-34-07、AC-34-09、AC-36-03、AC-36-05：PRD 允許先以 V-PWA (b) 驗證；本機通過者判「通過（另待人工確認）」 |
 
+### 2.5 第 5 輪量測方式與判定規則
+
+| 項目 | 方式／判定 |
+| :--- | :--- |
+| V-LAYOUT | CDP `Emulation.setDeviceMetricsOverride`（deviceScaleFactor 1、縮放 100%），寬 ≤ 767 以行動模式＋觸控；「兩種寬度」= 375×667、1366×768；「全部尺寸」= 375×667、390×844、412×915、768×1024、1366×768、1920×1080（AC-41-03 另加 375×812）。量測時無警示列與 Toast |
+| 色彩掃描（AC-38-01） | 走訪全部可見元素（含 SVG 子元素），讀計算後 `color`、`background-color`、4 邊 `border-*-color`、`fill`、`stroke`，正規化為 `#rrggbb`。允許位置：`.db-start` 底色、`#cz-start` 底色、`.db-stat__icon`（含子元素）；**標題列圖示 `.app-logo` 依 PRD v0.13 例外不列入計算**。另檢查文字色不為 `#1e9bf0`／`#f7893b`、白字元素的有效背景不為兩色 |
+| 對比（AC-38-04） | WCAG 2.x 相對亮度公式（QA 自寫，`tests/e2e/lib/layout-probe.mjs`）；量測首次畫面、4 個功能區、資料來源頁所有可見且有直接文字節點的元素；有效背景沿祖先鏈合成；`opacity` < 1 的祖先（鎖定列 0.85）以其外層背景混色。大字：≥ 24px，或 ≥ 18.66px 且粗細 ≥ 700。不量：停用按鈕、計算後文字色屬 Q-55 語意色（色級 5 色、對錯、燈號）、`visually-hidden`、標題列圖示 |
+| 卡片範圍（AC-38-06） | 主控台、難易度設定、模擬測驗、資料來源頁中可見的 `.card`（不含單字卡頁）；按鈕：`button.btn`、`.db-start`、導覽項，只在邊框寬度 > 0 且樣式非 none 時比對 `#d5d9e0` |
+| v0.11 對照（AC-38-03、AC-38-08） | 同一瀏覽器分別開 v0.11 與 v0.12 檔案。AC-38-08 擷取 `#view-flashcards` 可見元素樹（深度、標籤、class、直接文字、順序）比對；測驗模式前以初始化腳本**固定 `Math.random`**（LCG，種子 20261103）使選項順序可重現；幾何以頁面原點相對座標比較（標題列加圖示使整頁下移，屬全域變化），收音條相對位置列入判定 |
+| 鍵盤（AC-38-09、AC-41-04） | CDP `Input.dispatchKeyEvent`；Enter／空白鍵以帶 `text` 的 keyDown 送出（才會觸發按鈕預設動作）；Tab 順序前先重新載入，使循序焦點起點回到頁首 |
+| 減少動態 | `Emulation.setEmulatedMedia` `prefers-reduced-motion: reduce`；判定 `document.getAnimations().length === 0` 且相關元素 `transition-duration` 為 0 |
+| 首屏（AC-39-09、AC-41-03） | 開啟後不捲動（`scrollY` 0），以 `getBoundingClientRect` 判斷外框完整在視窗內，並以 `elementFromPoint` 確認可點；≤ 640px 另比對底部導覽上緣或固定底部列 |
+| 舊規則調整 | 「產物不含 `cz-color__range`」改為只檢查程式與 CSS 規則（去除註解，TC-S11）：原始字串會命中 `20-customizer.css` 檔頭記載 v0.10 刪除該 class 的歷史註解 1 次，註解不影響畫面，不開 BUG |
+| 只能人工 | 實機固定底部列與安全區、圖示清晰度、實機狀態列顏色：§6.2 TC-LAY-H1～H3；對應 AC 自動化已通過者判「通過（另待人工確認）」 |
+| 既有腳本的定位點 | 依 SD-FB-45 更新：色級列 `.cz-level[data-color]`；主控台目標行 `.db-goal`、3 格數據 `.db-stat--streak／--mastery／--accuracy`；「開始今日學習」`.db-start`（`btn--accent`）、「變更」`.db-change`；匯出、匯入、安裝前先展開 `.db-backup__toggle`；功能入口 `.dash-entry`、`#cz-guide`、小環形圖 `.db-mini` 已移除 |
+
 ## 3. 環境
 
 | 項目 | 版本 |
@@ -153,31 +184,42 @@ approved_at:
 | E2E 14 PWA 更新（第 4 輪） | `e2e-pwa-update.mjs` | US-36（AC-36-03～06）、AC-37-05（經過更新）、TC-PWA-H5 |
 | 診斷（不列入 run-all，第 4 輪） | `diag-install-button.mjs` | 「安裝 App」按鈕四角 `elementFromPoint` 命中元素（圓角外側命中自身容器，不算遮住） |
 
+### 4.2 第 5 輪新增與更新的套件
+
+| 套件 | 檔案 | 涵蓋 |
+| :--- | :--- | :--- |
+| E2E 15 版面與視覺（新） | `tests/e2e/e2e-layout.mjs`、`lib/layout-probe.mjs` | US-38～US-41（TC-38-01～TC-41-04、TC-39-03b） |
+| 靜態（新增 5 項） | `static-check.mjs` | TC-S11、TC-L-S01～TC-L-S04 |
+| 越界增量（新） | `tests/static/boundary-r5.mjs` | TC-B03（與 git HEAD `4fcbb9f` 比對，CT-24、FE-54～FE-62） |
+| QA 檢視 | `tests/tools/qa-review-r5.mjs` | TC-B01～B03、TC-R5-J1～J4（PG 超出設計字面之處的判定）、人工 TC |
+| 更新定位點 | `lib/state.mjs`、e2e-goal、e2e-cards、e2e-content、e2e-env、e2e-firstrun、e2e-progress、e2e-reinit、e2e-hidden、e2e-persist、e2e-pwa、e2e-pwa-update、`pwa-static.mjs` | 色級列、目標行、3 格數據、資料備份展開、新色值與 `<title>`（明細見 test-report §16.2） |
+| 診斷（不列入 run-all） | `diag-r5-dom.mjs`、`diag-r5-footer.mjs`、`diag-r5-p5clip.mjs`、`diag-r5-tab.mjs`、`diag-r5-textlen.mjs` | 選擇器盤點、頁尾點擊時機、文字裁切來源、Tab 序列、重設後主控台文字長度 |
+
 ## 5. TC 清單
 
-由 `node tests/tools/tc-list.mjs` 依第 4 輪執行結果產生（v0.3 以前的 TC 沿用原編號與說明；第 3、4 輪改寫或新增者說明已更新）。第 4 輪新增：TC-PS-01～TC-PS-06、TC-36-01a～TC-36-02、TC-36-01obs、TC-36-07a（`pwa-static.mjs`）、TC-37-*、TC-34-*、TC-35-*、TC-24-12a／b、TC-23-02c（`e2e-pwa.mjs`）、TC-36-03a～d、TC-36-04b、TC-36-06、TC-37-05b（`e2e-pwa-update.mjs`）、人工 TC-PWA-H1～H5。
+由 `node tests/tools/tc-list.mjs` 依第 5 輪執行結果產生（v0.5 以前的 TC 沿用原編號與說明；第 5 輪改寫或新增者說明已更新，標「v0.12 改寫／新增」或「第 5 輪」）。第 5 輪新增：TC-38-01～TC-41-04、TC-39-03b（`e2e-layout.mjs`）、TC-S11、TC-L-S01～S04（`static-check.mjs`）、TC-R5-J1～J4（QA 判讀）、人工 TC-LAY-H1～H3。
 
-共 311 個 TC：自動化 284、QA 檢視 7、人工 20（其中記「不適用（暫停）」19 個）。「TC-X-*」為各套件的「無未處理例外」檢查。
+共 351 個 TC：自動化 317、QA 檢視 11、人工 23（其中記「不適用（暫停）」19 個）。「TC-X-*」為各套件的「無未處理例外」檢查。
 
 | TC | 對應 AC | 方式 | 腳本 | 驗證重點 |
 | :--- | :--- | :--- | :--- | :--- |
-| TC-01-01 | AC-01-01 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 5 張卡片依序與內容（建議字量、本系統建議字量、情境、鎖定與即將開放）；卡片不出現分數範圍；無「官方門檻」「Tier」 |
+| TC-01-01 | AC-01-01 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | （v0.12 改寫）精簡色級列 5 列依序；橘棕綠顯示建議字量與每日新字量、適用情境；藍金只顯示鎖定圖示與「即將開放」，無字數、每日字量、「待定」；列表上方「本系統建議字量」只 1 次；無分數範圍、官方門檻、Tier |
 | TC-01-02 | AC-01-02 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 無學習紀錄時橘 → 綠套用不跳視窗，生效綠、單字集 5,620 |
 | TC-01-03 | AC-01-03 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 點棕未套用即離開：生效仍綠、單字集與 localStorage 不變 |
 | TC-01-04 | AC-01-04 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 生效色級仍為棕，分數仍為 300 |
 | TC-01-05 | AC-01-05 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | (a) 既有 300（棕）、(b) 既有 600（綠）點綠 → 只有綠選中、試算綠、套用後 localStorage 725 |
-| TC-01-06 | AC-01-06 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：畫面標示分數對應色級為「棕」，但「目前生效色級」仍顯示綠，抽認卡單字集不 |
+| TC-01-06 | AC-01-06 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：畫面標示分數對應色級為「棕」，但「目前生效色級」 |
 | TC-01-07 | AC-01-07、AC-03-03 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 有學習紀錄時點藍、金並套用：不跳視窗、目標藍／金、生效「綠（內建上限）」、localStorage 855／990、紀錄保留 |
-| TC-02-01 | AC-02-01 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：數字輸入框同步顯示 720；反之在輸入框輸入 720，滑桿位置同步到 7 |
-| TC-02-02 | AC-02-02 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不接受該值，顯示提示「請輸入 10～990 的分數」，試算結果維持上一個 |
+| TC-02-01 | AC-02-01 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：數字輸入框同步顯示 720；反之在輸入框輸入 7 |
+| TC-02-02 | AC-02-02 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不接受該值，顯示提示「請輸入 10～990 的分 |
 | TC-02-03 | AC-02-03 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 依序點 5 張卡片，試算每日新字量 10、10、15、20、20 |
 | TC-02-04 | AC-02-04 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 依序點 5 張卡片並套用：只有被點卡片選中、對應色級標示正確、localStorage 依序 215、465、725、855、990；無紀錄不跳視窗 |
 | TC-02-05a | AC-02-05 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | c = 0 時點橘、棕、綠的建議總字量與預計週數（15、41、54 週） |
 | TC-02-05b | AC-02-05 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | c = 409 時點棕 → 35 週 |
 | TC-02-06 | AC-02-06 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | c ≥ 目標字量時預計週數 0 並顯示「已達成目標字量」 |
-| TC-02-07 | AC-02-07 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：建議總字量、每日新字量、預計週數三項在 100ms 內更新 |
+| TC-02-07 | AC-02-07 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：建議總字量、每日新字量、預計週數三項在 100m |
 | TC-02-08 | AC-02-08 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 套用藍（855）後重新載入：選中藍、試算相同、localStorage 855 |
-| TC-02-09 | AC-02-09 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：分別修正為 725、720 並據以試算；滑桿以 5 分為步進 |
+| TC-02-09 | AC-02-09 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：分別修正為 725、720 並據以試算；滑桿以  |
 | TC-02-10a | AC-02-10 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 點藍、金：「即將開放」「待定」20 字/天、⌈N_G/140⌉ 週、旁註與「目前內建字庫到綠色為止」 |
 | TC-02-10b | AC-02-10 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | c ≥ N_G 時點藍、綠皆 0 週、不出現負數 |
 | TC-03-05 | AC-03-05、AC-32-04（單字卡位置） | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 有學習紀錄時換色級：取消維持第 5 張；確定後回第 1 張正面 |
@@ -229,25 +271,25 @@ approved_at:
 | TC-11-01 | AC-11-01、AC-11-02、AC-11-03、AC-11-06 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 所有選項立即鎖定；所選錯誤標紅、正確選項標綠；選對時只標綠 |
 | TC-11-04 | AC-11-04、AC-11-07 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 顯示下一題且為未作答狀態；最後一題作答後點「下一題」，顯示本輪「答對 x / y」結算與「重新開始」按鈕 |
 | TC-11-05 | AC-11-05 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 回到第 5 題 |
-| TC-12-01 | AC-12-01、AC-12-02、AC-12-03 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：主詞為藍色系、核心動詞為紅色系、受詞/補語為綠色系、修飾語/子句/插入語 |
-| TC-13-01 | AC-13-01、AC-13-02、AC-13-03、AC-13-04 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：所有修飾語元素計算後樣式 opacity 為 0.3 且套用灰階；主詞、 |
-| TC-14-01 | AC-14-01 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：有「Abstract 摘要」「方法論」「文獻回顧（Research Ga |
-| TC-14-02 | AC-14-02 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：3 個主題皆可閱讀完整內容（可展開或捲動） |
-| TC-15-01 | AC-15-01 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：有「全部」「研究空白 Gap」「研究目的 Aim」「研究結果 Findi |
-| TC-15-02 | AC-15-02、AC-15-03 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：只顯示 Gap 類句型；4 類各至少 25 則，共至少 100 則 |
-| TC-16-01 | AC-16-01 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：每次按鍵後 100ms 內，清單只顯示含該關鍵字的句型（不分大小寫，比對 |
-| TC-16-01b | AC-16-01 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：每次按鍵後 100ms 內，清單只顯示含該關鍵字的句型（不分大小寫，比對 |
-| TC-16-01c | AC-16-01 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：（v0.2 新增，BUG-002 第 1 輪驗證）重新載入後切到句型庫， |
-| TC-16-02 | AC-16-02 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：顯示「找不到符合的句型」 |
-| TC-16-03 | AC-16-03 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：剪貼簿內容與該句型模板文字完全相同，並顯示「已複製」提示 |
-| TC-16-04a | AC-16-04 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：顯示「複製失敗，請手動選取」並將該句文字反白選取，不拋出未處理錯誤 |
-| TC-16-04b | AC-16-04 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：顯示「複製失敗，請手動選取」並將該句文字反白選取，不拋出未處理錯誤 |
-| TC-17-01 | AC-17-01 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 顯示連續打卡天數、單字掌握數、Part 5 正確率 |
+| TC-12-01 | AC-12-01、AC-12-02、AC-12-03 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：主詞為藍色系、核心動詞為紅色系、受詞/補語為綠色 |
+| TC-13-01 | AC-13-01、AC-13-02、AC-13-03、AC-13-04 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：所有修飾語元素計算後樣式 opacity 為 0 |
+| TC-14-01 | AC-14-01 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：有「Abstract 摘要」「方法論」「文獻回顧 |
+| TC-14-02 | AC-14-02 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：3 個主題皆可閱讀完整內容（可展開或捲動） |
+| TC-15-01 | AC-15-01 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：有「全部」「研究空白 Gap」「研究目的 Aim |
+| TC-15-02 | AC-15-02、AC-15-03 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：只顯示 Gap 類句型；4 類各至少 25 則， |
+| TC-16-01 | AC-16-01 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：每次按鍵後 100ms 內，清單只顯示含該關鍵字 |
+| TC-16-01b | AC-16-01 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：每次按鍵後 100ms 內，清單只顯示含該關鍵字 |
+| TC-16-01c | AC-16-01 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：（v0.2 新增，BUG-002 第 1 輪驗證 |
+| TC-16-02 | AC-16-02 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：顯示「找不到符合的句型」 |
+| TC-16-03 | AC-16-03 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：剪貼簿內容與該句型模板文字完全相同，並顯示「已複 |
+| TC-16-04a | AC-16-04 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：顯示「複製失敗，請手動選取」並將該句文字反白選取 |
+| TC-16-04b | AC-16-04 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：顯示「複製失敗，請手動選取」並將該句文字反白選取 |
+| TC-17-01 | AC-17-01 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | （v0.12 改寫）3 格數據依序為連續打卡天數、單字掌握率（小字「已掌握 N 字」）、模擬測驗正確率，各只出現 1 次；無「單字掌握數」標籤 |
 | TC-17-02 | AC-17-02 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | 連續打卡天數為 2；同一天多次學習不重複累加；中斷一天後再學習，天數重設為 1。日期以裝置本地時區計 |
 | TC-17-04a | AC-17-04 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 顯示 70%（四捨五入至整數）；答題數為 0 時顯示「—」，不得顯示 NaN 或 Infinity |
 | TC-17-04b | AC-17-04 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 顯示 70%（四捨五入至整數）；答題數為 0 時顯示「—」，不得顯示 NaN 或 Infinity |
 | TC-17-05 | AC-17-05 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | 打卡天數不變、不為負，也不累加 |
-| TC-17-06 | AC-17-06 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 主控台目標區只有目標色級、生效色級、每日新字量（無目標分數）；藍、金時 15 字/天；入口 3 個模組 + 資料來源且可到達；無解碼器、句型庫 |
+| TC-17-06 | AC-17-06 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | （v0.12 改寫）5 色目標行逐字（每日新字量依生效色級、無分數）；主控台本體只有「開始今日學習」「變更」兩個 data-go；無功能入口與主控台內資料來源入口；開始今日學習、變更、導覽、頁尾各可到達 |
 | TC-18-01 | AC-18-01 | 自動化 E2E | `tests/e2e/e2e-persist.mjs` | 點棕套用、自訂字、模擬測驗、翻卡後關閉重開：資料（含今日已學與歷史）完全相同 |
 | TC-18-02 | AC-18-02 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 空 storage → 首次畫面選中綠、無主鍵；按「開始學習」後 localStorage 目標分數 725、目標與生效色級綠、單字集 5,620（v0.10 Q-39） |
 | TC-18-03 | AC-18-03、AC-24-01 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | localStorage 停用：警示、點棕套用與其他功能可用、可匯出（465） |
@@ -276,7 +318,7 @@ approved_at:
 | TC-22-05a | AC-22-05 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 一般模式 timeOrigin → emt-ready（主控台入口可點擊） |
 | TC-22-05b | AC-22-05、AC-25-01 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 首次模式 timeOrigin → emt-ready（「開始學習」可點擊） |
 | TC-23-01 | AC-23-01 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | 卡片顯示出處：該字出現的全部來源字表名稱、版本與授權（例：「單字來源：NGSL 1.2（CC BY-SA 4.0）」），以及音標、釋義各自依該欄位的實際來源標示：來源標記為 ECD… |
-| TC-23-02 | AC-23-02 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 列出本檔案實際使用的每一份外部資料（各字表與 ECDICT）：名稱、版本、原作者、授權名稱、授權條款網址、官網網址（純文字顯示即可）；註明本系統對外部資料做的修改：字表（合併、去重… |
+| TC-23-02 | AC-23-02 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | （v0.12 改寫）主控台本體無資料來源入口，主控台與其他頁的頁尾連結可開啟；列出外部資料欄位、修改說明與授權聲明；字表種類數一致 |
 | TC-23-02b | AC-23-02（375px） | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 375px 寬資料來源頁（含展開）無水平捲軸、超出與裁切 |
 | TC-23-02c | AC-23-02（v0.11 品牌標識聲明） | 自動化 E2E | `tests/e2e/e2e-pwa.mjs` | （v0.11）資料來源與授權頁含品牌標識聲明逐字、375／1366 寬可完整閱讀、既有 MIT／CC BY-SA 聲明仍在 |
 | TC-24-01 | AC-24-01、AC-24-02 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | 匯出檔名、格式、欄位（含今日已學與歷史）；既有 300 棕開始 |
@@ -288,11 +330,11 @@ approved_at:
 | TC-24-07 | AC-24-07 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | 內容以原文字元顯示，不出現圖片元素、不執行任何腳本（同 AC-04-04、AC-04-09） |
 | TC-24-08 | AC-24-08 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | 重複的自訂單字與不存在的已掌握單字被略過，不計入單字掌握數；完成後提示「已匯入，略過 N 筆」（N 為略過筆數） |
 | TC-24-09 | AC-24-09 | 自動化 E2E | `tests/e2e/e2e-env.mjs` | 顯示「儲存空間不足，未匯入」；匯入前已儲存的資料不被破壞（不出現只寫入一部分的狀態） |
-| TC-24-10 | AC-24-10 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | v1 備份（無 todayLearned、learnedHistory）匯入：提示 ["已匯入，略過 0 筆"]；既有 7 欄還原相同=true；今日已學 0 |
+| TC-24-10 | AC-24-10 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | （v0.12 改寫）v1 備份匯入成功、7 欄還原、今日已學 0、近 7 天顯示空狀態「開始學習後會顯示紀錄」 |
 | TC-24-11 | AC-24-11、AC-24-05 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 無效項目：提示 ["已匯入，略過 0 筆"]、匯入後歷史 {"2026-10-04":7,"2026-10-28":5}、todayLearned {"date |
 | TC-24-12a | AC-24-12 | 自動化 E2E | `tests/e2e/e2e-pwa.mjs` | （v0.11）file://：375／1366 寬 NT-1 說明逐字、緊接匯出按鈕、同區塊、非彈窗、不被裁切或遮住 |
 | TC-24-12b | AC-24-12 | 自動化 E2E | `tests/e2e/e2e-pwa.mjs` | （v0.11）localhost（V-PWA (b)）：同 TC-24-12a，文字相同 |
-| TC-25-01 | AC-25-01、AC-20-03（首次畫面不顯示導覽） | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 首次畫面元素：卡片、試算、開始學習、從備份還原；無分數輸入、導覽、主控台、自訂表單；頁尾資料來源 |
+| TC-25-01 | AC-25-01、AC-20-03（首次畫面不顯示導覽） | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | （v0.12 改寫）首次畫面：無試算結果卡，摘要行「綠級・每日 15 字　預計 54 週」、開始學習、從備份還原；5 列、預設綠；無導覽、自訂表單、範本；頁尾連結 |
 | TC-25-02 | AC-25-02 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 首次點棕「開始學習」：localStorage 465、主控台棕／10 字/天、導覽 4 鈕、不跳初始化視窗 |
 | TC-25-03 | AC-25-03、AC-26-04（首次畫面） | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 首次點藍「開始學習」：目標藍、生效綠（內建上限）、15 字/天、localStorage 855 |
 | TC-25-04 | AC-25-04 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 首次畫面點過卡片後重新整理／重開：仍首次、選中綠、預設 725、無主鍵 |
@@ -304,9 +346,9 @@ approved_at:
 | TC-25-10 | AC-25-10、AC-24-03 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 首次畫面點金後從備份還原 300 棕：依備份內容、不跳初始化視窗、localStorage 300 不轉換、重新載入後選中棕 |
 | TC-25-11 | AC-25-11 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | (a) 檔案選擇器開啟=true 後未選檔：firstRun、狀態鍵 無；(a) 確認框「匯入備份  匯入將覆蓋目前所有進度  取消 匯入」按取消：firstR |
 | TC-25-11d | AC-25-11（d）、AC-24-09 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 容量不足還原：提示 ["儲存空間不足，未匯入"]、firstRun、狀態鍵 無；解除後按「開始學習」→ main、狀態鍵 有 |
-| TC-26-01 | AC-26-01、AC-01-01 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 3 種寬度 5 張卡片內容與 ≥ 44px；不顯示分數範圍；整張卡片可點（既有 300 點綠卡右下角 → 725） |
+| TC-26-01 | AC-26-01、AC-01-01 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | （v0.12 改寫）一般頁 375／768／1366 與首次畫面 375／1366 使用相同精簡列表：色條為色級色、名稱與數字不裁切、說明一行、藍金 opacity < 1、選中列框線為色級色並顯示 ✓、只 1 列選中、≥ 44×44、無水平捲軸；整列可點 |
 | TC-26-02 | AC-26-02 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 既有 300 且有紀錄：點綠只有綠選中、draftScore 725、試算綠；生效與單字集不變；點卡片不跳視窗 |
-| TC-26-03 | AC-26-03 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。PRD v0.10 標「v0.10 暫停（分數輸入隱藏）」，本版不驗收（分數滑桿 |
+| TC-26-03 | AC-26-03 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。原驗證：不適用（暫停）。PRD v0.10 標「v0.10 暫停（分數輸入隱藏） |
 | TC-26-04 | AC-26-04、AC-01-07 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 既有 600 點藍、金：draftScore 855／990、即將開放、提示、不阻擋 |
 | TC-26-05 | AC-26-05 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 首次畫面、一般頁、主控台 × 375／1366：無可見滑桿、輸入框、範圍文字、目標分數、錯誤提示；無障礙樹無分數元件；Tab 不會聚焦分數元件；Console 無錯誤 |
 | TC-26-06 | AC-26-06 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 12 個既有分數（draftScore = appliedScore）：選中卡片、試算每日新字量、不點卡片直接套用後主控台色級與 localStorage 原值、重新載入不變、schemaVersion 2 |
@@ -326,7 +368,7 @@ approved_at:
 | TC-29-01 | AC-29-01 | 自動化 E2E | `tests/e2e/e2e-motion.mjs` | 四選一與模擬測驗答對、答錯：點擊到顏色 ≤ 100ms、強調／晃動動畫 ≤ 600ms、結束後顏色與鎖定保留 |
 | TC-29-02 | AC-29-02 | 自動化 E2E | `tests/e2e/e2e-motion.mjs` | 替身 vibrate：每次作答 1 次、總長含停頓 ≤ 200ms；鎖定後再點不震動、不播動畫 |
 | TC-29-03 | AC-29-03 | 自動化 E2E | `tests/e2e/e2e-motion.mjs` | vibrate 不存在或拋例外：無提示、無錯誤、其餘回饋正常 |
-| TC-30-01 | AC-30-01 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 主控台主環、2 小環、近 7 天長條；目標區 3 項 |
+| TC-30-01 | AC-30-01 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | （v0.12 改寫）主環形圖 1 個「今日已學 0 / 15 字」；3 格數據以數字顯示（0%、已掌握 0 字、—）、無小環形圖；近 7 天無資料顯示空狀態 |
 | TC-30-02 | AC-30-02 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 套用橘、綠、藍：D 為 10、15、15 |
 | TC-30-03 | AC-30-03、AC-17-02（學習行為） | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | X 依序 1、1、1、2、3、4（A=he、B=for、C=they、E=not；測驗題目 he/not）；localStorage todayLearned |
 | TC-30-04 | AC-30-04 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 瀏覽 5 次換卡未翻面、STT 逾時 no-speech:無分數、空結果:無分數、權限 not-allowed:無分數、結束無結果:無分數、離線:undefin |
@@ -336,10 +378,10 @@ approved_at:
 | TC-30-07c | AC-30-07、AC-30-13（FE-25／FE-30 跨午夜非學習寫入的正規化） | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 跨午夜前記憶體日期 2026-10-31；點藍卡並套用（生效色級不變，無確認視窗） → 有寫入、localStorage todayLearned {"date |
 | TC-30-08 | AC-30-08 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 長條 10/27:3(30%) 10/28:0(0%) 10/29:0(0%) 10/30:10(100%) 10/31:0(0%) 11/1:0(0%) 11 |
 | TC-30-09 | AC-30-09 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 預寫 31 筆（含今天往前第 30、45 天）→ 學 1 字後匯出歷史 30 筆（2026-10-04～2026-11-02）、第 29 天=7、今天=1、X= |
-| TC-30-10 | AC-30-10 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 單字集 1000 字、已掌握 260（集內 250、集外 10）→「目前單字集掌握率」25%（環 25%）；模擬測驗 10 題對 7 →「模擬測驗正確率」70% |
+| TC-30-10 | AC-30-10 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | （v0.12 改寫）單字集 1,000、集內已掌握 250、集外 10、模擬測驗 10 對 7 → 單字掌握率 25%、小字「已掌握 260 字」、正確率 70%；只有主環形圖 |
 | TC-30-10b | AC-30-10、E-48 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 單字集 0、答題 0：目前單字集掌握率=—（空環=true、比例 0%）；模擬測驗正確率=—（空環=true、比例 0%）；主環「今日已學 0 / 15 字」 |
 | TC-30-11 | AC-30-11 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 重新載入前「今日已學 6 / 15 字」長條 0,0,0,0,0,0,6；重新載入後「今日已學 6 / 15 字」長條相同=true；再翻已學過的字 →「今日已 |
-| TC-30-12 | AC-30-12、MG-3 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | v1 狀態開啟 → main/dashboard；7 欄不變=true；提示 []；今日已學 0 / 10 字、長條 0,0,0,0,0,0,0；localSt |
+| TC-30-12 | AC-30-12、MG-3 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | （v0.12 改寫）v1 狀態開啟直接進主控台、7 欄不變、X = 0、近 7 天空狀態、寫回 schemaVersion 2 |
 | TC-30-13 | AC-30-13、RD-1、V-ST-09～V-ST-11 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | (1) 無效歷史 + 昨天的今日紀錄：今日已學 0 / 10 字、長條 0,0,0,5,0,0,0、提示 []、目標 465；學 1 字後寫出歷史 {"2026 |
 | TC-30-14 | AC-30-14、LR-7 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 容量不足時學新字：X 2 → 3；提示 ["儲存空間不足"]（「儲存空間不足」第 1 次後 1 則、第 2 次後 1 則）；localStorage 不變=tr |
 | TC-31-01 | AC-31-01 | 自動化 E2E | `tests/e2e/e2e-motion.mjs` | 換頁淡入／滑入 ≤ 300ms、點擊到第一個影格 ≤ 100ms、結束後移除動畫 class |
@@ -347,7 +389,7 @@ approved_at:
 | TC-31-03 | AC-31-03 | 自動化 E2E | `tests/e2e/e2e-motion.mjs` | 減少動態：換頁、翻卡、滑動、作答、環形圖都不播動畫且結果相同；震動仍呼叫 |
 | TC-31-03d | AC-31-03（初始化確認視窗） | 自動化 E2E | `tests/e2e/e2e-reinit.mjs` | 減少動態下確認視窗直接出現（animation、transition 為 0） |
 | TC-32-01 | AC-32-01 | 自動化 E2E | `tests/e2e/e2e-reinit.mjs` | 有學習紀錄時點棕套用：視窗兩行文字、只有確定與取消、aria-modal、背景點擊無效、開啟中狀態與 localStorage 不變 |
-| TC-32-02 | AC-32-02 | 自動化 E2E | `tests/e2e/e2e-reinit.mjs` | 按確定：goal 465 棕、主控台 0 / 10、長條全 0、打卡 0、掌握 0、0%、—；試算 c = 0；單字卡與模擬測驗回第 1；重新載入不變；備份 6 欄 = 首次啟動預設 |
+| TC-32-02 | AC-32-02 | 自動化 E2E | `tests/e2e/e2e-reinit.mjs` | （v0.12 改寫）確定後 6 項回到初始值：今日已學 0 / 10、近 7 天空狀態、0 天｜0%｜已掌握 0 字｜—；目標行棕級；單字卡第 1 張、模擬測驗第 1 題；匯出值同清除後首次開始學習 |
 | TC-32-03 | AC-32-03 | 自動化 E2E | `tests/e2e/e2e-reinit.mjs` | 自訂 3 字原樣保留、單字集 = 2,809 + 3、monetization 不再計入掌握、STT 已讀保留 |
 | TC-32-04 | AC-32-04 | 自動化 E2E | `tests/e2e/e2e-reinit.mjs` | 取消、Esc、點視窗外：選中回綠、試算 15 字/天、目標分數 600、生效綠、單字卡位置與學習紀錄不變、localStorage 與按套用前相同 |
 | TC-32-04obs | AC-32-04（觀察：FB-35） | 自動化 E2E | `tests/e2e/e2e-reinit.mjs` | 觀察（FB-35）：取消後任何寫入前重新整理的選中卡片 |
@@ -399,10 +441,37 @@ approved_at:
 | TC-37-04 | AC-37-04 | 自動化 E2E | `tests/e2e/e2e-pwa.mjs` | （v0.11）127.0.0.1 註冊；非 localhost 的 http（非安全環境）不註冊不報錯；停用 SW 環境線上照常 |
 | TC-37-05a | AC-37-05、AC-21-01、AC-21-03 | 自動化 E2E | `tests/e2e/e2e-pwa.mjs` | （v0.11）環境層（含 SW）請求全部為同源、部署目錄內、GET、屬預先快取或 sw.js、無查詢字串；載入後操作（含 STT、匯出入）請求 0；Cache Storage、IndexedDB、localStorage 依契約 |
 | TC-37-05b | AC-37-05、AC-21-01（經過 1 次更新） | 自動化 E2E | `tests/e2e/e2e-pwa-update.mjs` | （v0.11）經過 1 次更新後的環境層請求同 TC-37-05a |
-| TC-37-06 | AC-37-06 | 自動化 E2E | `tests/e2e/e2e-pwa.mjs` | （v0.11）以 git HEAD 中目前部署的版本學習後換成 PWA 版：SW 啟用後 localStorage 鍵、欄位與內容完全不變、schemaVersion 2、進主控台 |
+| TC-37-06 | AC-37-06 | 自動化 E2E | `tests/e2e/e2e-pwa.mjs` | （v0.11；第 5 輪改以加入 PWA 前的提交 e9372f2 的 dist 模擬）加入 PWA 前已在網址版學習，換成 PWA 版後資料完全相同 |
+| TC-38-01 | AC-38-01 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）色彩掃描（首次畫面、4 功能區、資料來源頁 × 375／1366）：#f7893b 只在「開始今日學習」「開始學習」底色與打卡圖示（標題列圖示依 v0.13 例外不計）；文字色不為 #1e9bf0／#f7893b；白字不在兩色上；主環未達成與進度條為 #1e9bf0 |
+| TC-38-02 | AC-38-02、AC-34-04 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）body 背景 #eef4fa（HSL 210°、55%、96.7%）、區塊卡片白底；manifest background_color 同首次畫面背景；theme_color 與 meta theme-color 皆 #1e9bf0 |
+| TC-38-03 | AC-38-03、AC-40-03（對錯色） | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）v0.11（4fcbb9f）與 v0.12 語意色變數相同；色級列色條、選中框、目標行色點、達成金環、模擬測驗對錯色與 v0.11 相同；藍色級不被品牌色取代 |
+| TC-38-04 | AC-38-04 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）WCAG 對比：可見文字（不含停用按鈕與語意色）一般 ≥ 4.5、大字 ≥ 3；鎖定列 opacity 合成；強調橘按鈕為深色字 |
+| TC-38-05 | AC-38-05、AC-21-01 (a) | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）標題列：內嵌 SVG 圖示（藍底、橘對話框）＋文字 EnglishContext、24～40px 正方形、aria-hidden、375 不裁切；file:// 連網與斷網皆無額外請求；≤ 5 MB |
+| TC-38-06 | AC-38-06 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）區塊卡片白底、四角 16px、有陰影、無邊框；統計格無邊框；按鈕不以 #d5d9e0 為邊框 |
+| TC-38-07 | AC-38-07 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）主控台、難易度設定、模擬測驗區塊標題 ≥ 18px 且 ≥ 600；列舉數字 tabular-nums；3 格數值 ≥ 24px |
+| TC-38-08 | AC-38-08 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）單字卡頁（單字卡模式、測驗模式；375／1366；固定 Math.random）元素樹與 v0.11 相同；收音條相對位置相同 |
+| TC-38-09 | AC-38-09、AC-31-03 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）一般與減少動態：Tab 順序、焦點框 ≥ 2px、Enter／空白鍵與點擊相同、觸控 ≥ 44×44；減少動態下展開收合與進度條無轉場 |
+| TC-38-10 | AC-38-10、AC-24-03 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）<title>、各畫面與對話框／Toast 無 English Master Track、資料來源頁「原創內容來源：EnglishContext 原創內容」、註解第一行；不改清單（鍵名、schemaVersion、備份 format、匯出檔名、快取前綴）；v0.11 localStorage 直接進主控台、v0.11 備份可匯入 |
+| TC-39-01 | AC-39-01 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）主控台區塊 DOM 與畫面順序：標題 → 今日任務 → 3 格數據 → 近 7 天 → 資料備份 → 頁尾；無功能入口、學習統計、目前目標、圖示磚（375／1366／1920） |
+| TC-39-02 | AC-39-02 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）今日任務卡：主環形圖與「開始今日學習」並排、目標行在下；按鈕強調橘底深色字、≥ 44×44、不換行 |
+| TC-39-03 | AC-39-03、AC-22-01（量測方式） | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）「開始今日學習」→ 單字卡頁、導覽選中同步、localStorage 不變、≤ 100ms |
+| TC-39-03b | AC-39-03、AC-06-06 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）單字集為空時「開始今日學習」→ 單字卡空狀態，localStorage 不變（無內建資料 fixture） |
+| TC-39-04 | AC-39-04、AC-17-06、E-92 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）5 色目標行逐字；「變更」為按鈕 ≥ 44×44，點擊到一般難易度設定頁 |
+| TC-39-05 | AC-39-05、AC-17-01、AC-30-10 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）3 格同一列依序；3 天（橘色圖示、數字非橘）、25%＋已掌握 260 字、70%；無環形圖；不裁切（375／1366） |
+| TC-39-06 | AC-39-06、AC-23-02 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）主控台本體列舉文字各 1 次；無目前目標色級、生效色級、單字掌握數、資料來源入口、小環形圖、模組入口；頁尾連結可見可開啟 |
+| TC-39-07 | AC-39-07、AC-30-08、E-88 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）(a) 長條最高 ≤ 80px、圖表區 ≤ 120px；(b) 全 0 只顯示「開始學習後會顯示紀錄」、圖表區 ≤ 48px；學 1 字後回長條圖 |
+| TC-39-08 | AC-39-08、AC-24-12、E-90、E-91 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）資料備份預設收合、點擊／Enter 展開收合、切頁維持、匯入流程不收合、重新載入回收合、localStorage 不變；375 展開不被底部導覽遮住 |
+| TC-39-09 | AC-39-09、AC-22-05（量測點） | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）V-LAYOUT 6 種尺寸：開啟與切回主控台不捲動，「開始今日學習」完整在視窗內、可點、在底部導覽之上 |
+| TC-39-10 | AC-39-10、AC-40-02、AC-20-01 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）主控台與模擬測驗內容寬：1366／1920 ≤ 720 置中（左右差 ≤ 2）、768 = min(可用, 720)、375 填滿；6 種尺寸無水平捲軸 |
+| TC-40-01 | AC-40-01、AC-11-05 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）進度條：標題下題目上、高 ≥ 4px、#1e9bf0、role/aria、i÷N（誤差 ≤ 1 點）、下一題 ≤ 100ms、結算 100%、重新開始 1÷N、重新載入一致、減少動態無轉場 |
+| TC-40-03 | AC-40-03 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）模擬測驗既有 AC 由既有 TC 覆核（TC-10-*、TC-11-*、TC-29-*、TC-28-06、TC-38-03） |
+| TC-41-01 | AC-41-01、AC-25-01 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）首次畫面順序：標題列 → 選擇你的目標 → 副標 → 本系統建議字量 → 5 列；無試算結果卡、導覽、自訂表單、範本；背景同其他畫面 |
+| TC-41-02 | AC-41-02、AC-02-03、AC-02-05、AC-02-10、AC-22-04 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）固定底部列：鎖定行（藍金）→ 摘要行 → 開始學習 → 從備份還原；5 色摘要逐字、≤ 100ms、與一般頁試算相同；首次畫面不寫 localStorage |
+| TC-41-03 | AC-41-03 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）V-LAYOUT 6 種尺寸＋375×812：不捲動摘要行與兩按鈕在視窗內可點；≤ 640 固定，捲到中段與底部仍可見可點 |
+| TC-41-04 | AC-41-04、AC-25-07、AC-25-11 (b)、E-93 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | （v0.12 新增）375×667：列高 ≤ 184、捲到底頁尾連結在底部列上方可點、各列可捲到列上方、格式錯誤提示不被遮住、Tab 順序 列 → 開始學習 → 從備份還原 → 頁尾 |
 | TC-B01 | （越界檢查：檔案歸屬） | QA 檢視 | `tests/static/boundary-check.mjs` | 每個檔案是否屬於某任務 paths；人類自放檔（dist/ads.txt、LICENSE、.github/）另列 |
-| TC-B02 | （越界檢查：sources/、english_master_track.md、docs/、src/data/） | QA 檢視 | `人工判讀（檔案時間、docs 變更紀錄）` | sources/、english_master_track.md 未被修改；docs/ 的修改皆為上游角色或 QA |
-| TC-B03 | （越界檢查：第 4 輪增量） | QA 檢視 | `tests/static/boundary-delta.mjs` | （第 3 輪新增）2026-10-30 18:20 之後修改的 src、tools、dist、sources 檔案皆在 FE-34～FE-44 paths 內 |
+| TC-B02 | （越界檢查：原始需求、sources/、docs/、tests/） | QA 檢視 | `人工判讀（檔案時間、docs 變更紀錄）` | sources/、english_master_track.md 未被修改；docs/ 的修改皆為上游角色或 QA |
+| TC-B03 | （越界檢查：第 5 輪增量 CT-24、FE-54～FE-62） | QA 檢視 | `tests/static/boundary-r5.mjs` | （第 5 輪）與 git HEAD 比對的變動檔案皆在 CT-24、FE-54～FE-62 paths 或授權例外內 |
 | TC-D01 | AC-03-06 | 自動化（資料檢查） | `tests/data/data-check.mjs` | 「共 N 張」依序為 N_O（1,000，Q-29）、N_B、N_G，與契約文件記錄的字表實際字數一致（功能詞不扣除，Q-30） |
 | TC-D02 | AC-03-07 | 自動化（資料檢查） | `tests/data/data-check.mjs` | 不存在兩筆單字字串相同（不分大小寫）的項目 |
 | TC-D03 | AC-03-08 | 自動化（資料檢查） | `tests/data/data-check.mjs` | 每筆皆有排名，且排名為 1～N_G 連續不重複的整數；排名 1～N_B 的順序與 NGSL 原表頻率順序一致；排名 N_B+1～N_G 的單字皆來自 TSL、BSL 或 NAWL |
@@ -423,9 +492,16 @@ approved_at:
 | TC-D18 | AC-23-02、AC-23-03（architecture §8.4 紀錄完整性） | QA 檢視 | `tests/data/records-check.mjs＋人工判讀` | V-VOC-17、H-1W、V-VOC-09 在 _records 皆有對應列（沿用第 1 輪判讀，資料未變更） |
 | TC-D19 | AC-23-03（V-VOC-18 抽查） | QA 檢視 | `src/data/_tools/sample.mjs＋人工判讀` | V-VOC-18 抽查 301 筆（沿用第 1 輪，資料未變更） |
 | TC-D20 | AC-11-01（V-P5-05 正解唯一性） | QA 檢視 | `src/data/_tools/sample.mjs＋人工判讀` | Part 5 正解唯一性 40 題（沿用第 1 輪，資料未變更） |
+| TC-L-S01 | AC-38-07、AC-19-01（VC-8） | 自動化（靜態檢查） | `tests/static/static-check.mjs` | （第 5 輪新增）CSS 無 @font-face、無 url(；系統字型 |
+| TC-L-S02 | AC-38-10 (1)、AC-34-01、AC-34-02（V-LAY-05、NM-1、NM-4） | 自動化（靜態檢查） | `tests/static/static-check.mjs` | （第 5 輪新增）<title>EnglishContext</title> 恰 1 次、授權註解第一行 EnglishContext、HTML 文字與程式字串常值與 src/data 無 English Master Track |
+| TC-L-S03 | AC-38-10 (2)（NM-5 FROZEN_IDENTIFIERS） | 自動化（靜態檢查） | `tests/static/static-check.mjs` | （第 5 輪新增）不改清單：englishMasterTrack:state／unreadable、english-master-track-backup、匯出檔名前綴、emt-build-id、sw.js 快取前綴、交付檔名 |
+| TC-L-S04 | AC-38-05（NM-2） | 自動化（靜態檢查） | `tests/static/static-check.mjs` | （第 5 輪新增）標題列圖示為內嵌 SVG ≤ 1,500 bytes、aria-hidden、無 xmlns／image／text／href、產物無 <img> |
+| TC-LAY-H1 | AC-41-03、AC-41-04、E-93 | 人工 | `§6` | （第 5 輪人工）實機首次畫面固定底部列與安全區 |
+| TC-LAY-H2 | AC-38-05 | 人工 | `§6` | （第 5 輪人工）標題列圖示清晰度 |
+| TC-LAY-H3 | AC-38-02、AC-34-04 | 人工 | `§6` | （第 5 輪人工）實機狀態列顏色 #1e9bf0 |
 | TC-M01 | AC-08-01、AC-08-09、AC-08-13、AC-08-14、AC-21-01、AC-21-03 | 人工 | `§6` | 畫面文字與 AC 一致；Network 除 `file://` 主檔外無頁面請求；localStorage 只有 `englishMasterTrack:state`、無音訊或音量資料；IndexedDB、Cache Storage 無本系統資料；無下載 |
 | TC-M02 | AC-07-01～AC-07-05 | 人工 | `§6` | 語音為美式、速度正確、無排隊；提示逐字相符 |
-| TC-M03 | AC-19-02、AC-37-01 | 人工 | `§6` | 除 STT（依 AC-08-14）外皆可用；收音條斷網時不影響其他功能；Console 無資源載入失敗 |
+| TC-M03 | AC-19-02、AC-37-01、AC-38-05 | 人工 | `§6` | 除 STT（依 AC-08-14）外皆可用；收音條斷網時不影響其他功能；Console 無資源載入失敗 |
 | TC-M04 | AC-19-03、AC-18-01 | 人工 | `§6` | 頁面完整顯示；目標色級、自訂字、模擬測驗題號與統計、打卡、今日已學與近 7 天長條皆一致 |
 | TC-M05 | AC-20-01～AC-20-03、AC-26-01、AC-27-01、AC-27-02、AC-28-03～AC-28-06 | 人工 | `§6` | 全部可用手指完成；無水平捲軸與裁切重疊；滑動換卡手感正常、垂直捲動不換卡 |
 | TC-M06 | AC-24-01、AC-24-03 | 人工 | `§6` | B 的資料與 A 匯出時一致；重新載入後仍在 |
@@ -445,10 +521,14 @@ approved_at:
 | TC-PS-05 | AC-36-02、AC-37-05、AC-35-01（V-PWA-05） | 自動化（靜態與建置檢查） | `tests/static/pwa-static.mjs` | （v0.11）sw.js：BUILD_ID 同 HTML、CACHE_NAME 前綴、預先快取 7 項、禁用字串 0、只有 install／activate／fetch／message 4 種監聽（V-PWA-05） |
 | TC-PS-06 | AC-19-01（附屬檔參照） | 自動化（靜態與建置檢查） | `tests/static/pwa-static.mjs` | （v0.11）HTML 對檔案的參照只有同目錄相對路徑的 PWA 附屬檔；無絕對網址 src／href |
 | TC-PWA-H1 | AC-34-01、AC-34-02、AC-34-03、AC-34-06、AC-34-07、AC-34-09、AC-34-10 | 人工 | `§6` | （v0.11 人工）Windows Chrome／Edge 正式網址：原生與畫面內安裝、名稱、獨立視窗、Manifest 面板、maskable 預覽、解除安裝、Firefox |
-| TC-PWA-H2 | AC-34-02、AC-34-03、AC-35-03 | 人工 | `§6` | （v0.11 人工）Android Chrome：安裝、圓形遮罩、啟動畫面、飛航模式啟動 |
+| TC-PWA-H2 | AC-34-02、AC-34-03、AC-35-03、AC-38-02 | 人工 | `§6` | （v0.11 人工）Android Chrome：安裝、圓形遮罩、啟動畫面、飛航模式啟動 |
 | TC-PWA-H3 | AC-34-05、AC-34-08 | 人工 | `§6` | （v0.11 人工）iOS Safari：加入主畫面名稱、圖示、獨立啟動、無安裝按鈕 |
 | TC-PWA-H4 | AC-36-07（GitHub Pages 部署結果） | 人工 | `§6` | （v0.11 人工）MC-03 修改 static.yml 後 push：Actions 成功、正式網址 8 檔 200 且內容相同、不含 docs／src／sources |
 | TC-PWA-H5 | AC-36-03（正式網址、已安裝 App、背景 ≥ 1 小時）、AC-36-05（正式網址同網域快取） | 人工 | `§6` | （v0.11 人工）正式網址已安裝 App 重新部署後 60 秒內提示並更新；背景 ≥ 1 小時切回前景觸發檢查 |
+| TC-R5-J1 | AC-38-08、AC-38-06 | QA 檢視 | `人工判讀（設計字面 vs AC）` | （第 5 輪判讀）單字卡本體保留 v0.11 陰影不違反 AC-38-08、AC-38-06 |
+| TC-R5-J2 | AC-39-05、AC-39-03、AC-39-08 | QA 檢視 | `人工判讀（設計字面 vs AC）` | （第 5 輪判讀）主控台重繪清單加入 streak 不違反 AC |
+| TC-R5-J3 | AC-39-07 | QA 檢視 | `人工判讀（設計字面 vs AC）` | （第 5 輪判讀）近 7 天卡片內距縮小不違反 AC-39-07 |
+| TC-R5-J4 | AC-41-01、AC-25-01 | QA 檢視 | `人工判讀（設計字面 vs AC）` | （第 5 輪判讀）不建立 #cz-guide 不違反 AC-41-01 |
 | TC-S01 | AC-19-01 | 自動化（靜態檢查） | `tests/static/static-check.mjs` | 只有 1 個 .html 檔；所有 CSS 以 <style> 內嵌；檔案中無指向外部的 <script src>、<link href>、@import、外部字型或圖片網址，不含… |
 | TC-S02 | AC-19-04 | 自動化（靜態檢查） | `tests/static/static-check.mjs` | ≤ 5 MB（5,242,880 bytes） |
 | TC-S03 | AC-04-09 | 自動化（靜態檢查） | `tests/static/static-check.mjs` | 皆以 textContent 或等效的純文字方式寫入 DOM；不使用 innerHTML、outerHTML、insertAdjacentHTML、document.write 插… |
@@ -459,6 +539,7 @@ approved_at:
 | TC-S08 | AC-19-01（D-1 不打包） | 自動化（靜態檢查） | `tests/static/static-check.mjs` | 只有 1 個 .html 檔；所有 CSS 以 <style> 內嵌；檔案中無指向外部的 <script src>、<link href>、@import、外部字型或圖片網址，不含… |
 | TC-S09 | AC-19-01（交付物可追溯） | 自動化（靜態檢查） | `tests/static/static-check.mjs` | 只有 1 個 .html 檔；所有 CSS 以 <style> 內嵌；檔案中無指向外部的 <script src>、<link href>、@import、外部字型或圖片網址，不含… |
 | TC-S10 | AC-31-04 | 自動化（靜態檢查） | `tests/static/static-check.mjs` | （第 3 輪新增）無外部動畫／圖表／手勢函式庫，@keyframes 與 SVG 皆內嵌、原生 API 建立 |
+| TC-S11 | AC-26-05、AC-01-01（程式面） | 自動化（靜態檢查） | `tests/static/static-check.mjs` | （第 5 輪新增）產物程式與 CSS 規則（去除註解）不含 cz-color__range（取代以原始字串搜尋的舊規則） |
 | TC-X-cards | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | 例外：[] |
 | TC-X-clock | （時鐘套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | [] |
 | TC-X-content | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | [] |
@@ -467,6 +548,7 @@ approved_at:
 | TC-X-fixture | （fixture）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | [] |
 | TC-X-goal | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 例外：[]；console.error：[] |
 | TC-X-hidden | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-hidden.mjs` | [] |
+| TC-X-layout | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | 例外 []；console.error [] |
 | TC-X-mic | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-mic.mjs` | 例外：[] |
 | TC-X-motion | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-motion.mjs` | 例外 [] |
 | TC-X-progress | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | [] |
@@ -508,13 +590,23 @@ approved_at:
 | TC-PWA-H3 | AC-34-05、AC-34-08 (b) | iPhone 最新版 iOS Safari | (1) 開 `<網址>`；(2) 分享 → 加入主畫面：預設名稱為 EnglishContext、預覽圖示無灰邊與黑角；(3) 從主畫面啟動：無 Safari 網址列與工具列，可操作；(4) 主控台無「安裝 App」按鈕 | 如左；STT 是否可用不列判定（E-83） |
 | TC-PWA-H5 | AC-36-03、AC-36-05 | Windows Chrome 已安裝 App（TC-PWA-H1 後） | (0) 部署 V2 前，在 App 的 DevTools Console 執行 `caches.open("other-cache").then(c => c.put("/x", new Response("keep")))`（模擬同網域其他專案的快取）；(1) 記下 App 中 DevTools Console 執行 `document.querySelector('meta[name="emt-build-id"]').content` 的值 V1；(2) 主控改任一文字、建置、push 部署；(3) Actions 完成後重開 App：60 秒內頂端出現「有新版本，重新整理」與「重新整理」按鈕；按下後頁面重新載入 1 次，識別碼變為 V2；(4) 再部署一次 V3，讓 App 開著切到背景 ≥ 1 小時後切回前景：60 秒內出現提示 | 如左；學習資料不變；V2 啟用後 Application → Cache storage 只剩 1 個 `english-master-track-pwa-<V2>`，`other-cache` 仍在且內容為 keep |
 
+### 6.2 第 5 輪人工驗收（版面與視覺；人類執行）
+
+既有人工 TC 的步驟調整：TC-MIC-2 刪除「主控台入口」離開方式（AC-33-02 v0.12）；TC-PWA-H1 步驟 (2) 的「安裝 App」按鈕須先在主控台展開「資料備份」才出現（AC-34-07 v0.12）；TC-PWA-H2 步驟 (4) 啟動畫面背景改為淡藍灰 `#eef4fa`；TC-M07 (5) 的量測點改為主控台「開始今日學習」可點擊（AC-22-05 v0.12）。
+
+| TC | 對應 AC | 環境 | 步驟 | 通過條件 |
+| :--- | :--- | :--- | :--- | :--- |
+| TC-LAY-H1 | AC-41-03、AC-41-04、E-93 | Android Chrome 最新版；iPhone Safari 最新版（含瀏海與 Home Indicator 機型）；正式網址與 `file://`（Android 可用檔案管理員開啟） | (1) 清除網站資料後開啟，不捲動；(2) 依序點 5 個色級列；(3) 捲到頁面中段、最底部；(4) 每個色級列都捲到底部列上方並點選；(5) 點頁尾「資料來源與授權」再按「返回難易度設定」；(6) 橫向旋轉後重複 (1)(3) | (1) 摘要行、「開始學習」「從備份還原」完整可見；(2) 摘要行即時更新，選藍、金多一行「目前內建字庫到綠色為止」；(3) 底部列固定在底部、可點；(4)(5) 色級列與頁尾連結都能露出在底部列上方；底部列下緣不被 Home Indicator 或瀏覽器工具列擋住（安全區留白） |
+| TC-LAY-H2 | AC-38-05 | Windows 11（縮放 100%、150%）Chrome；Android Chrome；iPhone Safari | 檢視首次畫面、主控台、資料來源頁的標題列；以 OS 放大鏡放大圖示 | 圖示為藍底、橘色對話框、白色 EC，邊緣清楚無模糊或鋸齒，與主畫面 App 圖示一致；名稱 EnglishContext 不被裁切 |
+| TC-LAY-H3 | AC-38-02、AC-34-04 | Android Chrome；已安裝 v0.11 的 App（若有） | (1) 以正式網址開啟，觀察網址列／狀態列顏色；(2) 從主畫面啟動已安裝 App，觀察狀態列；(3) 已安裝 v0.11 者：重新部署後依提示重新整理，再關閉重開 App | 狀態列為亮藍 `#1e9bf0`（不再是 v0.11 的 `#2f6fd6`）；啟動畫面背景為淡藍灰；更新後重開顏色改變（作業系統快取 manifest 可能需要數小時至數日，屬瀏覽器行為，記錄即可） |
+
 ## 7. AC 對照（AC → TC）
 
-由 `node tests/tools/ac-matrix.mjs` 產生。PRD v0.11 的 243 個 AC 全部列出：應驗收的 221 個 AC 皆至少對應 1 個 TC（未涵蓋 0）；暫停的 22 個記「不適用（暫停）」。「判定」欄為第 4 輪結果，詳見 test-report §15（含 BUG-003 複驗）。
+由 `node tests/tools/ac-matrix.mjs` 產生。PRD v0.13 的 270 個 AC 全部列出：應驗收的 248 個 AC 皆至少對應 1 個 TC（未涵蓋 0）；暫停的 22 個記「不適用（暫停）」。「判定」欄為第 5 輪結果，詳見 test-report §16。
 
 | AC | 判定 | 對應 TC |
 | :--- | :--- | :--- |
-| AC-01-01 | 通過 | TC-26-01、TC-01-01 |
+| AC-01-01 | 通過 | TC-26-01、TC-01-01、TC-S11 |
 | AC-01-02 | 通過 | TC-01-02 |
 | AC-01-03 | 通過 | TC-01-03 |
 | AC-01-04 | 通過 | TC-01-04 |
@@ -523,14 +615,14 @@ approved_at:
 | AC-01-07 | 通過 | TC-26-04、TC-01-07 |
 | AC-02-01 | 不適用（暫停） | TC-02-01 |
 | AC-02-02 | 不適用（暫停） | TC-02-02 |
-| AC-02-03 | 通過 | TC-02-03 |
+| AC-02-03 | 通過 | TC-02-03、TC-41-02 |
 | AC-02-04 | 通過 | TC-02-04 |
-| AC-02-05 | 通過 | TC-02-05a、TC-02-05b |
+| AC-02-05 | 通過 | TC-02-05a、TC-02-05b、TC-41-02 |
 | AC-02-06 | 通過 | TC-02-06 |
 | AC-02-07 | 不適用（暫停） | TC-02-07 |
 | AC-02-08 | 通過 | TC-02-08 |
 | AC-02-09 | 不適用（暫停） | TC-02-09 |
-| AC-02-10 | 通過 | TC-02-10a、TC-02-10b |
+| AC-02-10 | 通過 | TC-02-10a、TC-02-10b、TC-41-02 |
 | AC-03-01 | 通過 | TC-03-06 |
 | AC-03-02 | 通過 | TC-03-06 |
 | AC-03-03 | 通過 | TC-01-07 |
@@ -559,7 +651,7 @@ approved_at:
 | AC-06-03 | 通過 | TC-06-02 |
 | AC-06-04 | 通過 | TC-06-04 |
 | AC-06-05 | 通過 | TC-06-04 |
-| AC-06-06 | 通過 | TC-06-06、TC-04-08b |
+| AC-06-06 | 通過 | TC-06-06、TC-04-08b、TC-39-03b |
 | AC-06-07 | 通過 | TC-D06、TC-06-07 |
 | AC-06-08 | 通過 | TC-D05 |
 | AC-07-01 | 通過（另待人工確認） | TC-07-01、TC-M02 |
@@ -594,7 +686,7 @@ approved_at:
 | AC-11-02 | 通過 | TC-D12、TC-11-01 |
 | AC-11-03 | 通過 | TC-11-01 |
 | AC-11-04 | 通過 | TC-11-04 |
-| AC-11-05 | 通過 | TC-11-05 |
+| AC-11-05 | 通過 | TC-11-05、TC-40-01 |
 | AC-11-06 | 通過 | TC-11-01 |
 | AC-11-07 | 通過 | TC-11-04 |
 | AC-12-01 | 不適用（暫停） | TC-12-01 |
@@ -613,12 +705,12 @@ approved_at:
 | AC-16-02 | 不適用（暫停） | TC-16-02 |
 | AC-16-03 | 不適用（暫停） | TC-16-03 |
 | AC-16-04 | 不適用（暫停） | TC-16-04a、TC-16-04b |
-| AC-17-01 | 通過 | TC-17-01 |
+| AC-17-01 | 通過 | TC-17-01、TC-39-05 |
 | AC-17-02 | 通過 | TC-17-02、TC-30-03 |
 | AC-17-03 | 通過 | TC-09-03 |
 | AC-17-04 | 通過 | TC-17-04a、TC-17-04b |
 | AC-17-05 | 通過 | TC-17-05 |
-| AC-17-06 | 通過 | TC-17-06 |
+| AC-17-06 | 通過 | TC-17-06、TC-39-04 |
 | AC-18-01 | 通過（另待人工確認） | TC-18-01、TC-M04 |
 | AC-18-02 | 通過 | TC-18-02 |
 | AC-18-03 | 通過 | TC-18-03、TC-25-08 |
@@ -627,7 +719,7 @@ approved_at:
 | AC-18-06 | 通過 | TC-21-01 |
 | AC-24-01 | 通過（另待人工確認） | TC-24-01、TC-18-03、TC-M06 |
 | AC-24-02 | 通過 | TC-24-01、TC-24-02b |
-| AC-24-03 | 通過（另待人工確認） | TC-24-03、TC-25-10、TC-M06 |
+| AC-24-03 | 通過（另待人工確認） | TC-24-03、TC-25-10、TC-38-10、TC-M06 |
 | AC-24-04 | 通過 | TC-24-04 |
 | AC-24-05 | 通過 | TC-24-05、TC-24-11 |
 | AC-24-06 | 通過 | TC-24-06 |
@@ -636,45 +728,45 @@ approved_at:
 | AC-24-09 | 通過 | TC-24-09、TC-25-11d |
 | AC-24-10 | 通過 | TC-24-10 |
 | AC-24-11 | 通過 | TC-24-11 |
-| AC-24-12 | 通過 | TC-37-01a、TC-37-02、TC-24-12a、TC-24-12b |
+| AC-24-12 | 通過 | TC-39-08、TC-37-01a、TC-37-02、TC-24-12a、TC-24-12b |
 | AC-23-01 | 通過 | TC-23-01 |
-| AC-23-02 | 通過 | TC-D10、TC-23-02、TC-23-02b、TC-25-07、TC-23-02c、TC-D18 |
+| AC-23-02 | 通過 | TC-D10、TC-23-02、TC-23-02b、TC-25-07、TC-39-06、TC-23-02c、TC-D18 |
 | AC-23-03 | 通過 | TC-D08、TC-D18、TC-D19 |
 | AC-23-04 | 待人工（TC-M08） | TC-D16、TC-M08 |
 | AC-23-05 | 通過 | TC-D09 |
 | AC-23-06 | 通過 | TC-S06 |
-| AC-19-01 | 通過 | TC-27-05、TC-PS-01、TC-PS-04、TC-PS-06、TC-S01、TC-S08、TC-S09 |
+| AC-19-01 | 通過 | TC-27-05、TC-PS-01、TC-PS-04、TC-PS-06、TC-S01、TC-S08、TC-L-S01、TC-S09 |
 | AC-19-02 | 通過（另待人工確認） | TC-19-02a、TC-35-02、TC-X-edge、TC-M03 |
 | AC-19-03 | 通過（另待人工確認） | TC-21-01、TC-M04 |
 | AC-19-04 | 通過 | TC-S02 |
-| AC-20-01 | 通過（另待人工確認） | TC-20-01、TC-27-01、TC-M05 |
+| AC-20-01 | 通過（另待人工確認） | TC-20-01、TC-27-01、TC-39-10、TC-M05 |
 | AC-20-02 | 通過（另待人工確認） | TC-20-02、TC-M05 |
 | AC-20-03 | 通過（另待人工確認） | TC-20-03、TC-25-01、TC-27-04、TC-20-04a、TC-M05 |
 | AC-20-04 | 通過 | TC-20-04a、TC-20-04b、TC-20-04c、TC-20-04d |
-| AC-21-01 | 通過（另待人工確認） | TC-21-01、TC-37-05b、TC-37-01a、TC-37-01b、TC-37-05a、TC-M01 |
+| AC-21-01 | 通過（另待人工確認） | TC-21-01、TC-38-05、TC-37-05b、TC-37-01a、TC-37-01b、TC-37-05a、TC-M01 |
 | AC-21-02 | 通過 | TC-S04 |
 | AC-21-03 | 通過（另待人工確認） | TC-21-03b、TC-37-01a、TC-35-01、TC-37-05a、TC-21-03、TC-M01、TC-S05 |
-| AC-22-01 | 通過（另待人工確認） | TC-22-01、TC-22-01m、TC-22-01r、TC-M07 |
+| AC-22-01 | 通過（另待人工確認） | TC-22-01、TC-22-01m、TC-22-01r、TC-39-03、TC-M07 |
 | AC-22-02 | 通過（另待人工確認） | TC-22-02b、TC-22-02、TC-M07 |
 | AC-22-03 | 通過（另待人工確認） | TC-22-03b、TC-22-03、TC-M07 |
-| AC-22-04 | 通過（另待人工確認） | TC-22-04b、TC-22-04、TC-M07 |
-| AC-22-05 | 通過（另待人工確認） | TC-22-05a、TC-22-05b、TC-M07 |
-| AC-25-01 | 通過 | TC-22-05b、TC-25-01 |
+| AC-22-04 | 通過（另待人工確認） | TC-22-04b、TC-22-04、TC-41-02、TC-M07 |
+| AC-22-05 | 通過（另待人工確認） | TC-22-05a、TC-22-05b、TC-39-09、TC-M07 |
+| AC-25-01 | 通過 | TC-22-05b、TC-25-01、TC-41-01、TC-R5-J4 |
 | AC-25-02 | 通過 | TC-25-02 |
 | AC-25-03 | 通過 | TC-25-03 |
 | AC-25-04 | 通過 | TC-25-04 |
 | AC-25-05 | 通過 | TC-25-05 |
 | AC-25-06 | 通過 | TC-25-06 |
-| AC-25-07 | 通過 | TC-25-07 |
+| AC-25-07 | 通過 | TC-25-07、TC-41-04 |
 | AC-25-08 | 通過 | TC-25-08 |
 | AC-25-09 | 通過 | TC-25-09 |
 | AC-25-10 | 通過 | TC-25-10 |
-| AC-25-11 | 通過 | TC-25-11、TC-25-11d |
+| AC-25-11 | 通過 | TC-25-11、TC-25-11d、TC-41-04 |
 | AC-26-01 | 通過（另待人工確認） | TC-26-01、TC-M05 |
 | AC-26-02 | 通過 | TC-26-02 |
 | AC-26-03 | 不適用（暫停） | TC-26-03 |
 | AC-26-04 | 通過 | TC-25-03、TC-26-04 |
-| AC-26-05 | 通過 | TC-26-05 |
+| AC-26-05 | 通過 | TC-26-05、TC-S11 |
 | AC-26-06 | 通過 | TC-26-06 |
 | AC-27-01 | 通過（另待人工確認） | TC-27-01、TC-M05 |
 | AC-27-02 | 通過（另待人工確認） | TC-27-02、TC-M05 |
@@ -699,16 +791,16 @@ approved_at:
 | AC-30-05 | 通過 | TC-30-05 |
 | AC-30-06 | 通過 | TC-30-06 |
 | AC-30-07 | 通過 | TC-30-07、TC-30-07c |
-| AC-30-08 | 通過 | TC-30-08 |
+| AC-30-08 | 通過 | TC-39-07、TC-30-08 |
 | AC-30-09 | 通過 | TC-30-09 |
-| AC-30-10 | 通過 | TC-30-10、TC-30-10b |
+| AC-30-10 | 通過 | TC-39-05、TC-30-10、TC-30-10b |
 | AC-30-11 | 通過 | TC-30-11 |
 | AC-30-12 | 通過 | TC-30-12 |
 | AC-30-13 | 通過 | TC-30-13、TC-30-07c |
 | AC-30-14 | 通過 | TC-30-14 |
 | AC-31-01 | 通過 | TC-31-01 |
 | AC-31-02 | 通過 | TC-31-02 |
-| AC-31-03 | 通過 | TC-22-01m、TC-33-08、TC-31-03、TC-36-03b、TC-31-03d |
+| AC-31-03 | 通過 | TC-22-01m、TC-38-09、TC-33-08、TC-31-03、TC-36-03b、TC-31-03d |
 | AC-31-04 | 通過 | TC-S10 |
 | AC-32-01 | 通過 | TC-32-01 |
 | AC-32-02 | 通過 | TC-32-02 |
@@ -729,10 +821,10 @@ approved_at:
 | AC-33-06 | 通過（另待人工確認） | TC-33-06、TC-MIC-5 |
 | AC-33-07 | 通過 | TC-33-07 |
 | AC-33-08 | 通過（另待人工確認） | TC-33-08、TC-MIC-3 |
-| AC-34-01 | 通過（另待人工確認） | TC-34-01、TC-PS-02、TC-PS-03、TC-X-edge、TC-PWA-H1 |
-| AC-34-02 | 待人工（TC-PWA-H1／H2） | TC-PWA-H1、TC-PWA-H2 |
+| AC-34-01 | 通過（另待人工確認） | TC-34-01、TC-PS-02、TC-PS-03、TC-X-edge、TC-PWA-H1、TC-L-S02 |
+| AC-34-02 | 待人工（TC-PWA-H1／H2） | TC-PWA-H1、TC-PWA-H2、TC-L-S02 |
 | AC-34-03 | 待人工（TC-PWA-H1／H2） | TC-34-03a、TC-PS-03、TC-PWA-H1、TC-PWA-H2 |
-| AC-34-04 | 通過 | TC-34-04、TC-PS-04 |
+| AC-34-04 | 通過（另待人工確認） | TC-38-02、TC-34-04、TC-PS-04、TC-LAY-H3 |
 | AC-34-05 | 待人工（TC-PWA-H3（iOS）） | TC-34-05a、TC-PS-03、TC-PS-04、TC-PWA-H3 |
 | AC-34-06 | 通過（另待人工確認） | TC-34-08、TC-37-03、TC-PWA-H1 |
 | AC-34-07 | 通過（另待人工確認） | TC-34-07、TC-PWA-H1 |
@@ -757,6 +849,33 @@ approved_at:
 | AC-37-04 | 通過 | TC-37-04 |
 | AC-37-05 | 通過 | TC-37-05b、TC-37-05a、TC-PS-05 |
 | AC-37-06 | 通過 | TC-37-06 |
+| AC-38-01 | 通過 | TC-38-01 |
+| AC-38-02 | 通過（另待人工確認） | TC-38-02、TC-PWA-H2、TC-LAY-H3 |
+| AC-38-03 | 通過 | TC-38-03 |
+| AC-38-04 | 通過 | TC-38-04 |
+| AC-38-05 | 通過（另待人工確認） | TC-38-05、TC-M03、TC-LAY-H2、TC-L-S04 |
+| AC-38-06 | 通過 | TC-38-06、TC-R5-J1 |
+| AC-38-07 | 通過 | TC-38-07、TC-L-S01 |
+| AC-38-08 | 通過 | TC-38-08、TC-R5-J1 |
+| AC-38-09 | 通過 | TC-38-09 |
+| AC-38-10 | 通過 | TC-38-10、TC-L-S02、TC-L-S03 |
+| AC-39-01 | 通過 | TC-39-01 |
+| AC-39-02 | 通過 | TC-39-02 |
+| AC-39-03 | 通過 | TC-39-03、TC-39-03b、TC-R5-J2 |
+| AC-39-04 | 通過 | TC-39-04 |
+| AC-39-05 | 通過 | TC-39-05、TC-R5-J2 |
+| AC-39-06 | 通過 | TC-39-06 |
+| AC-39-07 | 通過 | TC-39-07、TC-R5-J3 |
+| AC-39-08 | 通過 | TC-39-08、TC-R5-J2 |
+| AC-39-09 | 通過 | TC-39-09 |
+| AC-39-10 | 通過 | TC-39-10 |
+| AC-40-01 | 通過 | TC-40-01 |
+| AC-40-02 | 通過 | TC-39-10 |
+| AC-40-03 | 通過 | TC-38-03、TC-40-03 |
+| AC-41-01 | 通過 | TC-41-01、TC-R5-J4 |
+| AC-41-02 | 通過 | TC-41-02 |
+| AC-41-03 | 通過（另待人工確認） | TC-41-03、TC-LAY-H1 |
+| AC-41-04 | 通過（另待人工確認） | TC-41-04、TC-LAY-H1 |
 
 ## 8. 變更紀錄
 
@@ -767,3 +886,4 @@ approved_at:
 | 0.3 | 2026-10-30 | qa-agent | BUG-002 退回修正第 2 輪驗證：依人類決議（JimmyLin「偶爾失敗沒關係」）新增 §2.3 效能多輪判定；TC-22-01 改嚴格量法；新增 TC-22-01r；TC-M07 新增 (9)(10)。合計 160 個 TC |
 | 0.4 | 2026-11-02 | qa-agent | 第 3 輪（/qa-verify all）：範圍改為 PRD v0.10（33 個 US、214 個 AC，應驗收 192、暫停 22 標不適用）。新增 E2E 套件 e2e-firstrun、e2e-progress（v0.8，2026-10-30 暫停前已建立）、e2e-mic、e2e-hidden、e2e-reinit、e2e-motion 與共用 `lib/state.mjs`、`fakeMic`；改寫 e2e-goal（只點卡片、預設 725、localStorage 驗分數、TC-26-06）；e2e-cards、e2e-speech、e2e-env、e2e-persist、e2e-progress、e2e-firstrun 改為導覽 4 項、點卡片、麥克風替身；解碼器與句型庫的 TC（TC-12-01～TC-16-04b、TC-14-02、TC-16-01b、TC-16-01c）與分數輸入的 TC（TC-01-06、TC-02-01、TC-02-02、TC-02-07、TC-02-09、TC-26-03）記「不適用（暫停）」；移除 `perf-phrasebank.mjs`。靜態檢查 TC-S05 改依 architecture §10 v0.5、新增 TC-S10；越界新增 boundary-delta（TC-B03）。人工 TC 改寫並新增 TC-M09、TC-M10、TC-MIC-1～TC-MIC-5（V-MIC）。新增 §2.2 第 3 輪判定規則（暫停 AC、FB-36、AC-20-04／AC-26-05 判定方式、V-MIC、效能）。§5、§7 改由 `tests/tools/tc-list.mjs`、`ac-matrix.mjs` 依執行結果產生 |
 | 0.5 | 2026-11-03 | qa-agent | 第 4 輪（/qa-verify，PRD v0.11 PWA）：範圍改為 PRD v0.11（37 個 US、243 個 AC，應驗收 221、暫停 22）。新增 §1.1、§2.4（PWA 模擬方式與判定規則）、§6.1（TC-PWA-H1～H5 人工步驟）；§2、§3、§4 加入 Playwright（devDependency `playwright-core` 1.64.1）、`tests/static/pwa-static.mjs`、`tests/e2e/e2e-pwa.mjs`、`e2e-pwa-update.mjs`、`lib/pwa-env.mjs`、`diag-install-button.mjs`；無內建資料 fixture 改為只含 `sources.js` 的資料目錄＋`--no-site`；靜態檢查 TC-S01（PWA 部署目錄、`data:` 圖示白名單）、TC-S06（品牌標識聲明）更新；越界檢查加入授權例外；§5、§7 依第 4 輪結果重新產生。合計 311 個 TC。同日 BUG-003 複驗（主控重新產生圖示，BUILD_ID 5b5ae7a6d4bd0164）後重新產生 §5、§7 |
+| 0.6 | 2026-11-03 | qa-agent | 第 5 輪（/qa-verify，PRD v0.13 版面風格）：範圍改為 PRD v0.13（41 個 US、270 個 AC；應驗收 36 個 US、248 個 AC，暫停 22）。新增 §1.2、§2.5（量測方式與判定規則：色彩掃描與標題列圖示例外、WCAG 對比合成、v0.11 對照與固定 Math.random、鍵盤、首屏、cz-color__range 規則調整）、§4.2、§6.2（TC-LAY-H1～H3 與既有人工 TC 的步驟調整）；新增 `e2e-layout.mjs`、`lib/layout-probe.mjs`、`boundary-r5.mjs`、`qa-review-r5.mjs`；static-check 新增 TC-S11、TC-L-S01～S04；既有 E2E 依 SD-FB-45 更新定位點；§5、§7 依第 5 輪結果重新產生。合計 351 個 TC |

@@ -8,6 +8,9 @@
  *       AC-01-05、AC-02-04、AC-22-04（點卡片不重建 DOM）
  * v0.10：分數區隱藏且停用，畫面以點卡片設定分數（GS-2：該色 scoreMax）；原「輸入框／滑桿建立狀態」的案例已改為點卡片，
  *       滑桿與輸入框同步案例只留一則並標註「v0.10 暫停，程式保留」。
+ * v0.12（FE-57；architecture.md v0.8 §7.19.5、§10.5 customizer.test.js 列；契約 FT-1～FT-6）：cardModels → levelRows（精簡色級列）、
+ *       新增 firstRunSummary；首次畫面改為標題「選擇你的目標」＋副標＋固定底部列（鎖定行、摘要行、#cz-start、#cz-restore）；
+ *       涵蓋 AC-26-01、AC-41-01、AC-41-02、AC-41-04（Tab 順序以 DOM 順序代理）、AC-01-01、AC-25-01～AC-25-03、AC-25-10。
  */
 "use strict";
 
@@ -17,6 +20,7 @@ const assert = require("node:assert/strict");
 const H = require("../views/customizer.js");
 const G = require("../core/goal.js");
 const C = require("../core/constants.js");
+const L = require("../core/layout.js");
 
 describe("customizer.test.js", () => {
   const NB = 2809;      // AC-02-05 例題值
@@ -31,56 +35,85 @@ describe("customizer.test.js", () => {
     assert.equal(H.formatInt(1234567), "1,234,567");
   });
 
-  test("cardModels：5 張順序、內建字數與本系統建議字量；不含分數範圍（AC-01-01、AC-26-01、AC-26-05）", () => {
-    const M = H.cardModels(C.N_O, NB, NG, 600);
+  test("levelRows：5 列順序、名稱、說明、內建字數與 字/天；不含分數與分數範圍（FT-3、AC-26-01、AC-26-05）", () => {
+    const M = H.levelRows(C.N_O, NB, NG, 600);
     assert.equal(M.length, 5);
     assert.deepEqual(M.map((x) => x.id), ["orange", "brown", "green", "blue", "gold"]);
     assert.deepEqual(M.map((x) => x.name), ["橘", "棕", "綠", "藍", "金"]);
-    // （v0.10）模型不含 range 欄位，任何文字欄位也不含「數字～數字」的分數範圍
-    assert.ok(M.every((x) => !("range" in x)), "cardModels 無 range");
+    assert.deepEqual(Object.keys(M[0]).sort(), ["dailyText", "desc", "id", "locked", "name", "selected", "vocabText"]);
     assert.ok(!/\d+～\d+/.test(JSON.stringify(M)), "模型文字不含分數範圍");
-    // 橘棕綠為 N_O、nB、nG 實際數字（不寫死：換一組值結果跟著變）；藍金「待定」
-    assert.deepEqual(M.map((x) => x.vocab), ["1,000 字", "2,809 字", "6,000 字", "待定", "待定"]);
-    assert.deepEqual(H.cardModels(C.N_O, 2500, 5620, 600).map((x) => x.vocab), ["1,000 字", "2,500 字", "5,620 字", "待定", "待定"]);
-    assert.ok(M.every((x) => x.vocabNote === "本系統建議字量"));
-    // 適用情境逐字取自契約 COLOR_LEVELS.scenarioZh
-    assert.deepEqual(M.map((x) => x.scenario), C.COLOR_LEVELS.map((lv) => lv.scenarioZh));
-  });
-
-  test("cardModels：每日新字量 10、10、15、20、20，藍金標「僅供試算」（AC-26-01、Q-28）", () => {
-    const M = H.cardModels(C.N_O, NB, NG, 600);
-    assert.deepEqual(M.map((x) => x.daily), ["10 字/天", "10 字/天", "15 字/天", "20 字/天", "20 字/天"]);
-    assert.deepEqual(M.map((x) => x.dailyNote), ["", "", "", "僅供試算", "僅供試算"]);
-    // 與 core/goal.js 一致（不在本檔另寫數值）
-    assert.deepEqual(M.map((x) => x.daily), C.COLOR_LEVELS.map((lv) => G.dailyNewWords(lv.scoreMin) + " 字/天"));
-  });
-
-  test("cardModels：藍金鎖定並顯示「即將開放」，橘棕綠不鎖定（AC-01-01、AC-26-01）", () => {
-    const M = H.cardModels(C.N_O, NB, NG, 600);
+    assert.ok(!/分/.test(JSON.stringify(M.map((x) => [x.desc, x.vocabText, x.dailyText]))), "不含「分」");
+    // 開放列：N_O、nB、nG 實際數字（換一組值結果跟著變）
+    assert.deepEqual(M.map((x) => x.vocabText), ["1,000 字", "2,809 字", "6,000 字", null, null]);
+    assert.deepEqual(H.levelRows(C.N_O, 2500, 5620, 600).map((x) => x.vocabText), ["1,000 字", "2,500 字", "5,620 字", null, null]);
+    assert.deepEqual(M.map((x) => x.dailyText), ["10 字/天", "10 字/天", "15 字/天", null, null]);
+    // 說明：開放列為 scenarioZh，鎖定列為「即將開放」
+    assert.deepEqual(M.map((x) => x.desc), [
+      C.COLOR_LEVELS[0].scenarioZh, C.COLOR_LEVELS[1].scenarioZh, C.COLOR_LEVELS[2].scenarioZh, "即將開放", "即將開放"
+    ]);
     assert.deepEqual(M.map((x) => x.locked), [false, false, false, true, true]);
-    assert.deepEqual(M.map((x) => x.badge), ["", "", "", "即將開放", "即將開放"]);
   });
 
-  test("cardModels：選中 = colorOf(draftScore)，恰好一張（AC-26-02、AC-26-03）", () => {
-    for (const s of [10, 215, 220, 300, 465, 470, 600, 725, 730, 855, 860, 990]) {
-      const M = H.cardModels(C.N_O, NB, NG, s);
-      const sel = M.filter((x) => x.selected).map((x) => x.id);
-      assert.deepEqual(sel, [G.colorOf(s)], String(s));
+  test("levelRows：鎖定列（藍金）vocabText／dailyText 為 null，整列不含「待定」、數字、「20 字/天」（Q-57、AC-26-01）", () => {
+    const M = H.levelRows(C.N_O, NB, NG, 600);
+    for (const r of M.filter((x) => x.locked)) {
+      assert.equal(r.vocabText, null);
+      assert.equal(r.dailyText, null);
+      const t = JSON.stringify([r.name, r.desc]);
+      assert.ok(!t.includes("待定") && !/\d/.test(t) && !t.includes("20 字/天"), r.id);
     }
-    assert.deepEqual(H.cardModels(C.N_O, NB, NG, 300).filter((x) => x.selected).map((x) => x.id), ["brown"]);
-    // 分數無效（不在任何範圍）→ 沒有卡片選中，不拋例外
-    assert.equal(H.cardModels(C.N_O, NB, NG, NaN).filter((x) => x.selected).length, 0);
+    // 開放列的每日字量與 core/goal.js 一致（不在本檔另寫數值）
+    assert.deepEqual(M.slice(0, 3).map((x) => x.dailyText), C.COLOR_LEVELS.slice(0, 3).map((lv) => G.dailyNewWords(lv.scoreMin) + " 字/天"));
   });
 
-  test("cardModels：字庫缺漏（nB = nG = 0、undefined）→ 棕、綠顯示「—」，橘仍為 N_O（§7.1 v0.3、C-6）", () => {
-    assert.deepEqual(H.cardModels(C.N_O, 0, 0, 600).map((x) => x.vocab), ["1,000 字", "—", "—", "待定", "待定"]);
-    assert.deepEqual(H.cardModels(C.N_O, undefined, undefined, 600).map((x) => x.vocab), ["1,000 字", "—", "—", "待定", "待定"]);
+  test("levelRows：選中 = colorOf(draftScore)，恰好一列（AC-26-02、AC-26-03）", () => {
+    for (const s of [10, 215, 220, 300, 465, 470, 600, 725, 730, 855, 860, 990]) {
+      const M = H.levelRows(C.N_O, NB, NG, s);
+      assert.deepEqual(M.filter((x) => x.selected).map((x) => x.id), [G.colorOf(s)], String(s));
+    }
+    assert.equal(H.levelRows(C.N_O, NB, NG, NaN).filter((x) => x.selected).length, 0);
   });
 
-  test("cardModels 與畫面文字不含「官方門檻」「Tier」（AC-01-01）", () => {
-    const all = JSON.stringify([H.cardModels(C.N_O, NB, NG, 600), H.TEXT]);
+  test("levelRows：字庫缺漏（nB = nG = 0、undefined）→ 棕、綠顯示「—」，橘仍為 N_O（§7.1 v0.3、C-6）", () => {
+    assert.deepEqual(H.levelRows(C.N_O, 0, 0, 600).map((x) => x.vocabText), ["1,000 字", "—", "—", null, null]);
+    assert.deepEqual(H.levelRows(C.N_O, undefined, undefined, 600).map((x) => x.vocabText), ["1,000 字", "—", "—", null, null]);
+  });
+
+  test("levelRows 與畫面文字不含「官方門檻」「Tier」、「已選擇」「僅供試算」（AC-01-01）", () => {
+    const all = JSON.stringify([H.levelRows(C.N_O, NB, NG, 600), H.TEXT]);
     assert.ok(!all.includes("官方門檻"));
     assert.ok(!/Tier/i.test(all));
+    assert.ok(!all.includes("已選擇"));
+    assert.ok(!all.includes("僅供試算"));
+    assert.ok(!("cardModels" in H), "cardModels 已改為 levelRows");
+  });
+
+  test("firstRunSummary：5 色逐字（N_B 2,809、N_G 5,620；FT-4、AC-41-02）", () => {
+    const want = {
+      orange: ["橘級・每日 10 字\u3000預計 15 週", false],
+      brown: ["棕級・每日 10 字\u3000預計 41 週", false],
+      green: ["綠級・每日 15 字\u3000預計 54 週", false],
+      blue: ["藍級・每日 20 字\u3000預計 41 週（以綠試算）", true],
+      gold: ["金級・每日 20 字\u3000預計 41 週（以綠試算）", true],
+    };
+    for (const lv of C.COLOR_LEVELS) {
+      assert.deepEqual(H.firstRunSummary(G, lv.scoreMax, 2809, 5620), { text: want[lv.id][0], locked: want[lv.id][1] }, lv.id);
+      assert.deepEqual(H.firstRunSummary(G, lv.scoreMin, 2809, 5620), { text: want[lv.id][0], locked: want[lv.id][1] }, lv.id + " min");
+    }
+    // 不含分數與「待定」
+    for (const lv of C.COLOR_LEVELS) assert.ok(!/分|待定/.test(H.firstRunSummary(G, lv.scoreMax, 2809, 5620).text));
+  });
+
+  test("firstRunSummary 與 estimateTexts 使用同一個試算：每日字量與週數一致（FT-4）", () => {
+    for (const s of [10, 215, 300, 465, 600, 725, 800, 990]) {
+      const e = H.estimateTexts(G, s, 0, NB, NG);
+      const sum = H.firstRunSummary(G, s, NB, NG).text;
+      assert.ok(sum.includes("每日 " + e.daily.replace(" 字/天", "") + " 字"), s + "：" + sum);
+      assert.ok(sum.includes("預計 " + e.weeks.replace(" 週", "") + " 週"), s + "：" + sum);
+    }
+    // 字庫缺漏 → 週數「—」
+    assert.equal(H.firstRunSummary(G, 600, 0, 0).text, "綠級・每日 15 字\u3000預計 — 週");
+    assert.deepEqual(H.firstRunSummary(G, NaN, NB, NG), { text: "—", locked: false });
   });
 
   test("estimateTexts（AC-02-05、AC-02-06、AC-02-10）", () => {
@@ -228,7 +261,7 @@ describe("customizer.test.js：閒置預建", () => {
     const notify = (tags) => subs.slice().forEach((fn) => fn(state, tags));
     const root = {
       EMT: {
-        core: { dom: fakeDom(counter), goal: G, constants: C },
+        core: { dom: fakeDom(counter), goal: G, constants: C, layout: L },
         content: { nB: NB, nG: NG },
         store: {
           getState: () => state,
@@ -410,22 +443,51 @@ describe("customizer.test.js：閒置預建", () => {
     return { f, view, all, cards, byId, pressed, selClass };
   }
 
-  test("卡片：5 張 button、順序與內容、藍金鎖定圖示與「即將開放」（AC-01-01、AC-26-01）", () => {
-    const { cards } = mounted();
+  test("色級列：5 個 button.cz-level、順序與內容、藍金鎖定圖示與「即將開放」、右側「—」（FT-3、AC-01-01、AC-26-01）", () => {
+    const { cards, all } = mounted();
     assert.deepEqual(cards.map((b) => b.getAttribute("data-color")), ["orange", "brown", "green", "blue", "gold"]);
-    for (const b of cards) assert.equal(b.getAttribute("type"), "button");
+    for (const b of cards) {
+      assert.equal(b.getAttribute("type"), "button");
+      assert.ok(/(^| )cz-level( |$)/.test(b.className), b.className);
+      // 結構：色條（aria-hidden）→ 主體（名稱、說明）→ 右側
+      assert.deepEqual(b.children.map((c) => c.className), ["cz-level__bar", "cz-level__main", "cz-level__side"]);
+      assert.equal(b.children[0].getAttribute("aria-hidden"), "true");
+    }
     const t = cards.map(textOf);
-    assert.ok(t[0].includes("1,000 字") && t[0].includes("本系統建議字量") && t[0].includes("10 字/天"));
+    assert.ok(t[0].includes("1,000 字") && t[0].includes("10 字/天"));
     assert.ok(t[1].includes("2,809 字") && t[2].includes("6,000 字") && t[2].includes("15 字/天"));
     for (const i of [3, 4]) {
-      assert.ok(t[i].includes("待定") && t[i].includes("20 字/天") && t[i].includes("僅供試算") && t[i].includes("即將開放"));
-      assert.ok(walk(cards[i]).some((x) => x.tag === "svg"), "鎖定圖示為內嵌 SVG");
+      const side = cards[i].children[2];
+      assert.equal(textOf(side), "—");
+      assert.ok(t[i].includes("即將開放"));
+      assert.ok(!t[i].includes("待定") && !t[i].includes("20 字/天") && !t[i].includes("僅供試算"));
+      assert.ok(walk(cards[i]).some((x) => x.tag === "svg" && x.getAttribute("aria-hidden") === "true"), "鎖定圖示為內嵌 SVG（aria-hidden）");
+      assert.ok(/ is-locked( |$)/.test(cards[i].className));
     }
     for (const i of [0, 1, 2]) {
       assert.ok(!t[i].includes("僅供試算") && !t[i].includes("即將開放"));
       assert.ok(!walk(cards[i]).some((x) => x.tag === "svg"));
     }
-    assert.ok(t.every((x) => !x.includes("官方門檻") && !/Tier/i.test(x)));
+    assert.ok(t.every((x) => !x.includes("官方門檻") && !/Tier/i.test(x) && !x.includes("已選擇")));
+    // 列表上方說明行恰 1 個，以「本系統建議字量」開頭，且列內不再重複（AC-01-01）
+    const notes = all.filter((x) => /(^| )cz-vocab-note( |$)/.test(x.className || ""));
+    assert.equal(notes.length, 1);
+    assert.equal(notes[0].textContent, "本系統建議字量：右側為內建字數與每日新字量");
+    assert.ok(t.every((x) => !x.includes("本系統建議字量")));
+    // 色級列容器 role=group
+    const group = all.find((x) => /(^| )cz-levels( |$)/.test(x.className || ""));
+    assert.equal(group.getAttribute("role"), "group");
+    assert.deepEqual(group.children, cards);
+  });
+
+  test("色級列：✓ 節點 aria-hidden，每列 1 個（顯示與否由 CSS 依 aria-pressed 控制）", () => {
+    const { cards } = mounted();
+    for (const b of cards) {
+      const checks = walk(b).filter((x) => x.className === "cz-level__check");
+      assert.equal(checks.length, 1);
+      assert.equal(checks[0].textContent, "✓");
+      assert.equal(checks[0].getAttribute("aria-hidden"), "true");
+    }
   });
 
   const card = (m, id) => m.cards.find((b) => b.getAttribute("data-color") === id);
@@ -573,36 +635,104 @@ describe("customizer.test.js：閒置預建", () => {
     const slot = all.find((x) => x.className === "cz-status-slot");
     const guide = all.find((x) => x.getAttribute("id") === "cz-guide");
     const intro = all.find((x) => cls(x, "cz-intro"));
-    const buttons = actions.children.map((b) => ({ id: b.getAttribute("id"), text: b.textContent, className: b.className }));
-    return { actions, slot, guide, intro, buttons };
+    const title = all.find((x) => x.tag === "h2");
+    const subtitle = all.find((x) => cls(x, "cz-subtitle"));
+    const colorHeading = all.find((x) => x.getAttribute("id") === "cz-colors-title");
+    const estimate = all.find((x) => cls(x, "cz-estimate"));
+    const firstBar = all.find((x) => cls(x, "cz-firstbar"));
+    const page = m.f.host.children[0];
+    // 目前「可見」的按鈕（自身與祖先皆非 hidden）：「套用」區與固定底部列
+    const vis = visibleNodes(m.f.host);
+    const buttons = vis.filter((x) => x.tag === "button" && !x.getAttribute("data-color"))
+      .map((b) => ({ id: b.getAttribute("id"), text: b.textContent, className: b.className }));
+    return { all, page, actions, slot, guide, intro, title, subtitle, colorHeading, estimate, firstBar, buttons };
   }
 
-  test("首次模式：按鈕區為「開始學習」（主要按鈕）與「從備份還原」，無「套用」；狀態列隱藏；顯示引導文字（AC-25-01）", () => {
+  test("首次模式：標題「選擇你的目標」→ 副標 → 說明行 → 5 列 → 固定底部列；狀態列／試算卡／套用 hidden（FT-1、FT-2、AC-41-01、AC-25-01）", () => {
     const m = mounted({ entryMode: "firstRun", score: C.SCORE_DEFAULT });
     const p = parts(m);
+    assert.equal(p.title.textContent, "選擇你的目標");
+    assert.ok(cls(p.title, "page-title"));
+    assert.equal(p.subtitle.hidden, false);
+    assert.equal(p.subtitle.textContent, "之後可以在「難易度設定」隨時變更");
+    assert.equal(p.slot.hidden, true, "狀態列隱藏");
+    assert.equal(p.intro.hidden, true, "一般說明（提到「套用」）不顯示");
+    assert.equal(p.estimate.hidden, true, "試算結果卡隱藏");
+    assert.equal(p.actions.hidden, true, "「套用」區隱藏");
+    assert.equal(p.colorHeading.hidden, true, "色級區標題隱藏");
+    assert.equal(p.guide, undefined, "舊引導文字 #cz-guide 不再建立");
+    assert.ok(!visibleNodes(m.f.host).some((x) => x.getAttribute("id") === "cz-apply"), "無可見「套用」");
+    assert.equal(p.firstBar.hidden, false);
+    // 可見順序（DOM 順序 = Tab 順序）：標題 → 副標 → 說明行 → 5 列 → 鎖定行（hidden）→ 摘要行 → 開始學習 → 從備份還原
+    const vis = visibleNodes(m.f.host);
+    const idx = (pred) => vis.findIndex(pred);
+    const order = [
+      idx((x) => x === p.title),
+      idx((x) => x === p.subtitle),
+      idx((x) => cls(x, "cz-vocab-note")),
+      idx((x) => x === m.cards[0]),
+      idx((x) => x === m.cards[4]),
+      idx((x) => cls(x, "cz-firstbar__summary")),
+      idx((x) => x.getAttribute("id") === "cz-start"),
+      idx((x) => x.getAttribute("id") === "cz-restore"),
+    ];
+    assert.ok(order.every((i) => i >= 0), JSON.stringify(order));
+    assert.deepEqual(order.slice().sort((a, b) => a - b), order, "順序");
+    // 底部列內部順序：鎖定行 → 摘要行 → 開始學習 → 從備份還原
+    assert.deepEqual(p.firstBar.children.map((x) => x.className), ["cz-firstbar__locked", "cz-firstbar__summary", "btn btn--accent cz-start", "btn btn--link cz-restore"]);
     assert.deepEqual(p.buttons.map((b) => b.text), ["開始學習", "從備份還原"]);
     assert.deepEqual(p.buttons.map((b) => b.id), ["cz-start", "cz-restore"]);
-    assert.ok(/btn--primary/.test(p.buttons[0].className), "「開始學習」為主要按鈕");
-    assert.ok(cls(p.actions, "cz-actions--first-run"));
-    assert.ok(!walk(m.f.host).some((x) => x.getAttribute("id") === "cz-apply"), "無「套用」");
-    assert.equal(p.slot.hidden, true, "狀態列隱藏");
-    assert.equal(p.guide.hidden, false);
-    assert.equal(p.guide.textContent, "先選擇你的目標難易度，按「開始學習」後進入主控台。");
-    assert.equal(p.intro.hidden, true, "一般說明（提到「套用」）不顯示");
-    // 卡片與試算照常（AC-26-*）：預設 SCORE_DEFAULT（725）→ 綠
+    assert.ok(/btn--accent/.test(p.buttons[0].className), "「開始學習」為強調橘按鈕");
+    // 底部列在 .cz 頁面的最後（位於色級列之後、頁尾之前）
+    assert.equal(p.page.children[p.page.children.length - 1], p.firstBar);
+    // 預設 SCORE_DEFAULT（725）→ 綠；摘要行逐字、鎖定行隱藏
     assert.deepEqual(m.pressed(), ["green"]);
+    assert.equal(walk(p.firstBar).find((x) => cls(x, "cz-firstbar__summary")).textContent, "綠級・每日 15 字\u3000預計 " + G.estimate(725, 0, NB, NG).weeks + " 週");
+    assert.equal(p.firstBar.children[0].hidden, true);
+    assert.equal(p.firstBar.children[0].getAttribute("role"), "status");
+    assert.equal(p.firstBar.children[1].getAttribute("aria-live"), "polite");
     assert.equal(m.cards.length, 5);
   });
 
-  test("一般模式：按鈕區只有「套用」，狀態列顯示，無首次按鈕與引導文字（AC-25-06）", () => {
+  test("首次模式：點藍 → 鎖定行顯示、摘要行加「（以綠試算）」；點綠 → 鎖定行隱藏；不建立新節點（FT-2、FT-5、AC-41-02）", () => {
+    const m = mounted({ entryMode: "firstRun", score: C.SCORE_DEFAULT });
+    const p = parts(m);
+    const locked = p.firstBar.children[0];
+    const summary = p.firstBar.children[1];
+    const nodes = m.f.counter.nodes;
+    card(m, "blue").on.click();
+    assert.equal(locked.hidden, false);
+    assert.equal(locked.textContent, "目前內建字庫到綠色為止");
+    assert.ok(summary.textContent.startsWith("藍級・每日 20 字\u3000預計 "));
+    assert.ok(summary.textContent.endsWith("週（以綠試算）"));
+    card(m, "gold").on.click();
+    assert.equal(locked.hidden, false);
+    assert.ok(summary.textContent.startsWith("金級・每日 20 字"));
+    card(m, "orange").on.click();
+    assert.equal(locked.hidden, true);
+    assert.equal(summary.textContent, "橘級・每日 10 字\u3000預計 15 週");
+    assert.equal(m.f.counter.nodes, nodes, "點色級不建立節點");
+    assert.equal(m.f.host.appendCount, 1);
+  });
+
+  test("一般模式：標題「難易度設定」、狀態列、色級標題、試算卡、「套用」可見；固定底部列與副標 hidden（FT-6、AC-25-06）", () => {
     for (const opt of [undefined, { entryMode: "main" }]) {
       const m = mounted(opt);
       const p = parts(m);
+      assert.equal(p.title.textContent, "難易度設定");
       assert.deepEqual(p.buttons.map((b) => b.text), ["套用"]);
-      assert.ok(!cls(p.actions, "cz-actions--first-run"));
+      assert.equal(p.buttons[0].id, "cz-apply");
       assert.equal(p.slot.hidden, false);
-      assert.equal(p.guide.hidden, true);
       assert.equal(p.intro.hidden, false);
+      assert.equal(p.estimate.hidden, false);
+      assert.equal(p.actions.hidden, false);
+      assert.equal(p.colorHeading.hidden, false);
+      assert.equal(p.colorHeading.textContent, "色級");
+      assert.ok(cls(p.colorHeading, "section-title"));
+      assert.equal(p.subtitle.hidden, true);
+      assert.equal(p.firstBar.hidden, true, "固定底部列只屬首次畫面");
+      assert.ok(!visibleNodes(m.f.host).some((x) => cls(x, "cz-firstbar__summary")));
+      assert.equal(p.guide, undefined);
     }
   });
 
@@ -634,7 +764,9 @@ describe("customizer.test.js：閒置預建", () => {
     const p = parts(m);
     assert.deepEqual(p.buttons.map((b) => b.text), ["套用"]);
     assert.equal(p.slot.hidden, false);
-    assert.equal(p.guide.hidden, true);
+    assert.equal(p.firstBar.hidden, true);
+    assert.equal(p.title.textContent, "難易度設定");
+    assert.equal(p.estimate.hidden, false);
     assert.equal(p.intro.hidden, false);
     // 狀態列已更新為套用後的色級
     assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-target")).textContent, "棕");
@@ -902,26 +1034,41 @@ describe("customizer.test.js：閒置預建", () => {
 });
 
 describe("customizer.test.js：首次模式按鈕區模型（FE-32）", () => {
-  test("actionsModel(\"firstRun\")：「開始學習」「從備份還原」、無「套用」、無狀態列、有引導文字", () => {
+  test("actionsModel(\"firstRun\")：標題「選擇你的目標」、副標、「開始學習」「從備份還原」、固定底部列；無「套用」、狀態列、試算卡（FT-1、FT-2）", () => {
     const m = H.actionsModel("firstRun");
     assert.equal(m.mode, "firstRun");
+    assert.equal(m.title, "選擇你的目標");
     assert.deepEqual(m.buttons.map((b) => b.text), ["開始學習", "從備份還原"]);
     assert.deepEqual(m.buttons.map((b) => b.primary), [true, false]);
     assert.ok(!m.buttons.some((b) => b.text === "套用"));
+    assert.equal(m.showSubtitle, true);
     assert.equal(m.showStatus, false);
     assert.equal(m.showIntro, false);
-    assert.ok(m.guide.includes("開始學習"));
+    assert.equal(m.showColorHeading, false);
+    assert.equal(m.showEstimate, false);
+    assert.equal(m.showFirstBar, true);
+    assert.equal(m.guide, "", "舊引導文字不再顯示");
   });
 
-  test("actionsModel(\"main\")（與其他值）：只有「套用」、顯示狀態列、無引導文字", () => {
+  test("actionsModel(\"main\")（與其他值）：標題「難易度設定」、只有「套用」、顯示狀態列與試算卡、無固定底部列", () => {
     for (const v of ["main", undefined, null, "boot"]) {
       const m = H.actionsModel(v);
       assert.equal(m.mode, "main");
+      assert.equal(m.title, "難易度設定");
       assert.deepEqual(m.buttons.map((b) => b.text), ["套用"]);
       assert.equal(m.showStatus, true);
       assert.equal(m.showIntro, true);
+      assert.equal(m.showColorHeading, true);
+      assert.equal(m.showEstimate, true);
+      assert.equal(m.showFirstBar, false);
+      assert.equal(m.showSubtitle, false);
       assert.equal(m.guide, "");
     }
+  });
+
+  test("T.title、T.intro 字串不變（naming.test.js 檢查）", () => {
+    assert.equal(H.TEXT.title, "難易度設定");
+    assert.equal(H.TEXT.intro, "選擇色級即時試算，按「套用」後才會更新單字卡的單字集。");
   });
 
   test("entryModeOf：只有 runtime.entryMode === \"firstRun\" 為首次", () => {

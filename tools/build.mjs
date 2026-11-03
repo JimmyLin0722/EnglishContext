@@ -701,7 +701,7 @@ export function readPwaInputs(appDir, pwa, site, adsFile) {
 }
 
 /**
- * B-12：HD-1 靜態元素各逐字恰 1 次且皆在 </head> 之前；<title>English Master Track</title> 恰 1 次。
+ * B-12：HD-1 靜態元素各逐字恰 1 次且皆在 </head> 之前；（v0.12，FE-56，§5.3）<title>${PWA_APP_NAME}</title> 恰 1 次。
  * @param {string} html HTML₀（仍含佔位）
  * @returns {string[]} HD-1 元素清單
  */
@@ -723,7 +723,8 @@ export function checkPwaHead(html, pwa) {
       throw new BuildError("PWA_HEAD", `HTML 的 HD-1 元素 ${e} 必須位於 </head> 之前`);
     }
   }
-  const title = "<title>English Master Track</title>";
+  // （v0.12，NM-1）<title> = APP_DISPLAY_NAME = PWA_APP_NAME「EnglishContext」
+  const title = `<title>${pwa.PWA_APP_NAME}</title>`;
   if (countOf(html, title) !== 1) {
     throw new BuildError("PWA_HEAD", `HTML 的 ${title} 必須恰 1 次`);
   }

@@ -185,7 +185,9 @@ test("B-1：專案的 src/app/index.html 通過標記檢查且含必要元素", 
   assert.match(tpl, /<html lang="zh-Hant-TW">/);
   assert.match(tpl, /<meta charset="utf-8">/);
   assert.match(tpl, /<meta name="viewport"/);
-  assert.match(tpl, /<title>English Master Track<\/title>/);
+  // （v0.12，FE-56，NM-1）
+  assert.match(tpl, /<title>EnglishContext<\/title>/);
+  assert.doesNotMatch(tpl, /english\s*master\s*track/i);
   assert.match(tpl, /<style>\/\* @@STYLES@@ \*\/<\/style>/);
 });
 
@@ -559,7 +561,7 @@ function makePng(size, o = {}) {
 
 /** HD-1 的 7 個靜態元素（逐字） */
 const HD1 = [
-  '<meta name="theme-color" content="#2f6fd6">',
+  '<meta name="theme-color" content="#1e9bf0">',
   '<meta name="apple-mobile-web-app-title" content="EnglishContext">',
   '<meta name="apple-mobile-web-app-capable" content="yes">',
   '<meta name="mobile-web-app-capable" content="yes">',
@@ -575,7 +577,7 @@ const PWA_TEMPLATE_HTML = [
   '<meta charset="utf-8">',
   "<!-- @@LICENSE@@ -->",
   '<meta name="viewport" content="width=device-width, initial-scale=1">',
-  "<title>English Master Track</title>",
+  "<title>EnglishContext</title>",
   ...HD1,
   "<style>/* @@STYLES@@ */</style>",
   "</head>",
@@ -597,7 +599,7 @@ function pwaFiles(over = {}) {
       "app/index.html": PWA_TEMPLATE_HTML,
       "app/license-header.txt": LICENSE,
       "app/pwa/sw.template.js": SW_TEMPLATE_REAL,
-      "app/styles/00-base.css": ":root {\n  --primary: #2f6fd6;\n  --bg: #f6f7f9;\n}\nbody { background: var(--bg); }\n",
+      "app/styles/00-base.css": ":root {\n  --bg: #eef4fa;\n  --primary: #0866ad;\n}\nbody { background: var(--bg); }\n",
       "app/core/a.js": "/* APP_A */ var a = 1;\n",
       "app/assets/icons/icon-192.png": makePng(192),
       "app/assets/icons/icon-512.png": makePng(512),
@@ -760,8 +762,12 @@ test("PWA (4) V-PWA-04、HD-3：HD-1 缺任一 → PWA_HEAD；靜態 manifest／
     { "app/index.html": PWA_TEMPLATE_HTML.replace(HD1[2] + "\n", "").replace("<body>", "<body>\n" + HD1[2]) },
     "PWA_HEAD"
   );
-  // <title> 改變
-  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<title>English Master Track</title>", "<title>EnglishContext</title>") }, "PWA_HEAD");
+  // <title> 換成其他字串（v0.12：必須為 <title>${PWA_APP_NAME}</title>，§5.3）
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<title>EnglishContext</title>", "<title>Other</title>") }, "PWA_HEAD");
+  // 舊標題（v0.11）→ 中止
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<title>EnglishContext</title>", "<title>English Master Track</title>") }, "PWA_HEAD");
+  // 標題出現 2 次 → 中止
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<title>EnglishContext</title>", "<title>EnglishContext</title><title>EnglishContext</title>") }, "PWA_HEAD");
   // 靜態 manifest、apple-touch-icon（無論 href 在前或在後、或無 href）
   for (const tag of [
     '<link rel="manifest" href="manifest.webmanifest">',
@@ -875,9 +881,11 @@ test("PWA (6) V-PWA-06、AC-36-01：write: false 連續 2 次三檔相同；改�
 
 test("PWA (7) DS-13：00-base.css 的 --bg 不符或缺漏 → PWA_BG_COLOR；大小寫不同視為相同", async () => {
   await expectPwaAbort({ "app/styles/00-base.css": ":root { --bg: #ffffff; }\n" }, "PWA_BG_COLOR");
-  await expectPwaAbort({ "app/styles/00-base.css": ":root { --primary: #2f6fd6; }\n" }, "PWA_BG_COLOR");
+  await expectPwaAbort({ "app/styles/00-base.css": ":root { --primary: #0866ad; }\n" }, "PWA_BG_COLOR");
+  // v0.11 舊值 → 中止（VC-5）
+  await expectPwaAbort({ "app/styles/00-base.css": ":root { --bg: #f6f7f9; }\n" }, "PWA_BG_COLOR");
   await expectPwaAbort({ "app/styles/00-base.css": null }, "PWA_BG_COLOR");
-  const { fx } = await pwaBuild({ "app/styles/00-base.css": ":root { --bg: #F6F7F9; }\n" });
+  const { fx } = await pwaBuild({ "app/styles/00-base.css": ":root { --bg: #EEF4FA; }\n" });
   fx.cleanup();
 });
 

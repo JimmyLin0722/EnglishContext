@@ -1,4 +1,4 @@
-// QA 靜態檢查（第 4 輪更新 TC-S01、TC-S06 以符合 PRD v0.11）：交付產物與原始碼（AC-04-09、AC-19-01、AC-19-04、AC-21-02、AC-21-03、AC-23-06、AC-18-06 程式面）
+// QA 靜態檢查（第 4 輪更新 TC-S01、TC-S06 以符合 PRD v0.11；第 5 輪新增 TC-S11、TC-L-S01～S04，PRD v0.13）：交付產物與原始碼（AC-04-09、AC-19-01、AC-19-04、AC-21-02、AC-21-03、AC-23-06、AC-18-06 程式面）
 // 用法：node tests/static/static-check.mjs [輸出 JSON] [重建產物路徑（選填，比對是否與 dist 相同）]
 import fs from "node:fs";
 import path from "node:path";
@@ -145,6 +145,58 @@ rec("TC-S02", "AC-19-04", buf.length <= 5242880, `${buf.length.toLocaleString()}
   const svgNs = /createElementNS\(\s*["']http:\/\/www\.w3\.org\/2000\/svg["']/.test(appJs) || /\bsvg\s*\(/.test(appJs);
   const ok = hits.length === 0 && keyframes.length > 0 && svgNs && buf.length <= 5242880;
   rec("TC-S10", "AC-31-04", ok, `外部動畫／圖表／手勢函式庫特徵命中：${hits.join("、") || "無"}；內嵌 @keyframes ${keyframes.length} 個（${keyframes.join("、")}）；SVG 以原生 DOM API 建立=${svgNs}；檔案 ${buf.length.toLocaleString()} bytes（AC-19-01 外部資源見 TC-S01）`);
+}
+
+// ═════════ 第 5 輪（PRD v0.13，版面與視覺）═════════
+const cssAll = styles.join("\n");
+const stripCss = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
+
+// TC-S11（FE-44 起沿用的「卡片不建立分數範圍」檢查，AC-26-05、AC-01-01）：第 5 輪調整規則——只檢查程式與 CSS 規則（去除註解）。
+// 原始產物以字串搜尋會命中 20-customizer.css 檔頭的歷史註解 1 次（記載 v0.10 刪除 .cz-color__range），註解不影響畫面，非缺陷。
+{
+  const raw = (html.match(/cz-color__range/g) || []).length;
+  const inJs = (stripComments(appJs).match(/cz-color__range/g) || []).length;
+  const inCss = (stripCss(cssAll).match(/cz-color__range/g) || []).length;
+  rec("TC-S11", "AC-26-05、AC-01-01（程式面）", inJs === 0 && inCss === 0, `產物原始字串命中 ${raw} 次（CSS 註解）；去除註解後：程式 ${inJs} 次、CSS 規則 ${inCss} 次`);
+}
+
+// TC-L-S01 AC-38-07、AC-19-01、VC-8：CSS 無 @font-face、無 url(（含 data:）；字型為系統字型
+{
+  const ff = (cssAll.match(/@font-face/gi) || []).length; const urls = (stripCss(cssAll).match(/url\(/gi) || []).length;
+  const fam = [...new Set((stripCss(cssAll).match(/font-family\s*:[^;}]+/gi) || []).map((x) => x.trim()))];
+  rec("TC-L-S01", "AC-38-07、AC-19-01（VC-8）", ff === 0 && urls === 0, `@font-face ${ff}；CSS url( ${urls}；font-family 宣告 ${fam.length} 種：${fam.join("｜").slice(0, 300)}`);
+}
+
+// TC-L-S02 AC-38-10 (1)、V-LAY-05、NM-1、NM-4：<title>、授權註解第一行、畫面文字與 src/data 不含 English Master Track
+{
+  const titles = html.match(/<title>[^<]*<\/title>/g) || [];
+  const c = html.match(/<!--([\s\S]*?)-->/); const firstLine = c ? c[1].split(/\r?\n/).map((x) => x.trim()).filter(Boolean)[0] : "";
+  const bodyText = html.replace(/<script\b[\s\S]*?<\/script>/gi, "").replace(/<style\b[\s\S]*?<\/style>/gi, "").replace(/<!--[\s\S]*?-->/g, "").replace(/<[^>]+>/g, " ");
+  const re = /english\s+master\s+track/i;
+  const htmlHit = re.test(bodyText);
+  const jsStr = [...stripComments(appJs).matchAll(/"((?:[^"\\\n]|\\.)*)"/g)].map((m) => m[1]).filter((x) => re.test(x));
+  const dataDir = path.join(ROOT, "src", "data");
+  const dataHits = [];
+  (function walkD(d) { for (const f of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, f.name); if (f.isDirectory()) { if (f.name !== "_records") walkD(p); } else if (/\.(js|mjs)$/.test(f.name) && /english\s*master\s*track/i.test(fs.readFileSync(p, "utf8"))) dataHits.push(path.relative(ROOT, p)); } })(dataDir);
+  const ok = titles.length === 1 && titles[0] === "<title>EnglishContext</title>" && firstLine === "EnglishContext" && !htmlHit && jsStr.length === 0 && dataHits.length === 0;
+  rec("TC-L-S02", "AC-38-10 (1)、AC-34-01、AC-34-02（V-LAY-05、NM-1、NM-4）", ok, `${titles.join("")}；授權註解第一行「${firstLine}」；HTML 文字節點命中=${htmlHit}；程式字串常值（空白分隔）命中 ${jsStr.length}${jsStr.length ? JSON.stringify(jsStr.slice(0, 3)) : ""}；src/data（不含 _records）命中 ${dataHits.join("、") || "無"}`);
+}
+
+// TC-L-S03 AC-38-10 (2)、NM-5：不改清單仍在產物中且逐字相同
+{
+  const sw = fs.existsSync(path.join(ROOT, "dist", "site", "sw.js")) ? fs.readFileSync(path.join(ROOT, "dist", "site", "sw.js"), "utf8") : "";
+  const need = { "englishMasterTrack:state": html, "englishMasterTrack:unreadable": html, "english-master-track-backup": html, 'name="emt-build-id"': html, 'var CACHE_PREFIX = "english-master-track-pwa-";': sw };
+  const miss = Object.entries(need).filter(([k, s]) => !s.includes(k)).map(([k]) => k);
+  const prefix = /english-master-track-backup-/.test(appJs);
+  rec("TC-L-S03", "AC-38-10 (2)（NM-5 FROZEN_IDENTIFIERS）", miss.length === 0 && prefix && fs.existsSync(DIST), `缺少 ${miss.join("、") || "無"}；匯出檔名前綴 english-master-track-backup- 存在=${prefix}；交付檔 dist/english-master-track.html 存在=${fs.existsSync(DIST)}（匯出檔名實測見 TC-38-10）`);
+}
+
+// TC-L-S04 AC-38-05、NM-2：標題列圖示為內嵌 SVG（不參照 icons/、無 xmlns、無 <img>／<image>／<text>）
+{
+  const m = html.match(/<svg class="app-logo"[\s\S]*?<\/svg>/);
+  const svg = m ? m[0] : "";
+  const ok = !!svg && Buffer.byteLength(svg) <= 1500 && !/xmlns|<image|<text|href|icons\//.test(svg) && /aria-hidden="true"/.test(svg) && !/<img\b/i.test(html) && (html.match(/class="app-logo"/g) || []).length === 1;
+  rec("TC-L-S04", "AC-38-05（NM-2）", ok, `內嵌 svg.app-logo ${Buffer.byteLength(svg)} bytes（≤ 1,500）；含 xmlns/image/text/href/icons 路徑=${/xmlns|<image|<text|href|icons\//.test(svg)}；aria-hidden=${/aria-hidden="true"/.test(svg)}；產物 <img> ${(html.match(/<img\b/gi) || []).length}`);
 }
 
 // TC-S09 產物與原始碼一致（以 QA 自行重建的產物比對）

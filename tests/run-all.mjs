@@ -6,6 +6,7 @@
 // 第 4 輪（PRD v0.11 PWA）：新增 e2e-pwa（Chrome 全套、Edge 冒煙）、e2e-pwa-update（Chrome）、tests/static/pwa-static.mjs；
 // 無內建資料 fixture 改為「只含 sources.js 的資料目錄＋--no-site」（PWA 模式下缺 PROJECT_LICENSE.copyrightYear 會 LICENSE_YEAR 中止，architecture §5.1）。
 // PWA 套件需要 devDependency playwright-core（npm install）與空閒的埠 8080。
+// 第 5 輪（PRD v0.13 版面風格）：新增 e2e-layout（US-38～US-41）；越界增量檢查改用 boundary-r5.mjs（與 git HEAD 比對，CT-24、FE-54～FE-62），輸出仍為 boundary-delta.json。
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -32,7 +33,7 @@ const rebuilt = path.join(TMP, "rebuilt.html");
 spawnSync(process.execPath, ["tools/build.mjs", "--out", rebuilt], { cwd: ROOT, stdio: "ignore" });
 run(["tests/static/static-check.mjs", path.join(RES, "static.json"), rebuilt]);
 run(["tests/static/boundary-check.mjs", path.join(RES, "boundary.json")]);
-run(["tests/static/boundary-delta.mjs", path.join(RES, "boundary-delta.json")]);
+run(["tests/static/boundary-r5.mjs", path.join(RES, "boundary-delta.json")]);
 
 // 2. 無內建資料的 fixture 建置（AC-06-06、AC-09-06、AC-30-10）
 const empty = path.join(TMP, "emptydata"); fs.mkdirSync(empty, { recursive: true });
@@ -43,7 +44,7 @@ if (fx.status !== 0) console.log("無資料 fixture 建置失敗：" + (fx.stdou
 run(["tests/static/pwa-static.mjs", path.join(RES, "pwa-static.json")]);
 
 // 3. E2E（Chrome）
-const SUITES = ["e2e-goal", "e2e-cards", "e2e-speech", "e2e-content", "e2e-env", "e2e-persist", "e2e-firstrun", "e2e-progress", "e2e-mic", "e2e-hidden", "e2e-reinit", "e2e-motion"];
+const SUITES = ["e2e-goal", "e2e-cards", "e2e-speech", "e2e-content", "e2e-env", "e2e-persist", "e2e-firstrun", "e2e-progress", "e2e-mic", "e2e-hidden", "e2e-reinit", "e2e-motion", "e2e-layout"];
 for (const s of SUITES) run([`tests/e2e/${s}.mjs`], { QA_FIXTURE_NODATA: fixture });
 // 跨瀏覽器冒煙（Edge）
 for (const s of ["e2e-goal", "e2e-hidden"]) run([`tests/e2e/${s}.mjs`], { QA_BROWSER: "edge" });

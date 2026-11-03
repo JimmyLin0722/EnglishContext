@@ -1,11 +1,15 @@
 /*
  * 21-custom-vocab.css — 自訂單字表單、清單與領域範本（FE-10）
  * 依據：architecture.md §9（RWD：375／768／1366 不得水平捲動、觸控目標 ≥ 44px）
+ * （v0.12，FE-57）區塊標題 18px／700；清單分隔線改 --line；卡片與按鈕沿用全域 .card／.btn（不加 --border 外框）
  */
 
+/* （v0.12，FE-57）區塊標題 = .section-title 規格 18px／700（AC-38-07） */
 .cv-section__title {
   margin: 0 0 8px;
-  font-size: 1.15rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .cv-section__desc {
@@ -92,7 +96,7 @@
   align-items: center;
   gap: var(--gap);
   padding: 10px 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
   min-width: 0;
 }
 

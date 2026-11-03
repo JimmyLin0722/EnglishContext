@@ -191,4 +191,65 @@ describe("sources-page.test.js", () => {
     const rootEl = fakeDocument().createElement("section");
     assert.throws(() => sandbox.EMT.views.sourcesPage.render(rootEl, { sources: REG, builtin: F.builtin() }), /EMT\.core\.pwa/);
   });
+
+  // ── （v0.12，FE-60）原創內容來源（契約 NM-3、§4.3；architecture.md §7.19.8、SD-FB-49；AC-38-10 (1)） ──
+
+  /** 以指定 registry render，回傳根節點 */
+  function renderWithRegistry(registry) {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const vm = require("node:vm");
+    const sandbox = { console: { warn() {}, error() {}, log() {} } };
+    sandbox.self = sandbox;
+    vm.createContext(sandbox);
+    for (const rel of ["core/dom.js", "core/pwa.js", "views/sources-page.js"]) {
+      vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox, { filename: rel });
+    }
+    sandbox.EMT.core.dom.setDocument(fakeDocument());
+    const rootEl = fakeDocument().createElement("section");
+    sandbox.EMT.views.sourcesPage.render(rootEl, { sources: registry, builtin: F.builtin(), license: F.license() });
+    return rootEl;
+  }
+
+  test("originalSourceName：fixture → 「EnglishContext 原創內容」；無 ORIGINAL、fullName 空白或非字串 → null", () => {
+    assert.equal(P.originalSourceName(REG), "EnglishContext 原創內容");
+    assert.equal(P.originalSourceName(REG.filter((e) => e.code !== "ORIGINAL")), null);
+    assert.equal(P.originalSourceName([{ code: "ORIGINAL", fullName: "  " }]), null);
+    assert.equal(P.originalSourceName([{ code: "ORIGINAL", fullName: 3 }]), null);
+    assert.equal(P.originalSourceName(null), null);
+    assert.equal(P.originalSourceName([null, { code: "ORIGINAL", fullName: "X 原創" }]), "X 原創");
+  });
+
+  test("render：授權區在聲明清單之前顯示「原創內容來源：EnglishContext 原創內容」（名稱取自 registry，不寫死）", () => {
+    const rootEl = renderWithRegistry(REG);
+    const lines = findAll(rootEl, (n) => n.className === "src-original");
+    assert.equal(lines.length, 1);
+    assert.equal(lines[0].tagName, "P");
+    assert.equal(lines[0].textContent, "原創內容來源：EnglishContext 原創內容");
+    const section = lines[0].parentNode;
+    const ul = findAll(section, (n) => n.className === "src-statements")[0];
+    assert.equal(section.childNodes.indexOf(lines[0]) + 1, section.childNodes.indexOf(ul), "緊接在聲明清單之前");
+    // 換一個名稱，畫面跟著變（不寫死）
+    const reg2 = REG.map((e) => (e.code === "ORIGINAL" ? Object.assign({}, e, { fullName: "測試原創" }) : e));
+    assert.equal(findAll(renderWithRegistry(reg2), (n) => n.className === "src-original")[0].textContent, "原創內容來源：測試原創");
+    // 原始碼不寫死名稱
+    const src = require("node:fs").readFileSync(require("node:path").join(__dirname, "..", "views", "sources-page.js"), "utf8");
+    assert.ok(!src.includes("EnglishContext 原創內容"));
+  });
+
+  test("render：registry 無 ORIGINAL → 不建「原創內容來源」節點；既有聲明照常", () => {
+    const rootEl = renderWithRegistry(REG.filter((e) => e.code !== "ORIGINAL"));
+    assert.equal(findAll(rootEl, (n) => n.className === "src-original").length, 0);
+    const ul = findAll(rootEl, (n) => n.className === "src-statements")[0];
+    assert.deepEqual(ul.childNodes.map((li) => li.textContent), [P.TEXT.codeLicense, P.TEXT.dataLicense, P.TEXT.originalLicense, BRAND]);
+  });
+
+  test("畫面文字（render 結果與 TEXT）不分大小寫無「English Master Track」（AC-38-10 (1)、NM-6）；外部資料清單仍不列 ORIGINAL", () => {
+    const rootEl = renderWithRegistry(REG);
+    assert.doesNotMatch(rootEl.textContent, /english\s*master\s*track/i);
+    assert.doesNotMatch(JSON.stringify(P.TEXT), /english\s*master\s*track/i);
+    const cards = findAll(rootEl, (n) => n.className === "card src-card").map((n) => n.attrs["data-source"]);
+    assert.ok(cards.length > 0);
+    assert.ok(!cards.includes("ORIGINAL"));
+  });
 });

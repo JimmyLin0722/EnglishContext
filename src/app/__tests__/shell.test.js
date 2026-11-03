@@ -387,7 +387,7 @@ describe("shell.test.js：main.js 啟動順序", () => {
 describe("shell.test.js：PWA（v0.7，FE-50）", () => {
   const raw = read("index.html");
   const HD1 = [
-    '<meta name="theme-color" content="#2f6fd6">',
+    '<meta name="theme-color" content="#1e9bf0">',
     '<meta name="apple-mobile-web-app-title" content="EnglishContext">',
     '<meta name="apple-mobile-web-app-capable" content="yes">',
     '<meta name="mobile-web-app-capable" content="yes">',
@@ -398,7 +398,7 @@ describe("shell.test.js：PWA（v0.7，FE-50）", () => {
 
   test("HD-1：7 個靜態元素逐字各 1 次、依序在 <title> 之後、</head> 之前（AC-34-04、AC-34-05、AC-36-02）", () => {
     const headEnd = raw.indexOf("</head>");
-    let prev = raw.indexOf("<title>English Master Track</title>");
+    let prev = raw.indexOf("<title>EnglishContext</title>");
     assert.ok(prev > 0);
     for (const e of HD1) {
       assert.equal(raw.split(e).length - 1, 1, e);
@@ -413,8 +413,8 @@ describe("shell.test.js：PWA（v0.7，FE-50）", () => {
     assert.ok(raw.includes(`<meta name="${pwa.PWA_BUILD_ID_META_NAME}" content="@@BUILD_ID@@">`));
   });
 
-  test("<title> 不變；@@BUILD_ID@@ 恰 1 次（HD-5）", () => {
-    assert.equal(raw.split("<title>English Master Track</title>").length - 1, 1);
+  test("<title>EnglishContext</title> 恰 1 次（v0.12，NM-1）；@@BUILD_ID@@ 恰 1 次（HD-5）", () => {
+    assert.equal(raw.split("<title>EnglishContext</title>").length - 1, 1);
     assert.equal(raw.split("@@BUILD_ID@@").length - 1, 1);
   });
 
@@ -438,5 +438,77 @@ describe("shell.test.js：PWA（v0.7，FE-50）", () => {
     const iMainClose = raw.indexOf("</main>");
     assert.ok(iBanner >= 0 && iNotice > iBanner, "在 #app-banner 之後");
     assert.ok(iNotice < iMainOpen || iNotice > iMainClose, "不在 #app-main 內");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// （v0.12，FE-56）名稱與標題列圖示（契約 NM-1～NM-4；architecture.md §7.19.3、§10.5 shell.test.js 列）
+// ─────────────────────────────────────────────────────────────
+
+describe("shell.test.js：名稱 EnglishContext 與標題列圖示（v0.12，FE-56）", () => {
+  const raw = read("index.html");
+  const html = indexHtml();
+
+  test("NM-1：<title>EnglishContext</title> 恰 1 次；去除註解後不分大小寫無「English Master Track」", () => {
+    assert.equal(raw.split("<title>EnglishContext</title>").length - 1, 1);
+    assert.doesNotMatch(html, /english\s*master\s*track/i);
+  });
+
+  test("theme-color = #1e9bf0（= PWA_THEME_COLOR，VC-5）", () => {
+    const pwa = require("../core/pwa.js");
+    assert.equal(pwa.PWA_THEME_COLOR, "#1e9bf0");
+    assert.equal(raw.split('<meta name="theme-color" content="#1e9bf0">').length - 1, 1);
+  });
+
+  test("NM-2：h1.app-title = svg.app-logo ＋ span.app-title__text，文字內容 = EnglishContext", () => {
+    const m = html.match(/<h1 class="app-title">([\s\S]*?)<\/h1>/);
+    assert.ok(m, "找不到 h1.app-title");
+    const inner = m[1];
+    assert.match(inner, /^<svg class="app-logo"[\s\S]*<\/svg><span class="app-title__text">EnglishContext<\/span>$/);
+    // 去除標籤後的文字 = EnglishContext（textContent，AC-38-10）
+    assert.equal(inner.replace(/<[^>]*>/g, ""), "EnglishContext");
+  });
+
+  test("svg.app-logo：aria-hidden、focusable=false、無 xmlns／<text／<image／url(／http、≤ 1,500 bytes、1 rect + 2 path", () => {
+    const m = raw.match(/<svg class="app-logo"[\s\S]*?<\/svg>/);
+    assert.ok(m, "找不到 svg.app-logo");
+    const svg = m[0];
+    assert.match(svg, /\saria-hidden="true"/);
+    assert.match(svg, /\sfocusable="false"/);
+    assert.doesNotMatch(svg, /xmlns|<text|<image|url\(|http|Gradient|filter/i);
+    assert.ok(Buffer.byteLength(svg, "utf8") <= 1500, "長度 " + Buffer.byteLength(svg, "utf8"));
+    assert.equal((svg.match(/<rect\b/g) || []).length, 1);
+    assert.equal((svg.match(/<path\b/g) || []).length, 2);
+    // 底色 = --brand（VC-1 允許標題列圖示）、對話框 = 圖示橘（AC-38-05、SD-FB-39）
+    assert.match(svg, /<rect[^>]*fill="#1e9bf0"/);
+    assert.match(svg, /<path fill="#f7893b"/);
+  });
+
+  test(".app-logo 寬高 24～40px（UI_LAYOUT.LOGO_PX）；名稱不換行", () => {
+    const layout = require("../core/layout.js");
+    const base = css();
+    const logo = rulesOf(base, ".app-logo");
+    for (const k of ["width", "height"]) {
+      const v = prop(logo, k);
+      const px = Number((v || "").replace(/px$/, ""));
+      assert.ok(px >= 24 && px <= 40, k + " = " + v);
+      assert.equal(px, layout.UI_LAYOUT.LOGO_PX);
+    }
+    assert.equal(prop(logo, "flex"), "none");
+    assert.equal(prop(rulesOf(base, ".app-title__text"), "white-space"), "nowrap");
+    assert.equal(prop(rulesOf(base, ".app-title"), "display"), "flex");
+  });
+
+  test("NM-4：license-header.txt 第一行 = EnglishContext，第 2 行起與 v0.11 逐字相同（SHA-256）", () => {
+    const crypto = require("node:crypto");
+    // 換行一律正規化為 LF（Windows checkout 可能為 CRLF）
+    const lines = read("license-header.txt").replace(/\r\n/g, "\n").split("\n");
+    assert.equal(lines[0].replace(/\r$/, ""), "EnglishContext");
+    const rest = lines.slice(1).join("\n");
+    assert.equal(
+      crypto.createHash("sha256").update(rest).digest("hex"),
+      "14b65a247fcbfd5267d285e2d6df749ba6ed589f8fcdde49f40da7081f765e07"
+    );
+    assert.doesNotMatch(read("license-header.txt"), /english\s*master\s*track/i);
   });
 });

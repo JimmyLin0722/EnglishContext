@@ -1,4 +1,4 @@
-// QA E2E 共用（第 3 輪，PRD v0.10）：構造 localStorage 狀態、點色級卡片、套用與初始化確認視窗。
+// QA E2E 共用（第 3 輪，PRD v0.10；第 5 輪 PRD v0.13 改用精簡色級列 .cz-level、目標行 .db-goal、3 格數據、收合的資料備份）：構造 localStorage 狀態、點色級卡片、套用與初始化確認視窗。
 // 依據：契約 v0.10 storage-schema.json（schemaVersion 2）、FB-36（構造既有分數時 draftScore = appliedScore）、
 // architecture v0.6 §7.15（確認視窗）、§7.17（只選色級）。
 import { sleep } from "./cdp.mjs";
@@ -51,8 +51,8 @@ export async function seed(p, rec) {
 export const readState = (p) => p.ev(`(() => { const v = localStorage.getItem(${JSON.stringify(KEY)}); return v === null ? null : JSON.parse(v); })()`);
 
 /** 點色級卡片（真實滑鼠事件） */
-export async function clickCard(p, color) { await p.click(`.cz-color[data-color="${color}"]`); await sleep(40); }
-export const pressed = (p) => p.ev(`[...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((b) => b.dataset.color).join(",")`);
+export async function clickCard(p, color) { await p.click(`.cz-level[data-color="${color}"]`); await sleep(40); }
+export const pressed = (p) => p.ev(`[...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((b) => b.dataset.color).join(",")`);
 
 /** 目前開啟中的確認視窗（無則 null） */
 export const dialogInfo = (p) => p.ev(`(() => { const d = document.querySelector(".dialog"); if (!d) return null;
@@ -86,10 +86,22 @@ export const est = (p) => p.ev(`(() => { const q = (s) => document.querySelector
   return { color: t(".cz-est-color"), target: t(".cz-est-target"), daily: t(".cz-est-daily"), weeks: t(".cz-est-weeks"), mastered: t(".cz-est-mastered"),
     achieved: vis(".cz-achieved"), note: vis(".cz-note"), cap: vis(".cz-estimate .cz-warning"), statusCap: vis(".cz-status__cap"),
     stTarget: t(".cz-st-target"), stEffective: t(".cz-st-effective"),
-    pressed: [...document.querySelectorAll(".cz-color[aria-pressed=true]")].map((b) => b.dataset.color).join(",") }; })()`);
+    pressed: [...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((b) => b.dataset.color).join(",") }; })()`);
 
-/** 主控台目標區（標籤=值） */
-export const dashGoal = (p) => p.ev(`[...document.querySelectorAll(".dash-stats--goal .dash-stat")].map((e) => e.querySelector(".dash-stat__label").textContent + "=" + e.querySelector(".dash-stat__value").textContent).join("｜")`);
+/** 主控台目標區（第 5 輪，PRD v0.12 AC-39-04）：今日任務卡目標行的可見文字，如「綠級・每日 15 字・變更」 */
+export const dashGoal = (p) => p.ev(`(() => { const g = document.querySelector("#view-dashboard .db-goal"); return g ? g.innerText.replace(/\\s*\\n\\s*/g, "").trim() : ""; })()`);
+/** 第 5 輪：PRD v0.12 目標行期望字串（AC-39-04） */
+export const GOAL_LINE = { orange: "橘級・每日 10 字・變更", brown: "棕級・每日 10 字・變更", green: "綠級・每日 15 字・變更", blue: "目標藍級・生效綠級（內建上限）・每日 15 字・變更", gold: "目標金級・生效綠級（內建上限）・每日 15 字・變更" };
+/** 第 5 輪：主控台 3 格數據（AC-39-05）{ streak, mastery, masteredSub, accuracy }，數值為可見文字 */
+export const dashStats = (p) => p.ev(`(() => { const q = (s) => document.querySelector("#view-dashboard " + s); const t = (s) => (q(s) ? q(s).innerText.replace(/\\s+/g, " ").trim() : null);
+  return { streak: t(".db-stat--streak .db-stat__value"), mastery: t(".db-stat--mastery .db-stat__value"), masteredSub: t(".db-stat--mastery .db-stat__sub"), accuracy: t(".db-stat--accuracy .db-stat__value"),
+    labels: [...document.querySelectorAll("#view-dashboard .db-stat__label")].map((e) => e.textContent).join("、") }; })()`);
+/** 第 5 輪：展開主控台「資料備份」（AC-39-08；已展開則不動作）。需在主控台頁 */
+export async function expandBackup(p) {
+  const st = await p.ev(`(() => { const b = document.querySelector(".db-backup__toggle"); return b ? b.getAttribute("aria-expanded") : null; })()`);
+  if (st === "false") { await p.click(".db-backup__toggle"); await sleep(60); }
+  return st;
+}
 
 /** 畫面上可見的分數輸入相關元素與文字（AC-26-05） */
 export const scoreVisibility = (p) => p.ev(`(() => { const shown = (e) => { if (!e) return false; const s = getComputedStyle(e); if (s.display === "none" || s.visibility === "hidden" || e.closest("[hidden]")) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };

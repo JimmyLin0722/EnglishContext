@@ -1,6 +1,6 @@
 ---
 doc: ARCH
-version: 0.7
+version: 0.8
 status: approved
 author: sd-agent
 approved_by: JimmyLin（對話中核准，主控代填欄位）
@@ -9,8 +9,9 @@ approved_at: 2026-11-03
 
 # English Master Track — 系統架構與設計
 
-> 上游：`docs/01-PRD.md` v0.11（approved，JimmyLin，2026-11-02）、`docs/02-contract/` v0.11（README.md、data-schema.ts、storage-schema.json 三檔 approved，主控代核，2026-11-02）。v0.6 以前的內容仍有效，除非本版明文修改。
-> 搭配文件：`docs/03-design/tasks.json` v0.6（共 76 個任務：既有 67 個全部 `done` 不變；v0.7 新增 FE-45～FE-53 共 9 個，見 §12.6；另列主控執行項目 MC-01～MC-03，不派給 PG）。
+> 上游：`docs/01-PRD.md` v0.12（approved，JimmyLin，2026-11-03）、`docs/02-contract/` v0.12（README.md、data-schema.ts、storage-schema.json 三檔 approved，主控代核，2026-11-03）。v0.7 以前的內容仍有效，除非本版明文修改。
+> 搭配文件：`docs/03-design/tasks.json` v0.7（共 86 個任務：既有 76 個全部 `done` 不變；v0.8 新增 CT-24 與 FE-54～FE-62 共 10 個，見 §12.7；主控項目 MC-01～MC-03 已完成）。
+> **v0.8 增量導讀**（PRD R-21、US-38～US-41、Q-49～Q-57，修改 30 條 AC；契約 §11 NM／VC／DB／FT／MT／V-LAY、data-schema §13、§9.6 DS-19～DS-25、FB-44～FB-49）：版面與視覺改版，**功能行為與持久化結構不變**（`schemaVersion` 2）。重點：CSS token 重整（`--primary` 改為深品牌色、新增 `--brand`／`--accent`／`--line`／`--track`、卡片圓角 16px 加陰影去灰框，§7.19.1～§7.19.2）；標題列內嵌 SVG 圖示與名稱「EnglishContext」（§7.19.3）；主控台改為今日任務卡 → 3 格數據 → 近 7 天圖表 → 收合「資料備份」、720px 置中（§7.19.4）；首次畫面與難易度設定頁改精簡色級列，首次畫面固定底部列（§7.19.5）；模擬測驗進度條與 720px（§7.19.6）；單字卡頁只換配色（§7.19.7）；PWA `theme_color`／`background_color`／`<title>` 同步（§7.19.9）；效能、減少動態、鍵盤與無障礙評估（§7.19.10）。新模組 `core/layout.js`（契約 §13 常數與純函式）；`store` 新增 `runtime.dashboard` 與 `setBackupExpanded`。同步修訂 §1、§2、§3、§4.8、§5.3、§6.4、§9、§10.5、§11（T-55～T-66）、§12.7、§13.5、§14、§15（SD-FB-39～SD-FB-49）。`src/data/` 只改 ORIGINAL `fullName`（CT-24，DS-19）。
 > **v0.7 增量導讀**（PRD R-20、US-34～US-37、AC-24-12、Q-41～Q-48；契約 §10 DP／MF／HD／PE／SW／UP／IN／NT／PV、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）：加入 PWA。同一份 HTML 兩種形態——`file://` 雙擊（不註冊、零請求）與 https 部署目錄 `dist/site/`（manifest、service worker、圖示、`ads.txt`）。建置新增 B-10～B-16（PWA 輸入、BUILD_ID、`sw.js` 注入、部署目錄），B-7 以「逐字白名單」允許唯一的靜態 `<link rel="icon" href="data:,">`（§5.1）；GitHub Actions 改為 CI 建置後整個上傳 `dist/site/`（§5.2，主控執行）；新模組 `core/pwa.js`、`services/pwa.js`、`ui/pwa-notice.js`、`pwa/sw.template.js`、`tools/serve.mjs`（§3、§4.7、§7.18）。同步修訂 §1、§3、§5、§6.3、§9、§10.4、§11（T-45～T-54）、§12.6、§13.4、§14、§15（SD-FB-31～SD-FB-38）。**不改持久化結構**（`schemaVersion` 2）、不改 `src/data/`、不建 CT 任務。
 > **v0.6 增量導讀**（PRD R-19、Q-39、Q-40；契約 §5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）：難易度設定改為「只選色級、不顯示分數」。點卡片設為該色 `scoreMax`（取代 Q-32，§7.1）；預設分數一律引用 `SCORE_DEFAULT`（725）；首次畫面與一般頁隱藏滑桿、輸入框（不可見、不可聚焦）、卡片移除分數範圍、狀態列與主控台移除目標分數（§7.17）；AC-22-04 量測點改為點卡片；取消初始化確認時卡片回到原色級。同步修訂 §1、§3、§4.3、§7.9、§9、§10.3、§11（T-40～T-44）、§12.5、§13.3、§14、§15（SD-FB-28～SD-FB-30）。**不改持久化結構**（`schemaVersion` 2）、不改 `src/data/`。
 > **v0.5 增量導讀**（PRD R-18、契約 §5.7、§5.8、§9.3 DS-01～DS-06）：麥克風與收音條（§7.14，推翻原「不使用 `getUserMedia`」限制，仍禁止錄音）、切換難易度初始化確認視窗（§7.15）、隱藏解碼器與句型庫（§7.16）；同步修訂 §7.6（STT 與錯誤對照）、§7.11（減少動態）、§7.13（導覽 4 項）、§9（底部導覽 4 欄）、§10（靜態檢查、V-MIC 實機驗證、§10.2）、§11（T-32～T-39）、§12.4 批次、§13.2 AC 對照、§14 DS 回應、§15 SD-FB-20～SD-FB-27。
@@ -44,6 +45,11 @@ approved_at: 2026-11-03
 | （v0.7）建置識別碼 | BUILD_ID = SHA-256（Node 內建 `crypto`）對「注入前 HTML、manifest、4 張圖示、`sw` 範本」依固定格式計算取前 16 字元；**不含時間、亂數、絕對路徑**；寫入 HTML `<meta name="emt-build-id">` 與 `sw.js` | SW-2、AC-36-01、AC-36-02 |
 | （v0.7）部署 | `.github/workflows/static.yml` 改為：Node 22 → `npm run build`（**不執行 `npm ci`**：零相依、無 lockfile）→ 驗證 → 整個上傳 `dist/site/`；由主控依 §5.2 修改一次（Q-46） | AC-36-07、DS-15 |
 | （v0.7）PWA 畫面 | 主控台「匯出備份」區塊：按鈕列之後常駐 NT-1 說明，其後在 IN-1 成立時渲染「安裝 App」；新版提示為頁首下方的 sticky 文字列（`#pwa-update`），任何頁面、任何 `entryMode` 皆可顯示 | AC-24-12、AC-34-07～AC-34-10、AC-36-03、NT-1、IN-1、UP-6 |
+| （v0.8）色彩 token | `00-base.css` `:root` 定義契約 `COLOR_TOKENS`（`--brand`、`--brand-deep`、`--accent`、`--accent-text`、`--bg`、`--surface`、`--text`、`--text-muted`）；沿用變數名 `--primary` 但值改為深品牌色 `#0866ad`（既有 `var(--primary)` 自動改為白字可達 4.5:1 的顏色）；色級、對錯、燈號、達成金色變數**逐字不變**；`--border`（`#d5d9e0`）只留給表單輸入框、作答選項、收音條暗格；分隔線改 `--line` | VC-1～VC-8、AC-38-01～AC-38-04、§7.19.1 |
+| （v0.8）卡片與按鈕 | `.card`：白底、圓角 16px、陰影、無邊框；`.btn`：邊框透明、次要按鈕淡藍底；新增 `.btn--accent`（強調橘底、深色字，只給「開始今日學習」「開始學習」）；全域 `font-variant-numeric: tabular-nums`；焦點框 3px 深品牌色。單字卡頁卡片幾何維持 v0.11（只換配色） | AC-38-06、AC-38-07、AC-38-08、AC-38-09、§7.19.2 |
+| （v0.8）名稱與圖示 | `<title>`、標題列 `h1`、授權註解第一行改為「EnglishContext」；標題列左側 32px **內嵌 SVG**（不寫 `xmlns`、`aria-hidden`、無 `<img>`、無 data URI）；`FROZEN_IDENTIFIERS`（鍵名、備份格式、匯出檔名、交付檔名、快取前綴、`emt-build-id`）一律不改 | NM-1～NM-6、AC-38-05、AC-38-10、§7.19.3 |
+| （v0.8）版面常數 | 內容寬 720px（主控台、模擬測驗、難易度設定）置中；斷點沿用 640px（= `NAV_BOTTOM_MAX_PX`）；首次畫面 ≤ 640px 固定底部列，預留 184px；近 7 天長條軌道 64px；進度條高 6px；以上收在 `core/layout.js` `UI_LAYOUT` 與 CSS 變數 | 契約 §5.6 v0.12 段、AC-39-10、AC-40-02、AC-41-03、AC-39-07 |
+| （v0.8）新介面狀態 | 只有 `RuntimeState.dashboard.backupExpanded`（記憶體、tag `"dashboard"`、不寫 localStorage）；進度條、空狀態、首次選中列皆為推導值 | 契約 §11.3、DB-6、MT-1 |
 
 ---
 
@@ -115,6 +121,8 @@ approved_at: 2026-11-03
                  │ install：cache:"reload" 取 7 項 → 全部 200 才寫入 │ activate：刪本前綴舊快取 → claim │
                  └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+（v0.8）新模組 `core/layout.js` 屬 L1：契約 §13 常數（`APP_DISPLAY_NAME`、`FROZEN_IDENTIFIERS`、`COLOR_TOKENS`、`SEMANTIC_COLORS`、`LAYOUT_TEXTS`）與版面純函式（格式字串、千分位、目標行、試算摘要行、空狀態判定、進度條推導）；**載入時不取用任何模組**（LD-1），Node 可直接 `require`；不讀 DOM、不讀 `window` 資料。CSS 變數是畫面實際使用的顏色來源，`core/layout.js` 的 `COLOR_TOKENS` 只供測試比對與文件化（`tokens.test.js` 讀 CSS 與常數比對，§10.5）。
 
 （v0.5）新模組的層別：`core/meter.js`、`core/reinit.js` 屬 L1（遵守 LD-1：載入時只取 `constants`；`reinit` 呼叫 `goal`、`learning`、`persist` 一律在函式內取用）；`services/mic.js` 屬 L3（只包裝 `getUserMedia`、`AudioContext`，不改 store；音訊物件與音量值**不得**進入 `AppState`，契約 AC-21-03 對照）。
 
@@ -197,7 +205,8 @@ approved_at: 2026-11-03
       │  ├─ interaction.js             FE-21（v0.4 新增）Q-33 設計常數、滑動判斷、震動樣式（§7.10、§7.12）
       │  ├─ meter.js                   FE-35（v0.5 新增）收音條門檻 T1～T5、RMS、dBFS、亮格數、分析視窗大小（§7.14）
       │  ├─ reinit.js                  FE-34（v0.5 新增）生效色級是否改變、「有學習紀錄」(a)～(f)、初始化新資料（§7.15）
-      │  └─ pwa.js                     FE-45（v0.7 新增）PWA 契約常數（PWA_*）、PE-1 判定、IN-2、IN-1／UP-6 顯示條件、UP-3 重查判斷、初始 PwaRuntimeState（§4.7、§7.18）
+      │  ├─ pwa.js                     FE-45（v0.7 新增）PWA 契約常數（PWA_*）、PE-1 判定、IN-2、IN-1／UP-6 顯示條件、UP-3 重查判斷、初始 PwaRuntimeState（§4.7、§7.18）→ FE-56（v0.8：theme／background 色值）→ FE-58（v0.8：IN-1 加 `dashboard.backupExpanded`）
+      │  └─ layout.js                  FE-54（v0.8 新增）契約 §13 常數、UI_LAYOUT 版面常數、fill／formatInt／goalLine／summaryLine／chartIsEmpty／part5Progress（§4.8、§7.19）
       ├─ state/
       │  └─ store.js                   FE-07 → FE-25（v2、學習事件）→ FE-30（entryMode、首次流程）→ FE-37（v0.5：切換難易度初始化、隱藏頁守門）→ FE-42（v0.6：clickColor 改用 scoreForCard）→ FE-49（v0.7：RuntimeState.pwa、actions.setPwa）
       ├─ services/
@@ -279,6 +288,23 @@ approved_at: 2026-11-03
          └─ pwa-notice.test.js         FE-50（v0.7 新增）新版提示列顯示條件、按鈕只觸發一次
 ```
 
+（v0.8）檔案異動（新增檔標「新」；其餘接在目錄樹既有「→」之後）：
+
+| 檔案 | v0.8 任務 | 內容 |
+| :--- | :--- | :--- |
+| `src/data/sources.js`、`src/data/_tools/lib.mjs`、`src/data/_records/CT-24.md`（新） | CT-24（pg-content） | ORIGINAL `fullName` = 「EnglishContext 原創內容」（DS-19） |
+| `core/layout.js`（新）、`__tests__/layout.test.js`（新） | FE-54 | §4.8 |
+| `state/store.js`、`__tests__/store.test.js` | FE-55 | `runtime.dashboard`、`setBackupExpanded` |
+| `index.html`、`license-header.txt`、`styles/00-base.css`、`core/pwa.js`、`tools/build.mjs`、`__tests__/build.test.js`、`__tests__/shell.test.js`、`__tests__/pwa-core.test.js`、`__tests__/tokens.test.js`（新） | FE-56 | token、共用樣式、標題列圖示與名稱、PWA 色值、B-12 標題 |
+| `views/customizer.js`、`styles/20-customizer.css`、`styles/21-custom-vocab.css`、`__tests__/customizer.test.js`、`__tests__/first-run.test.js` | FE-57 | 精簡色級列、首次畫面固定底部列 |
+| `views/dashboard.js`、`styles/10-dashboard.css`、`core/pwa.js`、`__tests__/dashboard.test.js`、`__tests__/pwa-core.test.js`、`__tests__/naming.test.js` | FE-58（在 FE-56 之後） | 主控台改版、IN-1 |
+| `styles/30-flashcards.css`、`styles/31-speech.css`、`styles/32-quiz.css`、`styles/80-pwa.css` | FE-59 | 只換配色、單字卡頁幾何固定 |
+| `views/sources-page.js`、`styles/70-sources.css`、`__tests__/sources-page.test.js`、`__tests__/_fixtures.js` | FE-60 | 原創內容來源名稱（NM-3） |
+| `views/part5.js`、`styles/40-part5.css`、`__tests__/part5.test.js` | FE-61 | 進度條、720px |
+| `dist/english-master-track.html`、`dist/site/` 8 檔、`__tests__/load-order.test.js`、`styles/90-overrides.css` | FE-62 | 整合建置與自檢 |
+
+不改：`core/constants.js`（`STORAGE_KEYS` 等屬 `FROZEN_IDENTIFIERS`）、`core/backup.js`、`core/persist.js`、`main.js`、`ui/router.js`（「開始今日學習」「變更」沿用既有 `[data-go]` 委派）、`views/flashcards.js`、`views/speech-panel.js`、`views/flashcard-quiz.js`、`styles/05-motion.css`、`pwa/sw.template.js`、`src/app/assets/icons/`、`styles/50-decoder.css`、`styles/60-phrasebank.css`（隱藏頁）。
+
 （v0.7）既有測試檔的修改：`build.test.js` FE-01 → FE-41 → **FE-47**（PWA 建置、可重現、白名單）；`store.test.js` … → FE-42 → **FE-49**（`setPwa`、初始 `pwa`）；`shell.test.js` FE-26 → FE-38 → **FE-50**（HD-1、`#pwa-update`）；`dashboard.test.js` … → FE-43 → **FE-51**（NT-1、安裝按鈕）；`sources-page.test.js` FE-19 → **FE-52**；`load-order.test.js` … → FE-44 → **FE-53**。
 
 規則：
@@ -296,6 +322,7 @@ approved_at: 2026-11-03
 | D-10 | （v0.6）同 D-6、D-8：v0.6 對既有檔案的修改由 FE-42～FE-44 承接；**FE-42～FE-44 彼此之間沒有任何共用 path**，並以 `dependsOn` 串成 FE-42 → FE-43 → FE-44（每批 1 個任務）。`src/data/` 不改、不建 CT 任務（契約 DS-10）；`core/persist.js` 已引用 `C.SCORE_DEFAULT`，**不需修改**（只改其測試）|
 | D-11 | （v0.7）同 D-6、D-8、D-10：v0.7 對既有檔案的修改由 FE-45～FE-53 承接；**FE-45～FE-53 彼此之間沒有任何共用 path**。`src/data/` 不改、不建 CT 任務（契約 DS-18）。`src/app/assets/icons/*.png`、`sources/deploy/ads.txt`、`sources/pwa/README.md`、`.github/workflows/static.yml` 由**主控**放置或修改（tasks.json `manualSteps` MC-01～MC-03），**不屬任何 PG 任務**；PG 只讀取，不得修改（QA 越界檢查請視為授權例外，SD-FB-33） |
 | D-12 | （v0.7）`src/app/pwa/`、`src/app/assets/` 不打包進 HTML（建置只收 §4.1 的 5 層目錄與 `main.js`）；`src/app/pwa/sw.template.js` 不得被任何 `src/app` 模組 `require` 或讀取 |
+| D-13 | （v0.8）同 D-6、D-8、D-10、D-11：v0.8 對既有檔案的修改由 CT-24、FE-54～FE-62 承接；**同一批次的任務沒有任何共用 path**。唯一被兩個 v0.8 任務修改的檔案是 `core/pwa.js` 與 `__tests__/pwa-core.test.js`（FE-56 改色值 → FE-58 改 IN-1），以 `dependsOn` 串接、分屬第 1、2 批。`src/data/` 只改 ORIGINAL `fullName` 一個值（CT-24，契約 DS-19、DS-25）；`_fixtures.js` 的同名字串屬 FE-60 |
 | D-7 | （v0.4）`src/data/` 本版**不改**：R-15 更名不涉及內容資料（題型標籤 `PART5_TYPE_LABELS` 與授權文字中的「Part 5」屬題型與授權用語，保留），R-16、R-17 只涉及介面與持久化。因此不建 CT 任務 |
 
 ---
@@ -493,6 +520,39 @@ approved_at: 2026-11-03
 
 **`views/sources-page.js`（FE-52）**——既有聲明清單（`src-statements`）在 3 條授權聲明之後新增 1 條：「PWA 圖示與名稱「`PWA_APP_NAME`」為品牌標識，著作權人 `PROJECT_LICENSE.copyrightHolder`（缺漏時用既有保底值 JimmyLin），保留所有權利，不適用 MIT 與 CC BY-SA 4.0」，組字後必須與 PRD AC-23-02 原文逐字相同。`PWA_APP_NAME` 於 render 時取 `EMT.core.pwa`（LD-2；不存在依 LD-3 丟出錯誤）。
 
+### 4.8 v0.8 新增與修改的模組介面（版面與視覺）
+
+**`EMT.core.layout`（`core/layout.js`，FE-54；L1、IIFE、Node `module.exports`；載入時不取用其他模組）**
+
+| 成員 | 型別／簽章 | 說明 |
+| :--- | :--- | :--- |
+| `APP_DISPLAY_NAME`、`FROZEN_IDENTIFIERS`、`COLOR_TOKENS`、`SEMANTIC_COLORS`、`LAYOUT_TEXTS` | 深度凍結物件／字串 | 與 `data-schema.ts` §13 **逐字**相同（鍵順序亦同）；`layout.test.js` 以測試內複製的契約原文 `deepStrictEqual` |
+| `UI_LAYOUT` | 凍結物件 | 版面常數（§7.19 各節引用）：`CONTENT_NARROW_PX: 720`、`CARD_RADIUS_PX: 16`、`NARROW_MAX_PX: 640`（= `interaction.UI.NAV_BOTTOM_MAX_PX`）、`FIRSTBAR_RESERVE_PX: 184`、`CHART_TRACK_PX: 64`、`CHART_AREA_MAX_PX: 120`、`CHART_EMPTY_MAX_PX: 48`、`PROGRESS_BAR_PX: 6`、`LOGO_PX: 32`、`SECTION_TITLE_PX: 18`、`STAT_VALUE_PX: 28`、`FOCUS_OUTLINE_PX: 3`。CSS 以同值寫死，`tokens.test.js` 比對 |
+| `fill(template, values)` | `(string, object) → string` | 把 `{key}` 換成 `String(values[key])`；模板中出現但 `values` 沒有的鍵 → 拋 `TypeError`（程式錯誤，測試可抓）；不做 HTML 跳脫（一律 `textContent` 寫入） |
+| `formatInt(n)` | `(number) → string` | 整數四捨五入後加千分位（`2809` → `"2,809"`）；非有限數 → `LAYOUT_TEXTS.statNoData`「—」。**全畫面整數一律用此格式**（契約 `LAYOUT_TEXTS` 註解「千分位與否由 SD 定，全畫面一致」；與 `customizer.formatInt` 輸出相同） |
+| `goalLine(applied, effective)` | `(ColorLevelDefinition, ColorLevelDefinition) → { text, capped }` | DB-4：`applied.id === effective.id` → `goalLineSame`；否則 `goalLineCapped`；`{daily}` = `effective.dailyNewWords`。任一參數缺 → `{ text: "—", capped: false }`。回傳**不含** `・變更`（view 另建可點擊節點） |
+| `summaryLine(level, daily, weeks, capped)` | `(ColorLevelDefinition, number, number\|null, boolean) → string` | FT-4：`fill(summaryLine, { color: level.nameZh, daily: formatInt(daily), weeks: formatInt(weeks) })`，`capped` 時接 `summaryLockedSuffix`；`weeks` 為 `null` → 「—」 |
+| `chartIsEmpty(counts)` | `(number[]) → boolean` | 陣列為空或每個值皆為 0（含非有限數視為 0）→ `true`（§5.4 v0.12 段） |
+| `part5Progress(kind, number, total)` | `("question"\|"summary"\|"empty", number, number) → { visible, now, max, percent }` | MT-1：`total ≤ 0` 或 `kind === "empty"` → `visible: false`；`"summary"` → `now = total`、`percent = 100`；`"question"` → `now = number`（= 畫面「第 i / N 題」的 i）、`percent = Math.round(now / total × 1000) / 10`；`max = total` |
+
+**`EMT.store`（FE-55）**
+
+| 變更 | 說明 |
+| :--- | :--- |
+| `initialRuntime` | 新增 `dashboard: { backupExpanded: false }`（每次 `init` 皆為 false；匯入、`startLearning`、`confirmApplyGoal` 以 `assign` 局部更新，不重建 `runtime`，因此保留現值，E-91） |
+| `actions.setBackupExpanded(value)` | 只接受 `true`／`false`（其他 → `{ changed: false }`）；值相同 → 不通知；不同 → 以新物件取代 `runtime.dashboard`、通知 `["dashboard"]`、**不呼叫 `writeData`**（`setItem` 0 次；一般與首次模式相同）；回傳 `{ changed }` |
+| 其他 | `exportBackup` 不含 `runtime`（既有）；`getState().runtime.dashboard` 為唯讀快照 |
+
+**`EMT.core.pwa`（FE-56 → FE-58）**：`PWA_THEME_COLOR` `#1e9bf0`、`PWA_BACKGROUND_COLOR` `#eef4fa`、`PWA_MANIFEST.theme_color`／`background_color` 同值（FE-56）；`installVisible(state)` 多一個條件 `state.runtime.dashboard && state.runtime.dashboard.backupExpanded === true`（FE-58，IN-1 v0.12）。`PWA_APP_NAME` 不變（= `APP_DISPLAY_NAME`）。
+
+**`views/dashboard.js`（FE-58）**：移除 `ENTRIES`、`summaryOf`、2 個小環形圖；新增純函式 `dashboardModel(state, today)` → `{ today: { x, d, done, ratio, text, centerText, doneText }, goal: { text, colorId, capped }, stats: { streakValue, streakUnit, masteryText, masteredText, accuracyText }, chart: { empty, bars[] }, backupExpanded }`（文字全部經 `layout`）；保留 `goalInfoOf`、`importMessage`、`ringGeometry`；`INSTALL_TAGS` 加 `"dashboard"`；`PROGRESS_TAGS` 加 `"dashboard"`。
+
+**`views/customizer.js`（FE-57）**：`cardModels` 改為 `levelRows(nO, nB, nG, draftScore)` → `[{ id, name, desc, locked, vocabText, dailyText, selected }]`（鎖定列 `vocabText`／`dailyText` 為 `null`）；新增 `firstRunSummary(G, score, nB, nG)` → `{ text, locked }`（與 `estimateTexts` 使用同一個 `G.estimate(score, 0, nB, nG)`，FT-4）；`actionsModel` 依 §7.19.5 調整。元素 id `#cz-start`、`#cz-restore`、`#cz-apply` 保留（QA 定位用）。
+
+**`views/part5.js`（FE-61）**：`render()` 在 `h2.p5-heading` 之後插入進度條（`layout.part5Progress(vm.kind, vm.number, vm.total)`）；`buildViewModel` 不變。
+
+**`views/sources-page.js`（FE-60）**：新增純函式 `originalSourceName(registry)` → ORIGINAL 項目的 `fullName`（非空字串）或 `null`；授權區塊在聲明清單之前顯示一行「原創內容來源：{fullName}」（`null` 時不建節點，不寫死名稱，NM-3）。
+
 ---
 
 ## 5. 建置與打包流程
@@ -658,6 +718,19 @@ jobs:
 | 失敗行為 | B-7、B-10～B-16 任一檢查失敗 → `npm run build` 結束碼 1 → 不上傳、不部署（舊版網站維持） |
 | 驗證 | push 到 `main` 後由 QA／人類依 AC-36-07 檢查部署網址下 8 個檔案皆 200 且與 CI 產物相同（下載 Actions artifact 比對，或以 `curl` 取回後與本機 `--app` 相同來源的建置比對 BUILD_ID） |
 
+### 5.3 v0.8 建置修改（FE-56；契約 NM-1、MF-4、V-PWA-04、VC-5、DS-20）
+
+| 步驟 | 修改 | 不改 |
+| :--- | :--- | :--- |
+| B-12 | `<title>English Master Track</title>` 恰 1 次 → **`<title>${PWA_APP_NAME}</title>`（「EnglishContext」）恰 1 次**；`theme-color` 仍取 `PWA_THEME_COLOR`（值隨 FE-56 改為 `#1e9bf0`，程式不必改） | HD-1 其餘 6 個元素逐字不變 |
+| B-11 (4) | 不改程式：仍比對 `00-base.css` 第一個 `--bg` = `PWA_BACKGROUND_COLOR`；兩者在 FE-56 同一任務內改為 `#eef4fa`（VC-5） | — |
+| B-13 | 不改程式：manifest 由 `PWA_MANIFEST` 產生，`theme_color`、`background_color` 隨常數改變；鍵仍恰 10 個 | `name`／`short_name` 原本即為「EnglishContext」 |
+| B-6 | 不改程式：授權標頭第一行由 `license-header.txt` 提供，改為「EnglishContext」（NM-4）；其餘聲明逐字不變 | — |
+| B-7 | 不改：標題列圖示為**內嵌 `<svg>`**，不含 `<img`、`url(`、`http`（不寫 `xmlns`），不觸發 `FORBIDDEN_PATTERNS`；不放寬任何規則 | 白名單仍只有 `<link rel="icon" href="data:,">` |
+| B-14 | 不改：`index.html`、CSS、程式、manifest 改變 → BUILD_ID 改變，已安裝的 v0.11 使用者會看到「有新版本」提示，屬預期（AC-36-03）；快取前綴 `english-master-track-pwa-` 不變，SW-9 照常刪除舊快取（NM-5、AC-36-05） | — |
+
+`build.test.js` 同步：fixture 的 `<title>`、`theme-color`、`--bg` 字面值改為新值；新增「舊標題 `<title>English Master Track</title>` → `PWA_HEAD` 中止」案例；既有「把標題換成 EnglishContext 會中止」案例（第 764 行）改為「換成其他字串會中止」。
+
 ---
 
 ## 6. 檔案大小估算（回應 FB-17、R-02、AC-19-04）
@@ -729,6 +802,16 @@ localStorage：v0.5 不新增欄位、不改結構（`schemaVersion` 2）；初�
 | `dist/site/` 其他檔案（不計入 AC-19-04） | `sw.js` 約 4 KB、`manifest.webmanifest` 約 0.5 KB、4 張 PNG 依主控產出（預估合計 0.1～0.5 MB）、`ads.txt` 58 bytes |
 | Cache Storage（https 版，每個本專案快取） | HTML 以 `./`、`./index.html` 兩鍵各存一份（約 2 × 3.1 MB）＋ manifest ＋ 4 張 PNG ≈ 6.5～7 MB；更新等待期間最多 2 個快取（FB-39）≈ 14 MB。遠低於 Chrome 每來源配額（磁碟可用空間的比例，通常數 GB）；配額不足依 E-76、PE-3 靜默 |
 | localStorage | 不變（PV-1） |
+
+### 6.4 v0.8 增量估算
+
+| 項目 | 估算 |
+| :--- | :--- |
+| 新增 `core/layout.js`（常數＋純函式＋註解） | 約 +6 KB |
+| `00-base.css` token 與共用樣式、`10-dashboard.css`、`20-customizer.css`、`40-part5.css` 改寫 | 約 +4 KB |
+| 標題列內嵌 SVG（1 個 `rect`、2～3 個 `path`，不用 data URI、不用 PNG） | < 1 KB（以 PNG data URI 內嵌 192px 圖示約需 20～40 KB，故不採用） |
+| 主控台移除功能入口、學習統計、目前目標、2 個小環形圖的程式 | 約 −3 KB |
+| **合計** | **約 +8 KB**；交付檔遠低於 4.5 MiB 警告門檻（AC-19-04 不受影響）。localStorage 不變（`backupExpanded` 不持久化） |
 
 ---
 
@@ -1389,6 +1472,256 @@ AC-36-03「60 秒內顯示」：瀏覽器在導覽時檢查 `sw.js`（`updateVia
 | `sw.js` 禁用字串與監聽種類 | 建置產物 | B-15（建置中止）＋ `sw.test.js` |
 | manifest 鍵集合封閉 | 建置產物 | B-13 |
 
+### 7.19 版面與視覺（v0.8；PRD R-21、US-38～US-41、Q-49～Q-57；契約 §11、§5.6 v0.12 段、DS-19～DS-25）
+
+原則：**只改表現層**。資料流、store action 的語意、router、localStorage 寫入時機一律不變；唯一新狀態是記憶體中的 `runtime.dashboard.backupExpanded`。樣稿 `docs/mockups/v0.12-layout-demo.html` 只供參考，與 AC 不一致處以 AC 為準（FB-44：不加「→」箭頭、標題用「資料備份」、副標用「」）。
+
+#### 7.19.1 CSS token 重整（`00-base.css` `:root`，FE-56）
+
+採「**沿用變數名、改值**」＋「**新增語意變數**」：既有樣式檔中的 `var(--primary)` 多為白字按鈕底、選中狀態與品牌文字，改值即自動符合 AC-38-04，不需逐檔改寫；需要新語意的地方才改用新變數。
+
+| 變數 | v0.11 | v0.12 | 用途限制 | 依據 |
+| :--- | :--- | :--- | :--- | :--- |
+| `--color-orange`／`brown`／`green`／`blue`／`gold` | `#e8833a`／`#8b5a2b`／`#2e9e5b`／`#2f6fd6`／`#c9a227` | **不變** | 色級色條、選中列框線與淡底、目標行色點、達成金色 | AC-38-03、VC-6 |
+| `--correct`／`--wrong`、`--light-green`／`yellow`／`red`、`*-bg` | 現值 | **不變** | 對錯、燈號 | AC-38-03 |
+| `--brand`（新） | — | `#1e9bf0` | **只**用於：主環形圖未達成進度 `stroke`、模擬測驗進度條填色、選中導覽項指示（底線或 inset 陰影）、標題列圖示底色。**不得**出現在任何 `color:` 宣告，**不得**作為白字元素背景 | VC-1、AC-38-01 |
+| `--brand-deep`（新） | — | `#0866ad`（白字 6.0:1；色相 205.8°，與 `--brand` 差 1.5°） | 白字按鈕底、品牌色文字、連結、選中導覽文字 | VC-2 |
+| `--primary` | `#2f6fd6` | **`#0866ad`**（= `--brand-deep`，以字面值寫） | 沿用名稱；既有 `var(--primary)` 自動改為深品牌色。**`--primary` 與 `--color-blue` 從此不同值**（DS-21 (1)）；FE-56 須逐一檢查 `var(--primary)` 用處，若有代表「藍色級」者改用 `--color-blue`（實查 v0.11 無此用法，`.cz-color--blue` 已用 `--color-blue`） | DS-21、AC-38-03 |
+| `--primary-hover` | `#2459ad` | `#06558e` | 白字按鈕 hover | AC-38-04 |
+| `--accent`（新）／`--accent-text`（新） | — | `#f7893b`／`#1f2937`（6.0:1） | `--accent` **只**出現在 `.btn--accent` 的 `background`、`.db-stat__icon` 的 `fill`；按鈕自身 `border-color` 為 `transparent`。`--accent-text` 只用於 `.btn--accent` 文字 | VC-3、Q-53 |
+| `--bg` | `#f6f7f9` | `#eef4fa`（HSL 約 210°、55%、96%） | `body` 背景；= `PWA_BACKGROUND_COLOR`（B-11 比對） | VC-4、VC-5 |
+| `--surface`、`--text`、`--text-muted` | `#ffffff`、`#1f2937`、`#5b6472` | 不變 | — | VC-7 |
+| `--tint`（新） | — | `#e6f0fa` | 次要按鈕底（字 `--brand-deep`，約 5.2:1） | AC-38-04、AC-38-06 |
+| `--track`（新） | — | `#dbe7f3` | 環形圖底圈、進度條軌道、長條圖軌道（非文字） | — |
+| `--chart-bar`（新） | — | `#9cc3e6` | 近 7 天非今天的長條；今天用 `--brand-deep`（`--brand` 不在 VC-1 用途表，不得用於長條） | VC-1 |
+| `--line`（新） | — | `#e3e8ef` | 頁首／頁尾／導覽容器分隔線、區段分隔虛線、單字卡頁卡片框 | AC-38-06 |
+| `--border` | `#d5d9e0` | 值不變，**用途限縮** | 只留：表單輸入框（`input`、`select`、`textarea`）、四選一與模擬測驗作答選項、收音條暗格（皆在 AC-38-06 範圍外）。任何按鈕、區塊卡片**不得**再用 | AC-38-06 |
+| `--focus` | `#f59e0b` | `#0866ad` | `:focus-visible` 外框 3px、offset 2px（在白底與 `--bg` 上皆清楚；非文字，不在 AC-38-04 量測） | AC-38-09 |
+| `--radius`／`--radius-cta`（新）／`--radius-card`（新） | 8px／—／— | 8px／12px／16px | 8px：一般按鈕、輸入框、單字卡頁；12px：`.btn--accent`；16px：區塊卡片、首次畫面底部列上緣 | AC-38-06 |
+| `--shadow-card`（新） | — | `0 1px 3px rgba(16, 40, 80, 0.08), 0 4px 14px rgba(16, 40, 80, 0.06)` | 區塊卡片、色級列 | AC-38-06 |
+| `--content-narrow`（新） | — | 720px | 主控台、模擬測驗、難易度設定內容寬 | AC-39-10、AC-40-02 |
+| `--emt-firstbar-h`（新） | — | 184px | 首次畫面固定底部列預留高度（§7.19.5） | AC-41-04 |
+
+**禁止寫法（`tokens.test.js` 掃描 `styles/*.css` 全部檔案，FE-56 建立，之後每個任務的 `npm test` 都會執行）**：(1) `(?<![-\w])color\s*:\s*var\(--(brand|accent)\)`；(2) `var(--accent)` 只能出現在選擇器含 `.btn--accent` 或 `.db-stat__icon` 的規則；(3) `#f7893b`、`#1e9bf0` 字面值只能出現在 `:root`；(4) 規則選擇器含 `.btn` 或 `.card` 者不得有 `var(--border)` 或 `#d5d9e0`；(5) 無 `@font-face`、無 `url(`（`data:` 亦禁止）。
+
+#### 7.19.2 共用元件樣式（`00-base.css`，FE-56）
+
+| 元件 | 樣式 | AC |
+| :--- | :--- | :--- |
+| `body` | `background: var(--bg)`；**`font-variant-numeric: tabular-nums`**（全域繼承，所有數字等寬，AC-38-07 列舉的數字一次滿足）；字型堆疊不變（系統字型） | AC-38-02、AC-38-07 |
+| `.card` | `background: var(--surface); border: 0; border-radius: var(--radius-card); box-shadow: var(--shadow-card); padding: 16px; margin-bottom: 12px` | AC-38-06 |
+| `.btn`（次要，預設） | `border: 1px solid transparent`（保留 1px 幾何，單字卡頁按鈕尺寸不變）；`background: var(--tint)`；`color: var(--brand-deep)`；`border-radius: var(--radius)` | AC-38-06、AC-38-08 |
+| `.btn--primary` | `background: var(--primary); color: #fff; border-color: transparent` | AC-38-04 |
+| `.btn--accent`（新） | `background: var(--accent); color: var(--accent-text); border-color: transparent; border-radius: var(--radius-cta); font-weight: 700; min-height: 48px; padding: 12px 20px; white-space: nowrap`；hover 不換底色（只加 `box-shadow`），避免 hover 時出現第三種橘 | AC-38-01、AC-38-04、AC-39-02、AC-41-02 |
+| `.btn--link` | `color: var(--brand-deep)`；底線；`min-height`／`min-width` 44px | AC-38-04、AC-39-04 |
+| `.page-title`（新） | `font-size: 1.375rem; font-weight: 700; margin: 0 0 12px` | — |
+| `.section-title`（新） | `font-size: 1.125rem`（18px）`; font-weight: 700; line-height: 1.4; margin: 0 0 8px` | AC-38-07 |
+| `:focus-visible` | `outline: 3px solid var(--focus); outline-offset: 2px` | AC-38-09 |
+| 頁首／頁尾／導覽 | 頁首白底、下緣 `box-shadow: 0 1px 0 var(--line)`；頁尾上緣 `--line`；≤ 640px 底部導覽白底、上緣 `--line`，選中項 `color: var(--brand-deep); font-weight: 700; box-shadow: inset 0 3px 0 var(--brand)`；641～767px 選單按鈕 `--tint` 底無邊框、選中 `--primary` 底白字；≥ 768px 頁籤選中 `color: var(--brand-deep); border-bottom-color: var(--brand)` | AC-38-01、AC-38-04、AC-38-06 |
+| 輸入框 | 維持 `1px solid var(--border)`、圓角 8px（AC-38-06 範圍外） | — |
+
+#### 7.19.3 標題列內嵌圖示與名稱（`index.html`、`00-base.css`，FE-56；NM-1、NM-2、AC-38-05）
+
+```html
+<h1 class="app-title"><svg class="app-logo" viewBox="0 0 32 32" width="32" height="32" aria-hidden="true" focusable="false"><rect width="32" height="32" rx="7" fill="#1e9bf0"/><path fill="#f7893b" d="（圓角對話框＋左下尾巴）"/><path fill="#ffffff" d="（E、C 兩字的筆畫，以矩形與弧線 path 繪製）"/></svg><span class="app-title__text">EnglishContext</span></h1>
+```
+
+| 項目 | 決定 | 理由 |
+| :--- | :--- | :--- |
+| 形式 | **內嵌 `<svg>`**，1 個 `rect` + 2 個 `path`；總長 ≤ 1,500 bytes | 不產生請求、斷網可顯示；PNG data URI 約 20～40 KB 且 B-7 禁止 `<img` |
+| 不寫 | `xmlns`（避免 `http://` 字串）、`<text>`（避免字型差異）、`<image>`、`url(`、漸層、濾鏡 | B-7、§9.1 圖示慣例 |
+| 顏色 | 底 `#1e9bf0`（`--brand`，VC-1 允許「標題列圖示」）、對話框 `#f7893b`、字白色 | AC-38-05「藍底、橘色 EC 對話框」；**對話框的橘與 AC-38-01 衝突，見 T-55、SD-FB-39** |
+| 尺寸 | CSS `.app-logo { width: 32px; height: 32px; flex: none; }`（24～40 範圍內）；`h1` 為 `display: flex; align-items: center; gap: 8px; min-width: 0`；名稱 `white-space: nowrap`（375px 下「EnglishContext」約 130px，不裁切） | AC-38-05 |
+| 無障礙 | `aria-hidden="true"`、`focusable="false"`；`h1` 的 `textContent` = 「EnglishContext」 | AC-38-05、AC-38-10 |
+| `<title>` | `<title>EnglishContext</title>`（B-12 改檢查此值，§5.3） | NM-1 |
+| 授權註解 | `license-header.txt` 第一行「EnglishContext」，其餘逐字不變 | NM-4、AC-23-06 |
+| 不改 | `FROZEN_IDENTIFIERS` 全部（`STORAGE_KEYS`、`BACKUP_FORMAT_ID`、匯出檔名前綴、`dist/english-master-track.html`、`PWA_CACHE_PREFIX`、`emt-build-id`）；`sw.template.js` 註解不改（不屬畫面文字，改了只會多觸發一次 BUILD_ID 變更） | NM-5、NM-6 |
+
+#### 7.19.4 主控台（`views/dashboard.js`、`10-dashboard.css`，FE-58；DB-1～DB-6）
+
+**DOM（順序 = 畫面順序 = Tab 順序）**
+
+```
+div.dashboard                                   max-width: var(--content-narrow); margin-inline: auto
+├─ h2.page-title.dash-title 「學習主控台」
+├─ section.card.db-today [aria-labelledby=db-today-h]
+│  ├─ h3.section-title#db-today-h 「今日任務」                    （FB-46 (c) SD 定案）
+│  ├─ div.db-today__row                           display:flex; align-items:center; gap:16px
+│  │  ├─ div.db-ring-wrap  (svg.db-ring 88px：track --track、bar --brand／達成 .db-ring--done --color-gold；
+│  │  │                     中央 span.db-ring__value aria-hidden 只顯示 X)
+│  │  └─ div.db-today__side                        flex:1; display:grid; gap:8px; justify-items:start
+│  │     ├─ p.db-today__text 「今日已學 X / D 字」（LAYOUT_TEXTS.todayRing）
+│  │     ├─ p.db-today__done 「今日目標達成」（X ≥ D 才顯示，aria-live=polite，文字色 --text）
+│  │     └─ button.btn.btn--accent.db-start [type=button][data-go=flashcards] 「開始今日學習」
+│  └─ p.db-goal [data-color=<appliedColor>]       min-height:44px; display:flex; flex-wrap:wrap; align-items:center
+│     ├─ span.db-goal__dot (aria-hidden；background = 色級色，AC-38-03)
+│     ├─ span.db-goal__text 「綠級・每日 15 字」（layout.goalLine）
+│     ├─ span (aria-hidden)「・」（LAYOUT_TEXTS.goalLineSeparator）
+│     └─ button.btn.btn--link.db-change [type=button][data-go=customizer] 「變更」
+├─ section.card.db-stats [aria-label=學習數據]   display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px
+│  ├─ div.db-stat.db-stat--streak   p.db-stat__label「連續打卡天數」／ p.db-stat__value [svg.db-stat__icon(fill --accent) + span「3」+ span.db-stat__unit「天」]
+│  ├─ div.db-stat.db-stat--mastery  p.db-stat__label「單字掌握率」／ p.db-stat__value「25%」／ p.db-stat__sub「已掌握 60 字」
+│  └─ div.db-stat.db-stat--accuracy p.db-stat__label「模擬測驗正確率」／ p.db-stat__value「70%」或「—」
+├─ section.card.db-chart [aria-labelledby=db-chart-h]
+│  ├─ h3.section-title#db-chart-h 「近 7 天已學字數」               （FB-46 (c)）
+│  ├─ ol.db-bars [aria-labelledby=db-chart-h]  （7 個 li；空狀態時 hidden）
+│  └─ p.db-chart__empty 「開始學習後會顯示紀錄」 （非空狀態時 hidden）
+└─ section.card.db-backup [aria-labelledby=db-backup-h]
+   ├─ h3.section-title#db-backup-h > button.db-backup__toggle [type=button][aria-expanded][aria-controls=db-backup-body]
+   │     span「資料備份」 + svg.db-backup__chev（aria-hidden；展開時 rotate(180deg)，無 transition）
+   └─ div#db-backup-body.db-backup__body [hidden 當 backupExpanded = false]
+      ├─ p.dash-backup__hint（既有備份說明文字，FB-46 (a) 沿用）
+      ├─ div.btn-row  [button.btn.btn--primary「匯出備份」, button.btn「匯入備份」]
+      ├─ p.dash-backup__origin（PWA_TEXTS.backupOriginNotice，NT-1）
+      ├─ div.dash-backup__install（IN-1 成立時 1 個「安裝 App」，否則 hidden 且無子節點）
+      └─ input[type=file].visually-hidden
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 移除 | `功能入口`（`ENTRIES`、`.dash-entries`）、`學習統計`、`目前目標` 區塊、2 個小環形圖（`.db-mini`）、「今日學習進度」標題；主控台本體不再有 `data-go="sources"` | AC-39-01、AC-39-06、DB-1 |
+| 「X / D」只出現 1 次 | 環形圖中央只顯示 X（`aria-hidden`），完整「今日已學 X / D 字」只在 `p.db-today__text`；AC-30-05 的「18 / 15」由此行呈現（SD-FB-40） | AC-39-06、AC-30-05 |
+| 「開始今日學習」 | 沿用 router 既有 `[data-go]` 委派：與點導覽「單字卡」走同一個 `router.go("flashcards")`（含換頁動畫、`aria-current` 同步、首次模式守門）；view 不呼叫任何寫入 action；不改 `PersistedData` | AC-39-03、DB-3、E-89 |
+| 目標行 | `goalInfoOf` 推導已套用色級（既有邏輯，依 `appliedScore`，DB-4、FB-45）→ `layout.goalLine(levelOf(applied), levelOf(effective))`；色點顏色依已套用色級；「變更」`[data-go=customizer]`，44×44 | AC-39-04、AC-17-06、E-92 |
+| 3 格數據 | 值的計算沿用 `learning.masteryRate`、`learning.percentOf`、`streak.displayDays`（既有）；數值 `font-size: 1.75rem`（28px）`; font-weight: 700`；標籤 13px、`overflow-wrap: anywhere`（375px 允許換行）；小字 12px `--text-muted`；格本身無邊框、無背景（在同一張卡片內） | AC-39-05、AC-38-06、AC-38-07、AC-30-10 |
+| 長條圖 (a) | `ol.db-bars` 7 欄 grid、固定高 104px：字數行 16px＋4px＋軌道 **64px**＋4px＋日期行 16px（≤ 120）；填色高度 = `heightPct%` × 64px（最高 64 ≤ 80）；今天 `--brand-deep`、其他 `--chart-bar`、軌道 `--track` | AC-39-07 (a)、AC-30-08 |
+| 長條圖 (b) | `layout.chartIsEmpty(7 根顯示值)` → `ol` hidden、`p.db-chart__empty` 顯示（14px、`line-height: 24px`、無上下 padding，≤ 48px）；今天學第 1 字後回主控台，`show()` 重算即切回 (a) | AC-39-07 (b)、AC-24-10、AC-30-12、AC-32-02、E-88 |
+| 收合 | 點 toggle → `store.actions.setBackupExpanded(!current)`；訂閱 `"dashboard"` tag → 只改 `aria-expanded`、`body.hidden`、`renderInstall()`；焦點留在 toggle（節點不重建）。切頁不重設（runtime 保留）；匯入流程不呼叫 `setBackupExpanded`；重新載入回 false | AC-39-08、DB-6、E-90、E-91 |
+| 不互通說明與安裝 | NT-1 位置不變（按鈕列下一個兄弟）；`installVisible` 加 `backupExpanded`（FE-58 改 `core/pwa.js`）；收合時兩者皆不顯示，展開即依 IN-1 顯示 | AC-24-12、AC-34-07、AC-34-08 |
+| 寬度 | `.dashboard { max-width: 720px; margin-inline: auto }`：1366／1920 置中 720；768 時 `.app-main` 內容寬 736 → 720；375 填滿 | AC-39-10 |
+| 首屏預算（375×667） | 頁首 48 → `main` 上 padding 16 → 標題 41 → 今日卡上 padding 16＋卡片標題 33 → 列（88）：「開始今日學習」下緣約 y = 240，遠小於底部導覽上緣 667 − 56 = 611；1366×768（頁籤導覽約 49）下緣約 y = 290 | AC-39-09 |
+| 不寫 localStorage | 展開收合、「開始今日學習」皆 `setItem` 0 次（`store.test.js`、`dashboard.test.js` 以計數替身斷言） | AC-39-03、AC-39-08 |
+
+#### 7.19.5 首次畫面與難易度設定頁（`views/customizer.js`、`20-customizer.css`、`21-custom-vocab.css`，FE-57；FT-1～FT-6、AC-26-01）
+
+**色級列（兩種模式共用；FT-3）**
+
+```
+p.cz-vocab-note 「本系統建議字量：右側為內建字數與每日新字量」   （以 LAYOUT_TEXTS.vocabNoteLead 開頭；FB-46 (b) SD 定案；整個列表上方 1 次）
+div.cz-levels [role=group][aria-label=色級]          display:grid; gap:8px
+└─ button.cz-level.cz-level--<id>[aria-pressed][data-color=<id>]（5 個，COLOR_LEVELS 順序）
+   display:flex; align-items:center; gap:12px; min-height:56px; padding:10px 12px; border:2px solid transparent;
+   border-radius:14px; background:var(--surface); box-shadow:var(--shadow-card); text-align:left; width:100%
+   ├─ span.cz-level__bar      aria-hidden；12×36px；background: var(--color-<id>)
+   ├─ span.cz-level__main     flex:1; min-width:0
+   │  ├─ span.cz-level__name  「綠」+ span.cz-level__check「✓」（只在 aria-pressed=true 顯示）／鎖定列另加 svg.cz-lock（aria-hidden）
+   │  └─ span.cz-level__desc  scenarioZh 或「即將開放」；13px；white-space:nowrap; overflow:hidden; text-overflow:ellipsis
+   └─ span.cz-level__side     margin-left:auto; text-align:right; 12px；開放列兩行「5,620 字」「15 字/天」；鎖定列「—」
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 選中 | `aria-pressed="true"` + `.is-selected`：`border-color: var(--cz-accent)`（色級色）、`background: var(--cz-tint)`（各色淡底，沿用 v0.11 值）、顯示 ✓；同時只 1 列 | AC-26-01、AC-26-02 |
+| 鎖定列（藍、金） | `opacity: 0.85`；列內所有文字改 `color: var(--text)`（`#1f2937` 在 0.85 透明度下對白約 9:1，仍 ≥ 4.5:1）；右側只顯示「—」，不得出現「待定」、數字或「20 字/天」 | AC-26-01、AC-38-04、Q-57 |
+| 移除 | 卡片內的「（本系統建議字量）」逐列重複、「僅供試算」、「待定」、「已選擇」文字（`T.pending` 只留給一般頁試算區） | AC-01-01 |
+| 點選效能 | 只切換 `aria-pressed`／class 與更新摘要行或試算區文字，不重建節點 | AC-22-04、FT-5 |
+| 一般頁版面 | `h2.page-title「難易度設定」` → 說明 → 狀態列卡片（既有）→ `section.card` [`h3.section-title「色級」`、說明行、色級列] → 試算結果卡片（既有，`h3.section-title`）→「套用」→ `#customizer-custom`（自訂單字、範本；`21-custom-vocab.css` 標題改 `.section-title` 規格 18px/700、去灰框）；`#view-customizer { max-width: 720px; margin-inline: auto }` | FT-6、AC-25-06、AC-38-06、AC-38-07 |
+| 首次畫面版面 | `h2.page-title` 文字改 `firstRunTitle`「選擇你的目標」→ `p.cz-subtitle`（`firstRunSubtitle`，`--text-muted`）→ 色級區（`h3「色級」` 以 `hidden` 隱藏，卡片外觀保留）→ 固定底部列；狀態列、試算結果卡、「套用」、一般說明、舊引導文字 `firstRunGuide` 皆 `hidden` | FT-1、AC-41-01、AC-25-01 |
+| 模式切換 | `renderMode` 只切換上述節點的 `hidden` 與 `h2` 文字；首次 → 一般（`"entry"` tag）時不重建色級列 | 既有 FE-32 規則 |
+| 確認視窗與初始化 | `onApply`／`openReinitDialog`／`confirmApplyGoal`／`cancelApplyGoal` 流程與文字**不改**；首次畫面「開始學習」「從備份還原」照舊不跳視窗 | US-32、AC-32-08 |
+
+**固定底部列（只在首次畫面；FT-2）**
+
+```
+div.cz-firstbar                                  （建在 #customizer-goal 內、色級區之後；DOM 位於頁尾之前 → Tab：色級列 → 開始學習 → 從備份還原 → 頁尾）
+├─ p.cz-firstbar__locked 「目前內建字庫到綠色為止」（選中藍、金才顯示；role=status）
+├─ p.cz-firstbar__summary 「綠級・每日 15 字　預計 54 週」（aria-live=polite；layout.summaryLine）
+├─ button.btn.btn--accent#cz-start 「開始學習」         width:100%
+└─ button.btn.btn--link#cz-restore 「從備份還原」       width:100%; min-height:44px
+```
+
+```css
+/* 20-customizer.css（示意；數值不得改大，--emt-firstbar-h 定義在 00-base.css） */
+.cz-firstbar { display: grid; gap: 8px; margin-top: 16px; }
+.cz-firstbar__locked, .cz-firstbar__summary { margin: 0; font-size: 14px; line-height: 20px; }
+@media (max-width: 640px) {
+  .cz-firstbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 800; margin: 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface); border-radius: var(--radius-card) var(--radius-card) 0 0;
+    box-shadow: 0 -4px 16px rgba(16, 40, 80, 0.12); }
+  body[data-entry="firstRun"][data-tab="customizer"] {
+    padding-bottom: calc(var(--emt-firstbar-h) + env(safe-area-inset-bottom, 0px) + 8px); }
+  body[data-entry="firstRun"][data-tab="customizer"] .toast-root {
+    bottom: calc(var(--emt-firstbar-h) + env(safe-area-inset-bottom, 0px) + 12px); }
+}
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 列高預算 | 鎖定行 20 + 摘要 20 + 按鈕 48 + 還原 44 + 3 × 8 間距 + 上下 padding 24 = **180 ≤ 184**（未選藍金時 152）；FE-62 在 375×667 對 5 種選擇量 `offsetHeight ≤ 184` | AC-41-04 |
+| 不遮內容 | `body` 底部留白 = 184 + 安全區 + 8；頁尾「資料來源與授權」與每個色級列都能捲到列上方；Toast 上移到列上方；對話框（z-index 1100）在列之上；首次畫面無輸入欄，不需處理虛擬鍵盤 | AC-41-04、E-93 |
+| 與底部導覽 | 首次模式已以 `body[data-entry="firstRun"] #app-nav { display: none }` 隱藏導覽（FE-32 規則不變），兩者不會同時出現；列的 z-index 800 < 導覽 900，萬一同時出現也不蓋導覽。規則以 `[data-tab="customizer"]` 限定，首次模式切到「資料來源與授權」頁時不保留空白 | AC-25-01、AC-25-07 |
+| > 640px | `position: static`，在色級區下方隨內容排列（AC-41-03 允許）；1366×768 高度預算：頁首 57 + padding 24 + 標題 30 + 副標 33 + 說明 29 + 色級區 352 + 列 158～182 ≈ 733～757 < 768 | AC-41-03 |
+| 摘要行 | `firstRunSummary`：L = `colorOf(draftScore)`；`G.estimate(score, 0, nB, nG)` 的 `dailyNewWords`、`weeks`、`basedOnGreen` 與一般頁試算區**同一個函式**（FT-4）；`capped`（藍、金）→ 後綴與鎖定行 | AC-41-02、AC-02-03、AC-02-05、AC-02-10 |
+| 首屏預算（375×667） | 頁首 48 + padding 16 + 標題 30 + 副標 33 + 說明 29 + 5 列 × 64 = 476；列固定在底（667 − 152 = 515 起），**不捲動可見摘要行、「開始學習」「從備份還原」**；390×844、412×915、375×812 更寬裕 | AC-41-03 |
+
+#### 7.19.6 模擬測驗進度條與寬度（`views/part5.js`、`40-part5.css`，FE-61；MT-1、MT-2）
+
+```
+div.p5                                           max-width: var(--content-narrow); margin-inline: auto
+├─ h2.page-title.p5-heading 「模擬測驗」
+├─ div.p5-progress [role=progressbar][aria-label=作答進度][aria-valuemin=0][aria-valuemax=N][aria-valuenow=i]
+│  └─ span.p5-progress__fill  style.width = percent + "%"
+├─ p.p5-heading-note 「題型對應多益 Part 5」
+└─ （題目卡／結算卡／空狀態，既有）
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 推導 | `layout.part5Progress(vm.kind, vm.number, vm.total)`；`visible: false`（題庫空）不建節點 | MT-1、AC-40-01 |
+| 樣式 | 軌道 `height: 6px; border-radius: 3px; background: var(--track)`；填色 `background: var(--brand)`；**一律 `transition: none`**（既有 `render()` 每次重建整頁，本就沒有轉場；明寫以防日後誤加） | AC-40-01、AC-38-09 (b) |
+| 更新時機 | 既有 `part5` tag 訂閱 → `render()`；「下一題」、結算（100%）、「重新開始」（1 ÷ N）、重新載入（由持久化 `part5` 推導）皆自動正確；≤ 100ms | AC-40-01、AC-11-05 |
+| 區塊標題 | `.p5-number`（第 i / N 題）、`.p5-explain__title`、`.p5-summary__title` 改 18px／700 | AC-38-07 |
+| 卡片 | 題目區 `.card.p5-question` 套 §7.19.2；作答選項 `.p5-option` 維持 `--border` 外框與對錯色（AC-38-06 範圍外、AC-38-03） | AC-38-06、AC-40-03 |
+| 寬度 | `.p5 { max-width: 720px; margin-inline: auto }` | AC-40-02 |
+
+#### 7.19.7 單字卡頁只換配色（FE-59；AC-38-08）
+
+| 項目 | 決定 |
+| :--- | :--- |
+| 不改 | `views/flashcards.js`、`views/speech-panel.js`、`views/flashcard-quiz.js` 一行不改（元素順序、按鈕數量與文字、卡片內容、收音條位置自然相同） |
+| 幾何固定 | `.card` 全域改圓角 16px 與陰影後，於 `30-flashcards.css` 以 `#view-flashcards .card { border: 1px solid var(--line); border-radius: var(--radius); box-shadow: none; }` 固定為 v0.11 幾何（只有框線顏色改變）；`.btn` 全域只換顏色（1px 透明邊框與 8px 圓角維持） |
+| 顏色 | `var(--primary)` 自動成為深品牌色；`31-speech.css` 收音條暗格維持 `--border`、亮格 `--correct`；分隔線 `--border` → `--line`；四選一選項（`32-quiz.css`）維持 `--border` 外框與對錯色 |
+| 數字 | 「第 i / N 張」由全域 `tabular-nums` 滿足 AC-38-07，不改字級 |
+| 新版提示列 | `80-pwa.css` 上下框線 `--border` → `--line`，其餘不變 |
+
+#### 7.19.8 名稱、來源名稱與不改清單（CT-24、FE-56、FE-60；NM-1～NM-6、DS-19、DS-20）
+
+| 位置 | 改為 | 任務 |
+| :--- | :--- | :--- |
+| `<title>`、標題列 `h1` | EnglishContext | FE-56 |
+| 授權註解第一行 | EnglishContext | FE-56 |
+| `src/data/sources.js` ORIGINAL `fullName`、`_tools/lib.mjs` 同字串 | EnglishContext 原創內容 | CT-24 |
+| 「資料來源與授權」頁 | v0.11 的頁面**沒有**列出 ORIGINAL 項目；新增一行「原創內容來源：EnglishContext 原創內容」（名稱取資料，不寫死，SD-FB-49） | FE-60 |
+| `_fixtures.js` ORIGINAL `fullName` | EnglishContext 原創內容 | FE-60 |
+| 不改 | 鍵名、備份 `format`、匯出檔名前綴、交付檔名、快取前綴、`emt-build-id`、`PWA_APP_NAME`（已是 EnglishContext）、`sw.template.js` 註解 | — |
+
+#### 7.19.9 PWA 同步（FE-56；VC-5、AC-34-04、AC-38-02、Q-54）
+
+| 項目 | v0.11 | v0.12 | 同步點 |
+| :--- | :--- | :--- | :--- |
+| `PWA_THEME_COLOR`、`PWA_MANIFEST.theme_color`、`<meta name="theme-color">` | `#2f6fd6` | `#1e9bf0` | `core/pwa.js`、`index.html`；B-12 逐字比對 meta 與常數 |
+| `PWA_BACKGROUND_COLOR`、`PWA_MANIFEST.background_color`、`--bg` | `#f6f7f9` | `#eef4fa` | `core/pwa.js`、`00-base.css`；B-11 比對 |
+| `<title>` | English Master Track | EnglishContext | `index.html`；B-12 |
+| BUILD_ID | — | 隨內容改變（正常） | 已安裝者看到更新提示；舊快取由 SW-9 清除（前綴不變） |
+
+三處（`core/pwa.js`、`00-base.css`、`index.html`）在 **FE-56 同一任務**內修改，避免中間狀態建置中止（T-60）。
+
+#### 7.19.10 效能、減少動態、鍵盤與無障礙評估
+
+| 面向 | 既有 AC | 改版影響 | 結論／對策 |
+| :--- | :--- | :--- | :--- |
+| 首次載入 | AC-22-05、AC-35-04（≤ 3 秒／≤ 6 秒） | 量測點改為「開始今日學習」可點擊；主控台節點比 v0.11 少（移除 3 區塊與 2 個 SVG 環）；CSS 多約 4 KB；SVG 圖示 < 1 KB | 不增加風險；FE-62 以無頭瀏覽器量 1 次作參考 |
+| 換頁 | AC-22-01、AC-39-03（≤ 100ms） | 「開始今日學習」走既有 `router.go`，單字卡頁閒置預建不變 | 不變 |
+| 點色級 | AC-22-04、FT-5 | 色級列改精簡、不重建；首次畫面多更新 2 個文字節點 | 不變 |
+| 進度條 | AC-40-01（≤ 100ms） | 每次 `render()` 已重建題目卡，多 2 個節點 | 可忽略 |
+| 繪製成本 | — | 卡片 `box-shadow` 約 10 張、鎖定列 `opacity`、固定底部列 | 皆為靜態合成，無動畫；不使用 `backdrop-filter`、`filter` |
+| 減少動態 | AC-31-03、AC-38-09 (b) | 新增的展開收合、箭頭旋轉、進度條、按鈕狀態**都不設 transition／animation**；全域 `05-motion.css` 的 reduce 規則仍在 | 兩種模式行為相同，不需額外分支；主環形圖既有 `--emt-dur-ring` 轉場照舊受 reduce 規則關閉 |
+| 鍵盤 | AC-28-07、AC-38-09 (a) | 新控制項全為原生 `<button>`（Enter／空白鍵與點擊相同）；DOM 順序 = 畫面由上到下；首次畫面固定列在 DOM 中位於色級列之後、頁尾之前 | `:focus-visible` 3px；觸控目標 ≥ 44×44（`.btn` min 44、`.btn--accent` 48、色級列 56、「變更」「從備份還原」44） |
+| 螢幕閱讀器 | — | toggle `aria-expanded`／`aria-controls`；進度條 `role=progressbar`；色級列 `aria-pressed`；裝飾圖示 `aria-hidden` | 無新 ARIA 風險 |
+| 對比 | AC-38-04 | 見 §7.19.1 數值；鎖定列以深色字抵消 0.85 透明度 | QA 以工具量測（§10.5） |
+| 版面溢位 | AC-20-01 | 新容器皆 `min-width: 0`、`overflow-wrap: anywhere`；3 格數據在 375px 每格約 93px，標籤允許換行 | FE-62 以 `scrollWidth ≤ clientWidth` 在 6 種尺寸檢查 |
+
 ---
 
 ## 8. 內容製作設計（pg-content）
@@ -1565,6 +1898,8 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | （v0.4）動畫類名 | `view--entering`（換頁）、`fc-face--flip-in`、`fc-card--in-next`、`fc-card--in-prev`、`qz-opt--pop`、`qz-opt--shake`、`p5-opt--pop`、`p5-opt--shake`；主控台環形圖 `db-ring`、`db-ring--done`（金色）、長條圖 `db-bars` | §7.11 |
 | （v0.7）PWA 元素 | `80-pwa.css`：`.pwa-update`（sticky 頂端文字列，§7.18.7，無 transition／animation）；`10-dashboard.css`：`.dash-backup__origin`（同 `.dash-backup__hint` 字級、`overflow-wrap: anywhere`）、`.dash-backup__install`、`.dash-install`（≥ 44 × 44 px）。色彩只用既有變數；`--bg` 仍為 `#f6f7f9`（= `PWA_BACKGROUND_COLOR`，建置 B-11 比對，DS-13）、`--primary` 仍為 `#2f6fd6`（= `PWA_THEME_COLOR`）。日後改這兩個變數須同步提契約小修 | AC-24-12、AC-34-04、AC-34-07、AC-36-03 |
 | （v0.4）色彩 | 主環形圖達成時沿用既有 `--color-gold`（`#c9a227`）；未達成用 `--primary`；小環形圖用 `--correct`；空環用 `--border`。底部導覽目前項目沿用既有 `aria-current="page"` 樣式 | AC-30-05 |
+| （v0.8）取代上方 | 上方「色彩」「（v0.4）色彩」「（v0.7）PWA 元素」中 `--bg` `#f6f7f9`、`--primary` `#2f6fd6`、未達成環用 `--primary`、空環用 `--border` 的敘述由 §7.19.1 取代：`--bg` `#eef4fa`、`--primary` `#0866ad`、未達成環 `--brand`、底圈 `--track`；小環形圖已移除。「（v0.4）色級大卡片」由 §7.19.5 精簡色級列取代。「導覽」「入口在主控台與頁尾」改為只在頁尾（主控台本體不再有入口，DB-1）。內容區 960px 仍適用於頁首、頁尾與「資料來源與授權」頁；主控台、模擬測驗、難易度設定內容寬 720px | AC-38-02、AC-39-01、AC-39-10、AC-40-02 |
+| （v0.8）類名 | 新增 `app-logo`、`app-title__text`、`page-title`、`section-title`、`btn--accent`；主控台 `db-today*`、`db-ring*`、`db-goal*`、`db-change`、`db-start`、`db-stat*`、`db-chart*`、`db-bars*`、`db-backup*`；難易度設定 `cz-vocab-note`、`cz-levels`、`cz-level*`、`cz-subtitle`、`cz-firstbar*`；模擬測驗 `p5-progress*` | §7.19 |
 
 ### 9.1 底部導覽列（FE-26；PRD US-27、Q-33）
 
@@ -1804,6 +2139,52 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | V-PWA-H4 | GitHub Pages | push 後 Actions 成功；8 個網址 200 且內容同 CI 產物；網站不含 `docs/`、`src/`、`sources/` | AC-36-07 |
 | V-PWA-H5 | 已安裝 App | 重新部署後重開 App 60 秒內提示、按下更新；背景 ≥ 1 小時切回前景觸發檢查 | AC-36-03 |
 
+### 10.5 v0.8 測試範圍（PRD v0.12；契約 V-LAY-01～08、DS-22～DS-25）
+
+命令同 §10.1。CT-24 跑 `node src/data/_tools/validate.mjs --file sources.js`（或 `--all --stage final`）；FE-54～FE-61 收尾跑 `npm test` 與 `node tools/build.mjs --out <scratchpad>/t.html`；只有 FE-62 執行 `npm run build`。
+
+**中間狀態的已知失敗**：預期無。理由：(1) 會連動失敗的檔案組（`core/pwa.js` 色值 ↔ `index.html` meta ↔ `00-base.css` `--bg` ↔ `build.test.js`／`shell.test.js`／`pwa-core.test.js` 字面值）全部在 FE-56；(2) `installVisible` 加條件 ↔ `dashboard.test.js`、`pwa-core.test.js` 在 FE-58；(3) `naming.test.js` 對主控台入口的斷言在 FE-58；(4) `tokens.test.js` 的全檔掃描在 FE-56 建立時以 v0.11 其他樣式檔為準（現況無違規：無 `color: var(--brand)`、無 `--accent`），後續任務各自維持。若實際出現不在該任務 paths 的失敗 → 標 `blocked` 回報主控。
+
+**單元測試（`npm test`，Node，無瀏覽器）**——可用純函式或 CSS 原始碼靜態分析判定的部分
+
+| 檔案 | 任務 | 必含案例 | AC／契約 |
+| :--- | :--- | :--- | :--- |
+| `layout.test.js`（新） | FE-54 | 5 個契約常數與 `data-schema.ts` §13 逐值、逐鍵順序相同（測試內複製原文，不讀 `docs/`）且深度凍結；`UI_LAYOUT` 值；`fill` 替換與缺鍵拋錯；`formatInt`（0、999、1000 → "1,000"、2809、NaN → "—"）；`goalLine` 5 色（DB-4 五種字串逐字）；`summaryLine` 5 色（`N_B` 2,809、`N_G` 5,620 → 15／41／54／41／41 週，藍金含後綴）；`chartIsEmpty`（全 0、空陣列、含 NaN、任一 > 0）；`part5Progress`（question 1／N、5／N、N／N、summary 100、empty、total 0） | V-LAY-08、AC-39-04、AC-41-02、AC-39-07、AC-40-01 |
+| `store.test.js`（改） | FE-55 | 初始 `runtime.dashboard` = `{ backupExpanded: false }`；`setBackupExpanded(true)` 通知 `["dashboard"]`、`setItem` 0 次；同值不通知；非布林忽略；`setTab` 切換後仍為 true；`importBackup`（成功與失敗）、`startLearning`、`confirmApplyGoal` 後保持；localStorage 前後逐字相同；首次模式呼叫亦不寫入 | V-LAY-07、AC-39-08、E-91 |
+| `tokens.test.js`（新） | FE-56 | 解析 `00-base.css` `:root`：`--brand`…`--text-muted` = `COLOR_TOKENS`（測試內字面值）；色級／對錯／燈號變數 = v0.11 值（AC-38-03）；`--bg` = `PWA_BACKGROUND_COLOR`；以 WCAG 公式計算對比：`--text`／`--text-muted` 對 `--bg`、`--surface` ≥ 4.5、白對 `--primary` ≥ 4.5、`--accent-text` 對 `--accent` ≥ 4.5、`--brand-deep` 對 `--tint`、`--surface`、`--bg` ≥ 4.5、白對 `--brand` < 4.5（反向確認不可用）；`--brand-deep` 與 `--brand` 色相差 ≤ 10°；`--bg` HSL 條件；`.card` 規則（`border-radius: var(--radius-card)` = 16px、`border: 0`、`box-shadow` 非 none）；`body` 含 `tabular-nums`；§7.19.1 五條禁止寫法掃描**全部** `styles/*.css`；無 `@font-face`、`url(` | AC-38-01～AC-38-04、AC-38-06、AC-38-07、VC-1～VC-8 |
+| `shell.test.js`（改） | FE-56 | `<title>EnglishContext</title>` 恰 1 次、無「English Master Track」（不分大小寫，註解除外）；`theme-color` = `#1e9bf0`；`h1.app-title` 文字 = EnglishContext；`svg.app-logo` 有 `aria-hidden="true"`、`focusable="false"`、無 `xmlns`、無 `<text`／`<image`、長度 ≤ 1,500 bytes；`.app-logo` 寬高在 24～40；`license-header.txt` 第一行 = EnglishContext、第 2 行起與 v0.11 逐字相同；既有底部導覽斷言照常 | AC-38-05、AC-38-10、NM-1～NM-4 |
+| `build.test.js`、`pwa-core.test.js`（改） | FE-56 | §5.3；常數新值；manifest 深度相等 | AC-34-04、AC-38-02、V-PWA-04 |
+| `customizer.test.js`、`first-run.test.js`（改） | FE-57 | `levelRows`：5 列順序、開放列字數與 `字/天`、鎖定列 `vocabText`／`dailyText` 為 null、說明「即將開放」、不含「待定」「20 字/天」「分」；`firstRunSummary` 5 色字串（同 FT-4 例）且與 `estimateTexts` 的每日字量、週數一致；假 DOM：首次模式 `h2` = 「選擇你的目標」、副標、說明行恰 1 個且在列之前、狀態列／試算卡／套用 hidden、`.cz-firstbar` 存在且順序為鎖定行→摘要→`#cz-start`→`#cz-restore`；點藍 → 鎖定行顯示；一般模式無 `.cz-firstbar` 顯示、有試算卡與套用；點色級不重建節點；`20-customizer.css` 含 ≤ 640px 的 `position: fixed` 與 `body[data-entry="firstRun"][data-tab="customizer"]` 留白規則（引用 `--emt-firstbar-h`）；既有 US-32 確認視窗案例照常 | AC-26-01、AC-41-01、AC-41-02、AC-41-04（Tab 順序以 DOM 順序代理）、AC-01-01 |
+| `dashboard.test.js`、`pwa-core.test.js`、`naming.test.js`（改） | FE-58 | `dashboardModel`：AC-39-05 資料 → 「3」「天」「25%」「已掌握 60 字」「70%」；空資料「—」；AC-30-05 X = 18、D = 15 → `text` 「今日已學 18 / 15 字」、`centerText` 「18」；5 色目標行；`chart.empty`；假 DOM：區塊恰 4 個且順序 today → stats → chart → backup、標題只有「學習主控台」在前；AC-39-06 列舉文字各 1 次、無「單字掌握數」「目前目標色級」「功能入口」「學習統計」、無 `data-go="sources"`；「開始今日學習」為 `data-go="flashcards"`、「變更」為 `data-go="customizer"`；點擊 toggle 呼叫 `setBackupExpanded`、`aria-expanded` 與 body `hidden` 同步、`setItem` 0 次；收合時 NT-1 與安裝鈕不顯示、展開時 NT-1 為按鈕列下一個兄弟；`installVisible` 新條件（`backupExpanded` false → false）；naming 移除 `ENTRIES` 斷言、改為「主控台本體無模組入口」 | AC-39-01～AC-39-08、AC-24-12、AC-34-07、AC-34-08、V-LAY-07、V-LAY-08 |
+| `sources-page.test.js`（改） | FE-60 | `originalSourceName`：fixture → 「EnglishContext 原創內容」、無 ORIGINAL → null；render 後該行文字逐字、無 ORIGINAL 時不建節點；畫面文字無「English Master Track」；既有聲明照常 | AC-38-10 (1)、NM-3 |
+| `part5.test.js`（改） | FE-61 | 進度條屬性（`role`、`aria-valuenow`、`aria-valuemax`）與 `style.width` 在第 1、5、N 題、結算、空題庫；`40-part5.css` 的 `.p5-progress__fill` 有 `transition: none`、`.p5` 有 `max-width: var(--content-narrow)` | AC-40-01、AC-40-02 |
+| `load-order.test.js`（改） | FE-62 | `EMT.core.layout` 依建置順序載入且存在；`layout.APP_DISPLAY_NAME === pwa.PWA_APP_NAME`、`layout.COLOR_TOKENS.background === pwa.PWA_BACKGROUND_COLOR`、`layout.COLOR_TOKENS.themeColor === pwa.PWA_THEME_COLOR`（VC-5 跨模組一致） | LD-1、VC-5 |
+
+**E2E 截圖與量測（QA，Playwright Chromium，`file://` 開 `dist/english-master-track.html`；V-LAYOUT：縮放 100%、無警示與 Toast）**——需要瀏覽器排版結果的部分
+
+| AC | 量測方法（建議） | 判定 |
+| :--- | :--- | :--- |
+| AC-38-01 | `page.evaluate` 走訪主控台、難易度設定、單字卡、模擬測驗、資料來源頁所有元素（含 SVG 子元素），讀 `getComputedStyle` 的 `color`、`background-color`、`border-*-color`、`fill`、`stroke`，正規化為 `#rrggbb` 比對 `#f7893b`、`#1e9bf0` | 橘只在 `.db-start`、`.db-stat__icon`（及子元素）、首次 `#cz-start`；**`.app-logo` 內的橘色 path 為已知衝突（SD-FB-39），依人類決議判定**；文字 `color` 為兩色者 0 |
+| AC-38-02 | `body` 與 `.card` 計算後背景；讀 manifest 與 meta | 同 V-LAY-02 |
+| AC-38-03 | 分別以 v0.11、v0.12 產物開同一資料，讀色級色條、目標行色點、對錯選項、燈號、達成環的計算後顏色比對 | 完全相同 |
+| AC-38-04 | axe-core `color-contrast` 規則（QA 可加 devDependency）＋ 對鎖定列（`opacity`）以截圖取樣實際像素計算；列舉項目逐一記錄比值 | 一般 ≥ 4.5、大字 ≥ 3 |
+| AC-38-05 | `.app-logo` `getBoundingClientRect` 24～40 正方形；`file://` 連網與斷網 `context.on("request")` 計數 0；375px `scrollWidth ≤ clientWidth` | — |
+| AC-38-06、AC-38-07 | 計算後樣式逐項讀取（`border-radius` 四角、`box-shadow`、`border-*-width`、`font-size`、`font-weight`、`font-variant-numeric`） | — |
+| AC-38-08 | v0.11 與 v0.12 單字卡頁（兩種模式、兩種寬度）：擷取 `#view-flashcards` 的元素樹（標籤、按鈕文字、順序）比對；並截圖人工目視 | 結構相同 |
+| AC-38-09 | 鍵盤 `Tab` 序列記錄 `document.activeElement`；`outline-width` ≥ 2；`page.emulateMedia({ reducedMotion: "reduce" })` 後操作，`document.getAnimations().length === 0` 且相關元素 `transition-duration` 為 0s | — |
+| AC-39-01、AC-39-02 | 各區塊 `getBoundingClientRect().top` 排序；按鈕位於環形圖右側（`left` 比較）、目標行 `top` 大於兩者 | — |
+| AC-39-07 | `.db-bars` 高度 ≤ 120、最高填色 ≤ 80；空狀態 `p.db-chart__empty` 高 ≤ 48 | — |
+| AC-39-09 | 6 種尺寸開啟後 `scrollY === 0`、`.db-start` 外框在視窗內；≤ 640px 時 `.db-start.bottom ≤ #app-nav.top` | 截圖存證 |
+| AC-39-10、AC-40-02 | `.dashboard`、`.p5` 的 `width` 與左右留白差 | ≤ 720、差 ≤ 2px |
+| AC-40-01 | `.p5-progress__fill` 寬 ÷ 軌道寬 vs i ÷ N；屬性值；點「下一題」量 `performance.now()` | 誤差 ≤ 1 個百分點、≤ 100ms |
+| AC-41-03 | 首次畫面 6 種尺寸＋375×812，不捲動讀 `.cz-firstbar__summary`、`#cz-start`、`#cz-restore` 外框在視窗內；≤ 640px 捲到中段、底部各量一次 | 截圖存證 |
+| AC-41-04 | 捲到底：`#footer-sources.bottom ≤ .cz-firstbar.top`；以格式錯誤檔觸發 Toast，Toast 外框與底部列不重疊；5 列各 `scrollIntoView` 後不與底部列重疊；Tab 序列 | — |
+| AC-22-05、AC-35-04 | 量測點改為 `.db-start` 可點擊（首次為 `#cz-start`） | 同既有門檻 |
+
+**既有 E2E 腳本受影響（QA 負責更新，PG 不得改 `tests/`）**：主控台 `.dash-entry`、`.db-mini`、「學習統計」「目前目標」區塊、`#cz-guide` 已移除；備份按鈕需先展開「資料備份」；首次畫面試算結果卡改為摘要行（SD-FB-45）。
+
+**人工驗收**：實機（Android Chrome、iPhone Safari）檢視固定底部列與安全區、標題列圖示清晰度；V-PWA-H1／H2 確認新 `theme_color` 狀態列顏色。
+
 ---
 
 ## 11. 技術風險與對策
@@ -1864,6 +2245,18 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | T-52 | （v0.7）SW 快取 HTML 兩鍵約 6 MB，低容量裝置或嚴格配額下 install 失敗 | 無法離線（E-76） | 失敗時刪除該快取、線上照常（SW-4、PE-3）；AC-35-05 已接受；不做部分快取 |
 | T-53 | （v0.7）`beforeinstallprompt` 被 `preventDefault` 後，Android Chrome 不再自動顯示迷你橫幅（R-20 風險 (4)） | 使用者找不到安裝入口 | 主控台「安裝 App」按鈕與瀏覽器選單並存（AC-34-02、AC-34-07）；屬已接受取捨 |
 | T-54 | （v0.7）主控產出的 PNG 為 RGBA（含 alpha）或尺寸不符 | 建置中止，FE-53 無法完成 | MC-02 doneWhen 以 V-PWA-03 同一規則自檢；B-11 錯誤訊息列出檔名與不符項目，FE-53 遇到時標 `blocked` 回報主控重產 |
+| T-55 | （v0.8）AC-38-05 要求標題列圖示為「藍底、橘色 EC 對話框」，AC-38-01／VC-3 卻規定 `#f7893b` 只能出現在兩個按鈕與打卡圖示 | QA 掃描必定多出 `.app-logo` 的橘色 path，判 AC-38-01 失敗 | 設計採 AC-38-05 的字面（圖示使用原色）；以 SD-FB-39 交人類／PM 決議是否在 AC-38-01 加入「標題列圖示」；決議前 QA 依 §10.5 標記為已知衝突。若人類決議維持 AC-38-01，則依其指示調整圖示配色（只動 `index.html` 的 SVG，屬設計小修，另開小任務） |
+| T-56 | （v0.8）`--primary` 改值後，若有某處以 `--primary` 表示「藍色級」，該處顏色會改變 | AC-38-03 失敗 | §7.19.1 已查 v0.11 無此用法；FE-56 再逐一確認並在回報列出所有 `var(--primary)` 用處；QA 以 v0.11／v0.12 對照（§10.5） |
+| T-57 | （v0.8）全域 `.card`、`.btn` 改版波及單字卡頁幾何 | AC-38-08「只換配色」不成立 | `#view-flashcards .card` 固定 v0.11 幾何；`.btn` 保留 1px 透明邊框與 8px 圓角；FE-62 截圖比對兩版單字卡頁 |
+| T-58 | （v0.8）鎖定列 `opacity` 使文字對比下降 | AC-38-04、AC-26-01 | 透明度 0.85 且列內文字改 `--text`；QA 以截圖取樣量測 |
+| T-59 | （v0.8）首次畫面固定底部列高度超過預留（文字換行、系統字級放大） | 遮住頁尾連結或 Toast（AC-41-04） | 摘要行與鎖定行 14px／20px、預留 184px（計算值 180）；FE-62 在 375×667 量 5 種選擇；系統字級放大屬 E-87 可接受範圍 |
+| T-60 | （v0.8）PWA 色值、`<title>`、`--bg` 分散在 3 個檔案，任一先改都會讓建置或測試中止 | 中間狀態失敗 | 三者與相關測試全部放在 FE-56 同一任務（D-13） |
+| T-61 | （v0.8）`installVisible` 加 `backupExpanded` 條件後，既有 `dashboard.test.js` 安裝案例失敗 | 中間狀態失敗 | 條件修改與 `dashboard.test.js` 同在 FE-58；FE-56 不動 `installVisible` |
+| T-62 | （v0.8）`tokens.test.js` 的全檔掃描與其他任務的樣式改動互相影響 | 第 2 批任務的 `npm test` 失敗 | 禁止規則在 §7.19.1 事先公開，各任務 description 引用；違規時由該任務自行修正自己的 CSS，不得修改 `tokens.test.js`（非其 paths） |
+| T-63 | （v0.8）QA 既有 E2E 以已移除的主控台入口、`#cz-guide`、試算結果卡定位 | 回歸測試大量失敗 | 保留 `#cz-start`、`#cz-restore`、`#cz-apply`、`#view-*`、`data-tab`；SD-FB-45 知會 QA |
+| T-64 | （v0.8）已安裝 v0.11 的使用者因 BUILD_ID 改變而看到更新提示 | 使用者困惑（屬正常更新） | 快取前綴不變，SW-9 照常清除舊快取（NM-5）；不需任何處理 |
+| T-65 | （v0.8）「開始今日學習」若改寫成 view 直接呼叫 `store.setTab`，會繞過 router 的換頁動畫與 `aria-current` 同步 | AC-39-03「結果與點導覽相同」不成立 | 規定只用 `[data-go="flashcards"]`；`dashboard.test.js` 斷言屬性而非呼叫 |
+| T-66 | （v0.8）`body` 全域 `tabular-nums` 影響 IPA 或英文內容的字距 | 單字卡外觀微幅改變 | 只影響數字字形，不影響字母與 IPA 符號；AC-38-07 明確要求數字等寬 |
 
 ---
 
@@ -2025,6 +2418,35 @@ FE-19 與 FE-18 的先後（v0.3）：**FE-19 在前**。理由：FE-18 的 done
 說明：(1) 同批任務 paths 互不重疊；(2) FE-47 的 `build.test.js` 只用 fixture，不斷言專案 `index.html` 的 PWA 元素（那是 FE-50 的 `shell.test.js`），因此與 FE-50 平行無衝突；(3) 若主控採「依 dependsOn 即時派發」，FE-52 可與第 2 批任何任務同時、FE-47 只需等 FE-46；(4) FE-53 為交付關卡，`npm test` 必須全數通過、`npm run build` 產出 `dist/site/` 8 檔。
 
 任務數（全專案）：pg-content 23、pg-frontend 53（FE-01～FE-53），共 76 個；另有主控項目 MC-01～MC-03（不計入任務數）。
+
+### 12.7 v0.8 增量任務與執行批次（PRD v0.12、契約 v0.12）
+
+既有 76 個任務全部 `done`，內容不變。v0.8 新增 1 個 pg-content（CT-24）與 9 個 pg-frontend（FE-54～FE-62）任務；不需主控手動項目（圖示 PNG、`ads.txt`、workflow 皆不變）。
+
+| ID | 標題 | dependsOn | paths |
+| :--- | :--- | :--- | :--- |
+| CT-24 | ORIGINAL 來源名稱改為「EnglishContext 原創內容」 | — | `src/data/sources.js`、`src/data/_tools/lib.mjs`、`src/data/_records/CT-24.md` |
+| FE-54 | 版面核心：契約 §13 常數與版面純函式 | — | `core/layout.js`、`__tests__/layout.test.js` |
+| FE-55 | store：`runtime.dashboard` 與 `setBackupExpanded` | — | `state/store.js`、`__tests__/store.test.js` |
+| FE-56 | 殼層與 token：色彩變數、共用樣式、標題列圖示與名稱、PWA 色值、建置標題檢查 | — | `index.html`、`license-header.txt`、`styles/00-base.css`、`core/pwa.js`、`tools/build.mjs`、`__tests__/build.test.js`、`__tests__/shell.test.js`、`__tests__/pwa-core.test.js`、`__tests__/tokens.test.js` |
+| FE-57 | 難易度設定：精簡色級列、首次畫面固定底部列 | FE-54、FE-56 | `views/customizer.js`、`styles/20-customizer.css`、`styles/21-custom-vocab.css`、`__tests__/customizer.test.js`、`__tests__/first-run.test.js` |
+| FE-58 | 主控台改版：今日任務卡、3 格數據、近 7 天、收合資料備份、IN-1 | FE-54、FE-55、FE-56 | `views/dashboard.js`、`styles/10-dashboard.css`、`core/pwa.js`、`__tests__/dashboard.test.js`、`__tests__/pwa-core.test.js`、`__tests__/naming.test.js` |
+| FE-59 | 單字卡頁與其他樣式只換配色 | FE-56 | `styles/30-flashcards.css`、`styles/31-speech.css`、`styles/32-quiz.css`、`styles/80-pwa.css` |
+| FE-60 | 資料來源與授權頁：原創內容來源名稱、樣式 | FE-56 | `views/sources-page.js`、`styles/70-sources.css`、`__tests__/sources-page.test.js`、`__tests__/_fixtures.js` |
+| FE-61 | 模擬測驗：進度條與 720px | FE-54、FE-56 | `views/part5.js`、`styles/40-part5.css`、`__tests__/part5.test.js` |
+| FE-62 | v0.12 整合建置、產出 `dist/` 與部署目錄、版面自檢 | CT-24、FE-54～FE-61 | `dist/english-master-track.html`、`dist/site/` 下 8 檔、`__tests__/load-order.test.js`、`styles/90-overrides.css` |
+
+（paths 皆省略前綴 `src/app/`，`src/data/`、`dist/`、`tools/` 除外。）
+
+| 批次 | 任務（可平行） | 前置 | 共用檔案檢查 |
+| :--- | :--- | :--- | :--- |
+| v0.8 第 1 批 | CT-24、FE-54、FE-55、FE-56 | 無 | 4 個任務 paths 互不重疊 |
+| v0.8 第 2 批 | FE-57、FE-58、FE-59、FE-60、FE-61 | 依上表 | 互不重疊；`core/pwa.js`、`pwa-core.test.js` 只在本批的 FE-58（第 1 批 FE-56 已完成） |
+| v0.8 第 3 批 | FE-62 | 第 1、2 批全部 | — |
+
+說明：(1) 若主控採「依 dependsOn 即時派發」，FE-59、FE-60 只需等 FE-56；FE-55 完成後 FE-58 仍需 FE-54、FE-56。(2) FE-62 為交付關卡：`npm run validate:data`、`npm test`、`npm run build` 全數成功，並在有無頭瀏覽器時執行 §10.5 可自動化的量測（無則列為待 QA 項目）。(3) 第 3 批完成後，主控依既有流程 push 到 `main`，由 MC-03 建立的 workflow 自動部署（不需再改 workflow）。
+
+任務數（全專案）：pg-content 24（CT-01～CT-24）、pg-frontend 62（FE-01～FE-62），共 86 個。
 
 ---
 
@@ -2407,6 +2829,75 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | AC-23-02 | 資料來源頁加品牌標識聲明 | FE-52 |
 | AC-23-06 | HTML 開頭註解加品牌標識聲明 | FE-47（`license-header.txt`）、FE-53 |
 
+### 13.5 v0.8 追加對照（PRD v0.12：270 個 AC，本版應驗收 248 個）
+
+§13～§13.4 仍有效；下表列出 v0.12 新增的 27 個 AC，以及 v0.12 修改的 30 個 AC 所**追加**的 v0.8 任務。**本版應驗收的 248 個 AC 全部涵蓋，未涵蓋：無。**暫停的 22 個 AC 不變。「單元」「E2E」見 §10.5。
+
+**新增 AC（27）**
+
+| AC | 任務 | 設計位置 | 驗收方式 |
+| :--- | :--- | :--- | :--- |
+| AC-38-01 | FE-56、FE-57、FE-58、FE-59、FE-61、FE-62 | §7.19.1、§7.19.3（T-55） | 單元（`tokens.test.js` 掃描）＋E2E 計算後樣式 |
+| AC-38-02 | FE-56、FE-62 | §7.19.1、§7.19.9 | 單元＋E2E |
+| AC-38-03 | FE-56、FE-57、FE-58、FE-59、FE-61、FE-62 | §7.19.1 | 單元（變數值）＋E2E 兩版對照 |
+| AC-38-04 | FE-56、FE-57、FE-58、FE-59、FE-60、FE-61、FE-62 | §7.19.1、§7.19.5 鎖定列 | 單元（token 對比）＋E2E 工具量測 |
+| AC-38-05 | FE-56、FE-62 | §7.19.3 | 單元（原始碼）＋E2E（尺寸、請求 0） |
+| AC-38-06 | FE-56、FE-57、FE-58、FE-60、FE-61、FE-62 | §7.19.2 | 單元（CSS 規則）＋E2E |
+| AC-38-07 | FE-56、FE-57、FE-58、FE-59、FE-61、FE-62 | §7.19.2、各頁 | 單元＋E2E |
+| AC-38-08 | FE-59、FE-62 | §7.19.7 | E2E 兩版結構對照＋截圖 |
+| AC-38-09 | FE-56、FE-57、FE-58、FE-61、FE-62 | §7.19.10 | E2E 鍵盤與減少動態 |
+| AC-38-10 | CT-24、FE-56、FE-60、FE-62 | §7.19.8 | 單元＋資料驗證＋E2E（v0.11 資料與備份） |
+| AC-39-01 | FE-58、FE-62 | §7.19.4 | 單元（假 DOM 順序）＋E2E 座標 |
+| AC-39-02 | FE-58、FE-62 | §7.19.4 | 單元＋E2E |
+| AC-39-03 | FE-58、FE-62 | §7.19.4、T-65 | 單元（`data-go`）＋E2E 時間 |
+| AC-39-04 | FE-54、FE-58 | §4.8 `goalLine`、DB-4 | 單元 5 色 |
+| AC-39-05 | FE-58 | §7.19.4 | 單元＋E2E |
+| AC-39-06 | FE-58 | §7.19.4 | 單元（文字計數） |
+| AC-39-07 | FE-54、FE-58、FE-62 | §7.19.4 | 單元＋E2E 高度 |
+| AC-39-08 | FE-55、FE-58、FE-62 | §4.8 store、§7.19.4 | 單元（V-LAY-07）＋E2E |
+| AC-39-09 | FE-58、FE-62 | §7.19.4 首屏預算 | E2E 6 種尺寸 |
+| AC-39-10 | FE-58、FE-62 | §7.19.4 | E2E 寬度 |
+| AC-40-01 | FE-54、FE-61、FE-62 | §7.19.6 | 單元＋E2E |
+| AC-40-02 | FE-61、FE-62 | §7.19.6 | E2E 寬度 |
+| AC-40-03 | FE-61、FE-62 | §7.19.6 | 既有 part5 單元＋E2E 回歸 |
+| AC-41-01 | FE-57、FE-62 | §7.19.5 | 單元（假 DOM）＋E2E |
+| AC-41-02 | FE-54、FE-57、FE-62 | §7.19.5、FT-4 | 單元 5 色＋E2E |
+| AC-41-03 | FE-57、FE-62 | §7.19.5 | E2E 7 種尺寸截圖 |
+| AC-41-04 | FE-57、FE-62 | §7.19.5 | E2E 捲動、Toast、Tab |
+
+**v0.12 修改的 AC（30，追加任務）**
+
+| AC | 修改重點 | 追加任務 |
+| :--- | :--- | :--- |
+| AC-01-01 | 精簡列表、說明行只 1 次、藍金無字數 | FE-57 |
+| AC-01-02 | 主控台以目標行顯示 | FE-57、FE-58 |
+| AC-01-07 | 目標行「目標藍級・生效綠級（內建上限）」 | FE-54、FE-58 |
+| AC-17-01 | 3 格數據、「已掌握 N 字」 | FE-58 |
+| AC-17-06 | 目標行取代兩欄、移除功能入口 | FE-58 |
+| AC-22-05 | 量測點改為「開始今日學習」 | FE-58、FE-62 |
+| AC-23-02 | 主控台本體無入口（只在頁尾） | FE-58、FE-62 |
+| AC-24-01 | 先展開「資料備份」 | FE-55、FE-58 |
+| AC-24-10 | 近 7 天空狀態 | FE-58 |
+| AC-24-12 | 收合規則 | FE-58 |
+| AC-25-01 | 首次畫面標題、摘要行 | FE-57 |
+| AC-25-02、AC-25-03 | 主控台目標行文字 | FE-54、FE-57、FE-58 |
+| AC-25-06 | 由目標行「變更」進入 | FE-58 |
+| AC-25-10 | 目標行顯示「棕級」 | FE-58 |
+| AC-26-01 | 精簡色級列 | FE-57 |
+| AC-26-06 | 主控台目標行對應 | FE-57、FE-58 |
+| AC-30-01 | 3 格數據取代小環形圖 | FE-58 |
+| AC-30-10 | 數字顯示、「已掌握 N 字」 | FE-58 |
+| AC-30-12 | 近 7 天空狀態 | FE-58 |
+| AC-32-02 | 初始化後的主控台顯示 | FE-58 |
+| AC-33-02 | 刪除「主控台入口」字樣（行為不變） | FE-58（入口已移除）、FE-62 |
+| AC-34-01、AC-34-02 | `<title>` 統一為 EnglishContext | FE-56、FE-62 |
+| AC-34-03、AC-34-05 | 只改判定文字（安全圓、載入後元素），實作不變 | FE-62（回歸） |
+| AC-34-07、AC-34-08 | 安裝按鈕隨收合區塊 | FE-58 |
+| AC-35-04 | 量測點改為「開始今日學習」 | FE-58、FE-62 |
+| AC-36-01 | 補註只改註解不觸發更新（實作不變） | FE-62（回歸） |
+
+另：AC-34-04（未改寫，值隨 AC-38-02 改變）追加 FE-56、FE-62。
+
 ---
 
 ## 14. 回應契約 §9 指名 SD 的回饋
@@ -2446,6 +2937,14 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | DS-18（v0.7） | 同意：不需 CT、不需遷移任務；FE 任務 covers 列 AC-34～AC-37、AC-24-12、AC-23-02、AC-23-06 | §12.6、§13.4、D-11 |
 | FB-37～FB-43（v0.7，知會） | 依契約定案實作：HTML 靜態 `data:,` favicon，B-7 以逐字白名單允許（FB-37）；manifest／apple-touch-icon 只以程式加入，原始檔不含（FB-38）；等待期間 2 個快取屬正常（FB-39）；不偵測「已安裝但在分頁」（FB-40，T-48）；`theme_color` `#2f6fd6`（FB-41）；只接受具 `prompt` 的安裝事件（FB-42）；iOS 動態連結風險列 T-47，不成立時改靜態連結並同步 B-7 白名單（FB-43） | §5.1、§7.18、§11 |
 | FB-27～FB-31（v0.4，知會） | 依契約定案實作：匯入捨棄的歷史項目不計入略過數（FB-27）、`date` 字串格式錯視為「不是今天」（FB-28）、不提供降版（FB-29）、今天歷史與 X 一致（FB-30）、首次「開始學習」寫入失敗與停用時還原的行為（FB-31，另見 SD-FB-19） | §7.7、§7.8、§7.9 |
+| DS-19（v0.8） | 建 CT-24（pg-content）：`sources.js` 與 `_tools/lib.mjs` 的 ORIGINAL `fullName` 改為「EnglishContext 原創內容」，重跑驗證；`_fixtures.js` 同名字串歸 FE-60。另發現 v0.11「資料來源與授權」頁未列出 ORIGINAL 項目，FE-60 新增「原創內容來源」一行（SD-FB-49） | §7.19.8、CT-24、FE-60 |
+| DS-20（v0.8） | FE-56：`<title>`、標題列 `h1`、`license-header.txt` 第一行；B-12 改檢查 `<title>EnglishContext</title>`；`build.test.js`、`shell.test.js` 舊斷言同步改寫；`FROZEN_IDENTIFIERS` 全部不動（`tokens.test.js`／`layout.test.js` 以字面值鎖定） | §5.3、§7.19.3、§7.19.8 |
+| DS-21（v0.8） | (1) `--primary` 改值為 `#0866ad`（白字按鈕）、藍色級維持 `--color-blue` `#2f6fd6`，兩者已拆開；(2) `--bg` `#eef4fa`，B-11 比對改為新值（程式不變）；(3) `.btn--accent` 邊框 `transparent`、`--brand` 禁止用於 `color`；(4) `.btn` 邊框 `transparent`，`--border` 用途限縮 | §7.19.1、§7.19.2 |
+| DS-22（v0.8） | 主控台 4 區塊元件、720px、3 格並排、空狀態 ≤ 48px、收合 `aria-expanded`、移除功能入口與小環形圖、安裝與 NT-1 移入展開區；V-LAY-07 列入 FE-55、FE-58 單元測試 | §4.8、§7.19.4 |
+| DS-23（v0.8） | 精簡色級列兩種模式共用；固定底部列 ≤ 640px `position: fixed`、預留 184px、Toast 上移；摘要行與試算區共用 `G.estimate` | §7.19.5 |
+| DS-24（v0.8） | 進度條 `role=progressbar`、由 `layout.part5Progress` 推導、`transition: none`、720px | §7.19.6 |
+| DS-25（v0.8） | 同意：CT 任務 1 個（CT-24），其餘 FE；不需遷移任務 | §12.7 |
+| FB-44～FB-49（v0.8，知會） | 依契約定案實作：文字以 PRD 為準（FB-44：副標用「」、標題「資料備份」、按鈕不加箭頭）；目標行依已套用值（FB-45）；FB-46 的 3 項文字由 SD 定（今日卡標題「今日任務」、圖表標題「近 7 天已學字數」、3 格區塊不設可見標題而用 `aria-label`「學習數據」、說明行「本系統建議字量：右側為內建字數與每日新字量」、備份說明沿用 v0.11 文字，SD-FB-41）；結算畫面 `aria-valuenow` = N（FB-47）；背景與建議值採契約預設，**不改** `COLOR_TOKENS`，不需契約小修（FB-48）；下載檔名不屬畫面文字（FB-49） | §7.19 |
 
 ---
 
@@ -2491,6 +2990,17 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | SD-FB-36 | （v0.7）`dist/site/` 由 CI 重新建置部署；本機 `dist/` 是否提交 git 不影響部署 | 人類 | 待辦（確認） | 建議把 `dist/site/` 加入 `.gitignore`（避免本機與 CI 產物不同造成困惑，見 T-46）；`dist/english-master-track.html` 是否繼續提交由人類決定 |
 | SD-FB-37 | （v0.7）Windows checkout 換行可能為 CRLF，CI 為 LF，兩地 BUILD_ID 不同（不違反 AC-36-01） | 人類 | 待辦（確認） | 建議在專案根目錄加 `.gitattributes`：`* text=auto eol=lf`、`*.png binary`（非 PG 目錄，需人類或主控執行）；不加也不影響功能 |
 | SD-FB-38 | （v0.7）部署 workflow 不執行 `npm ci`／`npm install`（無 lockfile、零相依）。若 QA 日後在 `package.json` 加 devDependencies，部署仍不安裝；但若有人加入**建置期**相依，需同步修改 workflow（屬再次修改 `static.yml`，超出 Q-46 一次授權，須問人類） | QA、人類 | 待辦（知會） | 建置維持零相依（§1） |
+| SD-FB-39 | （v0.8）**PRD 內部衝突**：AC-38-05 要求標題列圖示為「PWA `any` 圖示的縮小版（藍底、橘色『EC』對話框）」，但 AC-38-01（與契約 VC-3、V-LAY-01）規定計算後顏色等於 `#f7893b` 的元素只能是「開始今日學習」「開始學習」按鈕底色與連續打卡圖示；強調橘本身「取自圖示」，因此圖示的橘色對話框必定被掃描到。VC-1 的 `brand` 用途表已列「標題列圖示」，`accent` 用途表卻沒有 | PM、SA、人類 | **影響 PRD（需人類決議）** | 建議 PM 在 AC-38-01 的允許清單補「標題列圖示（AC-38-05）」，SA 同步 VC-3、V-LAY-01。設計目前依 AC-38-05 使用原色（T-55）；決議前 QA 視為已知衝突、不開 BUG |
+| SD-FB-40 | （v0.8）AC-39-06 要求「今日已學 X / D」在主控台本體只出現 1 次，而 v0.11 環形圖中央另顯示「X / D」。SD 改為中央只顯示 X，完整「今日已學 X / D 字」只在環形圖旁一行；AC-30-05 的「顯示 18 / 15」由該行滿足 | QA、PM | 待辦（知會） | QA 驗 AC-30-05 時以「今日已學 18 / 15 字」那一行判定 |
+| SD-FB-41 | （v0.8）契約 FB-46 交由 SD 定案的畫面文字：今日任務卡標題「今日任務」；近 7 天圖表標題「近 7 天已學字數」（沿用 v0.11）；3 格數據區不設可見標題（`aria-label`「學習數據」，避免與 AC-39-06 列舉文字重複）；色級說明行「本系統建議字量：右側為內建字數與每日新字量」；「資料備份」展開後的說明沿用 v0.11「備份檔只含你的學習資料，不含內建字庫與題庫；可在其他裝置的同一個檔案匯入還原。」；展開指示為箭頭圖示（`aria-hidden`） | PM、QA | 待辦（知會） | 若 PM 要固定文字，補進 AC 後由 SA 加常數 |
+| SD-FB-42 | （v0.8）AC-38-08「只換配色」：全域卡片改為 16px 圓角與陰影後，單字卡頁以 `#view-flashcards .card` 固定 v0.11 幾何（8px、1px 框線、無陰影），只有框線與按鈕顏色改變；單字卡頁因此看起來與其他頁的卡片風格不同 | PM、QA | 待辦（知會） | 若 PM 希望單字卡頁的外框也換成新風格，需修改 AC-38-08 的「只有顏色依 token 改變」 |
+| SD-FB-43 | （v0.8）`--focus` 由琥珀色 `#f59e0b` 改為深品牌色 `#0866ad`（3px、offset 2px），使焦點框在淡藍灰背景上更清楚；PRD 只要求 ≥ 2px 可見 | QA | 待辦（知會） | — |
+| SD-FB-44 | （v0.8）契約 `LAYOUT_TEXTS` 說「千分位與否由 SD 定，全畫面一致」：SD 定為**整數 ≥ 1,000 一律加千分位**（沿用難易度設定頁既有 `2,809` 寫法），主控台的「今日已學」、3 格數據、長條圖字數、「已掌握 N 字」亦同（如「已掌握 1,234 字」） | QA、PM | 待辦（知會） | QA 構造大數值測試時依此判定 |
+| SD-FB-45 | （v0.8）QA 既有 E2E 受影響：主控台 `.dash-entry`、`.db-mini`、「學習統計」「目前目標」區塊、首次畫面 `#cz-guide` 與試算結果卡已移除；「匯出備份」「匯入備份」需先展開「資料備份」。保留的定位點：`#cz-start`、`#cz-restore`、`#cz-apply`、`#view-*`、`data-tab`、`data-action="export-backup"`／`"import-backup"`／`"install-app"` | QA | 待辦（知會） | QA 在 `/qa-verify` 前更新 `tests/` |
+| SD-FB-46 | （v0.8）AC-41-03 對 > 640px 允許「可固定或隨內容排列」：SD 採隨內容排列（`position: static`）；1366×768 以計算估約 733～757px 高，仍在首屏內，但餘裕只有約 10～35px | QA、PM | 待辦（知會） | 若 1366×768 量測超出，FE-62 在 `90-overrides.css` 對 > 640px 改為 `position: sticky; bottom: 0` |
+| SD-FB-47 | （v0.8）AC-26-01「說明為適用情境（一行，過長截斷）」與「375px 下 5 列文字不裁切」並存：SD 解讀為說明欄以省略號截斷屬 AC 允許，名稱與右側數字不得截斷；完整說明仍在按鈕可存取名稱中 | QA | 待辦（知會） | QA 以名稱與數字是否完整判定「不裁切」 |
+| SD-FB-48 | （v0.8）AC-38-06 的範圍「4 個功能區」包含單字卡頁的按鈕：`.btn` 全域改為透明邊框、淡藍底，單字卡頁按鈕因此只有顏色改變（尺寸不變），與 AC-38-08 不衝突 | QA | 待辦（知會） | — |
+| SD-FB-49 | （v0.8）AC-38-10 (1) 要求「資料來源與授權」頁顯示原創內容來源名稱「EnglishContext 原創內容」，但 v0.11 該頁只列字表與辭典、**不列 ORIGINAL 項目**（FE-17 依 AC-23-02 設計）。SD 在授權區塊新增一行「原創內容來源：{fullName}」（名稱取資料，NM-3）；「原創內容來源：」為 SD 定的標籤文字 | PM、QA | 待辦（知會） | 若 PM 希望以其他形式呈現（例如列為一張來源卡片），請補 AC |
 
 ---
 
@@ -2507,3 +3017,4 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | 0.5 | 2026-11-02 | sd-agent | 修訂已核准的 v0.4（主控代核），原因：PRD v0.9（approved，JimmyLin，2026-11-02；R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（README、data-schema.ts approved，主控代核；storage-schema.json 維持 v0.8）。status 改為 `in-review`、核准欄位清空。增量內容：(1) **推翻**「不直接存取麥克風音訊」限制：允許 `getUserMedia` + `AnalyserNode` 只讀即時音量，仍禁止 `MediaRecorder`、音訊輸出、網路傳送與保存；新增 §7.14（隱私限制、收音條常數與可調範圍 DS-01、麥克風生命週期與只在單字卡頁保留 Q-36／DS-02、`services/mic.js` API、錯誤對照 DS-03、speech-panel 修改）；修訂 §7.6 STT 列與 `audio-capture` 對照、§7.11 新增 A-6（收音條非動畫、無 transition）、A-7（確認視窗無淡入）、§10 靜態檢查（AC-21-03 改為只禁 `MediaRecorder` 並限制 `getUserMedia` 位置）、§5 B-7 擋 `MediaRecorder`；(2) 新增 §7.15 切換難易度初始化（流程、視窗文字、`core/reinit.js`、原子寫入位置 DS-04）與 §4.3 store 新 API；(3) 新增 §7.16 隱藏頁（導覽 4 項、主控台入口、router 與 hashchange 守門、store `setTab` 守門、保留程式與資料 DS-05），§7.13、§9、§9.1、§4.2 同步；(4) §1、§2、§3（新檔 `core/meter.js`、`core/reinit.js`、`services/mic.js` 與 3 個新測試檔；D-8 新任務間無共用 path、D-9 不改 `src/data/`）、§4.4、§4.6、§6.2；(5) §10.2 測試範圍、中間狀態已知失敗、E2E 建議與 **V-MIC** 實機驗證（Windows 11、Chrome 與 Edge 以 `file://` 開啟）；(6) §11 新增 T-32～T-39；(7) §12.4 新任務 FE-34～FE-41 與 4 個批次；(8) §13.2 新增 20 個 AC 與修改 AC 對照（應驗收 196 個全部涵蓋）、16 個暫停 AC 的處理；(9) §14 回應 DS-01～DS-06、FB-33～FB-35；§15 新增 SD-FB-20～SD-FB-27。tasks.json 同步升為 v0.4（只新增 FE-34～FE-41，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2） |
 | 0.6 | 2026-11-02 | sd-agent | 修訂已核准的 v0.5（JimmyLin 核准），原因：PRD v0.10（approved，JimmyLin，2026-11-02；R-19「只選色級、不顯示分數」、Q-39 預設 725、Q-40 不新增鍵盤 AC、新增 AC-26-05／AC-26-06、改寫 AC-22-04 等、暫停 6 條分數輸入 AC）與契約 v0.10（三檔 approved，主控代核；§5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §7.1 新增 `scoreForCard`、移除 Q-32 邏輯、`scoreAfterColorClick` 改語意；預設分數只引用 `SCORE_DEFAULT`（725）；(2) 新增 §7.17（資料流、分數區以 `hidden`＋`inert`＋`disabled`／`tabindex=-1` 隱藏且保留程式、「套用」「開始學習」不再讀輸入框、卡片無分數範圍、狀態列與主控台無目標分數、取消初始化確認後卡片回原色級、AC-22-04 量測點改為點卡片）；(3) §1、§3（D-10）、§4.3 v0.6、§7.9 狀態機、§9 同步；(4) §10.3 測試範圍、中間狀態已知失敗、E2E 建議；(5) §11 新增 T-40～T-44；(6) §12.5 新任務 FE-42～FE-44 與 3 個批次（依序執行）；(7) §13.3 新增 2 個 AC 與改寫 AC 對照（應驗收 192 個全部涵蓋）、6 個暫停 AC 的處理；(8) §14 回應 DS-07～DS-10、FB-36；§15 新增 SD-FB-28～SD-FB-30。tasks.json 同步升為 v0.5（只新增 FE-42～FE-44，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）、不改 `src/data/` |
 | 0.7 | 2026-11-02 | sd-agent | 修訂已核准的 v0.6（JimmyLin 核准），原因：PRD v0.11（approved，JimmyLin，2026-11-02；R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48，修改 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）與契約 v0.11（三檔 approved，主控代核；§10 DP／MF／HD／PE／SW／UP／IN／NT／PV、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §1 新增 6 列（交付形態、PWA 啟用、service worker、建置識別碼、部署、PWA 畫面）；§2 新模組層別與 PWA 流程圖；(2) §3 目錄：部署目錄 `dist/site/`（8 檔）、`dist/english-master-track.html` 保留、`sources/deploy/ads.txt`（DS-12）、`src/app/assets/icons/`（DS-14）、`src/app/pwa/sw.template.js`、`core/pwa.js`、`services/pwa.js`、`ui/pwa-notice.js`、`styles/80-pwa.css`、`tools/serve.mjs`、4 個新測試檔；D-11、D-12；(3) §4.2 v0.7 啟動順序與 `index.html`、§4.3 `setPwa`、§4.7 PWA 模組介面；(4) §5 新命令、§5.1 建置 B-10～B-16 與 B-7 逐字白名單（不放寬既有禁止規則）、`build()` 回傳與參數、可重現性檢查（現有建置無時間戳與亂數）、`serve.mjs`；§5.2 新 workflow 全文（Node 22、不執行 `npm ci`、上傳 `dist/site`）；(5) §6.3 大小與 Cache Storage 估算；(6) §7.18 PWA 設計（兩種形態、BUILD_ID、`sw` 範本、啟動與註冊、更新流程、安裝狀態機、畫面配置、隱私對照）；(7) §9 v0.7 樣式；(8) §10.4 單元測試、E2E（localhost）與人工 V-PWA-H1～H5；(9) §11 新增 T-45～T-54；(10) §12.6 新任務 FE-45～FE-53、主控項目 MC-01～MC-03 與 5 個批次；(11) §13.4 新增 29 個 AC 與修改 5 個 AC 的對照（應驗收 221 個全部涵蓋）；(12) §14 回應 DS-11～DS-18、FB-37～FB-43；§15 新增 SD-FB-31～SD-FB-38。tasks.json 同步升為 v0.6（只新增 FE-45～FE-53 與 `manualSteps`，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）、不改 `src/data/` |
+| 0.8 | 2026-11-03 | sd-agent | 修訂已核准的 v0.7（JimmyLin 核准），原因：PRD v0.12（approved，JimmyLin，2026-11-03；R-21 版面與視覺、US-38～US-41、Q-49～Q-57，新增 27 條、修改 30 條 AC）與契約 v0.12（三檔 approved，主控代核；§11 NM／VC／DB／FT／MT／V-LAY、data-schema §13、§9.6 DS-19～DS-25、FB-44～FB-49）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §1 新增 5 列；§2 `core/layout.js` 層別；§3 檔案異動表與 D-13；(2) §4.8 `core/layout.js` API、store `runtime.dashboard`／`setBackupExpanded`、`installVisible` 新條件、各 view 匯出變更；(3) §5.3 建置 B-12 改檢查 `<title>EnglishContext</title>`；§6.4 大小（約 +8 KB）；(4) 新增 §7.19：CSS token 重整（`--primary` 改深品牌色、新增 `--brand`／`--brand-deep`／`--accent`／`--tint`／`--track`／`--chart-bar`／`--line`、`--border` 用途限縮、禁止寫法掃描）、共用元件（卡片 16px 陰影無框、`.btn--accent`、全域 `tabular-nums`、焦點框）、標題列內嵌 SVG 圖示、主控台 DOM 與尺寸、首次畫面與精簡色級列與固定底部列、模擬測驗進度條、單字卡頁只換配色、名稱與來源名稱、PWA 同步、效能與無障礙評估；(5) §9 取代說明與新類名；(6) §10.5 單元與 E2E 量測分工、中間狀態已知失敗（預期無）；(7) §11 新增 T-55～T-66；(8) §12.7 新任務 CT-24、FE-54～FE-62 與 3 個批次；(9) §13.5 新增 27 個 AC 與修改 30 個 AC 對照（應驗收 248 個全部涵蓋）；(10) §14 回應 DS-19～DS-25、FB-44～FB-49；§15 新增 SD-FB-39～SD-FB-49（SD-FB-39 為 PRD 內部衝突，需人類決議）。tasks.json 同步升為 v0.7（只新增 CT-24、FE-54～FE-62，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）；`src/data/` 只改 ORIGINAL `fullName` |

@@ -1,15 +1,15 @@
 ---
 doc: CONTRACT
-version: 0.11
+version: 0.13
 status: approved
 author: sa-agent
 approved_by: JimmyLin（授權主控代核）
-approved_at: 2026-11-02
+approved_at: 2026-11-03
 ---
 
 # English Master Track — 資料契約總覽
 
-> 上游：`docs/01-PRD.md` v0.11（approved，JimmyLin，2026-11-02），以第 6 章「人類決議」與 R-15～R-20 為準；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
+> 上游：`docs/01-PRD.md` v0.13（approved，JimmyLin，2026-11-03），以第 6 章「人類決議」與 R-15～R-21 為準（v0.12 修訂內容見 §12 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
 > 本契約共 3 個檔案，視為一組審核：本檔、`data-schema.ts`（型別）、`storage-schema.json`（localStorage 與備份檔的 JSON Schema）。核准方式：把本檔 frontmatter 改為 `status: approved`，並同步填寫 `data-schema.ts` 開頭註解與 `storage-schema.json` `meta` 的 `status`、`approved_by`、`approved_at`（v0.5 起三檔狀態一律一致，SD-FB-04）。
 > 欄位的必填、值域、範例以 `data-schema.ts` 註解為準；本檔放總覽、規則、驗證與待辦。
 > v0.2：依主控 2026-10-29 連網查證結果，四份字表與 ECDICT 授權改為已確認、可收錄；原始字表已置於 `sources/wordlists/`；`N_B`、`N_G` 改為實際值（§4.2）。
@@ -21,6 +21,7 @@ approved_at: 2026-11-02
 > **v0.9：依 PRD v0.9（R-18、US-32、US-33、AC-20-04、Q-36～Q-38）增量修訂，不改持久化結構（`schemaVersion` 維持 2，`PersistedData`、`StorageRecord`、`BackupFile` 欄位不變）。** 重點：(1) 新增 §5.7 切換難易度初始化學習紀錄規則 CI-1～CI-10（「有學習紀錄」對應欄位、清除欄位與初始值、保留欄位、單次原子寫入），新增常數 `LEARNING_PROGRESS_FIELDS`；(2) 新增 §5.8 隱藏頁面規則 HT-1～HT-5，`NAV_TAB_ORDER` 由 6 項改為 4 項，新增常數 `HIDDEN_TAB_IDS`；`decoder.js`、`phrasebank.js` 格式不變、資料保留；(3) 收音條門檻 T1～T5 判定為架構常數，契約不定義，交 SD（§9.3 DS-01）；(4) 修改 LR-4、V-ST-12、§5.3「寫入：容量不足」列，新增 V-ST-14、V-ST-15。**三檔同步的例外**：依主控指示「沒有改動的檔案保持原樣」，`storage-schema.json` 本版未修改，維持 v0.8 approved；本版契約組合 = 本檔 v0.9 + `data-schema.ts` v0.9 + `storage-schema.json` v0.8（其內容對 v0.9 仍正確）。
 > **v0.10：依 PRD v0.10（R-19、Q-39）增量修訂，不改持久化結構（`schemaVersion` 維持 2，`GoalState` 4 欄與 `PersistedData` 9 欄不變，不需遷移）。** 重點：(1) 首次／重設預設分數 `SCORE_DEFAULT` 600 → 725（Q-39 決議 B）；(2) 新增 §5.9 目標分數規則 GS-1～GS-8：選中卡片 = Color(`draftScore`)、點卡片 = 該色 `scoreMax`（取代 Q-32）、既有分數不轉換、分數驗證只用於資料層、畫面不顯示分數；(3) 修改 §5.2、FS-2、FS-3、CI-3、CI-9、FB-08、FB-35，新增 V-ST-16、FB-36、§9.4 DS-07～DS-10。三檔同步升為 v0.10（`storage-schema.json` 只改 description、examples 與 meta）。
 > **v0.11：依 PRD v0.11（R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48）增量修訂，不改持久化結構（`schemaVersion` 維持 2，localStorage 鍵數 2，`PersistedData` 9 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。PWA 不寫入 localStorage 任何資料。** 重點：新增 **§10 PWA 契約**——(1) 兩種交付形態對照（§10.1）；(2) 部署目錄 8 個檔案與圖示 PNG 規格 DP-1～DP-7（§10.2）；(3) manifest 欄位值 MF-1～MF-4（§10.3）；(4) HTML head 靜態／動態元素 HD-1～HD-5（§10.4）；(5) PWA 啟用條件（`file://` 判定）PE-1～PE-4（§10.5）；(6) service worker、快取名稱、建置識別碼、預先快取清單、清除舊快取 SW-1～SW-11（§10.6）；(7) 更新流程與 postMessage UP-1～UP-9（§10.7）；(8) 安裝按鈕 IN-1～IN-8（§10.8）；(9) 不互通說明 NT-1（§10.9）；(10) 儲存與隱私 PV-1～PV-7（§10.10）；(11) 驗證規則 V-PWA-01～V-PWA-12（§10.11）。`data-schema.ts` 新增 §12（7 個型別、11 個常數，`RuntimeState.pwa`）；`storage-schema.json` 只改 meta（新增 `browserStoragePolicy`，AC-21-03）。原「§10 變更紀錄」改為 §11。
+> 專案代號、文件標題與識別字仍為 English Master Track；App 顯示名稱自 v0.12 起為「EnglishContext」（§11.1）。
 
 ---
 
@@ -42,13 +43,19 @@ approved_at: 2026-11-02
 | `BackupFile`、`ImportResult`、`ImportErrorCode` | JSON 備份匯出／匯入 | pg-frontend | pg-frontend、QA | AC-24-01～AC-24-11、AC-25-10、AC-25-11 |
 | `AppState`、`RuntimeState`、`StudyCard`、`VocabQuizQuestion`、`SttResult`、`SttLight`、`SttStatus`、`TabId`、`StorageStatus` | 執行期狀態（不持久化） | pg-frontend | pg-frontend | AC-03-04、AC-03-05、AC-06-04、AC-06-05、AC-08-01～AC-08-12、AC-09-01～AC-09-07、AC-13-03、AC-16-01、AC-18-03、AC-28-08、AC-30-14 |
 | `EntryMode`、`LearningEventKind`（v0.8） | 首次畫面／一般模式、「學過一個字」的學習行為（執行期，不持久化） | pg-frontend | pg-frontend、QA | US-25、AC-25-01～AC-25-11、US-30、AC-30-03、AC-30-04 |
-| `TAB_LABELS`、`NAV_TAB_ORDER`（v0.8；v0.9 `NAV_TAB_ORDER` 改為 4 項） | 頁面畫面名稱與導覽順序（R-15、R-18 三） | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-10-02、AC-17-06、AC-20-03、AC-27-01、AC-27-04 |
+| `TAB_LABELS`、`NAV_TAB_ORDER`（v0.8；v0.9 `NAV_TAB_ORDER` 改為 4 項；v0.12 主控台不再有模組入口） | 頁面畫面名稱與導覽順序（R-15、R-18 三） | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-10-02、AC-17-06、AC-20-03、AC-27-01、AC-27-04、AC-39-06 |
 | `HIDDEN_TAB_IDS`（v0.9） | 隱藏頁面（解碼器、句型庫）；不可到達，嘗試進入時改顯示主控台 | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-20-04、E-68、R-18 三 |
 | `LEARNING_PROGRESS_FIELDS`（v0.9） | 切換難易度初始化時清除的 6 個 `PersistedData` 欄位（白名單） | 契約常數（pg-frontend 實作） | pg-frontend、QA | US-32、AC-32-02、AC-32-03、AC-32-10、R-18 一 |
 | `PwaManifest`、`PwaManifestIcon`、`PwaIconPurpose`、`PWA_MANIFEST`、`PWA_APP_NAME`、`PWA_THEME_COLOR`、`PWA_BACKGROUND_COLOR`（v0.11） | Web App Manifest 全部欄位值（安裝名稱「EnglishContext」、相對路徑、顏色、3 個圖示） | 契約常數 → pg-frontend（建置輸出 `manifest.webmanifest`） | 瀏覽器、QA | AC-34-01～AC-34-05、Q-42、§10.3 |
 | `PwaDeployFile`、`PwaDeployFileRole`、`PWA_DEPLOY_FILES`（v0.11） | 部署目錄 8 個檔案的路徑、角色、MIME、圖示尺寸與用途 | 契約常數 → pg-frontend（建置）；圖示 PNG 由**主控**預先產生（Q-45） | 建置程式、`static.yml`、QA | AC-36-07、AC-34-01、AC-34-03、AC-34-05、Q-45、Q-46、§10.2 |
 | `PWA_PRECACHE_URLS`、`PWA_CACHE_PREFIX`、`PWA_BUILD_ID_PATTERN`、`PWA_BUILD_ID_META_NAME`、`PwaPageToSwMessage`（v0.11） | 預先快取清單、快取名稱、建置識別碼、頁面 → service worker 訊息 | 契約常數 → pg-frontend（建置輸出 `sw.js`、頁面端註冊） | 瀏覽器、QA | AC-35-01、AC-36-01～AC-36-05、AC-37-05、§10.6、§10.7 |
 | `PwaRuntimeState`（`RuntimeState.pwa`）、`PWA_UPDATE_RECHECK_MS`、`PWA_TEXTS`（v0.11） | 安裝按鈕、新版提示的記憶體狀態與畫面文字；不互通說明文字 | pg-frontend | pg-frontend、QA | AC-34-06～AC-34-10、AC-36-03、AC-36-06、AC-37-01～AC-37-04、AC-24-12、§10.5、§10.7～§10.9 |
+| `APP_DISPLAY_NAME`、`FROZEN_IDENTIFIERS`（v0.12） | App 顯示名稱「EnglishContext」；不隨改名變動的鍵名、備份格式、匯出檔名前綴、交付檔名、快取前綴 | 契約常數（pg-frontend 實作；ORIGINAL 來源名稱由 pg-content 提供） | pg-frontend、pg-content、QA | AC-38-05、AC-38-10、E-94、Q-49、§11.1 |
+| `COLOR_TOKENS`、`SEMANTIC_COLORS`（v0.12） | 品牌／強調／背景／表面／文字色 token；不得更動的語意色 | 契約常數（pg-frontend 實作 CSS） | pg-frontend、QA | AC-38-01～AC-38-04、AC-38-06、AC-34-04、Q-53～Q-55、§11.2 |
+| `LAYOUT_TEXTS`（v0.12） | 主控台與首次畫面的文字與格式字串 | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-39-01～AC-39-08、AC-41-01、AC-41-02、AC-17-01、AC-30-10、§11.4、§11.5 |
+| `DashboardRuntimeState`（`RuntimeState.dashboard`，v0.12） | 「資料備份」收合區塊展開狀態（記憶體，不持久化） | pg-frontend | pg-frontend、QA | AC-39-08、AC-24-12、AC-34-07、E-90、E-91、§11.4 DB-6 |
+
+型別數（v0.12）：66 → **67** 個（33 個 `interface`、34 個 `type`）；新增 `DashboardRuntimeState`（interface）。契約常數 31 → **36**（新增 `APP_DISPLAY_NAME`、`FROZEN_IDENTIFIERS`、`COLOR_TOKENS`、`SEMANTIC_COLORS`、`LAYOUT_TEXTS`）。修改：`RuntimeState` 新增 `dashboard`（不持久化）；`PWA_THEME_COLOR`、`PWA_BACKGROUND_COLOR`、`PWA_MANIFEST` 的顏色值。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變。
 
 型別數（v0.11）：59 → **66** 個（32 個 `interface`、34 個 `type`）；新增 7 個：`PwaManifestIcon`、`PwaManifest`、`PwaDeployFile`、`PwaRuntimeState`（interface）、`PwaIconPurpose`、`PwaDeployFileRole`、`PwaPageToSwMessage`（type）。契約常數 20 → **31**（新增 `PWA_APP_NAME`、`PWA_THEME_COLOR`、`PWA_BACKGROUND_COLOR`、`PWA_MANIFEST`、`PWA_DEPLOY_FILES`、`PWA_PRECACHE_URLS`、`PWA_CACHE_PREFIX`、`PWA_BUILD_ID_PATTERN`、`PWA_BUILD_ID_META_NAME`、`PWA_UPDATE_RECHECK_MS`、`PWA_TEXTS`）。修改：`RuntimeState` 新增 `pwa`（不持久化）。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變。
 
@@ -91,6 +98,8 @@ approved_at: 2026-11-02
 （v0.9）`decoder.js`、`phrasebank.js` 的畫面入口隱藏（PRD R-18 三），但**檔案、全域變數、格式、最少筆數與驗證規則（V-DEC、V-RS、V-PH）全部不變**，照常交付並打包進 `.html`（AC-20-04「交付檔原始碼仍含長難句 50 句、閱讀策略與句型 100 則」、AC-23-04 原創標示仍驗收）。pg-content 不需為 v0.9 修改這兩個檔案。
 
 （v0.11）PWA 不新增資料檔或 `window` 全域變數，本表不變；manifest、`sw.js`、圖示屬建置輸出與主控預產資產（§10.2），不屬 `src/data/`。
+
+（v0.12）不新增資料檔、全域變數或欄位，最少筆數不變。**唯一的資料值修改**：`sources.js` 中 `code = "ORIGINAL"` 那筆的 `fullName` 由 `"English Master Track 原創內容"` 改為 `"EnglishContext 原創內容"`（Q-49、AC-38-10 (1)；§4.3、DS-19）；其他欄位（含 `name` = `"原創"`）不變。`src/data/` 任何字串（畫面會顯示者）不得含「English Master Track」（不分大小寫）。
 
 **字庫分檔規則**：每檔涵蓋一段連續排名（每檔筆數由 SD 拆任務時決定，建議 ≤ 500），寫法固定為
 `window.MASTER_VOCAB_DATABASE = (window.MASTER_VOCAB_DATABASE || []).concat([ ... ]);`
@@ -224,7 +233,7 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | TSL | TOEIC Service List | 1.2 | 1,250 | Browne, C., Culligan, B. | CC BY-SA 4.0 International | `confirmed` | 2026-10-29 | 主控（Claude）代人類查證 | https://www.newgeneralservicelist.com/toeic-service-list | 是 |
 | BSL | Business Service List | 1.2 | 1,700 | Browne, C., Culligan, B. | CC BY-SA 4.0 International | `confirmed` | 2026-10-29 | 主控（Claude）代人類查證 | https://www.newgeneralservicelist.com/business-service-list | 是 |
 | ECDICT | ECDICT（英漢辭典資料庫） | `master@ab22ad3`（commit `ab22ad36302cafc6349a050e2b60894855208055`，2026-10-24；下載 2026-10-30） | 約 76 萬詞條 | Linwei（skywind3000） | MIT（LICENSE 原文 "Copyright (c) 2025 Linwei"） | `confirmed` | 2026-10-29 | 主控（Claude）代人類查證 | https://github.com/skywind3000/ECDICT | 是（需保留 MIT 聲明：`copyrightNotice`、`licenseText`） |
-| ORIGINAL | English Master Track 原創內容 | 同 `VOCAB_MANIFEST.dataVersion` | — | JimmyLin | CC BY-SA 4.0 | `confirmed` | 2026-10-29 | JimmyLin（PRD Q-31 決議） | — | 是 |
+| ORIGINAL | EnglishContext 原創內容（v0.12 由「English Master Track 原創內容」改名，Q-49、AC-38-10） | 同 `VOCAB_MANIFEST.dataVersion` | — | JimmyLin | CC BY-SA 4.0 | `confirmed` | 2026-10-29 | JimmyLin（PRD Q-31 決議） | — | 是 |
 
 `DataSourceEntry` 對應值：`licenseName` 一律用契約值 `"CC BY-SA 4.0"`／`"MIT"`（「International」寫入 `confirmation.note`）；`licenseUrl` CC BY-SA 為 `https://creativecommons.org/licenses/by-sa/4.0/`，ECDICT 為 `https://github.com/skywind3000/ECDICT/blob/master/LICENSE`；`homepageUrl`、`originUrl`、`confirmation.evidenceUrl` 皆填上表「原始出處網址」；`version` 字表填 `"1.2"`（BSL 檔名雖為 `BSL_120`，官網版本為 1.2），ECDICT 填 `"master@ab22ad3"`；`originalItemCount` 填輸入檔實際數（見 N-3 與 `data-schema.ts`），非官網字數。
 
@@ -253,6 +262,7 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 鍵數：2（v0.8 不變；今日已學紀錄與歷史放在主鍵的 `data` 內，不另開鍵，確保整筆一次寫入）。內建內容（字庫、題庫、例句、句型）**不寫入** localStorage（R-04）；不存音訊（AC-21-03）；不存語音實例、DOM、計時器等不可序列化物件。
 加前綴的原因：Chrome 以 `file://` 開啟的本機 HTML 可能共用同一個 storage origin。
 （v0.11）PWA **不新增任何鍵、不寫入任何資料**：安裝按鈕、新版提示、更新檢查時間只在記憶體（`RuntimeState.pwa`）；https 版與 `file://` 版的鍵名、欄位集合、`schemaVersion` 2 完全相同（AC-36-04、AC-37-06、§10.10 PV-1）。同一 `<帳號>.github.io` 網域下的其他專案也用同一個來源，本系統鍵名已有 `englishMasterTrack:` 前綴，不讀寫他人資料（E-80）。
+（v0.12）版面與視覺**不新增任何鍵、不寫入任何資料**：「資料備份」展開狀態只在記憶體（`RuntimeState.dashboard`，§11.4 DB-6）。App 改名為「EnglishContext」**不改鍵名**（`FROZEN_IDENTIFIERS`，§11.1 NM-5；AC-38-10 (2)、E-94）。
 
 ### 5.2 預設值（首次使用、重設時，AC-18-02；v0.9 起亦為切換難易度初始化時 `LEARNING_PROGRESS_FIELDS` 6 欄的值，§5.7）
 
@@ -334,7 +344,8 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | LR-7 | 寫入失敗：容量不足（IM-7）→ 記憶體照常更新、畫面照常計數；`learningQuotaNoticeShown` 為 false 時提示「儲存空間不足」並設為 true（同一工作階段只一次）；localStorage 原值不變，下一次寫入再試。其他例外同樣不回滾記憶體、不提示。`storageStatus = "unavailable"` 時只更新記憶體 | AC-30-14、E-54、AC-18-03 |
 | LR-8 | 首次畫面（`entryMode = "firstRun"`）沒有可觸發學習行為的頁面；即使有，也不得寫入主鍵（FS-2） | AC-25-04 |
 
-主控台另兩個小環形圖（AC-30-10）屬計算顯示、不持久化：「目前單字集掌握率」= |`masteredWordKeys` ∩ 目前單字集 wordKey| ÷ 單字集張數（單字集為空顯示「—」）；「模擬測驗正確率」= `part5.totalCorrect ÷ part5.totalAnswered`（答題數 0 顯示「—」），四捨五入規則同 AC-17-04。
+主控台 3 格數據（v0.12 取代 v0.8 的 2 個小環形圖與「學習統計」區塊，AC-30-10、AC-39-05；Q-52 決議 A）屬計算顯示、不持久化：「連續打卡天數」= `StreakState` 顯示規則；「單字掌握率」（大字）= |`masteredWordKeys` ∩ 目前單字集 wordKey| ÷ 單字集張數（單字集為空顯示「—」），同格小字「已掌握 N 字」N = `masteredWordKeys.length`（含不在目前單字集者，AC-17-03）；「模擬測驗正確率」= `part5.totalCorrect ÷ part5.totalAnswered`（答題數 0 顯示「—」），四捨五入規則同 AC-17-04。文字見 `LAYOUT_TEXTS`，版面規則見 §11.4。
+（v0.12）近 7 天圖表：LR-6 算出的 7 根值**全為 0**（含 today 那根 = X）→ 只顯示 `LAYOUT_TEXTS.chartEmpty`「開始學習後會顯示紀錄」，不畫長條、日期與「0」（AC-39-07 (b)、E-88）；任一根 > 0 → 照 LR-6 畫 7 根（AC-30-08）。判定只用 LR-6 的顯示值，不另存狀態。
 
 ### 5.5 首次進入流程的契約規則（v0.8，pg-frontend；PRD US-25、R-16 A、Q-34、Q-35；**不新增持久化欄位**）
 
@@ -342,7 +353,7 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | :--- | :--- | :--- |
 | FS-1 | **判定時機與條件**：只在應用啟動時判定一次（資料檔載入後、首次繪製前），結果存在 `RuntimeState.entryMode`，本工作階段內不再重新判定。`localStorage.getItem("englishMasterTrack:state")` 回傳 `null` → `"firstRun"`；回傳任何字串（含 `""`、無法解析、版本不符）→ `"main"`（無法讀取時依 AC-18-05 重設後進主控台）；存取 localStorage 拋例外 → `"firstRun"` 並 `storageStatus = "unavailable"`。`englishMasterTrack:unreadable` 鍵是否存在**不影響**判定 | AC-25-01、AC-25-05、AC-25-08、AC-25-09 |
 | FS-2 | **首次畫面期間不寫入**：`entryMode = "firstRun"` 時不得對主鍵或 `unreadable` 鍵呼叫 `setItem`／`removeItem`；卡片選擇只存在記憶體（`goal.draftScore`），重新整理即回到預設 725、綠（v0.10，Q-39）。開啟「資料來源與授權」頁（`currentTab = "sources"`）不改變 `entryMode`，返回時回到首次畫面 | AC-25-04、AC-25-07、E-38、E-41 |
-| FS-3 | 首次畫面只顯示 `customizer` 的色級卡片、試算、「開始學習」與「從備份還原」（v0.10 不顯示分數輸入與分數數值，GS-6）；不顯示自訂單字表單、領域範本區與導覽列（版面屬設計層） | AC-25-01、Q-35 |
+| FS-3 | 首次畫面只顯示 `customizer` 的色級卡片、試算、「開始學習」與「從備份還原」（v0.10 不顯示分數輸入與分數數值，GS-6）；不顯示自訂單字表單、領域範本區與導覽列（版面屬設計層）。（v0.12，Q-51）色級卡片改為精簡色級列、試算結果卡改為固定底部列中的一行試算摘要，標題與副標見 §11.5 FT-1～FT-6；資料行為（`draftScore`、FS-2 不寫入、FS-4、FS-5）不變 | AC-25-01、Q-35、AC-41-01、AC-41-02 |
 | FS-4 | **「開始學習」**：等同「套用」——`goal.appliedScore = draftScore`，依 V-ST-02 重算色級，其他欄位為 §5.2 預設值（`todayLearned`、`learnedHistory` 為預設）；以一次 `setItem` 寫入完整 `StorageRecord`（`schemaVersion` 2）；接著 `entryMode = "main"`、`currentTab = "dashboard"`。寫入失敗（容量不足或其他例外）仍進入主控台，依 §5.3「寫入」規則提示，下次寫入再試；`storageStatus = "unavailable"` 時不寫入、直接進入（本工作階段可用） | AC-25-02、AC-25-03、AC-18-02、AC-25-08 |
 | FS-5 | **「從備份還原」**：完全依 §6.2 步驟 1～9 與 IM-1～IM-8（含 v1 備份遷移、新欄位正規化）。步驟 9 成功 → `entryMode = "main"`、`currentTab = "dashboard"`，所有資料以備份為準，首次畫面上未生效的分數與卡片選擇捨棄。`storageStatus = "unavailable"` 時依步驟 9 只套用記憶體並進入主控台 | AC-25-10、E-58 |
 | FS-6 | 還原失敗（`cancelled`、`format`、`version`、`quota`、`write_failed`）→ 維持 `entryMode = "firstRun"`，記憶體與 localStorage 皆不變（主鍵仍不存在），顯示對應訊息（`cancelled` 不提示），可再試或按「開始學習」。localStorage 停用時每次開啟都是首次畫面（可接受的限制） | AC-25-11、AC-25-08、E-39、E-57 |
@@ -351,6 +362,8 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 ### 5.6 介面互動數值（Q-33）——屬設計層
 
 PRD Q-33 的介面數值（底部導覽 ≤ 640px、換頁動畫 ≤ 300ms、翻卡動畫 ≤ 400ms、答題動畫 ≤ 600ms、滑動門檻 50px 且水平位移大於垂直位移、震動 ≤ 200ms）、`prefers-reduced-motion`、觸控目標 ≥ 44×44 CSS px、圖示內嵌等（US-26～US-29、US-31）**不涉及資料檔或持久化結構**，契約不定義常數，由 SD 在 `architecture.md` 決定實作值（不得超過 PRD 上限），QA 依 PRD AC 驗收。契約只提供與狀態相關的部分：導覽項目與順序 `NAV_TAB_ORDER`、畫面名稱 `TAB_LABELS`、翻卡邏輯狀態 `flashcard.isFlipped`（AC-28-08 最終狀態依此值）、測驗模式下滑動不改 `VocabQuizQuestion.selectedIndex`（AC-28-06）。
+
+（v0.12，R-21）同一原則：內容寬度 720px、640px 斷點、圓角 16px、陰影、字級、焦點框、固定底部列、進度條高度與動畫等版面數值**屬設計層**，由 SD 依 PRD AC-38～AC-41 定為架構常數。契約只定義：顏色值（`COLOR_TOKENS`、`SEMANTIC_COLORS`，因 `PWA_BACKGROUND_COLOR`／`theme_color` 與其綁定）、畫面文字（`LAYOUT_TEXTS`、`APP_DISPLAY_NAME`）、不可改的識別字（`FROZEN_IDENTIFIERS`）與狀態面規則（§11.4 DB-6 展開狀態、§11.6 MT-1 進度推導）。
 
 ### 5.7 切換難易度初始化學習紀錄（v0.9，pg-frontend；PRD US-32、R-18 一、Q-38；**不改持久化結構**）
 
@@ -408,7 +421,7 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
 | HT-1 | **不變式**：`RuntimeState.currentTab` 任何時候都不得是 `HIDDEN_TAB_IDS`（`"decoder"`、`"phrasebank"`）中的值 | AC-20-04 |
-| HT-2 | **入口**：導覽列（寬螢幕與 ≤ 640px 底部導覽列）= `NAV_TAB_ORDER` 4 項，依序「主控台」「難易度設定」「單字卡」「模擬測驗」；主控台模組入口 = `customizer`、`flashcards`、`part5` 3 項 +「資料來源與授權」入口；頁尾「資料來源與授權」連結不變。任何導覽、入口、按鈕、連結都不得顯示 `TAB_LABELS.decoder`／`phrasebank` 文字或指向該頁 | AC-17-06、AC-20-03、AC-27-01、AC-27-04、AC-20-04 |
+| HT-2 | **入口**：導覽列（寬螢幕與 ≤ 640px 底部導覽列）= `NAV_TAB_ORDER` 4 項，依序「主控台」「難易度設定」「單字卡」「模擬測驗」；（v0.12，Q-50 決議 A）主控台**不再有**模組入口與「資料來源與授權」入口，主控台本體的換頁控制項只有「開始今日學習」（→ `flashcards`）與目標行「變更」（→ `customizer`）（§11.4 DB-3、DB-4）；頁尾「資料來源與授權」連結不變（`sources` 唯一入口）。任何導覽、入口、按鈕、連結都不得顯示 `TAB_LABELS.decoder`／`phrasebank` 文字或指向該頁 | AC-17-06、AC-20-03、AC-27-01、AC-27-04、AC-20-04 |
 | HT-3 | **嘗試進入隱藏頁**（含手動輸入網址片段、程式內部呼叫切頁）：`entryMode = "main"` → 改為 `"dashboard"`；`entryMode = "firstRun"` → 維持首次畫面（`"customizer"`，FS-2）。不顯示錯誤、Console 無未處理錯誤。是否使用網址片段（hash）路由及其字串由 SD 決定；若使用，隱藏頁的片段一律依本條處理。重新載入一律從 `"dashboard"`（或首次畫面）開始；匯入備份不含頁面狀態，不影響本條 | AC-20-04、E-68 |
 | HT-4 | `TabId`、`TAB_LABELS` 保留 `decoder`、`phrasebank` 兩項（未來開放用），但本版不得渲染到畫面 | AC-20-04 |
 | HT-5 | **保留程式與資料**：`decoder.js`、`phrasebank.js` 照常載入、打包，格式與驗證規則（§7.5、§7.6）不變；`RuntimeState.decoder`／`phrasebank` 照常初始化。前端不得刪除這兩個全域變數或從建置中移除資料檔 | AC-20-04、AC-23-04 |
@@ -438,7 +451,7 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | :--- | :--- | :--- |
 | 內容 | `BackupFile`：`format` = `"english-master-track-backup"`、`schemaVersion` = 目前版本（v0.8 起為 2）、`exportedAt`、`contentDataVersion`、`data` = 記憶體中的 `PersistedData`（localStorage 停用時仍可匯出）。（v0.8）匯出前以匯出當下的 today 依 V-ST-09～V-ST-11 正規化 `todayLearned`、`learnedHistory`，`data` 須符合 `storage-schema.json` `$defs/PersistedDataWritten` | AC-24-01、AC-24-02、AC-30-09 |
 | 不含 | 內建字庫、題庫、例句、句型、執行期狀態 | AC-24-02 |
-| 檔名 | `english-master-track-backup-YYYYMMDD.json`（本地日期） | AC-24-01 |
+| 檔名 | `english-master-track-backup-YYYYMMDD.json`（本地日期）。（v0.12）前綴不隨 App 改名變動（`FROZEN_IDENTIFIERS.backupFileNamePrefix`，§11.1 NM-5） | AC-24-01、AC-38-10 |
 | 方式 | 本機產生檔案下載，不產生網路請求 | AC-24-01、AC-18-06 |
 
 ### 6.2 匯入（依序檢查，任一步失敗即停止，目前資料完全不變）
@@ -602,7 +615,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 
 | AC | 契約欄位／規則 |
 | :--- | :--- |
-| AC-01-01、AC-02-03、AC-02-04、AC-02-10 | `COLOR_LEVELS`（`scoreMin`、`scoreMax`、`status`、`dailyNewWords`、`vocabTarget`、`scenarioZh`） |
+| AC-01-01、AC-02-03、AC-02-04、AC-02-10 | `COLOR_LEVELS`（`scoreMin`、`scoreMax`、`status`、`dailyNewWords`、`vocabTarget`、`scenarioZh`）；（v0.12 AC-01-01 精簡列表）`LAYOUT_TEXTS.vocabNoteLead`、`levelLocked`、§11.5 FT-3 |
 | AC-01-03、AC-01-04、AC-01-07、AC-02-08（AC-01-06 v0.10 暫停） | `GoalState.draftScore`／`appliedScore`／`appliedColor`／`effectiveColor`、V-ST-02、§5.9 GS-1～GS-3 |
 | AC-01-05、AC-02-04、AC-26-02、AC-26-04（v0.10 點卡片 = 上限） | `COLOR_LEVELS[].scoreMax`、§5.9 GS-2、V-ST-16 |
 | AC-18-02、AC-25-01、AC-25-04（v0.10 預設 725） | `SCORE_DEFAULT`、§5.2、FS-2、§5.9 GS-7 |
@@ -625,7 +638,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-12-01～AC-12-03、AC-13-01、AC-13-03（v0.9 暫停） | `DecoderSentence`、`DecoderSegment.role`、`RuntimeState.decoder` |
 | AC-14-01（v0.9 暫停） | `ReadingStrategy`、V-RS-01 |
 | AC-15-01～AC-16-03（v0.9 暫停） | `PhraseTemplate`、`PHRASE_CATEGORY_LABELS`、`RuntimeState.phrasebank` |
-| AC-17-01、AC-17-02、AC-17-05、AC-17-06 | `StreakState`、`GoalState`、`COLOR_LEVELS` |
+| AC-17-01、AC-17-02、AC-17-05、AC-17-06 | `StreakState`、`GoalState`、`COLOR_LEVELS`；（v0.12 3 格數據、目標行、移除功能入口與「目前目標／生效色級」欄位）`LAYOUT_TEXTS.stat*`、`goalLine*`、§5.4 末段、§11.4 DB-1～DB-5、HT-2 |
 | AC-18-01～AC-18-06 | §5 |
 | AC-21-03 | `PersistedData` 不含音訊；`RuntimeState` 禁放語音實例；（v0.9）`MediaStream`、`AudioContext`、`AnalyserNode` 與收音條音量值不得進入 `AppState` 或任何儲存（`RuntimeState` 註解） |
 | AC-23-01～AC-23-06 | `DataSourceEntry`、`BuiltinVocabItem.sources`／`phoneticSource`／`meaningSource`／`contentSource`、`ProjectLicenseInfo`、§4.3、L-4、L-6、V-SRC-01～05 |
@@ -637,9 +650,9 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-18-01、AC-24-02（v0.8 新增的今日紀錄與歷史） | `PersistedData.todayLearned`、`learnedHistory`、§6.1、§6.3 |
 | AC-18-02、AC-25-01～AC-25-11 | `EntryMode`、`RuntimeState.entryMode`、`STORAGE_KEYS.state`、§5.5 FS-1～FS-7、V-ST-13 |
 | AC-24-06、AC-24-10、AC-24-11 | `SUPPORTED_SCHEMA_VERSIONS`、`BackupFile.schemaVersion`、§5.3 MG-1～MG-4、§6.2 步驟 3～7、IM-8、§6.3 |
-| AC-26-01、AC-26-02、AC-26-04（AC-26-03 v0.10 暫停） | `COLOR_LEVELS`（`dailyNewWords`、`vocabTarget`、`status`、`scenarioZh`；`scoreMin`／`scoreMax` 不顯示）；卡片版面屬設計層 |
+| AC-26-01、AC-26-02、AC-26-04（AC-26-03 v0.10 暫停） | `COLOR_LEVELS`（`dailyNewWords`、`vocabTarget`、`status`、`scenarioZh`；`scoreMin`／`scoreMax` 不顯示）；（v0.12 精簡列表，首次畫面與一般頁相同）`SEMANTIC_COLORS.level`、`LAYOUT_TEXTS.levelLocked`、§11.5 FT-3；列的尺寸與透明度屬設計層 |
 | AC-27-01～AC-27-05、AC-28-01～AC-28-08、AC-29-01～AC-29-03、AC-31-01～AC-31-04 | 設計層（§5.6）；狀態面：`NAV_TAB_ORDER`、`flashcard.isFlipped`、`VocabQuizQuestion.selectedIndex`、`Part5Progress.lockedSelection` |
-| AC-30-01、AC-30-02、AC-30-05、AC-30-08、AC-30-10 | §5.4 LR-6（X、D、長條圖、小環形圖算法）、`DASHBOARD_CHART_DAYS`、`COLOR_LEVELS.dailyNewWords` |
+| AC-30-01、AC-30-02、AC-30-05、AC-30-08、AC-30-10 | §5.4 LR-6（X、D、長條圖）與末段（v0.12 3 格數據算法、空狀態；小環形圖已移除）、`DASHBOARD_CHART_DAYS`、`COLOR_LEVELS.dailyNewWords`、`LAYOUT_TEXTS.todayRing`／`stat*`、`SEMANTIC_COLORS.goalReached`、`COLOR_TOKENS.brand`（未達成進度色） |
 | AC-30-03、AC-30-04、AC-30-06、AC-30-07、AC-30-11 | `LearningEventKind`、`TodayLearnedState`、§5.4 LR-1～LR-5、V-ST-12 |
 | AC-30-09、AC-30-12、AC-30-13 | `LearnedHistory`、`LEARNED_HISTORY_DAYS`、MG-1～MG-4、RD-1、RD-2、V-ST-09～V-ST-11 |
 | AC-30-14 | §5.4 LR-7、`RuntimeState.learningQuotaNoticeShown`、IM-7 |
@@ -651,14 +664,14 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-20-03、AC-20-04、AC-27-01、AC-27-04、AC-17-06（v0.9 導覽 4 項） | `NAV_TAB_ORDER`、`HIDDEN_TAB_IDS`、`TabId`、§5.8 HT-1～HT-5、V-ST-15 |
 | AC-34-01 | `PWA_MANIFEST`、`PwaManifest`、`PwaManifestIcon`、§10.3 MF-1～MF-4、HD-2、V-PWA-02、V-PWA-03 |
 | AC-34-02 | `PWA_MANIFEST`（`name`、`start_url`、`display`、`background_color`）、MF-2、PE-1；首次畫面／主控台沿用 §5.5 FS-1 |
-| AC-34-03 | `PWA_DEPLOY_FILES`（`sizePx`、`purpose`）、§10.2 DP-4、DP-5、V-PWA-03 |
-| AC-34-04 | `PWA_THEME_COLOR`、`PWA_BACKGROUND_COLOR`、HD-1、V-PWA-04 |
+| AC-34-03 | `PWA_DEPLOY_FILES`（`sizePx`、`purpose`）、§10.2 DP-4（v0.12 (d) 改以 80% 安全圓判定）、DP-5、V-PWA-03 |
+| AC-34-04 | `PWA_THEME_COLOR`（v0.12 `#1e9bf0`）、`PWA_BACKGROUND_COLOR`（v0.12 `#eef4fa` = `COLOR_TOKENS.background`）、HD-1、V-PWA-04、VC-5 |
 | AC-34-05（iOS 實機） | `PWA_APP_NAME`、`icons/apple-touch-icon-180.png`（DP-4）、HD-1（`apple-mobile-web-app-title`、`apple-mobile-web-app-capable`）、HD-2（動態 `apple-touch-icon`）、FB-38、FB-43 |
 | AC-34-06、AC-34-08 | `PwaRuntimeState`（`eligible`、`standalone`、`installPromptAvailable`、`installSuppressed`）、§10.5 PE-1～PE-3、§10.8 IN-1～IN-3、FB-40 |
-| AC-34-07、AC-34-09、AC-34-10 | `PWA_TEXTS.installButton`、`RuntimeState.pwa`、§10.8 IN-1～IN-7、V-PWA-09、FB-42 |
+| AC-34-07、AC-34-09、AC-34-10 | `PWA_TEXTS.installButton`、`RuntimeState.pwa`、§10.8 IN-1～IN-7、V-PWA-09、FB-42；（v0.12 位於「資料備份」展開區內）`RuntimeState.dashboard.backupExpanded`、DB-6 |
 | AC-35-01 | `PWA_PRECACHE_URLS`、`PWA_CACHE_PREFIX`、§10.6 SW-1、SW-4、SW-5、`storage-schema.json` `meta.browserStoragePolicy.cacheStorage`、FB-39 |
 | AC-35-02、AC-35-03 | `PWA_PRECACHE_URLS`（`./` 與 `./index.html`）、SW-6 |
-| AC-35-04 | PE-4（PWA 初始化不阻擋首次繪製）、SW-6（快取優先） |
+| AC-35-04、AC-22-05（v0.12 量測點改為「開始今日學習」可點擊） | PE-4（PWA 初始化不阻擋首次繪製）、SW-6（快取優先）、`LAYOUT_TEXTS.startToday`／`startLearning` |
 | AC-35-05 | SW-4（安裝失敗不留下部分快取）、PE-3 |
 | AC-36-01、AC-36-02 | `PWA_BUILD_ID_PATTERN`、`PWA_BUILD_ID_META_NAME`、§10.6 SW-2、SW-3、V-PWA-06 |
 | AC-36-03 | §10.7 UP-1～UP-7、`PwaPageToSwMessage`、`PWA_TEXTS.updateNotice`／`updateButton`、`PWA_UPDATE_RECHECK_MS`、SW-1（`updateViaCache: "none"`）、SW-4（`cache: "reload"`） |
@@ -671,8 +684,19 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-37-05 | §10.10 PV-2～PV-7、SW-6～SW-8、SW-10、MF-1（封閉欄位集合）、HD-4（favicon）、FB-37 |
 | AC-21-01、AC-21-03（v0.11 修訂） | §10.10 PV-3、PV-5、PV-6；`storage-schema.json` `meta.browserStoragePolicy` |
 | AC-19-01（v0.11 修訂） | §10.2 DP-2、§10.4 HD-3（同目錄相對路徑、`file://` 下不得產生請求） |
-| AC-24-12 | `PWA_TEXTS.backupOriginNotice`、§10.9 NT-1 |
-| AC-23-02、AC-23-06（v0.11 品牌標識聲明） | 聲明文字由 pg-frontend 依 PRD 原文組字，名稱取 `PWA_APP_NAME`、著作權人取 `ProjectLicenseInfo.copyrightHolder`；`sources.js` 格式不變（pg-content 無工作） |
+| AC-24-12 | `PWA_TEXTS.backupOriginNotice`、§10.9 NT-1；（v0.12 收合規則）`RuntimeState.dashboard.backupExpanded`、DB-6 |
+| AC-23-02、AC-23-06（v0.11 品牌標識聲明） | 聲明文字由 pg-frontend 依 PRD 原文組字，名稱取 `PWA_APP_NAME`、著作權人取 `ProjectLicenseInfo.copyrightHolder`；`sources.js` 格式不變。（v0.12）「資料來源與授權」只由頁尾連結開啟（HT-2）；ORIGINAL `fullName` 改為「EnglishContext 原創內容」（§4.3，pg-content 修改值，DS-19） |
+| AC-24-01、AC-24-10、AC-30-12、AC-32-02（v0.12 改寫部分） | AC-24-01：DB-6（先展開「資料備份」）、§6.1 檔名不變；AC-24-10、AC-30-12、AC-32-02：§5.4 末段近 7 天空狀態、`LAYOUT_TEXTS.chartEmpty`；AC-32-02「已掌握 0 字」：`LAYOUT_TEXTS.statMasteredCount` |
+| AC-25-01～AC-25-03、AC-25-06、AC-25-10、AC-26-06（v0.12 改寫部分） | §5.5 FS-3、§11.5 FT-1～FT-6（首次畫面標題、摘要行）；§11.4 DB-4（目標行格式、依 `goal.appliedColor`／`effectiveColor`）；資料行為依 FS-4、FS-5、GS-3 不變 |
+| AC-33-02（v0.12 刪除「主控台入口」字樣） | HT-2（主控台無模組入口）；`RuntimeState.currentTab` 註解（離開 `flashcards` 釋放麥克風）不變 |
+| AC-36-01（v0.12 (b) 改為「會進入交付 HTML 的字元」） | §10.6 SW-2 不變（BUILD_ID 以寫入前的 HTML 計算，資料檔註解被建置捨棄時 HTML 不變、BUILD_ID 不變，屬正確行為）、V-PWA-06（v0.12 文字同步） |
+| AC-38-01～AC-38-04、AC-38-06 | `COLOR_TOKENS`、`SEMANTIC_COLORS`、§11.2 VC-1～VC-8、V-LAY-01～V-LAY-04 |
+| AC-38-05、AC-38-10、E-94 | `APP_DISPLAY_NAME`、`FROZEN_IDENTIFIERS`、§11.1 NM-1～NM-6、§4.3 ORIGINAL、V-LAY-05、V-LAY-06 |
+| AC-38-07、AC-38-08、AC-38-09 | 設計層（§5.6 v0.12 段）；AC-38-08 單字卡結構與 `RuntimeState.flashcard` 不變；AC-38-09 展開收合狀態：DB-6 |
+| AC-39-01～AC-39-07、AC-39-09、AC-39-10 | §11.4 DB-1～DB-5、`LAYOUT_TEXTS`（主控台段）、§5.4 末段、HT-2；尺寸與位置屬設計層 |
+| AC-39-08、E-90、E-91 | `DashboardRuntimeState`、`RuntimeState.dashboard`、§11.4 DB-6、V-LAY-07；`storage-schema.json` 未改 |
+| AC-40-01～AC-40-03 | §11.6 MT-1、MT-2（進度由 `part5.currentIndex`、`phase`、題庫長度推導，不新增狀態）、`COLOR_TOKENS.brand`、`SEMANTIC_COLORS.correct`／`wrong` |
+| AC-41-01～AC-41-04、E-93 | §11.5 FT-1～FT-6、`LAYOUT_TEXTS`（首次畫面段）、`COLOR_LEVELS`、`goal.draftScore`（GS-1）、§5.5 FS-2～FS-5；固定底部列與捲動行為屬設計層 |
 
 ---
 
@@ -719,12 +743,18 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | FB-35 | （v0.9 新增）AC-32-04 要求取消後分數回到 600，且 localStorage 與按「套用」前完全相同；但按「套用」前改分數時 `goal.draftScore`（例 300）已依 AC-02-08 寫入。契約定為取消時只還原記憶體 `draftScore`、不立即寫入（CI-9），下一次寫入時才寫出 600。若使用者取消後、任何寫入前就重新載入，滑桿會顯示 300（生效色級仍為綠、單字集不變，同 AC-01-03、AC-01-06 的「未套用」狀態）。**（v0.10 更新）** 畫面已無滑桿；點棕卡片時 `draftScore` = 465 已寫入，取消後任何寫入前重新載入，選中卡片會是棕（GS-1），生效色級仍為綠、單字集不變（同 AC-01-03） | PM、QA | 影響 PRD（輕微，確認即可） | 請 PM 確認此行為可接受；若希望重新載入也選中綠卡片，需放寬 AC-32-04 為「localStorage 中除 `draftScore` 外皆相同」，契約改為取消時立即寫入 |
 | FB-36 | （v0.10 新增）AC-26-06 的前置條件「目標分數分別設為 10、215、…、735（以 DevTools 修改）」只寫一個值，但資料有 `draftScore`（決定選中卡片，GS-1）與 `appliedScore`（目標分數）兩欄。若只改 `appliedScore`、`draftScore` 仍是別的值，選中卡片與「直接套用」後的分數會依 `draftScore`，AC 不成立 | QA、PM | 待辦（知會，SA 定案） | 不需改 PRD；QA 構造 AC-26-06 狀態時**兩欄設為同一值**（與正常套用後的資料一致），`appliedColor`／`effectiveColor` 可任填合法值（讀取時依 V-ST-02 重算）；匯入備份的方式同理 |
 | FB-37 | （v0.11 新增）AC-37-05 要求頁面請求「全部在部署目錄內」，但 HTML 沒有 `<link rel="icon">` 時，Chrome 會自動請求網域根目錄的 `/favicon.ico`（不在部署目錄、也不在預先快取清單），違反該 AC。契約以 HD-4 規定 HTML 靜態放 `<link rel="icon" href="data:,">`（`data:` 網址不產生網路請求），https 版可改指向預先快取清單內的 `icons/icon-192.png` | PM、QA | 待辦（知會，SA 定案） | 不需改 PRD；QA 驗 AC-37-05 時若看到 `/favicon.ico` 請求即為缺陷 |
-| FB-38 | （v0.11 新增）AC-34-01、AC-34-05 寫「檢查原始碼」頁面有 manifest 與 `<link rel="apple-touch-icon">`，但 R-20 PM 判斷 (d) 與 AC-37-01 要求 `file://` 下不得讀取 manifest，契約因此禁止 HTML 靜態寫入這兩個 `<link>`，只在 PE-1 成立時以程式加入（HD-2、HD-3）。交付 HTML 原始檔中**不會**有這兩個標籤 | QA、PM | 待辦（知會，SA 定案） | 不需改 PRD；QA 以載入後的 DOM（DevTools Elements）檢查，原始檔只檢查加入連結的程式與 PE-1 條件。若 PM 希望文字一致，可把 AC-34-05「檢查原始碼」改為「檢查載入後的頁面元素」 |
+| FB-38 | **已解除（v0.12）**：PRD v0.12 AC-34-05 已改為「檢查載入後的頁面元素」並註明連結由程式動態加入。原文：（v0.11 新增）AC-34-01、AC-34-05 寫「檢查原始碼」頁面有 manifest 與 `<link rel="apple-touch-icon">`，但 R-20 PM 判斷 (d) 與 AC-37-01 要求 `file://` 下不得讀取 manifest，契約因此禁止 HTML 靜態寫入這兩個 `<link>`，只在 PE-1 成立時以程式加入（HD-2、HD-3）。交付 HTML 原始檔中**不會**有這兩個標籤 | QA、PM | 待辦（知會，SA 定案） | 不需改 PRD；QA 以載入後的 DOM（DevTools Elements）檢查，原始檔只檢查加入連結的程式與 PE-1 條件。若 PM 希望文字一致，可把 AC-34-05「檢查原始碼」改為「檢查載入後的頁面元素」 |
 | FB-39 | （v0.11 新增）AC-35-01 要求「本專案快取恰為 1 個」。依 Q-43 決議 A，新版已安裝但使用者尚未按「重新整理」期間，舊版快取（使用中）與新版快取（等待中）會同時存在，共 2 個；新版啟用時才刪除舊版（SW-9） | QA | 待辦（知會） | 不需改 PRD；AC-35-01 為首次造訪情境不受影響；AC-36-05 依 PRD 在 V2 **啟用後**檢查。QA 不要在等待期間以 AC-35-01 判定 |
-| FB-40 | （v0.11 新增）AC-34-08 (e)「已安裝後以瀏覽器分頁開啟」不顯示按鈕：網頁無法可靠判斷「本應用已安裝但目前在分頁中」（`getInstalledRelatedApps` 需要 manifest `related_applications`，契約 MF-1 為隱私禁止此欄）。契約依賴 Chromium「已安裝時不觸發 `beforeinstallprompt`」的行為（IN-3），沒有另外的偵測 | PM、QA | 待辦（知會） | 不需改 PRD；若某瀏覽器版本在已安裝時仍觸發事件，按鈕會出現，屬瀏覽器行為，建議比照 AC-34-09 (b) 的「是否再次觸發由瀏覽器決定，不視為缺陷」處理；如 PM 同意，可於 AC-34-08 補註 |
-| FB-41 | （v0.11 新增）PRD 未指定 `theme_color` 的色值（AC-34-01 只要求格式 `#RRGGBB`、AC-34-04 只要求與 meta 相同）。SA 定為 App 主色 `#2f6fd6`（`--primary`）；`background_color` 依 AC-34-04 定為首次畫面 body 背景 `#f6f7f9`（`--bg`） | 人類 | 待辦（知會，SA 定案） | 契約核准即視為同意；若人類想改用圖示的藍色，只需改 `PWA_THEME_COLOR` 與 `PWA_MANIFEST.theme_color`（不涉持久化，可由主控代核） |
+| FB-40 | **已解除（v0.12）**：PRD v0.12 AC-34-08 已補註 (e) 按鈕是否出現由瀏覽器決定、不視為缺陷。原文：（v0.11 新增）AC-34-08 (e)「已安裝後以瀏覽器分頁開啟」不顯示按鈕：網頁無法可靠判斷「本應用已安裝但目前在分頁中」（`getInstalledRelatedApps` 需要 manifest `related_applications`，契約 MF-1 為隱私禁止此欄）。契約依賴 Chromium「已安裝時不觸發 `beforeinstallprompt`」的行為（IN-3），沒有另外的偵測 | PM、QA | 待辦（知會） | 不需改 PRD；若某瀏覽器版本在已安裝時仍觸發事件，按鈕會出現，屬瀏覽器行為，建議比照 AC-34-09 (b) 的「是否再次觸發由瀏覽器決定，不視為缺陷」處理；如 PM 同意，可於 AC-34-08 補註 |
+| FB-41 | **已解除（v0.12）**：PRD v0.12 Q-54 決議 A，`theme_color` 改為 `#1e9bf0`；`background_color` 依 AC-34-04、AC-38-02 改為新背景 `#eef4fa`（§10.3、VC-5）。原文：（v0.11 新增）PRD 未指定 `theme_color` 的色值（AC-34-01 只要求格式 `#RRGGBB`、AC-34-04 只要求與 meta 相同）。SA 定為 App 主色 `#2f6fd6`（`--primary`）；`background_color` 依 AC-34-04 定為首次畫面 body 背景 `#f6f7f9`（`--bg`） | 人類 | 待辦（知會，SA 定案） | 契約核准即視為同意；若人類想改用圖示的藍色，只需改 `PWA_THEME_COLOR` 與 `PWA_MANIFEST.theme_color`（不涉持久化，可由主控代核） |
 | FB-42 | （v0.11 新增）AC-34-07 允許 QA「以替身事件觸發」`beforeinstallprompt`。契約 IN-3 規定只接受具有 `prompt` 函式的事件（避免按下按鈕時拋出錯誤，AC-34-09 (c)），以 `new Event("beforeinstallprompt")` 建立的空事件會被忽略、按鈕不顯示 | QA | 待辦（知會） | 不需改 PRD；替身事件須附 `prompt()`（回傳 Promise）與 `userChoice`（Promise，值 `{ outcome: "accepted" \| "dismissed" }`），並可呼叫 `preventDefault()` |
 | FB-43 | （v0.11 新增）AC-34-05（iOS 實機）：iOS Safari 是否採用「載入後才由程式加入」的 `<link rel="apple-touch-icon">` 與 manifest，SA 無法驗證；契約另加靜態 `apple-mobile-web-app-capable`、`apple-mobile-web-app-title`（不產生請求）降低風險（HD-1） | 人類、SD | 待辦（知會，風險） | 不需改 PRD；人類實機驗證若圖示不正確，可改為 HTML 靜態寫入 `apple-touch-icon`（Chrome／Edge 在 `file://` 下不讀取此標籤，不影響 AC-37-01 的 Chrome／Edge 驗證），屬契約小修，可由主控代核 |
+| FB-44 | （v0.12 新增）PRD 與樣稿 `docs/mockups/v0.12-layout-demo.html` 的文字不一致：(a) AC-41-01 副標寫作「之後可以在『難易度設定』隨時變更」，『』是引號內再引用的寫法，樣稿顯示為「難易度設定」；(b) 樣稿收合區塊標題為「資料備份與安裝」，PRD 為「資料備份」（AC-39-08）；(c) 樣稿按鈕為「開始今日學習 →」，PRD 為「開始今日學習」 | QA、PM | 待辦（知會，SA 定案） | 依 PRD「樣稿與 AC 不一致時以 AC 為準」：(a) 畫面字串定為 `之後可以在「難易度設定」隨時變更`（`LAYOUT_TEXTS.firstRunSubtitle`）；(b) 用「資料備份」；(c) 文字為「開始今日學習」，箭頭若加須為 `aria-hidden` 裝飾。PM 若要 (a) 顯示『』，改常數即可（主控代核） |
+| FB-45 | （v0.12 新增）AC-39-04 目標行規定「分別套用」各色後的文字，未說明在一般難易度設定頁**點了卡片但未按「套用」**時主控台顯示什麼 | PM、QA | 待辦（知會，SA 定案） | 契約定為目標行一律依已套用值 `goal.appliedColor`／`effectiveColor`（DB-4），與 AC-17-06「每日新字量依生效色級」一致；未套用的 `draftScore` 不影響主控台。不需改 PRD |
+| FB-46 | （v0.12 新增）PRD 未給出下列畫面文字：(a) AC-39-08 展開後的「備份說明」；(b) AC-01-01 列表上方「本系統建議字量」說明行除這幾個字以外的內容；(c) AC-38-07 要求主控台各區塊有標題（≥ 18px），但今日任務卡、3 格數據、近 7 天圖表的標題文字未定（樣稿為「今日任務」「近 7 天」） | SD、PM | 待辦（知會） | 契約不定義這些文字（`LAYOUT_TEXTS` 只收 PRD 原文），由 SD 在 architecture.md 定案，限制：不得含「English Master Track」、「官方門檻」「Tier」、分數；AC-39-06 列舉的唯一性文字（「單字掌握率」等）不得在標題中重複出現。PM 若要固定文字，補進 AC 後契約再加常數 |
+| FB-47 | （v0.12 新增）AC-40-01 要求進度條 `aria-valuenow` = i（第 i 題），但結算畫面沒有「第 i / N 題」 | QA | 待辦（知會，SA 定案） | 契約定為結算畫面 `aria-valuenow` = N、填滿 100%（MT-1）；與 AC-40-01「結算畫面為 100%」一致 |
+| FB-48 | （v0.12 新增）PRD 色彩 token 表說「建議值由 SD 定為架構常數」，但 `background_color` 依 AC-34-04 須等於 body 背景，而 manifest 值是契約常數（§10.3）。契約因此把 token 定為 `COLOR_TOKENS`（固定值不得改；建議值為預設） | SD、主控 | 待辦（知會，SA 定案） | SD 若在 PRD 條件內改用其他背景值，須同時提契約小修改 `COLOR_TOKENS.background`、`PWA_BACKGROUND_COLOR`、`PWA_MANIFEST.background_color`（不涉持久化，主控代核，VC-5）；`brandDeep`、`accentText` 改值只需記入 architecture.md 並通過 VC-2、VC-3 條件，契約常數同步更新即可 |
+| FB-49 | （v0.12 新增）AC-38-10 (1) 要求畫面文字不出現「English Master Track」（不分大小寫），(2) 又要求匯出檔名前綴 `english-master-track-backup-` 不變。下載檔名會出現在瀏覽器的下載介面 | QA | 待辦（知會，SA 定案） | 契約把瀏覽器下載介面、DevTools、Cache Storage、localStorage 中出現的 `FROZEN_IDENTIFIERS` 視為**不屬 App 畫面文字**，不違反 (1)；App 自己的畫面（含匯出成功提示、錯誤訊息）不得顯示檔名或這些識別字（NM-6）。且 `english-master-track` 以連字號分隔，本來就不等於「English Master Track」字樣 |
 
 ### 9.1 下游回饋處理紀錄（v0.5，/pg-run 階段）
 
@@ -774,12 +804,24 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | :--- | :--- | :--- | :--- |
 | DS-11 | 建置流程（AC-36-01、AC-36-02、AC-36-07） | §10.2 DP-1～DP-7、§10.6 SW-2、SW-3：部署目錄恰 8 檔、BUILD_ID 由內容計算、不得含時間戳 | 決定部署目錄名稱與位置（例 `dist/site/`）；在 `tools/build.mjs` 加入：產生 `manifest.webmanifest`、計算 BUILD_ID、寫入 HTML meta 與 `sw.js`、複製圖示與 `ads.txt`、V-PWA-01～V-PWA-06 的建置期檢查（不符即中止）。**檢查現有建置是否寫入時間、隨機值或絕對路徑**（會破壞 AC-36-01 (a) 逐位元組相同） |
 | DS-12 | `ads.txt` 的來源位置（Q-46） | DP-6：內容與目前 `dist/ads.txt` 逐位元組相同、檔名小寫 | `dist/` 是建置輸出，目前 `ads.txt` 只存在於 `dist/`；若建置會清空 `dist/`，檔案會遺失。請指定來源位置（例如 `src/app/assets/ads.txt`，或另設非 PG 目錄由主控放置）並列入任務 |
-| DS-13 | `background_color` 與 CSS 的一致（AC-34-04） | `PWA_BACKGROUND_COLOR` = `#f6f7f9` = `--bg` | 架構記錄兩者必須相同；建議建置時讀取 `00-base.css` 的 `--bg` 比對，不同即中止；若日後改 `--bg`，同步提契約小修 |
+| DS-13 | `background_color` 與 CSS 的一致（AC-34-04） | `PWA_BACKGROUND_COLOR` = `--bg`（v0.11 為 `#f6f7f9`；**v0.12 改為 `#eef4fa`**，DS-21、VC-5） | 架構記錄兩者必須相同；建議建置時讀取 `00-base.css` 的 `--bg` 比對，不同即中止；若日後改 `--bg`，同步提契約小修 |
 | DS-14 | 圖示 PNG（Q-41、Q-45） | DP-4、DP-5：檔名、尺寸、不透明、maskable 安全區；由主控產生 | 決定 `src/app/` 下的資產目錄（建議 `src/app/assets/icons/`）；主控產圖不列為 PG 任務；FE 建置任務只複製並以 V-PWA-03 檢查 |
 | DS-15 | `static.yml`（Q-46，主控修改一次） | DP-1：整個部署目錄上傳 | 提供主控修改內容：建置後上傳部署目錄（取代逐檔 `cp`），不含 `docs/`、`src/`、`sources/` |
 | DS-16 | 頁面端模組與 UI | §10.4～§10.9：HD、PE、UP、IN、NT 規則與 `RuntimeState.pwa` | 新增 PWA 模組的位置與初始化時機（PE-4：不阻擋首次繪製，建議 `load` 事件後註冊）；新版提示的位置與樣式（不被底部導覽列遮住、非彈出式、減少動態無動畫，AC-27-03、AC-31-03）；安裝按鈕與 NT-1 說明放主控台「匯出備份」區塊 |
 | DS-17 | 測試策略 | V-PWA-01～V-PWA-12 | 單元測試：PE-1 判定表、IN 狀態機（替身事件，FB-42）、UP 流程（替身 registration）；建置測試：AC-36-01 三種情境；V-PWA (b) 本機 `localhost` 靜態伺服器的啟動方式 |
 | DS-18 | 工作範圍 | `src/data/` 格式不變、持久化結構不變（`schemaVersion` 2） | 不需 CT 任務、不需遷移任務；FE 任務列 V-PWA-01～V-PWA-12 與 AC-34～AC-37、AC-24-12、AC-23-02、AC-23-06（品牌標識聲明） |
+
+### 9.6 回饋下游（v0.12，給 SD；PRD R-21、Q-49～Q-57）
+
+| 編號 | 事項 | 契約的立場 | 請 SD 處理 |
+| :--- | :--- | :--- | :--- |
+| DS-19 | ORIGINAL 來源名稱（Q-49、AC-38-10 (1)） | §4.3：`fullName` = `"EnglishContext 原創內容"`；格式與其他欄位不變 | 列 **1 個 CT 任務**（pg-content）：改 `src/data/sources.js` ORIGINAL 的 `fullName`，以及產生該檔的 `src/data/_tools/lib.mjs` 中同一字串，重跑 V-SRC 自驗。`src/app/__tests__/_fixtures.js` 的同名字串屬 FE 範圍 |
+| DS-20 | 名稱與不改清單（NM） | §11.1 NM-1～NM-6、`FROZEN_IDENTIFIERS` | FE 任務：`<title>`、標題列 `h1`、`license-header.txt` 第一行改為「EnglishContext」；建置期檢查（V-PWA-04 現為檢查「English Master Track」）與既有測試（`build.test.js`、`shell.test.js` 斷言舊 `<title>`）同步改寫；**不得**改 `STORAGE_KEYS`、`BACKUP_FORMAT_ID`、匯出檔名、`dist/english-master-track.html`、`PWA_CACHE_PREFIX`、`emt-build-id` |
+| DS-21 | 色彩 token（VC） | `COLOR_TOKENS`、`SEMANTIC_COLORS`、§11.2 VC-1～VC-8 | (1) 把 CSS 變數對應到 token；**注意 v0.11 `--primary` = `#2f6fd6` 同時是藍色級色**：白字按鈕改用 `brandDeep`，藍色級維持 `#2f6fd6`（AC-38-03），兩者須拆成不同變數；(2) `--bg` 改為 `#eef4fa`，DS-13 的建置期比對改為 `--bg` = `PWA_BACKGROUND_COLOR`；(3) AC-38-01 以 `border-color` 也算出現強調橘，「開始今日學習」「開始學習」按鈕的邊框不得計算為 `#f7893b`（用 `border: none` 或其他色）；品牌主色同理不得出現在文字 `color`；(4) 按鈕邊框不得用 `#d5d9e0`（AC-38-06） |
+| DS-22 | 主控台重排（DB） | §11.4 DB-1～DB-6、`RuntimeState.dashboard`、IN-1（v0.12 加 `backupExpanded`）、NT-1 | 決定區塊元件、720px 置中、3 格並排、空狀態高度、收合控制項（`aria-expanded`）；刪除功能入口、「學習統計」「目前目標」區塊與 2 個小環形圖；「安裝 App」與不互通說明移入展開區；FE 單元測試列 V-LAY-07（展開狀態不寫 localStorage、切頁維持、匯入中不收合） |
+| DS-23 | 首次畫面（FT） | §11.5 FT-1～FT-6、`LAYOUT_TEXTS` 首次畫面段 | 精簡色級列（與一般難易度設定頁共用元件）、固定底部列（≤ 640px 固定、內容底部留白避免遮住頁尾連結與 Toast，AC-41-04）；摘要行數值與試算區共用同一計算函式（FT-4） |
+| DS-24 | 模擬測驗進度條（MT） | §11.6 MT-1、MT-2（純推導，不新增狀態） | 進度條元件與 `role="progressbar"` 屬性；720px 置中；減少動態無轉場 |
+| DS-25 | 工作範圍 | 持久化結構不變（`schemaVersion` 2、鍵 2、無遷移）；`src/data/` 只改 1 個字串值（DS-19） | CT 任務 1 個（DS-19）；其餘皆 FE；QA 依 V-LAY-01～V-LAY-08 與 PRD AC-38～AC-41 驗收 |
 
 ---
 
@@ -822,7 +864,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | DP-1 | 建置產出**一個**部署目錄（名稱與位置由 SD 定，例 `dist/site/`），內容恰為上表 8 檔，不多不少；不含 `docs/`、`src/`、`sources/`、source map、`english-master-track.html` 副本或其他檔案。`.github/workflows/static.yml` 整個上傳該目錄（Q-46，由主控修改一次） | AC-36-07 |
 | DP-2 | `index.html` 與 `dist/english-master-track.html` 逐位元組相同（同一份 HTML 同時作為 `file://` 版與 https 版） | AC-36-07、AC-19-01 |
 | DP-3 | 檔名與資料夾名全部小寫，HTML、manifest、`sw.js` 中的參照字串必須與上表路徑**大小寫完全相同**（GitHub 的 Linux 執行環境區分大小寫） | AC-36-07、AC-34-01 |
-| DP-4 | **圖示 PNG 規格**（Q-41 決議 A）：(a) PNG 格式、正方形、實際像素 = 表列尺寸；(b) 不含透明度通道（IHDR 色彩類型 2 = RGB、位元深度 8，且無 `tRNS` 區塊）；(c) `any` 圖示與 `apple-touch-icon-180`：取自來源圖裁掉灰色外框與陰影後的藍色方塊，四角補滿藍色成滿版正方形，保留橘色「EC」對話框與「EnglishContext」字樣；(d) `icon-maskable-512`：同 (c) 的圖案縮至約 85%、置中，四周以同一藍色補邊；橘色對話框與字樣必須完整位於以圖示中心為圓心、直徑為邊長 80% 的圓內 | AC-34-01、AC-34-03、AC-34-05 |
+| DP-4 | **圖示 PNG 規格**（Q-41 決議 A）：(a) PNG 格式、正方形、實際像素 = 表列尺寸；(b) 不含透明度通道（IHDR 色彩類型 2 = RGB、位元深度 8，且無 `tRNS` 區塊）；(c) `any` 圖示與 `apple-touch-icon-180`：取自來源圖裁掉灰色外框與陰影後的藍色方塊，四角補滿藍色成滿版正方形，保留橘色「EC」對話框與「EnglishContext」字樣；(d) `icon-maskable-512`：同 (c) 的圖案縮小後置中，四周以同一藍色補邊；**判定標準**：橘色「EC」對話框與「EnglishContext」字樣完整位於以圖示中心為圓心、直徑為邊長 80% 的安全圓內（v0.12 依 PRD AC-34-03、SD-FB-31 刪除「約縮至 85%」，不以縮放比例判定；主控實際產出約 78%，符合） | AC-34-01、AC-34-03、AC-34-05 |
 | DP-5 | **圖示來源**（Q-45 決議 A）：原圖 `sources/pwa/PWA_Icon.jpg`；由**主控**依 DP-4 產生 4 個 PNG，放在 `src/app/` 下的資產目錄（路徑由 SD 定，建議 `src/app/assets/icons/`），檔名與上表 `icons/` 下的檔名相同；產生方式記錄於 `sources/pwa/`。建置**只複製**（逐位元組相同），不縮放、不重新編碼；任何一檔缺少或不符 DP-4 (a)(b) 時建置中止 | AC-34-03、AC-36-01 (c) |
 | DP-6 | `ads.txt`：內容與目前 `dist/ads.txt` 逐位元組相同（1 行 `google.com, pub-4051803210893105, DIRECT, f08c47fec0942fa0`），檔名小寫；HTML 不參照、不預先快取、頁面與 service worker 不請求。來源位置由 SD 定（DS-12）。註：專案子路徑下的 `ads.txt` 不會被廣告系統讀取（R-20 風險 (5)），契約只負責照原樣部署 | AC-36-07 |
 | DP-7 | 文字檔編碼：`index.html`、`manifest.webmanifest`、`sw.js` 皆 UTF-8、無 BOM | AC-34-01 |
@@ -831,15 +873,15 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 
 | 欄位 | 值 | 規則 | 對應 AC |
 | :--- | :--- | :--- | :--- |
-| `name` | `"EnglishContext"` | = `PWA_APP_NAME`；只用於 PWA 安裝名稱（Q-42） | AC-34-01、AC-34-02 |
+| `name` | `"EnglishContext"` | = `PWA_APP_NAME` = `APP_DISPLAY_NAME`（Q-42；v0.12 起 App 內名稱也相同，Q-49） | AC-34-01、AC-34-02 |
 | `short_name` | `"EnglishContext"` | 同上 | AC-34-01、AC-34-02 |
 | `id` | `"./"` | 相對路徑，解析後 = 部署目錄 | AC-34-01 |
 | `start_url` | `"./"` | 相對於 manifest 網址解析 = 部署目錄（不是網域根目錄） | AC-34-01、AC-34-02 |
 | `scope` | `"./"` | 同上；與 service worker scope 相同 | AC-34-01、AC-35-01 |
 | `display` | `"standalone"` | — | AC-34-01、AC-34-02 |
 | `lang` | `"zh-Hant-TW"` | — | AC-34-01 |
-| `theme_color` | `"#2f6fd6"` | = `PWA_THEME_COLOR`（FB-41）；= HTML `<meta name="theme-color">` | AC-34-01、AC-34-04 |
-| `background_color` | `"#f6f7f9"` | = `PWA_BACKGROUND_COLOR` = 首次畫面 body 背景（`--bg`，DS-13） | AC-34-01、AC-34-02、AC-34-04 |
+| `theme_color` | `"#1e9bf0"` | = `PWA_THEME_COLOR` = `COLOR_TOKENS.themeColor`（v0.12 由 `#2f6fd6` 改，Q-54 決議 A）；= HTML `<meta name="theme-color">` | AC-34-01、AC-34-04、AC-38-02 |
+| `background_color` | `"#eef4fa"` | = `PWA_BACKGROUND_COLOR` = `COLOR_TOKENS.background` = 首次畫面 body 背景（v0.12 由 `#f6f7f9` 改，AC-34-04、AC-38-02；DS-13、VC-5） | AC-34-01、AC-34-02、AC-34-04、AC-38-02 |
 | `icons` | 3 筆，見下 | 順序固定；每筆單一 `purpose` | AC-34-01、AC-34-03 |
 
 `icons`：`{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }`、`{ "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }`、`{ "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }`。
@@ -849,13 +891,13 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | MF-1 | `manifest.webmanifest` 為合法 JSON，與 `PWA_MANIFEST` **深度相等**；鍵集合**封閉**為上表 10 個，不得加入 `description`、`orientation`、`shortcuts`、`share_target`、`protocol_handlers`、`file_handlers`、`related_applications`、`prefer_related_applications`、`screenshots` 等任何其他鍵（`share_target` 等會讓外部資料流入，`related_applications` 會連到外部商店，PV-4） | AC-34-01、AC-37-05 |
 | MF-2 | 所有網址欄位為相對路徑（不以 `/`、`http`、`https` 開頭）；`icons[].src` 相對於 manifest 網址解析，必須指向 `PWA_DEPLOY_FILES` 中的檔案 | AC-34-01、AC-34-02 |
 | MF-3 | manifest **不含** BUILD_ID 或任何隨建置變動的值；輸出位元組只由 `PWA_MANIFEST` 決定（鍵順序同常數；縮排格式由 SD 定，但每次建置相同） | AC-36-01 (a) |
-| MF-4 | 安裝相關名稱只此一處（加上 HD-1 的 `apple-mobile-web-app-title`）使用「EnglishContext」；HTML `<title>`、App 內標題、授權頁等既有文字維持「English Master Track」（AC-23-02、AC-23-06 的品牌標識聲明除外） | AC-34-01、AC-34-02 |
+| MF-4 | （v0.12 改寫，Q-49）manifest `name`／`short_name`、HD-1 的 `apple-mobile-web-app-title`、HTML `<title>`、標題列、授權註解作品名稱一律為「EnglishContext」（§11.1 NM-1～NM-4）；不再有「只用於安裝名稱」的限制。識別字依 `FROZEN_IDENTIFIERS` 不改（NM-5） | AC-34-01、AC-34-02、AC-38-10 |
 
 ### 10.4 HTML head（HD）
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| HD-1 | **靜態元素**（寫在 HTML 中，`file://` 與 https 都有，皆不產生網路請求）：`<meta name="theme-color" content="#2f6fd6">`、`<meta name="apple-mobile-web-app-title" content="EnglishContext">`、`<meta name="apple-mobile-web-app-capable" content="yes">`、`<meta name="mobile-web-app-capable" content="yes">`（兩者並存，避免 Chrome 對單獨的 `apple-mobile-web-app-capable` 發出已淘汰警告，AC-37-01）、`<meta name="apple-mobile-web-app-status-bar-style" content="default">`、`<meta name="emt-build-id" content="<BUILD_ID>">`（SW-2）、`<link rel="icon" href="data:,">`（HD-4）。`<title>English Master Track</title>` 不變 | AC-34-04、AC-34-05、AC-36-02、AC-37-01 |
+| HD-1 | **靜態元素**（寫在 HTML 中，`file://` 與 https 都有，皆不產生網路請求）：`<meta name="theme-color" content="#1e9bf0">`（v0.12，Q-54）、`<meta name="apple-mobile-web-app-title" content="EnglishContext">`、`<meta name="apple-mobile-web-app-capable" content="yes">`、`<meta name="mobile-web-app-capable" content="yes">`（兩者並存，避免 Chrome 對單獨的 `apple-mobile-web-app-capable` 發出已淘汰警告，AC-37-01）、`<meta name="apple-mobile-web-app-status-bar-style" content="default">`、`<meta name="emt-build-id" content="<BUILD_ID>">`（SW-2）、`<link rel="icon" href="data:,">`（HD-4）。（v0.12，Q-49）`<title>EnglishContext</title>`（原「English Master Track」，NM-1） | AC-34-04、AC-34-05、AC-36-02、AC-37-01、AC-38-10 |
 | HD-2 | **動態元素**（只在 PE-1 成立時，於啟動時以程式加入 `<head>`）：`<link rel="manifest" href="manifest.webmanifest">`、`<link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon-180.png">`。可選：把 HD-1 的 icon 連結 `href` 改為 `icons/icon-192.png`。所有 `href` 為相對路徑（DP-3） | AC-34-01、AC-34-05、AC-37-01 |
 | HD-3 | **禁止的靜態元素**：HTML 原始碼不得含 `<link rel="manifest">`、`<link rel="apple-touch-icon">`、`<link rel="apple-touch-startup-image">`、指向檔案的 `<link rel="icon">`、對 PWA 附屬檔的 `preload`／`prefetch`，以及任何 `<script src>`（R-20 PM 判斷 (d)：靜態 manifest 連結在 `file://` 下會被 Chrome 讀取並報錯）。QA 驗 AC-34-01、AC-34-05 的連結以載入後的 DOM 為準（FB-38） | AC-37-01、AC-37-02、AC-19-01 |
 | HD-4 | **favicon**：靜態 `<link rel="icon" href="data:,">` 防止瀏覽器自動請求網域根目錄 `/favicon.ico`（在部署目錄外，違反 AC-37-05，FB-37）。https 版若改指向 `icons/icon-192.png`（HD-2 可選），仍在預先快取清單內 | AC-37-05、AC-21-01 |
@@ -875,7 +917,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
 | SW-1 | **註冊**：`navigator.serviceWorker.register("./sw.js", { scope: "./", updateViaCache: "none" })`。腳本與頁面同源、位於部署目錄根；scope 解析後 = 部署目錄（不是網域根目錄）。`updateViaCache: "none"` 使瀏覽器檢查更新時不取 HTTP 快取 | AC-35-01、AC-36-03 |
-| SW-2 | **BUILD_ID**（建置識別碼 = 快取版本識別）：建置時計算，格式 `PWA_BUILD_ID_PATTERN`（16 個小寫十六進位字元）= 以 SHA-256（Node 內建 `crypto`）對下列輸入依固定順序計算的十六進位摘要前 16 字元：(1) 寫入 BUILD_ID **之前**的 HTML（meta 的 `content` 為固定佔位字串）；(2) `manifest.webmanifest`；(3) 4 個圖示 PNG（依 `PWA_DEPLOY_FILES` 順序）；(4) 寫入任何值**之前**的 service worker 範本原始碼。每項以「相對路徑 + 位元組長度 + 內容」分隔（具體分隔格式由 SD 定，但必須固定）。不得納入時間、隨機值、絕對路徑、環境變數；`ads.txt` 不納入。結果：內容不變 → 相同；`src/app/`、`src/data/` 任一字元或任一圖示改變 → 不同 | AC-36-01、AC-36-02 |
+| SW-2 | **BUILD_ID**（建置識別碼 = 快取版本識別）：建置時計算，格式 `PWA_BUILD_ID_PATTERN`（16 個小寫十六進位字元）= 以 SHA-256（Node 內建 `crypto`）對下列輸入依固定順序計算的十六進位摘要前 16 字元：(1) 寫入 BUILD_ID **之前**的 HTML（meta 的 `content` 為固定佔位字串）；(2) `manifest.webmanifest`；(3) 4 個圖示 PNG（依 `PWA_DEPLOY_FILES` 順序）；(4) 寫入任何值**之前**的 service worker 範本原始碼。每項以「相對路徑 + 位元組長度 + 內容」分隔（具體分隔格式由 SD 定，但必須固定）。不得納入時間、隨機值、絕對路徑、環境變數；`ads.txt` 不納入。結果：內容不變 → 相同；`src/app/`、`src/data/` 任一會進入交付 HTML 的字元或任一圖示改變 → 不同（v0.12 依 PRD AC-36-01 (b) 釐清） | AC-36-01、AC-36-02 |
 | SW-3 | **`sw.js` 內嵌值**：`BUILD_ID`（同 HTML `<meta name="emt-build-id">`）、`CACHE_NAME = "english-master-track-pwa-" + BUILD_ID`、`PRECACHE_URLS` = `PWA_PRECACHE_URLS`（7 項）。不得使用 `importScripts`、不得含任何絕對網址或其他來源網址 | AC-36-02、AC-37-05 |
 | SW-4 | **install**：開啟 `CACHE_NAME`，對 `PRECACHE_URLS` 每一項以 `new Request(url, { cache: "reload" })` 向伺服器取得（不取 HTTP 快取，R-20 PM 判斷 (c)）；每個回應須 `ok`（狀態 200）才寫入；任一項失敗 → 刪除 `CACHE_NAME` 並讓 install 失敗（`waitUntil` 的 Promise 拒絕），不留下部分快取。install 中**不得**呼叫 `skipWaiting()`。`./` 與 `./index.html` 兩鍵的內容須逐位元組相同（可各自請求，或取一次後以 `clone()` 寫入兩鍵，由 SD 定） | AC-35-01、AC-35-05、AC-36-03 |
 | SW-5 | **activate**：先依 SW-9 刪除舊的本專案快取，再呼叫 `self.clients.claim()` | AC-35-01、AC-36-05 |
@@ -911,7 +953,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| IN-1 | **顯示條件**（推導值，不另存）：`eligible && !standalone && installPromptAvailable && !installSuppressed && entryMode === "main" && currentTab === "dashboard"`。不成立時不渲染（不佔版面、不留空白）。位置：主控台「匯出備份」所在區塊、NT-1 說明文字之後；文字 `PWA_TEXTS.installButton`「安裝 App」；觸控目標 ≥ 44×44 CSS px。首次畫面、導覽列、難易度設定、單字卡、模擬測驗、「資料來源與授權」頁皆不顯示 | AC-34-07、AC-34-08 |
+| IN-1 | **顯示條件**（推導值，不另存）：`eligible && !standalone && installPromptAvailable && !installSuppressed && entryMode === "main" && currentTab === "dashboard" && dashboard.backupExpanded`（v0.12 新增最後一項，AC-34-07、AC-39-08、E-90）。不成立時不渲染（不佔版面、不留空白）。位置：主控台「資料備份」收合區塊的展開內容中、NT-1 說明文字之後（v0.12；區塊內順序見 DB-6）；文字 `PWA_TEXTS.installButton`「安裝 App」；觸控目標 ≥ 44×44 CSS px。首次畫面、導覽列、難易度設定、單字卡、模擬測驗、「資料來源與授權」頁皆不顯示 | AC-34-07、AC-34-08 |
 | IN-2 | **standalone 判定**（啟動時一次）：`matchMedia("(display-mode: standalone)").matches === true` 或 `navigator.standalone === true`（iOS）→ `standalone = true`；例外 → `false` | AC-34-08 (d) |
 | IN-3 | **`beforeinstallprompt`**（只在 `eligible` 時監聽）：`installSuppressed` 或 `standalone` 為 true → 忽略；事件沒有 `prompt` 函式 → 忽略（FB-42）；否則呼叫 `event.preventDefault()`（不讓瀏覽器自動跳出迷你橫幅，R-20 風險 (4)），把事件存在**模組內部變數**（不得放入 `AppState`），`installPromptAvailable = true` 並重繪主控台。瀏覽器未觸發事件前按鈕不顯示 | AC-34-07、AC-34-08 (c)(e)(f) |
 | IN-4 | 不自動呼叫 `prompt()`；不顯示任何自製的安裝橫幅、浮動提示或 iOS 專用說明（Q-44 未採選項 C） | AC-34-07、AC-34-08 (b) |
@@ -924,7 +966,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| NT-1 | 主控台「匯出備份」按鈕所在區塊、緊接按鈕之後，常駐顯示 `PWA_TEXTS.backupOriginNotice`（逐字：「學習紀錄只存在目前的瀏覽器與網址；檔案版、網頁版、主畫面 App 彼此不互通，可用匯出備份／匯入轉移」）；`file://` 與 https 文字相同，不受 `eligible`、`storageStatus` 影響；以 `textContent` 寫入（C-7）；不是彈出視窗、不需關閉；不被裁切或被底部導覽列遮住（版面屬設計層） | AC-24-12、E-81 |
+| NT-1 | （v0.12）只要「匯出備份」按鈕可見（`dashboard.backupExpanded = true`，DB-6），就在同一區塊、緊接「匯出備份」「匯入備份」之後顯示；收合時與按鈕一併不渲染（AC-24-12 v0.12）。主控台「匯出備份」按鈕所在區塊、緊接按鈕之後，常駐顯示 `PWA_TEXTS.backupOriginNotice`（逐字：「學習紀錄只存在目前的瀏覽器與網址；檔案版、網頁版、主畫面 App 彼此不互通，可用匯出備份／匯入轉移」）；`file://` 與 https 文字相同，不受 `eligible`、`storageStatus` 影響；以 `textContent` 寫入（C-7）；不是彈出視窗、不需關閉；不被裁切或被底部導覽列遮住（版面屬設計層） | AC-24-12、E-81 |
 
 ### 10.10 儲存與隱私（PV）
 
@@ -945,9 +987,9 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | V-PWA-01 | 部署目錄的檔案集合 = `PWA_DEPLOY_FILES` 的 `path` 集合（8 個，大小寫相同）；`index.html` 與 `dist/english-master-track.html` 位元組相同；`ads.txt` 與來源逐位元組相同 | AC-36-07 |
 | V-PWA-02 | `manifest.webmanifest`：UTF-8 無 BOM、`JSON.parse` 成功、與 `PWA_MANIFEST` 深度相等、鍵恰為 10 個 | AC-34-01 |
 | V-PWA-03 | 每個 PNG：檔頭為 PNG 簽章；IHDR 寬 = 高 = `sizePx`；色彩類型 2、位元深度 8；無 `tRNS` 區塊。maskable 安全區與四角顏色由 QA 以 DevTools 遮罩預覽與目視驗收（AC-34-03） | AC-34-01、AC-34-03、AC-34-05 |
-| V-PWA-04 | HTML：含 HD-1 全部靜態元素，`theme-color` = `PWA_THEME_COLOR`；`emt-build-id` 符合 `PWA_BUILD_ID_PATTERN`；不含 HD-3 禁止的元素；`<title>` 仍為「English Master Track」 | AC-34-04、AC-36-02、AC-37-01、AC-19-01 |
+| V-PWA-04 | HTML：含 HD-1 全部靜態元素，`theme-color` = `PWA_THEME_COLOR`；`emt-build-id` 符合 `PWA_BUILD_ID_PATTERN`；不含 HD-3 禁止的元素；（v0.12）`<title>` 為「EnglishContext」（= `APP_DISPLAY_NAME`），`theme-color` 為 `#1e9bf0` | AC-34-04、AC-36-02、AC-37-01、AC-19-01、AC-38-10 |
 | V-PWA-05 | `sw.js`：`BUILD_ID` 與 HTML 相同；`CACHE_NAME` = `PWA_CACHE_PREFIX` + `BUILD_ID`；預先快取清單與 `PWA_PRECACHE_URLS` 集合相同；原始碼不含 `importScripts`、`indexedDB`、`localStorage`、`"push"`、`"sync"`、`http://`、`https://`；只有 SW-10 允許的 4 種監聽 | AC-36-02、AC-37-05 |
-| V-PWA-06 | 建置可重現：同一原始碼連續建置 2 次，`index.html`、`manifest.webmanifest`、`sw.js` 逐位元組相同；改 `src/app/` 或 `src/data/` 1 個字元、或替換 1 張圖示 PNG 後，BUILD_ID 不同、`sw.js` 不同；全程不需手動修改版本號 | AC-36-01 |
+| V-PWA-06 | 建置可重現：同一原始碼連續建置 2 次，`index.html`、`manifest.webmanifest`、`sw.js` 逐位元組相同；改 `src/app/` 或 `src/data/` 中 1 個**會進入交付 HTML** 的字元、或替換 1 張圖示 PNG 後，BUILD_ID 不同、`sw.js` 不同；只改不進入交付 HTML 的內容（如被建置捨棄的資料檔註解）時 HTML 與 BUILD_ID 不變，屬正確行為（v0.12 依 PRD AC-36-01 (b)）；全程不需手動修改版本號 | AC-36-01 |
 | V-PWA-07 | `file://` 執行期：`getRegistrations()` 為空、DOM 無 manifest／apple-touch-icon 連結、Network 請求 0、Console 無錯誤與 manifest／service worker／圖示警告、無安裝按鈕與新版提示、NT-1 說明顯示 | AC-37-01、AC-37-02 |
 | V-PWA-08 | PE-1 判定表（單元測試）：`file:///…` → false；`https://x.github.io/p/` 且有 `serviceWorker` → true；`http://localhost:8080/` → true；`http://127.0.0.1/` → true；`http://192.168.0.2/` → false；https 但 `navigator.serviceWorker` 不存在 → false；存取 `navigator.serviceWorker` 拋例外 → false | AC-37-04、AC-37-03 |
 | V-PWA-09 | 安裝按鈕狀態機（單元測試，替身事件依 FB-42）：事件前不顯示；事件後只在主控台顯示；按下後立即消失且 `prompt()` 只被呼叫 1 次（含快速連點 2 次）；接受、拒絕後本頁不再顯示（再次觸發事件也不顯示）；`appinstalled` 後不顯示；`standalone` 或 `eligible = false` 時永不顯示 | AC-34-07～AC-34-10 |
@@ -957,7 +999,101 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 
 ---
 
-## 11. 變更紀錄
+## 11. 版面與視覺契約（v0.12，PRD R-21、US-38～US-41、Q-49～Q-57；**不改持久化結構**）
+
+型別與常數見 `data-schema.ts` §13。PRD 原則「只改版面與視覺，功能行為不變」：本節以外的既有規則（§5～§10）全部繼續成立，除非下文明文修改。版面尺寸與動畫屬設計層（§5.6 v0.12 段）。
+
+### 11.1 名稱（NM；Q-49 決議）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| NM-1 | HTML `<title>` = `APP_DISPLAY_NAME`「EnglishContext」（HD-1、V-PWA-04 同步） | AC-38-10 (1)、AC-34-01、AC-34-02 |
+| NM-2 | 頁面頂端標題列（首次畫面、4 個功能區、「資料來源與授權」頁）由左到右：品牌小圖示 + 名稱文字 `APP_DISPLAY_NAME`。圖示為 PWA `any` 圖示的縮小版，**內嵌**於 HTML（`data:` 網址或內嵌 SVG），不得參照 `icons/` 檔案（`file://` 請求數須為 0）；裝飾用（`alt=""` 或 `aria-hidden="true"`），名稱以文字呈現 | AC-38-05、AC-19-01、AC-21-01 |
+| NM-3 | 「資料來源與授權」頁原創內容來源名稱取 `DATA_SOURCE_REGISTRY` 中 ORIGINAL 的 `fullName`（v0.12 值「EnglishContext 原創內容」，§4.3），pg-frontend 不得寫死；品牌標識聲明（AC-23-02、Q-48）文字不變，名稱仍取 `PWA_APP_NAME` | AC-38-10 (1)、AC-23-02 |
+| NM-4 | HTML 開頭授權註解**第一行**的作品名稱 = 「EnglishContext」；其餘聲明文字（MIT、CC BY-SA 4.0、著作權人 JimmyLin、品牌標識聲明）逐字不變 | AC-38-10 (1)(3)、AC-23-06 |
+| NM-5 | **不改清單**（`FROZEN_IDENTIFIERS`，與 v0.11 逐字相同）：localStorage 鍵 `englishMasterTrack:state`、`englishMasterTrack:unreadable`；備份 `format` `english-master-track-backup` 與 `schemaVersion` 2、欄位；匯出檔名前綴 `english-master-track-backup-`；交付檔 `dist/english-master-track.html`；快取前綴 `english-master-track-pwa-`（**改了會讓 SW-9 認不出 v0.11 的舊快取，舊快取永遠清不掉**）；`emt-build-id`。不得新增別名鍵、不得做「新舊鍵名」遷移 | AC-38-10 (2)、AC-36-04、AC-36-05、AC-24-03、E-94 |
+| NM-6 | App 的畫面文字（首次畫面、4 個功能區、「資料來源與授權」頁、對話框、Toast、更新提示）不得出現「English Master Track」（不分大小寫），也不得把 NM-5 的識別字或下載檔名當作文字顯示。瀏覽器下載介面、DevTools、程式註解、文件不屬畫面文字（FB-49） | AC-38-10 (1) |
+
+### 11.2 色彩（VC；PRD 色彩 token 表、Q-53～Q-55）
+
+| token（`COLOR_TOKENS`） | 值 | 固定／建議 | 用途 |
+| :--- | :--- | :--- | :--- |
+| `brand` 品牌主色 | `#1e9bf0` | 固定 | 非文字品牌元素：主環形圖未達成時的進度色、模擬測驗進度條填色、選中導覽項的指示、標題列圖示 |
+| `brandDeep` 深品牌色 | `#0866ad` | 建議 | 白字主要按鈕底色（「套用」「匯出備份」等）、品牌色文字與連結 |
+| `accent` 強調橘 | `#f7893b` | 固定 | 只用於「開始今日學習」「開始學習」按鈕底色、連續打卡格的強調圖示；標題列品牌圖示（AC-38-05）的橘色「EC」對話框除外（v0.13） |
+| `accentText` 橘鈕文字 | `#1f2937` | 建議 | 強調橘按鈕上的文字（深色字，Q-53 決議 A） |
+| `themeColor` | `#1e9bf0` | 固定 | manifest `theme_color`、`<meta name="theme-color">`（Q-54 決議 A） |
+| `background` 背景 | `#eef4fa` | 建議 | `body` 背景；= `PWA_BACKGROUND_COLOR` |
+| `surface` 表面 | `#ffffff` | 固定 | 區塊卡片底色 |
+| `text`／`textMuted` | `#1f2937`／`#5b6472` | 沿用 v0.11 | 內文、說明 |
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| VC-1 | `brand` 只用於上表用途；任何元素的文字 `color` 不得為 `brand`；白字元素的背景不得為 `brand`（白字對比約 3.0:1） | AC-38-01、AC-38-04 |
+| VC-2 | `brandDeep` 條件：與 `brand` 的 HSL 色相差 ≤ 10°、白字對比 ≥ 4.5:1（建議值約 205.8°，差 1.5°；約 6.0:1） | AC-38-04 |
+| VC-3 | `accent` 只出現在「開始今日學習」「開始學習」按鈕底色與連續打卡格的強調圖示；**標題列品牌圖示（AC-38-05）除外**：其橘色「EC」對話框與 App 圖示一致，可使用 `accent`，且不列入本條與 V-LAY-01 的計算（v0.13，PRD AC-38-01、SD-FB-39）；其他元素計算後的 `color`、`background-color`、`border-color`、SVG `fill`／`stroke` 都不得等於 `accent`（**含這兩個按鈕自己的邊框**）。按鈕文字為 `accentText`（不得白字，對 `accent` ≥ 4.5:1，建議值約 6.0:1）；打卡格的數字文字不得為橘色 | AC-38-01、AC-38-04、AC-39-02、AC-39-05 |
+| VC-4 | `body` 背景 = `background`（條件：HSL 色相 190°～220°、飽和度 ≥ 15%、亮度 94%～98%）；區塊卡片背景 = `surface`、`box-shadow` 不為 `none`、邊框寬度 0；卡片內統計格邊框寬度 0；按鈕不得以 v0.11 灰框線色 `#d5d9e0` 為邊框 | AC-38-02、AC-38-06 |
+| VC-5 | **綁定**：`COLOR_TOKENS.background` = `PWA_BACKGROUND_COLOR` = `PWA_MANIFEST.background_color` = 首次畫面 `body` 計算後背景；`COLOR_TOKENS.themeColor` = `PWA_THEME_COLOR` = `PWA_MANIFEST.theme_color` = `<meta name="theme-color">`。任何一處改值，其餘須同時改（契約小修，不涉持久化，主控代核；FB-48） | AC-34-04、AC-38-02 |
+| VC-6 | `SEMANTIC_COLORS`（色級 5 色、答對／答錯、STT 3 燈號、達成金色）與 v0.11 逐字相同，語意與位置不變；藍色級 `#2f6fd6` 不得被 `brand` 取代（v0.11 的 `--primary` 與藍色級同值，須拆開，DS-21） | AC-38-03、AC-40-03 |
+| VC-7 | 對比：一般文字 ≥ 4.5:1、大字（≥ 24 CSS px，或 ≥ 18.66 CSS px 且粗細 ≥ 700）≥ 3:1；量測範圍依 AC-38-04；停用按鈕與 `SEMANTIC_COLORS` 文字不量測（Q-55 決議 A）。`text`、`textMuted` 對 `background`（約 13.3:1、5.4:1）與 `surface` 皆符合 | AC-38-04 |
+| VC-8 | 不新增外部字型或外部資源；色彩一律以 CSS 內嵌 | AC-38-07、AC-19-01 |
+
+### 11.3 只在記憶體的介面狀態（v0.12 總表）
+
+| 狀態 | 存放 | 持久化 | 說明 |
+| :--- | :--- | :--- | :--- |
+| 「資料備份」展開／收合 | `RuntimeState.dashboard.backupExpanded` | 否 | DB-6；PRD AC-39-08 明定不寫入 localStorage、重新載入回到收合 |
+| 首次畫面選中列 | `goal.draftScore`（既有欄位） | 首次畫面期間否（FS-2）；一般頁依 GS-2 | 不新增欄位 |
+| 模擬測驗進度條 | 由 `part5.currentIndex`、`part5.phase`、題庫長度推導 | 不另存 | MT-1 |
+| 近 7 天空狀態 | 由 LR-6 顯示值推導 | 不另存 | §5.4 末段 |
+
+v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `schemaVersion` 維持 2、`PersistedData` 9 欄不變。日後若要求記住展開狀態等，屬持久化結構變更，須回 PM 並由人類核准（CLAUDE.md）。
+
+### 11.4 主控台（DB；US-39、Q-50、Q-52、Q-56）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| DB-1 | **區塊與順序**（DOM 順序 = 畫面順序）：頁面標題 `LAYOUT_TEXTS.dashboardTitle`「學習主控台」→ (1) 今日任務卡 → (2) 3 格數據 → (3) 近 7 天圖表 → (4) 「資料備份」收合區塊 → 頁尾（含「資料來源與授權」連結）。**移除**（v0.11 有、v0.12 不得出現）：「功能入口」區塊與通往難易度設定／單字卡／模擬測驗的模組入口按鈕、主控台本體內的「資料來源與授權」入口、「學習統計」「目前目標」區塊、「目前目標色級」「目前生效色級」「單字掌握數」標籤、2 個小環形圖、圖示磚 | AC-39-01、AC-39-06、AC-17-06、AC-30-01 |
+| DB-2 | **今日任務卡**：主環形圖文字 `LAYOUT_TEXTS.todayRing`（X、D 依 LR-6）；未達成（X < D）進度色 `COLOR_TOKENS.brand`，達成（X ≥ D）為 `SEMANTIC_COLORS.goalReached`；按鈕 `LAYOUT_TEXTS.startToday`（`accent` 底、`accentText` 字）；目標行（DB-4） | AC-39-02、AC-30-05、AC-38-01 |
+| DB-3 | **「開始今日學習」**：結果與點導覽「單字卡」相同——`currentTab = "flashcards"`（導覽選中項同步）；單字集為空時顯示 AC-06-06 空狀態。**不得**改動任何 `PersistedData`、不得呼叫 `setItem`（X、打卡、掌握數不變） | AC-39-03、E-89 |
+| DB-4 | **目標行**：依**已套用**的 `goal.appliedColor`、`goal.effectiveColor`（不看 `draftScore`，FB-45）。兩者相同 → `goalLineSame`（`{color}` = `appliedColor` 的 `nameZh`）；不同（藍、金）→ `goalLineCapped`（`{target}` = `appliedColor`、`{effective}` = `effectiveColor` 的 `nameZh`）；`{daily}` 一律 = `effectiveColor` 的 `dailyNewWords`（R-14）。之後接 `goalLineSeparator` 與可點擊的 `changeLink`「變更」→ `currentTab = "customizer"`（一般難易度設定頁，AC-25-06）。不顯示分數。結果：橘「橘級・每日 10 字・變更」、棕「棕級・每日 10 字・變更」、綠「綠級・每日 15 字・變更」、藍「目標藍級・生效綠級（內建上限）・每日 15 字・變更」、金「目標金級・生效綠級（內建上限）・每日 15 字・變更」 | AC-39-04、AC-17-06、AC-01-02、AC-01-07、AC-25-02、AC-25-03、AC-26-06、E-92 |
+| DB-5 | **3 格數據**（同一列並排，順序固定）：「連續打卡天數」數值 + 單位「天」（`StreakState` 顯示規則；格內有 `accent` 強調圖示）→「單字掌握率」大字百分比 + 小字 `statMasteredCount`「已掌握 N 字」→「模擬測驗正確率」百分比；算法見 §5.4 末段；無資料顯示 `statNoData`「—」，不得 NaN／Infinity；不使用環形圖 | AC-39-05、AC-17-01、AC-30-10、E-48 |
+| DB-6 | **「資料備份」收合區塊**：標題 `backupSectionTitle`「資料備份」+ 展開指示，控制項有 `aria-expanded` = `RuntimeState.dashboard.backupExpanded`。(a) 初始值 `false`：每次頁面載入、從首次畫面進入主控台時皆為收合；(b) 只有使用者點擊（或 Tab 後 Enter／空白鍵）標題列時切換；(c) 切換 `currentTab` 不改變此值（本次頁面期間維持）；(d) 匯入流程（選檔、確認對話框、成功或失敗提示）期間與之後都不自動收合；(e) 收合時不渲染備份說明、「匯出備份」「匯入備份」、`PWA_TEXTS.backupOriginNotice`、「安裝 App」；展開時依此順序顯示（「安裝 App」依 IN-1）；(f) 展開狀態**不寫入** localStorage、備份檔或任何儲存，操作前後本系統 localStorage 內容完全相同 | AC-39-08、AC-24-01、AC-24-12、AC-34-07、AC-38-09、E-90、E-91 |
+
+### 11.5 首次畫面與色級列（FT；US-41、US-26、Q-51、Q-57）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| FT-1 | **首次畫面順序**：標題列（NM-2）→ `firstRunTitle`「選擇你的目標」→ `firstRunSubtitle`「之後可以在「難易度設定」隨時變更」（FB-44）→ 說明行（以 `vocabNoteLead`「本系統建議字量」開頭，整個列表上方只 1 次）→ 5 個色級列（FT-3）。不再有獨立的「試算結果」卡；不顯示導覽列、自訂單字表單、領域範本（FS-3）；頁尾「資料來源與授權」連結照常 | AC-41-01、AC-25-01、AC-01-01 |
+| FT-2 | **固定底部列**（只在首次畫面）：由上到下 [選中藍或金時多一行 `lockedNotice`「目前內建字庫到綠色為止」] → 試算摘要行（FT-4）→ `startLearning`「開始學習」（`accent` 底、`accentText` 字）→ `restoreFromBackup`「從備份還原」。行為依 FS-4、FS-5、FS-6，不因版面改變 | AC-41-02、AC-25-02、AC-25-03、AC-25-10、AC-25-11 |
+| FT-3 | **色級列**（首次畫面與一般難易度設定頁共用）：依 `COLOR_LEVELS` 順序 5 列。`status = "open"`（橘、棕、綠）：色條 `SEMANTIC_COLORS.level[id]`、名稱 `nameZh`、說明 `scenarioZh`（一行，過長截斷）、右側內建字數（`N_O`／`N_B`／`N_G` 實際數字）與 `dailyNewWords` 字/天。`status = "locked"`（藍、金）：名稱、🔒、說明 `levelLocked`「即將開放」；右側空白或「—」，**不得**出現「待定」、數字或「20 字/天」；整列降低透明度。選中列 = Color(`goal.draftScore`)（GS-1），框線與淡色底為該色級色並在名稱旁顯示 ✓；同時只 1 列選中；點列依 GS-2。不顯示分數與分數範圍 | AC-26-01、AC-01-01、AC-26-02、AC-26-04、AC-26-05 |
+| FT-4 | **試算摘要行**：選中色級 L = Color(`goal.draftScore`)；`{color}` = L 的 `nameZh`；`{daily}` = L 的 `dailyNewWords`；`{weeks}` = 與一般難易度設定頁試算區**同一個計算**（AC-02-05，首次畫面 CurrentVocab = 0；藍、金以 `N_G` 試算）。格式 `summaryLine`；L 為藍、金時後接 `summaryLockedSuffix`「（以綠試算）」並顯示 FT-2 的 `lockedNotice`。不顯示分數與「待定」。以 `N_B` = 2,809、`N_G` = 5,620 為例：橘「橘級・每日 10 字　預計 15 週」、棕「棕級・每日 10 字　預計 41 週」、綠「綠級・每日 15 字　預計 54 週」、藍「藍級・每日 20 字　預計 41 週（以綠試算）」、金「金級・每日 20 字　預計 41 週（以綠試算）」 | AC-41-02、AC-02-03、AC-02-05、AC-02-10、AC-26-05 |
+| FT-5 | 點選色級列後摘要行即時更新（≤ 100ms）；首次畫面期間不寫入 localStorage（FS-2） | AC-41-02、AC-22-04、AC-25-04 |
+| FT-6 | 一般難易度設定頁使用 FT-3 的色級列，但保留原有試算區、「套用」、自訂單字表單與領域範本（AC-25-06）；FT-2 的固定底部列與 FT-4 摘要行只屬首次畫面 | AC-26-01、AC-25-06 |
+
+### 11.6 模擬測驗進度（MT；US-40）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| MT-1 | **進度推導**（不新增狀態）：N = 畫面「第 i / N 題」所用的題數（題庫長度 `PART5_QUESTION_BANK.length`）；`part5.phase = "question"` 時 i = `part5.currentIndex + 1`、填滿 i ÷ N、`aria-valuenow` = i；`phase = "summary"` 時填滿 100%、`aria-valuenow` = N（FB-47）；`aria-valuemax` = N、`role="progressbar"`。「重新開始」後依既有規則 `currentIndex` = 0 → 1 ÷ N；重新載入後由持久化的 `part5` 推導（AC-11-05）。N = 0（題庫為空）時不顯示進度條，沿用既有空題庫處理 | AC-40-01、AC-11-05 |
+| MT-2 | 進度條填色 `COLOR_TOKENS.brand`；作答選項對錯色 `SEMANTIC_COLORS.correct`／`wrong` 不變；`Part5Progress` 欄位與寫入時機不變 | AC-40-01、AC-40-03、AC-38-03 |
+
+### 11.7 驗證規則（V-LAY；pg-frontend 單元測試、QA 驗收）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| V-LAY-01 | 色彩掃描：計算後 `color`／`background-color`／`border-color`／`fill`／`stroke` 等於 `#f7893b` 的元素只有 VC-3 所列（標題列品牌圖示除外，其內部元素不列入計算，v0.13）；文字 `color` 等於 `#1e9bf0` 或 `#f7893b` 的元素數 = 0；白字元素背景為這兩色的數 = 0 | AC-38-01 |
+| V-LAY-02 | `body` 背景 = `COLOR_TOKENS.background` = manifest `background_color`；`<meta name="theme-color">` = manifest `theme_color` = `#1e9bf0`；區塊卡片背景 `#ffffff` | AC-38-02、AC-34-04 |
+| V-LAY-03 | `SEMANTIC_COLORS` 各值與 v0.11 交付版計算後顏色相同 | AC-38-03 |
+| V-LAY-04 | 對比依 VC-7（AC-38-04 列舉的文字）；強調橘按鈕為深色字 | AC-38-04 |
+| V-LAY-05 | `<title>`、標題列名稱 = `APP_DISPLAY_NAME`；「資料來源與授權」頁顯示「EnglishContext 原創內容」；授權註解第一行為「EnglishContext」；畫面可見文字（含對話框、Toast）以 `/english\s*master\s*track/i` 搜尋結果 = 0；`src/data/` 字串同（§3.1） | AC-38-05、AC-38-10 (1) |
+| V-LAY-06 | `FROZEN_IDENTIFIERS` 各值與 v0.11 相同；v0.11 寫入的 localStorage 開啟後直接進主控台、資料不變；v0.11 備份可匯入；匯出檔名前綴不變；v0.11 已安裝者更新後舊快取被 SW-9 刪除 | AC-38-10 (2)、AC-36-04、AC-36-05、E-94 |
+| V-LAY-07 | `backupExpanded`：載入後為 false 且 `aria-expanded="false"`；點擊後 true；切頁後回主控台仍 true；匯入流程中不變；重新載入回 false；整個過程本系統 localStorage `setItem` 呼叫次數 = 0（只操作展開收合時） | AC-39-08、E-90、E-91 |
+| V-LAY-08 | 文字：DB-4 五種目標行、FT-4 五種摘要行、`chartEmpty`、DB-5 三格標籤與「已掌握 N 字」與 `LAYOUT_TEXTS` 逐字相同；AC-39-06 列舉文字在主控台本體各只出現 1 次；主控台本體無模組入口與「資料來源與授權」連結（只在頁尾） | AC-39-04～AC-39-07、AC-41-02、AC-17-01 |
+
+---
+
+## 12. 變更紀錄
 
 | 版本 | 日期 | 作者 | 說明 |
 | :--- | :--- | :--- | :--- |
@@ -972,9 +1108,15 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | 0.9 | 2026-11-02 | sa-agent | 修訂已核准的 v0.8（JimmyLin，2026-10-30），原因：PRD v0.9（approved，JimmyLin，2026-11-02）新增 R-18（一、切換難易度初始化學習紀錄 US-32；二、麥克風只詢問一次與收音條 US-33；三、隱藏解碼器與句型庫 AC-20-04）與 Q-36～Q-38 決議。本檔與 `data-schema.ts` 的 `status` 改回 `draft`、`version` 0.9、核准欄位清空；`storage-schema.json` 未修改（維持 v0.8 approved，主控指示「沒有改動的檔案保持原樣」，為 SD-FB-04 三檔同步的例外）。(1) 新增 §5.7 CI-1～CI-10：觸發條件、「有學習紀錄」(a)～(f) 對應欄位（(e) 不看 today，FB-33）、清除 6 欄與初始值、保留欄位（`customVocab` 原值只清掌握狀態、`sttNoticeAcknowledged` 保留、`goal` 改新值）、單次原子寫入、停用與寫入失敗處理、取消不寫入；新增常數 `LEARNING_PROGRESS_FIELDS`；(2) 新增 §5.8 HT-1～HT-5，`NAV_TAB_ORDER` 6 → 4 項，新增常數 `HIDDEN_TAB_IDS`；§3.1、§7.5、§7.6 註明 `decoder.js`、`phrasebank.js` 格式與資料保留；(3) 修改 §5.3「寫入：容量不足」列、LR-4、V-ST-12，新增 V-ST-14、V-ST-15；§8 補 v0.9 AC 對照；(4) 收音條門檻判定為架構常數，新增 §9.3 回饋下游 DS-01～DS-06；(5) 新增 FB-33～FB-35。型別數 59 不變；契約常數 18 → 20；localStorage 鍵數維持 2；**持久化結構不變，`schemaVersion` 維持 2，備份格式不變**。依 CLAUDE.md，本版未改 PRD、未改持久化結構，符合主控代核條件 |
 | 0.10 | 2026-11-02 | sa-agent | 修訂已核准的 v0.9（主控代核），原因：PRD v0.10（approved，JimmyLin，2026-11-02）R-19（難易度設定只選色級、不顯示分數，取代 Q-32）與 Q-39（首次預設分數改為 725）。三檔 `status` 改回 `draft`、`version` 0.10、核准欄位清空，上游改為 PRD v0.10（`storage-schema.json` 由 v0.8 直接升為 v0.10，恢復三檔同步）。(1) `data-schema.ts`：`SCORE_DEFAULT` 600 → 725；`ColorLevelDefinition.scoreMax`、`COLOR_LEVELS` 註明兼為點卡片的色級上限分數（不新增常數）；`SCORE_*` 註明只用於資料層驗證、不四捨五入、畫面不用；`GoalState` 註解與預設值更新；(2) `storage-schema.json`：只改 `Score`、`GoalState`、`draftScore` 的 description 與 examples 第 1 筆（600 → 725），結構關鍵字全部未動；(3) 本檔：新增 §5.9 GS-1～GS-8、V-ST-16、FB-36、§9.4 DS-07～DS-10；修改 §5.2 預設值、FS-2、FS-3、CI-1、CI-3、CI-9、§1、§8；FB-08 解除；FB-35 補 v0.10 說明。型別數 59、契約常數 20、localStorage 鍵數 2 皆不變；**持久化結構不變，`schemaVersion` 維持 2，既有分數不轉換、不需遷移**。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 | 0.11 | 2026-11-02 | sa-agent | 修訂已核准的 v0.10（主控代核），原因：PRD v0.11（approved，JimmyLin，2026-11-02）新增 R-20 PWA（US-34～US-37、AC-24-12，Q-41～Q-48 全部已決議）。三檔 `status` 改為 `in-review`、`version` 0.11、核准欄位清空並同步，上游改為 PRD v0.11。(1) 新增 **§10 PWA 契約**：§10.1 兩種交付形態對照；§10.2 部署目錄 8 檔與 DP-1～DP-7（含圖示 PNG 尺寸、用途、不透明與 maskable 安全區規格，主控預產、建置只複製，`ads.txt` 照原樣部署）；§10.3 manifest 欄位值與 MF-1～MF-4（`name`／`short_name`「EnglishContext」、`id`／`start_url`／`scope` 為 `"./"`、`standalone`、`zh-Hant-TW`、`theme_color` `#2f6fd6`、`background_color` `#f6f7f9`、3 個圖示、鍵集合封閉）；§10.4 HTML head HD-1～HD-5（靜態 meta 含 `apple-mobile-web-app-title`、`emt-build-id`、`data:` favicon；manifest 與 apple-touch-icon 只動態加入）；§10.5 啟用條件 PE-1～PE-4（`file://` 判定順序、不啟用時全部不做、失敗靜默、不影響啟動）；§10.6 service worker SW-1～SW-11（`./sw.js`、`updateViaCache: "none"`、BUILD_ID 由內容 SHA-256 計算、快取名稱 `english-master-track-pwa-<BUILD_ID>`、預先快取 7 項、`cache: "reload"`、只回應清單內同源 GET、只清除本專案前綴的舊快取、禁止 API）；§10.7 更新流程 UP-1～UP-9 與訊息總表（只有頁面 → service worker 的 `SKIP_WAITING`）；§10.8 安裝按鈕 IN-1～IN-8；§10.9 不互通說明 NT-1；§10.10 儲存與隱私 PV-1～PV-7；§10.11 驗證規則 V-PWA-01～V-PWA-12。(2) §1 新增 4 列與 v0.11 型別數；§5.1 註明 PWA 不新增鍵；§8 新增 AC-34～AC-37、AC-24-12、AC-19-01／AC-21-01／AC-21-03／AC-23-02／AC-23-06（v0.11 修訂部分）對照。(3) 新增回饋上游 FB-37～FB-43、回饋下游 §9.5 DS-11～DS-18。(4) 原「§10 變更紀錄」改為 §11。(5) `data-schema.ts` 新增 §12（7 個型別、11 個常數）、`RuntimeState.pwa`；`storage-schema.json` 只改 meta（新增 `browserStoragePolicy`，AC-21-03）。型別數 59 → 66、契約常數 20 → 31、localStorage 鍵數維持 2；**持久化結構不變，`schemaVersion` 維持 2，不需遷移**；`src/data/` 格式不變（pg-content 無工作）。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
+| 0.12 | 2026-11-03 | sa-agent | 修訂已核准的 v0.11（主控代核），原因：PRD v0.12（approved，JimmyLin，2026-11-03）新增 R-21 版面與視覺（US-38～US-41，修改 30 條既有 AC，Q-49～Q-57 全部已決議）。三檔 `status` 改為 `in-review`、`version` 0.12、核准欄位清空並同步，上游改為 PRD v0.12。(1) 新增 **§11 版面與視覺契約**：§11.1 名稱 NM-1～NM-6（App 顯示名稱「EnglishContext」用於 `<title>`、標題列、ORIGINAL 來源名稱、授權註解第一行；鍵名、備份格式、匯出檔名前綴、交付檔名、快取前綴 `english-master-track-pwa-` 明定不改）；§11.2 色彩 VC-1～VC-8（`COLOR_TOKENS`、`SEMANTIC_COLORS`、背景與 theme 綁定）；§11.3 只在記憶體的介面狀態總表；§11.4 主控台 DB-1～DB-6（區塊順序、移除功能入口與小環形圖、「開始今日學習」、目標行、3 格數據、「資料備份」收合狀態不持久化）；§11.5 首次畫面與色級列 FT-1～FT-6；§11.6 模擬測驗進度 MT-1～MT-2；§11.7 驗證 V-LAY-01～V-LAY-08。(2) §10 PWA 同步：MF 表 `theme_color` `#2f6fd6` → `#1e9bf0`（Q-54）、`background_color` `#f6f7f9` → `#eef4fa`（AC-34-04、AC-38-02）、HD-1 `theme-color` 與 `<title>EnglishContext</title>`、MF-4 改寫、DP-4 (d) maskable 改以 80% 安全圓判定（實際約 78%）、IN-1 顯示條件加 `dashboard.backupExpanded`、NT-1 收合規則、SW-2 與 V-PWA-04、V-PWA-06 文字同步、DS-13 背景值。(3) 修改 §1（新增 4 列與 v0.12 型別數）、§3.1、§4.3 ORIGINAL 全名、§5.1、§5.4 末段（3 格數據與近 7 天空狀態）、FS-3、§5.6、HT-2（移除主控台模組入口）、§6.1、§8（新增 AC-38～AC-41 與 v0.12 改寫 AC 的對照，移除小環形圖與功能入口的對照）。(4) FB-38、FB-40、FB-41 已解除；新增回饋上游 FB-44～FB-49、回饋下游 §9.6 DS-19～DS-25。(5) 原「§11 變更紀錄」改為 §12。(6) `data-schema.ts` 新增 §13（型別 `DashboardRuntimeState`；常數 `APP_DISPLAY_NAME`、`FROZEN_IDENTIFIERS`、`COLOR_TOKENS`、`SEMANTIC_COLORS`、`LAYOUT_TEXTS`）、`RuntimeState.dashboard`，修改 PWA 顏色常數；`storage-schema.json` 只改 meta。型別數 66 → 67、契約常數 31 → 36、localStorage 鍵數維持 2；**持久化結構不變，`schemaVersion` 維持 2，不需遷移**；`src/data/` 格式不變，只有 ORIGINAL `fullName` 一個值要改（1 個 CT 任務，DS-19）。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
+| 0.13 | 2026-11-03 | sa-agent | 修訂已核准的 v0.12（主控代核），原因：PRD v0.13（approved，JimmyLin，2026-11-03）依 SD-FB-39 修改 AC-38-01：標題列品牌圖示（AC-38-05）的橘色「EC」對話框不受強調橘用途限制，與 App 圖示一致。三檔 `status` 改為 `in-review`、`version` 0.13、核准欄位清空並同步，上游改為 PRD v0.13。只改：(1) VC-3 加入「標題列品牌圖示除外」；(2) V-LAY-01 註明標題列品牌圖示不列入計算；(3) §11.2 token 表 `accent` 用途同步（與 PRD 色彩 token 表一致）；(4) `data-schema.ts` `COLOR_TOKENS.accent` 註解同步（值不變）；`storage-schema.json` 只改 meta。型別數 67、契約常數 36、localStorage 鍵數 2 皆不變；**持久化結構不變，`schemaVersion` 維持 2，不需遷移**；`src/data/` 不受影響。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 
 > **主控代核（2026-11-02）**：v0.9 依 PRD v0.9（JimmyLin 核准）增量修訂，未改 PRD、未改持久化結構（schemaVersion 維持 2、備份格式不變），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 內容無變動，維持 v0.8 approved，三檔版本不同步屬本版例外。FB-33～FB-35 接受 SA 處理方式，於下次 PRD 修訂時交 PM 確認。
 
 > **主控代核（2026-11-02，v0.10）**：依 PRD v0.10（JimmyLin 核准）修訂；只改常數 SCORE_DEFAULT（600 → 725）、規則說明與範例，未改持久化結構（schemaVersion 維持 2、無遷移），符合 CLAUDE.md 主控代核範圍。三檔版本已同步為 0.10。FB-36 接受 SA 處理方式（構造 AC-26-06 測試狀態時 draftScore 與 appliedScore 設為同值）。
 
 > **主控代核（2026-11-02，v0.11）**：依 PRD v0.11（JimmyLin 核准）新增 §10 PWA 契約；未改 PRD、未改持久化結構（schemaVersion 維持 2、localStorage 仍 2 鍵、無遷移），符合 CLAUDE.md 主控代核範圍。FB-37～FB-43 接受 SA 處理方式，FB-38、FB-40 於下次 PRD 修訂時交 PM 調整文字。三檔版本同步為 0.11。
+
+> **主控代核（2026-11-03，v0.12）**：依 PRD v0.12（JimmyLin 核准）新增 §11 版面與視覺契約、同步 PWA theme／background 色；未改 PRD、未改持久化結構（schemaVersion 維持 2、localStorage 仍 2 鍵、無遷移；展開狀態只放記憶體），符合 CLAUDE.md 主控代核範圍。FB-44～FB-49 接受 SA 處理方式。三檔版本同步為 0.12。
+
+> **主控代核（2026-11-03，v0.13）**：依 PRD v0.13（JimmyLin 核准）只修 VC-3、V-LAY-01、§11.2 accent 列與 COLOR_TOKENS.accent 註解，加入「標題列品牌圖示（AC-38-05）除外」；§11.2 一併修改接受。未改持久化結構（schemaVersion 2），符合主控代核範圍。

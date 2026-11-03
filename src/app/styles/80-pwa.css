@@ -14,8 +14,9 @@
   gap: 8px 12px;
   padding: 8px 16px;
   background: var(--surface);
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  /* （v0.12，FE-59）上下框線 --border → --line（§7.19.7） */
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .pwa-update__text {

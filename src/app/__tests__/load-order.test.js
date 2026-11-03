@@ -316,3 +316,66 @@ describe("load-order.test.js：PWA 模組（v0.11，FE-53）", () => {
     assert.equal(typeof EMT.store.actions.setPwa, "function");
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+// （v0.12，FE-62）版面模組與 VC-5 跨模組一致（architecture.md v0.8 §10.5 load-order.test.js 列；契約 VC-5、LD-1）
+// ─────────────────────────────────────────────────────────────
+
+describe("load-order.test.js：版面模組（v0.12，FE-62）", () => {
+  const APP_DIR = path.join(__dirname, "..");
+  const BUILD_MJS = path.join(APP_DIR, "..", "..", "tools", "build.mjs");
+
+  /** 依建置順序在 vm 沙箱載入 src/app 全部檔案（不含 main.js），回傳 EMT 與失敗清單 */
+  async function loadInBuildOrder() {
+    const build = await import(pathToFileURL(BUILD_MJS).href);
+    const files = build.listAppFiles(APP_DIR).filter((f) => f !== "main.js");
+    const errors = [];
+    const sandbox = { console: { log() {}, info() {}, debug() {}, warn: (...a) => errors.push(a), error: (...a) => errors.push(a) } };
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    for (const name of ["navigator", "location", "document", "localStorage"]) {
+      Object.defineProperty(sandbox, name, { configurable: true, get() { throw new Error("載入時讀取 " + name); } });
+    }
+    vm.createContext(sandbox);
+    const failures = [];
+    for (const rel of files) {
+      try {
+        vm.runInContext(fs.readFileSync(path.join(APP_DIR, rel), "utf8"), sandbox, { filename: rel });
+      } catch (e) {
+        failures.push(rel + "：" + e.message);
+      }
+    }
+    return { files, EMT: sandbox.EMT, failures, errors };
+  }
+
+  test("EMT.core.layout 依建置順序載入不拋例外且存在；core/layout.js 在 state/、views/ 之前", async () => {
+    const { files, EMT, failures, errors } = await loadInBuildOrder();
+    assert.ok(files.includes("core/layout.js"), "建置清單缺少 core/layout.js");
+    assert.ok(files.indexOf("core/layout.js") < files.findIndex((f) => f.startsWith("state/")));
+    assert.ok(files.indexOf("core/layout.js") < files.findIndex((f) => f.startsWith("views/")));
+    assert.deepEqual(failures, []);
+    assert.deepEqual(errors, []);
+    assert.equal(typeof EMT.core.layout, "object");
+    assert.equal(typeof EMT.core.layout.goalLine, "function");
+    assert.equal(typeof EMT.core.layout.part5Progress, "function");
+    assert.equal(EMT.core.layout.LAYOUT_TEXTS.startToday, "開始今日學習");
+    assert.equal(typeof EMT.store.actions.setBackupExpanded, "function");
+  });
+
+  test("VC-5：layout.APP_DISPLAY_NAME === pwa.PWA_APP_NAME；COLOR_TOKENS.background === PWA_BACKGROUND_COLOR；COLOR_TOKENS.themeColor === PWA_THEME_COLOR", async () => {
+    const { EMT } = await loadInBuildOrder();
+    const L = EMT.core.layout;
+    const W = EMT.core.pwa;
+    assert.equal(L.APP_DISPLAY_NAME, W.PWA_APP_NAME);
+    assert.equal(L.COLOR_TOKENS.background, W.PWA_BACKGROUND_COLOR);
+    assert.equal(L.COLOR_TOKENS.themeColor, W.PWA_THEME_COLOR);
+    assert.equal(W.PWA_MANIFEST.background_color, L.COLOR_TOKENS.background);
+    assert.equal(W.PWA_MANIFEST.theme_color, L.COLOR_TOKENS.themeColor);
+    // FROZEN_IDENTIFIERS 與執行中常數一致（NM-5）
+    assert.equal(L.FROZEN_IDENTIFIERS.storageStateKey, EMT.core.constants.STORAGE_KEYS.state);
+    assert.equal(L.FROZEN_IDENTIFIERS.storageUnreadableKey, EMT.core.constants.STORAGE_KEYS.unreadable);
+    assert.equal(L.FROZEN_IDENTIFIERS.backupFormatId, EMT.core.constants.BACKUP_FORMAT_ID);
+    assert.equal(L.FROZEN_IDENTIFIERS.pwaCachePrefix, W.PWA_CACHE_PREFIX);
+    assert.equal(L.FROZEN_IDENTIFIERS.buildIdMetaName, W.PWA_BUILD_ID_META_NAME);
+  });
+});

@@ -25,7 +25,7 @@
     "tc": "TC-24-12a",
     "ac": "AC-24-12",
     "result": "通過",
-    "note": "file://：375px：逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、309×67；1366px：逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、894×22"
+    "note": "file://：375px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、311×67；1366px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、688×22"
   },
   {
     "suite": "e2e-pwa",
@@ -39,20 +39,20 @@
     "tc": "TC-35-01",
     "ac": "AC-35-01、AC-21-03",
     "result": "通過",
-    "note": "啟用 192 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-5b5ae7a6d4bd0164\"]（BUILD_ID 5b5ae7a6d4bd0164）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
+    "note": "啟用 206 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-962e0f286c63e9e6\"]（BUILD_ID 962e0f286c63e9e6）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-35-02",
     "ac": "AC-35-02、AC-19-02（離線範圍）",
     "result": "通過",
-    "note": "/english-master-track/：學習資料保留=true、回應來自 service worker=true（同源回應皆來自 SW=true）、main、模組入口 4、操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、資源錯誤 0；/english-master-track/index.html：學習資料保留=true、回應來自 service worker=true（同源回應皆來自 SW=true）、main、模組入口 4、操作 難易度設定、翻卡、STT（替身）、Part 5（本題已作答）、資料來源與授權、主控台、資源錯誤 0；離線操作後學習紀錄照常寫入 localStorage（連續天數等因操作而更新屬正常）"
+    "note": "/english-master-track/：學習資料保留=true、回應來自 service worker=true（同源回應皆來自 SW=true）、main、「開始今日學習」1、操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、資源錯誤 0；/english-master-track/index.html：學習資料保留=true、回應來自 service worker=true（同源回應皆來自 SW=true）、main、「開始今日學習」1、操作 難易度設定、翻卡、STT（替身）、Part 5（本題已作答）、資料來源與授權、主控台、資源錯誤 0；離線操作後學習紀錄照常寫入 localStorage（連續天數等因操作而更新屬正常）"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-34-07",
     "ac": "AC-34-07、AC-34-08 (f)",
     "result": "通過",
-    "note": "1366px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 1（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台 1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次；375px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 1（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台 1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次"
+    "note": "1366px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 0（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後收合中 0、展開後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台（仍展開=true）1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次；375px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 0（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後收合中 0、展開後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台（仍展開=true）1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次"
   }
 ]

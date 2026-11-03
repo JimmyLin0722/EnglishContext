@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { launch, recorder, sleep, FILE_URL, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeTts, fakeStt, fakeClipboard, storageMode, fakeMic } from "./lib/inits.mjs";
-import { stateRecord, readState } from "./lib/state.mjs";
+import { stateRecord, readState, dashGoal, expandBackup } from "./lib/state.mjs";
 
 const R = recorder("e2e-env");
 const KEY = "englishMasterTrack:state";
@@ -30,15 +30,15 @@ async function open(inits = [], vp = [1366, 900]) {
   await p.goto();
   await R.check("TC-18-03", "AC-18-03、AC-24-01", async () => {
     const banner = await p.ev(`document.getElementById("app-banner").innerText`);
-    await p.go("customizer"); await p.click('.cz-color[data-color="brown"]'); await p.click("#cz-apply");
+    await p.go("customizer"); await p.click('.cz-level[data-color="brown"]'); await p.click("#cz-apply");
     await p.type("#cv-word", "qastorageoff"); await p.type("#cv-meaning", "停用測試"); await p.click('.cv-form button[type="submit"]'); await sleep(80);
     await p.click('[data-template="cs"]'); await sleep(80);
     await p.go("flashcards"); const total = await p.text(".fc-total"); await p.click(".fc-flip");
     await p.go("part5"); await p.click("[data-p5=option]", 0); const answered = await p.ev(`EMT.store.getState().data.part5.totalAnswered`);
-    await p.go("dashboard"); await p.click('[data-action="export-backup"]');
+    await p.go("dashboard"); await sleep(300); await expandBackup(p); await p.click('[data-action="export-backup"]');
     let files = []; for (let i = 0; i < 30; i++) { await sleep(100); files = fs.readdirSync(p.downloads).filter((f) => f.endsWith(".json")); if (files.length) break; }
     const j = files.length ? JSON.parse(fs.readFileSync(path.join(p.downloads, files[0]), "utf8")) : null;
-    const d = await p.ev(`[...document.querySelectorAll(".dash-stat")].map((x) => x.innerText.replace(/\\n/g, "=")).join("；")`);
+    const d = await p.ev(`[...document.querySelectorAll("#view-dashboard .db-stat")].map((x) => x.innerText.replace(/\\s*\\n\\s*/g, "=")).join("；")`);
     return { ok: banner.includes("進度將無法保存") && total === "共 2820 張" && answered === 1 && !!j && j.data.goal.appliedScore === 465 && j.data.goal.effectiveColor === "brown" && j.data.customVocab.length === 11 && p.log.exceptions.length === 0,
       note: `警示「${banner}」；點棕套用 + 自訂 1 + 範本 10 → ${total}；Part 5 作答 ${answered}；匯出 ${files[0] || "無"}（分數 ${j && j.data.goal.appliedScore}、自訂 ${j && j.data.customVocab.length}）；主控台 ${d}；例外 ${p.log.exceptions.length}` };
   });
@@ -69,7 +69,7 @@ async function open(inits = [], vp = [1366, 900]) {
       note: `新增時訊息 ${JSON.stringify(msg)}；範本注入 toast ${JSON.stringify(tst)}、狀態「${status}」；localStorage 不變=${before === after}；記憶體自訂字 ${mem.join(",")}` };
   });
   await R.check("TC-24-09", "AC-24-09", async () => {
-    await p.go("dashboard");
+    await p.go("dashboard"); await sleep(300); await expandBackup(p);
     await p.send("Page.setInterceptFileChooserDialog", { enabled: true });
     let chooser = null; p.onEvent((m) => { if (m.method === "Page.fileChooserOpened") chooser = m.params; });
     const backup = await p.ev(`EMT.store.actions.exportBackup().json`);
@@ -101,12 +101,13 @@ async function open(inits = [], vp = [1366, 900]) {
       await p.ev(`localStorage.setItem(${JSON.stringify(KEY)}, ${JSON.stringify(v)})`);
       await p.reload();
       const t = await toasts(p);
-      const d = await p.ev(`(() => { EMT.router.go("dashboard"); return [...document.querySelectorAll(".dash-stats--goal .dash-stat__value")].map((e) => e.textContent).join("/"); })()`);
+      await p.ev(`EMT.router.go("dashboard")`); await sleep(300); const d = await dashGoal(p); // 第 5 輪：今日任務卡目標行（AC-39-04）
       const saved = await p.ev(`localStorage.getItem("englishMasterTrack:unreadable")`);
-      const visible = await p.ev(`document.body.innerText.length > 200`);
+      // 第 5 輪：v0.12 主控台精簡、資料備份預設收合，畫面文字少於舊門檻 200 字；改以主控台主要元素可見判定「正常顯示」
+      const visible = await p.ev(`(() => { const b = document.querySelector("#view-dashboard .db-start"); return !!b && b.getClientRects().length > 0 && document.body.innerText.length > 50; })()`);
       const g = (await readState(p)).data.goal;
-      const good = t.includes("資料讀取失敗，已重設") && d === "綠/綠/15 字/天" && g.appliedScore === 725 && saved === v && visible;
-      ok = ok && good; out.push(`${k}：toast ${JSON.stringify(t)}、主控台 ${d}、localStorage 目標分數 ${g.appliedScore}、原字串保存=${saved === v}`);
+      const good = t.includes("資料讀取失敗，已重設") && d === "綠級・每日 15 字・變更" && g.appliedScore === 725 && saved === v && visible;
+      ok = ok && good; out.push(`${k}：toast ${JSON.stringify(t)}、主控台 ${d}、localStorage 目標分數 ${g.appliedScore}、原字串保存=${saved === v}、畫面正常顯示=${visible}`);
     }
     return { ok: ok && p.log.exceptions.length === 0, note: out.join("；") };
   });
@@ -119,16 +120,16 @@ async function open(inits = [], vp = [1366, 900]) {
   await p.goto();
   await R.check("TC-21-01", "AC-21-01、AC-18-06、AC-19-03", async () => {
     const start = p.log.requests.length;
-    await p.go("customizer"); await p.click('.cz-color[data-color="brown"]'); await p.click("#cz-apply"); await p.click('[data-template="biostat"]');
+    await p.go("customizer"); await p.click('.cz-level[data-color="brown"]'); await p.click("#cz-apply"); await p.click('[data-template="biostat"]');
     await p.type("#cv-word", "qanet"); await p.type("#cv-meaning", "網路"); await p.click('.cv-form button[type="submit"]');
     await p.go("flashcards"); await p.click(".fc-flip"); await p.click(".fc-next"); await p.click(".fc-front .sp-tts__btn"); await p.ev(`EMT.store.actions.acknowledgeSttNotice()`);
     await micOn(p); await p.ev(`window.__qaMic.setDb(-20)`); await sleep(300); await p.ev(`(() => { const r = window.__qaStt.last; r.emitResult("hello"); r.emitEnd(); })()`);
     await p.click(".fc-mode-btn"); await p.click(".fcq-option", 0); await p.click(".fc-mode-btn");
     await p.go("part5"); await p.click("[data-p5=option]", 1); await p.click("[data-p5=next]");
     // 第 3 輪：另切換難易度觸發初始化確認視窗並按「確定」、匯入備份
-    await p.go("customizer"); await p.click('.cz-color[data-color="orange"]'); await p.click("#cz-apply"); await sleep(100); if (await p.ev(`!!document.querySelector(".dialog")`)) await p.click('.dialog [data-action="ok"]');
+    await p.go("customizer"); await p.click('.cz-level[data-color="orange"]'); await p.click("#cz-apply"); await sleep(100); if (await p.ev(`!!document.querySelector(".dialog")`)) await p.click('.dialog [data-action="ok"]');
     await p.go("sources"); await p.ev(`document.querySelectorAll("#view-sources details").forEach((d) => d.open = true)`);
-    await p.go("dashboard"); await p.click('[data-action="export-backup"]'); await sleep(500);
+    await p.go("dashboard"); await sleep(300); await expandBackup(p); await p.click('[data-action="export-backup"]'); await sleep(500);
     const reqs = p.log.requests.slice(start);
     const all = p.log.requests.map((r) => r.url.slice(0, 80));
     const nonLocal = p.log.requests.filter((r) => !r.url.startsWith("file://") && !/^(blob|data):/.test(r.url));
@@ -167,6 +168,8 @@ const LAYOUT = `(() => {
     while (p && p !== document.body) { const ox = getComputedStyle(p).overflowX; if (ox === "auto" || ox === "scroll") { inScroller = true; break; } p = p.parentElement; }
     if (!inScroller && (r.right > cw + 1 || r.left < -1)) out.push(desc(el) + " [" + Math.round(r.left) + "," + Math.round(r.right) + "]");
     const s = getComputedStyle(el);
+    // 第 5 輪：色級列說明 .cz-level__desc 依 AC-26-01（v0.12）「一行，過長截斷」以省略號截斷屬 AC 允許（SD-FB-47）；名稱與數字仍檢查
+    if (el.classList.contains("cz-level__desc")) continue;
     if (el.children.length === 0 && el.textContent.trim() && !el.closest(".visually-hidden") && (s.overflowX === "hidden" || s.overflow === "hidden" || s.textOverflow === "ellipsis") && el.scrollWidth > el.clientWidth + 1) clip.push(desc(el));
   }
   // 按鈕之間重疊
@@ -239,7 +242,7 @@ const LAYOUT = `(() => {
 
   await navTo("customizer");
   // 第 3 輪（v0.10）：分數滑桿與輸入框已隱藏，不在檢查範圍（AC-20-02）；改逐一觸控 5 張色級卡片
-  for (const [c, sc] of [["orange", 215], ["brown", 465], ["blue", 855], ["gold", 990], ["green", 725]]) await T("色級 " + c, `.cz-color[data-color="${c}"]`, async () => (await p.ev(`EMT.store.getState().data.goal.draftScore`)) === sc);
+  for (const [c, sc] of [["orange", 215], ["brown", 465], ["blue", 855], ["gold", 990], ["green", 725]]) await T("色級 " + c, `.cz-level[data-color="${c}"]`, async () => (await p.ev(`EMT.store.getState().data.goal.draftScore`)) === sc);
   await T("套用", "#cz-apply", async () => !(await p.ev(`!!document.querySelector(".dialog")`)));
   await T("英文單字欄", "#cv-word", async () => (await p.ev(`document.activeElement.id`)) === "cv-word");
   await p.send("Input.insertText", { text: "qatouch" });
@@ -266,10 +269,14 @@ const LAYOUT = `(() => {
   await T("下一題", "[data-p5=next]", async () => (await p.text("[data-p5=number]")).includes("第"));
   await T("頁尾 資料來源", "#footer-sources", async () => (await cur()) === "sources");
   await navTo("dashboard");
-  await T("主控台入口", '.dash-entry[data-go="part5"]', async () => (await cur()) === "part5");
+  // 第 5 輪（v0.12）：功能入口移除；改觸控「資料備份」展開、「變更」與「開始今日學習」
+  await T("資料備份 展開", ".db-backup__toggle", async () => (await p.ev(`document.querySelector(".db-backup__toggle").getAttribute("aria-expanded")`)) === "true");
+  await T("變更", ".db-change", async () => (await cur()) === "customizer");
+  await navTo("dashboard");
+  await T("開始今日學習", ".db-start", async () => (await cur()) === "flashcards");
   // 第 3 輪：初始化確認視窗的按鈕（已有學習紀錄後點橘套用 → 取消）
   await navTo("customizer");
-  await T("色級 橘（有紀錄）", '.cz-color[data-color="orange"]', async () => true);
+  await T("色級 橘（有紀錄）", '.cz-level[data-color="orange"]', async () => true);
   await T("套用（跳出確認視窗）", "#cz-apply", async () => !!(await p.ev(`document.querySelector(".dialog")`)));
   await T("確認視窗 取消", '.dialog [data-action="cancel"]', async () => !(await p.ev(`document.querySelector(".dialog")`)) && (await p.ev(`EMT.store.getState().data.goal.effectiveColor`)) === "green");
   const okAll = steps.every((s) => s.includes(":OK"));
@@ -312,10 +319,10 @@ async function perfRun(withLoads) {
       } return { loose, strict, strictRaf, hostInfo }; })()`);
     await p.go("customizer");
     for (const t of ["cs", "business", "biostat"]) await p.click(`[data-template="${t}"]`);
-    const apply = await p.ev(`(async () => { const out = []; for (let i = 0; i < 10; i++) { if (document.querySelector(".dialog")) throw new Error("套用量測中出現確認視窗"); document.querySelector('.cz-color[data-color="' + (i % 2 ? "green" : "brown") + '"]').click(); const t0 = performance.now(); document.getElementById("cz-apply").click();
+    const apply = await p.ev(`(async () => { const out = []; for (let i = 0; i < 10; i++) { if (document.querySelector(".dialog")) throw new Error("套用量測中出現確認視窗"); document.querySelector('.cz-level[data-color="' + (i % 2 ? "green" : "brown") + '"]').click(); const t0 = performance.now(); document.getElementById("cz-apply").click();
       await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0))); out.push(+(performance.now() - t0).toFixed(1)); } return out; })()`);
     // v0.10（AC-22-04 改寫）：點選色級卡片（未套用）到選中狀態與試算繪製完成
-    const slider = await p.ev(`(async () => { const order = ["orange", "brown", "green", "blue", "gold"]; const out = []; for (let i = 0; i < 10; i++) { const el = document.querySelector('.cz-color[data-color="' + order[i % 5] + '"]'); const t0 = performance.now(); el.click();
+    const slider = await p.ev(`(async () => { const order = ["orange", "brown", "green", "blue", "gold"]; const out = []; for (let i = 0; i < 10; i++) { const el = document.querySelector('.cz-level[data-color="' + order[i % 5] + '"]'); const t0 = performance.now(); el.click();
       await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0))); out.push(+(performance.now() - t0).toFixed(1)); await new Promise((r) => setTimeout(r, 30)); } return out; })()`);
     await p.go("flashcards"); await p.ev(`EMT.store.actions.acknowledgeSttNotice()`);
     const stt = [];
@@ -337,7 +344,7 @@ async function perfRun(withLoads) {
   const slowReduced = await measureNav();
   await p.send("Emulation.setEmulatedMedia", { features: [] });
   await p.send("Emulation.setCPUThrottlingRate", { rate: 1 });
-  // AC-22-05（v0.8 修訂）：每輪都量；一般模式（有狀態鍵）到主控台入口可點擊、首次模式（無狀態鍵）到「開始學習」可點擊
+  // AC-22-05（v0.12 修訂）：每輪都量；一般模式（有狀態鍵）到主控台「開始今日學習」可點擊、首次模式（無狀態鍵）到「開始學習」可點擊
   const loads = { normal: [], slow: [], frNormal: [], frSlow: [], readyOk: [] };
   await p.send("Network.setCacheDisabled", { cacheDisabled: true });
   p.autoStart = false;
@@ -348,7 +355,7 @@ async function perfRun(withLoads) {
       await p.goto("about:blank", { waitReady: false }); await sleep(200);
       await p.goto();
       const r = await p.ev(`(() => { const m = performance.getEntriesByName("emt-ready")[0]; const vis = (e) => !!e && e.getClientRects().length > 0 && !e.disabled;
-        const target = ${first} ? document.getElementById("cz-start") : document.querySelector('.dash-entry[data-go="customizer"]');
+        const target = ${first} ? document.getElementById("cz-start") : document.querySelector("#view-dashboard .db-start"); // 第 5 輪：v0.12 量測點改「開始今日學習」（AC-22-05）
         return { ms: m ? Math.round(m.startTime) : -1, entry: document.body.dataset.entry, clickable: vis(target) }; })()`);
       loads[k].push(r.ms); loads.readyOk.push(r.entry === (first ? "firstRun" : "main") && r.clickable);
     }
@@ -422,7 +429,7 @@ async function perfRun(withLoads) {
     const st = (k, lim) => { const all = runs.flatMap((r) => r.loads[k]); const pm = [0, 1, 2, 3, 4].map((j) => median(runs.map((r) => r.loads[k][j]))); const p90 = pct(all, 0.9); const mx = Math.max(...all);
       return { ok: all.every((t) => t > 0) && pm.every((v) => v <= lim) && p90 <= lim, text: `中位數 ${r1(median(all))}、各次序中位數最大 ${r1(Math.max(...pm))}、p90 ${p90}、最大 ${mx}（上限 ${lim}；> 上限 ${all.filter((t) => t > lim).length}/${all.length}）` }; };
     const a = st("normal", 3000), b = st("slow", 6000);
-    R[a.ok && b.ok && readyOk ? "pass" : "fail"]("TC-22-05a", "AC-22-05", `本機無頭 Chrome 參考值，${runs.length} 輪 × 5 次：一般模式（timeOrigin → emt-ready，主控台入口可點擊）一般 ${a.text}；4 倍降速 ${b.text}；emt-ready 時目標元素可點擊 ${readyOk}；第 1 輪原始 一般 ${runs[0].loads.normal.join("、")}、降速 ${runs[0].loads.slow.join("、")}；基準環境實測列人工 TC-M07`);
+    R[a.ok && b.ok && readyOk ? "pass" : "fail"]("TC-22-05a", "AC-22-05", `本機無頭 Chrome 參考值，${runs.length} 輪 × 5 次：一般模式（timeOrigin → emt-ready，「開始今日學習」可點擊）一般 ${a.text}；4 倍降速 ${b.text}；emt-ready 時目標元素可點擊 ${readyOk}；第 1 輪原始 一般 ${runs[0].loads.normal.join("、")}、降速 ${runs[0].loads.slow.join("、")}；基準環境實測列人工 TC-M07`);
     const c = st("frNormal", 3000), d = st("frSlow", 6000);
     R[c.ok && d.ok && readyOk ? "pass" : "fail"]("TC-22-05b", "AC-22-05、AC-25-01", `本機無頭 Chrome 參考值，${runs.length} 輪 × 5 次：首次模式（無狀態鍵；timeOrigin → emt-ready，「開始學習」可點擊）一般 ${c.text}；4 倍降速 ${d.text}；第 1 輪原始 一般 ${runs[0].loads.frNormal.join("、")}、降速 ${runs[0].loads.frSlow.join("、")}`);
   }

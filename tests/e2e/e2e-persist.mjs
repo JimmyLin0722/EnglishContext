@@ -10,7 +10,7 @@ await p.viewport(1366, 900);
 await p.goto();
 
 await R.check("TC-18-01", "AC-18-01", async () => {
-  await p.go("customizer"); await p.click('.cz-color[data-color="brown"]'); await p.click("#cz-apply");
+  await p.go("customizer"); await p.click('.cz-level[data-color="brown"]'); await p.click("#cz-apply");
   await p.type("#cv-word", "qapersist"); await p.type("#cv-meaning", "持久化"); await p.click('.cv-form button[type="submit"]'); await sleep(60);
   await p.go("part5"); await p.click("[data-p5=option]", 0); await p.click("[data-p5=next]"); await p.click("[data-p5=option]", 2);
   await p.go("flashcards"); await p.click(".fc-flip");

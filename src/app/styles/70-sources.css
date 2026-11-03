@@ -1,5 +1,7 @@
 /* ─── 資料來源與授權頁（FE-17；AC-23-02、FB-20、FB-21） ─── */
 /* 375px 寬度下長網址與授權全文須換行，不得產生水平捲軸 */
+/* （v0.12，FE-60；§7.19.8）各區塊沿用全域 .card（白底、圓角 16px、陰影、無邊框）；授權全文等非卡片元素框線改 --line；
+ * 新增「原創內容來源」一行（.src-original，樣式同 .src-attrib） */
 
 .src-page {
   min-width: 0;
@@ -101,7 +103,7 @@
 /* MIT 全文：可摺疊、保留換行 */
 .src-license {
   margin-top: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 0 12px;
 }
@@ -131,6 +133,7 @@
   max-width: 100%;
 }
 
-.src-attrib {
+.src-attrib,
+.src-original {
   margin: 12px 0;
 }

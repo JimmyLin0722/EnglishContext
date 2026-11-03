@@ -25,7 +25,7 @@
     "tc": "TC-24-12a",
     "ac": "AC-24-12",
     "result": "通過",
-    "note": "file://：375px：逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、309×67；1366px：逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、894×22"
+    "note": "file://：375px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、311×67；1366px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、688×22"
   },
   {
     "suite": "e2e-pwa",
@@ -46,14 +46,14 @@
     "tc": "TC-34-04",
     "ac": "AC-34-04",
     "result": "通過",
-    "note": "首次畫面（firstRun）：meta theme-color=#2f6fd6（manifest #2f6fd6）；body 背景 rgb(246, 247, 249)（manifest background_color #f6f7f9 = rgb(246, 247, 249)）"
+    "note": "首次畫面（firstRun）：meta theme-color=#1e9bf0（manifest #1e9bf0）；body 背景 rgb(238, 244, 250)（manifest background_color #eef4fa = rgb(238, 244, 250)）"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-34-05a",
     "ac": "AC-34-05（連結與圖示部分；iOS 實機見 TC-PWA-H3）",
     "result": "通過",
-    "note": "apple-touch-icon [{\"href\":\"icons/apple-touch-icon-180.png\",\"sizes\":\"180x180\",\"abs\":\"http://localhost:8080/english-master-track/icons/apple-touch-icon-180.png\"}] → 200、180×180、色彩類型 2（2=RGB 無 alpha）、tRNS=false；apple-mobile-web-app-title=[\"EnglishContext\"]；<title>「English Master Track」"
+    "note": "apple-touch-icon [{\"href\":\"icons/apple-touch-icon-180.png\",\"sizes\":\"180x180\",\"abs\":\"http://localhost:8080/english-master-track/icons/apple-touch-icon-180.png\"}] → 200、180×180、色彩類型 2（2=RGB 無 alpha）、tRNS=false；apple-mobile-web-app-title=[\"EnglishContext\"]；<title>「EnglishContext」"
   },
   {
     "suite": "e2e-pwa",
@@ -67,35 +67,35 @@
     "tc": "TC-35-01",
     "ac": "AC-35-01、AC-21-03",
     "result": "通過",
-    "note": "啟用 198 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-5b5ae7a6d4bd0164\"]（BUILD_ID 5b5ae7a6d4bd0164）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
+    "note": "啟用 213 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-962e0f286c63e9e6\"]（BUILD_ID 962e0f286c63e9e6）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-37-05a",
     "ac": "AC-37-05、AC-21-01、AC-21-03",
     "result": "通過",
-    "note": "整個工作階段請求 10 筆（含 service worker 發出 7 筆：[\"/english-master-track/sw.js\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/icons/apple-touch-icon-180.png\"]）：[\"GET /english-master-track/\",\"GET /english-master-track/sw.js\",\"GET /english-master-track/index.html\",\"GET /english-master-track/manifest.webmanifest\",\"GET /english-master-track/icons/icon-192.png\",\"GET /english-master-track/icons/icon-512.png\",\"GET /english-master-track/icons/icon-maskable-512.png\",\"GET /english-master-track/icons/apple-touch-icon-180.png\"]；不在允許清單／非 GET／帶本文／有查詢字串／跨來源 0；載入完成後操作（難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入）請求 0；Cache Storage {\"english-master-track-pwa-5b5ae7a6d4bd0164\":7}；IndexedDB []；localStorage 鍵 [\"englishMasterTrack:state\"]；Console 錯誤／警告 0"
+    "note": "整個工作階段請求 10 筆（含 service worker 發出 7 筆：[\"/english-master-track/sw.js\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/icons/apple-touch-icon-180.png\"]）：[\"GET /english-master-track/\",\"GET /english-master-track/sw.js\",\"GET /english-master-track/index.html\",\"GET /english-master-track/manifest.webmanifest\",\"GET /english-master-track/icons/icon-192.png\",\"GET /english-master-track/icons/icon-512.png\",\"GET /english-master-track/icons/icon-maskable-512.png\",\"GET /english-master-track/icons/apple-touch-icon-180.png\"]；不在允許清單／非 GET／帶本文／有查詢字串／跨來源 0；載入完成後操作（難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入）請求 0；Cache Storage {\"english-master-track-pwa-962e0f286c63e9e6\":7}；IndexedDB []；localStorage 鍵 [\"englishMasterTrack:state\"]；Console 錯誤／警告 0"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-35-02",
     "ac": "AC-35-02、AC-19-02（離線範圍）",
     "result": "通過",
-    "note": "/english-master-track/：學習資料保留=true、回應來自 service worker=true（同源回應皆來自 SW=true）、main、模組入口 4、操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、資源錯誤 0；/english-master-track/index.html：學習資料保留=true、回應來自 service worker=true（同源回應皆來自 SW=true）、main、模組入口 4、操作 難易度設定、翻卡、STT（替身）、Part 5（本題已作答）、資料來源與授權、主控台、資源錯誤 0；離線操作後學習紀錄照常寫入 localStorage（連續天數等因操作而更新屬正常）"
+    "note": "/english-master-track/：學習資料保留=true、回應來自 service worker=true（同源回應皆來自 SW=true）、main、「開始今日學習」1、操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、資源錯誤 0；/english-master-track/index.html：學習資料保留=true、回應來自 service worker=true（同源回應皆來自 SW=true）、main、「開始今日學習」1、操作 難易度設定、翻卡、STT（替身）、Part 5（本題已作答）、資料來源與授權、主控台、資源錯誤 0；離線操作後學習紀錄照常寫入 localStorage（連續天數等因操作而更新屬正常）"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-35-04",
     "ac": "AC-35-04",
     "result": "通過",
-    "note": "離線（伺服器停止＋context 離線）重新載入到主控台模組入口可點擊：一般 127、110、103、110、105 ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 517、560、646、585、502 ms（門檻每次 ≤ 6000）"
+    "note": "離線（伺服器停止＋context 離線）重新載入到主控台「開始今日學習」可點擊：一般 104、102、103、108、111 ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 496、773、751、725、665 ms（門檻每次 ≤ 6000）"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-34-07",
     "ac": "AC-34-07、AC-34-08 (f)",
     "result": "通過",
-    "note": "1366px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 1（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台 1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次；375px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 1（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台 1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次"
+    "note": "1366px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 0（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後收合中 0、展開後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台（仍展開=true）1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次；375px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 0（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後收合中 0、展開後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台（仍展開=true）1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次"
   },
   {
     "suite": "e2e-pwa",
@@ -151,13 +151,13 @@
     "tc": "TC-37-06",
     "ac": "AC-37-06",
     "result": "通過",
-    "note": "加入 PWA 前版本（git HEAD 的 dist，無建置識別碼=true）學習後換成 PWA 版：service worker 啟用=true；再載入 main；localStorage 鍵 [\"englishMasterTrack:state\"] 相同=true；StorageRecord／data 欄位集合相同=true；data 內容完全相同=true；schemaVersion 2"
+    "note": "加入 PWA 前版本（git e9372f2 的 dist，無建置識別碼=true）學習後換成 PWA 版：service worker 啟用=true；再載入 main；localStorage 鍵 [\"englishMasterTrack:state\"] 相同=true；StorageRecord／data 欄位集合相同=true；data 內容完全相同=true；schemaVersion 2"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-24-12b",
     "ac": "AC-24-12",
     "result": "通過",
-    "note": "localhost（V-PWA (b)）：375px：逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、309×67；1366px：逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、894×22"
+    "note": "localhost（V-PWA (b)）：375px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、311×67；1366px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、688×22"
   }
 ]

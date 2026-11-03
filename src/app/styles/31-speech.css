@@ -6,6 +6,7 @@
  *       AC-33-03、AC-33-08、AC-31-03
  * 規則：燈號同時以文字（綠燈／黃燈／紅燈）表示，不只靠顏色辨識。
  *       收音條是狀態顯示不是動畫：.sp-meter__bar 一律無 transition、無 animation（A-6）。
+ * （v0.12，FE-59；§7.19.7）只換配色：面板分隔線 --border → --line；收音條暗格維持 --border、亮格 --correct。
  */
 
 .sp-panel {
@@ -14,7 +15,7 @@
   gap: 10px;
   margin-top: var(--gap);
   padding-top: var(--gap);
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
   min-width: 0;
 }
 

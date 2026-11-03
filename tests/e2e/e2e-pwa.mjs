@@ -2,6 +2,8 @@
 // 離線開啟、快取寫入失敗、附屬檔 404、啟用條件、隱私（環境層請求記錄）、加入 PWA 前的使用者。
 // 更新流程（V1 → V2）、建置可重現、workflow 模擬另見 e2e-pwa-update.mjs。
 // 執行：node tests/e2e/e2e-pwa.mjs   （QA_BROWSER=edge 時只跑冒煙子集，結果檔加 -edge）
+// 第 5 輪（PRD v0.13）：theme_color #1e9bf0、background_color #eef4fa、<title> EnglishContext；「安裝 App」與匯出入在收合的「資料備份」內，需先展開（AC-39-08、AC-34-07）；
+// 主控台模組入口移除，就緒判定改「開始今日學習」（AC-35-04）。
 // 前提：npm run build 已產生 dist/；埠 8080 未被佔用（本腳本以 tools/serve.mjs 啟動、結束時只關閉自己的程序）。
 import fs from "node:fs";
 import os from "node:os";
@@ -23,7 +25,7 @@ const TMP = fs.mkdtempSync(path.join(process.env.QA_TMP || os.tmpdir(), "pwa-"))
 const INITS = [TOAST_RECORDER, fakeTts("ok"), fakeStt("ok"), fakeMic("ok", -25), TRUSTED_BIP];
 const MANIFEST_EXPECTED = {
   name: "EnglishContext", short_name: "EnglishContext", id: "./", start_url: "./", scope: "./", display: "standalone", lang: "zh-Hant-TW",
-  theme_color: "#2f6fd6", background_color: "#f6f7f9",
+  theme_color: "#1e9bf0", background_color: "#eef4fa",
   icons: [
     { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
     { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
@@ -33,6 +35,12 @@ const MANIFEST_EXPECTED = {
 const browser = await launchBrowser();
 const seedRec = () => stateRecord(725, { sttNoticeAcknowledged: true, streak: { days: 3, lastActiveDate: null }, vocabQuiz: { answered: 4, correct: 3 }, masteredWordKeys: [] });
 
+/** 第 5 輪：展開主控台「資料備份」（已展開則不動作）；回傳展開前的 aria-expanded */
+async function expand(page) {
+  const st = await page.evaluate(() => { const b = document.querySelector(".db-backup__toggle"); return b ? b.getAttribute("aria-expanded") : null; });
+  if (st === "false") { await page.click(".db-backup__toggle"); await sleep(80); }
+  return st;
+}
 /** 主控台安裝按鈕與相關狀態 */
 const installState = (page) => page.evaluate(() => {
   const v = (e) => { if (!e) return false; const s = getComputedStyle(e); if (s.display === "none" || s.visibility === "hidden" || e.closest("[hidden]")) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
@@ -40,7 +48,7 @@ const installState = (page) => page.evaluate(() => {
   const box = document.querySelector(".dash-backup__install");
   return { n: btns.length, visible: btns.filter(v).length, text: btns.map((b) => b.textContent).join("|"), boxHidden: box ? box.hidden : null, boxH: box ? Math.round(box.getBoundingClientRect().height) : null,
     prompts: window.__qaPrompt || 0, tab: window.EMT && EMT.router ? EMT.router.current() : null, entry: document.body.dataset.entry,
-    update: v(document.querySelector("#pwa-update")), trusted: window.__qaTrustedBip || 0 };
+    update: v(document.querySelector("#pwa-update")), trusted: window.__qaTrustedBip || 0, expanded: (document.querySelector(".db-backup__toggle") || { getAttribute: () => null }).getAttribute("aria-expanded") };
 });
 /** 主控台 NT-1 與匯出按鈕的位置關係 */
 const ntInfo = (page) => page.evaluate((nt) => {
@@ -72,7 +80,7 @@ async function exercise(page) {
 }
 /** 匯出備份並匯入同一檔（確認視窗按確定） */
 async function exportImport(page) {
-  await goTab(page, "dashboard");
+  await goTab(page, "dashboard"); await sleep(250); await expand(page);
   const [dl] = await Promise.all([page.waitForEvent("download", { timeout: 5000 }), page.click('[data-action="export-backup"]')]);
   const f = path.join(TMP, "backup-" + Date.now() + ".json"); await dl.saveAs(f);
   const [fc] = await Promise.all([page.waitForEvent("filechooser", { timeout: 5000 }), page.click('[data-action="import-backup"]')]);
@@ -134,9 +142,10 @@ async function ntLayout(tc, url, label) {
       const env = await newEnv(browser, { width: w, height: w === 375 ? 740 : 900, inits: INITS });
       const page = await env.newPage();
       await page.goto(url); await sleep(500); await startLearning(page); await sleep(300);
+      const hiddenBefore = !(await visible(page, ".dash-backup__origin")); await expand(page); // 第 5 輪：收合時隱藏、展開後可見（AC-24-12 v0.12）
       const nt = await ntInfo(page); const lay = await layoutCheck(page, ".dash-backup__origin");
-      const good = nt.exact && nt.afterExport && nt.sameBlock && !nt.dialog && lay.covered === 0 && !lay.clipped;
-      ok = ok && good; out.push(`${w}px：逐字=${nt.exact}、緊接匯出按鈕=${nt.afterExport}、同區塊=${nt.sameBlock}、非彈窗=${!nt.dialog}、遮住點 ${lay.covered}/5、裁切=${lay.clipped}、${lay.w}×${lay.h}`);
+      const good = hiddenBefore && nt.exact && nt.afterExport && nt.sameBlock && !nt.dialog && lay.covered === 0 && !lay.clipped;
+      ok = ok && good; out.push(`${w}px：收合時隱藏=${hiddenBefore}、展開後逐字=${nt.exact}、緊接匯出按鈕=${nt.afterExport}、同區塊=${nt.sameBlock}、非彈窗=${!nt.dialog}、遮住點 ${lay.covered}/5、裁切=${lay.clipped}、${lay.w}×${lay.h}`);
       await env.ctx.close();
     }
     return { ok, note: `${label}：${out.join("；")}` };
@@ -209,8 +218,8 @@ if (!SMOKE) {
     await page.goto(BASE); await sleep(600);
     const a = await page.evaluate(() => ({ theme: (document.querySelector('meta[name="theme-color"]') || {}).content, bg: getComputedStyle(document.body).backgroundColor, entry: document.body.dataset.entry }));
     await env.ctx.close();
-    const ok = a.theme === MANIFEST_EXPECTED.theme_color && a.bg === "rgb(246, 247, 249)" && a.entry === "firstRun";
-    return { ok, note: `首次畫面（${a.entry}）：meta theme-color=${a.theme}（manifest ${MANIFEST_EXPECTED.theme_color}）；body 背景 ${a.bg}（manifest background_color ${MANIFEST_EXPECTED.background_color} = rgb(246, 247, 249)）` };
+    const ok = a.theme === MANIFEST_EXPECTED.theme_color && a.bg === "rgb(238, 244, 250)" && a.entry === "firstRun";
+    return { ok, note: `首次畫面（${a.entry}）：meta theme-color=${a.theme}（manifest ${MANIFEST_EXPECTED.theme_color}）；body 背景 ${a.bg}（manifest background_color ${MANIFEST_EXPECTED.background_color} = rgb(238, 244, 250)）` };
   });
 
   await R.check("TC-34-05a", "AC-34-05（連結與圖示部分；iOS 實機見 TC-PWA-H3）", async () => {
@@ -220,7 +229,7 @@ if (!SMOKE) {
       title: [...document.querySelectorAll('meta[name="apple-mobile-web-app-title"]')].map((m) => m.content), docTitle: document.title }));
     const r = a.link[0] ? await env.ctx.request.get(a.link[0].abs) : null; const d = r ? decodePng(await r.body()) : {};
     await env.ctx.close();
-    const ok = a.link.length === 1 && a.link[0].sizes === "180x180" && r && r.status() === 200 && d.w === 180 && d.h === 180 && d.ct === 2 && !d.tRNS && a.title.length === 1 && a.title[0] === "EnglishContext" && a.docTitle === "English Master Track";
+    const ok = a.link.length === 1 && a.link[0].sizes === "180x180" && r && r.status() === 200 && d.w === 180 && d.h === 180 && d.ct === 2 && !d.tRNS && a.title.length === 1 && a.title[0] === "EnglishContext" && a.docTitle === "EnglishContext";
     return { ok, note: `apple-touch-icon ${JSON.stringify(a.link)} → ${r && r.status()}、${d.w}×${d.h}、色彩類型 ${d.ct}（2=RGB 無 alpha）、tRNS=${d.tRNS}；apple-mobile-web-app-title=${JSON.stringify(a.title)}；<title>「${a.docTitle}」` };
   });
 
@@ -309,13 +318,13 @@ await R.check("TC-35-02", "AC-35-02、AC-19-02（離線範圍）", async () => {
     const resp = await page.goto(u); await sleep(800);
     const fromSW = resp ? resp.fromServiceWorker() : false;
     const st = await readStore(page); const kept = !!st[KEY] && (u !== BASE || st[KEY] === store0[KEY]); // 第一次離線載入時與離線前逐字相同
-    const a = await page.evaluate(() => ({ entry: document.body.dataset.entry, entries: document.querySelectorAll(".dash-entry").length, streak: (document.querySelector(".dash-stats") || {}).innerText || "" }));
+    const a = await page.evaluate(() => ({ entry: document.body.dataset.entry, entries: document.querySelectorAll("#view-dashboard .db-start").length, streak: (document.querySelector("#view-dashboard .db-stats") || {}).innerText || "" }));
     const ops = await exercise(page);
     const resErr = [...env.log.cdp.filter((m) => m.kind === "log" && m.level === "error"), ...env.log.console.filter((m) => m.type === "error")];
     const allSW = env.log.responses.slice(n0).filter((r) => r.url.startsWith(ORIGIN)).every((r) => r.fromSW);
     const good = kept && fromSW && allSW && a.entry === "main" && a.entries > 0 && ops.length >= 6 && resErr.length === 0 && env.log.errors.length === 0;
     ok = ok && good;
-    out.push(`${u.replace(ORIGIN, "")}：學習資料保留=${kept}、回應來自 service worker=${fromSW}（同源回應皆來自 SW=${allSW}）、${a.entry}、模組入口 ${a.entries}、操作 ${ops.join("、")}、資源錯誤 ${resErr.length}${resErr.length ? JSON.stringify(resErr).slice(0, 200) : ""}`);
+    out.push(`${u.replace(ORIGIN, "")}：學習資料保留=${kept}、回應來自 service worker=${fromSW}（同源回應皆來自 SW=${allSW}）、${a.entry}、「開始今日學習」${a.entries}、操作 ${ops.join("、")}、資源錯誤 ${resErr.length}${resErr.length ? JSON.stringify(resErr).slice(0, 200) : ""}`);
   }
   return { ok, note: out.join("；") + "；離線操作後學習紀錄照常寫入 localStorage（連續天數等因操作而更新屬正常）" };
   } finally { await env.ctx.close(); await serve(SITE); }
@@ -326,7 +335,7 @@ if (!SMOKE) await R.check("TC-35-04", "AC-35-04", async () => {
   await page.goto(BASE); await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, JSON.stringify(seedRec())]);
   await page.reload(); await waitSW(page); await sleep(300);
   await stopServer(); await env.ctx.setOffline(true);
-  const ready = () => page.waitForFunction(() => { const e = document.querySelector(".dash-entry"); if (!e || e.disabled) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && document.body.dataset.entry === "main"; }, null, { timeout: 15000, polling: "raf" });
+  const ready = () => page.waitForFunction(() => { const e = document.querySelector("#view-dashboard .db-start"); if (!e || e.disabled) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && document.body.dataset.entry === "main"; }, null, { timeout: 15000, polling: "raf" });
   const runs = { normal: [], cpu4: [] };
   for (const mode of ["normal", "cpu4"]) {
     await page.__cdp.send("Emulation.setCPUThrottlingRate", { rate: mode === "cpu4" ? 4 : 1 });
@@ -335,7 +344,7 @@ if (!SMOKE) await R.check("TC-35-04", "AC-35-04", async () => {
   await page.__cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
   await env.ctx.close(); await serve(SITE);
   const ok = runs.normal.every((t) => t <= 3000) && runs.cpu4.every((t) => t <= 6000);
-  return { ok, note: `離線（伺服器停止＋context 離線）重新載入到主控台模組入口可點擊：一般 ${runs.normal.join("、")} ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 ${runs.cpu4.join("、")} ms（門檻每次 ≤ 6000）` };
+  return { ok, note: `離線（伺服器停止＋context 離線）重新載入到主控台「開始今日學習」可點擊：一般 ${runs.normal.join("、")} ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 ${runs.cpu4.join("、")} ms（門檻每次 ≤ 6000）` };
 });
 
 // AC-34-07～AC-34-10：安裝按鈕（替身事件）
@@ -352,6 +361,7 @@ await R.check("TC-34-07", "AC-34-07、AC-34-08 (f)", async () => {
     await page.reload(); await page.waitForLoadState("load"); await sleep(600);
     const s2 = await installState(page);
     const prevented = await fireBip(page); await sleep(200);
+    const s3c = await installState(page); await expand(page); // 第 5 輪：收合時隨區塊隱藏，展開即可見（AC-34-07 v0.12）
     const s3 = await installState(page);
     const lay = await layoutCheck(page, '[data-action="install-app"]');
     const nt = await ntInfo(page);
@@ -361,10 +371,10 @@ await R.check("TC-34-07", "AC-34-07、AC-34-08 (f)", async () => {
     const navHas = await page.evaluate(() => !!document.querySelector('#app-nav [data-action="install-app"], header [data-action="install-app"]'));
     await goTab(page, "dashboard"); const back = await installState(page);
     const banners = await page.evaluate(() => document.querySelectorAll(".dialog,[role=dialog]").length);
-    const good = f0.entry === "firstRun" && f0.visible === 0 && s2.visible === 0 && s2.boxHidden === true && s2.boxH === 0 && prevented && s3.visible === 1 && s3.text === "安裝 App"
+    const good = f0.entry === "firstRun" && f0.visible === 0 && s2.visible === 0 && s2.boxHidden === true && s2.boxH === 0 && prevented && s3c.visible === 0 && s3c.expanded === "false" && s3.visible === 1 && s3.text === "安裝 App"
       && lay.w >= 44 && lay.h >= 44 && lay.covered === 0 && !lay.clipped && nt.installAfter && Object.values(others).every((v) => v === 0) && !navHas && back.visible === 1 && s3.prompts === 0 && banners === 0;
     ok = ok && good;
-    notes.push(`${w}px：首次畫面收到事件 → 顯示 ${f0.visible}（preventDefault=${p0}）；開始學習後主控台 ${s1.visible}（首次畫面事件已存）；重新載入事件前 ${s2.visible}（容器 hidden=${s2.boxHidden}、高 ${s2.boxH}px）；事件後 ${s3.visible}「${s3.text}」preventDefault=${prevented}；${lay.w}×${lay.h}、遮住點 ${lay.covered}/5、裁切=${lay.clipped}、位於 NT-1 之後=${nt.installAfter}；其他畫面 ${JSON.stringify(others)}、導覽列內=${navHas}；回主控台 ${back.visible}；自動 prompt ${s3.prompts} 次；彈窗 ${banners}；瀏覽器真實事件 ${s3.trusted} 次`);
+    notes.push(`${w}px：首次畫面收到事件 → 顯示 ${f0.visible}（preventDefault=${p0}）；開始學習後主控台 ${s1.visible}（首次畫面事件已存）；重新載入事件前 ${s2.visible}（容器 hidden=${s2.boxHidden}、高 ${s2.boxH}px）；事件後收合中 ${s3c.visible}、展開後 ${s3.visible}「${s3.text}」preventDefault=${prevented}；${lay.w}×${lay.h}、遮住點 ${lay.covered}/5、裁切=${lay.clipped}、位於 NT-1 之後=${nt.installAfter}；其他畫面 ${JSON.stringify(others)}、導覽列內=${navHas}；回主控台（仍展開=${back.expanded}）${back.visible}；自動 prompt ${s3.prompts} 次；彈窗 ${banners}；瀏覽器真實事件 ${s3.trusted} 次`);
     await env.ctx.close();
   }
   return { ok, note: notes.join("；") };
@@ -378,7 +388,7 @@ if (!SMOKE) {
       ["(b) iOS navigator.standalone", `(() => { Object.defineProperty(Navigator.prototype, "standalone", { get: () => true, configurable: true }); })();`],
     ]) {
       const env = await newEnv(browser, { inits: [...INITS, init] }); const page = await env.newPage();
-      await page.goto(BASE); await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, JSON.stringify(seedRec())]); await page.reload(); await page.waitForLoadState("load"); await sleep(600);
+      await page.goto(BASE); await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, JSON.stringify(seedRec())]); await page.reload(); await page.waitForLoadState("load"); await sleep(600); await expand(page);
       const prevented = await fireBip(page); await sleep(200); const s = await installState(page);
       const bad = consoleBad(env.log);
       const good = s.visible === 0 && s.n === 0 && s.boxHidden === true && bad.length === 0 && !prevented;
@@ -391,7 +401,7 @@ if (!SMOKE) {
   const installFlow = async (tc, ac, outcome, fn) => R.check(tc, ac, async () => {
     const env = await newEnv(browser, { inits: INITS }); const page = await env.newPage();
     await page.goto(BASE); await page.evaluate(([k, v]) => localStorage.setItem(k, v), [KEY, JSON.stringify(seedRec())]); await page.reload(); await page.waitForLoadState("load"); await sleep(600);
-    await fireBip(page, outcome); await sleep(200);
+    await fireBip(page, outcome); await sleep(200); await expand(page);
     const r = await fn(page, env);
     await env.ctx.close();
     return r;
@@ -410,7 +420,7 @@ if (!SMOKE) {
     await page.click('[data-action="install-app"]'); await sleep(300); const s1 = await installState(page);
     await fireBip(page); await sleep(200); const s1b = await installState(page);
     const toasts = await page.evaluate(() => window.__qaToasts.length);
-    await page.reload(); await page.waitForLoadState("load"); await sleep(600); const s2 = await installState(page);
+    await page.reload(); await page.waitForLoadState("load"); await sleep(600); await expand(page); const s2 = await installState(page);
     await fireBip(page); await sleep(200); const s3 = await installState(page);
     const s4 = await readStore(page);
     const ok = s1.visible === 0 && s1.prompts === 1 && s1b.visible === 0 && toasts === 0 && s2.visible === 0 && s3.visible === 1 && JSON.stringify(s0) === JSON.stringify(s4) && env.log.errors.length === 0;
@@ -489,10 +499,10 @@ if (!SMOKE) {
     return { ok, note: out.join("；") + "；判定表與 file:／192.168.x 等見單元測試 pwa-core.test.js（V-PWA-08）" };
   });
 
-  // AC-37-06：加入 PWA 前已在網址版學習（以 git HEAD 中目前部署的 dist 模擬）
+  // AC-37-06：加入 PWA 前已在網址版學習（第 5 輪：HEAD 已是 v0.11 PWA 版，改取加入 PWA 前的提交 e9372f2 的 dist 模擬）
   await R.check("TC-37-06", "AC-37-06", async () => {
     const pre = path.join(TMP, "site-prepwa"); fs.mkdirSync(pre, { recursive: true });
-    fs.writeFileSync(path.join(pre, "index.html"), execFileSync("git", ["show", "HEAD:dist/english-master-track.html"], { cwd: ROOT, maxBuffer: 64 << 20 }));
+    fs.writeFileSync(path.join(pre, "index.html"), execFileSync("git", ["show", "e9372f2:dist/english-master-track.html"], { cwd: ROOT, maxBuffer: 64 << 20 }));
     await serve(pre);
     const env = await newEnv(browser, { inits: INITS }); const page = await env.newPage();
     await page.goto(BASE); await sleep(800);
@@ -511,7 +521,7 @@ if (!SMOKE) {
     const dataSame = JSON.stringify(b.data) === JSON.stringify(a.data);
     await env.ctx.close();
     const ok = !preBuild && sw.ok && keysSame && fieldsSame && dataSame && a.schemaVersion === 2 && entry === "main";
-    return { ok, note: `加入 PWA 前版本（git HEAD 的 dist，無建置識別碼=${!preBuild}）學習後換成 PWA 版：service worker 啟用=${sw.ok}；再載入 ${entry}；localStorage 鍵 ${JSON.stringify(Object.keys(after))} 相同=${keysSame}；StorageRecord／data 欄位集合相同=${fieldsSame}；data 內容完全相同=${dataSame}；schemaVersion ${a.schemaVersion}${dataSame ? "" : "；差異 前 " + JSON.stringify(b.data).slice(0, 300) + " 後 " + JSON.stringify(a.data).slice(0, 300)}` };
+    return { ok, note: `加入 PWA 前版本（git e9372f2 的 dist，無建置識別碼=${!preBuild}）學習後換成 PWA 版：service worker 啟用=${sw.ok}；再載入 ${entry}；localStorage 鍵 ${JSON.stringify(Object.keys(after))} 相同=${keysSame}；StorageRecord／data 欄位集合相同=${fieldsSame}；data 內容完全相同=${dataSame}；schemaVersion ${a.schemaVersion}${dataSame ? "" : "；差異 前 " + JSON.stringify(b.data).slice(0, 300) + " 後 " + JSON.stringify(a.data).slice(0, 300)}` };
   });
 
   await ntLayout("TC-24-12b", BASE, "localhost（V-PWA (b)）");

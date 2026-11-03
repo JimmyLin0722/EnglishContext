@@ -4,7 +4,7 @@
     "tc": "TC-25-01",
     "ac": "AC-25-01、AC-20-03（首次畫面不顯示導覽）",
     "result": "通過",
-    "note": "1366：{\"entry\":\"firstRun\",\"tab\":\"customizer\",\"cards\":\"orange,brown,green,blue,gold\",\"pressed\":\"green\",\"input\":null,\"slider\":false,\"estimate\":true,\"start\":true,\"restore\":true,\"apply\":false,\"nav\":false,\"navBtns\":0,\"toggle\":false,\"dashboard\":false,\"entries\":0,\"custom\":false,\"form\":false,\"templates\":0,\"status\":false,\"footerSources\":true}；375：導覽可見=false、可見導覽鈕 0、選單鈕=false；狀態鍵=無"
+    "note": "1366：{\"entry\":\"firstRun\",\"tab\":\"customizer\",\"cards\":\"orange,brown,green,blue,gold\",\"pressed\":\"green\",\"input\":null,\"slider\":false,\"estimate\":false,\"summary\":\"綠級・每日 15 字　預計 54 週\",\"start\":true,\"restore\":true,\"apply\":false,\"nav\":false,\"navBtns\":0,\"toggle\":false,\"dashboard\":false,\"entries\":0,\"custom\":false,\"form\":false,\"templates\":0,\"status\":false,\"footerSources\":true}；375：導覽可見=false、可見導覽鈕 0、選單鈕=false；狀態鍵=無"
   },
   {
     "suite": "e2e-firstrun",
@@ -39,14 +39,14 @@
     "tc": "TC-25-02",
     "ac": "AC-25-02",
     "result": "通過",
-    "note": "點棕 → 選中 brown；按「開始學習」→ 確認視窗=false、main/dashboard、導覽 4 鈕；主控台 目前目標色級=棕｜目前生效色級=棕｜每日新字量=10 字/天；單字集 2809；寫入 schemaVersion 2、goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}"
+    "note": "點棕 → 選中 brown；按「開始學習」→ 確認視窗=false、main/dashboard、導覽 4 鈕；主控台 棕級・每日 10 字・變更；單字集 2809；寫入 schemaVersion 2、goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}"
   },
   {
     "suite": "e2e-firstrun",
     "tc": "TC-25-06",
     "ac": "AC-25-06",
     "result": "通過",
-    "note": "{\"entry\":\"main\",\"tab\":\"customizer\",\"cards\":\"orange,brown,green,blue,gold\",\"pressed\":\"brown\",\"input\":null,\"slider\":false,\"estimate\":true,\"start\":false,\"restore\":false,\"apply\":true,\"nav\":true,\"navBtns\":4,\"toggle\":false,\"dashboard\":false,\"entries\":0,\"custom\":true,\"form\":true,\"templates\":3,\"status\":true,\"footerSources\":true}"
+    "note": "{\"entry\":\"main\",\"tab\":\"customizer\",\"cards\":\"orange,brown,green,blue,gold\",\"pressed\":\"brown\",\"input\":null,\"slider\":false,\"estimate\":true,\"summary\":null,\"start\":false,\"restore\":false,\"apply\":true,\"nav\":true,\"navBtns\":4,\"toggle\":false,\"dashboard\":false,\"entries\":0,\"custom\":true,\"form\":true,\"templates\":3,\"status\":true,\"footerSources\":true}"
   },
   {
     "suite": "e2e-firstrun",
@@ -60,7 +60,7 @@
     "tc": "TC-25-03",
     "ac": "AC-25-03、AC-26-04（首次畫面）",
     "result": "通過",
-    "note": "點藍 → {\"draft\":855,\"cap\":true,\"pressed\":\"blue\"}；開始學習後主控台 目前目標色級=藍｜目前生效色級=綠（內建上限）｜每日新字量=15 字/天；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}"
+    "note": "點藍 → {\"draft\":855,\"cap\":true,\"summary\":\"藍級・每日 20 字　預計 41 週（以綠試算）\",\"pressed\":\"blue\"}；開始學習後主控台 目標藍級・生效綠級（內建上限）・每日 15 字・變更；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}"
   },
   {
     "suite": "e2e-firstrun",
@@ -81,14 +81,14 @@
     "tc": "TC-25-10",
     "ac": "AC-25-10、AC-24-03",
     "result": "通過",
-    "note": "首次畫面點金（990）後還原 300 棕備份：匯入確認框=true、初始化確認視窗=false、提示 [\"已匯入，略過 0 筆\"] → main/dashboard、導覽=true；主控台 目前目標色級=棕｜目前生效色級=棕｜每日新字量=10 字/天；goal {\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；localStorage appliedScore 300；重新載入 → main、目前目標色級=棕｜目前生效色級=棕｜每日新字量=10 字/天、localStorage 300；難易度設定選中 brown"
+    "note": "首次畫面點金（990）後還原 300 棕備份：匯入確認框=true、初始化確認視窗=false、提示 [\"已匯入，略過 0 筆\"] → main/dashboard、導覽=true；主控台 棕級・每日 10 字・變更；goal {\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；localStorage appliedScore 300；重新載入 → main、棕級・每日 10 字・變更、localStorage 300；難易度設定選中 brown"
   },
   {
     "suite": "e2e-firstrun",
     "tc": "TC-24-10",
     "ac": "AC-24-10",
     "result": "通過",
-    "note": "v1 備份（無 todayLearned、learnedHistory）匯入：提示 [\"已匯入，略過 0 筆\"]；既有 7 欄還原相同=true；今日已學 0 / 10 字、長條 0,0,0,0,0,0,0；重新載入後 localStorage schemaVersion 2、todayLearned {\"date\":null,\"wordKeys\":[]}"
+    "note": "v1 備份（無 todayLearned、learnedHistory）匯入：提示 [\"已匯入，略過 0 筆\"]；既有 7 欄還原相同=true；今日已學 0 / 10 字、近 7 天空狀態「開始學習後會顯示紀錄」、長條顯示=false；重新載入後 localStorage schemaVersion 2、todayLearned {\"date\":null,\"wordKeys\":[]}"
   },
   {
     "suite": "e2e-firstrun",
@@ -109,7 +109,7 @@
     "tc": "TC-26-01",
     "ac": "AC-26-01、AC-01-01",
     "result": "通過",
-    "note": "375px：橘 1,000 字 每日新字量：10字/天 343×151／棕 2,809 字 每日新字量：10字/天 343×151／綠 5,620 字 每日新字量：15字/天 343×171／藍 待定 每日新字量：20字/天（僅供試算） 343×151 鎖／金 待定 每日新字量：20字/天（僅供試算） 343×151 鎖｜768px：橘 1,000 字 每日新字量：10字/天 356×151／棕 2,809 字 每日新字量：10字/天 356×151／綠 5,620 字 每日新字量：15字/天 356×171／藍 待定 每日新字量：20字/天（僅供試算） 356×171 鎖／金 待定 每日新字量：20字/天（僅供試算） 356×151 鎖｜1366px：橘 1,000 字 每日新字量：10字/天 179×211／棕 2,809 字 每日新字量：10字/天 179×211／綠 5,620 字 每日新字量：15字/天 179×211／藍 待定 每日新字量：20字/天（僅供試算） 179×211 鎖／金 待定 每日新字量：20字/天（僅供試算） 179×211 鎖；點綠卡右下角 → 選中 green、draftScore 725；官方門檻/Tier 字樣=false"
+    "note": "375px 一般頁：橘[1,000 字/10 字/天/「入門：最高頻的生」 op1 311×64]／棕[2,809 字/10 字/天/「基礎：日常溝通與」 op1 311×64]／綠[5,620 字/15 字/天/「大學畢業門檻、基」 op1 311×64 選中✓=true 框 rgb(46, 158, 91)]／藍[—/—/「即將開放」 鎖 op0.85 311×64]／金[—/—/「即將開放」 鎖 op0.85 311×64]；水平捲軸=false；說明行 1 次「本系統建議字量：右側為內建字數與每日新字量」｜768px 一般頁：橘[1,000 字/10 字/天/「入門：最高頻的生」 op1 688×64]／棕[2,809 字/10 字/天/「基礎：日常溝通與」 op1 688×64]／綠[5,620 字/15 字/天/「大學畢業門檻、基」 op1 688×64 選中✓=true 框 rgb(46, 158, 91)]／藍[—/—/「即將開放」 鎖 op0.85 688×64]／金[—/—/「即將開放」 鎖 op0.85 688×64]；水平捲軸=false；說明行 1 次「本系統建議字量：右側為內建字數與每日新字量」｜1366px 一般頁：橘[1,000 字/10 字/天/「入門：最高頻的生」 op1 688×64]／棕[2,809 字/10 字/天/「基礎：日常溝通與」 op1 688×64]／綠[5,620 字/15 字/天/「大學畢業門檻、基」 op1 688×64 選中✓=true 框 rgb(46, 158, 91)]／藍[—/—/「即將開放」 鎖 op0.85 688×64]／金[—/—/「即將開放」 鎖 op0.85 688×64]；水平捲軸=false；說明行 1 次「本系統建議字量：右側為內建字數與每日新字量」｜375px 首次畫面：橘[1,000 字/10 字/天/「入門：最高頻的生」 op1 311×64]／棕[2,809 字/10 字/天/「基礎：日常溝通與」 op1 311×64]／綠[5,620 字/15 字/天/「大學畢業門檻、基」 op1 311×64 選中✓=true 框 rgb(46, 158, 91)]／藍[—/—/「即將開放」 鎖 op0.85 311×64]／金[—/—/「即將開放」 鎖 op0.85 311×64]；水平捲軸=false｜1366px 首次畫面：橘[1,000 字/10 字/天/「入門：最高頻的生」 op1 688×64]／棕[2,809 字/10 字/天/「基礎：日常溝通與」 op1 688×64]／綠[5,620 字/15 字/天/「大學畢業門檻、基」 op1 688×64 選中✓=true 框 rgb(46, 158, 91)]／藍[—/—/「即將開放」 鎖 op0.85 688×64]／金[—/—/「即將開放」 鎖 op0.85 688×64]；水平捲軸=false；點綠列右下角 → 選中 green、draftScore 725；官方門檻/Tier 字樣=false"
   },
   {
     "suite": "e2e-firstrun",
@@ -137,7 +137,7 @@
     "tc": "TC-26-05",
     "ac": "AC-26-05",
     "result": "通過",
-    "note": "375px｜(a) 首次畫面：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(c) 主控台：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 11 個焦點中分數元件 0｜(b) 一般頁：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(b) 一般頁點 5 卡並套用後：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(c) 主控台（套用金後）：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 11 個焦點中分數元件 0 ／ 1366px｜(a) 首次畫面：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(c) 主控台：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 11 個焦點中分數元件 0｜(b) 一般頁：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(b) 一般頁點 5 卡並套用後：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(c) 主控台（套用金後）：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 11 個焦點中分數元件 0；未處理錯誤 0"
+    "note": "375px｜(a) 首次畫面：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(c) 主控台：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(b) 一般頁：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(b) 一般頁點 5 卡並套用後：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(c) 主控台（套用金後）：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0 ／ 1366px｜(a) 首次畫面：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(c) 主控台：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(b) 一般頁：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(b) 一般頁點 5 卡並套用後：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(c) 主控台（套用金後）：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0；未處理錯誤 0"
   },
   {
     "suite": "e2e-firstrun",

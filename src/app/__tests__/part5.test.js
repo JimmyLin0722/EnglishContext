@@ -217,3 +217,152 @@ describe("part5.test.js — 答題回饋（FE-29）", () => {
     assert.match(css, /\.p5-heading-note\s*\{[^}]*color:\s*var\(--text-muted\)/);
   });
 });
+
+// ─────────────────────────────────────────────────────────────
+// （v0.12，FE-61）作答進度條與內容寬（architecture.md v0.8 §7.19.6、§10.5 part5.test.js 列；契約 MT-1、MT-2）
+// 涵蓋：AC-40-01、AC-40-02、AC-40-03
+// 做法：node:vm 依瀏覽器方式載入 core/dom、constants、layout 與 views/part5.js；假 DOM 與假 store（只讀 part5 進度）
+// ─────────────────────────────────────────────────────────────
+
+describe("part5.test.js — 作答進度條（v0.12，FE-61）", () => {
+  const vm = require("node:vm");
+  const APP = path.join(__dirname, "..");
+
+  function makeNode(tag) {
+    const n = {
+      nodeType: tag === "#text" ? 3 : 1,
+      tagName: tag.toUpperCase(),
+      className: "",
+      attrs: {},
+      style: {},
+      childNodes: [],
+      _text: "",
+      setAttribute(k, v) { this.attrs[k] = String(v); },
+      getAttribute(k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; },
+      removeAttribute(k) { delete this.attrs[k]; },
+      addEventListener() {},
+      appendChild(c) { this.childNodes.push(c); c.parentNode = this; return c; },
+      removeChild(c) { this.childNodes.splice(this.childNodes.indexOf(c), 1); return c; },
+      querySelector() { return null; },
+      get firstChild() { return this.childNodes[0] || null; },
+      get textContent() { return this.nodeType === 3 ? this._text : this._text + this.childNodes.map((c) => c.textContent).join(""); },
+      set textContent(v) { this.childNodes = []; this._text = String(v); }
+    };
+    return n;
+  }
+  const fakeDoc = () => ({
+    createElement: (t) => makeNode(t),
+    createElementNS: (ns, t) => makeNode(t),
+    createTextNode: (t) => { const n = makeNode("#text"); n._text = t; return n; }
+  });
+  function findAll(n, pred, out = []) {
+    if (n.nodeType === 1 && pred(n)) out.push(n);
+    for (const c of n.childNodes || []) findAll(c, pred, out);
+    return out;
+  }
+
+  /** 題庫 n 題（以 fixture 4 題輪替，id 不重複） */
+  function bankOf(n) {
+    const src = F.part5();
+    return Array.from({ length: n }, (_, i) => Object.assign({}, src[i % src.length], { id: "q" + (i + 1) }));
+  }
+
+  /**
+   * 載入 part5 並 mount，回傳根節點。
+   * @param {object} part5 Part5Progress
+   * @param {object[]} bank 題庫
+   */
+  function renderWith(part5, bank) {
+    const sandbox = { console: { log() {}, warn() {}, error() {} } };
+    sandbox.self = sandbox;
+    vm.createContext(sandbox);
+    for (const rel of ["core/constants.js", "core/dom.js", "core/layout.js"]) {
+      vm.runInContext(fs.readFileSync(path.join(APP, rel), "utf8"), sandbox, { filename: rel });
+    }
+    sandbox.EMT.core.dom.setDocument(fakeDoc());
+    let view = null;
+    sandbox.EMT.views = { register: (tab, m) => { if (tab === "part5") view = m; } };
+    sandbox.EMT.content = { part5: bank };
+    sandbox.EMT.store = {
+      getState: () => ({ data: { part5 } }),
+      subscribe: () => () => {},
+      actions: {}
+    };
+    vm.runInContext(fs.readFileSync(path.join(APP, "views/part5.js"), "utf8"), sandbox, { filename: "views/part5.js" });
+    const rootEl = fakeDoc().createElement("section");
+    view.mount(rootEl);
+    return rootEl;
+  }
+
+  const prog = (over) => Object.assign({
+    currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 0, totalCorrect: 0
+  }, over);
+  const barOf = (rootEl) => findAll(rootEl, (n) => n.className === "p5-progress");
+
+  for (const [label, part5, n, now, pct] of [
+    ["第 1 題", prog({ currentIndex: 0 }), 10, 1, 10],
+    ["第 5 題", prog({ currentIndex: 4 }), 10, 5, 50],
+    ["第 N 題", prog({ currentIndex: 9 }), 10, 10, 100],
+    ["第 1 題（N = 3，1 ÷ 3）", prog({ currentIndex: 0 }), 3, 1, 33.3],
+    ["結算（aria-valuenow = N、100%）", prog({ phase: "summary", currentIndex: 9 }), 10, 10, 100],
+  ]) {
+    test("MT-1 " + label + "：role=progressbar、aria-label、valuemin 0、valuemax N、valuenow、填色寬度", () => {
+      const rootEl = renderWith(part5, bankOf(n));
+      const bars = barOf(rootEl);
+      assert.equal(bars.length, 1);
+      const bar = bars[0];
+      assert.equal(bar.getAttribute("role"), "progressbar");
+      assert.equal(bar.getAttribute("aria-label"), "作答進度");
+      assert.equal(bar.getAttribute("aria-valuemin"), "0");
+      assert.equal(bar.getAttribute("aria-valuemax"), String(n));
+      assert.equal(bar.getAttribute("aria-valuenow"), String(now));
+      const fill = bar.childNodes[0];
+      assert.equal(fill.className, "p5-progress__fill");
+      assert.equal(fill.style.width, pct + "%");
+      // 與畫面「第 i / N 題」一致（question 時）
+      if (part5.phase === "question") {
+        assert.ok(rootEl.textContent.includes(now + " / " + n), rootEl.textContent.slice(0, 80));
+      }
+    });
+  }
+
+  test("位置：h2.p5-heading 之後、題型說明之前；h2 套 .page-title", () => {
+    const rootEl = renderWith(prog({}), bankOf(4));
+    const page = findAll(rootEl, (n) => n.className === "p5")[0];
+    const kids = page.childNodes;
+    assert.equal(kids[0].tagName, "H2");
+    assert.ok(/(^| )p5-heading( |$)/.test(kids[0].className) && /(^| )page-title( |$)/.test(kids[0].className));
+    assert.equal(kids[1].className, "p5-progress");
+    assert.equal(kids[2].className, "p5-heading-note");
+  });
+
+  test("空題庫：不建立進度條（MT-1 N = 0）", () => {
+    const rootEl = renderWith(prog({}), []);
+    assert.equal(barOf(rootEl).length, 0);
+    assert.ok(rootEl.textContent.includes(P.TEXT.empty));
+  });
+
+  test("40-part5.css：.p5 max-width var(--content-narrow) 置中；進度條 6px --track、填色 --brand、transition: none；標題 18px／700", () => {
+    const css = fs.readFileSync(path.join(APP, "styles", "40-part5.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const rule = (sel) => {
+      const m = new RegExp("(?:^|\\})\\s*" + sel.replace(/[.]/g, "\\.") + "\\s*\\{([^}]*)\\}").exec(css);
+      assert.ok(m, sel);
+      return m[1];
+    };
+    const v = (r, p) => (new RegExp("(?:^|;|\\s)" + p + ":\\s*([^;]+);").exec(r) || [])[1];
+    assert.equal(v(rule(".p5"), "max-width"), "var(--content-narrow)");
+    assert.equal(v(rule(".p5"), "margin-inline"), "auto");
+    assert.equal(v(rule(".p5-progress"), "height"), "6px");
+    assert.equal(v(rule(".p5-progress"), "background"), "var(--track)");
+    assert.equal(v(rule(".p5-progress__fill"), "background"), "var(--brand)");
+    assert.equal(v(rule(".p5-progress__fill"), "transition"), "none");
+    for (const sel of [".p5-number", ".p5-explain__title", ".p5-summary__title"]) {
+      assert.equal(v(rule(sel), "font-size"), "1.125rem", sel);
+      assert.equal(v(rule(sel), "font-weight"), "700", sel);
+    }
+    // 作答選項維持 --border 外框與對錯色（AC-38-03、AC-40-03）
+    assert.match(rule(".p5-option"), /border:\s*2px solid var\(--border\)/);
+    assert.match(rule(".p5-option--correct"), /border-color:\s*var\(--correct\)/);
+    assert.match(rule(".p5-option--wrong"), /border-color:\s*var\(--wrong\)/);
+  });
+});

@@ -1,6 +1,6 @@
 ---
 doc: TEST-REPORT
-version: 0.5
+version: 0.6
 status: in-review
 author: qa-agent
 approved_by:
@@ -9,15 +9,36 @@ approved_at:
 
 # English Master Track — 測試報告（第 5 階段驗收）
 
+> **第 5 輪（v0.6）依據**：`docs/04-qa/test-plan.md` v0.6；PRD v0.13、契約 v0.13、architecture v0.8、tasks.json v0.7（CT-24、FE-54～FE-62 done）；受測物 `dist/english-master-track.html` 3,308,145 bytes＋`dist/site/` 8 檔（BUILD_ID `962e0f286c63e9e6`）；結論見 §0、詳情見 §16。
+>
 > **第 4 輪（v0.5）依據**：`docs/04-qa/test-plan.md` v0.5；PRD v0.11、契約 v0.11、architecture v0.7、tasks.json（FE-45～FE-53 done）；受測物 `dist/english-master-track.html` 3,278,334 bytes＋`dist/site/` 8 檔（BUG-003 修正後 BUILD_ID `5b5ae7a6d4bd0164`；初測 `d7085fd3fb24c46f`）；結論見 §0、詳情見 §15（BUG-003 複驗見 §15.11）。
 >
 > **第 3 輪（v0.4）依據**：`docs/04-qa/test-plan.md` v0.4；PRD v0.10、契約 v0.10、architecture v0.6、tasks.json v0.5；受測物 3,241,023 bytes；結論見 §0、詳情見 §14。
 >
 > （第 1～2 輪）依據：`docs/04-qa/test-plan.md` v0.3；PRD v0.7、契約 v0.7、architecture v0.3、tasks.json v0.2。受測物（v0.2，退回修正第 1 輪）`dist/english-master-track.html` 3,030,574 bytes（QA 以 `tools/build.mjs --out` 重建後與 `dist/` 位元組相同）；初版受測物 3,022,217 bytes。（v0.3，退回修正第 2 輪）受測物 3,047,158 bytes，只驗證 BUG-002 並回歸 AC-01-*、AC-02-*、AC-04-*、AC-05-*、AC-16-*、AC-20-02、AC-22-*，詳見 §12。執行日期 2026-10-30。v0.2 範圍只驗證 BUG-001、BUG-002，並回歸 AC-08-*、AC-15-*、AC-16-*、AC-20-02、AC-22-*、靜態與越界檢查，詳見 §11；其餘 TC 沿用 v0.1 結果（本輪 `npm run test:e2e` 全套重跑，其餘 TC 結果不變）。
 
-## 0. 目前有效結論（第 4 輪，PRD v0.11，2026-11-03）
+## 0. 目前有效結論（第 5 輪，PRD v0.13 版面風格，2026-11-03）
 
-> 本節與 §15 為第 4 輪（PRD v0.11，新增 PWA）的結論，取代第 3 輪結論（保留於 §0.1、§14）。
+> 本節與 §16 為第 5 輪（PRD v0.13：US-38～US-41 版面與視覺，修改 30 個 AC）的結論，取代第 4 輪結論（保留於 §0.1、§15）。
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 受測物 | `dist/english-master-track.html` 3,308,145 bytes、`dist/site/` 8 檔（BUILD_ID `962e0f286c63e9e6`）；QA 重建與 `dist/` 逐位元組相同（TC-S09）；`dist/site/index.html` 與交付檔相同（TC-PS-01） |
+| TC 總數 | 351 |
+| TC 結果 | 通過 309、失敗 0、待人工 23、不適用（暫停）19；Edge 冒煙 40 項：通過 35、失敗 0、其餘不適用（暫停） |
+| AC 覆蓋率 | 應驗收 248 個 AC，未涵蓋 0（覆蓋 100%）；暫停 22 個標「不適用（暫停）」 |
+| AC 判定 | 通過 239（其中 52 個另待人工確認）、待人工 9、失敗 0、不適用（暫停）22 |
+| 新增 27 個 AC | 通過 27 / 27（明細 §16.3） |
+| 修改 30 個 AC | 通過 26 / 30；待人工 AC-33-02、AC-34-02、AC-34-03、AC-34-05（實機必要項，沿用第 3、4 輪判定） |
+| 待人工的 AC | AC-23-04、AC-27-03、AC-33-01、AC-33-02、AC-34-02、AC-34-03、AC-34-05、AC-35-03、AC-36-07（皆為實機必要項，自動化代理驗證已通過或無法自動化） |
+| 缺陷 | 本輪新開 0 張；BUG-001～BUG-003 維持 verified |
+| 越界檢查 | 通過：與 git HEAD `4fcbb9f` 相比變動的 PG 檔案皆在 CT-24、FE-54～FE-62 paths 內（超出 0）；授權例外為 `docs/mockups/` 與上游文件；`tests/` 在本輪 QA 開始前未被 PG 修改 |
+| 安全檢查 | 通過：`file://` 連網與斷網皆無額外請求（TC-38-05、TC-21-01）；標題列圖示為內嵌 SVG、無 `<img>`、無 `xmlns`；CSS 無 `@font-face`、`url(`；新增文字皆以 `textContent` 寫入（TC-S03 禁用 DOM API 0）；XSS 回歸（TC-04-09、TC-24-07）通過 |
+| 需要人類 | 見 §16.8 |
+
+### 0.1 第 4 輪結論（歷史，PRD v0.11，2026-11-03）
+
+> 本節與 §15 為第 4 輪（PRD v0.11，新增 PWA）的結論，已由第 5 輪（§0）取代。
 
 | 項目 | 結果 |
 | :--- | :--- |
@@ -33,7 +54,7 @@ approved_at:
 | MC-03 模擬 | 依 architecture §5.2 新 workflow，在 LF 複本建置並執行 Verify 步驟：`dist/site/` 恰 8 檔，通過（TC-36-07a）；但 CI 所需 12 個檔案尚未被 git 追蹤（§15.8 H-4-2） |
 | 需要人類 | 見 §15.8、彙整清單見 §15.12 |
 
-### 0.1 第 3 輪結論（歷史，PRD v0.10，2026-11-02）
+### 0.2 第 3 輪結論（歷史，PRD v0.10，2026-11-02）
 
 > 本節與 §14 為第 3 輪（範圍 v0.8 + v0.9 + v0.10，依據 test-plan v0.4）的結論，取代 §1～§12 的第 1～2 輪結果（PRD v0.7）。§1～§12 保留為歷史紀錄。
 
@@ -1234,7 +1255,210 @@ BUG-003 改為 verified。AC-34-03 自動化通過，但圖示在實機上的外
 | 觀察 | O-4-8 | TC-22-01m 減少動態效能邊緣，請 TC-M07 於基準環境量測 | 人類 |
 | 回饋上游 | §15.10 | PM：AC-36-01 (b) 字面；SD：無資料 fixture 需 `sources.js`、Playwright 無痕可安裝性、CI 前提檔未提交 | PM／SD |
 
-## 16. 變更紀錄
+## 16. 第 5 輪驗收（PRD v0.13：版面與視覺）
+
+範圍：PRD v0.13（41 個 US、270 個 AC；應驗收 36 個 US、248 個 AC，暫停 22），重點為 v0.12 新增的 27 個 AC（US-38～US-41）、修改的 30 個 AC 與 v0.13 的 AC-38-01 例外（標題列品牌圖示可用橘色），並全套回歸。契約 v0.13（§11、V-LAY-01～08）、architecture v0.8（§7.19、§10.5、§15）、tasks.json v0.7（CT-24、FE-54～FE-62 done）。執行日期 2026-11-03。
+
+### 16.1 執行紀錄
+
+| 項目 | 指令 | 結果（QA 自行執行） |
+| :--- | :--- | :--- |
+| PG 單元測試 | `npm test` | 1,134 / 1,134 通過、fail 0（80 個 suite）（參考，非驗收依據） |
+| 資料自驗 | `npm run validate:data` | 錯誤 0、警告 61、結果通過（與前幾輪相同） |
+| 靜態 | `tests/static/static-check.mjs` | TC-S01～TC-S11、TC-L-S01～S04 全數通過（TC-S09 重建與 `dist/` 逐位元組相同） |
+| PWA 靜態與建置 | `tests/static/pwa-static.mjs` | 依 v0.12 更新 theme-color、`<title>`、manifest 色值後通過；TC-PWA-H4 待人工 |
+| 越界 | `boundary-check.mjs`、`boundary-r5.mjs` | 不屬於任何任務 0；與 HEAD 相比 PG 變動 45 檔，超出 0 |
+| 驗收全套 | `npm run test:e2e`（含 Chrome 全套、Edge 冒煙、`tools/serve.mjs` 埠 8080 的 PWA E2E） | 子程序結束碼：tests/data/data-check.mjs=0、tests/data/records-check.mjs=0、tests/static/static-check.mjs=0、tests/static/boundary-check.mjs=0、tests/static/boundary-r5.mjs=0、tests/static/pwa-static.mjs=0、tests/e2e/e2e-goal.mjs=0、tests/e2e/e2e-cards.mjs=0、tests/e2e/e2e-speech.mjs=0、tests/e2e/e2e-content.mjs=0、tests/e2e/e2e-env.mjs=0、tests/e2e/e2e-persist.mjs=0、tests/e2e/e2e-firstrun.mjs=0、tests/e2e/e2e-progress.mjs=0、tests/e2e/e2e-mic.mjs=0、tests/e2e/e2e-hidden.mjs=0、tests/e2e/e2e-reinit.mjs=0、tests/e2e/e2e-motion.mjs=0、tests/e2e/e2e-layout.mjs=0、tests/e2e/e2e-goal.mjs（edge）=0、tests/e2e/e2e-hidden.mjs（edge）=0、tests/e2e/e2e-pwa.mjs=3221226505、tests/e2e/e2e-pwa-update.mjs=0、tests/e2e/e2e-pwa.mjs（edge）=0 |
+| 單獨重跑 | `node tests/e2e/e2e-pwa.mjs`、`node tests/e2e/e2e-env.mjs`、`node tests/static/pwa-static.mjs`（全套後） | e2e-pwa（Chrome）在全套中於第 5 項後程序異常結束（結束碼 3221226505 = 0xC0000409，未產生結果檔；同一次全套的 Edge 子集與 e2e-pwa-update 正常）；單獨重跑 23 / 23 通過。e2e-env：TC-18-05、TC-20-01 測試程式判定條件更新後重跑 21 項通過、3 項不適用（§16.6 O-5-2、O-5-7）。pwa-static：只更新 TC-PWA-H4 過時說明後重跑，12 通過＋1 待人工 |
+| QA 檢視 | `node tests/tools/qa-review-r5.mjs` | `tests/results/qa-review.json`（TC-D18～D20、TC-B01～B03、TC-X-edge、TC-R5-J1～J4、人工 TC 21 個） |
+| 彙整 | `rebuild-summary.mjs`、`ac-matrix.mjs`、`tc-list.mjs` | `tests/results/summary.json`、`ac-matrix.json`；test-plan §5、§7 |
+
+各套件結果（彙整後）：
+
+| 套件 | 通過 | 失敗 | 待人工 | 不適用 |
+| :--- | :--- | :--- | :--- | :--- |
+| data | 17 | 0 | 0 | 0 |
+| e2e-cards | 37 | 0 | 0 | 0 |
+| e2e-content | 9 | 0 | 0 | 10 |
+| e2e-env | 18 | 0 | 0 | 3 |
+| e2e-firstrun | 25 | 0 | 0 | 1 |
+| e2e-goal | 22 | 0 | 0 | 5 |
+| e2e-hidden | 5 | 0 | 0 | 0 |
+| e2e-layout | 28 | 0 | 0 | 0 |
+| e2e-mic | 11 | 0 | 0 | 0 |
+| e2e-motion | 15 | 0 | 0 | 0 |
+| e2e-persist | 1 | 0 | 0 | 0 |
+| e2e-progress | 18 | 0 | 0 | 0 |
+| e2e-pwa | 23 | 0 | 0 | 0 |
+| e2e-pwa-update | 7 | 0 | 1 | 0 |
+| e2e-reinit | 15 | 0 | 0 | 0 |
+| e2e-speech | 20 | 0 | 0 | 0 |
+| pwa-static | 12 | 0 | 1 | 0 |
+| qa-review | 11 | 0 | 21 | 0 |
+| static | 15 | 0 | 0 | 0 |
+| **合計** | **309** | **0** | **23** | **19** |
+
+失敗 TC：無
+
+### 16.2 測試程式更新（QA）
+
+| 檔案 | 異動 |
+| :--- | :--- |
+| `tests/e2e/e2e-layout.mjs`（新）、`lib/layout-probe.mjs`（新） | US-38～US-41 的 28 個 TC：色彩掃描、WCAG 對比、卡片與字級樣式、v0.11 對照（git `4fcbb9f`）、標題列圖示、鍵盤與減少動態、名稱與不改清單、主控台編排與寬度、進度條、首次畫面固定底部列；截圖存 `tests/results/diag/layout-r5/` |
+| `tests/e2e/lib/state.mjs` | `clickCard`／`pressed`／`est` 改 `.cz-level`；`dashGoal` 改讀今日任務卡目標行；新增 `GOAL_LINE`、`dashStats`、`expandBackup` |
+| `e2e-goal.mjs` | TC-01-01、TC-17-06 依 v0.12 改寫（精簡列表、目標行、無功能入口）；其餘目標區斷言改比對目標行字串 |
+| `e2e-cards.mjs`、`e2e-hidden.mjs`、`e2e-reinit.mjs`、`e2e-firstrun.mjs`、`e2e-env.mjs` | 匯出、匯入前先展開「資料備份」；單字掌握數改讀「已掌握 N 字」、打卡改讀 3 格數據 |
+| `e2e-content.mjs` | TC-17-01 改讀 3 格數據並檢查各只出現 1 次；TC-23-02 改由頁尾開啟並確認主控台本體無入口 |
+| `e2e-env.mjs` | TC-20-02 的「主控台入口」改為觸控「資料備份」「變更」「開始今日學習」；AC-22-05 量測點改「開始今日學習」；TC-18-05 的「畫面正常顯示」由「文字 > 200 字」改為「開始今日學習可見且文字 > 50 字」（§16.6 O-5-2）；TC-20-01 的裁切偵測排除 AC-26-01 允許截斷的 `.cz-level__desc`（O-5-7） |
+| `e2e-firstrun.mjs` | TC-25-01（摘要行取代試算結果卡）、TC-25-02／03／10（目標行）、TC-24-10（空狀態）、TC-26-01（精簡列表，一般頁與首次畫面） |
+| `e2e-progress.mjs`、`e2e-reinit.mjs` | 主環中央只顯示 X（SD-FB-40）、小環形圖改 3 格數字、近 7 天空狀態（AC-30-01、AC-30-10、AC-30-12、AC-32-02） |
+| `e2e-pwa.mjs`、`pwa-static.mjs` | 新色值 `#1e9bf0`／`#eef4fa`、`<title>` EnglishContext；安裝與 NT-1 檢查前展開「資料備份」，並加驗收合時隱藏；離線與 AC-35-04 就緒判定改「開始今日學習」；AC-37-06 的「加入 PWA 前版本」改取 `e9372f2`（HEAD 已是 PWA 版） |
+| `e2e-persist.mjs`、`e2e-pwa-update.mjs` | 色級列選擇器 |
+| `pwa-static.mjs`（TC-PWA-H4） | 更新過時說明：`static.yml` 已為 MC-03 新版，v0.12 尚未部署 |
+| `tests/static/static-check.mjs` | 新增 TC-S11（cz-color__range 規則調整）、TC-L-S01～S04 |
+| `tests/static/boundary-r5.mjs`（新）、`tests/run-all.mjs` | 與 git HEAD 比對的越界增量；run-all 加入 e2e-layout、改用 boundary-r5 |
+| `tests/tools/qa-review-r5.mjs`（新）、`tc-list.mjs`、`tc-desc.json` | 第 5 輪 QA 檢視、人工 TC-LAY-H1～H3、新 TC 說明 |
+| 診斷（不列入 run-all） | `diag-r5-dom.mjs`、`diag-r5-footer.mjs`、`diag-r5-p5clip.mjs`、`diag-r5-tab.mjs`、`diag-r5-textlen.mjs` |
+
+### 16.3 新增 AC 判定（US-38～US-41）
+
+| AC | 判定 | 對應 TC |
+| :--- | :--- | :--- |
+| AC-38-01 | 通過 | TC-38-01 |
+| AC-38-02 | 通過（另待人工確認） | TC-38-02、TC-PWA-H2、TC-LAY-H3 |
+| AC-38-03 | 通過 | TC-38-03 |
+| AC-38-04 | 通過 | TC-38-04 |
+| AC-38-05 | 通過（另待人工確認） | TC-38-05、TC-M03、TC-LAY-H2、TC-L-S04 |
+| AC-38-06 | 通過 | TC-38-06、TC-R5-J1 |
+| AC-38-07 | 通過 | TC-38-07、TC-L-S01 |
+| AC-38-08 | 通過 | TC-38-08、TC-R5-J1 |
+| AC-38-09 | 通過 | TC-38-09 |
+| AC-38-10 | 通過 | TC-38-10、TC-L-S02、TC-L-S03 |
+| AC-39-01 | 通過 | TC-39-01 |
+| AC-39-02 | 通過 | TC-39-02 |
+| AC-39-03 | 通過 | TC-39-03、TC-39-03b、TC-R5-J2 |
+| AC-39-04 | 通過 | TC-39-04 |
+| AC-39-05 | 通過 | TC-39-05、TC-R5-J2 |
+| AC-39-06 | 通過 | TC-39-06 |
+| AC-39-07 | 通過 | TC-39-07、TC-R5-J3 |
+| AC-39-08 | 通過 | TC-39-08、TC-R5-J2 |
+| AC-39-09 | 通過 | TC-39-09 |
+| AC-39-10 | 通過 | TC-39-10 |
+| AC-40-01 | 通過 | TC-40-01 |
+| AC-40-02 | 通過 | TC-39-10 |
+| AC-40-03 | 通過 | TC-38-03、TC-40-03 |
+| AC-41-01 | 通過 | TC-41-01、TC-R5-J4 |
+| AC-41-02 | 通過 | TC-41-02 |
+| AC-41-03 | 通過（另待人工確認） | TC-41-03、TC-LAY-H1 |
+| AC-41-04 | 通過（另待人工確認） | TC-41-04、TC-LAY-H1 |
+
+重點量測（本機無頭 Chrome）：
+
+| AC | 結果 |
+| :--- | :--- |
+| AC-38-01 | 標題列圖示（.app-logo）依 v0.13 例外不列入。375px 首次畫面：橘 1 處（cz-start.background-color）；375px 主控台：橘 3 處（db-start.background-color、db-stat__icon.fill）；375px 難易度設定：橘 0 處（無）；375px 單字卡：橘 0 處（無）；375px 模擬測驗：橘 0 處（無）；375px 資料來源與授權：橘 0 處（無）；1366px 首次畫面：橘 1 處（cz-start.background-color）；1366px 主控台：橘 3 處（db-start.background-color、db-stat__icon.fill）；1366px 難易度設定：橘 0 處（無）；1366px 單字卡：橘 0 處（無）；1366px 模擬測驗：橘 0 處（無）；1366px 資料來源與授權：橘 0 處（無）；不允許位置：無；主環形圖未達成進度色 375px #1e9bf0、1366px #1e9bf0；模擬測驗進度條填色 375px #1e9bf0、1366px #1e9bf0 |
+| AC-38-04 | WCAG 公式量測可見文字（不含停用按鈕、Q-55 語意色、標題列圖示；鎖定列以 opacity 合成）：375px 首次畫面：量測 27 處、最小 5.32；375px 主控台：量測 38 處、最小 5.39；375px 難易度設定：量測 67 處、最小 5.18；375px 單字卡：量測 23 處、最小 5.18；375px 模擬測驗：量測 19 處、最小 5.39；375px 資料來源與授權：量測 108 處、最小 5.39；1366px 首次畫面：量測 27 處、最小 5.32；1366px 主控台：量測 38 處、最小 5.39；1366px 難易度設定：量測 67 處、最小 5.18；1366px 單字卡：量測 23 處、最小 5.18；1366px 模擬測驗：量測 19 處、最小 5.39；1366px 資料來源與授權：量測 108 處、最小 5.39；未達標 無 |
+| AC-38-08 | v0.11（4fcbb9f）與 v0.12 單字卡頁元素樹（標籤、class、文字、順序）比對：375-card：元素 42/42、順序與文字相同=true；375-quiz：元素 37/37、順序與文字相同=true；1366-card：元素 42/42、順序與文字相同=true；1366-quiz：元素 37/37、順序與文字相同=true；幾何（收音條相對位置列入判定，其餘參考）：375-card 收音條相對位置 v0.11 (161,390) v0.12 (161,390)；375-card 相對頁面原點位置或尺寸差 > 1px 的元素 0；375-quiz 相對頁面原點位置或尺寸差 > 1px 的元素 0；1366-card 收音條相對位置 v0.11 (177,382) v0.12 (177,382)；1366-card 相對頁面原點位置或尺寸差 > 1px 的元素 0；1366-quiz 相對頁面原點位置或尺寸差 > 1px 的元素 0；截圖 tests/results/diag/layout-r5/r5-fc-*.png。AC-06～09、28、33 照常見既有套件 |
+| AC-39-07 | 375px：(a) 長條 3,0,0,10,0,0,4、最高 64px（≤ 80）、圖表區 104px（≤ 120）；(b) 「開始學習後會顯示紀錄」、長條顯示=false、文字高 24px、圖表區（標題下至卡片內距）28px（≤ 48）、可見文字 ["開始學習後會顯示紀錄"]；學 1 字後回主控台 → 長條=true、今天 1；1366px：(a) 長條 3,0,0,10,0,0,4、最高 64px（≤ 80）、圖表區 104px（≤ 120）；(b) 「開始學習後會顯示紀錄」、長條顯示=false、文字高 24px、圖表區（標題下至卡片內距）28px（≤ 48）、可見文字 ["開始學習後會顯示紀錄"]；學 1 字後回主控台 → 長條=true、今天 1 |
+| AC-39-09 | 375×667：捲動 0、按鈕下緣 245、底部導覽上緣 611、完整在視窗內=true、可點=true；由導覽切回 捲動 0 可見=true；390×844：捲動 0、按鈕下緣 245、底部導覽上緣 788、完整在視窗內=true、可點=true；由導覽切回 捲動 0 可見=true；412×915：捲動 0、按鈕下緣 245、底部導覽上緣 859、完整在視窗內=true、可點=true；由導覽切回 捲動 0 可見=true；768×1024：捲動 0、按鈕下緣 291、完整在視窗內=true、可點=true；由導覽切回 捲動 0 可見=true；1366×768：捲動 0、按鈕下緣 299、完整在視窗內=true、可點=true；由導覽切回 捲動 0 可見=true；1920×1080：捲動 0、按鈕下緣 299、完整在視窗內=true、可點=true；由導覽切回 捲動 0 可見=true |
+| AC-41-03 | 375×667 選綠：不捲動三者在視窗內=true、可點=true、position fixed；捲到中段（93/186）=true、到底（186）=true；375×667 選藍：不捲動三者在視窗內=true、可點=true、position fixed；捲到中段（93/186）=true、到底（186）=true；390×844 選綠：不捲動三者在視窗內=true、可點=true、position fixed；捲到中段（5/9）=true、到底（9）=true；390×844 選藍：不捲動三者在視窗內=true、可點=true、position fixed；捲到中段（5/9）=true、到底（9）=true；412×915 選綠：不捲動三者在視窗內=true、可點=true、position fixed；捲到中段（0/0）=true、到底（0）=true；412×915 選藍：不捲動三者在視窗內=true、可點=true、position fixed；捲到中段（0/0）=true、到底（0）=true；768×1024 選綠：不捲動三者在視窗內=true、可點=true、position static；768×1024 選藍：不捲動三者在視窗內=true、可點=true、position static；1366×768 選綠：不捲動三者在視窗內=true、可點=true、position static；1366×768 選藍：不捲動三者在視窗內=true、可點=true、position static；1920×1080 選綠：不捲動三者在視窗內=true、可點=true、position static；1920×1080 選藍：不捲動三者在視窗內=true、可點=true、position static；375×812 選綠：不捲動三者在視窗內=true、可點=true、position fixed；捲到中段（21/41）=true、到底（41）=true；375×812 選藍：不捲動三者在視窗內=true、可點=true、position fixed；捲到中段（21/41）=true、到底（41）=true |
+| AC-41-04 | 底部列高 152/152/152/180/180px（≤ 184）；捲到底頁尾連結下緣 459 ≤ 底部列上緣 487=true、可點=true；各色級列可捲到底部列上方 orange:true brown:true green:true blue:true gold:true；格式錯誤提示 [{"t":"備份檔格式錯誤，未匯入","b":471}]、底部列上緣 487，不被遮住=true；Tab 順序 row:orange,row:brown,row:green,row:blue,row:gold,cz-start,cz-restore,footer-sources |
+
+### 16.4 修改 AC 判定與 PG 超出設計字面之處
+
+| AC | 判定 | 對應 TC |
+| :--- | :--- | :--- |
+| AC-01-01 | 通過 | TC-26-01、TC-01-01、TC-S11 |
+| AC-01-02 | 通過 | TC-01-02 |
+| AC-01-07 | 通過 | TC-26-04、TC-01-07 |
+| AC-17-01 | 通過 | TC-17-01、TC-39-05 |
+| AC-17-06 | 通過 | TC-17-06、TC-39-04 |
+| AC-22-05 | 通過（另待人工確認） | TC-22-05a、TC-22-05b、TC-39-09、TC-M07 |
+| AC-35-04 | 通過（另待人工確認） | TC-35-04、TC-M07 |
+| AC-23-02 | 通過 | TC-D10、TC-23-02、TC-23-02b、TC-25-07、TC-39-06、TC-23-02c、TC-D18 |
+| AC-24-01 | 通過（另待人工確認） | TC-24-01、TC-18-03、TC-M06 |
+| AC-24-12 | 通過 | TC-39-08、TC-37-01a、TC-37-02、TC-24-12a、TC-24-12b |
+| AC-34-07 | 通過（另待人工確認） | TC-34-07、TC-PWA-H1 |
+| AC-24-10 | 通過 | TC-24-10 |
+| AC-30-12 | 通過 | TC-30-12 |
+| AC-32-02 | 通過 | TC-32-02 |
+| AC-25-01 | 通過 | TC-22-05b、TC-25-01、TC-41-01、TC-R5-J4 |
+| AC-25-02 | 通過 | TC-25-02 |
+| AC-25-03 | 通過 | TC-25-03 |
+| AC-25-06 | 通過 | TC-25-06 |
+| AC-25-10 | 通過 | TC-25-10 |
+| AC-26-06 | 通過 | TC-26-06 |
+| AC-26-01 | 通過（另待人工確認） | TC-26-01、TC-M05 |
+| AC-30-01 | 通過 | TC-30-01 |
+| AC-30-10 | 通過 | TC-39-05、TC-30-10、TC-30-10b |
+| AC-33-02 | 待人工（V-MIC-2） | TC-33-02a、TC-MIC-2 |
+| AC-34-01 | 通過（另待人工確認） | TC-34-01、TC-PS-02、TC-PS-03、TC-X-edge、TC-PWA-H1、TC-L-S02 |
+| AC-34-02 | 待人工（TC-PWA-H1／H2） | TC-PWA-H1、TC-PWA-H2、TC-L-S02 |
+| AC-36-01 | 通過 | TC-36-01a、TC-36-01b、TC-36-01c、TC-36-01obs |
+| AC-34-03 | 待人工（TC-PWA-H1／H2） | TC-34-03a、TC-PS-03、TC-PWA-H1、TC-PWA-H2 |
+| AC-34-05 | 待人工（TC-PWA-H3（iOS）） | TC-34-05a、TC-PS-03、TC-PS-04、TC-PWA-H3 |
+| AC-34-08 | 通過（另待人工確認） | TC-37-01a、TC-37-01b、TC-34-07、TC-34-08、TC-PWA-H3 |
+
+PG 回報超出設計字面之處（主控指示範圍 4）：
+
+| 編號 | 內容 | 判定 |
+| :--- | :--- | :--- |
+| TC-R5-J1 | 單字卡頁另加 `#view-flashcards .card.fc-card { box-shadow: var(--shadow) }` | 不違反：`--shadow` 值與 v0.11 相同，單字卡本體維持 v0.11 陰影，正是 AC-38-08「只換配色」的要求；AC-38-06 明列單字卡本體不在範圍。TC-38-08 元素樹與相對幾何差異 0 |
+| TC-R5-J2 | 主控台重繪清單加入 `streak` | 不違反：只重繪打卡數字，不寫 localStorage（TC-39-03、TC-39-08 前後逐字相同），打卡顯示照常（TC-17-02、TC-17-05） |
+| TC-R5-J3 | 近 7 天卡片內距縮小 | 不違反：AC-39-07 只限高度，實測長條最高 64px、圖表區 104px、空狀態圖表區 28px；AC-38-06 不規定內距 |
+| TC-R5-J4 | `#cz-guide` 直接不建立（設計原為 hidden） | 不違反：AC-41-01 規定的首次畫面元素不含引導文字；不建立與隱藏在畫面、Tab 順序、無障礙樹的結果相同 |
+
+### 16.5 已知事項的處理
+
+| 項目 | 處理 |
+| :--- | :--- |
+| 「產物不含 `cz-color__range`」命中 1 次 | 命中處為 `20-customizer.css` 檔頭記載 v0.10 刪除該 class 的歷史註解，不影響畫面與行為。**判定調整檢查規則、不開 BUG**：新規則 TC-S11 只檢查程式與 CSS 規則（去除註解），結果 0／0。若希望產物連註解都不含，可在下次修改該檔時順手刪除（非必要） |
+| 測驗模式結構對照 | 依主控指示以初始化腳本固定 `Math.random`（種子 20261103）後比對，v0.11 與 v0.12 元素樹相同（TC-38-08） |
+| SD-FB-39（標題列圖示橘色） | PRD v0.13 已將標題列品牌圖示列為 AC-38-01 例外；TC-38-01 掃描排除 `.app-logo`，其餘位置的橘色只有「開始今日學習」「開始學習」底色與打卡圖示 |
+
+### 16.6 觀察事項（不構成缺陷）
+
+| 編號 | 內容 |
+| :--- | :--- |
+| O-5-1 | 換頁轉場進行中（約 240ms）以座標點擊頁尾連結，可能因頁面高度改變而點不到（測試程式改為換頁後等待 350ms 再點）。屬既有換頁動畫行為，非本輪變更；實機手動操作不受影響 |
+| O-5-2 | TC-18-05 第 1 次全套失敗：測試程式以「body 文字超過 200 字」判斷畫面正常顯示，v0.12 主控台精簡且資料備份預設收合，重設後主控台畫面文字實測 179 字（`diag-r5-textlen.mjs`）；4 種損壞資料的提示、目標行、localStorage 重設與原字串保存皆正確。改為「開始今日學習可見且文字超過 50 字」後重跑通過 |
+| O-5-7 | TC-20-01 第 1 次全套失敗：通用的文字裁切偵測把 375px 難易度設定頁 `.cz-level__desc` 的省略號截斷判為裁切。AC-26-01（v0.12）明定說明「一行，過長截斷」（SD-FB-47），屬 AC 允許；排除該元素（名稱與數字仍檢查，另見 TC-26-01）後重跑通過 |
+| O-5-8 | 全套中 e2e-pwa（Chrome）在第 5 項後程序異常結束（Windows 結束碼 0xC0000409，未寫出結果檔），同次全套的 Edge 子集正常；單獨重跑 23 / 23 通過。研判為本機 Playwright／瀏覽器程序偶發異常，非產品行為；若再發生請保留 `tests/results/tmp/r5-run-all.txt` |
+| O-5-3 | 單字卡頁與其他頁卡片風格不同（單字卡頁維持 v0.11 的 8px 圓角與框線，SD-FB-42），符合 AC-38-08；若希望統一需修改 AC |
+| O-5-4 | 首次畫面 375×667 選藍、金時固定底部列高 180px（設計預算 184px），色級列與頁尾都能捲到列上方；餘裕 4px，日後增加文字需注意 |
+| O-5-5 | 1366×768 首次畫面的固定底部列依 SD-FB-46 隨內容排列，不捲動仍完整可見（TC-41-03） |
+| O-5-6 | 樣稿 `docs/mockups/v0.12-layout-demo.html` 未作為判定依據；與交付版的差異（廣告框等）依 PRD 不在範圍 |
+
+### 16.7 越界與安全（本輪）
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 第 5 輪增量（TC-B03） | 與 git HEAD `4fcbb9f`（v0.11 交付）比對，含 `.gitignore` 的 `dist/site/`：PG 變動 45 檔全部在 CT-24、FE-54～FE-62 paths 內（超出 0）；`src/app/styles/32-quiz.css`、`90-overrides.css` 未變動（允許）。授權例外：`docs/mockups/` 2 檔、`docs/01-PRD.md`、`docs/02-contract/` 3 檔、`docs/03-design/` 2 檔 |
+| 檔案歸屬（TC-B01） | 不屬於任何任務 0 |
+| 上游與 QA 目錄（TC-B02） | `english_master_track.md` 未修改；`sources/` 未修改；`tests/` 在本輪 QA 開始時與 HEAD 相同（PG 未寫入）；`docs/04-qa/` 在本輪 QA 開始前最後修改為第 4 輪 |
+| XSS | 新增文字（目標行、摘要行、空狀態、原創內容來源）皆以 `textContent` 寫入；禁用 DOM API 0（TC-S03）；自訂單字 XSS 回歸通過（TC-04-09） |
+| 外部資源 | 標題列圖示為內嵌 SVG 406 bytes、無 `xmlns`／`href`／`<image>`；CSS 無 `@font-face`、`url(`；`file://` 連網與斷網主文件以外的請求 0（TC-38-05、TC-L-S01、TC-L-S04） |
+| 不改清單 | localStorage 鍵、`schemaVersion` 2、備份 `format`、匯出檔名 `english-master-track-backup-YYYYMMDD.json`、交付檔名、快取前綴、`emt-build-id` 與 v0.11 相同；v0.11 寫入的 localStorage 直接進主控台、資料逐欄相同；v0.11 備份可匯入（TC-38-10、TC-L-S03） |
+
+### 16.8 需要人類決定或執行的事項
+
+| 編號 | 事項 |
+| :--- | :--- |
+| H-5-1 | 實機人工驗收（test-plan §6.2）：TC-LAY-H1 固定底部列與安全區、TC-LAY-H2 標題列圖示清晰度、TC-LAY-H3 狀態列顏色 `#1e9bf0` |
+| H-5-2 | 沿用前幾輪尚未回報的實機項目：V-MIC-1～5、TC-M01～M10、TC-PWA-H1～H5（步驟已依 v0.12 調整，見 test-plan §6.2 開頭） |
+| H-5-3 | 部署：本輪變更尚未提交與部署；push 後 V-PWA (a) 的 TC-PWA-H1／H2／H5 與 TC-LAY-H3 才能在正式網址驗證 |
+
+### 16.9 缺陷
+
+本輪新開 0 張。既有 BUG-001、BUG-002、BUG-003 皆 verified，無 open 缺陷。
+
+### 16.10 回饋上游
+
+| 對象 | 內容 |
+| :--- | :--- |
+| SD（architecture §10.5） | 鍵盤 E2E 以 CDP 送 Enter 時需帶 `text`（否則按鈕預設動作不觸發）；Tab 序列量測前需重新載入或重設循序焦點起點，建議在 §10.5 註明 |
+
+## 17. 變更紀錄
 
 | 版本 | 日期 | 作者 | 說明 |
 | :--- | :--- | :--- | :--- |
@@ -1243,3 +1467,4 @@ BUG-003 改為 verified。AC-34-03 自動化通過，但圖示在實機上的外
 | 0.3 | 2026-10-30 | qa-agent | 退回修正第 2 輪驗證（§12）：依人類決議（JimmyLin「偶爾失敗沒關係」）TC-22-01、TC-16-01b、TC-16-01c 改用多輪判定（test-plan v0.3 §2.3）；TC-22-01 改採嚴格量法並新增 TC-22-01r；BUG-002 verified；TC-M07 新增 (9) 句型庫捲軸觀察、(10) 自訂器延後顯示觀察；160 個 TC，通過 152、失敗 0、待人工 8 |
 | 0.4 | 2026-11-02 | qa-agent | 第 3 輪驗收（§0、§14）：範圍 PRD v0.10（v0.8 + v0.9 + v0.10），192 個 AC 應驗收、22 個不適用（暫停）。264 個 TC：通過 230、失敗 0、待人工 15、不適用 19；AC 通過 188（其中 37 另待人工確認）、待人工 4、失敗 0；新開缺陷 0。更新與新增測試程式（§14.2）；TC-22-01m 全套執行 1 次不符、單獨重跑 2 次符合，判定通過並列觀察（§14.3）；新增觀察 O-7～O-13、需人類決定 H-1～H-5、回饋上游 QA-FB-03、QA-FB-04。原 §13 變更紀錄改為 §15 |
 | 0.5 | 2026-11-03 | qa-agent | 第 4 輪驗收（§0、§15）：範圍 PRD v0.11（新增 PWA），221 個 AC 應驗收、22 個不適用（暫停）。311 個 TC：通過 271、失敗 1、待人工 20、不適用 19；AC 通過 212（47 個另待人工確認）、待人工 8、失敗 1（AC-34-03）。新開 BUG-003（minor，主控 MC-01）。新增 Playwright（devDependency `playwright-core`）與 PWA 測試；第 3 輪結論移至 §0.1；變更紀錄改為 §16 ；同日 BUG-003 複驗通過改 verified（§15.11），最終 TC 通過 272、失敗 0、待人工 20、不適用 19，AC 通過 212（47 另待人工）、待人工 9、失敗 0；新增 §15.12 清單 |
+| 0.6 | 2026-11-03 | qa-agent | 第 5 輪驗收（§0、§16）：範圍 PRD v0.13（版面風格調整，新增 US-38～US-41、修改 30 個 AC），248 個 AC 應驗收、22 個不適用（暫停）。351 個 TC：通過 309、失敗 0、待人工 23、不適用 19；AC 通過 239（52 個另待人工確認）、待人工 9、失敗 0。新開缺陷 0。新增 e2e-layout 等測試程式並依 SD-FB-45 更新既有 E2E（§16.2）；判定 PG 超出設計字面 4 處皆不違反 AC（§16.4）；「cz-color__range」靜態規則改為只查程式與 CSS 規則（§16.5）。第 4 輪結論移至 §0.1；變更紀錄改為 §17 |

@@ -36,7 +36,14 @@
  * - DOM 只建立一次（啟動後閒置預建，或第一次 mount，以先到者為準）；之後的更新只改既有節點的文字與屬性，
  *   不重建（AC-02-07、AC-22-04）。閒置預建讓第一次切到本頁時不必在點擊事件內建 DOM（AC-22-01，BUG-002）。
  * - 所有文字以 textContent 寫入（經 EMT.core.dom），不使用任何 HTML 字串 API（C-7）。
- * - 純顯示邏輯（cardModels、estimateTexts、statusTexts、formatInt）不碰 DOM，Node 下可 require 測試。
+ * - 純顯示邏輯（levelRows、firstRunSummary、estimateTexts、statusTexts、formatInt）不碰 DOM，Node 下可 require 測試。
+ *
+ * （v0.12，FE-57；architecture.md v0.8 §4.8、§7.19.5；契約 README §11.5 FT-1～FT-6、LAYOUT_TEXTS 首次畫面段）
+ * - 色級大卡片改為 5 列精簡色級列（.cz-level，兩種模式共用；cardModels → levelRows）；列表上方說明行恰 1 個
+ * - 首次畫面：標題「選擇你的目標」＋副標 → 說明行 → 5 列 → 固定底部列 .cz-firstbar（鎖定行、摘要行、#cz-start、#cz-restore）；
+ *   狀態列、試算結果卡、「套用」、一般說明、色級區標題 hidden；舊引導文字 #cz-guide 不再建立
+ * - 版面文字一律於呼叫時取 EMT.core.layout（LD-2），以 textContent 寫入
+ * 涵蓋（v0.12）：US-41、AC-41-01～AC-41-04、AC-26-01、AC-01-01、AC-01-07、AC-25-01～AC-25-03、AC-25-10、AC-38-*
  */
 (function (root, factory) {
   var api = factory(root);
@@ -57,10 +64,10 @@
   function core() {
     if (coreCache) { return coreCache; }
     if (typeof require === "function" && typeof module === "object") {
-      coreCache = { G: require("../core/goal.js"), C: require("../core/constants.js") };
+      coreCache = { G: require("../core/goal.js"), C: require("../core/constants.js"), L: require("../core/layout.js") };
     } else {
       var c = root.EMT.core;
-      coreCache = { G: c.goal, C: c.constants };
+      coreCache = { G: c.goal, C: c.constants, L: c.layout };
     }
     return coreCache;
   }
@@ -74,11 +81,10 @@
     builtinCap: "（內建上限）",
     colorHeading: "色級",
     vocabNote: "本系統建議字量",
-    vocabLabel: "內建字數",
-    dailyLabel: "每日新字量",
-    trialOnly: "僅供試算",
-    picked: "已選擇",
-    pending: "待定",
+    // （v0.12，FE-57；SD-FB-41）色級列表上方說明行 = LAYOUT_TEXTS.vocabNoteLead + 本段（整個列表上方 1 次）
+    vocabNoteRest: "：右側為內建字數與每日新字量",
+    levelsLabel: "色級",
+    pending: "待定", // 只留給一般頁試算區（藍、金建議總字量）
     comingSoon: "即將開放",
     scoreHeading: "目標分數",
     scoreSlider: "目標分數滑桿",
@@ -94,10 +100,7 @@
     basedOnGreen: "以目前內建字庫上限（綠）試算",
     greenCap: "目前內建字庫到綠色為止",
     apply: "套用",
-    // （FE-32）首次畫面
-    startLearning: "開始學習",
-    restore: "從備份還原",
-    firstRunGuide: "先選擇你的目標難易度，按「開始學習」後進入主控台。",
+    // （FE-32）首次畫面文字（v0.12 起「開始學習」「從備份還原」、標題、副標、摘要行取 EMT.core.layout.LAYOUT_TEXTS）
     applied: "已套用目標",
     // （FE-40）切換難易度初始化確認視窗（AC-32-01、Q-38；architecture.md §7.15 確認視窗表）
     reinitTitle: "切換難易度",
@@ -149,46 +152,65 @@
   }
 
   /**
-   * 5 張色級卡片的顯示模型（AC-01-01、AC-26-01、AC-26-03）。順序同契約 COLOR_LEVELS（橘、棕、綠、藍、金）。
-   * - （v0.10，AC-26-05）不含分數範圍（scoreMin／scoreMax 不顯示）
-   * - 內建字數：橘 nO、棕 nB、綠 nG 的實際數字（非正數視為資料缺漏，顯示「—」）；藍、金「待定」
-   * - 每日新字量：取自 core/goal.js dailyNewWords（橘 10、棕 10、綠 15、藍金 20）；藍、金加註「僅供試算」
-   * - 選中：colorOf(draftScore)；分數無效時沒有卡片選中
+   * （v0.12，FE-57）5 列精簡色級列的顯示模型（契約 FT-3；AC-01-01、AC-26-01、AC-26-03）。
+   * 首次畫面與一般難易度設定頁共用；順序同契約 COLOR_LEVELS（橘、棕、綠、藍、金）。
+   * - 開放列（橘棕綠）：desc = scenarioZh；vocabText = 內建字數（橘 nO、棕 nB、綠 nG；非正數視為資料缺漏 →「—」）；
+   *   dailyText = dailyNewWords 字/天
+   * - 鎖定列（藍金）：desc = 「即將開放」（LAYOUT_TEXTS.levelLocked）；vocabText／dailyText 為 null（右側只顯示「—」），
+   *   不得出現「待定」、數字或「20 字/天」（Q-57）
+   * - 不含分數與分數範圍（AC-26-05）；選中 = colorOf(draftScore)，分數無效時沒有列選中
    * @param {number} nO 橘色建議字量（契約常數 N_O）
    * @param {number} nB 棕色建議字量（實際資料計算）
    * @param {number} nG 綠色建議字量（實際資料計算）
    * @param {number} draftScore 目前草稿分數
-   * @returns {Array<{id: string, name: string, vocab: string, vocabNote: string, daily: string,
-   *          dailyNote: string, scenario: string, locked: boolean, badge: string, selected: boolean}>}
+   * @returns {Array<{id: string, name: string, desc: string, locked: boolean,
+   *          vocabText: (string|null), dailyText: (string|null), selected: boolean}>}
    */
-  function cardModels(nO, nB, nG, draftScore) {
+  function levelRows(nO, nB, nG, draftScore) {
     var k = core();
     var G = k.G;
+    var L = k.L;
     var counts = { N_O: positiveOrNull(nO), N_B: positiveOrNull(nB), N_G: positiveOrNull(nG) };
     var selectedId = G.colorOf(draftScore);
     return k.C.COLOR_LEVELS.map(function (level) {
       var open = G.isOpenColor(level.id);
-      var vocab;
-      if (!open) {
-        vocab = T.pending;
-      } else {
+      var vocabText = null;
+      var dailyText = null;
+      if (open) {
         var n = Object.prototype.hasOwnProperty.call(counts, level.vocabTarget) ? counts[level.vocabTarget] : null;
-        vocab = n === null ? T.unknown : formatInt(n) + T.wordsUnit;
+        vocabText = n === null ? T.unknown : formatInt(n) + T.wordsUnit;
+        var daily = G.dailyNewWords(level.scoreMin);
+        dailyText = daily === null ? T.unknown : formatInt(daily) + T.dailyUnit;
       }
-      var daily = G.dailyNewWords(level.scoreMin);
       return {
         id: level.id,
         name: level.nameZh,
-        vocab: vocab,
-        vocabNote: T.vocabNote,
-        daily: daily === null ? T.unknown : formatInt(daily) + T.dailyUnit,
-        dailyNote: open ? "" : T.trialOnly,
-        scenario: level.scenarioZh,
+        desc: open ? level.scenarioZh : L.LAYOUT_TEXTS.levelLocked,
         locked: !open,
-        badge: open ? "" : T.comingSoon,
+        vocabText: vocabText,
+        dailyText: dailyText,
         selected: level.id === selectedId
       };
     });
+  }
+
+  /**
+   * （v0.12，FE-57）首次畫面試算摘要行（契約 FT-4；AC-41-02）。
+   * 與一般頁試算區 estimateTexts 使用同一個 G.estimate(score, 0, nB, nG)（首次畫面 CurrentVocab = 0）；
+   * 藍、金（basedOnGreen）時接「（以綠試算）」並回傳 locked = true（顯示 lockedNotice 行）。
+   * @param {object} G core/goal.js
+   * @param {number} score 目前草稿分數
+   * @param {number} nB
+   * @param {number} nG
+   * @returns {{text: string, locked: boolean}}
+   */
+  function firstRunSummary(G, score, nB, nG) {
+    var L = core().L;
+    var e = G.estimate(score, 0, positiveOrNull(nB), positiveOrNull(nG));
+    var level = G.levelOf(e.color);
+    if (!level) { return { text: T.unknown, locked: false }; }
+    var locked = !!e.basedOnGreen;
+    return { text: L.summaryLine(level, e.dailyNewWords, e.weeks, locked), locked: locked };
   }
 
   /**
@@ -249,30 +271,43 @@
   }
 
   /**
-   * 按鈕區與狀態列的顯示模型（FE-32；AC-25-01、AC-25-06）。
-   * - 首次：引導文字、「開始學習」（主要按鈕）、「從備份還原」；無「套用」、無狀態列、不顯示一般說明
-   * - 一般：「套用」、狀態列、一般說明；無首次按鈕與引導文字
+   * 兩種模式的顯示模型（FE-32；v0.12 FE-57 依 architecture.md §7.19.5 調整；契約 FT-1、FT-2、FT-6；AC-25-01、AC-25-06、AC-41-01）。
+   * - 首次：標題「選擇你的目標」＋ 副標；色級區標題「色級」隱藏；狀態列、一般說明、試算結果卡、「套用」皆隱藏；
+   *   固定底部列（.cz-firstbar）顯示「開始學習」「從備份還原」（buttons）；舊引導文字 firstRunGuide 不再顯示（guide 為空）
+   * - 一般：標題「難易度設定」、一般說明、狀態列、色級區標題、試算結果卡、「套用」；無固定底部列與副標
    * @param {string} entryMode "firstRun"｜"main"（其他值視為 "main"）
-   * @returns {{mode: string, showStatus: boolean, showIntro: boolean, guide: string,
+   * @returns {{mode: string, title: string, showSubtitle: boolean, showStatus: boolean, showIntro: boolean,
+   *          showColorHeading: boolean, showEstimate: boolean, showFirstBar: boolean, guide: string,
    *          buttons: Array<{action: string, text: string, primary: boolean}>}}
    */
   function actionsModel(entryMode) {
+    var LT = core().L.LAYOUT_TEXTS;
     if (entryMode === "firstRun") {
       return {
         mode: "firstRun",
+        title: LT.firstRunTitle,
+        showSubtitle: true,
         showStatus: false,
         showIntro: false,
-        guide: T.firstRunGuide,
+        showColorHeading: false,
+        showEstimate: false,
+        showFirstBar: true,
+        guide: "",
         buttons: [
-          { action: "start", text: T.startLearning, primary: true },
-          { action: "restore", text: T.restore, primary: false }
+          { action: "start", text: LT.startLearning, primary: true },
+          { action: "restore", text: LT.restoreFromBackup, primary: false }
         ]
       };
     }
     return {
       mode: "main",
+      title: T.title,
+      showSubtitle: false,
       showStatus: true,
       showIntro: true,
+      showColorHeading: true,
+      showEstimate: true,
+      showFirstBar: false,
       guide: "",
       buttons: [{ action: "apply", text: T.apply, primary: true }]
     };
@@ -299,7 +334,8 @@
     actionsModel: actionsModel,
     formatInt: formatInt,
     colorLabel: colorLabel,
-    cardModels: cardModels,
+    levelRows: levelRows,
+    firstRunSummary: firstRunSummary,
     estimateTexts: estimateTexts,
     statusTexts: statusTexts
   };
@@ -313,7 +349,7 @@
    */
   function createView(root) {
     var EMT = root.EMT;
-    var D, G, C;            // core/dom、core/goal、core/constants（mount 時取用）
+    var D, G, C, L;         // core/dom、core/goal、core/constants、core/layout（mount 時取用，LD-2）
     var host = null;        // #customizer-goal
     var refs = {};          // 需要更新的節點
     var colorButtons = {};  // colorId → { node: button, base: 基本 class }
@@ -353,41 +389,60 @@
       ]);
     }
 
-    /** 建立單一色級卡片（整張為 button；內容依 cardModels） */
-    function buildColorCard(m) {
-      var head = [D.el("span", { className: "cz-color__name", text: m.name })];
-      if (m.locked) {
-        head.push(D.el("span", { className: "cz-color__badge" }, [lockIcon(), D.el("span", { text: m.badge })]));
-      }
-      // 「已選擇」：僅在 aria-pressed="true" 時由 CSS 顯示（不只靠顏色，也給螢幕閱讀器）
-      head.push(D.el("span", { className: "cz-color__picked", text: T.picked }));
-      var daily = [D.el("span", { text: T.dailyLabel + "：" }), D.el("strong", { text: m.daily })];
-      if (m.dailyNote) {
-        daily.push(D.el("span", { className: "cz-color__note", text: "（" + m.dailyNote + "）" }));
-      }
-      var base = "cz-color cz-color--" + m.id + (m.locked ? " is-locked" : "");
+    /**
+     * （v0.12，FE-57）建立單一色級列（整列為 button；內容依 levelRows；architecture.md §7.19.5）。
+     * 色條 → 名稱＋✓（只在 aria-pressed="true" 時由 CSS 顯示）＋鎖定圖示 → 說明一行 → 右側字數與 字/天（鎖定列「—」）。
+     */
+    function buildLevelRow(m) {
+      var name = [
+        D.el("span", { className: "cz-level__label", text: m.name }),
+        D.el("span", { className: "cz-level__check", attrs: { "aria-hidden": "true" }, text: "✓" })
+      ];
+      if (m.locked) { name.push(lockIcon()); }
+      var side = m.locked
+        ? [D.el("span", { className: "cz-level__dash", text: T.unknown })]
+        : [D.el("span", { className: "cz-level__vocab", text: m.vocabText }),
+          D.el("span", { className: "cz-level__daily", text: m.dailyText })];
+      var base = "cz-level cz-level--" + m.id + (m.locked ? " is-locked" : "");
       var btn = D.el("button", {
         className: base,
         attrs: { type: "button", "aria-pressed": "false", "data-color": m.id },
         on: { click: function () { onColorClick(m.id); } }
       }, [
-        D.el("span", { className: "cz-color__head" }, head),
-        D.el("span", { className: "cz-color__vocab" }, [
-          D.el("span", { text: T.vocabLabel + "：" }),
-          D.el("strong", { text: m.vocab }),
-          D.el("span", { className: "cz-color__note", text: "（" + m.vocabNote + "）" })
+        D.el("span", { className: "cz-level__bar", attrs: { "aria-hidden": "true" } }),
+        D.el("span", { className: "cz-level__main" }, [
+          D.el("span", { className: "cz-level__name" }, name),
+          D.el("span", { className: "cz-level__desc", text: m.desc })
         ]),
-        D.el("span", { className: "cz-color__daily" }, daily),
-        D.el("span", { className: "cz-color__scenario", text: m.scenario })
+        D.el("span", { className: "cz-level__side" }, side)
       ]);
       colorButtons[m.id] = { node: btn, base: base };
       return btn;
     }
 
+    /**
+     * （v0.12，FE-57）首次畫面固定底部列（契約 FT-2；architecture.md §7.19.5）：
+     * 鎖定行（選中藍、金才顯示）→ 摘要行 → 「開始學習」→「從備份還原」。只建一次，一般模式 hidden。
+     */
+    function buildFirstBar() {
+      var LT = L.LAYOUT_TEXTS;
+      refs.firstLocked = D.el("p", { className: "cz-firstbar__locked", attrs: { role: "status" }, text: LT.lockedNotice });
+      refs.firstLocked.hidden = true;
+      refs.firstSummary = D.el("p", { className: "cz-firstbar__summary", attrs: { "aria-live": "polite" } });
+      refs.firstBar = D.el("div", { className: "cz-firstbar" }, [
+        refs.firstLocked,
+        refs.firstSummary,
+        buildActionButton({ action: "start", text: LT.startLearning }),
+        buildActionButton({ action: "restore", text: LT.restoreFromBackup })
+      ]);
+      refs.firstBar.hidden = true;
+      return refs.firstBar;
+    }
+
     /** 建立整頁（只在 mount 時一次） */
     function build() {
       var ct = content();
-      var levels = cardModels(C.N_O, ct.nB, ct.nG, goalState().draftScore).map(buildColorCard);
+      var levels = levelRows(C.N_O, ct.nB, ct.nG, goalState().draftScore).map(buildLevelRow);
 
       // （v0.10，AC-26-05）滑桿與輸入框停用（disabled）且移出 Tab 順序（tabindex="-1"）：
       // 即使日後 CSS 誤改分數區的 display，也無法聚焦或輸入（architecture.md §7.17 三重保證之 (3)）
@@ -417,7 +472,7 @@
       refs.achieved = achieved;
       refs.cap = cap;
       var estimate = D.el("section", { className: "card cz-estimate", attrs: { "aria-labelledby": "cz-estimate-title", "aria-live": "polite" } }, [
-        D.el("h3", { className: "cz-heading", attrs: { id: "cz-estimate-title" }, text: T.estimateHeading }),
+        D.el("h3", { className: "section-title cz-heading", attrs: { id: "cz-estimate-title" }, text: T.estimateHeading }),
         D.el("dl", { className: "cz-rows" }, [
           row(T.estColor, "estColor", "cz-est-color"),
           row(T.estTarget, "estTarget", "cz-est-target"),
@@ -444,8 +499,7 @@
       var statusSlot = D.el("div", { className: "cz-status-slot" }, [status]);
       refs.statusSlot = statusSlot;
 
-      // （FE-32）首次畫面引導文字與一般說明：依模式切換 hidden（renderMode）
-      refs.guide = D.el("p", { className: "cz-guide", attrs: { id: "cz-guide" }, text: T.firstRunGuide });
+      // 一般說明：依模式切換 hidden（renderMode）。（v0.12，FE-57）首次畫面改為標題＋副標，舊引導文字 #cz-guide 不再建立
       refs.intro = D.el("p", { className: "cz-intro", text: T.intro });
 
       // （v0.10，FE-43；GS-6、AC-26-05）分數區程式保留，但建立時即 hidden + inert；之後任何路徑都不改回可見。
@@ -463,20 +517,31 @@
       ]);
       scoreSection.hidden = true;
       refs.scoreSection = scoreSection;
+      refs.estimate = estimate;
+
+      // （v0.12，FE-57）標題文字依模式切換（renderMode）；首次畫面副標（FT-1）
+      refs.title = D.el("h2", { className: "page-title cz-title", text: T.title });
+      refs.subtitle = D.el("p", { className: "cz-subtitle", text: L.LAYOUT_TEXTS.firstRunSubtitle });
+      refs.subtitle.hidden = true;
+      refs.colorHeading = D.el("h3", { className: "section-title cz-heading", attrs: { id: "cz-colors-title" }, text: T.colorHeading });
 
       var page = D.el("div", { className: "cz" }, [
-        D.el("h2", { className: "cz-title", text: T.title }),
-        refs.guide,
+        refs.title,
+        refs.subtitle,
         refs.intro,
         statusSlot,
-        D.el("section", { className: "cz-colors-wrap", attrs: { "aria-labelledby": "cz-colors-title" } }, [
-          D.el("h3", { className: "cz-heading", attrs: { id: "cz-colors-title" }, text: T.colorHeading }),
-          D.el("div", { className: "cz-colors" }, levels)
+        // 色級區：卡片外觀；首次畫面只隱藏標題「色級」（以 aria-label 保留名稱）
+        D.el("section", { className: "card cz-colors-wrap", attrs: { "aria-label": T.colorHeading } }, [
+          refs.colorHeading,
+          D.el("p", { className: "cz-vocab-note", text: L.LAYOUT_TEXTS.vocabNoteLead + T.vocabNoteRest }),
+          D.el("div", { className: "cz-levels", attrs: { role: "group", "aria-label": T.levelsLabel } }, levels)
         ]),
         scoreSection,
         estimate,
-        // 按鈕區內容依進入模式建立（renderMode）
-        refs.actions = D.el("div", { className: "btn-row cz-actions" })
+        // 「套用」按鈕區內容依進入模式建立（renderMode）
+        refs.actions = D.el("div", { className: "btn-row cz-actions" }),
+        // 首次畫面固定底部列：DOM 位於色級列之後、頁尾之前（Tab 順序：色級列 → 開始學習 → 從備份還原 → 頁尾）
+        buildFirstBar()
       ]);
       D.clear(host);
       host.appendChild(page);
@@ -496,7 +561,16 @@
       refs.achieved.hidden = !t.achieved;
       refs.note.hidden = !t.basedOnGreen;
       refs.cap.hidden = !t.greenCap;
+      renderSummary(score);
       renderSelected(G.colorOf(score));
+    }
+
+    /** （v0.12，FE-57）首次畫面摘要行與鎖定行：只改既有節點文字與 hidden（FT-5，≤ 100ms） */
+    function renderSummary(score) {
+      var ct = content();
+      var s = firstRunSummary(G, score, ct.nB, ct.nG);
+      D.setText(refs.firstSummary, s.text);
+      refs.firstLocked.hidden = !s.locked;
     }
 
     /**
@@ -528,15 +602,16 @@
         });
       }
       if (b.action === "start") {
+        // （v0.12）強調橘按鈕（VC-3：只用於「開始今日學習」「開始學習」）
         return D.el("button", {
-          className: "btn btn--primary cz-start",
+          className: "btn btn--accent cz-start",
           attrs: { type: "button", id: "cz-start" },
           text: b.text,
           on: { click: onStartLearning }
         });
       }
       return D.el("button", {
-        className: "btn btn--secondary cz-restore",
+        className: "btn btn--link cz-restore",
         attrs: { type: "button", id: "cz-restore" },
         text: b.text,
         on: { click: onRestore }
@@ -544,8 +619,8 @@
     }
 
     /**
-     * （FE-32）依進入模式呈現按鈕區、狀態列、引導文字與一般說明。
-     * 模式沒變時不碰 DOM；變更時只重建按鈕區（卡片、分數、試算區不動，AC-26-*）。
+     * （FE-32；v0.12 FE-57）依進入模式切換標題文字、副標、一般說明、狀態列、色級區標題、試算結果卡、「套用」與固定底部列。
+     * 模式沒變時不碰 DOM；變更時只重建「套用」按鈕區（色級列、分數、試算區、底部列不重建，AC-26-*）。
      * @param {"firstRun"|"main"} next
      */
     function renderMode(next) {
@@ -553,13 +628,19 @@
       mode = next;
       var m = actionsModel(next);
       D.clear(refs.actions);
-      for (var i = 0; i < m.buttons.length; i++) {
-        refs.actions.appendChild(buildActionButton(m.buttons[i]));
+      if (m.mode !== "firstRun") {
+        for (var i = 0; i < m.buttons.length; i++) {
+          refs.actions.appendChild(buildActionButton(m.buttons[i]));
+        }
       }
-      refs.actions.className = "btn-row cz-actions" + (m.mode === "firstRun" ? " cz-actions--first-run" : "");
+      refs.actions.hidden = m.mode === "firstRun";
+      D.setText(refs.title, m.title);
+      refs.subtitle.hidden = !m.showSubtitle;
       refs.statusSlot.hidden = !m.showStatus;
-      refs.guide.hidden = m.mode !== "firstRun";
       refs.intro.hidden = !m.showIntro;
+      refs.colorHeading.hidden = !m.showColorHeading;
+      refs.estimate.hidden = !m.showEstimate;
+      refs.firstBar.hidden = !m.showFirstBar;
     }
 
     /** 狀態列：目前目標色級、目前生效色級（v0.10 不顯示目標分數） */
@@ -785,9 +866,10 @@
       D = dom.dom;
       G = dom.goal;
       C = dom.constants;
+      L = dom.layout;
       host = (sectionEl && sectionEl.querySelector && sectionEl.querySelector("#customizer-goal")) ||
         root.document.getElementById("customizer-goal");
-      if (!host || !D || !G || !C || !store()) { return false; }
+      if (!host || !D || !G || !C || !L || !store()) { return false; }
       build();
       renderMode(entryModeOf(store().getState()));
       renderStatus();

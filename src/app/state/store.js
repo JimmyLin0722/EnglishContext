@@ -329,7 +329,9 @@
         // （v0.8）首次進入判定結果（FS-1）；本工作階段只會 firstRun → main
         entryMode: entryMode === "firstRun" ? "firstRun" : "main",
         // （v0.11，FE-49）PWA 頁面端狀態（只在記憶體，不持久化，PV-1）；PE-1 由 main.js 經 setPwa 寫入
-        pwa: pwaCore().initialPwaState()
+        pwa: pwaCore().initialPwaState(),
+        // （v0.12，FE-55）主控台介面狀態（只在記憶體，不持久化，DB-6）；每次 init 皆為收合
+        dashboard: { backupExpanded: false }
       };
     }
 
@@ -1128,6 +1130,26 @@
       return { changed: true };
     }
 
+    // ── actions：主控台介面狀態（v0.12，FE-55）──
+
+    /**
+     * 切換「資料備份」收合區塊（契約 RuntimeState.dashboard、README §11.4 DB-6、V-LAY-07；E-90、E-91）。
+     * 只接受 true／false（其他值 → { changed: false }、不通知）；值相同不通知；
+     * 不同 → 以新物件取代 runtime.dashboard 並通知 ["dashboard"]；不寫入 localStorage（setItem 0 次，首次與一般模式相同）。
+     * 其他 action 一律以 assign 局部更新 runtime，因此切頁、匯入、startLearning、confirmApplyGoal 後本值保留。
+     * @param {boolean} value
+     * @returns {{changed: boolean}}
+     */
+    function setBackupExpanded(value) {
+      ensureInit();
+      if (value !== true && value !== false) { return { changed: false }; }
+      var rt = state.runtime;
+      var cur = !!(rt.dashboard && rt.dashboard.backupExpanded === true);
+      if (cur === value) { return { changed: false }; }
+      commit(state.data, assign(rt, { dashboard: { backupExpanded: value } }), ["dashboard"], false);
+      return { changed: true };
+    }
+
     // ── actions：備份 ──
 
     /**
@@ -1250,6 +1272,7 @@
         setPhraseKeyword: setPhraseKeyword,
         setTab: setTab,
         setPwa: setPwa,
+        setBackupExpanded: setBackupExpanded,
         exportBackup: exportBackup,
         importBackup: importBackup
       }

@@ -195,13 +195,19 @@ describe("naming.test.js", () => {
     }
   });
 
-  test("（AC-17-06、AC-20-04）主控台入口 = NAV_TAB_ORDER 去掉 dashboard 再加 sources，不含隱藏頁", () => {
+  test("（v0.12，FE-58；AC-39-01、AC-39-06、DB-1）主控台本體無模組入口與 data-go=sources；只有「開始今日學習」→ flashcards、「變更」→ customizer", () => {
     const D = require("../views/dashboard.js");
-    const tabs = D.ENTRIES.map((e) => e.tab);
-    assert.deepEqual(tabs, C.NAV_TAB_ORDER.filter((t) => t !== "dashboard").concat(["sources"]));
-    for (const t of C.HIDDEN_TAB_IDS) assert.ok(!tabs.includes(t), t);
-    for (const l of D.ENTRIES.map((e) => e.label)) {
-      assert.ok(l !== "解碼器" && l !== "句型庫", l);
+    assert.equal("ENTRIES" in D, false, "功能入口已移除");
+    const lits = stringLiterals(read(path.join(VIEWS_DIR, "dashboard.js")));
+    // data-go 值只有 flashcards、customizer
+    const src = read(path.join(VIEWS_DIR, "dashboard.js"));
+    const gos = [...src.matchAll(/"data-go":\s*"([^"]+)"/g)].map((m) => m[1]);
+    assert.deepEqual(gos, ["flashcards", "customizer"]);
+    assert.ok(!lits.includes("sources"), "不含 sources 頁代碼");
+    for (const t of C.HIDDEN_TAB_IDS) assert.ok(!lits.includes(t), t);
+    // 模組名稱不作為主控台按鈕文字（TAB_LABELS 的 4 個功能區名稱與「資料來源與授權」）
+    for (const tab of ["customizer", "flashcards", "part5", "sources"]) {
+      assert.ok(!lits.includes(C.TAB_LABELS[tab]), C.TAB_LABELS[tab]);
     }
   });
 
@@ -221,10 +227,13 @@ describe("naming.test.js", () => {
     assert.deepEqual(hits, []);
   });
 
-  test("主控台模組入口 label 取自 TAB_LABELS；統計標籤為「模擬測驗正確率」", () => {
+  test("主控台統計標籤為「模擬測驗正確率」（TEXT 與 LAYOUT_TEXTS 一致）；無「單字掌握數」", () => {
     const D = require("../views/dashboard.js");
-    assert.deepEqual(D.ENTRIES.map((e) => e.label), D.ENTRIES.map((e) => C.TAB_LABELS[e.tab]));
+    const L = require("../core/layout.js");
     assert.equal(D.TEXT.accuracy, "模擬測驗正確率");
+    assert.equal(L.LAYOUT_TEXTS.statAccuracyLabel, D.TEXT.accuracy);
+    const lits = stringLiterals(read(path.join(VIEWS_DIR, "dashboard.js")));
+    assert.ok(!lits.some((s) => s.includes("單字掌握數")));
   });
 
   test("各頁標題與說明（§7.13）", () => {

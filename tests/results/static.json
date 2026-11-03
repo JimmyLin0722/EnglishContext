@@ -4,14 +4,14 @@
     "tc": "TC-S01",
     "ac": "AC-19-01",
     "result": "通過",
-    "note": "dist 建置產物：english-master-track.html＋PWA 部署目錄 site（人類自放檔案 ads.txt 不列入）；白名單 data: 圖示連結 1 次；<style> 區塊 1；外部資源樣式命中：無；程式網路 API：無"
+    "note": "dist 建置產物：english-master-track.html＋PWA 部署目錄 site（人類自放檔案 無 不列入）；白名單 data: 圖示連結 1 次；<style> 區塊 1；外部資源樣式命中：無；程式網路 API：無"
   },
   {
     "suite": "static",
     "tc": "TC-S02",
     "ac": "AC-19-04",
     "result": "通過",
-    "note": "3,278,334 bytes（上限 5,242,880）"
+    "note": "3,308,145 bytes（上限 5,242,880）"
   },
   {
     "suite": "static",
@@ -60,13 +60,48 @@
     "tc": "TC-S10",
     "ac": "AC-31-04",
     "result": "通過",
-    "note": "外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,278,334 bytes（AC-19-01 外部資源見 TC-S01）"
+    "note": "外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,308,145 bytes（AC-19-01 外部資源見 TC-S01）"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-S11",
+    "ac": "AC-26-05、AC-01-01（程式面）",
+    "result": "通過",
+    "note": "產物原始字串命中 1 次（CSS 註解）；去除註解後：程式 0 次、CSS 規則 0 次"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-L-S01",
+    "ac": "AC-38-07、AC-19-01（VC-8）",
+    "result": "通過",
+    "note": "@font-face 0；CSS url( 0；font-family 宣告 3 種：font-family: var(--font)｜font-family: Consolas, \"Courier New\", monospace｜font-family: var(--font-ipa)"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-L-S02",
+    "ac": "AC-38-10 (1)、AC-34-01、AC-34-02（V-LAY-05、NM-1、NM-4）",
+    "result": "通過",
+    "note": "<title>EnglishContext</title>；授權註解第一行「EnglishContext」；HTML 文字節點命中=false；程式字串常值（空白分隔）命中 0；src/data（不含 _records）命中 無"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-L-S03",
+    "ac": "AC-38-10 (2)（NM-5 FROZEN_IDENTIFIERS）",
+    "result": "通過",
+    "note": "缺少 無；匯出檔名前綴 english-master-track-backup- 存在=true；交付檔 dist/english-master-track.html 存在=true（匯出檔名實測見 TC-38-10）"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-L-S04",
+    "ac": "AC-38-05（NM-2）",
+    "result": "通過",
+    "note": "內嵌 svg.app-logo 406 bytes（≤ 1,500）；含 xmlns/image/text/href/icons 路徑=false；aria-hidden=true；產物 <img> 0"
   },
   {
     "suite": "static",
     "tc": "TC-S09",
     "ac": "AC-19-01（交付物可追溯）",
     "result": "通過",
-    "note": "重建產物 3,278,334 bytes；與 dist 位元組相同=true"
+    "note": "重建產物 3,308,145 bytes；與 dist 位元組相同=true"
   }
 ]

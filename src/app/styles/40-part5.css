@@ -3,11 +3,38 @@
  * 依據：architecture.md §9（行動優先 RWD；觸控 ≥ 44px；不得出現水平捲軸）
  * 涵蓋：AC-10-02（含空格句子、A～D 選項、題型標籤）、AC-11-01（鎖定與標色）、AC-11-02（解析區）、AC-11-04（結算）
  * 規則：標色同時搭配文字標記（「正確答案」「你的選擇」），不只靠顏色辨識。
+ * （v0.12，FE-61；architecture.md v0.8 §7.19.6；契約 MT-1、MT-2；AC-40-01～AC-40-03、AC-38-06、AC-38-07）
+ *   內容寬 720px 置中；頁首作答進度條（軌道 6px --track、填色 --brand、transition: none）；
+ *   題號、解析標題、結算標題 18px／700；題目卡沿用全域 .card；作答選項維持 --border 外框與對錯色。
  */
 
+/* 內容寬 720px 置中（AC-40-02；375px 填滿） */
+.p5 {
+  max-width: var(--content-narrow);
+  margin-inline: auto;
+  min-width: 0;
+}
+
+/* 頁面標題沿用 .page-title（00-base.css） */
 .p5-heading {
-  margin-bottom: 4px;
-  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+/* ─── 作答進度條（MT-1）：無轉場（AC-38-09 (b)；render() 每次重建，明寫以防日後誤加） ─── */
+.p5-progress {
+  height: 6px;
+  margin: 0 0 8px;
+  border-radius: 3px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.p5-progress__fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--brand);
+  transition: none;
 }
 
 /* 標題下說明「題型對應多益 Part 5」（FE-23 新增；樣式同難易度設定頁 .cz-intro：次要色、較小字級） */
@@ -28,8 +55,9 @@
 
 .p5-number {
   margin: 0;
-  font-size: 1rem;
-  color: var(--text-muted);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
 .p5-number:focus,
@@ -183,7 +211,8 @@
 
 .p5-explain__title {
   margin: 0 0 4px;
-  font-size: 1rem;
+  font-size: 1.125rem;
+  font-weight: 700;
 }
 
 .p5-explain__body {
@@ -212,7 +241,8 @@
 }
 
 .p5-summary__title {
-  font-size: 1.15rem;
+  font-size: 1.125rem;
+  font-weight: 700;
 }
 
 .p5-summary__score {

@@ -1,5 +1,6 @@
 // QA（第 3 輪）：由 tests/results/summary.json 產生 test-plan §5 的 TC 清單（Markdown，stdout）
 // 驗證重點：tests/tools/tc-desc.json 優先，其次沿用 test-plan.md 既有列的說明
+// 第 5 輪：TC-LAY-H* 為人工；TC-B03 改由 boundary-r5.mjs 產生；TC-R5-J* 為 QA 判讀
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,18 +16,19 @@ const kind = (r) => {
   if (r.file === "data.json") return "自動化（資料檢查）";
   if (r.file === "static.json") return "自動化（靜態檢查）";
   if (r.file === "pwa-static.json") return r.result === "待人工" ? "人工" : "自動化（靜態與建置檢查）";
-  if (r.result === "待人工" && /^TC-PWA-H/.test(r.tc)) return "人工";
+  if (r.result === "待人工" && /^TC-(PWA|LAY)-H/.test(r.tc)) return "人工";
   if (r.file === "qa-review.json") return r.result === "待人工" ? "人工" : "QA 檢視";
   return "自動化 E2E";
 };
 const script = (r) => {
-  if (/^TC-PWA-H/.test(r.tc)) return "§6";
+  if (/^TC-(PWA|LAY)-H/.test(r.tc)) return "§6";
   if (SCRIPT[r.file]) return SCRIPT[r.file];
   if (r.file === "qa-review.json") {
-    if (/^TC-B0[13]/.test(r.tc)) return r.tc === "TC-B01" ? "tests/static/boundary-check.mjs" : "tests/static/boundary-delta.mjs";
+    if (/^TC-B0[13]/.test(r.tc)) return r.tc === "TC-B01" ? "tests/static/boundary-check.mjs" : "tests/static/boundary-r5.mjs";
     if (r.tc === "TC-B02") return "人工判讀（檔案時間、docs 變更紀錄）";
     if (r.tc === "TC-D18") return "tests/data/records-check.mjs＋人工判讀";
     if (/^TC-D/.test(r.tc)) return "src/data/_tools/sample.mjs＋人工判讀";
+    if (/^TC-R5-J/.test(r.tc)) return "人工判讀（設計字面 vs AC）";
     if (r.tc === "TC-X-edge") return "e2e-goal、e2e-hidden、e2e-pwa（QA_BROWSER=edge）";
     return "§6";
   }

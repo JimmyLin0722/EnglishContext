@@ -19,6 +19,10 @@
  * - 只認點擊（AC-28-06）：選項清單以 touchstart／touchmove（passive）記錄位移，位移 ≥ TAP_SLOP_PX 視為滑動，
  *   觸控結束後 CLICK_SUPPRESS_MS 內的 click 忽略（shouldIgnoreClick）；滑鼠與鍵盤不受影響。
  *
+ * （v0.12，FE-61；architecture.md v0.8 §7.19.6；契約 MT-1、MT-2；AC-40-01～AC-40-03）頁首 h2 之後插入作答進度條
+ *   div.p5-progress[role=progressbar]（值取 EMT.core.layout.part5Progress，呼叫時取用）；題庫為空時不建節點；
+ *   buildViewModel、作答、下一題、重新開始與焦點邏輯不變。
+ *
  * 寫法：純邏輯（splitSentence、splitStructure、optionState、buildViewModel、feedbackOf、shouldIgnoreClick 等）
  * 在 Node 下以 module.exports 匯出供測試；
  * 瀏覽器下登錄為 EMT.views part5 模組。
@@ -50,6 +54,7 @@
     empty: "題庫尚未載入",
     heading: "模擬測驗",
     headingNote: "題型對應多益 Part 5",
+    progressLabel: "作答進度", // （v0.12，FE-61）進度條 aria-label（architecture.md §7.19.6）
     blank: "空格",
     next: "下一題",
     restart: "重新開始",
@@ -375,6 +380,41 @@
     return root.EMT && root.EMT.store;
   }
 
+  /** （v0.12，FE-61）EMT.core.layout（呼叫時取用，LD-2）；Node 下 require */
+  function layout() {
+    if (typeof require === "function" && typeof module === "object") {
+      return require("../core/layout.js");
+    }
+    return root.EMT && root.EMT.core ? root.EMT.core.layout : null;
+  }
+
+  /**
+   * （v0.12，FE-61）作答進度條（MT-1）：role=progressbar、aria-valuemin 0、aria-valuemax N、aria-valuenow i；
+   * 填色寬度 = percent%。visible 為 false（題庫為空）時回傳 null（不建節點）。
+   * @param {object} vm buildViewModel 的結果
+   * @param {number} total 題庫長度 N
+   * @returns {Element|null}
+   */
+  function renderProgressBar(vm, total) {
+    var L = layout();
+    if (!L) return null;
+    var p = L.part5Progress(vm.kind, vm.kind === "question" ? vm.number : 0, total);
+    if (!p.visible) return null;
+    var D = dom();
+    var fill = D.el("span", { className: "p5-progress__fill" });
+    fill.style.width = p.percent + "%";
+    return D.el("div", {
+      className: "p5-progress",
+      attrs: {
+        role: "progressbar",
+        "aria-label": TEXT.progressLabel,
+        "aria-valuemin": "0",
+        "aria-valuemax": String(p.max),
+        "aria-valuenow": String(p.now)
+      }
+    }, [fill]);
+  }
+
   function bank() {
     try {
       var c = root.EMT && root.EMT.content;
@@ -542,7 +582,8 @@
   function render() {
     if (!rootEl) return;
     var D = dom();
-    var vm = buildViewModel(progress(), bank());
+    var list = bank();
+    var vm = buildViewModel(progress(), list);
     var body;
     if (vm.kind === "empty") body = renderEmpty();
     else if (vm.kind === "summary") body = renderSummary(vm);
@@ -551,7 +592,9 @@
     D.clear(rootEl);
     D.append(rootEl, [
       D.el("div", { className: "p5" }, [
-        D.el("h2", { className: "p5-heading", text: TEXT.heading }),
+        D.el("h2", { className: "page-title p5-heading", text: TEXT.heading }),
+        // （v0.12，FE-61）作答進度條：h2 之後、題型說明之前（MT-1）
+        renderProgressBar(vm, list.length),
         D.el("p", { className: "p5-heading-note", text: TEXT.headingNote }),
         body
       ])

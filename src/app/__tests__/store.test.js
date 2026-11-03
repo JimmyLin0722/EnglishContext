@@ -2198,3 +2198,123 @@ test("FE-49：exportBackup JSON 不含 pwa；setPwa 前後 localStorage 鍵集�
   assert.ok(!exp.json.includes("installPromptAvailable"));
   assert.ok(!exp.json.includes("lastUpdateCheckAt"));
 });
+
+// ════════════════════════════ （v0.12，FE-55）runtime.dashboard 與 setBackupExpanded（DB-6、V-LAY-07、E-90、E-91） ════════════════════════════
+
+/** localStorage 全部鍵值的快照（逐字比對用） */
+function storageSnapshot(storage) {
+  return JSON.stringify(Array.from(storage.map.entries()).sort((x, y) => (x[0] < y[0] ? -1 : 1)));
+}
+
+test("FE-55：初始 runtime.dashboard = { backupExpanded: false }（一般與首次模式）", () => {
+  assert.deepEqual(makeStore().store.getState().runtime.dashboard, { backupExpanded: false });
+  assert.deepEqual(makeStore({ firstRun: true }).store.getState().runtime.dashboard, { backupExpanded: false });
+});
+
+for (const mode of ["main", "firstRun"]) {
+  test(`FE-55：setBackupExpanded(true／false) → 通知 ["dashboard"]、setItem 0 次、以新物件取代（${mode}，AC-39-08）`, () => {
+    const { store, storage, a } = makeStore({ firstRun: mode === "firstRun" });
+    const snap = storageSnapshot(storage);
+    const before = store.getState().runtime.dashboard;
+    const log = tagLog(store);
+    let r;
+    assert.equal(writesDuring(storage, () => { r = a.setBackupExpanded(true); }), 0);
+    assert.deepEqual(r, { changed: true });
+    assert.deepEqual(log, [["dashboard"]]);
+    assert.notEqual(store.getState().runtime.dashboard, before);
+    assert.equal(before.backupExpanded, false, "舊物件不被就地修改");
+    assert.deepEqual(store.getState().runtime.dashboard, { backupExpanded: true });
+    assert.equal(writesDuring(storage, () => { r = a.setBackupExpanded(false); }), 0);
+    assert.deepEqual(r, { changed: true });
+    assert.deepEqual(log, [["dashboard"], ["dashboard"]]);
+    assert.deepEqual(store.getState().runtime.dashboard, { backupExpanded: false });
+    assert.equal(store.getState().runtime.entryMode, mode);
+    assert.equal(storageSnapshot(storage), snap, "localStorage 前後逐字相同");
+  });
+}
+
+test("FE-55：同值與非布林 → changed false、不通知", () => {
+  const { store, a } = makeStore();
+  const log = tagLog(store);
+  assert.deepEqual(a.setBackupExpanded(false), { changed: false });
+  for (const v of ["true", 1, 0, null, undefined, {}, []]) {
+    assert.deepEqual(a.setBackupExpanded(v), { changed: false }, String(v));
+  }
+  assert.equal(log.length, 0);
+  a.setBackupExpanded(true);
+  assert.deepEqual(a.setBackupExpanded(true), { changed: false });
+  assert.equal(log.length, 1);
+  assert.deepEqual(store.getState().runtime.dashboard, { backupExpanded: true });
+});
+
+test("FE-55：setTab 切頁後回主控台仍為 true（DB-6 (c)、E-90）", () => {
+  const { store, storage, a } = makeStore();
+  a.setBackupExpanded(true);
+  const snap = storageSnapshot(storage);
+  a.setTab("flashcards");
+  a.setTab("part5");
+  a.setTab("customizer");
+  a.setTab("dashboard");
+  assert.equal(store.getState().runtime.dashboard.backupExpanded, true);
+  assert.equal(storageSnapshot(storage), snap);
+});
+
+test("FE-55：importBackup 成功、失敗、取消後保持（DB-6 (d)、E-91）", async () => {
+  const { store, a } = makeStore();
+  a.setBackupExpanded(true);
+  // 失敗：格式錯誤
+  let r = await a.importBackup("not json", () => true);
+  assert.equal(r.ok, false);
+  assert.equal(store.getState().runtime.dashboard.backupExpanded, true);
+  // 取消
+  r = await a.importBackup(brownBackupText(), () => false);
+  assert.deepEqual(r, { ok: false, error: "cancelled" });
+  assert.equal(store.getState().runtime.dashboard.backupExpanded, true);
+  // 成功
+  r = await a.importBackup(brownBackupText(), () => true);
+  assert.equal(r.ok, true);
+  assert.equal(store.getState().runtime.dashboard.backupExpanded, true);
+});
+
+test("FE-55：首次模式 startLearning、首次還原後 backupExpanded 不被重設", async () => {
+  {
+    const { store, a } = makeStore({ firstRun: true });
+    a.setBackupExpanded(true);
+    a.startLearning();
+    assert.equal(store.getState().runtime.entryMode, "main");
+    assert.equal(store.getState().runtime.dashboard.backupExpanded, true);
+  }
+  {
+    const { store, a } = makeStore({ firstRun: true });
+    a.setBackupExpanded(true);
+    const r = await a.importBackup(brownBackupText(), () => true);
+    assert.equal(r.ok, true);
+    assert.equal(store.getState().runtime.entryMode, "main");
+    assert.equal(store.getState().runtime.dashboard.backupExpanded, true);
+  }
+});
+
+test("FE-55：confirmApplyGoal、cancelApplyGoal 後保持", () => {
+  const { store, a } = storeWith(learnedData());
+  a.setBackupExpanded(true);
+  a.clickColor("brown");
+  assert.equal(a.requestApplyGoal().status, "confirm");
+  a.cancelApplyGoal();
+  assert.equal(store.getState().runtime.dashboard.backupExpanded, true);
+  a.clickColor("brown"); // 取消會還原草稿，重新選一次
+  assert.equal(a.requestApplyGoal().status, "confirm");
+  assert.equal(a.confirmApplyGoal().ok, true);
+  assert.equal(store.getState().runtime.dashboard.backupExpanded, true);
+});
+
+test("FE-55：localStorage 與匯出備份 JSON 皆不含 dashboard／backupExpanded", () => {
+  const { storage, a } = makeStore();
+  a.setBackupExpanded(true);
+  a.setDraftScore(300); // 之後的一般寫入也不帶 dashboard
+  const raw = storage.map.get(KEY);
+  assert.ok(!raw.includes("dashboard"));
+  assert.ok(!raw.includes("backupExpanded"));
+  const exp = a.exportBackup();
+  assert.ok(!exp.json.includes("dashboard"));
+  assert.ok(!exp.json.includes("backupExpanded"));
+});

@@ -1,8 +1,11 @@
 /*
  * dashboard.test.js — 主控台純邏輯與下載服務單元測試（FE-08 測試移入，FE-19；FE-31 今日學習進度）
- * 受測：views/dashboard.js（summaryOf、goalInfoOf、importMessage、ENTRIES（v0.5 FE-38 改由 NAV_TAB_ORDER 推導）、progressModel、ringGeometry）、services/download.js
+ * 受測：views/dashboard.js（goalInfoOf、importMessage、progressModel、dashboardModel、ringGeometry）、services/download.js
  * 涵蓋：AC-17-04（正確率 0 題「—」、10 題 7 對 70%）、AC-24-05、AC-24-06、AC-24-09、契約 IM-6（R6-4 write_failed）；
  *       （FE-31）AC-30-02、AC-30-05、AC-30-07、AC-30-08、AC-30-10、AC-17-01 統計標籤
+ * v0.12（FE-58；architecture.md v0.8 §7.19.4、§10.5 dashboard.test.js 列；契約 DB-1～DB-6、V-LAY-07、V-LAY-08）：
+ *       移除 summaryOf、ENTRIES（功能入口）案例；新增 dashboardModel 與假 DOM 版面案例（區塊順序、AC-39-06 文字次數、
+ *       「開始今日學習」「變更」的 data-go、收合區塊與 setItem 0 次、收合時 NT-1 與安裝鈕不顯示）。
  */
 "use strict";
 
@@ -24,26 +27,11 @@ describe("dashboard.test.js", () => {
     sttNoticeAcknowledged: false
   };
 
-  // ── 統計（AC-17-04） ──
+  // ── 3 格數據（AC-17-04、AC-39-05；v0.12 summaryOf 併入 dashboardModel） ──
 
-  test("統計：0 題 → —（引用 stats.accuracyText）", () => {
-    const s = D.summaryOf(base, "2026-10-30");
-    assert.equal(s.accuracy, "—");
-    assert.equal(s.accuracy, stats.accuracyText(0, 0));
-    assert.equal(s.mastered, 3);
-    assert.equal(s.streakDays, 4);
-  });
-
-  test("統計：10 題 7 對 → 70%；中斷 → 0 天", () => {
-    const d = { ...base, part5: { ...base.part5, totalAnswered: 10, totalCorrect: 7 } };
-    const s = D.summaryOf(d, "2026-11-05");
-    assert.equal(s.accuracy, "70%");
-    assert.equal(s.streakDays, 0);
-  });
-
-  test("統計：資料缺漏不拋錯", () => {
-    const s = D.summaryOf(null, "2026-10-30");
-    assert.deepEqual(s, { streakDays: 0, mastered: 0, accuracy: "—" });
+  test("summaryOf、ENTRIES 已移除（v0.12，DB-1）", () => {
+    assert.equal("summaryOf" in D, false);
+    assert.equal("ENTRIES" in D, false);
   });
 
   // ── 目標資訊 ──
@@ -133,30 +121,16 @@ describe("dashboard.test.js", () => {
     assert.equal(D.importMessage(r2).text, "儲存空間不足，未匯入");
   });
 
-  // ── 模組入口（v0.5，FE-38；AC-17-06、AC-20-04、契約 §5.8 HT-2） ──
-
-  test("入口 4 個：customizer、flashcards、part5、sources；label = TAB_LABELS；不含隱藏頁", () => {
-    const C = require("../core/constants.js");
-    assert.deepEqual(D.ENTRIES.map((e) => e.tab), ["customizer", "flashcards", "part5", "sources"]);
-    assert.deepEqual(D.ENTRIES.map((e) => e.label), ["難易度設定", "單字卡", "模擬測驗", "資料來源與授權"]);
-    for (const e of D.ENTRIES) {
-      assert.equal(e.label, C.TAB_LABELS[e.tab], e.tab);
-      assert.ok(!C.HIDDEN_TAB_IDS.includes(e.tab), e.tab);
-    }
-  });
-
-  test("入口由 NAV_TAB_ORDER 推導（去掉 dashboard、加 sources）；每次讀取回傳新陣列", () => {
-    const C = require("../core/constants.js");
-    assert.deepEqual(D.ENTRIES.map((e) => e.tab), C.NAV_TAB_ORDER.filter((t) => t !== "dashboard").concat("sources"));
-    assert.notEqual(D.ENTRIES, D.ENTRIES);
-  });
-
-  test("原始碼：入口不寫死隱藏頁代碼（不含 entry(\"decoder\")／entry(\"phrasebank\")）", () => {
+  test("原始碼：主控台不再有模組入口（無 NAV_TAB_ORDER 推導、無 data-go sources／part5）（DB-1、AC-39-06）", () => {
     const fs = require("node:fs");
     const path = require("node:path");
     const src = fs.readFileSync(path.join(__dirname, "..", "views", "dashboard.js"), "utf8");
-    assert.doesNotMatch(src, /entry\(\s*["'](?:decoder|phrasebank)["']\s*\)/);
-    assert.match(src, /NAV_TAB_ORDER/);
+    assert.doesNotMatch(src, /NAV_TAB_ORDER/);
+    assert.doesNotMatch(src, /"data-go":\s*"(?:sources|part5|decoder|phrasebank)"/);
+    assert.doesNotMatch(src, /dash-entr/);
+    // view 不呼叫 setTab 或任何寫入 action（「開始今日學習」「變更」只走 [data-go]，DB-3）
+    assert.doesNotMatch(src, /\.setTab\s*\(/);
+    assert.doesNotMatch(src, /router\.go\s*\(/);
   });
 
   // ── 今日學習進度（FE-31；architecture.md §10.1） ──
@@ -201,7 +175,8 @@ describe("dashboard.test.js", () => {
     assert.equal(m.today.doneText, "今日目標達成");
     m = at(18);
     assert.equal(m.today.text, "今日已學 18 / 15 字");
-    assert.equal(m.today.centerText, "18 / 15");
+    // （v0.12，SD-FB-40）環形圖中央只顯示 X
+    assert.equal(m.today.centerText, "18");
     assert.equal(m.today.done, true);
     assert.equal(m.today.ratio, 1);
     // 滿圈：dashoffset = 0
@@ -264,7 +239,7 @@ describe("dashboard.test.js", () => {
       { masteredWordKeys: mastered, part5: { ...base.part5, totalAnswered: 10, totalCorrect: 7 } },
       { studySet: set }
     ), TODAY);
-    assert.equal(m.mastery.label, "目前單字集掌握率");
+    assert.equal(m.mastery.label, "單字掌握率");
     assert.equal(m.mastery.numer, 50);
     assert.equal(m.mastery.denom, 200);
     assert.equal(m.mastery.text, "25%");
@@ -323,12 +298,99 @@ describe("dashboard.test.js", () => {
     assert.equal(D.progressAffected(undefined), true);
   });
 
-  test("畫面文字逐字（AC-30-01、AC-30-05、AC-30-10、AC-17-01）", () => {
+  test("畫面文字逐字（AC-30-01、AC-30-05、AC-30-10、AC-17-01）；v0.11 舊標籤已移除（AC-39-06）", () => {
     assert.equal(D.TEXT.goalDone, "今日目標達成");
-    assert.equal(D.TEXT.masteryRate, "目前單字集掌握率");
-    assert.equal(D.TEXT.accuracyRate, "模擬測驗正確率");
     assert.equal(D.TEXT.accuracy, "模擬測驗正確率");
     assert.equal(D.TEXT.empty, "—");
+    assert.equal(D.TEXT.todayTitle, "今日任務");
+    assert.equal(D.TEXT.chartTitle, "近 7 天已學字數");
+    const all = JSON.stringify(D.TEXT);
+    for (const bad of ["單字掌握數", "目前目標色級", "目前生效色級", "功能入口", "學習統計", "目前目標", "今日學習進度", "目前單字集掌握率"]) {
+      assert.ok(!all.includes(bad), bad);
+    }
+  });
+
+  // ── dashboardModel（v0.12，FE-58；DB-2～DB-6） ──
+
+  test("dashboardModel AC-39-05：打卡 3 天、200 字掌握 50（另 10 不在單字集）、10 題 7 對 → 「3」「天」「25%」「已掌握 60 字」「70%」", () => {
+    const set = keys(200).map((k) => ({ wordKey: k }));
+    const m = D.dashboardModel(stateOf(
+      {
+        masteredWordKeys: keys(50).concat(keys(10, "x")),
+        part5: { ...base.part5, totalAnswered: 10, totalCorrect: 7 },
+        streak: { days: 3, lastActiveDate: TODAY },
+      },
+      { studySet: set }
+    ), TODAY);
+    assert.deepEqual(m.stats, {
+      streakValue: "3",
+      streakUnit: "天",
+      masteryText: "25%",
+      masteredText: "已掌握 60 字",
+      accuracyText: "70%",
+    });
+    assert.equal(m.stats.accuracyText, stats.accuracyText(10, 7));
+  });
+
+  test("dashboardModel：空資料 → 掌握率、正確率「—」、已掌握 0 字、打卡 0；不出現 NaN／Infinity（AC-30-10、E-48）", () => {
+    for (const st of [stateOf(), null, {}, { data: null, runtime: null }]) {
+      const m = D.dashboardModel(st, TODAY);
+      assert.equal(m.stats.masteryText, "—");
+      assert.equal(m.stats.accuracyText, "—");
+      assert.equal(m.stats.masteredText.startsWith("已掌握 "), true);
+      noBad(m);
+    }
+    const m = D.dashboardModel(stateOf({ masteredWordKeys: [], streak: { days: 0, lastActiveDate: null } }), TODAY);
+    assert.equal(m.stats.masteredText, "已掌握 0 字");
+    assert.equal(m.stats.streakValue, "0");
+  });
+
+  test("dashboardModel AC-30-05：X = 18、D = 15 → text「今日已學 18 / 15 字」、centerText「18」、done", () => {
+    const m = D.dashboardModel(stateOf({ goal: goalOf(600), todayLearned: { date: TODAY, wordKeys: keys(18) } }), TODAY);
+    assert.equal(m.today.text, "今日已學 18 / 15 字");
+    assert.equal(m.today.centerText, "18");
+    assert.equal(m.today.done, true);
+    assert.equal(m.today.doneText, "今日目標達成");
+  });
+
+  test("dashboardModel 目標行 5 色逐字（DB-4；依已套用色級，不看 draftScore）", () => {
+    const want = [
+      [215, "橘級・每日 10 字", "orange", false],
+      [465, "棕級・每日 10 字", "brown", false],
+      [725, "綠級・每日 15 字", "green", false],
+      [855, "目標藍級・生效綠級（內建上限）・每日 15 字", "blue", true],
+      [990, "目標金級・生效綠級（內建上限）・每日 15 字", "gold", true],
+    ];
+    for (const [score, text, colorId, capped] of want) {
+      const g = { ...goalOf(score), draftScore: 10 }; // 草稿不同也不影響
+      const m = D.dashboardModel(stateOf({ goal: g }), TODAY);
+      assert.deepEqual(m.goal, { text, colorId, capped }, String(score));
+      assert.ok(!/分/.test(m.goal.text));
+    }
+    assert.equal(D.dashboardModel(stateOf({ goal: null }), TODAY).goal.text, "—");
+  });
+
+  test("dashboardModel 近 7 天：全 0 → chart.empty；任一 > 0 → 非空（AC-39-07、§5.4 v0.12 段）", () => {
+    assert.equal(D.dashboardModel(stateOf(), TODAY).chart.empty, true);
+    assert.equal(D.dashboardModel(stateOf({ learnedHistory: { "2026-10-25": 0 } }), TODAY).chart.empty, true);
+    const m = D.dashboardModel(stateOf({ todayLearned: { date: TODAY, wordKeys: keys(1) } }), TODAY);
+    assert.equal(m.chart.empty, false);
+    assert.equal(m.chart.bars.length, 7);
+    assert.equal(m.chart.bars.at(-1).count, 1);
+    assert.equal(D.dashboardModel(stateOf({ learnedHistory: { "2026-10-27": 10 } }), TODAY).chart.empty, false);
+  });
+
+  test("dashboardModel backupExpanded：依 runtime.dashboard（缺漏 → false）", () => {
+    assert.equal(D.dashboardModel(stateOf(), TODAY).backupExpanded, false);
+    assert.equal(D.dashboardModel(stateOf({}, { dashboard: { backupExpanded: true } }), TODAY).backupExpanded, true);
+    assert.equal(D.dashboardModel(stateOf({}, { dashboard: { backupExpanded: "true" } }), TODAY).backupExpanded, false);
+  });
+
+  test("PROGRESS_TAGS、INSTALL_TAGS 含 \"dashboard\"", () => {
+    assert.ok(D.PROGRESS_TAGS.includes("dashboard"));
+    assert.ok(D.INSTALL_TAGS.includes("dashboard"));
+    assert.equal(D.progressAffected(["dashboard"]), true);
+    assert.equal(D.installAffected(["dashboard"]), true);
   });
 
   test("dashboard.js 無禁用 API、無網路 API、無外部網址（C-7、離線）", () => {
@@ -476,7 +538,7 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     sandbox.self = sandbox;
     sandbox.window = sandbox;
     vm.createContext(sandbox);
-    for (const rel of ["core/constants.js", "core/wordkey.js", "core/dom.js", "core/goal.js", "core/streak.js",
+    for (const rel of ["core/constants.js", "core/wordkey.js", "core/dom.js", "core/goal.js", "core/layout.js", "core/streak.js",
       "core/stats.js", "core/learning.js", "core/pwa.js"]) {
       vm.runInContext(read(rel), sandbox, { filename: rel });
     }
@@ -486,16 +548,18 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     if (!o.noService) {
       sandbox.EMT.services = { pwa: { requestInstall: () => { calls.install++; return Promise.resolve(); } } };
     }
-    const { store, a } = F.makeStore({ firstRun: o.firstRun });
+    const { store, a, storage } = F.makeStore({ firstRun: o.firstRun });
     if (o.pwa) a.setPwa(o.pwa);
     if (o.tab) a.setTab(o.tab);
+    // （v0.12，FE-58）預設展開「資料備份」（v0.11 既有案例檢查的是展開後的內容；收合行為另有案例）
+    if (o.expanded !== false) a.setBackupExpanded(true);
     sandbox.EMT.store = store;
     vm.runInContext(read("views/dashboard.js"), sandbox, { filename: "views/dashboard.js" });
     const view = views.dashboard;
     const rootEl = makeNode("section");
     view.mount(rootEl);
-    const backup = byClass(rootEl, "dash-section").find((s) => s.textContent.includes("匯出備份"));
-    return { sandbox, store, a, view, rootEl, backup, calls };
+    const backup = byClass(rootEl, "db-backup")[0];
+    return { sandbox, store, a, storage, view, rootEl, backup, calls };
   }
 
   const installBox = (s) => byClass(s.rootEl, "dash-backup__install")[0];
@@ -551,6 +615,23 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.equal(installBox(s).childNodes.length, 0);
   });
 
+  test("（v0.12，IN-1）「資料備份」收合時 NT-1 與安裝鈕都不顯示；展開後 NT-1 為按鈕列下一個兄弟、安裝鈕出現（AC-24-12、AC-34-07、AC-34-08）", () => {
+    const s = setup({ pwa: AVAILABLE, expanded: false });
+    const body = byClass(s.rootEl, "db-backup__body")[0];
+    assert.equal(body.hidden, true);
+    assert.equal(installButtons(s).length, 0);
+    assert.equal(installBox(s).hidden, true);
+    const toggle = byClass(s.rootEl, "db-backup__toggle")[0];
+    toggle.click();
+    assert.equal(body.hidden, false);
+    assert.equal(installButtons(s).length, 1);
+    const origin = byClass(s.backup, "dash-backup__origin")[0];
+    assert.equal(byClass(s.backup, "btn-row")[0].nextElementSibling, origin);
+    toggle.click();
+    assert.equal(body.hidden, true);
+    assert.equal(installButtons(s).length, 0);
+  });
+
   test("standalone、installSuppressed、非主控台頁、首次模式 → 不顯示", () => {
     assert.equal(installButtons(setup({ pwa: Object.assign({}, AVAILABLE, { standalone: true }) })).length, 0);
     assert.equal(installButtons(setup({ pwa: Object.assign({}, AVAILABLE, { installSuppressed: true }) })).length, 0);
@@ -584,6 +665,190 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.deepEqual([...D.INSTALL_TAGS].includes("pwa"), true);
     assert.equal(D.installAffected(["pwa"]), true);
     assert.equal(D.installAffected(["flashcard"]), false);
+  });
+
+  // ── v0.12 版面（FE-58；DB-1～DB-6、V-LAY-07、V-LAY-08） ──
+
+  /** 主控台本體（.dashboard）的直接子節點 */
+  const bodyOf = (s) => byClass(s.rootEl, "dashboard")[0];
+  /** 計算文字在本體中出現的次數 */
+  const countText = (s, t) => bodyOf(s).textContent.split(t).length - 1;
+
+  test("DB-1：本體 = 標題「學習主控台」→ 今日任務 → 3 格數據 → 近 7 天 → 資料備份（恰 4 個 section）", () => {
+    const s = setup({ expanded: false });
+    const kids = bodyOf(s).childNodes.filter((n) => n.nodeType === 1);
+    assert.equal(kids[0].tagName, "H2");
+    assert.equal(kids[0].textContent, "學習主控台");
+    const sections = kids.slice(1);
+    assert.equal(sections.length, 4);
+    assert.ok(sections.every((n) => n.tagName === "SECTION" && n.classList.contains("card")));
+    assert.deepEqual(sections.map((n) => ["db-today", "db-stats", "db-chart", "db-backup"].find((c) => n.classList.contains(c))),
+      ["db-today", "db-stats", "db-chart", "db-backup"]);
+    // 今日任務卡標題與圖表標題（SD-FB-41）；3 格數據區以 aria-label 命名
+    assert.equal(byClass(sections[0], "section-title")[0].textContent, "今日任務");
+    assert.equal(byClass(sections[2], "section-title")[0].textContent, "近 7 天已學字數");
+    assert.equal(sections[1].getAttribute("aria-label"), "學習數據");
+  });
+
+  test("AC-39-06：列舉文字各 1 次；無舊標籤、無功能入口、無 data-go=sources；色級名稱只在目標行", () => {
+    const s = setup({ expanded: true });
+    for (const t of ["模擬測驗正確率", "單字掌握率", "連續打卡天數"]) assert.equal(countText(s, t), 1, t);
+    const st = s.store.getState();
+    const x = D.dashboardModel(st, s.store.today()).today;
+    assert.equal(countText(s, x.x + " / " + x.d), 1, "X / D 只出現 1 次");
+    for (const t of ["單字掌握數", "目前目標色級", "目前生效色級", "功能入口", "學習統計", "目前目標", "今日學習進度", "資料來源與授權"]) {
+      assert.equal(countText(s, t), 0, t);
+    }
+    const gos = findAll(bodyOf(s), (n) => n.getAttribute("data-go") !== null).map((n) => n.getAttribute("data-go"));
+    assert.deepEqual(gos, ["flashcards", "customizer"]);
+    // 色級名稱（綠）只在目標行
+    const goal = byClass(s.rootEl, "db-goal")[0];
+    assert.equal(countText(s, "綠"), goal.textContent.split("綠").length - 1);
+    assert.equal(byClass(s.rootEl, "db-ring").length, 1, "只有 1 個環形圖（無小環形圖）");
+  });
+
+  test("今日任務卡：環形圖與按鈕同一列（按鈕在右側欄）、目標行在下；「開始今日學習」btn--accent[data-go=flashcards]；「變更」[data-go=customizer]", () => {
+    const s = setup({ expanded: false });
+    const today = byClass(s.rootEl, "db-today")[0];
+    const row = byClass(today, "db-today__row")[0];
+    const rowKids = row.childNodes;
+    assert.ok(rowKids[0].classList.contains("db-ring-wrap"));
+    assert.ok(rowKids[1].classList.contains("db-today__side"));
+    const start = byClass(rowKids[1], "db-start")[0];
+    assert.equal(start.tagName, "BUTTON");
+    assert.equal(start.textContent, "開始今日學習");
+    assert.equal(start.getAttribute("data-go"), "flashcards");
+    assert.equal(start.getAttribute("type"), "button");
+    assert.ok(start.classList.contains("btn--accent"));
+    const goal = byClass(today, "db-goal")[0];
+    assert.ok(today.childNodes.indexOf(goal) > today.childNodes.indexOf(row), "目標行在列之後");
+    assert.equal(goal.textContent, "綠級・每日 15 字・變更");
+    assert.equal(goal.getAttribute("data-color"), "green");
+    const change = byClass(goal, "db-change")[0];
+    assert.equal(change.textContent, "變更");
+    assert.equal(change.getAttribute("data-go"), "customizer");
+    assert.ok(change.classList.contains("btn--link"));
+    // 環形圖中央只顯示 X（aria-hidden）
+    const center = byClass(today, "db-ring__value")[0];
+    assert.equal(center.getAttribute("aria-hidden"), "true");
+    assert.equal(center.textContent, "0");
+    assert.equal(byClass(today, "db-today__text")[0].textContent, "今日已學 0 / 15 字");
+  });
+
+  test("點「開始今日學習」「變更」：view 不改 store（setItem 0 次、currentTab 不變，由 router 的 [data-go] 委派處理）", () => {
+    const s = setup({ expanded: false });
+    const before = JSON.stringify(s.store.getState().data);
+    const writes = s.storage.setCalls.length;
+    byClass(s.rootEl, "db-start")[0].click();
+    byClass(s.rootEl, "db-change")[0].click();
+    assert.equal(s.storage.setCalls.length, writes);
+    assert.equal(JSON.stringify(s.store.getState().data), before);
+    assert.equal(s.store.getState().runtime.currentTab, "dashboard");
+  });
+
+  test("3 格數據：格內強調圖示 svg.db-stat__icon（aria-hidden）、數字與單位、小字「已掌握 N 字」", () => {
+    const s = setup({ expanded: false });
+    const streak = byClass(s.rootEl, "db-stat--streak")[0];
+    const icon = byClass(streak, "db-stat__icon")[0];
+    assert.equal(icon.tagName, "SVG");
+    assert.equal(icon.getAttribute("aria-hidden"), "true");
+    assert.equal(byClass(streak, "db-stat__unit")[0].textContent, "天");
+    assert.equal(byClass(s.rootEl, "db-stat__sub")[0].textContent, "已掌握 0 字");
+    assert.equal(byClass(s.rootEl, "db-stat--accuracy")[0].textContent, "模擬測驗正確率—");
+  });
+
+  test("近 7 天：無資料 → 只顯示「開始學習後會顯示紀錄」，長條 hidden；學 1 字後 show() → 長條（AC-39-07、E-88）", () => {
+    const s = setup({ expanded: false });
+    const bars = byClass(s.rootEl, "db-bars")[0];
+    const empty = byClass(s.rootEl, "db-chart__empty")[0];
+    assert.equal(bars.hidden, true);
+    assert.equal(empty.hidden, false);
+    assert.equal(empty.textContent, "開始學習後會顯示紀錄");
+    // 今天學第 1 字（翻卡觸發學習紀錄）
+    s.a.setTab("flashcards");
+    s.a.flipCard();
+    s.a.setTab("dashboard");
+    s.view.show();
+    assert.equal(s.store.getState().data.todayLearned.wordKeys.length, 1);
+    assert.equal(bars.hidden, false);
+    assert.equal(empty.hidden, true);
+  });
+
+  test("DB-6／V-LAY-07：預設收合（aria-expanded=false、body hidden）；點擊切換、setItem 0 次、localStorage 不變；節點不重建", () => {
+    const s = setup({ expanded: false });
+    const toggle = byClass(s.rootEl, "db-backup__toggle")[0];
+    const body = byClass(s.rootEl, "db-backup__body")[0];
+    assert.equal(toggle.tagName, "BUTTON");
+    assert.equal(toggle.getAttribute("type"), "button");
+    assert.equal(toggle.getAttribute("aria-controls"), "db-backup-body");
+    assert.equal(body.getAttribute("id"), "db-backup-body");
+    assert.equal(toggle.getAttribute("aria-expanded"), "false");
+    assert.equal(body.hidden, true);
+    assert.equal(toggle.textContent, "資料備份");
+    // 收合時不顯示：說明、匯出、匯入、NT-1（皆在 hidden 的 body 內）
+    for (const cls of ["dash-backup__hint", "btn-row", "dash-backup__origin", "dash-backup__install"]) {
+      const n = byClass(s.backup, cls)[0];
+      let p = n;
+      let hiddenAncestor = false;
+      while (p) { if (p.hidden) hiddenAncestor = true; p = p.parentNode; }
+      assert.ok(hiddenAncestor, cls + " 應在收合區內");
+    }
+    const snap = JSON.stringify([...s.storage.map.entries()]);
+    const writes = s.storage.setCalls.length;
+    toggle.click();
+    assert.equal(toggle.getAttribute("aria-expanded"), "true");
+    assert.equal(body.hidden, false);
+    assert.equal(s.store.getState().runtime.dashboard.backupExpanded, true);
+    assert.equal(byClass(s.rootEl, "db-backup__toggle")[0], toggle, "toggle 節點不重建（焦點保留）");
+    toggle.click();
+    assert.equal(toggle.getAttribute("aria-expanded"), "false");
+    assert.equal(body.hidden, true);
+    assert.equal(s.storage.setCalls.length, writes, "setItem 0 次");
+    assert.equal(JSON.stringify([...s.storage.map.entries()]), snap);
+  });
+
+  test("DB-6 (c)：展開後切頁再回主控台 show() 仍展開", () => {
+    const s = setup({ expanded: false });
+    byClass(s.rootEl, "db-backup__toggle")[0].click();
+    s.a.setTab("flashcards");
+    s.a.setTab("dashboard");
+    s.view.show();
+    assert.equal(byClass(s.rootEl, "db-backup__toggle")[0].getAttribute("aria-expanded"), "true");
+    assert.equal(byClass(s.rootEl, "db-backup__body")[0].hidden, false);
+  });
+
+  test("原始碼：toggle 只呼叫 setBackupExpanded；匯入流程不呼叫（E-91）", () => {
+    const src = read("views/dashboard.js");
+    assert.equal(src.split("setBackupExpanded(").length - 1, 1, "只在 toggle 處理函式呼叫 1 次");
+    const i = src.indexOf("function finishImport(");
+    const j = src.indexOf("\n    }\n", i);
+    assert.ok(!/setBackupExpanded/.test(src.slice(i, j)));
+  });
+
+  test("10-dashboard.css：720px 置中、環形圖 88px、長條區 104px／軌道 64px、空狀態 24px、3 欄、數值 28px、目標行 44px、箭頭無 transition", () => {
+    const css = read("styles/10-dashboard.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    const rule = (sel) => {
+      const m = new RegExp("(?:^|\\})\\s*" + sel.replace(/[.[\]="()]/g, "\\$&") + "\\s*\\{([^}]*)\\}").exec(css);
+      assert.ok(m, sel);
+      return m[1];
+    };
+    const v = (r, p) => (new RegExp("(?:^|;|\\s)" + p + ":\\s*([^;]+);").exec(r) || [])[1];
+    assert.equal(v(rule(".dashboard"), "max-width"), "var(--content-narrow)");
+    assert.equal(v(rule(".dashboard"), "margin-inline"), "auto");
+    assert.equal(v(rule(".db-ring-wrap"), "width"), "88px");
+    assert.equal(v(rule(".db-bars"), "height"), "104px");
+    assert.ok(104 <= 120);
+    assert.equal(v(rule(".db-bars__track"), "height"), "64px");
+    assert.ok(64 <= 80);
+    assert.equal(v(rule(".db-chart__empty"), "line-height"), "24px");
+    assert.equal(v(rule(".db-stats"), "grid-template-columns"), "repeat(3, minmax(0, 1fr))");
+    assert.equal(v(rule(".db-stat__value"), "font-size"), "1.75rem");
+    assert.equal(v(rule(".db-goal"), "min-height"), "44px");
+    assert.equal(v(rule(".db-backup__chev"), "transition"), "none");
+    assert.equal(v(rule(".db-bars__fill"), "background"), "var(--chart-bar)");
+    assert.equal(v(rule(".db-bars__item--today .db-bars__fill"), "background"), "var(--brand-deep)");
+    assert.equal(v(rule(".db-stat__icon"), "fill"), "var(--accent)");
+    assert.doesNotMatch(css, /\.dash-entr|\.db-mini/);
   });
 
   test("10-dashboard.css：.dash-backup__origin 同 .dash-backup__hint 字級、overflow-wrap: anywhere、無 nowrap；.dash-install ≥ 44px", () => {

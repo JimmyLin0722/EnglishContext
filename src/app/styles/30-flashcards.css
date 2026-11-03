@@ -3,6 +3,8 @@
  * 依據：architecture.md §9（行動優先 RWD；斷點 768px）、v0.4 §7.10～§7.12；沿用 00-base.css 的變數、.btn、.card
  * 涵蓋：AC-06-01～AC-06-07、AC-23-01、AC-20-01（無水平捲軸）、AC-20-02（觸控 ≥ 44px）、AC-28-01、AC-28-03、AC-28-05
  * 子元件容器 .fc-speech（FE-12）、.fc-quiz（FE-13）只定位，內部樣式由各自的 CSS 負責。
+ * （v0.12，FE-59；architecture.md v0.8 §7.19.7、AC-38-08）單字卡頁只換配色：全域 .card 改為圓角 16px＋陰影、無邊框後，
+ * 本頁以 #view-flashcards .card 固定回 v0.11 幾何（1px 框線、8px 圓角），只有框線顏色改為 --line；分隔線 --border → --line。
  */
 
 .fc {
@@ -45,6 +47,18 @@
 }
 
 /* ─── 卡片 ─── */
+/* （v0.12，FE-59）卡片幾何固定為 v0.11（1px 框線、8px 圓角）；框線色改 --line */
+#view-flashcards .card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+
+/* 單字卡本體沿用 v0.11 的陰影（上一條規則的 box-shadow: none 不套用到 .fc-card） */
+#view-flashcards .card.fc-card {
+  box-shadow: var(--shadow);
+}
+
 .fc-stage {
   min-width: 0;
   /* 換卡滑入時卡片暫時位移 24px，裁掉水平溢出以免出現水平捲軸；保留陰影的顯示空間 */
@@ -98,7 +112,7 @@
 
 .fc-field {
   padding: 8px 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--line);
   min-width: 0;
 }
 
@@ -184,7 +198,7 @@
 .fc-attrib {
   margin-top: var(--gap);
   padding-top: 8px;
-  border-top: 1px dashed var(--border);
+  border-top: 1px dashed var(--line);
   color: var(--text-muted);
   font-size: 0.8rem;
   line-height: 1.5;

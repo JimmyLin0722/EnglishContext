@@ -5,7 +5,8 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { launch, recorder, sleep, FILE_URL, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeTts, fakeStt, fakeDate, fakeMic } from "./lib/inits.mjs";
-import { stateRecord, seed, apply as applyGoal, clickCard } from "./lib/state.mjs";
+import { stateRecord, seed, apply as applyGoal, clickCard, expandBackup } from "./lib/state.mjs";
+// 第 5 輪（PRD v0.13）：匯出、匯入前先展開「資料備份」（AC-39-08）；單字掌握數改讀 3 格數據小字「已掌握 N 字」、打卡天數改讀 3 格數據（AC-39-05）
 // 第 3 輪（PRD v0.9／v0.10）：加麥克風替身（按麥克風先取得麥克風）；目標分數改以既有狀態或點卡片設定
 
 const R = recorder("e2e-cards");
@@ -49,7 +50,7 @@ const studyLen = () => p.ev(`EMT.store.getState().runtime.studySet.length`);
 async function importFile(content, { confirm = true, name = "backup.json" } = {}) {
   const f = path.join(TMP, "imp-" + Date.now() + "-" + name);
   fs.writeFileSync(f, content);
-  await p.go("dashboard");
+  await p.go("dashboard"); await sleep(300); await expandBackup(p);
   const n = await toastCount();
   chooser = null;
   await p.click('[data-action="import-backup"]');
@@ -337,11 +338,11 @@ await R.check("TC-09-03", "AC-09-03、AC-17-03", async () => {
   const wi = (ci + 1) % 4;
   await p.click(".fcq-option", wi); await sleep(60);
   const b = await quiz();
-  await p.go("dashboard"); const dashM = await p.ev(`[...document.querySelectorAll(".dash-stat")].find((d) => d.textContent.includes("單字掌握數")).querySelector(".dash-stat__value").textContent`);
+  await p.go("dashboard"); const dashM = await p.ev(`(document.querySelector("#view-dashboard .db-stat--mastery .db-stat__sub") || {}).textContent`);
   const okA = a.opts[ci] && a.opts.every((o) => o.dis) && a.opts.filter((o) => o.s === "correct").length === 1 && a.opts.filter((o) => o.s === "wrong").length === 0 && JSON.stringify(a2.opts) === JSON.stringify(a.opts);
   const okB = b.opts[wi].s === "wrong" && b.opts[ci].s === "correct" && b.opts.every((o) => o.dis);
   const colorOk = /\(.*\)/.test(b.opts[wi].bg + b.opts[wi].bc) && b.opts[wi].bg !== b.opts[ci].bg;
-  return { ok: okA && okB && colorOk && st1.masteredWordKeys.length === 1 && st2.masteredWordKeys.length === 1 && st2.vocabQuiz.answered === 2 && st2.vocabQuiz.correct === 2 && dashM === "1 字",
+  return { ok: okA && okB && colorOk && st1.masteredWordKeys.length === 1 && st2.masteredWordKeys.length === 1 && st2.vocabQuiz.answered === 2 && st2.vocabQuiz.correct === 2 && dashM === "已掌握 1 字",
     note: `答對：狀態 ${a.opts.map((o) => o.s).join(",")}、鎖定=${a.opts.every((o) => o.dis)}、再點不變=${JSON.stringify(a2.opts) === JSON.stringify(a.opts)}；答錯：${b.opts.map((o) => o.s + "(" + o.bg + ")").join(",")}；同字答對兩次後掌握數 ${st2.masteredWordKeys.length}（主控台「${dashM}」）、答題 ${st2.vocabQuiz.answered}/${st2.vocabQuiz.correct}` };
 });
 await R.check("TC-09-04", "AC-09-04", async () => {
@@ -368,7 +369,7 @@ await R.check("TC-09-07", "AC-09-07", async () => {
 
 // ═════════ AC-17-02、AC-17-05 打卡 ═════════
 async function withDate(ymd) { await p.clearInitScripts(); await p.addInitScript(TOAST_RECORDER); await p.addInitScript(fakeTts("ok")); await p.addInitScript(fakeStt("ok")); await p.addInitScript(fakeMic("ok")); if (ymd) await p.addInitScript(fakeDate(ymd)); await p.reload(); }
-const streakText = async () => { await p.go("dashboard"); return p.ev(`[...document.querySelectorAll(".dash-stat")].find((d) => d.textContent.includes("連續打卡天數")).querySelector(".dash-stat__value").textContent`); };
+const streakText = async () => { await p.go("dashboard"); return p.ev(`(() => { const v = document.querySelector("#view-dashboard .db-stat--streak"); return v.querySelector(".db-stat__num").textContent + " " + v.querySelector(".db-stat__unit").textContent; })()`); };
 await R.check("TC-17-02", "AC-17-02", async () => {
   await p.ev(`localStorage.clear()`);
   const out = [];
@@ -407,7 +408,7 @@ await R.check("TC-24-01", "AC-24-01、AC-24-02", async () => {
   await p.ev(`EMT.store.actions.acknowledgeSttNotice()`);
   const reqBefore = p.log.requests.length;
   for (const f of fs.readdirSync(p.downloads)) fs.rmSync(path.join(p.downloads, f), { force: true });
-  await p.go("dashboard"); await p.click('[data-action="export-backup"]');
+  await p.go("dashboard"); await sleep(300); await expandBackup(p); await p.click('[data-action="export-backup"]');
   let files = []; for (let i = 0; i < 40; i++) { await sleep(100); files = fs.readdirSync(p.downloads).filter((f) => f.endsWith(".json")); if (files.length) break; }
   const reqs = p.log.requests.slice(reqBefore).filter((r) => !/^(blob|data):/.test(r.url));
   const name = files[0];
@@ -488,8 +489,8 @@ await R.check("TC-24-08", "AC-24-08", async () => {
   const f = { ...base, data: { ...base.data, customVocab: [...base.data.customVocab, dup, dup2], masteredWordKeys: [...base.data.masteredWordKeys, "zzqanotexist"], vocabQuiz: { answered: 5, correct: 3 } } };
   const r = await importFile(JSON.stringify(f), { name: "dup.json" });
   const d = (await state()).data;
-  await p.go("dashboard"); const m = await p.ev(`[...document.querySelectorAll(".dash-stat")].find((x) => x.textContent.includes("單字掌握數")).querySelector(".dash-stat__value").textContent`);
-  return { ok: r.toasts.includes("已匯入，略過 3 筆") && !d.customVocab.some((c) => c.word === "OFFICE") && !d.masteredWordKeys.includes("zzqanotexist") && m === `${base.data.masteredWordKeys.length} 字`,
+  await p.go("dashboard"); const m = await p.ev(`(document.querySelector("#view-dashboard .db-stat--mastery .db-stat__sub") || {}).textContent`);
+  return { ok: r.toasts.includes("已匯入，略過 3 筆") && !d.customVocab.some((c) => c.word === "OFFICE") && !d.masteredWordKeys.includes("zzqanotexist") && m === `已掌握 ${base.data.masteredWordKeys.length} 字`,
     note: `提示 ${JSON.stringify(r.toasts)}（預期略過 3 筆：內建重複 1、檔內重複 1、不存在的已掌握 1）；匯入後自訂 ${d.customVocab.length} 筆、掌握數「${m}」` };
 });
 

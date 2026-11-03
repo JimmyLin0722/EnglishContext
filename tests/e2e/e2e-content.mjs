@@ -1,5 +1,6 @@
 // QA E2E 套件 4：模擬測驗（US-10、US-11）、解碼器與句型庫（第 3 輪：暫停，記不適用）、
 // 資料來源與授權頁（AC-23-02）、主控台統計（AC-17-01、AC-17-04）
+// 第 5 輪（PRD v0.13）：主控台統計改讀 3 格數據（AC-39-05）；「資料來源與授權」只從頁尾開啟（AC-23-02 v0.12、Q-50）
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeClipboard } from "./lib/inits.mjs";
 
@@ -19,7 +20,7 @@ const p5 = () => p.ev(`(() => { const q = document.querySelector(".p5-question")
     next: !!document.querySelector("[data-p5=next]") }; })()`);
 const totals = () => p.ev(`EMT.store.getState().data.part5`);
 const correctIdx = (i) => p.ev(`PART5_QUESTION_BANK[${i}].correctIndex`);
-const accText = async () => { await p.go("dashboard"); return p.ev(`[...document.querySelectorAll(".dash-stat")].find((d) => d.textContent.includes("模擬測驗正確率")).querySelector(".dash-stat__value").textContent`); };
+const accText = async () => { await p.go("dashboard"); return p.ev(`document.querySelector("#view-dashboard .db-stat--accuracy .db-stat__value").textContent`); };
 
 // ═════════ Part 5 ═════════
 await R.check("TC-17-04a", "AC-17-04", async () => { const t = await accText(); return { ok: t === "—", note: `答題數 0 時顯示「${t}」` }; });
@@ -90,8 +91,11 @@ await R.check("TC-17-04b", "AC-17-04", async () => {
 });
 await R.check("TC-17-01", "AC-17-01", async () => {
   await p.go("dashboard");
-  const s = await p.ev(`[...document.querySelectorAll(".dash-stats:not(.dash-stats--goal) .dash-stat")].map((d) => d.innerText.replace(/\\n/g, "="))`);
-  return { ok: s.length === 3 && s[0].startsWith("連續打卡天數") && s[1].startsWith("單字掌握數") && s[2].startsWith("模擬測驗正確率") && !/NaN|Infinity|undefined/.test(s.join()), note: s.join("；") };
+  // v0.12：3 格依序為連續打卡天數、單字掌握率（大字）＋小字「已掌握 N 字」（= 單字掌握數）、模擬測驗正確率；各只出現 1 次
+  const s = await p.ev(`[...document.querySelectorAll("#view-dashboard .db-stat")].map((d) => d.innerText.replace(/\\s*\\n\\s*/g, "="))`);
+  const body = await p.ev(`document.querySelector("#view-dashboard .dashboard").innerText`);
+  const once = ["連續打卡天數", "單字掌握率", "模擬測驗正確率", "已掌握"].every((w) => body.split(w).length === 2);
+  return { ok: s.length === 3 && s[0].startsWith("連續打卡天數") && s[1].startsWith("單字掌握率") && /=已掌握 \d[\d,]* 字$/.test(s[1]) && s[2].startsWith("模擬測驗正確率") && once && !/單字掌握數/.test(body) && !/NaN|Infinity|undefined/.test(s.join()), note: s.join("；") + `；各只出現 1 次=${once}` };
 });
 
 // ═════════ 解碼器、句型庫（PRD v0.9 R-18 三：暫停（隱藏），本版不驗收）═════════
@@ -104,7 +108,9 @@ await R.check("TC-17-01", "AC-17-01", async () => {
 
 // ═════════ 資料來源與授權頁 ═════════
 await R.check("TC-23-02", "AC-23-02", async () => {
-  await p.go("dashboard"); await p.click('.dash-entry[data-go="sources"]'); const viaDash = await p.ev(`!document.getElementById("view-sources").hidden`);
+  // v0.12：主控台本體不再有入口（Q-50），只從頁尾開啟；主控台的頁尾連結可見且可開啟
+  await p.go("dashboard"); await sleep(350); const dashEntry = await p.ev(`document.querySelectorAll("#view-dashboard [data-go=sources]").length`);
+  await p.click("#footer-sources"); await sleep(350); const viaDash = dashEntry === 0 && await p.ev(`!document.getElementById("view-sources").hidden`);
   await p.go("phrasebank"); await sleep(3500); await p.click("#footer-sources"); const viaFooter = await p.ev(`!document.getElementById("view-sources").hidden`);
   const t = await p.ev(`document.getElementById("view-sources").innerText`);
   const reg = await p.ev(`DATA_SOURCE_REGISTRY.filter((r) => r.code !== "ORIGINAL")`);
@@ -115,7 +121,7 @@ await R.check("TC-23-02", "AC-23-02", async () => {
   const wl = await p.ev(`[...document.querySelectorAll("#view-sources h3, #view-sources h4")].map((h) => h.textContent).filter((x) => /NGSL|TSL|BSL|NAWL/.test(x)).length`);
   const used = await p.ev(`new Set(MASTER_VOCAB_DATABASE.flatMap((w) => w.sources)).size`);
   const mit = await p.ev(`(() => { const d = [...document.querySelectorAll("#view-sources details")]; d.forEach((x) => x.open = true); return document.getElementById("view-sources").innerText.includes("Permission is hereby granted"); })()`);
-  return { ok: viaDash && viaFooter && miss.length === 0 && missS.length === 0 && wl === used && mit, note: `主控台入口=${viaDash}、頁尾連結=${viaFooter}；缺欄位 ${miss.join("、") || "無"}；缺聲明 ${missS.join("、") || "無"}；列出字表 ${wl} 種／資料中 ${used} 種；ECDICT MIT 全文可展開=${mit}` };
+  return { ok: viaDash && viaFooter && miss.length === 0 && missS.length === 0 && wl === used && mit, note: `主控台本體入口 ${dashEntry} 個、主控台頁尾連結開啟=${viaDash}、其他頁頁尾連結=${viaFooter}；缺欄位 ${miss.join("、") || "無"}；缺聲明 ${missS.join("、") || "無"}；列出字表 ${wl} 種／資料中 ${used} 種；ECDICT MIT 全文可展開=${mit}` };
 });
 
 await R.check("TC-X-content", "（全套件）無未處理例外", async () => ({ ok: p.log.exceptions.length === 0, note: JSON.stringify(p.log.exceptions).slice(0, 300) }));

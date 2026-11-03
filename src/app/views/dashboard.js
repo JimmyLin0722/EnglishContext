@@ -1,30 +1,29 @@
 /*
- * views/dashboard.js — 學習主控台與備份匯出／匯入（FE-08；FE-31 今日學習進度）
- * 依據：architecture.md §4.2、§7.5、v0.4 §7.7、§7.11、§9；契約 GoalState、StreakState、VocabQuizStats、Part5Progress、
- *       BackupFile、ImportResult、COLOR_LEVELS、TodayLearnedState、LearnedHistory、DASHBOARD_CHART_DAYS；
- *       README §5.4 LR-6（含小環形圖段）、§6.1、§6.2（IM-1～IM-5）、C-7
- * 涵蓋：US-17、US-24、US-30、AC-17-01、AC-17-04、AC-17-06、AC-24-01、AC-24-03～AC-24-08、
- *       AC-30-01、AC-30-02、AC-30-05、AC-30-07、AC-30-08、AC-30-10、AC-31-03
+ * views/dashboard.js — 學習主控台與備份匯出／匯入（FE-08；FE-31 今日學習進度；v0.12 FE-58 主控台改版）
+ * 依據：architecture.md §4.2、§7.5、v0.4 §7.7、§7.11、§9；v0.8 §4.8「views/dashboard.js」、§7.19.4（DOM 樹與表格）、§7.19.10；
+ *       契約 GoalState、StreakState、Part5Progress、BackupFile、ImportResult、COLOR_LEVELS、TodayLearnedState、LearnedHistory、
+ *       DASHBOARD_CHART_DAYS、RuntimeState.dashboard、LAYOUT_TEXTS 主控台段；
+ *       README §5.4 LR-6 與 v0.12 段、§6.1、§6.2（IM-1～IM-5）、§10.8 IN-1（v0.12）、§10.9 NT-1、§11.4 DB-1～DB-6、C-7
+ * 涵蓋：US-17、US-24、US-30、US-39；AC-39-01～AC-39-10、AC-17-01、AC-17-06、AC-24-01、AC-24-03～AC-24-12、
+ *       AC-30-01、AC-30-05、AC-30-07、AC-30-08、AC-30-10、AC-30-12、AC-31-03、AC-34-07、AC-34-08、AC-38-*
  *
- * 畫面：
- * - （FE-31）今日學習進度區（位於統計區之前）：主環形圖「今日已學 X / D 字」、
- *   2 個小環形圖（目前單字集掌握率、模擬測驗正確率）、近 7 天長條圖。
- *   顯示值全部由純函式 progressModel(state, today) 計算，view 只依模型繪製；
- *   環形以內嵌 SVG（core/dom.js 的 svg()）繪製，長條以 div 繪製，文字一律 textContent。
- * - 統計區：連續打卡天數、單字掌握數、模擬測驗正確率（訂閱 store，只重繪本區）。
- * - 目標區：目前目標色級、目前生效色級、每日新字量（顯示頁面與匯入成功時更新）。
- *   （v0.10，FE-43；PRD R-19、AC-17-06、AC-26-05 (c)）不顯示目標分數；色級仍由 appliedScore 推導。
- * - 入口：導覽模組（NAV_TAB_ORDER 去掉 dashboard）與「資料來源與授權」，以 data-go 交給 router 切換。
- *   （v0.5，FE-38）入口由 NAV_TAB_ORDER 推導，不含隱藏頁（AC-17-06、AC-20-04、契約 §5.8 HT-2）。
- * - 備份：匯出（store.actions.exportBackup → services/download）、匯入（FileReader → store.actions.importBackup）。
- *   （v0.11，FE-51；architecture §4.7、§7.18.6、§7.18.7）按鈕列之後依序：
- *   p.dash-backup__origin（PWA_TEXTS.backupOriginNotice，常駐，不看 eligible／storageStatus；NT-1、AC-24-12）、
- *   div.dash-backup__install（EMT.core.pwa.installVisible 成立時只含 1 個「安裝 App」按鈕，不成立時 hidden 且無子節點；IN-1）。
- *   按下 → EMT.services.pwa.requestInstall()（呼叫時取用；不存在時不做事）；不自動 prompt、不做安裝橫幅或 iOS 說明（IN-4）。
- *   訂閱回呼收到 "pwa"（及 "tab"、"entry"）tag 時、show() 時重繪安裝區。
- * 所有文字以 textContent 呈現（經 core/dom.js）。
+ * 畫面（v0.12，DOM 順序 = 畫面順序 = Tab 順序；DB-1）：
+ * - h2「學習主控台」
+ * - (1) 今日任務卡 section.card.db-today：h3「今日任務」→ 列（主環形圖 88px：中央只顯示 X，SD-FB-40；
+ *   右側「今日已學 X / D 字」、「今日目標達成」、button「開始今日學習」[data-go=flashcards]）→ 目標行
+ *   （色點 + layout.goalLine + 「・」+ button「變更」[data-go=customizer]；依已套用色級，DB-4）
+ * - (2) 3 格數據 section.card.db-stats（aria-label「學習數據」）：連續打卡天數（強調橘圖示 + 數字 + 天）→
+ *   單字掌握率（大字 % + 小字「已掌握 N 字」）→ 模擬測驗正確率；無資料「—」（DB-5）
+ * - (3) 近 7 天圖表 section.card.db-chart：ol.db-bars（7 根）或空狀態「開始學習後會顯示紀錄」（layout.chartIsEmpty）
+ * - (4) 「資料備份」收合區塊 section.card.db-backup：標題列 toggle（aria-expanded = runtime.dashboard.backupExpanded）→
+ *   展開區：備份說明 → 「匯出備份」「匯入備份」→ NT-1 → 「安裝 App」（IN-1）→ 隱藏 file input（DB-6）
+ * - 移除：功能入口（ENTRIES）、學習統計、目前目標、2 個小環形圖、「今日學習進度」標題；本體不再有 data-go="sources"
+ * - 「開始今日學習」「變更」只以 [data-go] 交給 router（view 不呼叫 setTab 或任何寫入 action）；
+ *   toggle 只呼叫 store.actions.setBackupExpanded（不寫 localStorage）；訂閱 "dashboard" tag 時只更新 aria-expanded、
+ *   展開區 hidden 與安裝區，節點不重建（焦點留在 toggle）
+ * 所有文字以 textContent 呈現（經 core/dom.js）；版面文字於呼叫時取 EMT.core.layout（LD-2）。
  *
- * 寫法：純邏輯（summaryOf、goalInfoOf、importMessage、progressModel、ringGeometry）以 module.exports 匯出供 Node 測試；
+ * 寫法：純邏輯（dashboardModel、goalInfoOf、importMessage、progressModel、ringGeometry）以 module.exports 匯出供 Node 測試；
  * 瀏覽器下登錄 EMT.views "dashboard"，載入時不操作 DOM。
  */
 (function (root, factory) {
@@ -49,12 +48,12 @@
         C: require("../core/constants.js"),
         GOAL: require("../core/goal.js"),
         STREAK: require("../core/streak.js"),
-        STATS: require("../core/stats.js"),
-        LEARN: require("../core/learning.js")
+        LEARN: require("../core/learning.js"),
+        LAY: require("../core/layout.js")
       };
     } else {
       var c = root.EMT.core;
-      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, STATS: c.stats, LEARN: c.learning };
+      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, LEARN: c.learning, LAY: c.layout };
     }
     return coreCache;
   }
@@ -71,8 +70,8 @@
     return m;
   }
 
-  /** （v0.11，FE-51）會影響「安裝 App」按鈕顯示條件（IN-1）的 tags */
-  var INSTALL_TAGS = ["pwa", "tab", "entry", "init"];
+  /** （v0.11，FE-51；v0.12 加 "dashboard"）會影響「安裝 App」按鈕顯示條件（IN-1）的 tags */
+  var INSTALL_TAGS = ["pwa", "tab", "entry", "init", "dashboard"];
 
   /** tags 是否含會影響安裝按鈕的項目；tags 缺漏時視為需要重繪 */
   function installAffected(tags) {
@@ -83,20 +82,16 @@
     return false;
   }
 
-  // ── 畫面文字（AC 引號內文案逐字使用）──
+  // ── 畫面文字（AC 引號內文案逐字使用；v0.12 主控台版面文字取 EMT.core.layout.LAYOUT_TEXTS）──
   var TEXT = {
     title: "學習主控台",
-    statsTitle: "學習統計",
-    streak: "連續打卡天數",
-    mastered: "單字掌握數",
     accuracy: "模擬測驗正確率",
-    goalTitle: "目前目標",
-    appliedColor: "目前目標色級",
-    effectiveColor: "目前生效色級",
-    daily: "每日新字量",
     builtinCap: "（內建上限）",
-    entriesTitle: "功能入口",
-    backupTitle: "資料備份",
+    // （v0.12，SD-FB-41）今日任務卡標題、3 格數據區的 aria-label、近 7 天圖表標題
+    todayTitle: "今日任務",
+    statsLabel: "學習數據",
+    chartTitle: "近 7 天已學字數",
+    chartUnit: "字",
     backupHint: "備份檔只含你的學習資料，不含內建字庫與題庫；可在其他裝置的同一個檔案匯入還原。",
     exportBtn: "匯出備份",
     importBtn: "匯入備份",
@@ -112,81 +107,25 @@
     versionNone: "無",                                  // IM-3
     exportDone: "已匯出備份",
     exportFail: "此瀏覽器無法下載檔案，未匯出",
-    // （FE-31）今日學習進度（AC-30-01、AC-30-05、AC-30-08、AC-30-10）
-    progressTitle: "今日學習進度",
-    todayPrefix: "今日已學 ",       // 「今日已學 X / D 字」
-    todaySuffix: " 字",
-    goalDone: "今日目標達成",
-    masteryRate: "目前單字集掌握率",
-    accuracyRate: "模擬測驗正確率",
-    chartTitle: "近 7 天已學字數",
-    chartUnit: "字",
+    goalDone: "今日目標達成",                           // AC-30-05
     empty: "—"
   };
 
   /**
-   * 環形圖幾何（SVG viewBox 0 0 120 120；半徑 52、線寬 12）。
+   * 環形圖幾何（SVG viewBox 0 0 120 120；半徑 52、線寬 12；CSS 縮為 88px）。
    * 以周長作為 stroke-dasharray，stroke-dashoffset = 周長 × (1 − 比例) 表示填滿比例。
    */
   var RING = Object.freeze({ size: 120, r: 52, stroke: 12 });
   var RING_CIRC = 2 * Math.PI * RING.r;
 
-  /** 會影響今日學習進度區的 store tag（AC-30-07 (b)：show() 時另外重繪） */
-  var PROGRESS_TAGS = ["init", "learning", "goal", "studySet", "customVocab", "part5", "flashcard", "stats", "storage"];
-
-  /**
-   * 模組入口項目（R-15，FE-23）：顯示名稱改由 C.TAB_LABELS[tab] 取得，不再寫死。
-   * label 以 getter 於讀取時才取用 constants（LD-2：載入時不得讀取其他模組成員）。
-   */
-  function entry(tab) {
-    return {
-      tab: tab,
-      get label() { return core().C.TAB_LABELS[tab]; }
-    };
-  }
-
-  /**
-   * 模組入口（AC-17-06；v0.5，FE-38）：NAV_TAB_ORDER 去掉 dashboard 後加上 sources
-   * （customizer、flashcards、part5、sources）。於讀取時計算（LD-2），隱藏頁不會出現。
-   * @returns {{ tab: string, label: string }[]}
-   */
-  function entries() {
-    var order = core().C.NAV_TAB_ORDER || [];
-    var tabs = [];
-    for (var i = 0; i < order.length; i++) {
-      if (order[i] !== "dashboard") tabs.push(order[i]);
-    }
-    tabs.push("sources");
-    return tabs.map(entry);
-  }
-
-  /** 非負整數；異常值 → 0 */
-  function safeCount(v) {
-    return typeof v === "number" && isFinite(v) && v > 0 ? Math.floor(v) : 0;
-  }
+  /** 會影響今日任務卡、3 格數據、近 7 天圖表的 store tag（AC-30-07 (b)：show() 時另外重繪；v0.12 加 "dashboard"） */
+  var PROGRESS_TAGS = ["init", "learning", "goal", "studySet", "customVocab", "part5", "flashcard", "stats", "streak",
+    "storage", "dashboard"];
 
   // ── 純邏輯 ──
 
   /**
-   * 統計區數值（AC-17-01、AC-17-04）。
-   * @param {object|null} data PersistedData
-   * @param {string} today 本地日期 YYYY-MM-DD
-   * @returns {{ streakDays: number, mastered: number, accuracy: string }}
-   */
-  function summaryOf(data, today) {
-    var K = core();
-    var d = data && typeof data === "object" ? data : {};
-    var p5 = d.part5 && typeof d.part5 === "object" ? d.part5 : {};
-    return {
-      streakDays: K.STREAK.displayDays(d.streak || null, today),
-      mastered: Array.isArray(d.masteredWordKeys) ? d.masteredWordKeys.length : 0,
-      // 正確率一律交給 stats.accuracyText：0 題 → 「—」
-      accuracy: K.STATS.accuracyText(p5.totalAnswered, p5.totalCorrect)
-    };
-  }
-
-  /**
-   * 目標區顯示文字（AC-17-06、AC-01-07）。
+   * 已套用色級與生效色級（AC-17-06、AC-01-07；DB-4 依已套用值，FB-45）。
    * 目標色級為藍、金時，生效色級顯示「綠（內建上限）」；其餘兩者相同。
    * 每日新字量取生效色級的 dailyNewWords（藍、金顯示綠的 15）。
    * （v0.10）回傳不含 appliedScore（目標分數只存在資料中，畫面不顯示）。
@@ -220,8 +159,14 @@
     };
   }
 
+  /** 非負整數；異常值 → 0 */
+  function safeCount(v) {
+    return typeof v === "number" && isFinite(v) && v > 0 ? Math.floor(v) : 0;
+  }
+
   /**
    * 匯入結果 → 提示文字（AC-24-04～AC-24-09）。cancelled 不提示 → 回 null。
+   * （ui/import-flow.js 的 messageOf 與本函式輸出逐字相同，first-run.test.js 比對；不得改動文字，SD-FB-14）
    * @param {object} result ImportResult
    * @returns {{ text: string, kind: "success"|"error" } | null}
    */
@@ -280,10 +225,10 @@
   }
 
   /**
-   * 今日學習進度區的全部顯示值（FE-31；契約 README §5.4 LR-6 與小環形圖段）。
+   * 今日進度、掌握率、正確率與近 7 天長條的計算值（FE-31；契約 README §5.4 LR-6）。dashboardModel 由此組出畫面文字。
    * - 主環：X = learning.todayCount、D = learning.dailyGoal(生效色級)；X 可超過 D；X ≥ D → done、滿圈。
-   * - 小環：目前單字集掌握率 = learning.masteryRate(runtime.studySet, data.masteredWordKeys)；
-   *         模擬測驗正確率 = learning.percentOf(part5.totalCorrect, part5.totalAnswered)；null → 空環「—」。
+   * - 掌握率 = learning.masteryRate(runtime.studySet, data.masteredWordKeys)；
+   *   正確率 = learning.percentOf(part5.totalCorrect, part5.totalAnswered)；null → 「—」。
    * - 長條：learning.chartSeries(learnedHistory, X, today)，由舊到新 7 筆；高度 = 字數 ÷ 最大字數（全 0 → 0）。
    * 不修改傳入值；state 缺漏時以預設值計算，不拋錯。
    * @param {{data: object, runtime: object}|null} state store.getState() 的結果
@@ -299,6 +244,7 @@
   function progressModel(state, today) {
     var K = core();
     var L = K.LEARN;
+    var LT = K.LAY.LAYOUT_TEXTS;
     var st = state && typeof state === "object" ? state : {};
     var d = st.data && typeof st.data === "object" ? st.data : {};
     var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
@@ -314,12 +260,14 @@
       d: goal,
       done: done,
       ratio: done ? 1 : clampRatio(x / goal),
-      text: TEXT.todayPrefix + x + " / " + goal + TEXT.todaySuffix,
-      centerText: x + " / " + goal,
+      // 「今日已學 X / D 字」（LAYOUT_TEXTS.todayRing；AC-39-02）
+      text: K.LAY.fill(LT.todayRing, { x: K.LAY.formatInt(x), d: K.LAY.formatInt(goal) }),
+      // （v0.12，SD-FB-40）環形圖中央只顯示 X，「X / D」在畫面只出現 1 次（AC-39-06）
+      centerText: K.LAY.formatInt(x),
       doneText: done ? TEXT.goalDone : ""
     };
 
-    // 小環形圖（AC-30-10）
+    // 掌握率、正確率（AC-30-10、AC-39-05）
     var mr = L.masteryRate(Array.isArray(rt.studySet) ? rt.studySet : [],
       Array.isArray(d.masteredWordKeys) ? d.masteredWordKeys : []);
     var p5 = d.part5 && typeof d.part5 === "object" ? d.part5 : {};
@@ -345,7 +293,7 @@
     return {
       today: todayModel,
       mastery: {
-        label: TEXT.masteryRate,
+        label: LT.statMasteryLabel,
         numer: mr.numer,
         denom: mr.denom,
         percent: mr.percent,
@@ -353,7 +301,7 @@
         text: percentText(mr.percent)
       },
       accuracy: {
-        label: TEXT.accuracyRate,
+        label: LT.statAccuracyLabel,
         percent: acc,
         ratio: acc === null ? 0 : clampRatio(acc / 100),
         text: percentText(acc)
@@ -363,7 +311,54 @@
     };
   }
 
-  /** tags 是否含會影響今日學習進度區的項目；tags 缺漏時視為需要重繪 */
+  /**
+   * （v0.12，FE-58）主控台全部顯示值（architecture.md §4.8；契約 DB-2～DB-6）。文字全部經 EMT.core.layout。
+   * @param {{data: object, runtime: object}|null} state store.getState() 的結果
+   * @param {string} today 本地日期 YYYY-MM-DD
+   * @returns {{
+   *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
+   *   goal: { text: string, colorId: (string|null), capped: boolean },
+   *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, accuracyText: string },
+   *   chart: { empty: boolean, bars: object[] },
+   *   backupExpanded: boolean
+   * }}
+   */
+  function dashboardModel(state, today) {
+    var K = core();
+    var LAY = K.LAY;
+    var LT = LAY.LAYOUT_TEXTS;
+    var st = state && typeof state === "object" ? state : {};
+    var d = st.data && typeof st.data === "object" ? st.data : {};
+    var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
+    var p = progressModel(st, today);
+
+    // 目標行（DB-4）：依已套用色級（goalInfoOf 以 appliedScore 推導）
+    var info = goalInfoOf(d.goal || null);
+    var gl = LAY.goalLine(K.GOAL.levelOf(info.appliedColorId), K.GOAL.levelOf(info.effectiveColorId));
+
+    // 3 格數據（DB-5）
+    var streakDays = K.STREAK.displayDays(d.streak || null, today);
+    var masteredN = Array.isArray(d.masteredWordKeys) ? d.masteredWordKeys.length : 0;
+
+    return {
+      today: p.today,
+      goal: { text: gl.text, colorId: info.appliedColorId, capped: gl.capped },
+      stats: {
+        streakValue: LAY.formatInt(streakDays),
+        streakUnit: LT.statStreakUnit,
+        masteryText: p.mastery.text,
+        masteredText: LAY.fill(LT.statMasteredCount, { n: LAY.formatInt(masteredN) }),
+        accuracyText: p.accuracy.text
+      },
+      chart: {
+        empty: LAY.chartIsEmpty(p.bars.map(function (b) { return b.count; })),
+        bars: p.bars
+      },
+      backupExpanded: !!(rt.dashboard && rt.dashboard.backupExpanded === true)
+    };
+  }
+
+  /** tags 是否含會影響今日任務卡、數據與圖表的項目；tags 缺漏時視為需要重繪 */
   function progressAffected(tags) {
     if (!Array.isArray(tags)) return true;
     for (var i = 0; i < tags.length; i++) {
@@ -394,30 +389,8 @@
       }
     }
 
-    function currentData() {
-      var s = store();
-      if (!s || typeof s.getState !== "function") return null;
-      try {
-        var st = s.getState();
-        return st && st.data ? st.data : null;
-      } catch (e) {
-        return null;
-      }
-    }
-
     function todayStr() {
       return core().STREAK.localDate(new Date());
-    }
-
-    /** 一個數值卡片：標題 + 數值節點 */
-    function statItem(label, cls) {
-      var D = dom();
-      var value = D.el("p", { className: "dash-stat__value" + (cls ? " " + cls : ""), text: TEXT.empty });
-      var item = D.el("div", { className: "dash-stat" }, [
-        D.el("p", { className: "dash-stat__label", text: label }),
-        value
-      ]);
-      return { item: item, value: value };
     }
 
     /** 目前日期：優先用 store.today()（LR-6：每次繪製以當下 today 計算） */
@@ -444,11 +417,10 @@
     }
 
     /**
-     * 建立一個 SVG 環形圖（底圈 + 進度圈）。進度圈初始為空環。
-     * @param {string} cls 額外類名（db-ring--main／db-ring--small）
+     * 建立 SVG 主環形圖（底圈 + 進度圈）。進度圈初始為空環。
      * @returns {{ svg: SVGElement, bar: SVGElement }}
      */
-    function ringSvg(cls) {
+    function ringSvg() {
       var D = dom();
       var c = String(RING.size / 2);
       var g = ringGeometry(0);
@@ -467,7 +439,7 @@
         transform: "rotate(-90 " + c + " " + c + ")"
       }));
       var node = D.svg("svg", {
-        "class": "db-ring " + cls,
+        "class": "db-ring",
         viewBox: "0 0 " + RING.size + " " + RING.size,
         "aria-hidden": "true",
         focusable: "false"
@@ -483,139 +455,75 @@
       }
     }
 
-    /** 小環形圖區塊：標題 + 環 + 中央數值 */
-    function smallRing(label) {
+    /** 連續打卡格的強調橘圖示（裝飾；fill 由 CSS .db-stat__icon 給 --accent，VC-3） */
+    function streakIcon() {
       var D = dom();
-      var ring = ringSvg("db-ring--small");
-      var value = D.el("span", { className: "db-ring__value db-ring__value--small", text: TEXT.empty });
-      var item = D.el("div", { className: "db-mini" }, [
-        D.el("p", { className: "db-mini__label", text: label }),
-        D.el("div", { className: "db-ring-wrap db-ring-wrap--small" }, [ring.svg, value])
+      return D.svg("svg", { "class": "db-stat__icon", viewBox: "0 0 24 24", "aria-hidden": "true", focusable: "false" }, [
+        D.svg("path", { d: "M12 2c1 3.5-1.5 5-3 7.5S7.5 15 9 17.5c-1.5-.5-3-2-3-4.5C4 15 4 17 5 19c1.5 2.5 4 3 7 3s6-1.5 7-4.5c1-3.5-.5-6.5-3-9 .5 2.5-.5 4-1.5 4.5C15 8.5 14 5 12 2z" })
       ]);
-      return { item: item, ring: ring, value: value };
     }
 
-    /** 今日學習進度區重繪（FE-31）：只依 progressModel 的結果改屬性與 textContent */
-    function renderProgress() {
-      if (!refs || !refs.progress) return;
+    /** 「資料備份」展開指示（裝飾；展開時以 CSS 旋轉 180 度，無 transition） */
+    function chevronIcon() {
       var D = dom();
-      var P = refs.progress;
-      var m = progressModel(currentState(), progressToday());
+      return D.svg("svg", { "class": "db-backup__chev", viewBox: "0 0 24 24", "aria-hidden": "true", focusable: "false" }, [
+        D.svg("path", { d: "M6 9l6 6 6-6", fill: "none", stroke: "currentColor", "stroke-width": "2" })
+      ]);
+    }
 
-      // 主環形圖（AC-30-05：達成 → 滿圈金色 + 「今日目標達成」）
-      setRing(P.main.bar, m.today.ratio);
-      P.main.svg.classList.toggle("db-ring--done", m.today.done);
-      P.mainWrap.classList.toggle("db-today--done", m.today.done);
-      D.setText(P.center, m.today.centerText);
-      D.setText(P.todayText, m.today.text);
-      D.setText(P.doneText, m.today.doneText);
-      P.doneText.hidden = !m.today.done;
+    /** 依 dashboardModel 更新今日任務卡、3 格數據、近 7 天圖表（只改屬性與 textContent，不重建節點） */
+    function renderProgress() {
+      if (!refs) return;
+      var D = dom();
+      var m = dashboardModel(currentState(), progressToday());
 
-      // 小環形圖（AC-30-10：null → 空環「—」）
-      setRing(P.mastery.ring.bar, m.mastery.ratio);
-      D.setText(P.mastery.value, m.mastery.text);
-      P.mastery.ring.svg.classList.toggle("db-ring--empty", m.mastery.percent === null);
-      setRing(P.accuracy.ring.bar, m.accuracy.ratio);
-      D.setText(P.accuracy.value, m.accuracy.text);
-      P.accuracy.ring.svg.classList.toggle("db-ring--empty", m.accuracy.percent === null);
+      // 今日任務卡（AC-30-05：達成 → 滿圈金色 + 「今日目標達成」）
+      setRing(refs.ring.bar, m.today.ratio);
+      refs.ring.svg.classList.toggle("db-ring--done", m.today.done);
+      D.setText(refs.center, m.today.centerText);
+      D.setText(refs.todayText, m.today.text);
+      D.setText(refs.doneText, m.today.doneText);
+      refs.doneText.hidden = !m.today.done;
 
-      // 近 7 天長條圖（AC-30-08）：節點固定 DASHBOARD_CHART_DAYS 組，只改高度與文字
-      for (var i = 0; i < P.bars.length; i++) {
-        var b = m.bars[i];
-        var cell = P.bars[i];
+      // 目標行（DB-4）
+      D.setText(refs.goalText, m.goal.text);
+      refs.goalLine.setAttribute("data-color", m.goal.colorId || "");
+
+      // 3 格數據（DB-5）
+      D.setText(refs.streakValue, m.stats.streakValue);
+      D.setText(refs.masteryValue, m.stats.masteryText);
+      D.setText(refs.masteredSub, m.stats.masteredText);
+      D.setText(refs.accuracyValue, m.stats.accuracyText);
+
+      // 近 7 天（AC-39-07）：空狀態只顯示一行文字；否則 7 根長條，節點固定，只改高度與文字
+      refs.bars.hidden = m.chart.empty;
+      refs.chartEmpty.hidden = !m.chart.empty;
+      for (var i = 0; i < refs.barCells.length; i++) {
+        var b = m.chart.bars[i];
+        var cell = refs.barCells[i];
         if (!b) {
           cell.item.hidden = true;
           continue;
         }
         cell.item.hidden = false;
-        D.setText(cell.count, String(b.count));
+        D.setText(cell.count, core().LAY.formatInt(b.count));
         D.setText(cell.label, b.label);
         cell.fill.style.height = b.heightPct + "%";
         cell.item.classList.toggle("db-bars__item--today", b.isToday);
         cell.item.setAttribute("data-date", b.date);
         cell.item.setAttribute("aria-label", b.label + " " + b.count + " " + TEXT.chartUnit);
       }
+
+      renderBackup(m.backupExpanded);
     }
 
-    /** 建立今日學習進度區（節點只建一次；之後 renderProgress 更新） */
-    function buildProgress() {
-      var D = dom();
-      var main = ringSvg("db-ring--main");
-      var center = D.el("span", { className: "db-ring__value", attrs: { "aria-hidden": "true" }, text: "" });
-      var todayText = D.el("p", { className: "db-today__text", text: "" });
-      var doneText = D.el("p", { className: "db-today__done", attrs: { "aria-live": "polite" }, text: "" });
-      doneText.hidden = true;
-      var mainWrap = D.el("div", { className: "db-today" }, [
-        D.el("div", { className: "db-ring-wrap db-ring-wrap--main" }, [main.svg, center]),
-        todayText,
-        doneText
-      ]);
-      var mastery = smallRing(TEXT.masteryRate);
-      var accuracy = smallRing(TEXT.accuracyRate);
-
-      var days = core().C.DASHBOARD_CHART_DAYS;
-      var n = typeof days === "number" && days > 0 ? Math.floor(days) : 7;
-      var bars = [];
-      var items = [];
-      for (var i = 0; i < n; i++) {
-        var count = D.el("span", { className: "db-bars__count", attrs: { "aria-hidden": "true" }, text: "0" });
-        var fill = D.el("span", { className: "db-bars__fill" });
-        var label = D.el("span", { className: "db-bars__label", attrs: { "aria-hidden": "true" }, text: "" });
-        var item = D.el("li", { className: "db-bars__item" }, [
-          count,
-          D.el("span", { className: "db-bars__track" }, fill),
-          label
-        ]);
-        bars.push({ item: item, count: count, fill: fill, label: label });
-        items.push(item);
-      }
-
-      var section = D.el("section", { className: "card dash-section db-progress", attrs: { "aria-labelledby": "dash-progress-h" } }, [
-        D.el("h3", { className: "dash-section__title", attrs: { id: "dash-progress-h" }, text: TEXT.progressTitle }),
-        D.el("div", { className: "db-rings" }, [
-          mainWrap,
-          D.el("div", { className: "db-minis" }, [mastery.item, accuracy.item])
-        ]),
-        D.el("h4", { className: "db-bars__title", attrs: { id: "dash-chart-h" }, text: TEXT.chartTitle }),
-        D.el("ol", { className: "db-bars", attrs: { "aria-labelledby": "dash-chart-h" } }, items)
-      ]);
-
-      return {
-        section: section,
-        refs: {
-          main: main,
-          mainWrap: mainWrap,
-          center: center,
-          todayText: todayText,
-          doneText: doneText,
-          mastery: mastery,
-          accuracy: accuracy,
-          bars: bars
-        }
-      };
-    }
-
-    /** 統計區重繪（只改 textContent） */
-    function renderStats() {
+    /** 「資料備份」收合狀態（DB-6）：只改 aria-expanded、展開區 hidden 與 class，不重建節點（焦點留在 toggle） */
+    function renderBackup(expanded) {
       if (!refs) return;
-      var D = dom();
-      var s = summaryOf(currentData(), todayStr());
-      D.setText(refs.streak, s.streakDays + " 天");
-      D.setText(refs.mastered, s.mastered + " 字");
-      D.setText(refs.accuracy, s.accuracy);
-    }
-
-    /** 目標區重繪 */
-    function renderGoal() {
-      if (!refs) return;
-      var D = dom();
-      var data = currentData();
-      var info = goalInfoOf(data ? data.goal : null);
-      D.setText(refs.appliedColor, info.appliedColor);
-      D.setText(refs.effectiveColor, info.effectiveColor);
-      D.setText(refs.daily, info.daily);
-      refs.appliedColor.setAttribute("data-color", info.appliedColorId || "");
-      refs.effectiveColor.setAttribute("data-color", info.effectiveColorId || "");
+      var on = expanded === true;
+      refs.toggle.setAttribute("aria-expanded", on ? "true" : "false");
+      refs.backupBody.hidden = !on;
+      refs.backupSection.classList.toggle("is-expanded", on);
     }
 
     function setBusy(v) {
@@ -623,6 +531,15 @@
       if (!refs) return;
       refs.exportBtn.disabled = busy;
       refs.importBtn.disabled = busy;
+    }
+
+    /** 「資料備份」標題列：切換展開（store 只改記憶體，不寫 localStorage；V-LAY-07） */
+    function onToggleBackup() {
+      var s = store();
+      if (!s || !s.actions || typeof s.actions.setBackupExpanded !== "function") return;
+      var st = currentState();
+      var cur = !!(st && st.runtime && st.runtime.dashboard && st.runtime.dashboard.backupExpanded === true);
+      s.actions.setBackupExpanded(!cur);
     }
 
     /** 匯出（AC-24-01） */
@@ -655,13 +572,12 @@
       });
     }
 
-    /** 依匯入結果提示並更新畫面 */
+    /** 依匯入結果提示並更新畫面（不改變「資料備份」展開狀態，E-91） */
     function finishImport(result) {
       var msg = importMessage(result);
       if (msg) toast(msg.text, msg.kind);
       if (result && result.ok === true) {
-        renderGoal();
-        renderStats();
+        renderProgress();
       }
       setBusy(false);
     }
@@ -717,7 +633,7 @@
       }
     }
 
-    /** （v0.11，FE-51）依 IN-1 重繪安裝區：成立時恰 1 個按鈕；不成立時 hidden 且無子節點（不佔版面） */
+    /** （v0.11，FE-51；v0.12 IN-1 含 backupExpanded）重繪安裝區：成立時恰 1 個按鈕；不成立時 hidden 且無子節點 */
     function renderInstall() {
       if (!refs || !refs.installBox) return;
       var box = refs.installBox;
@@ -743,26 +659,109 @@
       refs.fileInput.click();
     }
 
+    /** (1) 今日任務卡 */
+    function buildToday() {
+      var D = dom();
+      var LT = core().LAY.LAYOUT_TEXTS;
+      var ring = ringSvg();
+      var center = D.el("span", { className: "db-ring__value", attrs: { "aria-hidden": "true" }, text: "" });
+      var todayText = D.el("p", { className: "db-today__text", text: "" });
+      var doneText = D.el("p", { className: "db-today__done", attrs: { "aria-live": "polite" }, text: "" });
+      doneText.hidden = true;
+      var startBtn = D.el("button", {
+        className: "btn btn--accent db-start",
+        attrs: { type: "button", "data-go": "flashcards" },
+        text: LT.startToday
+      });
+      var goalText = D.el("span", { className: "db-goal__text", text: "" });
+      var changeBtn = D.el("button", {
+        className: "btn btn--link db-change",
+        attrs: { type: "button", "data-go": "customizer" },
+        text: LT.changeLink
+      });
+      var goalLine = D.el("p", { className: "db-goal", attrs: { "data-color": "" } }, [
+        D.el("span", { className: "db-goal__dot", attrs: { "aria-hidden": "true" } }),
+        goalText,
+        D.el("span", { className: "db-goal__sep", attrs: { "aria-hidden": "true" }, text: LT.goalLineSeparator }),
+        changeBtn
+      ]);
+      var section = D.el("section", { className: "card db-today", attrs: { "aria-labelledby": "db-today-h" } }, [
+        D.el("h3", { className: "section-title", attrs: { id: "db-today-h" }, text: TEXT.todayTitle }),
+        D.el("div", { className: "db-today__row" }, [
+          D.el("div", { className: "db-ring-wrap" }, [ring.svg, center]),
+          D.el("div", { className: "db-today__side" }, [todayText, doneText, startBtn])
+        ]),
+        goalLine
+      ]);
+      return { section: section, ring: ring, center: center, todayText: todayText, doneText: doneText,
+        startBtn: startBtn, goalLine: goalLine, goalText: goalText, changeBtn: changeBtn };
+    }
+
+    /** (2) 3 格數據（同一張卡片內；格本身無邊框與背景） */
+    function buildStats() {
+      var D = dom();
+      var LT = core().LAY.LAYOUT_TEXTS;
+      var streakValue = D.el("span", { className: "db-stat__num", text: TEXT.empty });
+      var masteryValue = D.el("p", { className: "db-stat__value", text: TEXT.empty });
+      var masteredSub = D.el("p", { className: "db-stat__sub", text: "" });
+      var accuracyValue = D.el("p", { className: "db-stat__value", text: TEXT.empty });
+      var section = D.el("section", { className: "card db-stats", attrs: { "aria-label": TEXT.statsLabel } }, [
+        D.el("div", { className: "db-stat db-stat--streak" }, [
+          D.el("p", { className: "db-stat__label", text: LT.statStreakLabel }),
+          D.el("p", { className: "db-stat__value" }, [
+            streakIcon(),
+            streakValue,
+            D.el("span", { className: "db-stat__unit", text: LT.statStreakUnit })
+          ])
+        ]),
+        D.el("div", { className: "db-stat db-stat--mastery" }, [
+          D.el("p", { className: "db-stat__label", text: LT.statMasteryLabel }),
+          masteryValue,
+          masteredSub
+        ]),
+        D.el("div", { className: "db-stat db-stat--accuracy" }, [
+          D.el("p", { className: "db-stat__label", text: LT.statAccuracyLabel }),
+          accuracyValue
+        ])
+      ]);
+      return { section: section, streakValue: streakValue, masteryValue: masteryValue,
+        masteredSub: masteredSub, accuracyValue: accuracyValue };
+    }
+
+    /** (3) 近 7 天圖表：長條（節點固定 DASHBOARD_CHART_DAYS 組）與空狀態 */
+    function buildChart() {
+      var D = dom();
+      var days = core().C.DASHBOARD_CHART_DAYS;
+      var n = typeof days === "number" && days > 0 ? Math.floor(days) : 7;
+      var cells = [];
+      var items = [];
+      for (var i = 0; i < n; i++) {
+        var count = D.el("span", { className: "db-bars__count", attrs: { "aria-hidden": "true" }, text: "0" });
+        var fill = D.el("span", { className: "db-bars__fill" });
+        var label = D.el("span", { className: "db-bars__label", attrs: { "aria-hidden": "true" }, text: "" });
+        var item = D.el("li", { className: "db-bars__item" }, [
+          count,
+          D.el("span", { className: "db-bars__track" }, fill),
+          label
+        ]);
+        cells.push({ item: item, count: count, fill: fill, label: label });
+        items.push(item);
+      }
+      var bars = D.el("ol", { className: "db-bars", attrs: { "aria-labelledby": "db-chart-h" } }, items);
+      var empty = D.el("p", { className: "db-chart__empty", text: core().LAY.LAYOUT_TEXTS.chartEmpty });
+      empty.hidden = true;
+      var section = D.el("section", { className: "card db-chart", attrs: { "aria-labelledby": "db-chart-h" } }, [
+        D.el("h3", { className: "section-title", attrs: { id: "db-chart-h" }, text: TEXT.chartTitle }),
+        bars,
+        empty
+      ]);
+      return { section: section, bars: bars, empty: empty, cells: cells };
+    }
+
     function mount(rootEl) {
       if (!rootEl) return;
       var D = dom();
-
-      var st = statItem(TEXT.streak);
-      var ma = statItem(TEXT.mastered);
-      var ac = statItem(TEXT.accuracy);
-
-      var applied = statItem(TEXT.appliedColor, "dash-color");
-      var effective = statItem(TEXT.effectiveColor, "dash-color");
-      var daily = statItem(TEXT.daily);
-
-      var entryItems = entries().map(function (en) {
-        return D.el("li", { className: "dash-entries__item" },
-          D.el("button", {
-            className: "btn dash-entry" + (en.tab === "sources" ? " dash-entry--sources" : ""),
-            attrs: { type: "button", "data-go": en.tab },
-            text: en.label
-          }));
-      });
+      var LT = core().LAY.LAYOUT_TEXTS;
 
       var fileInput = D.el("input", {
         className: "visually-hidden",
@@ -785,42 +784,56 @@
       // （v0.11，FE-51）安裝區（IN-1）；內容由 renderInstall 依狀態增刪
       var installBox = D.el("div", { className: "dash-backup__install", attrs: { hidden: true } });
 
-      var progress = buildProgress();
+      var today = buildToday();
+      var stats = buildStats();
+      var chart = buildChart();
+
+      // (4) 「資料備份」收合區塊（DB-6）：預設收合
+      var toggle = D.el("button", {
+        className: "db-backup__toggle",
+        attrs: { type: "button", "aria-expanded": "false", "aria-controls": "db-backup-body" },
+        on: { click: onToggleBackup }
+      }, [D.el("span", { className: "db-backup__label", text: LT.backupSectionTitle }), chevronIcon()]);
+      var backupBody = D.el("div", { className: "db-backup__body", attrs: { id: "db-backup-body" } }, [
+        D.el("p", { className: "dash-backup__hint", text: TEXT.backupHint }),
+        D.el("div", { className: "btn-row" }, [exportBtn, importBtn]),
+        // （v0.11，FE-51）NT-1：按鈕列的下一個兄弟節點（AC-24-12）
+        D.el("p", { className: "dash-backup__origin", text: pwaCore().PWA_TEXTS.backupOriginNotice }),
+        installBox,
+        fileInput
+      ]);
+      backupBody.hidden = true;
+      var backupSection = D.el("section", { className: "card db-backup", attrs: { "aria-labelledby": "db-backup-h" } }, [
+        D.el("h3", { className: "section-title db-backup__head", attrs: { id: "db-backup-h" } }, [toggle]),
+        backupBody
+      ]);
 
       var page = D.el("div", { className: "dashboard" }, [
-        D.el("h2", { className: "dash-title", text: TEXT.title }),
-        progress.section,
-        D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-stats-h" } }, [
-          D.el("h3", { className: "dash-section__title", attrs: { id: "dash-stats-h" }, text: TEXT.statsTitle }),
-          D.el("div", { className: "dash-stats" }, [st.item, ma.item, ac.item])
-        ]),
-        D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-goal-h" } }, [
-          D.el("h3", { className: "dash-section__title", attrs: { id: "dash-goal-h" }, text: TEXT.goalTitle }),
-          D.el("div", { className: "dash-stats dash-stats--goal" }, [applied.item, effective.item, daily.item])
-        ]),
-        D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-entries-h" } }, [
-          D.el("h3", { className: "dash-section__title", attrs: { id: "dash-entries-h" }, text: TEXT.entriesTitle }),
-          D.el("ul", { className: "dash-entries" }, entryItems)
-        ]),
-        D.el("section", { className: "card dash-section", attrs: { "aria-labelledby": "dash-backup-h" } }, [
-          D.el("h3", { className: "dash-section__title", attrs: { id: "dash-backup-h" }, text: TEXT.backupTitle }),
-          D.el("p", { className: "dash-backup__hint", text: TEXT.backupHint }),
-          D.el("div", { className: "btn-row" }, [exportBtn, importBtn]),
-          // （v0.11，FE-51）NT-1：按鈕列的下一個兄弟節點，常駐（AC-24-12）
-          D.el("p", { className: "dash-backup__origin", text: pwaCore().PWA_TEXTS.backupOriginNotice }),
-          installBox,
-          fileInput
-        ])
+        D.el("h2", { className: "page-title dash-title", text: LT.dashboardTitle }),
+        today.section,
+        stats.section,
+        chart.section,
+        backupSection
       ]);
 
       refs = {
-        progress: progress.refs,
-        streak: st.value,
-        mastered: ma.value,
-        accuracy: ac.value,
-        appliedColor: applied.value,
-        effectiveColor: effective.value,
-        daily: daily.value,
+        ring: today.ring,
+        center: today.center,
+        todayText: today.todayText,
+        doneText: today.doneText,
+        startBtn: today.startBtn,
+        goalLine: today.goalLine,
+        goalText: today.goalText,
+        streakValue: stats.streakValue,
+        masteryValue: stats.masteryValue,
+        masteredSub: stats.masteredSub,
+        accuracyValue: stats.accuracyValue,
+        bars: chart.bars,
+        chartEmpty: chart.empty,
+        barCells: chart.cells,
+        toggle: toggle,
+        backupBody: backupBody,
+        backupSection: backupSection,
         exportBtn: exportBtn,
         importBtn: importBtn,
         fileInput: fileInput,
@@ -829,18 +842,15 @@
 
       // 先在未掛上文件前繪製初值：進度圈不會從空環播放 transition（只在數值改變時播放，§7.11）
       renderProgress();
-      renderStats();
-      renderGoal();
       renderInstall();
 
       D.clear(rootEl);
       rootEl.appendChild(page);
 
-      // 訂閱 store：重繪統計區；相關 tag（PROGRESS_TAGS）才重繪今日學習進度區
+      // 訂閱 store：相關 tag（PROGRESS_TAGS，含 "dashboard"）才重繪；安裝區依 INSTALL_TAGS
       var s = store();
       if (s && typeof s.subscribe === "function" && !unsubscribe) {
         unsubscribe = s.subscribe(function (state, tags) {
-          renderStats();
           if (progressAffected(tags)) renderProgress();
           if (installAffected(tags)) renderInstall();
         });
@@ -850,8 +860,6 @@
     function show() {
       // 回到主控台時更新（目標可能已在難易度設定變更；跨日時打卡與今日已學數也要更新，AC-30-07 (b)）
       renderProgress();
-      renderStats();
-      renderGoal();
       renderInstall();
     }
 
@@ -864,12 +872,10 @@
 
   return {
     TEXT: TEXT,
-    // 讀取時才由 NAV_TAB_ORDER 推導（LD-2）；每次讀取回傳新陣列
-    get ENTRIES() { return entries(); },
-    summaryOf: summaryOf,
     goalInfoOf: goalInfoOf,
     importMessage: importMessage,
     progressModel: progressModel,
+    dashboardModel: dashboardModel,
     ringGeometry: ringGeometry,
     PROGRESS_TAGS: PROGRESS_TAGS,
     progressAffected: progressAffected,

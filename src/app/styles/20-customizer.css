@@ -3,16 +3,31 @@
  * 依據：architecture.md §9 RWD；色彩變數沿用 00-base.css（--color-orange 等）。
  * 375／768／1366 寬度皆不得出現水平捲軸：格線使用 minmax(0, 1fr)，文字可斷行。
  * （v0.10，FE-43）卡片不再顯示分數範圍（刪除 .cz-color__range）；分數區 .cz-score 以 [hidden] 隱藏（00-base.css），
- * 其規則保留但不會渲染。卡片最小高度仍為 var(--touch)（44px）。
+ * 其規則保留但不會渲染。
+ * （v0.12，FE-57；architecture.md v0.8 §7.19.5）色級大卡片改為 5 列精簡色級列 .cz-level（兩種模式共用）；
+ * 首次畫面固定底部列 .cz-firstbar（≤ 640px position: fixed）；內容寬 720px 置中；
+ * 卡片與按鈕不使用 --border、文字不使用 --brand（§7.19.1 禁止寫法，tokens.test.js 掃描）。
  */
+
+/* （v0.12）難易度設定內容寬 720px 置中（--content-narrow；AC-38-06、FT-6） */
+#view-customizer {
+  max-width: var(--content-narrow);
+  margin-inline: auto;
+}
 
 .cz {
   min-width: 0;
 }
 
+/* 頁面標題：沿用 .page-title（00-base.css）；首次畫面標題與副標 */
 .cz-title {
-  font-size: 1.4rem;
   margin-bottom: 4px;
+}
+
+.cz-subtitle {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-size: 0.9375rem;
 }
 
 .cz-intro {
@@ -20,9 +35,12 @@
   margin-bottom: var(--gap);
 }
 
+/* 區塊標題：18px／700（.section-title 規格，AC-38-07） */
 .cz-heading {
-  font-size: 1.1rem;
-  margin-bottom: 8px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0 0 8px;
 }
 
 /* ─── 標籤＋數值列 ─── */
@@ -41,7 +59,7 @@
   gap: 4px 12px;
   min-width: 0;
   padding-bottom: 6px;
-  border-bottom: 1px dashed var(--border);
+  border-bottom: 1px dashed var(--line);
 }
 
 .cz-row:last-child {
@@ -75,116 +93,123 @@
   }
 }
 
-/* ─── 色級大卡片（FE-27；architecture.md §9 v0.4，AC-26-01～AC-26-04）───
- * 版面：≤ 640px 單欄、641～1199px 2 欄（第 5 張靠左）、≥ 1200px 5 欄。
- * 整張卡片為 <button>；選中 = 色級色 3px 外框（2px 邊框 + 1px 外陰影，不改版面）+ 淺底 + 「已選擇」字樣，
- * 不只靠顏色。選中切換只改 aria-pressed／class，不觸發卡片重建（AC-22-04）。
+/* ─── 色級列（v0.12，FE-57；architecture.md §7.19.5；契約 FT-3；AC-26-01～AC-26-04）───
+ * 5 列單欄（所有寬度）；整列為 <button>（min-height 56px，觸控 ≥ 44）。選中 = 色級色 2px 框線 + 淡底 + ✓
+ * （不只靠顏色）；選中切換只改 aria-pressed／class，不重建節點（AC-22-04）。鎖定列（藍、金）opacity 0.85、文字一律 --text。
  */
 .cz-colors-wrap {
   margin-bottom: var(--gap);
 }
 
-.cz-colors {
+.cz-vocab-note {
+  margin: 0 0 8px;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.cz-levels {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
-@media (min-width: 641px) {
-  .cz-colors {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1200px) {
-  .cz-colors {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 8px;
-  }
-}
-
-.cz-color {
-  --cz-accent: var(--border);
+.cz-level {
+  --cz-accent: transparent;
   --cz-tint: var(--surface);
+  --cz-bar: var(--line);
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-  gap: 6px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
   min-width: 0;
-  min-height: var(--touch);
-  padding: 12px 14px;
-  border: 2px solid var(--border);
-  border-top: 8px solid var(--cz-accent);
-  border-radius: var(--radius);
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 2px solid transparent;
+  border-radius: 14px;
   background: var(--surface);
+  box-shadow: var(--shadow-card);
   color: var(--text);
   font: inherit;
-  line-height: 1.4;
+  line-height: 1.35;
   text-align: left;
-  overflow-wrap: anywhere;
   cursor: pointer;
   touch-action: manipulation;
 }
 
-.cz-color--orange { --cz-accent: var(--color-orange); --cz-tint: #fdf0e6; }
-.cz-color--brown  { --cz-accent: var(--color-brown);  --cz-tint: #f4ece4; }
-.cz-color--green  { --cz-accent: var(--color-green);  --cz-tint: #e7f5ed; }
-.cz-color--blue   { --cz-accent: var(--color-blue);   --cz-tint: #e9f0fb; }
-.cz-color--gold   { --cz-accent: var(--color-gold);   --cz-tint: #faf4dc; }
+.cz-level--orange { --cz-bar: var(--color-orange); --cz-select: var(--color-orange); --cz-select-tint: #fdf0e6; }
+.cz-level--brown  { --cz-bar: var(--color-brown);  --cz-select: var(--color-brown);  --cz-select-tint: #f4ece4; }
+.cz-level--green  { --cz-bar: var(--color-green);  --cz-select: var(--color-green);  --cz-select-tint: #e7f5ed; }
+.cz-level--blue   { --cz-bar: var(--color-blue);   --cz-select: var(--color-blue);   --cz-select-tint: #e9f0fb; }
+.cz-level--gold   { --cz-bar: var(--color-gold);   --cz-select: var(--color-gold);   --cz-select-tint: #faf4dc; }
 
-/* 鎖定色級：仍可點擊（不阻擋設定，AC-01-07、AC-26-04），只以虛線框與淡底標示 */
-.cz-color.is-locked {
-  border-style: dashed;
-  border-top-style: solid;
-  background: var(--bg);
+/* 選中：框線與淡底為該色級色（is-selected 與 aria-pressed 同步） */
+.cz-level[aria-pressed="true"] {
+  border-color: var(--cz-select);
+  background: var(--cz-select-tint);
 }
 
-/* 選中：色級色 3px 外框 + 淺底（is-selected 與 aria-pressed 同步） */
-.cz-color[aria-pressed="true"] {
-  border-color: var(--cz-accent);
-  border-style: solid;
-  box-shadow: 0 0 0 1px var(--cz-accent), var(--shadow);
-  background: var(--cz-tint);
+/* 鎖定列：仍可點擊（AC-01-07、AC-26-04）；整列降低透明度，列內文字一律 --text（0.85 下對白約 9:1，Q-57） */
+.cz-level.is-locked {
+  opacity: 0.85;
 }
 
-.cz-color__head {
+.cz-level.is-locked .cz-level__name,
+.cz-level.is-locked .cz-level__desc,
+.cz-level.is-locked .cz-level__side {
+  color: var(--text);
+}
+
+.cz-level__bar {
+  flex: none;
+  width: 12px;
+  height: 36px;
+  border-radius: 6px;
+  background: var(--cz-bar);
+}
+
+.cz-level__main {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.cz-level__name {
+  display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.cz-color__name {
   font-weight: 700;
-  font-size: 1.3rem;
+  font-size: 1.0625rem;
 }
 
-.cz-color__badge,
-.cz-color__picked {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 8px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.cz-color__badge {
-  background: var(--warning-bg);
-  color: var(--warning-text);
-}
-
-/* 「已選擇」只在選中時顯示；未選中為 display: none，螢幕閱讀器也不會讀到 */
-.cz-color__picked {
+/* ✓ 只在選中時顯示（aria-hidden；選中狀態由 aria-pressed 告知螢幕閱讀器） */
+.cz-level__check {
   display: none;
-  background: var(--text);
-  color: var(--surface);
 }
 
-.cz-color[aria-pressed="true"] .cz-color__picked {
-  display: inline-flex;
+.cz-level[aria-pressed="true"] .cz-level__check {
+  display: inline;
+}
+
+.cz-level__desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cz-level__side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+  margin-left: auto;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: right;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .cz-lock {
@@ -197,27 +222,6 @@
 
 .cz-lock path {
   fill: none;
-}
-
-.cz-color__vocab,
-.cz-color__daily,
-.cz-color__scenario {
-  font-size: 0.9rem;
-}
-
-.cz-color__note,
-.cz-color__scenario {
-  color: var(--text-muted);
-}
-
-.cz-color__note {
-  font-size: 0.8rem;
-}
-
-.cz-color__scenario {
-  margin-top: 2px;
-  padding-top: 6px;
-  border-top: 1px dashed var(--border);
 }
 
 /* ─── 分數區 ─── */
@@ -275,37 +279,60 @@
   min-width: 120px;
 }
 
-/* ─── 首次畫面（v0.4，FE-32；architecture.md §7.9；PRD US-25、AC-25-01） ───
- * 標題下的引導文字；按鈕區「開始學習」（主要按鈕）與「從備份還原」，觸控高度 ≥ 44px。 */
-.cz-guide {
-  margin-bottom: var(--gap);
-  padding: 10px 12px;
-  border-left: 4px solid var(--primary);
-  border-radius: var(--radius);
-  background: var(--surface);
-  font-weight: 600;
+/* ─── 首次畫面固定底部列（v0.12，FE-57；architecture.md §7.19.5；契約 FT-2；AC-41-02～AC-41-04）───
+ * 列高預算：鎖定行 20 + 摘要 20 + 按鈕 48 + 還原 44 + 3 × 8 間距 + 上下 padding 24 = 180 ≤ --emt-firstbar-h（184）。
+ * ≤ 640px 固定在畫面底部；body 底部留白與 Toast 上移只在首次模式且位於難易度設定頁（[data-tab="customizer"]）時生效。
+ * > 640px 為 position: static，隨內容排在色級區下方（AC-41-03 允許）。
+ */
+.cz-firstbar {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
 }
 
-.cz-actions--first-run {
-  align-items: center;
+.cz-firstbar__locked,
+.cz-firstbar__summary {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
 }
 
-.cz-actions--first-run .btn {
-  min-height: var(--touch);
+.cz-firstbar__locked {
+  color: var(--warning-text);
 }
 
-.cz-start {
-  min-width: 160px;
-  font-weight: 600;
+.cz-firstbar__summary {
+  font-weight: 700;
+}
+
+.cz-firstbar .cz-start,
+.cz-firstbar .cz-restore {
+  width: 100%;
+}
+
+.cz-firstbar .cz-restore {
+  min-height: 44px;
 }
 
 @media (max-width: 640px) {
-  /* 手機：「開始學習」佔滿一列，「從備份還原」在下一列 */
-  .cz-actions--first-run .cz-start {
-    flex: 1 1 100%;
+  .cz-firstbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 800;
+    margin: 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: var(--surface);
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    box-shadow: 0 -4px 16px rgba(16, 40, 80, 0.12);
   }
 
-  .cz-actions--first-run .cz-restore {
-    flex: 1 1 100%;
+  body[data-entry="firstRun"][data-tab="customizer"] {
+    padding-bottom: calc(var(--emt-firstbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  body[data-entry="firstRun"][data-tab="customizer"] .toast-root {
+    bottom: calc(var(--emt-firstbar-h) + env(safe-area-inset-bottom, 0px) + 12px);
   }
 }

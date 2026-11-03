@@ -38,11 +38,11 @@
   /** PWA 安裝名稱（manifest name／short_name、apple-mobile-web-app-title 共用；Q-42） */
   var PWA_APP_NAME = "EnglishContext";
 
-  /** manifest theme_color 與 <meta name="theme-color"> 的值（= --primary，AC-34-04） */
-  var PWA_THEME_COLOR = "#2f6fd6";
+  /** manifest theme_color 與 <meta name="theme-color"> 的值（v0.12 = COLOR_TOKENS.themeColor = --brand，VC-5、AC-34-04） */
+  var PWA_THEME_COLOR = "#1e9bf0";
 
-  /** manifest background_color（= --bg，DS-13、AC-34-04） */
-  var PWA_BACKGROUND_COLOR = "#f6f7f9";
+  /** manifest background_color（v0.12 = COLOR_TOKENS.background = --bg，DS-13、VC-5、AC-34-04） */
+  var PWA_BACKGROUND_COLOR = "#eef4fa";
 
   /** manifest 內容；鍵順序即輸出順序（MF-1、MF-3） */
   var PWA_MANIFEST = {
@@ -53,8 +53,8 @@
     scope: "./",
     display: "standalone",
     lang: "zh-Hant-TW",
-    theme_color: "#2f6fd6",
-    background_color: "#f6f7f9",
+    theme_color: "#1e9bf0",
+    background_color: "#eef4fa",
     icons: [
       { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
@@ -204,15 +204,18 @@
 
   /**
    * IN-1「安裝 App」按鈕是否顯示（推導值，不另存）。
-   * @param {{runtime: {pwa: object, entryMode: string, currentTab: string}}} state
+   * （v0.12，FE-58；IN-1 v0.12、AC-34-07）另需主控台「資料備份」區塊已展開（runtime.dashboard.backupExpanded === true）。
+   * @param {{runtime: {pwa: object, entryMode: string, currentTab: string, dashboard: {backupExpanded: boolean}}}} state
    * @returns {boolean}
    */
   function installVisible(state) {
     var p = pwaOf(state);
     if (!p) { return false; }
+    var db = state.runtime.dashboard;
     return p.eligible === true && p.standalone !== true && p.installPromptAvailable === true &&
       p.installSuppressed !== true && state.runtime.entryMode === "main" &&
-      state.runtime.currentTab === "dashboard";
+      state.runtime.currentTab === "dashboard" &&
+      !!db && db.backupExpanded === true;
   }
 
   /**

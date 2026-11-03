@@ -1,11 +1,12 @@
 // QA E2E 套件 11（第 3 輪新增，PRD v0.9 US-32、v0.10 改寫）：切換難易度時確認並初始化學習紀錄（AC-32-01～AC-32-11）
 // 另：AC-31-03（減少動態下確認視窗直接出現）、FB-35 觀察（取消後重新整理的選中卡片）。
 // 依據：契約 v0.10 §5.7 CI-1～CI-10、§5.9 GS-1～GS-8、FB-35、FB-36；architecture v0.6 §7.15、§10.2、§10.3。
+// 第 5 輪（PRD v0.13）：主控台改讀今日任務卡目標行與 3 格數據；AC-32-02 v0.12 改寫（近 7 天空狀態、「單字掌握率 0% 且已掌握 0 字」）；匯入前先展開「資料備份」
 import fs from "node:fs";
 import path from "node:path";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic, storageMode } from "./lib/inits.mjs";
-import { KEY, stateRecord, seed, readState, clickCard, apply, est, dashGoal, dialogInfo, todayYmd, addDays } from "./lib/state.mjs";
+import { KEY, stateRecord, seed, readState, clickCard, apply, est, dashGoal, dialogInfo, todayYmd, addDays, GOAL_LINE, expandBackup } from "./lib/state.mjs";
 
 const R = recorder("e2e-reinit");
 const TMP = process.env.QA_TMP || path.resolve("tests/results/tmp");
@@ -41,10 +42,11 @@ function withRecords(score = 600) {
     learnedHistory: { [addDays(TODAY, -2)]: 4, [addDays(TODAY, -1)]: 6, [TODAY]: 3 },
   });
 }
-const progress = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const q = (s) => document.querySelector(s);
-  return { today: q(".db-today__text").textContent, bars: [...document.querySelectorAll(".db-bars__item")].map((b) => Number(b.querySelector(".db-bars__count").textContent)).join(","),
-    stats: [...document.querySelectorAll(".dash-stats:not(.dash-stats--goal) .dash-stat")].map((e) => e.querySelector(".dash-stat__value").textContent).join("｜"),
-    minis: [...document.querySelectorAll(".db-mini")].map((m) => m.querySelector(".db-ring__value").textContent).join("｜") }; })()`);
+const progress = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const q = (s) => document.querySelector("#view-dashboard " + s); const tx = (s) => (q(s) ? q(s).textContent : "");
+  const shown = (e) => !!e && !e.hidden && e.getClientRects().length > 0;
+  return { today: tx(".db-today__text"), bars: [...document.querySelectorAll("#view-dashboard .db-bars__item")].map((b) => Number(b.querySelector(".db-bars__count").textContent)).join(","),
+    empty: shown(q(".db-chart__empty")) ? tx(".db-chart__empty") : "", barsShown: shown(q(".db-bars")),
+    stats: [tx(".db-stat--streak .db-stat__num") + " " + tx(".db-stat--streak .db-stat__unit"), tx(".db-stat--mastery .db-stat__value"), tx(".db-stat--mastery .db-stat__sub"), tx(".db-stat--accuracy .db-stat__value")].join("｜") }; })()`);
 const fcPos = (p) => p.ev(`(() => { EMT.router.go("flashcards"); return [document.querySelector(".fc-position").textContent, document.querySelector(".fc-card") ? document.querySelector(".fc-card").dataset.flipped : null]; })()`);
 const p5Pos = (p) => p.ev(`(() => { EMT.router.go("part5"); const n = document.querySelector("[data-p5=number]"); return [n ? n.textContent : "", [...document.querySelectorAll("[data-p5=option]")].every((b) => !b.disabled)]; })()`);
 async function freshDefaults() {
@@ -94,12 +96,12 @@ const DEFAULTS = await freshDefaults();
     await p.reload();
     const pr2 = await progress(p); const st2 = await readState(p); const fc2 = await fcPos(p); const p52 = await p5Pos(p);
     const backup = JSON.parse(await p.ev(`EMT.store.actions.exportBackup().json`)).data;
-    const ok = closed && st.data.goal.appliedScore === 465 && st.data.goal.appliedColor === "brown" && st.data.goal.effectiveColor === "brown" && g.includes("目前生效色級=棕")
+    const ok = closed && st.data.goal.appliedScore === 465 && st.data.goal.appliedColor === "brown" && st.data.goal.effectiveColor === "brown" && g === GOAL_LINE.brown
       && fc[0] === "第 1 / 2812 張" && fc[1] === "false" && e.mastered === "0 字" && e.weeks === "41 週"
-      && pr.today === "今日已學 0 / 10 字" && pr.bars === "0,0,0,0,0,0,0" && pr.stats.startsWith("0 天｜0 字｜—") && pr.minis === "0%｜—"
+      && pr.today === "今日已學 0 / 10 字" && pr.bars === "0,0,0,0,0,0,0" && pr.empty === "開始學習後會顯示紀錄" && !pr.barsShown && pr.stats === "0 天｜0%｜已掌握 0 字｜—"
       && p5[0].startsWith("第 1 /") && p5[1] && same(pr, pr2) && same(st.data, st2.data) && fc2[0] === "第 1 / 2812 張" && p52[0].startsWith("第 1 /")
       && same(pick(backup, LEARN), DEFAULTS);
-    return { ok, note: `確定後視窗關閉=${closed}；localStorage goal ${JSON.stringify(st.data.goal)}；主控台 ${g}、${pr.today}、長條 ${pr.bars}、統計 ${pr.stats}、小環 ${pr.minis}；試算 c=${e.mastered}、棕 ${e.weeks}；單字卡 ${fc.join("/")}；模擬測驗 ${p5[0]}（未作答=${p5[1]}）；重新載入後相同=${same(pr, pr2) && same(st.data, st2.data)}；匯出備份 6 欄 ${JSON.stringify(pick(backup, LEARN))} 與首次啟動預設相同=${same(pick(backup, LEARN), DEFAULTS)}` };
+    return { ok, note: `確定後視窗關閉=${closed}；localStorage goal ${JSON.stringify(st.data.goal)}；主控台 ${g}、${pr.today}、長條 ${pr.bars}、近 7 天「${pr.empty}」、3 格 ${pr.stats}；試算 c=${e.mastered}、棕 ${e.weeks}；單字卡 ${fc.join("/")}；模擬測驗 ${p5[0]}（未作答=${p5[1]}）；重新載入後相同=${same(pr, pr2) && same(st.data, st2.data)}；匯出備份 6 欄 ${JSON.stringify(pick(backup, LEARN))} 與首次啟動預設相同=${same(pick(backup, LEARN), DEFAULTS)}` };
   });
   await R.check("TC-32-03", "AC-32-03", async () => {
     const st = await readState(p);
@@ -166,7 +168,7 @@ const DEFAULTS = await freshDefaults();
     for (const [c, sc, tgt, eff] of [["green", 725, "綠", "綠"], ["blue", 855, "藍", "綠（內建上限）"], ["gold", 990, "金", "綠（內建上限）"], ["green", 725, "綠", "綠"]]) {
       await p.go("customizer"); await clickCard(p, c); const r = await apply(p, "leave");
       const st = await readState(p); await p.go("dashboard"); await sleep(150); const d = await dashGoal(p);
-      const good = !r.dialog && st.data.goal.appliedScore === sc && same(pick(st.data, LEARN), pick(s0.data, LEARN)) && d.includes(`目前目標色級=${tgt}`) && d.includes(`目前生效色級=${eff}`) && d.includes("每日新字量=15 字/天");
+      const good = !r.dialog && st.data.goal.appliedScore === sc && same(pick(st.data, LEARN), pick(s0.data, LEARN)) && d === GOAL_LINE[c];
       ok = ok && good; out.push(`${c}：視窗=${!!r.dialog}、localStorage ${st.data.goal.appliedScore}、${d}、學習紀錄不變=${same(pick(st.data, LEARN), pick(s0.data, LEARN))}`);
       if (r.dialog) await p.click('.dialog [data-action="cancel"]');
     }
@@ -218,7 +220,7 @@ const DEFAULTS = await freshDefaults();
     const ref = JSON.parse(await p.ev(`EMT.store.actions.exportBackup().json`));
     for (const k of Object.keys(ref)) if (!(k in backup)) backup[k] = ref[k];
     const f = path.join(TMP, "reinit-import-" + Date.now() + ".json"); fs.writeFileSync(f, JSON.stringify(backup));
-    await p.go("dashboard"); p.chooser = null; await p.click('[data-action="import-backup"]');
+    await p.go("dashboard"); await sleep(300); await expandBackup(p); p.chooser = null; await p.click('[data-action="import-backup"]');
     for (let i = 0; i < 40 && !p.chooser; i++) await sleep(50);
     await p.send("DOM.setFileInputFiles", { files: [f], backendNodeId: p.chooser.backendNodeId }); await sleep(300);
     const d1 = await dialogInfo(p);
@@ -261,7 +263,7 @@ const DEFAULTS = await freshDefaults();
     await p.go("customizer"); await clickCard(p, "brown"); const r = await apply(p, "ok");
     const pr = await progress(p); const g = await dashGoal(p); const banner = await p.ev(`document.getElementById("app-banner").innerText`);
     const t = await p.ev(`window.__qaToasts.map((x) => x.text)`);
-    const ok = !!r.dialog && x0 === "今日已學 1 / 15 字" && pr.today === "今日已學 0 / 10 字" && g.includes("目前生效色級=棕") && banner.includes("進度將無法保存") && !t.includes("儲存空間不足，未套用") && p.log.exceptions.length === 0;
+    const ok = !!r.dialog && x0 === "今日已學 1 / 15 字" && pr.today === "今日已學 0 / 10 字" && g === GOAL_LINE.brown && banner.includes("進度將無法保存") && !t.includes("儲存空間不足，未套用") && p.log.exceptions.length === 0;
     return { ok, note: `停用時：翻卡後 ${x0} → 確認視窗=${!!r.dialog} 按確定 → ${pr.today}、${g}；警示「${banner.trim()}」；toast ${JSON.stringify(t.slice(-2))}；例外 ${p.log.exceptions.length}` };
   });
   await p.close();
@@ -285,7 +287,7 @@ const DEFAULTS = await freshDefaults();
     const pr = await progress(p); const g = await dashGoal(p);
     const memLearn = same(pick(mem, LEARN), pick(JSON.parse(mem0), LEARN));
     const ok = !!r.dialog && t.includes("儲存空間不足，未套用") && before === after && e.pressed === "green" && e.stEffective === "綠" && mem.goal.effectiveColor === "green" && mem.goal.appliedScore === 600 && memLearn
-      && same(pr, pr0) && g.includes("目前生效色級=綠") && p.log.exceptions.length === 0;
+      && same(pr, pr0) && g === GOAL_LINE.green && p.log.exceptions.length === 0;
     return { ok, note: `寫入拋 QuotaExceededError 時按確定：toast ${JSON.stringify(t)}；localStorage 不變=${before === after}；畫面選中 ${e.pressed}、生效 ${e.stEffective}；記憶體 goal ${JSON.stringify(mem.goal)}、學習紀錄不變=${memLearn}；主控台與套用前相同=${same(pr, pr0)}（${pr.today}）；例外 ${p.log.exceptions.length}` };
   });
   await p.close();

@@ -16,8 +16,8 @@ const pwa = require("../core/pwa.js");
 
 const EXPECTED = {
   PWA_APP_NAME: "EnglishContext",
-  PWA_THEME_COLOR: "#2f6fd6",
-  PWA_BACKGROUND_COLOR: "#f6f7f9",
+  PWA_THEME_COLOR: "#1e9bf0",
+  PWA_BACKGROUND_COLOR: "#eef4fa",
   PWA_MANIFEST: {
     name: "EnglishContext",
     short_name: "EnglishContext",
@@ -26,8 +26,8 @@ const EXPECTED = {
     scope: "./",
     display: "standalone",
     lang: "zh-Hant-TW",
-    theme_color: "#2f6fd6",
-    background_color: "#f6f7f9",
+    theme_color: "#1e9bf0",
+    background_color: "#eef4fa",
     icons: [
       { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
@@ -260,7 +260,7 @@ function stateOf(pwaPatch = {}, rt = {}) {
   return {
     data: {},
     runtime: Object.assign(
-      { entryMode: "main", currentTab: "dashboard" },
+      { entryMode: "main", currentTab: "dashboard", dashboard: { backupExpanded: true } },
       rt,
       {
         pwa: Object.assign(pwa.initialPwaState(), {
@@ -271,9 +271,17 @@ function stateOf(pwaPatch = {}, rt = {}) {
   };
 }
 
-describe("installVisible（IN-1）", () => {
-  test("6 個條件全成立 → true", () => {
+describe("installVisible（IN-1；v0.12 加 backupExpanded）", () => {
+  test("7 個條件全成立 → true", () => {
     assert.equal(pwa.installVisible(stateOf()), true);
+  });
+
+  test("（v0.12，FE-58）「資料備份」收合（backupExpanded false）或 runtime.dashboard 缺漏 → false（AC-34-07、AC-24-12）", () => {
+    assert.equal(pwa.installVisible(stateOf({}, { dashboard: { backupExpanded: false } })), false);
+    assert.equal(pwa.installVisible(stateOf({}, { dashboard: undefined })), false);
+    assert.equal(pwa.installVisible(stateOf({}, { dashboard: null })), false);
+    assert.equal(pwa.installVisible(stateOf({}, { dashboard: { backupExpanded: "true" } })), false);
+    assert.equal(pwa.installVisible(stateOf({}, { dashboard: { backupExpanded: true } })), true);
   });
 
   test("6 個條件逐一不成立皆 false", () => {

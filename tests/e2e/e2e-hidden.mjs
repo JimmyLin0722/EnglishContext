@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { launch, recorder, sleep, resultPath, FILE_URL } from "./lib/cdp.mjs";
 import { TOAST_RECORDER } from "./lib/inits.mjs";
-import { stateRecord, seed } from "./lib/state.mjs";
+import { stateRecord, seed, expandBackup } from "./lib/state.mjs";
 
 const R = recorder("e2e-hidden");
 const TMP = process.env.QA_TMP || path.resolve("tests/results/tmp");
@@ -92,7 +92,7 @@ await R.check("TC-20-04c", "AC-20-04（匯入備份）", async () => {
   await seed(p, stateRecord(300, { masteredWordKeys: ["the"], vocabQuiz: { answered: 1, correct: 1 } }));
   const json = await p.ev(`EMT.store.actions.exportBackup().json`);
   const f = path.join(TMP, "hidden-" + Date.now() + ".json"); fs.writeFileSync(f, json);
-  await p.go("dashboard"); chooser = null;
+  await p.go("dashboard"); await sleep(300); await expandBackup(p); chooser = null; // 第 5 輪：先展開「資料備份」（AC-39-08）
   await p.click('[data-action="import-backup"]');
   for (let i = 0; i < 40 && !chooser; i++) await sleep(50);
   await p.send("DOM.setFileInputFiles", { files: [f], backendNodeId: chooser.backendNodeId }); await sleep(300);

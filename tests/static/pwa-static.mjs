@@ -55,8 +55,8 @@ const sw = fs.readFileSync(path.join(SITE, "sw.js"), "utf8");
   const rel = ["id", "start_url", "scope", ...j.icons.map((_, i) => `icons[${i}]`)].every((k) => { const v = k.startsWith("icons[") ? j.icons[Number(k.slice(6, -1))].src : j[k]; return !/^(\/|https?:)/i.test(v); });
   const icons = j.icons.every((ic) => DEPLOY.includes(ic.src) && typeof ic.purpose === "string" && !ic.purpose.includes(" "));
   const exact = b.toString("utf8") === JSON.stringify(j, null, 2) + "\n";
-  rec("TC-PS-02", "AC-34-01（V-PWA-02）", !bom && JSON.stringify(keys) === JSON.stringify(order) && rel && icons && j.name === "EnglishContext" && j.short_name === "EnglishContext" && /^#[0-9a-f]{6}$/i.test(j.theme_color) && /^#[0-9a-f]{6}$/i.test(j.background_color) && exact && !/emt|[0-9a-f]{16}/.test(JSON.stringify(j)),
-    `UTF-8 無 BOM=${!bom}；鍵 ${keys.length} 個、順序同契約=${JSON.stringify(keys) === JSON.stringify(order)}；相對路徑=${rel}；icons 皆在部署清單且單一 purpose=${icons}；格式為 JSON.stringify(…, null, 2)+"\\n"=${exact}；不含 BUILD_ID`);
+  rec("TC-PS-02", "AC-34-01（V-PWA-02）", !bom && JSON.stringify(keys) === JSON.stringify(order) && rel && icons && j.name === "EnglishContext" && j.short_name === "EnglishContext" && j.theme_color === "#1e9bf0" && j.background_color === "#eef4fa" && exact && !/emt|[0-9a-f]{16}/.test(JSON.stringify(j)),
+    `UTF-8 無 BOM=${!bom}；鍵 ${keys.length} 個、順序同契約=${JSON.stringify(keys) === JSON.stringify(order)}；相對路徑=${rel}；icons 皆在部署清單且單一 purpose=${icons}；格式為 JSON.stringify(…, null, 2)+"\\n"=${exact}；不含 BUILD_ID；theme_color ${j.theme_color}、background_color ${j.background_color}（第 5 輪：PRD v0.12 AC-38-02、Q-54）`);
 }
 
 // TC-PS-03 V-PWA-03、DP-4 (a)(b)
@@ -71,9 +71,10 @@ const sw = fs.readFileSync(path.join(SITE, "sw.js"), "utf8");
 }
 
 // TC-PS-04 V-PWA-04、HD-1～HD-5（AC-34-04、AC-36-02、AC-37-01、AC-19-01）
+// 第 5 輪（PRD v0.13）：theme-color 改 #1e9bf0（Q-54、AC-38-02）、<title> 改 EnglishContext（Q-49、NM-1）
 {
   const head = htmlS.slice(0, htmlS.indexOf("</head>"));
-  const HD1 = ['<meta name="theme-color" content="#2f6fd6">', '<meta name="apple-mobile-web-app-title" content="EnglishContext">', '<meta name="apple-mobile-web-app-capable" content="yes">',
+  const HD1 = ['<meta name="theme-color" content="#1e9bf0">', '<meta name="apple-mobile-web-app-title" content="EnglishContext">', '<meta name="apple-mobile-web-app-capable" content="yes">',
     '<meta name="mobile-web-app-capable" content="yes">', '<meta name="apple-mobile-web-app-status-bar-style" content="default">', '<link rel="icon" href="data:,">'];
   const cnt = (s, t) => s.split(t).length - 1;
   const hd1 = HD1.map((t) => `${cnt(htmlS, t)}/${cnt(head, t)}`);
@@ -81,7 +82,7 @@ const sw = fs.readFileSync(path.join(SITE, "sw.js"), "utf8");
   const forb = [/<link\b[^>]*\brel=["']?(manifest|apple-touch-icon|apple-touch-startup-image|preload|prefetch|modulepreload)\b/i, /<script\b[^>]*\bsrc\s*=/i, /<link\b[^>]*rel=["']?icon["']?[^>]*href=["'](?!data:,)/i].filter((re) => re.test(htmlS)).map(String);
   const titles = htmlS.match(/<title>[^<]*<\/title>/g) || [];
   const linkTags = htmlS.match(/<link\b[^>]*>/gi) || [];
-  rec("TC-PS-04", "AC-34-04、AC-34-05、AC-36-02、AC-37-01、AC-19-01（V-PWA-04）", HD1.every((t) => cnt(htmlS, t) === 1 && cnt(head, t) === 1) && /^[0-9a-f]{16}$/.test(id || "") && cnt(htmlS, "<meta name=\"emt-build-id\"") === 1 && forb.length === 0 && titles.length === 1 && titles[0] === "<title>English Master Track</title>" && linkTags.length === 1 && !htmlS.includes("@@"),
+  rec("TC-PS-04", "AC-34-04、AC-34-05、AC-36-02、AC-37-01、AC-19-01（V-PWA-04）", HD1.every((t) => cnt(htmlS, t) === 1 && cnt(head, t) === 1) && /^[0-9a-f]{16}$/.test(id || "") && cnt(htmlS, "<meta name=\"emt-build-id\"") === 1 && forb.length === 0 && titles.length === 1 && titles[0] === "<title>EnglishContext</title>" && linkTags.length === 1 && !htmlS.includes("@@"),
     `HD-1 各元素（全檔／head 內）次數 ${hd1.join("、")}；emt-build-id=${id}；禁止元素命中 ${forb.length}${forb.length ? forb.join("、") : ""}；<link> 標籤 ${JSON.stringify(linkTags)}；${titles.join("")}；殘留佔位 @@=${htmlS.includes("@@")}`);
 }
 
@@ -189,7 +190,7 @@ const ids = {};
   const ok = bRes.status === 0 && vRes.status === 0 && files.length === 8 && buildCmd === "npm run build" && upload === "dist/site" && noNpmCi && verifyScript.includes("-eq 8");
   rec("TC-36-07a", "AC-36-07（本機模擬 MC-03 新 workflow）", ok,
     `取 architecture §5.2 workflow：Build「${buildCmd}」、上傳 path「${upload}」、不執行 npm ci=${noNpmCi}；以不含 .git／node_modules／dist 的複本（${conv} 個文字檔轉 LF，模擬 .gitattributes eol=lf 的 CI checkout）執行 npm run build → 結束碼 ${bRes.status}；Verify 步驟（逐字取自 §5.2，以 Git Bash 執行）結束碼 ${vRes.status}${vRes.status ? "：" + (vRes.stdout + vRes.stderr).slice(-200) : ""}；dist/site 恰 ${files.length} 個檔案 ${JSON.stringify(files.sort())}；CI 模擬 BUILD_ID ${ciId}（本機 CRLF 工作目錄 ${ids.base}；${ciId === ids.base ? "相同" : "不同，屬 SD-FB-37 已知事項"}）；CI 建置所需但尚未被 git 追蹤的檔案 ${untracked.length} 個${untracked.length ? JSON.stringify(untracked) : ""}`);
-  manualRec("TC-PWA-H4", "AC-36-07（GitHub Pages 部署結果）", `MC-03 由主控整檔取代 static.yml 後，push 到 main：Actions 成功；部署網址下 8 個檔案皆 200 且與 artifact 相同；網站不含 docs/、src/、sources/。目前 static.yml 仍為舊版（逐檔 cp 到 _site，含 cp dist/ads.txt），MC-03 尚未執行`);
+  manualRec("TC-PWA-H4", "AC-36-07（GitHub Pages 部署結果）", `MC-03 由主控整檔取代 static.yml 後，push 到 main：Actions 成功；部署網址下 8 個檔案皆 200 且與 artifact 相同；網站不含 docs/、src/、sources/。第 5 輪：static.yml 已為 MC-03 新版（npm run build＋Verify deploy directory），v0.11 部署時主控回報 Actions 成功、正式網址 8 檔皆 200；v0.12（本輪）尚未提交與部署，push 後由人類重驗`);
 }
 
 const sum = { pass: results.filter((r) => r.result === "通過").length, fail: results.filter((r) => r.result === "失敗").length };
