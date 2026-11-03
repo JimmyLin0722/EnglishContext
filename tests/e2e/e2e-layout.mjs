@@ -149,7 +149,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   };
   const a = await read(V011_URL, false), b = await read(FILE_URL, true);
   const lv = "#e8833a,#8b5a2b,#2e9e5b,#2f6fd6,#c9a227";
-  const ok = a.vars === b.vars && a.p5 === b.p5 && b.vars.includes("--color-blue=#2f6fd6") && b.bars === lv && b.dots === lv && b.gold === "#c9a227" && b.selBorder === "#2e9e5b" && b.vars.includes("--correct=#15803d") && b.vars.includes("--wrong=#b91c1c") && /--light-green=#16a34a.*--light-yellow=#ca8a04.*--light-red=#dc2626/.test(b.vars);
+  const ok = a.vars === b.vars && a.p5 === b.p5 && b.vars.includes("--color-blue=#2f6fd6") && b.bars === lv && b.dots === "#e8833a,#8b5a2b,#2e9e5b,#2e9e5b,#2e9e5b" /* 第 6 輪：色點依生效色級（SD-FB-53、AC-39-04 v0.14），藍、金套用時為綠；色值本身不變 */ && b.gold === "#c9a227" && b.selBorder === "#2e9e5b" && b.vars.includes("--correct=#15803d") && b.vars.includes("--wrong=#b91c1c") && /--light-green=#16a34a.*--light-yellow=#ca8a04.*--light-red=#dc2626/.test(b.vars);
   R[ok ? "pass" : "fail"]("TC-38-03", "AC-38-03、AC-40-03（對錯色）", `語意色變數 v0.11「${a.vars}」／v0.12「${b.vars}」相同=${a.vars === b.vars}；v0.12 色級列色條 ${b.bars}、選中框 ${b.selBorder}、目標行色點 ${b.dots}、達成金環 ${b.gold}；模擬測驗答錯後選項色 v0.11「${a.p5}」／v0.12「${b.p5}」相同=${a.p5 === b.p5}；藍色級未被品牌色取代=${b.vars.includes("--color-blue=#2f6fd6")}（STT 燈號以變數比對，元素見 TC-08 系列）`);
 }
 

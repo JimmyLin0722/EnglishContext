@@ -393,10 +393,12 @@ describe("shell.test.js：PWA（v0.7，FE-50）", () => {
     '<meta name="mobile-web-app-capable" content="yes">',
     '<meta name="apple-mobile-web-app-status-bar-style" content="default">',
     '<meta name="emt-build-id" content="@@BUILD_ID@@">',
+    // （v0.14，FE-63）HD-1 第 8 項：網站版本號佔位，緊接 emt-build-id（VR-2、architecture.md §5.4）
+    '<meta name="emt-app-version" content="@@APP_VERSION@@">',
     '<link rel="icon" href="data:,">',
   ];
 
-  test("HD-1：7 個靜態元素逐字各 1 次、依序在 <title> 之後、</head> 之前（AC-34-04、AC-34-05、AC-36-02）", () => {
+  test("HD-1：8 個靜態元素逐字各 1 次、依序在 <title> 之後、</head> 之前（AC-34-04、AC-34-05、AC-36-02）", () => {
     const headEnd = raw.indexOf("</head>");
     let prev = raw.indexOf("<title>EnglishContext</title>");
     assert.ok(prev > 0);
@@ -416,6 +418,26 @@ describe("shell.test.js：PWA（v0.7，FE-50）", () => {
   test("<title>EnglishContext</title> 恰 1 次（v0.12，NM-1）；@@BUILD_ID@@ 恰 1 次（HD-5）", () => {
     assert.equal(raw.split("<title>EnglishContext</title>").length - 1, 1);
     assert.equal(raw.split("@@BUILD_ID@@").length - 1, 1);
+  });
+
+  // ── （v0.14，FE-63）網站版本號 meta（VR-2、HD-1、architecture.md §5.4）──
+
+  test("emt-app-version：佔位 @@APP_VERSION@@ 恰 1 次且位於逐字 meta 內、緊接在 emt-build-id 之後、</head> 之前", () => {
+    const version = require("../core/version.js");
+    const meta = `<meta name="${version.APP_VERSION_META_NAME}" content="@@APP_VERSION@@">`;
+    assert.equal(raw.split("@@APP_VERSION@@").length - 1, 1);
+    assert.equal(raw.split(meta).length - 1, 1);
+    const buildMeta = '<meta name="emt-build-id" content="@@BUILD_ID@@">';
+    const after = raw.slice(raw.indexOf(buildMeta) + buildMeta.length);
+    assert.match(after, /^\r?\n<meta name="emt-app-version" content="@@APP_VERSION@@">/);
+    assert.ok(raw.indexOf(meta) < raw.indexOf("</head>"));
+  });
+
+  test("頁尾 HTML 不含版本行（由 ui/version-line.js 以 JS 建立，VR-8）", () => {
+    const footer = raw.slice(raw.indexOf('<footer id="app-footer"'), raw.indexOf("</footer>"));
+    assert.ok(footer.length > 0);
+    assert.ok(!footer.includes("app-version"));
+    assert.ok(!footer.includes("版本"));
   });
 
   test("HD-3：不含靜態 manifest／apple-touch-icon／其他 <link>；原始檔（含註解）的 <link 只有 data:, 圖示 1 個；無 <script src", () => {

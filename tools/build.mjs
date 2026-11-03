@@ -1,17 +1,21 @@
-// English Master Track 建置腳本（FE-01；architecture.md §5 B-1～B-9；v0.7 PWA 建置 FE-47，§5.1 B-10～B-16）
+// English Master Track 建置腳本（FE-01；architecture.md §5 B-1～B-9；v0.7 PWA 建置 FE-47，§5.1 B-10～B-16；
+// v0.9 網站版本號注入 FE-63，§5.4 B-17～B-19）
 // 將 src/app/index.html 模板、授權標頭、樣式、內容資料與程式串接為單一離線 HTML；
 // （v0.7）PWA 模式下另產生部署目錄（index.html、manifest.webmanifest、sw.js、4 張圖示、ads.txt，恰 8 檔）。
 // 只使用 Node 內建模組（fs、path、vm、url、crypto、module），無 npm 相依。
 // 可重現（AC-36-01）：不使用時間、亂數、環境變數；BUILD_ID 只由內容計算（§7.18.2）。
+// （v0.9）版本號只讀 --package 檔（預設專案根目錄 package.json）的 version 欄位，先寫入 HTML 再計算 BUILD_ID（VR-4）。
 //
 // 用法：
 //   node tools/build.mjs [--out <path>] [--data <dir>] [--app <dir>] [--site <dir> | --no-site] [--ads <file>]
+//                        [--package <file>]
 //     --out      產物路徑，預設 dist/english-master-track.html
 //     --data     內容資料目錄，預設 src/data
 //     --app      前端程式目錄（含 index.html、license-header.txt），預設 src/app；供測試以 fixture 建置
 //     --site     部署目錄，預設為 --out 所在目錄下的 site（預設 --out 時即 dist/site）
 //     --no-site  只輸出 HTML（HTML 位元組與完整建置相同）
 //     --ads      ads.txt 來源，預設 sources/deploy/ads.txt
+//     --package  版本號來源（只讀 version 欄位），預設專案根目錄 package.json（v0.9，B-18）
 //
 // 結束碼：0 成功；1 建置中止（錯誤訊息輸出至 stderr，不寫出產物、不動部署目錄）。
 
@@ -32,10 +36,13 @@ export const DEFAULTS = Object.freeze({
   data: path.join(PROJECT_ROOT, "src", "data"),
   app: path.join(PROJECT_ROOT, "src", "app"),
   ads: path.join(PROJECT_ROOT, "sources", "deploy", "ads.txt"),
+  package: path.join(PROJECT_ROOT, "package.json"),
 });
 
 /** PWA 契約常數的固定來源（B-11 (1)：固定取專案檔，不隨 --app 改變） */
 export const PWA_CORE_FILE = path.join(PROJECT_ROOT, "src", "app", "core", "pwa.js");
+/** 版本號契約常數與驗證函式的固定來源（B-18 (2)：固定取專案檔，不隨 --app 改變） */
+export const APP_VERSION_CORE_FILE = path.join(PROJECT_ROOT, "src", "app", "core", "version.js");
 
 /** 產物大小上限（AC-19-04） */
 export const MAX_BYTES = 5242880;
@@ -97,6 +104,10 @@ export const ALLOWED_STATIC_TAGS = Object.freeze(['<link rel="icon" href="data:,
 
 /** 建置識別碼佔位（B-10、B-15） */
 export const BUILD_ID_PLACEHOLDER = "@@BUILD_ID@@";
+/** 網站版本號佔位（v0.9，B-17、B-18；只能出現在 index.html 的 emt-app-version meta） */
+export const APP_VERSION_PLACEHOLDER = "@@APP_VERSION@@";
+/** 產物不得殘留的佔位樣式（B-19、V-VER-01） */
+const PLACEHOLDER_RE = /@@[A-Za-z0-9_]+@@/;
 /** sw 範本中預先快取清單的佔位（B-15） */
 export const PRECACHE_PLACEHOLDER = "/* @@PRECACHE_URLS@@ */";
 /** sw 範本相對 --app 的位置（B-11 (2)） */
@@ -510,7 +521,10 @@ export function checkCharset(html) {
  * 另檢查不得殘留 @@BUILD_ID@@、emt-build-id 的值符合 PWA_BUILD_ID_PATTERN（opts.buildIdPattern）。
  * @param {string} html
  * @param {(s: string) => void} warn
- * @param {{ pwa?: boolean, metaName?: string, buildIdPattern?: string }} [opts]
+ * （v0.9，B-19）opts.appVersionMetaName 有值時另檢查：opts.appVersion 為字串 → <meta name="…" content="…"> 恰 1 個且
+ * content 相同；為 null（版本步驟略過）→ 該 meta 須為 0 個；兩種情況都不得殘留 /@@[A-Za-z0-9_]+@@/。
+ * @param {{ pwa?: boolean, metaName?: string, buildIdPattern?: string,
+ *           appVersion?: string|null, appVersionMetaName?: string, appVersionPattern?: string }} [opts]
  */
 export function checkOutput(html, warn, opts = {}) {
   checkCharset(html);
@@ -556,6 +570,15 @@ export function checkOutput(html, warn, opts = {}) {
       throw new BuildError("PWA_HEAD", `產物的 <meta name="${opts.metaName}"> 缺少或值不符 ${opts.buildIdPattern}`);
     }
   }
+  if (opts.appVersionMetaName) {
+    checkAppVersionOutput(
+      html,
+      opts.appVersion === undefined ? null : opts.appVersion,
+      opts.appVersionMetaName,
+      opts.appVersionPattern,
+      Boolean(opts.pwa) || typeof opts.appVersion === "string"
+    );
+  }
   return bytes;
 }
 
@@ -575,6 +598,118 @@ export function countOf(text, needle) {
 function replaceOnce(text, needle, value) {
   const at = text.indexOf(needle);
   return text.slice(0, at) + value + text.slice(at + needle.length);
+}
+
+// ─────────────────────────────────────────────────────────────
+// v0.9 網站版本號（B-17～B-19；architecture.md §5.4、契約 README §12.1 VR-1～VR-4）
+// ─────────────────────────────────────────────────────────────
+
+/** 讀取版本號契約常數與 isValidVersion（B-18 (2)；固定專案檔，Node 下 module.exports 即同一 api 物件） */
+export function loadVersionCore() {
+  const require = createRequire(import.meta.url);
+  return require(APP_VERSION_CORE_FILE);
+}
+
+/** 逐字的版本 meta（模板中為佔位，產物中為版本號） */
+function appVersionMeta(metaName, value) {
+  return `<meta name="${metaName}" content="${value}">`;
+}
+
+/**
+ * B-17：檢查模板與組合後 HTML₀ 中的版本佔位。
+ * PWA 模式 → 模板中必須恰 1 次；非 PWA 模式 → 0 次則略過整個版本步驟（回傳 false），1 次則同 PWA 模式處理。
+ * 佔位必須位於逐字 <meta name="emt-app-version" content="(佔位)">，且在 </head> 之前；
+ * HTML₀ 中必須恰 1 次（程式或資料含此字串 → 中止）。
+ * @param {string} template index.html 模板
+ * @param {string} html0 B-1～B-6 組合後的 HTML
+ * @param {boolean} pwaMode B-10 判定結果
+ * @param {string} metaName APP_VERSION_META_NAME
+ * @returns {boolean} 是否執行版本步驟
+ */
+export function checkAppVersionTemplate(template, html0, pwaMode, metaName) {
+  const n = countOf(template, APP_VERSION_PLACEHOLDER);
+  if (n === 0 && !pwaMode) return false;
+  if (n !== 1) {
+    throw new BuildError(
+      "APP_VERSION_TEMPLATE",
+      `index.html 的 ${APP_VERSION_PLACEHOLDER} 出現 ${n} 次（${pwaMode ? "PWA 模式" : "非 PWA 模式"}必須恰 1 次）`
+    );
+  }
+  const meta = appVersionMeta(metaName, APP_VERSION_PLACEHOLDER);
+  if (countOf(template, meta) !== 1) {
+    throw new BuildError("APP_VERSION_TEMPLATE", `index.html 的 ${APP_VERSION_PLACEHOLDER} 必須位於 ${meta}`);
+  }
+  const headEnd = template.search(/<\/head>/i);
+  if (headEnd < 0 || template.indexOf(meta) > headEnd) {
+    throw new BuildError("APP_VERSION_TEMPLATE", `index.html 的 ${meta} 必須位於 </head> 之前`);
+  }
+  const m = countOf(html0, APP_VERSION_PLACEHOLDER);
+  if (m !== 1) {
+    throw new BuildError(
+      "APP_VERSION_TEMPLATE",
+      `組合後的 HTML 中 ${APP_VERSION_PLACEHOLDER} 必須恰 1 次（目前 ${m} 次；程式或資料不得含此字串）`
+    );
+  }
+  return true;
+}
+
+/**
+ * B-18 (1)(2)：讀版本號來源檔（去 BOM、JSON.parse），只取 version 欄位並驗證格式（VR-3）。
+ * 其他欄位（scripts、devDependencies 等）不影響產物。
+ * @param {string} packageFile
+ * @param {{ isValidVersion: (v: unknown) => boolean, APP_VERSION_PATTERN: string }} versionCore
+ * @returns {string} 版本號（逐字，不 trim、不加前綴）
+ */
+export function readAppVersion(packageFile, versionCore) {
+  let text;
+  try {
+    text = readText(packageFile);
+  } catch (err) {
+    throw new BuildError("APP_VERSION", `找不到或無法讀取版本號來源 ${packageFile}（VR-3）`);
+  }
+  let pkg;
+  try {
+    pkg = JSON.parse(text);
+  } catch (err) {
+    throw new BuildError("APP_VERSION", `版本號來源 ${packageFile} 不是合法 JSON（VR-3）`);
+  }
+  const v = pkg && typeof pkg === "object" && !Array.isArray(pkg) ? pkg.version : undefined;
+  if (!versionCore.isValidVersion(v)) {
+    throw new BuildError(
+      "APP_VERSION",
+      `${packageFile} 的 version 為 ${v === undefined ? "（缺漏）" : JSON.stringify(v)}，` +
+        `必須為符合 ${versionCore.APP_VERSION_PATTERN} 的字串（不含 v 前綴、預發布或建置中繼資料，VR-3）`
+    );
+  }
+  return v;
+}
+
+/**
+ * B-19：對最終 HTML 檢查版本 meta 與佔位殘留（V-VER-01）。
+ * @param {string} html 最終 HTML
+ * @param {string|null} appVersion 版本號；null = 版本步驟略過（meta 須為 0 個）
+ * @param {string} metaName APP_VERSION_META_NAME
+ * @param {string} [pattern] APP_VERSION_PATTERN
+ * @param {boolean} [checkPlaceholders=true] 是否檢查佔位殘留（非 PWA 且略過版本步驟的舊 fixture 為 false，維持舊行為）
+ */
+export function checkAppVersionOutput(html, appVersion, metaName, pattern, checkPlaceholders = true) {
+  const metas = [...html.matchAll(new RegExp(`<meta name="${metaName}" content="([^"]*)">`, "g"))];
+  const any = countOf(html, `<meta name="${metaName}"`);
+  if (appVersion === null) {
+    if (any !== 0) throw new BuildError("APP_VERSION", `版本步驟已略過，產物卻含 <meta name="${metaName}">（B-19）`);
+  } else {
+    if (metas.length !== 1 || any !== 1) {
+      throw new BuildError("APP_VERSION", `產物的 <meta name="${metaName}"> 必須恰 1 個（目前 ${any} 個，B-19）`);
+    }
+    const value = metas[0][1];
+    if (value !== appVersion || (pattern && !new RegExp(pattern).test(value))) {
+      throw new BuildError("APP_VERSION", `產物的 <meta name="${metaName}"> 值 ${value} 與版本號 ${appVersion} 不符（B-19）`);
+    }
+  }
+  const left = checkPlaceholders ? PLACEHOLDER_RE.exec(html) : null;
+  if (left) {
+    throw new BuildError("PWA_HEAD", `產物仍殘留佔位字串 ${left[0]}（B-19、V-VER-01）：…${snippet(html, left.index)}…`);
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -702,10 +837,13 @@ export function readPwaInputs(appDir, pwa, site, adsFile) {
 
 /**
  * B-12：HD-1 靜態元素各逐字恰 1 次且皆在 </head> 之前；（v0.12，FE-56，§5.3）<title>${PWA_APP_NAME}</title> 恰 1 次。
- * @param {string} html HTML₀（仍含佔位）
+ * （v0.9，FE-63）ver.appVersion 為字串時加第 8 項 <meta name="emt-app-version" content="<版本號>">（對 HTML₀′ 檢查）。
+ * @param {string} html HTML₀′（版本號已寫入、emt-build-id 仍為佔位）
+ * @param {object} pwa core/pwa.js
+ * @param {{ appVersion?: string|null, metaName?: string }} [ver]
  * @returns {string[]} HD-1 元素清單
  */
-export function checkPwaHead(html, pwa) {
+export function checkPwaHead(html, pwa, ver = {}) {
   const elements = [
     `<meta name="theme-color" content="${pwa.PWA_THEME_COLOR}">`,
     `<meta name="apple-mobile-web-app-title" content="${pwa.PWA_APP_NAME}">`,
@@ -715,6 +853,7 @@ export function checkPwaHead(html, pwa) {
     `<meta name="${pwa.PWA_BUILD_ID_META_NAME}" content="${BUILD_ID_PLACEHOLDER}">`,
     ALLOWED_STATIC_TAGS[0],
   ];
+  if (typeof ver.appVersion === "string") elements.push(appVersionMeta(ver.metaName, ver.appVersion));
   const headEnd = html.search(/<\/head>/i);
   for (const e of elements) {
     const n = countOf(html, e);
@@ -887,13 +1026,15 @@ export function compressVocabLayer2(items) {
 
 /**
  * 執行建置。全部檢查在記憶體完成後才寫出產物（中止時 out 與部署目錄都不寫、不刪）。
- * 執行順序（§5.1）：B-1～B-6 → B-10～B-15 → B-7（對最終 HTML）→ B-16 → B-8。
- * @param {{ out?: string, data?: string, app?: string, site?: string|false, ads?: string,
+ * 執行順序（§5.4）：B-1～B-6 → B-10 → B-17 → B-18 → B-11 → B-12（HTML₀′）→ B-13 → B-14（HTML₀′）→ B-15
+ *   → B-7（對最終 HTML，含 B-19）→ B-16 → B-8。
+ * @param {{ out?: string, data?: string, app?: string, site?: string|false, ads?: string, packageFile?: string,
  *           log?: (s: string) => void, warn?: (s: string) => void, write?: boolean, now?: Date }} [options]
  *   site：部署目錄；未指定時為 out 所在目錄下的 site；false = 不輸出部署目錄（--no-site）
  * @returns {{ html: string, bytes: number, sections: { name: string, bytes: number }[],
  *             vocabCount: number, vocabAvgBytes: number|null, warnings: string[], out: string,
- *             buildId: string|null, site: { dir: string, files: { path: string, bytes: Buffer }[] }|null }}
+ *             buildId: string|null, site: { dir: string, files: { path: string, bytes: Buffer }[] }|null,
+ *             appVersion: string|null }}
  */
 export function build(options = {}) {
   const out = path.resolve(options.out || DEFAULTS.out);
@@ -902,6 +1043,7 @@ export function build(options = {}) {
   const site =
     options.site === false ? false : path.resolve(options.site || path.join(path.dirname(out), "site"));
   const adsFile = path.resolve(options.ads || DEFAULTS.ads);
+  const packageFile = path.resolve(options.packageFile || DEFAULTS.package);
   const log = options.log || ((s) => console.log(s));
   const warnings = [];
   const warn = (s) => {
@@ -961,19 +1103,25 @@ export function build(options = {}) {
     throw new BuildError("PWA_TEMPLATE", `組合後的 HTML 中 ${BUILD_ID_PLACEHOLDER} 必須恰 1 次（程式或資料不得含此字串）`);
   }
 
-  let html = html0;
+  // B-17 版本佔位、B-18 讀版本並寫入（HTML₀′）；非 PWA 模式且無佔位時略過
+  const versionCore = loadVersionCore();
+  const versionOn = checkAppVersionTemplate(template, html0, pwaMode, versionCore.APP_VERSION_META_NAME);
+  const appVersion = versionOn ? readAppVersion(packageFile, versionCore) : null;
+  const html0v = versionOn ? replaceOnce(html0, APP_VERSION_PLACEHOLDER, appVersion) : html0;
+
+  let html = html0v;
   let buildId = null;
   let siteFiles = null;
   if (pwaMode) {
     // B-11 PWA 輸入
     const inputs = readPwaInputs(appDir, pwa, site, adsFile);
-    // B-12 HTML head
-    checkPwaHead(html0, pwa);
+    // B-12 HTML head（對 HTML₀′；版本 meta 為第 8 項）
+    checkPwaHead(html0v, pwa, { appVersion, metaName: versionCore.APP_VERSION_META_NAME });
     // B-13 manifest
     const manifest = buildManifest(pwa);
     // B-14 BUILD_ID
     buildId = computeBuildId([
-      { path: "index.html", bytes: Buffer.from(html0, "utf8") },
+      { path: "index.html", bytes: Buffer.from(html0v, "utf8") },
       { path: "manifest.webmanifest", bytes: Buffer.from(manifest, "utf8") },
       ...inputs.icons,
       { path: "sw.js", bytes: Buffer.from(inputs.swTemplate, "utf8") },
@@ -982,7 +1130,7 @@ export function build(options = {}) {
       throw new BuildError("PWA_TEMPLATE", `BUILD_ID ${buildId} 不符 ${pwa.PWA_BUILD_ID_PATTERN}`);
     }
     // B-15 注入
-    html = replaceOnce(html0, BUILD_ID_PLACEHOLDER, buildId);
+    html = replaceOnce(html0v, BUILD_ID_PLACEHOLDER, buildId);
     const sw = buildServiceWorker(inputs.swTemplate, buildId, pwa);
     if (site !== false) {
       const byPath = new Map([
@@ -996,11 +1144,18 @@ export function build(options = {}) {
     }
   }
 
-  // B-7（對最終 HTML）
+  // B-7（對最終 HTML，含 B-19）
   const bytes = checkOutput(
     html,
     warn,
-    pwaMode ? { pwa: true, metaName: pwa.PWA_BUILD_ID_META_NAME, buildIdPattern: pwa.PWA_BUILD_ID_PATTERN } : {}
+    Object.assign(
+      pwaMode ? { pwa: true, metaName: pwa.PWA_BUILD_ID_META_NAME, buildIdPattern: pwa.PWA_BUILD_ID_PATTERN } : {},
+      {
+        appVersion,
+        appVersionMetaName: versionCore.APP_VERSION_META_NAME,
+        appVersionPattern: versionCore.APP_VERSION_PATTERN,
+      }
+    )
   );
 
   // B-8 報告
@@ -1041,6 +1196,7 @@ export function build(options = {}) {
     `  字庫：${fmt(data.vocabCount)} 筆` +
       (vocabAvgBytes === null ? "" : `，平均每筆 ${vocabAvgBytes.toFixed(1)} bytes`),
     `  資料檔：${data.files.length} 個；程式檔：${app.files.length} 個；樣式檔：${styles.files.length} 個`,
+    `  版本號：${appVersion === null ? "（略過：模板無版本佔位）" : appVersion}`,
     `  PWA 模式：${pwaMode ? "是" : "否"}` + (buildId ? `；BUILD_ID：${buildId}` : ""),
     ...(siteFiles
       ? [`  部署目錄：${site}`, ...siteFiles.map((f) => `    ${f.path}：${fmt(f.bytes.length)} bytes`)]
@@ -1059,10 +1215,14 @@ export function build(options = {}) {
     out,
     buildId,
     site: siteFiles ? { dir: site, files: siteFiles } : null,
+    appVersion,
   };
 }
 
-/** 解析命令列參數（v0.7：新增 --site、--ads、--no-site；--site 與 --no-site 不可同時出現） */
+/**
+ * 解析命令列參數（v0.7：新增 --site、--ads、--no-site；--site 與 --no-site 不可同時出現；
+ * v0.9：新增 --package <file>，對應 build() 的 packageFile）
+ */
 export function parseArgs(argv) {
   const opts = {};
   let noSite = false;
@@ -1072,13 +1232,16 @@ export function parseArgs(argv) {
       noSite = true;
       continue;
     }
-    const m = /^--(out|data|app|site|ads)(?:=(.*))?$/.exec(a);
+    const m = /^--(out|data|app|site|ads|package)(?:=(.*))?$/.exec(a);
     if (!m) {
-      throw new BuildError("BAD_ARGS", `不認識的參數：${a}（可用 --out、--data、--app、--site、--no-site、--ads）`);
+      throw new BuildError(
+        "BAD_ARGS",
+        `不認識的參數：${a}（可用 --out、--data、--app、--site、--no-site、--ads、--package）`
+      );
     }
     const value = m[2] !== undefined ? m[2] : argv[++i];
     if (!value) throw new BuildError("BAD_ARGS", `參數 --${m[1]} 缺少值`);
-    opts[m[1]] = value;
+    opts[m[1] === "package" ? "packageFile" : m[1]] = value;
   }
   if (noSite) {
     if (opts.site !== undefined) throw new BuildError("BAD_ARGS", "--site 與 --no-site 不可同時使用");

@@ -1,13 +1,13 @@
 {
   "meta": {
     "doc": "TASKS",
-    "version": "0.7",
+    "version": "0.8",
     "status": "approved",
     "author": "sd-agent",
-    "approved_by": "JimmyLin（對話中核准，主控代填欄位）",
+    "approved_by": "JimmyLin（對話中授權「修正好測試沒問題就直接推」，主控代填欄位）",
     "approved_at": "2026-11-03",
-    "upstream": "docs/01-PRD.md v0.12（approved，JimmyLin，2026-11-03）、docs/02-contract/ v0.12（README、data-schema.ts、storage-schema.json 三檔 approved，主控代核）、docs/03-design/architecture.md v0.8",
-    "changelog": "v0.7（2026-11-03，sd-agent）：修訂已核准的 v0.6（JimmyLin 核准），原因：PRD v0.12（R-21 版面與視覺、US-38～US-41、Q-49～Q-57；新增 27 條、修改 30 條 AC）與契約 v0.12（§11 NM／VC／DB／FT／MT／V-LAY、data-schema §13、§9.6 DS-19～DS-25）。status 改為 in-review、核准欄位清空。只新增 CT-24（pg-content，ORIGINAL fullName，DS-19）與 FE-54～FE-62 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 76 個任務的內容、status、retries 皆未修改。批次：第 1 批 CT-24、FE-54、FE-55、FE-56；第 2 批 FE-57～FE-61；第 3 批 FE-62（architecture.md §12.7）。同批任務沒有共用 path；core/pwa.js 與 __tests__/pwa-core.test.js 由 FE-56 → FE-58 依序修改（D-13）。AC 對照見 architecture.md §13.5（應驗收 248 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）；不需主控手動項目。共 86 個任務：pg-content 24、pg-frontend 62。｜v0.6（2026-11-02，sd-agent）：修訂已核准的 v0.5（JimmyLin 核准），原因：PRD v0.11（R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48；修改 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）與契約 v0.11（§10 PWA、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）。status 改為 in-review、核准欄位清空。只新增 FE-45～FE-53 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 67 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-18）。FE-45～FE-53 彼此沒有任何共用 path；FE-53 負責重新建置 dist/english-master-track.html 與部署目錄 dist/site/。新增頂層 manualSteps（MC-01 複製 ads.txt 到 sources/deploy/、MC-02 放置 4 張 PNG 到 src/app/assets/icons/、MC-03 修改 .github/workflows/static.yml），owner 為主控、不派給 PG；FE 任務以 manualPrereqs 引用（architecture.md §12.6、SD-FB-32）。批次見 architecture.md §12.6，AC 對照見 §13.4（應驗收 221 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 76 個任務：pg-content 23、pg-frontend 53。｜v0.5（2026-11-02，sd-agent）：修訂已核准的 v0.4（JimmyLin 核准），原因：PRD v0.10（R-19 只選色級不顯示分數、Q-39 預設 725、Q-40、AC-26-05、AC-26-06、AC-22-04 改寫、6 條分數輸入 AC 暫停）與契約 v0.10（§5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）。status 改為 in-review、核准欄位清空。只新增 FE-42～FE-44 共 3 個 pg-frontend 任務（status todo、retries 0），依序執行（FE-42 → FE-43 → FE-44）；既有 64 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-10）。FE-42～FE-44 彼此沒有任何共用 path；FE-44 負責重新建置 dist/。批次見 architecture.md §12.5，AC 對照見 §13.3（應驗收 192 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 67 個任務：pg-content 23、pg-frontend 44。｜v0.4（2026-11-02，sd-agent）：修訂已核准的 v0.3，原因：PRD v0.9（R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（§5.7、§5.8、§9.3 DS-01～DS-06）。status 改為 in-review、核准欄位清空。只新增 FE-34～FE-41 共 8 個 pg-frontend 任務（status todo、retries 0）；既有 56 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-06）。FE-34～FE-41 彼此沒有任何共用 path；FE-41 負責重新建置 dist/。批次見 architecture.md §12.4，AC 對照見 §13.2（應驗收 196 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 64 個任務：pg-content 23、pg-frontend 41。｜v0.3（2026-10-30，sd-agent）：依 PRD v0.8（R-15～R-17、US-25～US-31）與契約 v0.8 增量修訂；v0.2 已核准，依 CLAUDE.md 改回 draft、核准欄位清空。只新增 FE-20～FE-33 共 14 個 pg-frontend 任務（status todo、retries 0）；既有 42 個任務的內容、status、retries 皆未修改；src/data/ 不需改動，不新增 CT 任務。批次見 architecture.md §12.3，AC 對照見 §13.1。本版含持久化結構 schemaVersion 1 → 2 的實作任務（FE-22、FE-25），須由人類核准。共 56 個任務：pg-content 23、pg-frontend 33。 主控代核（2026-10-30）：持久化結構變更已由人類於契約 v0.8 核准，本版僅實作該契約，不改 PRD、不另改持久化結構；check_tasks 驗證新任務間無共用 paths（共用僅發生於與已 done 舊任務之間）。 主控代核（2026-11-02）：FE-41 paths 追加 src/app/__tests__/backup.test.js，修正因執行日期而失敗的既有測試（FE-34／FE-35 回報）；不改 PRD、不改持久化結構。 主控代核（2026-11-02）：FE-43 paths 追加 views/flashcards.js、__tests__/flashcards.test.js，改寫單字卡空狀態提示（人類決議，AC-06-06 未規定文字，不改 PRD）。",
+    "upstream": "docs/01-PRD.md v0.14（approved，JimmyLin，2026-11-03）、docs/02-contract/ v0.14（README、data-schema.ts、storage-schema.json 三檔 approved，主控代核）、package.json version 1.0.0（Q-62）、docs/03-design/architecture.md v0.9",
+    "changelog": "v0.8（2026-11-03，sd-agent）：修訂已核准的 v0.7（JimmyLin 核准），原因：PRD v0.14（R-22：US-42 網站版本號、US-43 隱藏領域範本、AC-01-08、AC-39-04 改寫等 13 條、暫停 AC-05-01～05、Q-58～Q-62）與契約 v0.14（§12 VR／LS／V-VER、§5.8 HT-6～HT-9、data-schema §14、§9.7 DS-26～DS-31）。status 改為 in-review、核准欄位清空。只新增 FE-63～FE-69 共 7 個 pg-frontend 任務（status todo、retries 0），新任務另加 batch 欄位（v0.9-1：FE-63、FE-65、FE-68；v0.9-2：FE-64、FE-66、FE-67；v0.9-3：FE-69）；既有 86 個任務的內容、status、retries 皆未修改。同批任務沒有共用 path，且本版每個檔案只屬於 1 個 v0.9 任務（architecture.md §3 D-14、§12.8）。不需 CT 任務（src/data/ 不改，DS-31）、不需主控手動項目。AC 對照見 architecture.md §13.6（應驗收 251 個 AC 全部涵蓋；AC-05-01～05 暫停）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 93 個任務：pg-content 24、pg-frontend 69。｜v0.7（2026-11-03，sd-agent）：修訂已核准的 v0.6（JimmyLin 核准），原因：PRD v0.12（R-21 版面與視覺、US-38～US-41、Q-49～Q-57；新增 27 條、修改 30 條 AC）與契約 v0.12（§11 NM／VC／DB／FT／MT／V-LAY、data-schema §13、§9.6 DS-19～DS-25）。status 改為 in-review、核准欄位清空。只新增 CT-24（pg-content，ORIGINAL fullName，DS-19）與 FE-54～FE-62 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 76 個任務的內容、status、retries 皆未修改。批次：第 1 批 CT-24、FE-54、FE-55、FE-56；第 2 批 FE-57～FE-61；第 3 批 FE-62（architecture.md §12.7）。同批任務沒有共用 path；core/pwa.js 與 __tests__/pwa-core.test.js 由 FE-56 → FE-58 依序修改（D-13）。AC 對照見 architecture.md §13.5（應驗收 248 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）；不需主控手動項目。共 86 個任務：pg-content 24、pg-frontend 62。｜v0.6（2026-11-02，sd-agent）：修訂已核准的 v0.5（JimmyLin 核准），原因：PRD v0.11（R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48；修改 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）與契約 v0.11（§10 PWA、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）。status 改為 in-review、核准欄位清空。只新增 FE-45～FE-53 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 67 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-18）。FE-45～FE-53 彼此沒有任何共用 path；FE-53 負責重新建置 dist/english-master-track.html 與部署目錄 dist/site/。新增頂層 manualSteps（MC-01 複製 ads.txt 到 sources/deploy/、MC-02 放置 4 張 PNG 到 src/app/assets/icons/、MC-03 修改 .github/workflows/static.yml），owner 為主控、不派給 PG；FE 任務以 manualPrereqs 引用（architecture.md §12.6、SD-FB-32）。批次見 architecture.md §12.6，AC 對照見 §13.4（應驗收 221 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 76 個任務：pg-content 23、pg-frontend 53。｜v0.5（2026-11-02，sd-agent）：修訂已核准的 v0.4（JimmyLin 核准），原因：PRD v0.10（R-19 只選色級不顯示分數、Q-39 預設 725、Q-40、AC-26-05、AC-26-06、AC-22-04 改寫、6 條分數輸入 AC 暫停）與契約 v0.10（§5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）。status 改為 in-review、核准欄位清空。只新增 FE-42～FE-44 共 3 個 pg-frontend 任務（status todo、retries 0），依序執行（FE-42 → FE-43 → FE-44）；既有 64 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-10）。FE-42～FE-44 彼此沒有任何共用 path；FE-44 負責重新建置 dist/。批次見 architecture.md §12.5，AC 對照見 §13.3（應驗收 192 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 67 個任務：pg-content 23、pg-frontend 44。｜v0.4（2026-11-02，sd-agent）：修訂已核准的 v0.3，原因：PRD v0.9（R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（§5.7、§5.8、§9.3 DS-01～DS-06）。status 改為 in-review、核准欄位清空。只新增 FE-34～FE-41 共 8 個 pg-frontend 任務（status todo、retries 0）；既有 56 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-06）。FE-34～FE-41 彼此沒有任何共用 path；FE-41 負責重新建置 dist/。批次見 architecture.md §12.4，AC 對照見 §13.2（應驗收 196 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 64 個任務：pg-content 23、pg-frontend 41。｜v0.3（2026-10-30，sd-agent）：依 PRD v0.8（R-15～R-17、US-25～US-31）與契約 v0.8 增量修訂；v0.2 已核准，依 CLAUDE.md 改回 draft、核准欄位清空。只新增 FE-20～FE-33 共 14 個 pg-frontend 任務（status todo、retries 0）；既有 42 個任務的內容、status、retries 皆未修改；src/data/ 不需改動，不新增 CT 任務。批次見 architecture.md §12.3，AC 對照見 §13.1。本版含持久化結構 schemaVersion 1 → 2 的實作任務（FE-22、FE-25），須由人類核准。共 56 個任務：pg-content 23、pg-frontend 33。 主控代核（2026-10-30）：持久化結構變更已由人類於契約 v0.8 核准，本版僅實作該契約，不改 PRD、不另改持久化結構；check_tasks 驗證新任務間無共用 paths（共用僅發生於與已 done 舊任務之間）。 主控代核（2026-11-02）：FE-41 paths 追加 src/app/__tests__/backup.test.js，修正因執行日期而失敗的既有測試（FE-34／FE-35 回報）；不改 PRD、不改持久化結構。 主控代核（2026-11-02）：FE-43 paths 追加 views/flashcards.js、__tests__/flashcards.test.js，改寫單字卡空狀態提示（人類決議，AC-06-06 未規定文字，不改 PRD）。",
     "note": "（以下為 v0.2 記載，任務數以 changelog 為準）v0.2 依 architecture v0.3 新增 FE-19（主控代核）；FE-18 dependsOn 加 FE-19；CT-02 doneWhen 的驗證方式改依 architecture.md §8.4（v0.1 由 JimmyLin 於 2026-10-30 核准；依 CLAUDE.md 修改已核准文件須改回 draft，待主控代核）。共 42 個任務：pg-content 23（CT-01～CT-23）、pg-frontend 19（FE-01～FE-19）。批次見 architecture.md §12；AC 對照見 §13。所有任務只能寫入自己的 paths；sources/ 唯讀且不得打包；建置驗證一律 --out 到 scratchpad（只有 FE-18 寫 dist/）。"
   },
   "tasks": [
@@ -4100,6 +4100,310 @@
         "dist/english-master-track.html 已重新產生、≤ 5,242,880 bytes；dist/site/ 恰 8 檔且 index.html 與交付檔位元組相同",
         "連續兩次 `npm run build` 的 index.html、manifest.webmanifest、sw.js 位元組相同（附 SHA-256）",
         "load-order.test.js 含 core.layout 與 VC-5 跨模組一致斷言並通過",
+        "description (3) 的靜態檢查全部符合（附指令與輸出）",
+        "description (4) 已執行並附結果與截圖路徑，或明確列為待 QA 驗證項目",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-63",
+      "title": "建置：版本號注入（package.json → emt-app-version）先於 BUILD_ID、core/version.js",
+      "owner": "pg-frontend",
+      "batch": "v0.9-1",
+      "paths": [
+        "src/app/core/version.js",
+        "src/app/__tests__/version.test.js",
+        "src/app/index.html",
+        "tools/build.mjs",
+        "src/app/__tests__/build.test.js",
+        "src/app/__tests__/shell.test.js"
+      ],
+      "dependsOn": [],
+      "covers": [
+        "US-42",
+        "AC-42-01",
+        "AC-42-02",
+        "AC-42-04",
+        "AC-36-01",
+        "AC-36-02"
+      ],
+      "contractRefs": [
+        "data-schema.ts §14 APP_VERSION_META_NAME、APP_VERSION_PATTERN、BUILD_CODE_LENGTH、VERSION_LINE_TEXT",
+        "README §12.1 VR-1～VR-4、VR-9",
+        "README §10.4 HD-1、HD-5（v0.14）",
+        "README §10.6 SW-2（v0.14）",
+        "README §12.4 V-VER-01、V-VER-02、V-VER-06",
+        "README §9.7 DS-26"
+      ],
+      "description": "依 architecture.md v0.9 §4.9（core.version）、§5.4（B-17～B-19、B-12／B-14／B-15 修訂）、§10.6。(1) 新建 src/app/core/version.js（L1、IIFE + module.exports，比照 core/pwa.js 寫法；載入時不取用任何模組，LD-1）：匯出 §14 四個常數（逐字）與 isValidVersion(v)、buildCode(buildId)（PWA_BUILD_ID_PATTERN 在呼叫時取用：Node require(\"./pwa.js\")、瀏覽器 EMT.core.pwa；取不到回 null）、versionLineText(version, buildId)（任一不合法回 null；以 split/join 替換）。本檔不得含字串 @@ 與任何寫死的版本號。(2) index.html：在 <meta name=\"emt-build-id\" content=\"@@BUILD_ID@@\"> 之後新增一行 <meta name=\"emt-app-version\" content=\"@@APP_VERSION@@\">；其他內容不改（頁尾不改，版本行由 FE-64 以 JS 建立）。(3) tools/build.mjs：新增常數 APP_VERSION_PLACEHOLDER = \"@@APP_VERSION@@\"、APP_VERSION_CORE_FILE（PROJECT_ROOT/src/app/core/version.js，以 createRequire 讀取，不隨 --app 改變）、DEFAULTS.package（PROJECT_ROOT/package.json）；build() 新增選項 packageFile、parseArgs 新增 --package <file>；依 §5.4 執行順序加入 B-17（模板佔位：PWA 模式恰 1 次且位於逐字 meta、在 </head> 前；非 PWA 模式 0 次則略過整個版本步驟；HTML₀ 中恰 1 次，否則 APP_VERSION_TEMPLATE）、B-18（讀檔、去 BOM、JSON.parse、version 須為字串且 isValidVersion，否則 APP_VERSION；替換得 HTML₀′）；B-12 對 HTML₀′ 檢查並把 <meta name=\"emt-app-version\" content=\"<version>\"> 加為 HD-1 第 8 項；B-14 的 index.html 紀錄改用 HTML₀′；B-15 以 HTML₀′ 替換 BUILD_ID；B-7 加 B-19（產物 emt-app-version 恰 1 個且 = version；不含 /@@[A-Za-z0-9_]+@@/）；B-8 報告加「版本號」行，build() 回傳加 appVersion（略過時 null）。只讀 package.json 的 version 欄位；不得使用 process.env（含 npm_package_version）、時間或亂數。所有檢查在寫檔前完成（中止時不寫不刪）。(4) build.test.js：PWA fixture 模板加版本 meta 並以暫存 package.json（packageFile）建置；依 §10.6 加入 V-VER-01、APP_VERSION_TEMPLATE／APP_VERSION 各中止案例、V-VER-02 三情境（write:false；不得修改專案根目錄 package.json）、VR-4 以 computeBuildId(HTML₀′) 重算比對、V-VER-06、--package 解析、非 PWA 舊 fixture 照常、原始碼掃描禁止 npm_package_version；既有案例的 HD-1 清單改為 8 項。(5) shell.test.js：HD-1 改為 8 個元素逐字各 1 次、依序（emt-app-version 緊接 emt-build-id）、@@APP_VERSION@@ 恰 1 次。(6) 新建 version.test.js（§10.6 表列案例）。注意：既有 load-order.test.js 會自動依建置順序載入 core/version.js，須符合 LD-1；不得修改 package.json 與 load-order.test.js。",
+      "doneWhen": [
+        "`npm test` 全部通過（含新 version.test.js 與修改後的 build.test.js、shell.test.js、既有 load-order.test.js）",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功；產物含 <meta name=\"emt-app-version\" content=\"1.0.0\"> 恰 1 次，全文無 `@@`；報告列出版本號與 BUILD_ID",
+        "以 `--package <scratchpad>/p.json`（version 1.0.1）建置的 BUILD_ID 與 1.0.0 不同；以 version \"v1.0.0\" 建置失敗（APP_VERSION）且未寫出任何檔案（附指令與輸出）",
+        "同一輸入連續兩次建置的 t.html、site/sw.js、site/manifest.webmanifest SHA-256 相同（附輸出）",
+        "src/app/core/version.js 不含 `@@` 與寫死版本號；tools/build.mjs 不含 process.env、npm_package_version",
+        "只寫入本任務 paths（package.json 未被修改）"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-65",
+      "title": "版面核心：LAYOUT_TEXTS.levelStatus、goalLineText、levelStatusText",
+      "owner": "pg-frontend",
+      "batch": "v0.9-1",
+      "paths": [
+        "src/app/core/layout.js",
+        "src/app/__tests__/layout.test.js"
+      ],
+      "dependsOn": [],
+      "covers": [
+        "US-01",
+        "US-39",
+        "AC-01-08",
+        "AC-39-04",
+        "AC-01-02",
+        "AC-01-07",
+        "AC-17-06",
+        "AC-25-02",
+        "AC-25-03",
+        "AC-26-06"
+      ],
+      "contractRefs": [
+        "data-schema.ts §13 LAYOUT_TEXTS（v0.14：levelStatus、goalLineSame、goalLineCapped／goalLineSeparator 停用）",
+        "README §12.2 LS-1",
+        "README §11.4 DB-4（v0.14）",
+        "README §11.7 V-LAY-08、§12.4 V-LAY-09",
+        "README §9.7 DS-29"
+      ],
+      "description": "依 architecture.md v0.9 §4.9（EMT.core.layout）、§10.6。(1) core/layout.js：LAYOUT_TEXTS 與契約 data-schema.ts §13 v0.14 逐字、逐鍵順序相同——新增最後一鍵 levelStatus: \"目前色級：{color}\"（全形冒號 U+FF1A）；goalLineCapped、goalLineSeparator 兩鍵保留（契約仍含）。新增純函式 goalLineText(effective)（fill(goalLineSame, { color: effective.nameZh, daily: formatInt(effective.dailyNewWords) })，缺參數回 statNoData「—」）與 levelStatusText(effective)（fill(levelStatus, { color: effective.nameZh })，缺參數回「目前色級：—」），並加入匯出。既有 goalLine(applied, effective) **不改行為**，只在註解標 @deprecated（v0.9 起 view 不得呼叫；避免 dashboard.test.js 在 FE-66 前失敗，T-70）。載入時仍不取用任何模組（LD-1）。(2) layout.test.js：契約常數複本加 levelStatus；goalLineText 5 色（橘、棕、綠；藍、金以綠呼叫）逐字為「橘級・每日 10 字」「棕級・每日 10 字」「綠級・每日 15 字」、結尾非「・」、不含「目標」「生效」「內建上限」「藍」「金」，缺參數「—」；levelStatusText 5 色與缺參數；既有 goalLine 案例保留。不得修改其他檔案（dashboard、customizer 由 FE-66、FE-67 改用新函式）。",
+      "doneWhen": [
+        "`npm test` 全部通過（含既有 dashboard.test.js、customizer.test.js、load-order.test.js 未受影響）",
+        "layout.test.js 對 LAYOUT_TEXTS 的逐字、逐鍵順序比對含 levelStatus 並通過",
+        "goalLineText、levelStatusText 已匯出且有 5 色與缺參數測試",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-68",
+      "title": "隱藏領域範本區塊（hidden + inert）、移除畫面「範本」字樣、範本單字只標「自訂擴充」",
+      "owner": "pg-frontend",
+      "batch": "v0.9-1",
+      "paths": [
+        "src/app/views/custom-vocab.js",
+        "src/app/views/flashcards.js",
+        "src/app/__tests__/custom-vocab.test.js",
+        "src/app/__tests__/flashcards.test.js",
+        "src/app/__tests__/naming.test.js"
+      ],
+      "dependsOn": [],
+      "covers": [
+        "US-43",
+        "AC-43-01",
+        "AC-43-02",
+        "AC-43-03",
+        "AC-25-06",
+        "AC-22-02",
+        "AC-04-01",
+        "AC-04-06",
+        "AC-04-07",
+        "AC-06-06",
+        "AC-23-01"
+      ],
+      "contractRefs": [
+        "README §5.8 HT-6～HT-9",
+        "README §7.7 V-ST-17",
+        "README §9.7 DS-27、DS-28",
+        "README §9 FB-51",
+        "README §12.3（AC-05-01～05 暫停）"
+      ],
+      "description": "依 architecture.md v0.9 §4.9、§7.20.2（含 DS-27 文字定案表）、§10.6。(1) views/custom-vocab.js：buildTemplates() 回傳的 section.card.cv-section（範本區唯一外層容器）建立時 attrs 加 hidden: true 與 inert: \"\"（兩者都要，之後任何路徑不改回可見）；容器內的標題、說明、3 個按鈕、MSG_TEMPLATE_MISSING、tplStatus 與 onTemplate、injectMessage、templateButtons、templateLabel、TEMPLATE_ORDER 全部保留（HT-8）；#customizer-custom 子節點仍為 3 個（表單、範本、清單）。buildItem 不再建立 .cv-item__source（origin = \"template\" 的項目只顯示 CUSTOM_BADGE「自訂擴充」，不顯示領域名稱，FB-51 由 SD 定案）。自訂清單空狀態改為模組常數 EMPTY_TEXT = 「尚未新增自訂單字。可用上方表單新增。」並匯出。檔頭註解補 v0.14 說明（註解可含「範本」，畫面文字不可）。(2) views/flashcards.js：只把 .fc-empty__hint 文字改為「請到難易度設定選擇色級並按「套用」，或新增自訂單字。」（「前往難易度設定」按鈕與其他程式不變）。(3) custom-vocab.test.js：依 §10.6 加入範本 section 的 hidden 與 inert 屬性斷言、可見文字掃描（略過 hidden 祖先，含 aria-label、title）不含「範本」、EMPTY_TEXT 逐字且不以「或」「、」「，」結尾、HT-9／AC-43-03 情境（10 個 origin template + 1 個表單字 → 11 項皆只有「自訂擴充」、新增 latency → 單字已存在、刪除 1 個範本字、exportBackup 的 customVocab 欄位逐一相同且 origin／templateId 保留）；既有注入與 BUG-002 補掛案例照常通過（假 DOM 不實作 inert，按鈕 click 測試可保留）。(4) flashcards.test.js、naming.test.js：把對舊空狀態文字的斷言改為新文字，並斷言 flashcards.js 字串常值不含「範本」。不得修改 core/custom.js、state/store.js、src/data/templates.js、styles/21-custom-vocab.css（全域 [hidden] 已 !important）。",
+      "doneWhen": [
+        "`npm test` 全部通過",
+        "custom-vocab.js 範本 section 同時有 hidden 與 inert；src/app/views 中可見字串（不含註解與 HT-6 隱藏容器內文字）以「範本」搜尋結果 = 0（附 grep 輸出與說明）",
+        "兩段空狀態文字與 architecture.md §7.20.2 逐字相同",
+        "AC-43-03 情境的單元測試通過（清單 11 項、重複提示、刪除、匯出欄位不變）",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功，產物仍含 window.DOMAIN_TEMPLATES 與 3 個 data-template 值",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-64",
+      "title": "頁尾版本行：讀 emt-app-version 與 emt-build-id，合法才在「資料來源與授權」正下方顯示",
+      "owner": "pg-frontend",
+      "batch": "v0.9-2",
+      "paths": [
+        "src/app/ui/version-line.js",
+        "src/app/main.js",
+        "src/app/styles/00-base.css",
+        "src/app/__tests__/version-line.test.js"
+      ],
+      "dependsOn": ["FE-63"],
+      "covers": [
+        "US-42",
+        "AC-42-01",
+        "AC-42-02",
+        "AC-42-03",
+        "AC-41-04",
+        "AC-36-02",
+        "AC-23-02"
+      ],
+      "contractRefs": [
+        "data-schema.ts §14 VERSION_LINE_TEXT、BUILD_CODE_LENGTH、APP_VERSION_META_NAME",
+        "data-schema.ts PWA_BUILD_ID_META_NAME、PWA_BUILD_ID_PATTERN",
+        "README §12.1 VR-5～VR-8",
+        "README §12.4 V-VER-03、V-VER-04、V-VER-05",
+        "README §11.2 VC-3、VC-7",
+        "README §9.7 DS-30"
+      ],
+      "description": "依 architecture.md v0.9 §4.9（EMT.ui.versionLine）、§7.20.1、§10.6。(1) 新建 src/app/ui/version-line.js（L4；載入時只登錄 EMT.ui.versionLine，不讀 document，LD-2；Node 下 module.exports 供測試）：readMeta(doc, name)（querySelectorAll 恰 1 個才回 content，否則 null）；init(doc?)：讀 core.version.APP_VERSION_META_NAME 與 core.pwa.PWA_BUILD_ID_META_NAME 兩個 meta → core.version.versionLineText → 非 null 且有 #footer-sources 時以 core/dom.js 建立 p#app-version.app-footer__version（textContent；無 tabindex、role、事件）插在 #footer-sources 之後（parentNode.insertBefore(p, footerSources.nextSibling)）；已存在則只更新文字；null 或無 #footer-sources → 不建（已存在則移除）。整個 init 包在 try 內，例外回 { rendered: false, text: null }，不得 console.error、不得拋出。不得 fetch、XMLHttpRequest、import()、讀 package.json、存取 localStorage 或 store；不得寫死版本號。(2) main.js：在 banner.render 之後、pwa.start 之前加 step(\"versionLine.init\", …)（模組存在才呼叫；更新檔頭註解）。(3) 00-base.css：新增 .app-footer__version { margin: 4px 0 0; font-size: 0.75rem; line-height: 1.5; color: var(--text-muted); white-space: nowrap; }；不改任何留白、--emt-firstbar-h、--emt-bottomnav-h（§7.20.1 已確認不需調整）；遵守 §7.19.1 禁止寫法（tokens.test.js 會掃描）。(4) 新建 version-line.test.js（§10.6 表列案例：合法建立 1 個且位置正確、重入只 1 個、V-VER-04 全部異常值不建且不拋錯不 console.error、無 #footer-sources、原始碼掃描、src/app 非測試 .js（不含 pwa/）不含「package.json」字串、main.js 呼叫位置、CSS 規則）。不得修改 index.html（頁尾 HTML 不變）、core/version.js、load-order.test.js。",
+      "doneWhen": [
+        "`npm test` 全部通過（含既有 first-run.test.js、tokens.test.js、load-order.test.js）",
+        "以 `node tools/build.mjs --out <scratchpad>/t.html` 建置後，若有無頭瀏覽器：file:// 開啟主控台與首次畫面各有 1 個 #app-version，文字為「版本 1.0.0（建置 <BUILD_ID 前 7 碼>）」且緊接 #footer-sources；375×667 捲到底不被底部導覽列／固定底部列遮住（附截圖）；無則列為待 FE-69 驗證",
+        "以手動把產物中 emt-app-version 改為 v1.0.0 的副本開啟時不顯示版本行、Console 無錯誤（或以單元測試等價證明）",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-66",
+      "title": "主控台目標行只顯示生效色級、移除「・」、「變更」改為外框按鈕",
+      "owner": "pg-frontend",
+      "batch": "v0.9-2",
+      "paths": [
+        "src/app/views/dashboard.js",
+        "src/app/styles/10-dashboard.css",
+        "src/app/__tests__/dashboard.test.js"
+      ],
+      "dependsOn": ["FE-65"],
+      "covers": [
+        "US-39",
+        "AC-39-04",
+        "AC-17-06",
+        "AC-01-02",
+        "AC-01-07",
+        "AC-25-02",
+        "AC-25-03",
+        "AC-26-06",
+        "AC-38-01",
+        "AC-38-09"
+      ],
+      "contractRefs": [
+        "README §11.4 DB-4（v0.14）",
+        "data-schema.ts §13 LAYOUT_TEXTS.goalLineSame、changeLink（v0.14 註解）",
+        "README §12.4 V-LAY-10、§11.7 V-LAY-08",
+        "README §9.7 DS-29"
+      ],
+      "description": "依 architecture.md v0.9 §4.9（views/dashboard.js）、§7.20.4、§10.6。(1) views/dashboard.js：dashboardModel 的 goal 改為 { text: LAY.goalLineText(K.GOAL.levelOf(info.effectiveColorId)), colorId: info.effectiveColorId }（不再有 capped，不再呼叫 LAY.goalLine）；goalInfoOf 的 effectiveColor 不再附加「（內建上限）」，刪除 TEXT.builtinCap；DOM 刪除 span.db-goal__sep，目標行子節點依序為 db-goal__dot、db-goal__text、changeBtn；refs.goalLine 的 data-color 改用生效色級；changeBtn className 改為 \"btn db-change\"（移除 btn--link），保留 type=button、data-go=customizer、文字 LT.changeLink（行為沿用 router 的 [data-go] 委派，不改）。原始碼不得再出現 goalLineCapped、goalLineSeparator、builtinCap。(2) 10-dashboard.css：刪除 .db-goal__sep 規則；.db-goal gap 改 8px；.db-change 改為外框按鈕：min-height 44px、min-width 44px、margin-left auto、padding 0 14px、background var(--surface)、border 1px solid var(--brand-deep)、color var(--brand-deep)、font-weight 600、text-decoration none；@media (hover: hover) .db-change:hover background var(--tint)。不得使用 var(--accent)、var(--border)、#d5d9e0、#f7893b、color: var(--brand)（§7.19.1 禁止寫法，tokens.test.js 會掃描）。(3) dashboard.test.js：依 §10.6 改寫 5 色目標行斷言（藍 855、金 990 → 「綠級・每日 15 字」、colorId green）、goalInfoOf 855 → 「綠」、假 DOM 子節點與 class、無「・」結尾、點擊 setItem 0 次、原始碼與 CSS 掃描。不得修改 core/layout.js、naming.test.js（其 data-go 斷言 [flashcards, customizer] 應照常通過）。",
+      "doneWhen": [
+        "`npm test` 全部通過（含既有 naming.test.js、tokens.test.js）",
+        "dashboard.test.js 5 色目標行逐字為「橘級・每日 10 字」「棕級・每日 10 字」「綠級・每日 15 字」×3，無「・」結尾、無「目標」「生效」「內建上限」",
+        "views/dashboard.js 原始碼不含 goalLineCapped、goalLineSeparator、builtinCap、btn--link",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功；若有無頭瀏覽器，375／1366 下 .db-change 計算後背景不透明、四邊 1px、無底線、≥ 44×44（附數值）；否則列為待 FE-69 驗證",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-67",
+      "title": "難易度設定頁狀態列改為一行「目前色級：{生效色級}」",
+      "owner": "pg-frontend",
+      "batch": "v0.9-2",
+      "paths": [
+        "src/app/views/customizer.js",
+        "src/app/styles/20-customizer.css",
+        "src/app/__tests__/customizer.test.js"
+      ],
+      "dependsOn": ["FE-65"],
+      "covers": [
+        "US-01",
+        "AC-01-08",
+        "AC-01-02",
+        "AC-01-07",
+        "AC-25-03",
+        "AC-25-06",
+        "AC-26-06",
+        "AC-32-05"
+      ],
+      "contractRefs": [
+        "README §12.2 LS-1～LS-5",
+        "data-schema.ts §13 LAYOUT_TEXTS.levelStatus",
+        "README §11.5 FT-6（v0.14）",
+        "README §12.4 V-LAY-09",
+        "README §9.7 DS-29"
+      ],
+      "description": "依 architecture.md v0.9 §4.9（views/customizer.js）、§7.20.3、§10.6。(1) views/customizer.js：statusTexts(G, goal) 改為 statusLine(G, L, goal) → { text: L.levelStatusText(G.levelOf(goal && goal.effectiveColor)) }（只看已套用的 effectiveColor，不看 draftScore、appliedColor）並更新匯出；狀態列 section.card.cz-status 的 aria-label 改為「目前色級」，內容改為單一 p.cz-status__line#cz-st-line（refs.stLine），刪除 dl.cz-rows--status 兩列與 statusCap 節點（refs.statusCap）；renderStatus 只設定 refs.stLine 文字；刪除 T.statusTarget、T.statusEffective、T.builtinCap。呼叫 renderStatus 的時機不變（點色級卡片不更新狀態列；取消初始化確認不改變）。試算區（#cz-est-color、refs.cap 的 lockedNotice、basedOnGreen 文字）與首次畫面規則不變。(2) 20-customizer.css：刪除 .cz-rows--status 相關規則；新增 .cz-status__line { margin: 0; font-size: 1rem; font-weight: 600; white-space: nowrap; }；遵守 §7.19.1 禁止寫法。(3) customizer.test.js：依 §10.6 改寫 statusTexts 相關案例為 statusLine 5 色序列「目前色級：橘／棕／綠／綠／綠」、假 DOM 單行與無 dl、無 .cz-status__cap、未套用點棕不變、取消確認不變、appliedColor blue 重新 init 為「目前色級：綠」且藍列 aria-pressed、整頁可見文字無「目前目標色級」「目前生效色級」「內建上限」、試算區藍（即將開放）與 lockedNotice 仍在；既有 FE-32「狀態列與套用各在獨立容器」等案例保留。不得修改 core/layout.js、first-run.test.js。",
+      "doneWhen": [
+        "`npm test` 全部通過（含既有 first-run.test.js、tokens.test.js）",
+        "customizer.test.js 依序套用 5 色的狀態列文字為「目前色級：橘」「目前色級：棕」「目前色級：綠」「目前色級：綠」「目前色級：綠」",
+        "views/customizer.js 原始碼不含「目前目標色級」「目前生效色級」「（內建上限）」",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功；若有無頭瀏覽器，375px 下 #cz-st-line 為單行（getClientRects 長度 1，附截圖）；否則列為待 FE-69 驗證",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-69",
+      "title": "v0.14 整合建置：產出 dist/ 與部署目錄、跨模組一致性測試、版本行與版面自檢",
+      "owner": "pg-frontend",
+      "batch": "v0.9-3",
+      "paths": [
+        "dist/english-master-track.html",
+        "dist/site/index.html",
+        "dist/site/manifest.webmanifest",
+        "dist/site/sw.js",
+        "dist/site/ads.txt",
+        "dist/site/icons/icon-192.png",
+        "dist/site/icons/icon-512.png",
+        "dist/site/icons/icon-maskable-512.png",
+        "dist/site/icons/apple-touch-icon-180.png",
+        "src/app/__tests__/load-order.test.js",
+        "src/app/styles/90-overrides.css"
+      ],
+      "dependsOn": ["FE-63", "FE-64", "FE-65", "FE-66", "FE-67", "FE-68"],
+      "covers": [
+        "US-42",
+        "US-43",
+        "AC-42-01",
+        "AC-42-02",
+        "AC-42-03",
+        "AC-42-04",
+        "AC-43-01",
+        "AC-43-02",
+        "AC-43-03",
+        "AC-01-08",
+        "AC-39-04",
+        "AC-41-04",
+        "AC-36-01",
+        "AC-36-02",
+        "AC-22-02",
+        "AC-19-01",
+        "AC-19-04",
+        "AC-20-01",
+        "AC-27-03"
+      ],
+      "contractRefs": [
+        "README §12.4 V-VER-01～V-VER-06、V-LAY-09、V-LAY-10",
+        "README §7.7 V-ST-17",
+        "README §10.11 V-PWA-01～06",
+        "README §9.7 DS-31"
+      ],
+      "description": "所有 v0.9 任務完成後的交付關卡，比照 FE-62。(1) load-order.test.js：依建置順序載入後斷言 EMT.core.version、EMT.ui.versionLine 存在且載入不讀 document；layout.goalLineText、layout.levelStatusText 存在；version.APP_VERSION_META_NAME !== pwa.PWA_BUILD_ID_META_NAME；既有斷言不變。(2) 執行 `npm run validate:data`、`npm test`、`npm run build`：產出 dist/english-master-track.html（≤ 5,242,880 bytes，預估比 FE-62 產物多約 3 KB）與 dist/site/ 8 檔；再建置一次比對 index.html、manifest.webmanifest、sw.js 位元組相同（AC-42-04 (a)）；回報版本號、BUILD_ID、建置碼（前 7 碼）、各區段 bytes。(3) 靜態檢查（附指令與輸出）：FE-62 description (3) 全部照常；另加產物 <meta name=\"emt-app-version\" content=\"1.0.0\"> 恰 1 個且等於 package.json version；全文無 `@@`；emt-build-id 前 7 碼 = dist/site/sw.js 的 BUILD_ID 前 7 碼；dist/site/index.html 與交付檔位元組相同；產物仍含 window.DOMAIN_TEMPLATES 3 筆與 3 個 data-template；產物 views 字串常值無「目前目標色級」「目前生效色級」。AC-42-04 (b)(c) 以 `node tools/build.mjs --out <scratchpad>/b.html --package <scratchpad>/p.json`（version 1.0.1）與改 1 字元的專案副本在 scratchpad 驗證（不得修改專案 package.json 或其他任務檔案）。(4) 若環境有無頭瀏覽器，以 file:// 依 architecture.md §10.6 E2E 表執行可自動化項目：6 個畫面 × 375／1366 的版本行（數量、位置、單行、Tab 不可達、對比、無 @@／undefined）、捲到底不被底部導覽列與首次畫面固定底部列遮住（AC-41-04、E-95）、Network 請求 0（AC-42-03）、範本區 display none 與 Tab（AC-43-01）、可見文字無「範本」（AC-43-02）、狀態列 5 色（AC-01-08）、目標行與「變更」計算後樣式與 4 種操作（AC-39-04）、水平捲軸（AC-20-01），並以 `npm run serve` 驗證 https 形態（localhost）版本行文字與 file:// 相同；跨頁版面問題只在 90-overrides.css 修正，需改其他任務檔案時回報主控開 BUG，不得越界。無無頭瀏覽器時，回報列為待 QA 驗證項目。(5) 回報列出：已安裝 v0.12 PWA 的使用者將看到「有新版本，重新整理」（預期）；QA 既有 E2E 定位點變更（SD-FB-54）。",
+      "doneWhen": [
+        "`npm run validate:data`、`npm test`、`npm run build` 皆成功",
+        "dist/english-master-track.html 已重新產生、≤ 5,242,880 bytes、含 emt-app-version 1.0.0、無 `@@`；dist/site/ 恰 8 檔且 index.html 與交付檔位元組相同",
+        "連續兩次 `npm run build` 的 index.html、manifest.webmanifest、sw.js 位元組相同（附 SHA-256）；version 1.0.1 的 scratchpad 建置 BUILD_ID 不同（附輸出）",
+        "load-order.test.js 含 core.version、ui.versionLine 與新 layout 函式的斷言並通過",
         "description (3) 的靜態檢查全部符合（附指令與輸出）",
         "description (4) 已執行並附結果與截圖路徑，或明確列為待 QA 驗證項目",
         "只寫入本任務 paths"

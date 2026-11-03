@@ -11,7 +11,9 @@
  * - h2「學習主控台」
  * - (1) 今日任務卡 section.card.db-today：h3「今日任務」→ 列（主環形圖 88px：中央只顯示 X，SD-FB-40；
  *   右側「今日已學 X / D 字」、「今日目標達成」、button「開始今日學習」[data-go=flashcards]）→ 目標行
- *   （色點 + layout.goalLine + 「・」+ button「變更」[data-go=customizer]；依已套用色級，DB-4）
+ *   （色點 + layout.goalLineText + button.btn.db-change「變更」[data-go=customizer]；v0.14 起只依生效色級，DB-4）
+ * - （v0.9，FE-66；契約 v0.14 DB-4、AC-39-04、Q-61）目標行一律以生效色級組字（藍、金套用時為「綠級・每日 15 字」），
+ *   不再顯示目標與生效兩個色級的對照註記與「・」分隔；色點亦依生效色級；「變更」改為外框按鈕（10-dashboard.css）。
  * - (2) 3 格數據 section.card.db-stats（aria-label「學習數據」）：連續打卡天數（強調橘圖示 + 數字 + 天）→
  *   單字掌握率（大字 % + 小字「已掌握 N 字」）→ 模擬測驗正確率；無資料「—」（DB-5）
  * - (3) 近 7 天圖表 section.card.db-chart：ol.db-bars（7 根）或空狀態「開始學習後會顯示紀錄」（layout.chartIsEmpty）
@@ -86,7 +88,6 @@
   var TEXT = {
     title: "學習主控台",
     accuracy: "模擬測驗正確率",
-    builtinCap: "（內建上限）",
     // （v0.12，SD-FB-41）今日任務卡標題、3 格數據區的 aria-label、近 7 天圖表標題
     todayTitle: "今日任務",
     statsLabel: "學習數據",
@@ -125,8 +126,8 @@
   // ── 純邏輯 ──
 
   /**
-   * 已套用色級與生效色級（AC-17-06、AC-01-07；DB-4 依已套用值，FB-45）。
-   * 目標色級為藍、金時，生效色級顯示「綠（內建上限）」；其餘兩者相同。
+   * 已套用色級與生效色級（AC-17-06、AC-01-07）。
+   * （v0.9，DB-4 v0.14）目標色級為藍、金時生效色級為「綠」（不再附加任何註記）；其餘兩者相同。
    * 每日新字量取生效色級的 dailyNewWords（藍、金顯示綠的 15）。
    * （v0.10）回傳不含 appliedScore（目標分數只存在資料中，畫面不顯示）。
    * @param {object|null} goal GoalState
@@ -146,7 +147,6 @@
     var applied = K.GOAL.levelOf(appliedId);
     var effective = K.GOAL.levelOf(effectiveId);
     var effectiveText = effective ? effective.nameZh : TEXT.empty;
-    if (effective && appliedId !== effectiveId) effectiveText += TEXT.builtinCap;
 
     // 每日新字量依「生效色級」顯示（人類決議 R6-2，2026-10-30）：藍、金生效為綠 → 15
     var daily = effective && typeof effective.dailyNewWords === "number" ? effective.dailyNewWords : null;
@@ -317,7 +317,7 @@
    * @param {string} today 本地日期 YYYY-MM-DD
    * @returns {{
    *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
-   *   goal: { text: string, colorId: (string|null), capped: boolean },
+   *   goal: { text: string, colorId: (string|null) },
    *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, accuracyText: string },
    *   chart: { empty: boolean, bars: object[] },
    *   backupExpanded: boolean
@@ -332,9 +332,8 @@
     var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
     var p = progressModel(st, today);
 
-    // 目標行（DB-4）：依已套用色級（goalInfoOf 以 appliedScore 推導）
+    // 目標行（DB-4 v0.14）：只以生效色級組字與上色（goalInfoOf 以 appliedScore 推導生效色級）
     var info = goalInfoOf(d.goal || null);
-    var gl = LAY.goalLine(K.GOAL.levelOf(info.appliedColorId), K.GOAL.levelOf(info.effectiveColorId));
 
     // 3 格數據（DB-5）
     var streakDays = K.STREAK.displayDays(d.streak || null, today);
@@ -342,7 +341,7 @@
 
     return {
       today: p.today,
-      goal: { text: gl.text, colorId: info.appliedColorId, capped: gl.capped },
+      goal: { text: LAY.goalLineText(K.GOAL.levelOf(info.effectiveColorId)), colorId: info.effectiveColorId },
       stats: {
         streakValue: LAY.formatInt(streakDays),
         streakUnit: LT.statStreakUnit,
@@ -485,7 +484,7 @@
       D.setText(refs.doneText, m.today.doneText);
       refs.doneText.hidden = !m.today.done;
 
-      // 目標行（DB-4）
+      // 目標行（DB-4 v0.14：文字與色點皆為生效色級）
       D.setText(refs.goalText, m.goal.text);
       refs.goalLine.setAttribute("data-color", m.goal.colorId || "");
 
@@ -674,15 +673,15 @@
         text: LT.startToday
       });
       var goalText = D.el("span", { className: "db-goal__text", text: "" });
+      // （v0.9，Q-61、AC-39-04）「變更」為外框按鈕（不再是連結樣式）；行為沿用 router 的 [data-go] 委派
       var changeBtn = D.el("button", {
-        className: "btn btn--link db-change",
+        className: "btn db-change",
         attrs: { type: "button", "data-go": "customizer" },
         text: LT.changeLink
       });
       var goalLine = D.el("p", { className: "db-goal", attrs: { "data-color": "" } }, [
         D.el("span", { className: "db-goal__dot", attrs: { "aria-hidden": "true" } }),
         goalText,
-        D.el("span", { className: "db-goal__sep", attrs: { "aria-hidden": "true" }, text: LT.goalLineSeparator }),
         changeBtn
       ]);
       var section = D.el("section", { className: "card db-today", attrs: { "aria-labelledby": "db-today-h" } }, [

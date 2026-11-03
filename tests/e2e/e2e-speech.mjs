@@ -4,6 +4,7 @@
 // 收音條與麥克風生命週期（US-33）另見 e2e-mic.mjs。
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic } from "./lib/inits.mjs";
+import { injectTpl } from "./lib/state.mjs"; // 第 6 輪：範本按鈕隱藏（AC-43-01），改以 store 注入前置資料
 
 const R = recorder("e2e-speech");
 const KEY = "englishMasterTrack:state";
@@ -48,7 +49,7 @@ async function speakAndScore(p, recognized) {
 {
   const p = await open();
   await p.go("customizer");
-  for (const t of ["cs"]) { await p.click(`[data-template="${t}"]`); await sleep(80); }
+  for (const t of ["cs"]) { await injectTpl(p, t); await sleep(80); }
   for (const w of ["sitting", "comply with", "abcdefghij", "abcdefghi", "abcdefghijklmnopqrst", "abcdefghijklmnopqrstuvwxy"]) await addWord(p, w);
 
   // AC-08-13：首次說明（先做，localStorage 尚無已讀）

@@ -4,6 +4,7 @@
  *       templateButtons、FIELDS、CUSTOM_BADGE）；搭配 state/store.js 的實際回傳值驗證提示文字
  * 依據：architecture.md v0.3 §4.3、§7.5（範本注入容量不足 → 回滾 +「儲存空間不足」，R3-2、R3-3）
  * 涵蓋：AC-04-01、AC-04-03、AC-04-06、AC-05-01、AC-05-02、AC-05-04、AC-18-04
+ * （v0.14，FE-68）新增範本區 hidden＋inert、可見文字無「範本」、EMPTY_TEXT、HT-9／AC-43-03 情境（AC-43-01～AC-43-03）
  */
 "use strict";
 
@@ -515,5 +516,136 @@ describe("custom-vocab.test.js：閒置預建與分批掛上（BUG-002）", () =
     find(f.host, "cv-form").dispatch("submit");
     assert.equal(find(f.host, "cv-form__field--meaning").childNodes[2].textContent, "此欄位為必填，請輸入內容");
     assert.equal(f.words().length, 1);
+  });
+
+  // ── （v0.14，FE-68）隱藏領域範本區塊與「範本」字樣（契約 HT-6～HT-9、DS-27、FB-51；architecture.md v0.9 §7.20.2）──
+
+  /** 是否有 hidden 祖先（含自己）：假 DOM 的 hidden 屬性或 hidden 特性 */
+  function hiddenUp(n) {
+    for (let p = n; p; p = p.parentNode) {
+      if (p.nodeType === 1 && (p.hidden === true || "hidden" in p.attrs)) return true;
+    }
+    return false;
+  }
+
+  /** 走訪 host 樹，收集可見文字（textContent 的文字節點、aria-label、title），略過有 hidden 祖先的節點 */
+  function visibleTexts(node, out = []) {
+    for (const c of node.childNodes) {
+      if (hiddenUp(c)) continue;
+      if (c.nodeType === 3) {
+        if (c._text) out.push(c._text);
+        continue;
+      }
+      for (const k of ["aria-label", "title"]) if (k in c.attrs) out.push(c.attrs[k]);
+      visibleTexts(c, out);
+    }
+    return out;
+  }
+
+  test("HT-6：範本 section 同時有 hidden 與 inert 屬性、為 #customizer-custom 第 2 個子節點、仍含 3 個 data-template 按鈕（AC-43-01）", () => {
+    const f = setup({ words: 2 });
+    f.view.mount(null);
+    f.view.show();
+    assert.equal(f.host.childNodes.length, 3, "表單、範本、清單 3 區");
+    const tpl = f.host.childNodes[1];
+    assert.equal(tpl.tagName, "section");
+    assert.equal(tpl.getAttribute("aria-labelledby"), "cv-tpl-title");
+    assert.ok("hidden" in tpl.attrs, "hidden 屬性");
+    assert.ok("inert" in tpl.attrs, "inert 屬性");
+    const btns = findAll(tpl, "cv-templates__btn");
+    assert.deepEqual(btns.map((b) => b.getAttribute("data-template")), ["cs", "business", "biostat"], "程式保留（HT-8）");
+    // 表單與清單照常可見
+    assert.ok(!("hidden" in f.host.childNodes[0].attrs));
+    assert.ok(!("hidden" in f.host.childNodes[2].attrs));
+    // 資料變動、顯示更多等路徑都不改回可見
+    f.a.addCustomWord(F.customFields("Zymurgy", "釀造學"));
+    f.view.hide();
+    f.view.show();
+    f.flushIdle();
+    assert.ok("hidden" in tpl.attrs && "inert" in tpl.attrs);
+  });
+
+  test("HT-7：可見文字（含 aria-label、title；略過隱藏容器）不含「範本」——空清單與有範本單字兩種情況（AC-43-02）", () => {
+    const empty = setup();
+    empty.view.mount(null);
+    empty.view.show();
+    const t1 = visibleTexts(empty.host);
+    assert.ok(t1.includes(v.EMPTY_TEXT), "空狀態可見");
+    assert.deepEqual(t1.filter((t) => t.includes("範本")), []);
+    // 隱藏容器內仍有原文（豁免、程式保留）
+    assert.ok(find(empty.host, "cv-section__title") && empty.host.childNodes[1].textContent.includes("領域範本"));
+
+    const f = setup();
+    f.a.injectTemplate("cs");
+    f.view.mount(null);
+    f.view.show();
+    f.flushIdle();
+    assert.equal(f.words().length, 10);
+    assert.deepEqual(visibleTexts(f.host).filter((t) => t.includes("範本")), []);
+  });
+
+  test("EMPTY_TEXT 逐字（DS-27）、不以「或」「、」「，」結尾；原始碼可見字串不含「注入領域範本」", () => {
+    assert.equal(v.EMPTY_TEXT, "尚未新增自訂單字。可用上方表單新增。");
+    assert.ok(v.EMPTY_TEXT.endsWith("。"));
+    assert.ok(!/[或、，]$/.test(v.EMPTY_TEXT.slice(0, -1)));
+    assert.ok(!/English Master Track/i.test(v.EMPTY_TEXT));
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const src = fs.readFileSync(path.join(__dirname, "..", "views", "custom-vocab.js"), "utf8");
+    assert.ok(!src.includes("注入領域範本"));
+    assert.ok(!src.includes("cv-item__source"), "不再建立來源標示（FB-51）");
+    assert.ok(!src.includes('"範本：'), "不再組「範本：」字串");
+  });
+
+  test("HT-9／AC-43-03：10 個範本字 + 1 個表單字啟動 → 11 項皆只標「自訂擴充」；新增 latency → 單字已存在；刪除 1 個範本字；匯出欄位不變", () => {
+    // 準備：v0.13 以前注入的 10 個資工字 + 表單新增 1 個字，寫入 localStorage（schemaVersion 2）
+    const prep = setup();
+    assert.equal(prep.a.injectTemplate("cs").injected, 10);
+    assert.ok(prep.a.addCustomWord(F.customFields("Zymurgy", "釀造學")).ok);
+    const saved = Object.fromEntries(prep.storage.map);
+
+    // 以該 localStorage 啟動
+    const f = setup({ storage: F.fakeStorage(saved) });
+    const before = JSON.parse(JSON.stringify(f.store.getState().data.customVocab));
+    assert.equal(before.length, 11);
+    assert.equal(before.filter((x) => x.origin === "template").length, 10);
+    assert.ok(before.some((x) => x.word === "Latency") && before.some((x) => x.word === "Scalability"));
+    f.view.mount(null);
+    f.view.show();
+    f.flushIdle();
+    const items = findAll(f.host, "cv-item");
+    assert.equal(items.length, 11);
+    for (const li of items) {
+      const badges = findAll(li, "cv-badge").map((n) => n.textContent);
+      assert.deepEqual(badges, ["自訂擴充"]);
+      assert.equal(find(li, "cv-item__source"), null);
+      assert.ok(!li.textContent.includes("範本"));
+    }
+
+    // 以表單新增 latency → 欄位錯誤「單字已存在」，清單不變
+    const word = find(f.host, "cv-form__field--word").childNodes[1];
+    const meaning = find(f.host, "cv-form__field--meaning").childNodes[1];
+    word.value = "latency"; meaning.value = "延遲";
+    find(f.host, "cv-form").dispatch("submit");
+    assert.equal(find(f.host, "cv-form__field--word").childNodes[2].textContent, "單字已存在");
+    assert.equal(f.store.getState().data.customVocab.length, 11);
+
+    // 刪除 1 個範本字（Latency）→ 10 項，其餘物件逐欄相同
+    const idx = f.words().indexOf("Latency");
+    assert.ok(idx >= 0);
+    findAll(f.host, "cv-item__delete")[idx].click();
+    f.flushIdle();
+    const after = f.store.getState().data.customVocab;
+    const expected = before.filter((x) => x.word !== "Latency");
+    assert.equal(after.length, 10);
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(after)), expected);
+    assert.equal(findAll(f.host, "cv-item").length, 10);
+
+    // 匯出：customVocab 與原值（去掉刪除者）相同，origin／templateId 保留
+    const backup = JSON.parse(f.store.actions.exportBackup().json);
+    assert.deepStrictEqual(backup.data.customVocab, expected);
+    const tpl = backup.data.customVocab.filter((x) => x.origin === "template");
+    assert.equal(tpl.length, 9);
+    assert.ok(tpl.every((x) => x.templateId === "cs"));
   });
 });

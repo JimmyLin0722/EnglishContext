@@ -1,9 +1,9 @@
 {
   "stats": {
-    "total": 270,
-    "paused": 22,
+    "total": 278,
+    "paused": 27,
     "pass": 187,
-    "passManual": 52,
+    "passManual": 55,
     "manual": 9,
     "fail": 0,
     "uncovered": 0
@@ -71,7 +71,17 @@
       "verdict": "通過",
       "tcs": [
         "TC-26-04",
-        "TC-01-07"
+        "TC-01-07",
+        "TC-01-08"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-01-08",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-01-08"
       ],
       "human": ""
     },
@@ -303,7 +313,8 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-04-06"
+        "TC-04-06",
+        "TC-43-03a"
       ],
       "human": ""
     },
@@ -312,7 +323,8 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-04-07"
+        "TC-04-07",
+        "TC-43-03a"
       ],
       "human": ""
     },
@@ -337,8 +349,8 @@
     },
     {
       "ac": "AC-05-01",
-      "paused": false,
-      "verdict": "通過",
+      "paused": true,
+      "verdict": "不適用（暫停）",
       "tcs": [
         "TC-D11",
         "TC-05-01"
@@ -347,8 +359,8 @@
     },
     {
       "ac": "AC-05-02",
-      "paused": false,
-      "verdict": "通過",
+      "paused": true,
+      "verdict": "不適用（暫停）",
       "tcs": [
         "TC-D11",
         "TC-05-02"
@@ -357,8 +369,8 @@
     },
     {
       "ac": "AC-05-03",
-      "paused": false,
-      "verdict": "通過",
+      "paused": true,
+      "verdict": "不適用（暫停）",
       "tcs": [
         "TC-D11",
         "TC-05-03"
@@ -367,8 +379,8 @@
     },
     {
       "ac": "AC-05-04",
-      "paused": false,
-      "verdict": "通過",
+      "paused": true,
+      "verdict": "不適用（暫停）",
       "tcs": [
         "TC-05-02"
       ],
@@ -376,8 +388,8 @@
     },
     {
       "ac": "AC-05-05",
-      "paused": false,
-      "verdict": "通過",
+      "paused": true,
+      "verdict": "不適用（暫停）",
       "tcs": [
         "TC-05-05"
       ],
@@ -438,7 +450,8 @@
       "tcs": [
         "TC-06-06",
         "TC-04-08b",
-        "TC-39-03b"
+        "TC-39-03b",
+        "TC-43-02"
       ],
       "human": ""
     },
@@ -998,7 +1011,8 @@
       "verdict": "通過",
       "tcs": [
         "TC-17-06",
-        "TC-39-04"
+        "TC-39-04",
+        "TC-39-04v"
       ],
       "human": ""
     },
@@ -1135,7 +1149,8 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-24-08"
+        "TC-24-08",
+        "TC-43-03b"
       ],
       "human": ""
     },
@@ -1185,7 +1200,8 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-23-01"
+        "TC-23-01",
+        "TC-43-03a"
       ],
       "human": ""
     },
@@ -1200,6 +1216,7 @@
         "TC-25-07",
         "TC-39-06",
         "TC-23-02c",
+        "TC-42-01a",
         "TC-D18"
       ],
       "human": ""
@@ -1348,6 +1365,7 @@
         "TC-37-01a",
         "TC-37-01b",
         "TC-37-05a",
+        "TC-42-03a",
         "TC-M01"
       ],
       "human": ""
@@ -1442,8 +1460,7 @@
       "tcs": [
         "TC-22-05b",
         "TC-25-01",
-        "TC-41-01",
-        "TC-R5-J4"
+        "TC-41-01"
       ],
       "human": ""
     },
@@ -1488,7 +1505,9 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-25-06"
+        "TC-25-06",
+        "TC-43-01",
+        "TC-01-08"
       ],
       "human": ""
     },
@@ -1624,7 +1643,10 @@
       "tcs": [
         "TC-27-03",
         "TC-36-03b",
-        "TC-M09"
+        "TC-42-01a",
+        "TC-42-01b",
+        "TC-M09",
+        "TC-VER-H1"
       ],
       "human": "TC-M09（虛擬鍵盤）"
     },
@@ -2275,6 +2297,8 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
+        "TC-42-04a",
+        "TC-42-04c",
         "TC-36-01a",
         "TC-36-01b",
         "TC-36-01c",
@@ -2287,6 +2311,7 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
+        "TC-42-02",
         "TC-PS-04",
         "TC-PS-05",
         "TC-36-01b",
@@ -2304,7 +2329,9 @@
         "TC-36-03c",
         "TC-36-04b",
         "TC-36-03d",
-        "TC-PWA-H5"
+        "TC-PWA-H5",
+        "TC-42-04d",
+        "TC-VER-H3"
       ],
       "human": ""
     },
@@ -2343,9 +2370,11 @@
       "paused": false,
       "verdict": "待人工",
       "tcs": [
+        "TC-42-02",
         "TC-PS-01",
         "TC-36-07a",
-        "TC-PWA-H4"
+        "TC-PWA-H4",
+        "TC-VER-H2"
       ],
       "human": "TC-PWA-H4（MC-03 後）"
     },
@@ -2396,6 +2425,7 @@
       "tcs": [
         "TC-37-05b",
         "TC-37-05a",
+        "TC-42-01b",
         "TC-PS-05"
       ],
       "human": ""
@@ -2414,7 +2444,8 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-38-01"
+        "TC-38-01",
+        "TC-39-04v"
       ],
       "human": ""
     },
@@ -2443,7 +2474,8 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-38-04"
+        "TC-38-04",
+        "TC-39-04v"
       ],
       "human": ""
     },
@@ -2465,7 +2497,7 @@
       "verdict": "通過",
       "tcs": [
         "TC-38-06",
-        "TC-R5-J1"
+        "TC-39-04v"
       ],
       "human": ""
     },
@@ -2484,8 +2516,7 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-38-08",
-        "TC-R5-J1"
+        "TC-38-08"
       ],
       "human": ""
     },
@@ -2494,7 +2525,8 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-38-09"
+        "TC-38-09",
+        "TC-39-04v"
       ],
       "human": ""
     },
@@ -2533,8 +2565,7 @@
       "verdict": "通過",
       "tcs": [
         "TC-39-03",
-        "TC-39-03b",
-        "TC-R5-J2"
+        "TC-39-03b"
       ],
       "human": ""
     },
@@ -2543,7 +2574,9 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-39-04"
+        "TC-39-04",
+        "TC-39-04v",
+        "TC-V-S03"
       ],
       "human": ""
     },
@@ -2552,8 +2585,7 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-39-05",
-        "TC-R5-J2"
+        "TC-39-05"
       ],
       "human": ""
     },
@@ -2571,8 +2603,7 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-39-07",
-        "TC-R5-J3"
+        "TC-39-07"
       ],
       "human": ""
     },
@@ -2581,8 +2612,7 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-39-08",
-        "TC-R5-J2"
+        "TC-39-08"
       ],
       "human": ""
     },
@@ -2637,8 +2667,7 @@
       "paused": false,
       "verdict": "通過",
       "tcs": [
-        "TC-41-01",
-        "TC-R5-J4"
+        "TC-41-01"
       ],
       "human": ""
     },
@@ -2667,7 +2696,90 @@
       "verdict": "通過（另待人工確認）",
       "tcs": [
         "TC-41-04",
-        "TC-LAY-H1"
+        "TC-42-01a",
+        "TC-42-01b",
+        "TC-LAY-H1",
+        "TC-VER-H1"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-42-01",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-42-01a",
+        "TC-42-01b",
+        "TC-X-edge",
+        "TC-VER-H1",
+        "TC-V-S03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-42-02",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-42-02",
+        "TC-VER-H2",
+        "TC-V-S01",
+        "TC-V-S02"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-42-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-42-03a",
+        "TC-42-01b",
+        "TC-V-S01"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-42-04",
+      "paused": false,
+      "verdict": "通過（另待人工確認）",
+      "tcs": [
+        "TC-42-04a",
+        "TC-42-04b",
+        "TC-42-04c",
+        "TC-42-04d",
+        "TC-VER-H3"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-43-01",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-43-01",
+        "TC-43-02",
+        "TC-X-edge"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-43-02",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-43-02",
+        "TC-V-S03"
+      ],
+      "human": ""
+    },
+    {
+      "ac": "AC-43-03",
+      "paused": false,
+      "verdict": "通過",
+      "tcs": [
+        "TC-43-03a",
+        "TC-43-03b"
       ],
       "human": ""
     }

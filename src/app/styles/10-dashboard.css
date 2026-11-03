@@ -92,7 +92,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   min-height: 44px;
   margin: 12px 0 0;
   min-width: 0;
@@ -118,14 +118,23 @@
   overflow-wrap: anywhere;
 }
 
-.db-goal__sep {
-  color: var(--text-muted);
-}
-
+/* （v0.9，FE-66；AC-39-04、Q-61、V-LAY-10）「變更」外框按鈕：白底、四邊 1px 深藍框、無底線、≥ 44×44，置於行末 */
 .db-change {
   min-height: 44px;
   min-width: 44px;
-  padding: 0 8px;
+  margin-left: auto;
+  padding: 0 14px;
+  background: var(--surface);
+  border: 1px solid var(--brand-deep);
+  color: var(--brand-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .db-change:hover {
+    background: var(--tint);
+  }
 }
 
 /* ─── (2) 3 格數據（同一張卡片內；格本身無邊框、無背景，VC-4） ─── */

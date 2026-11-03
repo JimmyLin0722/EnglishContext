@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { launch, recorder, sleep, FILE_URL, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeTts, fakeStt, fakeClipboard, storageMode, fakeMic } from "./lib/inits.mjs";
-import { stateRecord, readState, dashGoal, expandBackup } from "./lib/state.mjs";
+import { stateRecord, readState, dashGoal, GOAL_LINE, expandBackup, injectTpl } from "./lib/state.mjs";
 
 const R = recorder("e2e-env");
 const KEY = "englishMasterTrack:state";
@@ -32,7 +32,7 @@ async function open(inits = [], vp = [1366, 900]) {
     const banner = await p.ev(`document.getElementById("app-banner").innerText`);
     await p.go("customizer"); await p.click('.cz-level[data-color="brown"]'); await p.click("#cz-apply");
     await p.type("#cv-word", "qastorageoff"); await p.type("#cv-meaning", "停用測試"); await p.click('.cv-form button[type="submit"]'); await sleep(80);
-    await p.click('[data-template="cs"]'); await sleep(80);
+    await injectTpl(p, "cs"); await sleep(80);
     await p.go("flashcards"); const total = await p.text(".fc-total"); await p.click(".fc-flip");
     await p.go("part5"); await p.click("[data-p5=option]", 0); const answered = await p.ev(`EMT.store.getState().data.part5.totalAnswered`);
     await p.go("dashboard"); await sleep(300); await expandBackup(p); await p.click('[data-action="export-backup"]');
@@ -58,7 +58,7 @@ async function open(inits = [], vp = [1366, 900]) {
     const n = (await toasts(p)).length;
     await p.type("#cv-word", "qaquotafail"); await p.type("#cv-meaning", "容量不足"); await p.click('.cv-form button[type="submit"]'); await sleep(80);
     const msg = await p.ev(`(() => { const m = document.querySelector(".cv-form__message"); return [m && !m.hidden ? m.textContent : "", ...[...document.querySelectorAll(".cv-form .field__error")].filter((e) => !e.hidden).map((e) => e.textContent)].filter(Boolean); })()`);
-    await p.click('[data-template="business"]'); await sleep(100);
+    await injectTpl(p, "business"); await sleep(100);
     const tst = (await toasts(p)).slice(n);
     const status = await p.ev(`(() => { const s = document.querySelector(".cv-templates__status"); return s && !s.hidden ? s.textContent : ""; })()`);
     const after = await p.ev(`localStorage.getItem(${JSON.stringify(KEY)})`);
@@ -106,7 +106,7 @@ async function open(inits = [], vp = [1366, 900]) {
       // 第 5 輪：v0.12 主控台精簡、資料備份預設收合，畫面文字少於舊門檻 200 字；改以主控台主要元素可見判定「正常顯示」
       const visible = await p.ev(`(() => { const b = document.querySelector("#view-dashboard .db-start"); return !!b && b.getClientRects().length > 0 && document.body.innerText.length > 50; })()`);
       const g = (await readState(p)).data.goal;
-      const good = t.includes("資料讀取失敗，已重設") && d === "綠級・每日 15 字・變更" && g.appliedScore === 725 && saved === v && visible;
+      const good = t.includes("資料讀取失敗，已重設") && d === GOAL_LINE.green && g.appliedScore === 725 && saved === v && visible;
       ok = ok && good; out.push(`${k}：toast ${JSON.stringify(t)}、主控台 ${d}、localStorage 目標分數 ${g.appliedScore}、原字串保存=${saved === v}、畫面正常顯示=${visible}`);
     }
     return { ok: ok && p.log.exceptions.length === 0, note: out.join("；") };
@@ -120,7 +120,7 @@ async function open(inits = [], vp = [1366, 900]) {
   await p.goto();
   await R.check("TC-21-01", "AC-21-01、AC-18-06、AC-19-03", async () => {
     const start = p.log.requests.length;
-    await p.go("customizer"); await p.click('.cz-level[data-color="brown"]'); await p.click("#cz-apply"); await p.click('[data-template="biostat"]');
+    await p.go("customizer"); await p.click('.cz-level[data-color="brown"]'); await p.click("#cz-apply"); await injectTpl(p, "biostat");
     await p.type("#cv-word", "qanet"); await p.type("#cv-meaning", "網路"); await p.click('.cv-form button[type="submit"]');
     await p.go("flashcards"); await p.click(".fc-flip"); await p.click(".fc-next"); await p.click(".fc-front .sp-tts__btn"); await p.ev(`EMT.store.actions.acknowledgeSttNotice()`);
     await micOn(p); await p.ev(`window.__qaMic.setDb(-20)`); await sleep(300); await p.ev(`(() => { const r = window.__qaStt.last; r.emitResult("hello"); r.emitEnd(); })()`);
@@ -249,7 +249,7 @@ const LAYOUT = `(() => {
   await T("中文釋義欄", "#cv-meaning", async () => (await p.ev(`document.activeElement.id`)) === "cv-meaning");
   await p.send("Input.insertText", { text: "觸控" });
   await T("新增單字", '.cv-form button[type="submit"]', async () => (await p.ev(`EMT.store.getState().data.customVocab.length`)) === 1);
-  await T("範本 資工", '[data-template="cs"]', async () => (await p.ev(`EMT.store.getState().data.customVocab.length`)) === 11);
+  await injectTpl(p, "cs"); // 第 6 輪：範本按鈕已隱藏（AC-43-01），不再列入觸控目標；以 store 注入維持後續「刪除自訂字」的前置狀態
   await T("刪除自訂字", ".cv-item__delete", async () => { if (await p.ev(`!!document.querySelector(".dialog")`)) await p.tap('.dialog [data-action="ok"]'); return (await p.ev(`EMT.store.getState().data.customVocab.length`)) === 10; });
   await navTo("flashcards");
   await T("翻面", ".fc-flip", async () => (await p.ev(`document.querySelector(".fc-card").dataset.flipped`)) === "true");
@@ -318,7 +318,7 @@ async function perfRun(withLoads) {
         } else { strict.push(l); strictRaf.push(l); }
       } return { loose, strict, strictRaf, hostInfo }; })()`);
     await p.go("customizer");
-    for (const t of ["cs", "business", "biostat"]) await p.click(`[data-template="${t}"]`);
+    for (const t of ["cs", "business", "biostat"]) await injectTpl(p, t);
     const apply = await p.ev(`(async () => { const out = []; for (let i = 0; i < 10; i++) { if (document.querySelector(".dialog")) throw new Error("套用量測中出現確認視窗"); document.querySelector('.cz-level[data-color="' + (i % 2 ? "green" : "brown") + '"]').click(); const t0 = performance.now(); document.getElementById("cz-apply").click();
       await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0))); out.push(+(performance.now() - t0).toFixed(1)); } return out; })()`);
     // v0.10（AC-22-04 改寫）：點選色級卡片（未套用）到選中狀態與試算繪製完成

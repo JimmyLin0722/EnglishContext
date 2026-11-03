@@ -225,6 +225,15 @@ pre {
   color: var(--text-muted);
 }
 
+/* （v0.9，FE-64）頁尾版本行：「資料來源與授權」正下方、純文字、單行（VR-7；architecture.md §7.20.1） */
+.app-footer__version {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 /* ─── 導覽：行動版（< 768px）選單鈕展開 2 欄（v0.5 起 4 鈕 = 2 × 2） ─── */
 .app-nav {
   display: none;

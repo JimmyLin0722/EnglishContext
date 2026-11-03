@@ -5,6 +5,7 @@ import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeTts, fakeStt, storageMode, controllableClock, fakeMic } from "./lib/inits.mjs";
+import { injectTpl } from "./lib/state.mjs"; // 第 6 輪：範本按鈕隱藏（AC-43-01）
 // 第 3 輪（PRD v0.9／v0.10）：主控台目標區 3 項（無目標分數）；改點卡片套用；按麥克風先取得麥克風（fakeMic）
 // 第 5 輪（PRD v0.13）：主控台改版（US-39）：主環形圖中央只顯示 X（SD-FB-40）、2 個小環形圖改為 3 格數據的數字（AC-30-01、AC-30-10）、
 // 近 7 天全 0 改顯示空狀態「開始學習後會顯示紀錄」（AC-30-12、AC-39-07）
@@ -257,7 +258,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     // 此時時鐘在 T2，記憶體 todayLearned 仍為 T1（尚未有學習事件換日）；以「非學習 action」觸發寫入
     const mem = await p.ev(`EMT.store.getState().data.todayLearned.date`);
     const out = []; let ok = true;
-    for (const [k, fn] of [["點藍卡並套用（生效色級不變，無確認視窗）", async () => { await applyCard(p, "blue"); }], ["模擬測驗作答", async () => { await p.go("part5"); await p.click("[data-p5=option]", 0); }], ["注入範本", async () => { await p.go("customizer"); await p.click('[data-template="cs"]'); await sleep(100); }]]) {
+    for (const [k, fn] of [["點藍卡並套用（生效色級不變，無確認視窗）", async () => { await applyCard(p, "blue"); }], ["模擬測驗作答", async () => { await p.go("part5"); await p.click("[data-p5=option]", 0); }], ["注入範本（v0.14 按鈕隱藏，以 store 注入）", async () => { await p.go("customizer"); await injectTpl(p, "cs"); await sleep(100); }]]) {
       const saved0 = (await stored(p)).savedAt;
       await fn(); await sleep(80);
       const rec = await stored(p); const st = rec.data; const wrote = rec.savedAt !== saved0;

@@ -14,7 +14,8 @@
  * - 「套用」「開始學習」不讀輸入框，直接以 store 的 draftScore 套用（GS-3、AC-26-06）
  *
  * 版面（掛在 #customizer-goal）：
- * - 狀態列（.cz-status-slot）：「目前目標色級」「目前生效色級」（藍、金套用後生效顯示「綠（內建上限）」）
+ * - 狀態列（.cz-status-slot）：（v0.9，FE-67；契約 v0.14 LS-1～LS-5、AC-01-08）恰一行 p.cz-status__line#cz-st-line
+ *   「目前色級：{已套用的生效色級}」（layout.levelStatusText）；藍、金套用後為「目前色級：綠」，不附加任何註記
  * - 色級區：橘、棕、綠、藍、金 5 張大卡片（整張為 <button>，aria-pressed 表示選中）；點擊呼叫 actions.clickColor
  *   （GS-2：draftScore = 該色 scoreMax）；選中卡片 = colorOf(draftScore)；只切換 aria-pressed 與選中 class，
  *   不重建卡片（AC-26-03、AC-22-04）
@@ -36,7 +37,7 @@
  * - DOM 只建立一次（啟動後閒置預建，或第一次 mount，以先到者為準）；之後的更新只改既有節點的文字與屬性，
  *   不重建（AC-02-07、AC-22-04）。閒置預建讓第一次切到本頁時不必在點擊事件內建 DOM（AC-22-01，BUG-002）。
  * - 所有文字以 textContent 寫入（經 EMT.core.dom），不使用任何 HTML 字串 API（C-7）。
- * - 純顯示邏輯（levelRows、firstRunSummary、estimateTexts、statusTexts、formatInt）不碰 DOM，Node 下可 require 測試。
+ * - 純顯示邏輯（levelRows、firstRunSummary、estimateTexts、statusLine、formatInt）不碰 DOM，Node 下可 require 測試。
  *
  * （v0.12，FE-57；architecture.md v0.8 §4.8、§7.19.5；契約 README §11.5 FT-1～FT-6、LAYOUT_TEXTS 首次畫面段）
  * - 色級大卡片改為 5 列精簡色級列（.cz-level，兩種模式共用；cardModels → levelRows）；列表上方說明行恰 1 個
@@ -76,9 +77,6 @@
   var T = {
     title: "難易度設定",
     intro: "選擇色級即時試算，按「套用」後才會更新單字卡的單字集。",
-    statusTarget: "目前目標色級",
-    statusEffective: "目前生效色級",
-    builtinCap: "（內建上限）",
     colorHeading: "色級",
     vocabNote: "本系統建議字量",
     // （v0.12，FE-57；SD-FB-41）色級列表上方說明行 = LAYOUT_TEXTS.vocabNoteLead + 本段（整個列表上方 1 次）
@@ -243,22 +241,16 @@
   }
 
   /**
-   * 狀態列文字（AC-01-02、AC-01-06、AC-01-07）。（v0.10，AC-26-05 (b)）不含目標分數。
+   * （v0.9，FE-67；LS-1、AC-01-08）狀態列一行文字「目前色級：{color}」。
+   * 只看已套用的 goal.effectiveColor（不看 draftScore、appliedColor）；藍、金套用時生效為綠 →「目前色級：綠」。
+   * 色級無法辨識 → 「目前色級：—」。不含目標分數（AC-26-05 (b)）。
    * @param {object} G core/goal.js
-   * @param {{appliedColor: string, effectiveColor: string}} goal
-   * @returns {{target: string, effective: string, greenCap: boolean}}
+   * @param {object} L core/layout.js
+   * @param {{effectiveColor: string}} goal
+   * @returns {{text: string}}
    */
-  function statusTexts(G, goal) {
-    var applied = goal && goal.appliedColor;
-    var eff = goal && goal.effectiveColor;
-    var lvEff = G.levelOf(eff);
-    var lvApplied = G.levelOf(applied);
-    var capped = !!lvApplied && !G.isOpenColor(applied);
-    return {
-      target: lvApplied ? lvApplied.nameZh : T.unknown,
-      effective: lvEff ? (capped ? lvEff.nameZh + T.builtinCap : lvEff.nameZh) : T.unknown,
-      greenCap: capped
-    };
+  function statusLine(G, L, goal) {
+    return { text: L.levelStatusText(G.levelOf(goal && goal.effectiveColor)) };
   }
 
   /**
@@ -337,7 +329,7 @@
     levelRows: levelRows,
     firstRunSummary: firstRunSummary,
     estimateTexts: estimateTexts,
-    statusTexts: statusTexts
+    statusLine: statusLine
   };
 
   // ── 頁面模組（瀏覽器）──
@@ -485,15 +477,10 @@
         cap
       ]);
 
-      var statusCap = D.el("p", { className: "cz-warning cz-status__cap", text: T.greenCap });
-      refs.statusCap = statusCap;
-      var status = D.el("section", { className: "card cz-status", attrs: { "aria-label": "目前目標狀態" } }, [
-        D.el("dl", { className: "cz-rows cz-rows--status" }, [
-          row(T.statusTarget, "stTarget", "cz-st-target"),
-          row(T.statusEffective, "stEffective", "cz-st-effective")
-        ]),
-        statusCap
-      ]);
+      // （v0.9，FE-67；LS-1、LS-3）狀態列恰一行「目前色級：…」；不再有兩列 dl 與內建字庫上限提示
+      var stLine = D.el("p", { className: "cz-status__line", attrs: { id: "cz-st-line" }, text: "" });
+      refs.stLine = stLine;
+      var status = D.el("section", { className: "card cz-status", attrs: { "aria-label": "目前色級" } }, [stLine]);
 
       // 狀態列與按鈕區各放獨立容器（FE-32 首次模式只替換這兩區，不動卡片與分數區）
       var statusSlot = D.el("div", { className: "cz-status-slot" }, [status]);
@@ -643,12 +630,9 @@
       refs.firstBar.hidden = !m.showFirstBar;
     }
 
-    /** 狀態列：目前目標色級、目前生效色級（v0.10 不顯示目標分數） */
+    /** 狀態列：「目前色級：{生效色級}」一行（v0.9，LS-1；呼叫時機不變：init、goal tag 等，點色級列不呼叫） */
     function renderStatus() {
-      var t = statusTexts(G, goalState());
-      D.setText(refs.stTarget, t.target);
-      D.setText(refs.stEffective, t.effective);
-      refs.statusCap.hidden = !t.greenCap;
+      D.setText(refs.stLine, statusLine(G, L, goalState()).text);
     }
 
     /** 隱藏錯誤提示 */

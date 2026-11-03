@@ -4,6 +4,7 @@
  * 做法：以 tools/build.mjs 的 listAppFiles 取得實際串接順序，在只有 self／window／console 的 node:vm 沙箱
  *       （沒有 module、require、document、localStorage、資料全域變數）依序載入 src/app 全部 .js（不含 main.js、__tests__）。
  * （FE-44）v0.10：新增 SCORE_DEFAULT 725 與 scoreForCard 斷言。
+ * （FE-69）v0.14：新增 core/version.js、ui/version-line.js 與 layout.goalLineText、levelStatusText 斷言。
  * 背景：R6-1（backup.js 早於 persist.js 載入，載入時取用 EMT.core.persist 得到 undefined）在 Node 單元測試中
  *       因 require 不受順序影響而測不到；本檔對全部模組做同樣的瀏覽器環境模擬。
  */
@@ -377,5 +378,52 @@ describe("load-order.test.js：版面模組（v0.12，FE-62）", () => {
     assert.equal(L.FROZEN_IDENTIFIERS.backupFormatId, EMT.core.constants.BACKUP_FORMAT_ID);
     assert.equal(L.FROZEN_IDENTIFIERS.pwaCachePrefix, W.PWA_CACHE_PREFIX);
     assert.equal(L.FROZEN_IDENTIFIERS.buildIdMetaName, W.PWA_BUILD_ID_META_NAME);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// （v0.9，FE-69）v0.14 新模組：core/version.js（FE-63）、ui/version-line.js（FE-64）；layout 新函式（FE-65）
+// ─────────────────────────────────────────────────────────────
+
+describe("load-order.test.js：版本號與介面精簡（v0.14，FE-69）", () => {
+  const APP_DIR = path.join(__dirname, "..");
+  const BUILD_MJS = path.join(APP_DIR, "..", "..", "tools", "build.mjs");
+
+  test("依建置順序載入後 EMT.core.version、EMT.ui.versionLine 存在且載入不讀 document；layout.goalLineText、levelStatusText 存在；版本 meta 名稱 ≠ BUILD_ID meta 名稱", async () => {
+    const build = await import(pathToFileURL(BUILD_MJS).href);
+    const files = build.listAppFiles(APP_DIR).filter((f) => f !== "main.js");
+    for (const f of ["core/version.js", "ui/version-line.js"]) assert.ok(files.includes(f), "建置清單缺少 " + f);
+    assert.ok(files.indexOf("core/version.js") < files.findIndex((f) => f.startsWith("state/")));
+    assert.ok(files.indexOf("ui/version-line.js") < files.findIndex((f) => f.startsWith("views/")));
+    const errors = [];
+    const sandbox = { console: { log() {}, info() {}, debug() {}, warn: (...a) => errors.push(a), error: (...a) => errors.push(a) } };
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    let docReads = 0;
+    Object.defineProperty(sandbox, "document", { configurable: true, get() { docReads++; return undefined; } });
+    vm.createContext(sandbox);
+    const failures = [];
+    for (const rel of files) {
+      try {
+        vm.runInContext(fs.readFileSync(path.join(APP_DIR, rel), "utf8"), sandbox, { filename: rel });
+      } catch (e) {
+        failures.push(rel + "：" + e.message);
+      }
+    }
+    assert.deepEqual(failures, [], "載入時拋出例外");
+    assert.deepEqual(errors, [], "載入時輸出 console.error／warn");
+    assert.equal(docReads, 0, "載入過程不讀 document（LD-2）");
+    const EMT = sandbox.EMT;
+    assert.equal(typeof EMT.core.version, "object", "缺少 EMT.core.version");
+    assert.equal(typeof EMT.ui.versionLine, "object", "缺少 EMT.ui.versionLine");
+    assert.equal(typeof EMT.ui.versionLine.init, "function");
+    assert.equal(typeof EMT.core.layout.goalLineText, "function", "缺少 layout.goalLineText");
+    assert.equal(typeof EMT.core.layout.levelStatusText, "function", "缺少 layout.levelStatusText");
+    assert.equal(EMT.core.version.APP_VERSION_META_NAME, "emt-app-version");
+    assert.notEqual(EMT.core.version.APP_VERSION_META_NAME, EMT.core.pwa.PWA_BUILD_ID_META_NAME);
+    // 瀏覽器環境下組字可用（buildCode 於呼叫時取用 EMT.core.pwa）
+    assert.equal(EMT.core.version.versionLineText("1.0.0", "3f9a2c1d77e2b6a4"), "版本 1.0.0（建置 3f9a2c1）");
+    assert.equal(EMT.core.layout.levelStatusText(EMT.core.goal.levelOf("green")), "目前色級：綠");
+    assert.equal(EMT.core.layout.goalLineText(EMT.core.goal.levelOf("orange")), "橘級・每日 10 字");
   });
 });

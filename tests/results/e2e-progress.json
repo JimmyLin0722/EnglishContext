@@ -102,7 +102,7 @@
     "tc": "TC-30-07c",
     "ac": "AC-30-07、AC-30-13（FE-25／FE-30 跨午夜非學習寫入的正規化）",
     "result": "通過",
-    "note": "跨午夜前記憶體日期 2026-10-31；點藍卡並套用（生效色級不變，無確認視窗） → 有寫入、localStorage todayLearned {\"date\":null,\"wordKeys\":[]}、歷史 {\"2026-10-30\":5,\"2026-10-31\":1}；模擬測驗作答 → 有寫入、localStorage todayLearned {\"date\":null,\"wordKeys\":[]}、歷史 {\"2026-10-30\":5,\"2026-10-31\":1}；注入範本 → 有寫入、localStorage todayLearned {\"date\":null,\"wordKeys\":[]}、歷史 {\"2026-10-30\":5,\"2026-10-31\":1}；重新載入 →「今日已學 0 / 15 字」、長條 0,0,0,0,5,1,0"
+    "note": "跨午夜前記憶體日期 2026-10-31；點藍卡並套用（生效色級不變，無確認視窗） → 有寫入、localStorage todayLearned {\"date\":null,\"wordKeys\":[]}、歷史 {\"2026-10-30\":5,\"2026-10-31\":1}；模擬測驗作答 → 有寫入、localStorage todayLearned {\"date\":null,\"wordKeys\":[]}、歷史 {\"2026-10-30\":5,\"2026-10-31\":1}；注入範本（v0.14 按鈕隱藏，以 store 注入） → 有寫入、localStorage todayLearned {\"date\":null,\"wordKeys\":[]}、歷史 {\"2026-10-30\":5,\"2026-10-31\":1}；重新載入 →「今日已學 0 / 15 字」、長條 0,0,0,0,5,1,0"
   },
   {
     "suite": "e2e-progress",

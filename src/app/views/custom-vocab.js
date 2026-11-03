@@ -18,6 +18,14 @@
  *      離開頁面時卸下第 FIRST_BATCH 筆之後的節點（保留於快取），下次切回只需繪製少量節點。
  *   筆數文字、空狀態、「顯示更多」按鈕一律在同一事件內依完整清單更新，不受分批影響。
  *
+ * （v0.14，FE-68；契約 README §5.8 HT-6～HT-9、DS-27、DS-28、FB-51；architecture.md v0.9 §7.20.2）
+ * - 領域範本區塊（buildTemplates 回傳的 section.card.cv-section，即 HT-6 的「同一個外層容器」）建立時即帶
+ *   hidden 與 inert 兩個屬性，之後任何路徑都不改回可見；容器內的標題、說明、按鈕、注入結果與 onTemplate、
+ *   injectMessage、templateButtons、templateLabel、TEMPLATE_ORDER 全部保留（HT-8），只是不可觸發。
+ * - 畫面文字不得出現「範本」二字（HT-7；隱藏容器內文字豁免）：origin = "template" 的清單項目只顯示「自訂擴充」，
+ *   不另顯示領域名稱（FB-51 由 SD 定案）；自訂清單空狀態改為 EMPTY_TEXT（DS-27 定案文字）。
+ *   已注入的範本單字照原值保留、照常顯示與刪除（HT-9），本檔不需特別處理。
+ *
  * 純邏輯（訊息文字、欄位錯誤文字、清單截取、分批筆數）另以 module.exports 匯出供 Node 測試；
  * 瀏覽器下載入時只做登錄與 load 事件登記，不讀取 document、不操作 DOM（LD-2）。
  */
@@ -45,6 +53,9 @@
 
   /** 自訂字標記文字（AC-04-02） */
   var CUSTOM_BADGE = "自訂擴充";
+
+  /** 自訂清單空狀態文字（v0.14 DS-27 定案；仍引導使用表單，不提及已隱藏的功能，HT-7 (a)） */
+  var EMPTY_TEXT = "尚未新增自訂單字。可用上方表單新增。";
 
   /** 範本按鈕順序與預設名稱（AC-05-01）；名稱優先使用 DOMAIN_TEMPLATES 的 label */
   var TEMPLATE_ORDER = [
@@ -182,7 +193,7 @@
     });
   }
 
-  /** 範本代碼 → 名稱（清單中顯示來源用） */
+  /** 範本代碼 → 名稱（v0.14 起清單不再顯示來源名稱，FB-51；保留供日後開放，HT-8） */
   function templateLabel(buttons, id) {
     for (var i = 0; i < buttons.length; i++) {
       if (buttons[i].id === id) return buttons[i].label;
@@ -382,7 +393,11 @@
       });
       tplStatus = d.el("p", { className: "cv-templates__status", attrs: { role: "status", "aria-live": "polite" } });
       tplStatus.hidden = true;
-      return d.el("section", { className: "card cv-section", attrs: { "aria-labelledby": "cv-tpl-title" } }, [
+      // （v0.14，HT-6）外層容器同時帶 hidden 與 inert：不渲染、不可聚焦、不可觸發；之後任何路徑都不改回可見
+      return d.el("section", {
+        className: "card cv-section",
+        attrs: { "aria-labelledby": "cv-tpl-title", hidden: true, inert: "" }
+      }, [
         d.el("h2", { className: "cv-section__title", attrs: { id: "cv-tpl-title" }, text: "領域範本" }),
         d.el("p", { className: "cv-section__desc", text: "一鍵加入領域常用單字，已存在的字會自動略過。" }),
         d.el("div", { className: "btn-row cv-templates" }, btns),
@@ -402,11 +417,8 @@
 
     function buildItem(item) {
       var d = dom();
+      // （v0.14，HT-7 (b)、FB-51）origin = "template" 的項目與表單新增的字相同，只標「自訂擴充」
       var meta = [d.el("span", { className: "cv-badge", text: CUSTOM_BADGE })];
-      if (item.origin === "template") {
-        var lbl = templateLabel(buttons, item.templateId);
-        if (lbl) meta.push(d.el("span", { className: "cv-item__source", text: "範本：" + lbl }));
-      }
       var main = d.el("div", { className: "cv-item__main" }, [
         d.el("div", { className: "cv-item__head" }, [
           d.el("span", { className: "cv-item__word", attrs: { lang: "en" }, text: s(item.word) }),
@@ -519,7 +531,7 @@
     function buildList() {
       var d = dom();
       countEl = d.el("p", { className: "cv-list__count", attrs: { "aria-live": "polite" } });
-      emptyEl = d.el("p", { className: "cv-list__empty", text: "尚未新增自訂單字。可用上方表單新增，或注入領域範本。" });
+      emptyEl = d.el("p", { className: "cv-list__empty", text: EMPTY_TEXT });
       listEl = d.el("ul", { className: "cv-list", attrs: { "aria-label": "自訂單字清單" } });
       moreBtn = d.el("button", {
         className: "btn btn--secondary cv-list__more",
@@ -658,6 +670,7 @@
     syncCount: syncCount,
     fillCount: fillCount,
     CUSTOM_BADGE: CUSTOM_BADGE,
+    EMPTY_TEXT: EMPTY_TEXT,
     FIELDS: FIELDS,
     fieldErrorText: fieldErrorText,
     injectMessage: injectMessage,

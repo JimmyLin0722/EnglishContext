@@ -1,3 +1,4 @@
+// 第 6 輪（PRD v0.14）：範本按鈕隱藏，TC-05-* 記不適用（暫停）；需要範本單字的前置資料改用 injectTpl。
 // QA E2E 套件 2：自訂單字、領域範本、抽認卡、出處標示、四選一、打卡、備份匯出匯入
 // US-04、US-05、US-06、US-09、US-17（AC-17-02、AC-17-03、AC-17-05）、US-23（AC-23-01）、US-24
 import fs from "node:fs";
@@ -5,7 +6,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { launch, recorder, sleep, FILE_URL, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeTts, fakeStt, fakeDate, fakeMic } from "./lib/inits.mjs";
-import { stateRecord, seed, apply as applyGoal, clickCard, expandBackup } from "./lib/state.mjs";
+import { stateRecord, seed, apply as applyGoal, clickCard, expandBackup, injectTpl } from "./lib/state.mjs";
 // 第 5 輪（PRD v0.13）：匯出、匯入前先展開「資料備份」（AC-39-08）；單字掌握數改讀 3 格數據小字「已掌握 N 字」、打卡天數改讀 3 格數據（AC-39-05）
 // 第 3 輪（PRD v0.9／v0.10）：加麥克風替身（按麥克風先取得麥克風）；目標分數改以既有狀態或點卡片設定
 
@@ -112,7 +113,7 @@ await R.check("TC-04-04", "AC-04-04", async () => {
 
 await R.check("TC-04-06", "AC-04-06", async () => {
   const a = await addWord({ word: "Office", meaning: "辦公室" });
-  await p.click('[data-template="cs"]'); await sleep(100);
+  await injectTpl(p, "cs"); await sleep(100);
   const b = await addWord({ word: "LATENCY", meaning: "延遲" });
   const keys = (await state()).data.customVocab.map((c) => c.word.toLowerCase());
   return { ok: a.word === "單字已存在" && b.word === "單字已存在" && keys.filter((k) => k === "latency").length === 1 && !keys.includes("office"), note: `內建 Office → 「${a.word}」；自訂已有 Latency 再加 LATENCY → 「${b.word}」` };
@@ -127,58 +128,20 @@ await R.check("TC-04-05", "AC-04-05", async () => {
   return { ok: JSON.stringify(before) === JSON.stringify(after) && listText.includes("kubernetes") && listText.includes(XSS), note: `重載前後自訂單字 ${before.length} / ${after.length} 筆，內容完全相同=${JSON.stringify(before) === JSON.stringify(after)}` };
 });
 
-// ═════════ US-05 範本 ═════════
-await R.check("TC-05-01", "AC-05-01", async () => {
-  await p.go("customizer");
-  const b = await p.ev(`[...document.querySelectorAll(".cv-templates__btn")].map((x) => x.textContent)`);
-  return { ok: b.join("、") === "資工、商管、生醫統計", note: b.join("、") };
-});
-
-await R.check("TC-05-02", "AC-05-02、AC-05-04", async () => {
+// ═════════ US-05 範本（第 6 輪：PRD v0.14 暫停，R-22 二） ═════════
+// AC-05-01～AC-05-05 不驗收，記「不適用（暫停）」；畫面不可見改由 e2e-version.mjs TC-43-01 驗證，已注入單字的使用改由 TC-43-03。
+{
+  const why = "PRD v0.14 暫停（領域範本隱藏，R-22 二、Q-59）；改由 TC-43-01、TC-43-03 驗證";
+  for (const [tc, ac] of [["TC-05-01", "AC-05-01"], ["TC-05-02", "AC-05-02、AC-05-04"], ["TC-05-03", "AC-05-03"], ["TC-05-05", "AC-05-05"]]) R.na(tc, ac, why);
+  // 保留後續 TC-04-07、TC-04-08 需要的前置狀態（原 TC-05-03 結束時：只有生醫統計 10 字）
   await p.ev(`localStorage.clear()`); await p.reload(); await p.go("customizer");
-  const n = await toastCount();
-  await p.click('[data-template="cs"]'); await sleep(150);
-  const st1 = await p.ev(`(() => { const s = document.querySelector(".cv-templates__status"); return s && !s.hidden ? s.textContent : ""; })()`);
-  const t1 = await toastsSince(n);
-  const words = (await state()).data.customVocab.map((c) => c.word);
-  const n2 = await toastCount();
-  await p.click('[data-template="cs"]'); await sleep(150);
-  const st2 = await p.ev(`(() => { const s = document.querySelector(".cv-templates__status"); return s && !s.hidden ? s.textContent : ""; })()`);
-  const t2 = await toastsSince(n2);
-  const words2 = (await state()).data.customVocab.map((c) => c.word);
-  const msg1 = [st1, ...t1].join(" | "), msg2 = [st2, ...t2].join(" | ");
-  return { ok: words.includes("Latency") && words.includes("Scalability") && words.length === 10 && msg1.includes("已注入 10 個單字") && words2.length === 10 && msg2.includes("已注入 0 個單字（皆已存在）"),
-    note: `第一次：${words.length} 字、提示「${msg1}」；第二次：${words2.length} 字、提示「${msg2}」` };
-});
-
-await R.check("TC-05-03", "AC-05-03", async () => {
-  await p.ev(`localStorage.clear()`); await p.reload(); await p.go("customizer");
-  await p.click('[data-template="business"]'); await sleep(120);
-  const b = (await state()).data.customVocab.map((c) => c.word);
-  await p.ev(`localStorage.clear()`); await p.reload(); await p.go("customizer");
-  await p.click('[data-template="biostat"]'); await sleep(120);
-  const s = (await state()).data.customVocab.map((c) => c.word);
-  return { ok: b.length === 10 && b.includes("Monetization") && s.length === 10 && s.includes("Heterogeneous"), note: `商管 ${b.length} 字（${b.join(",")}）；生醫統計 ${s.length} 字（${s.join(",")}）` };
-});
-
-await R.check("TC-05-05", "AC-05-05", async () => {
-  const n = await studyLen();
-  await gotoCard(n - 10);
-  const c = await card();
-  const before = await p.ev(`window.__qaTts.spoken.length`);
-  await p.click(".fc-front .sp-tts__btn", 1); await sleep(150);
-  const sp = await p.ev(`window.__qaTts.spoken.slice(${before})`);
-  await p.ev(`EMT.store.actions.acknowledgeSttNotice()`);
-  await p.click(".fc-front .sp-mic"); await sleep(250);
-  await p.ev(`window.__qaStt.last.emitResult(${JSON.stringify(c.word)}); window.__qaStt.last.emitEnd()`); await sleep(120);
-  const score = await p.ev(`(() => { const r = document.querySelector(".fc-front .sp-result"); return r && !r.hidden ? r.innerText : ""; })()`);
-  return { ok: c.attrib.includes("自訂擴充") && sp.length === 1 && sp[0].text === c.word && score.includes("100"), note: `卡片 ${c.word}（${c.pos}）出處「${c.attrib.join("/")}」；0.75x 朗讀 ${JSON.stringify(sp)}；STT 結果「${score.replace(/\n/g, " ")}」` };
-});
+  await injectTpl(p, "biostat"); await sleep(120);
+}
 
 // ═════════ AC-04-07、AC-04-08 刪除 ═════════
 await R.check("TC-04-07", "AC-04-07", async () => {
   await p.go("customizer");
-  await p.click('[data-template="business"]'); await sleep(120);
+  await injectTpl(p, "business"); await sleep(120);
   const n0 = await studyLen();
   const idx = await p.ev(`[...document.querySelectorAll(".cv-item")].findIndex((li) => li.querySelector(".cv-item__word").textContent === "Monetization")`);
   await p.click(".cv-item__delete", idx); await sleep(150);
@@ -401,7 +364,7 @@ await R.check("TC-24-01", "AC-24-01、AC-24-02", async () => {
   // 建立學習資料
   await seed(p, stateRecord(300)); // v0.10：畫面無分數輸入，以既有狀態 300（棕）開始（FB-36）
   await p.go("customizer");
-  await p.click('[data-template="cs"]'); await sleep(80);
+  await injectTpl(p, "cs"); await sleep(80);
   await gotoCard(0); await p.click(".fc-mode-btn"); await sleep(50);
   const q = await quiz(); const m = await meaningOf(q.word); await p.click(".fcq-option", q.opts.findIndex((o) => o.t === m)); await p.click(".fc-mode-btn");
   await p.go("part5"); await p.click("[data-p5=option]", 0); await p.click("[data-p5=next]");

@@ -2,6 +2,8 @@
 // 以 os.tmpdir() 下的 fixture 目錄測試，不寫入 dist/。
 // （v0.7，FE-47）既有 fixture 的 opts 一律 site: false（舊模板無 @@BUILD_ID@@，走非 PWA 模式，既有斷言不變）；
 // 新增 PWA 建置（B-10～B-16、V-PWA-01～V-PWA-06、AC-36-01 三情境）與 tools/serve.mjs 測試，見檔尾。
+// （v0.9，FE-63）PWA fixture 模板加 emt-app-version meta，並以暫存 package.json（packageFile）建置；HD-1 改為 8 項；
+// 新增 B-17～B-19（V-VER-01、V-VER-02、V-VER-06、VR-4）測試，見檔尾。舊非 PWA fixture 無版本佔位 → 略過版本步驟。
 "use strict";
 
 const test = require("node:test");
@@ -559,7 +561,7 @@ function makePng(size, o = {}) {
   return Buffer.concat(parts);
 }
 
-/** HD-1 的 7 個靜態元素（逐字） */
+/** HD-1 的 8 個靜態元素（逐字；v0.9 起 emt-app-version 緊接 emt-build-id） */
 const HD1 = [
   '<meta name="theme-color" content="#1e9bf0">',
   '<meta name="apple-mobile-web-app-title" content="EnglishContext">',
@@ -567,8 +569,15 @@ const HD1 = [
   '<meta name="mobile-web-app-capable" content="yes">',
   '<meta name="apple-mobile-web-app-status-bar-style" content="default">',
   '<meta name="emt-build-id" content="@@BUILD_ID@@">',
+  '<meta name="emt-app-version" content="@@APP_VERSION@@">',
   '<link rel="icon" href="data:,">',
 ];
+/** data:, 圖示連結（HD1 中的位置隨版本 meta 加入而後移，以名稱取用） */
+const ICON_LINK = '<link rel="icon" href="data:,">';
+/** 暫存 package.json 的內容（只有 version 會被讀取） */
+function pkgJson(version, extra) {
+  return JSON.stringify(Object.assign({ name: "fixture", version }, extra), null, 2) + "\n";
+}
 
 const PWA_TEMPLATE_HTML = [
   "<!DOCTYPE html>",
@@ -608,6 +617,7 @@ function pwaFiles(over = {}) {
       "data/sources.js": 'window.PROJECT_LICENSE = { "copyrightHolder": "JimmyLin", "copyrightYear": 2026 };',
       "data/part5.js": 'window.PART5_QUESTION_BANK = [{ "id": "p5-001" }];',
       "ads.txt": ADS,
+      "package.json": pkgJson("1.0.0"),
     },
     over
   );
@@ -633,6 +643,7 @@ function pwaFixture(over) {
       data: path.join(dir, "data"),
       out,
       ads: path.join(dir, "ads.txt"),
+      packageFile: path.join(dir, "package.json"),
       log: () => {},
       warn: () => {},
     },
@@ -755,7 +766,8 @@ test("PWA (3) V-PWA-03：PNG 色彩類型 6、含 tRNS、尺寸不符、非正�
 
 test("PWA (4) V-PWA-04、HD-3：HD-1 缺任一 → PWA_HEAD；靜態 manifest／apple-touch-icon 連結、第二個 data:, 連結 → 中止", async () => {
   for (const e of HD1) {
-    await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace(e + "\n", "") }, e.includes("@@BUILD_ID@@") ? "PWA_TEMPLATE" : "PWA_HEAD");
+    const code = e.includes("@@BUILD_ID@@") ? "PWA_TEMPLATE" : e.includes("@@APP_VERSION@@") ? "APP_VERSION_TEMPLATE" : "PWA_HEAD";
+    await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace(e + "\n", "") }, code);
   }
   // HD-1 元素不在 </head> 之前
   await expectPwaAbort(
@@ -779,9 +791,9 @@ test("PWA (4) V-PWA-04、HD-3：HD-1 缺任一 → PWA_HEAD；靜態 manifest／
     await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("</head>", tag + "\n</head>") }, "EXTERNAL_RESOURCE");
   }
   // 第二個 data:, 連結
-  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("</head>", HD1[6] + "\n</head>") }, "PWA_HEAD");
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("</head>", ICON_LINK + "\n</head>") }, "PWA_HEAD");
   // 程式碼中出現白名單字串（第二次）也中止
-  await expectPwaAbort({ "app/core/z.js": "var s = '" + HD1[6] + "';\n" }, "PWA_HEAD");
+  await expectPwaAbort({ "app/core/z.js": "var s = '" + ICON_LINK + "';\n" }, "PWA_HEAD");
   // 指向檔案的 icon 連結：既有 <link href> 規則照常中止
   await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("</head>", '<link rel="icon" href="icons/icon-192.png">\n</head>') }, "EXTERNAL_RESOURCE");
 });
@@ -944,6 +956,10 @@ test("PWA (10) parseArgs：--site、--no-site、--ads 與衝突", async () => {
   assert.deepEqual(parseArgs(["--out", "a.html", "--site", "s", "--ads", "x.txt"]), { out: "a.html", site: "s", ads: "x.txt" });
   assert.deepEqual(parseArgs(["--site=s2", "--ads=y.txt"]), { site: "s2", ads: "y.txt" });
   assert.deepEqual(parseArgs(["--no-site", "--out", "b.html"]), { out: "b.html", site: false });
+  // （v0.9）--package <file> → packageFile
+  assert.deepEqual(parseArgs(["--package", "p.json"]), { packageFile: "p.json" });
+  assert.deepEqual(parseArgs(["--package=q.json", "--out", "c.html"]), { packageFile: "q.json", out: "c.html" });
+  assert.throws(() => parseArgs(["--package"]), (e) => e.code === "BAD_ARGS");
   assert.deepEqual(parseArgs([]), {});
   assert.throws(() => parseArgs(["--site", "s", "--no-site"]), (e) => e.code === "BAD_ARGS");
   assert.throws(() => parseArgs(["--no-site", "--site=s"]), (e) => e.code === "BAD_ARGS");
@@ -957,11 +973,12 @@ test("PWA (10b) CLI：預設部署目錄 = --out 所在目錄下的 site；報�
   try {
     const r = spawnSync(
       process.execPath,
-      [BUILD, "--out", fx.out, "--data", fx.opts.data, "--app", fx.opts.app, "--ads", fx.opts.ads],
+      [BUILD, "--out", fx.out, "--data", fx.opts.data, "--app", fx.opts.app, "--ads", fx.opts.ads, "--package", fx.opts.packageFile],
       { encoding: "utf8" }
     );
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /BUILD_ID：[0-9a-f]{16}/);
+    assert.match(r.stdout, /版本號：1\.0\.0/);
     for (const f of PWA.PWA_DEPLOY_FILES) assert.ok(r.stdout.includes(`${f.path}：`), f.path);
     assert.equal(listFiles(fx.siteDir).length, 8);
   } finally {
@@ -969,9 +986,9 @@ test("PWA (10b) CLI：預設部署目錄 = --out 所在目錄下的 site；報�
   }
 });
 
-test("PWA (11) 原始碼掃描：build.mjs 無 Math.random、Date.now、process.env、performance.now；new Date( 只在 buildLicenseHeader 預設參數", () => {
+test("PWA (11) 原始碼掃描：build.mjs 無 Math.random、Date.now、process.env、npm_package_version、performance.now；new Date( 只在 buildLicenseHeader 預設參數", () => {
   const src = fs.readFileSync(BUILD, "utf8");
-  for (const w of ["Math.random", "Date.now", "process.env", "performance.now"]) assert.ok(!src.includes(w), w);
+  for (const w of ["Math.random", "Date.now", "process.env", "npm_package_version", "performance.now"]) assert.ok(!src.includes(w), w);
   const dates = src.split("\n").filter((l) => l.includes("new Date("));
   assert.equal(dates.length, 1);
   assert.match(dates[0], /export function buildLicenseHeader\(text, license, warn, now = new Date\(\)\)/);
@@ -1076,4 +1093,202 @@ test("PWA (12b) serve.mjs：參數解析與 base 格式", async () => {
   assert.equal(serve.SERVE_DEFAULTS.port, 8080);
   assert.equal(serve.SERVE_DEFAULTS.base, "/english-master-track/");
   assert.equal(serve.SERVE_DEFAULTS.host, "127.0.0.1");
+});
+
+// ═══════════════════════════════════════════════════════════════
+// （v0.9，FE-63）網站版本號注入 B-17～B-19
+// 依據：architecture.md v0.9 §5.4、§10.6「build.test.js」；契約 README §12.1 VR-1～VR-4、VR-9、§12.4 V-VER-01、V-VER-02、V-VER-06
+// 一律以暫存 package.json（packageFile）建置，不讀寫專案根目錄 package.json。
+// ═══════════════════════════════════════════════════════════════
+
+const VERSION = require("../core/version.js");
+const PROJECT_PKG = path.join(ROOT, "package.json");
+const PROJECT_PKG_BEFORE = fs.readFileSync(PROJECT_PKG);
+const VERSION_META_RE = /<meta name="emt-app-version" content="([^"]*)">/g;
+const VERSION_META_TPL = '<meta name="emt-app-version" content="@@APP_VERSION@@">';
+
+test("V-VER-01：產物 emt-app-version 恰 1 個且 = fixture version；無 @@ 佔位殘留；build() 回傳 appVersion；報告列出版本號", async () => {
+  const lines = [];
+  const { res, fx } = await pwaBuild({ "package.json": pkgJson("2.13.40") }, { log: (s) => lines.push(s) });
+  try {
+    const html = fs.readFileSync(fx.out, "utf8");
+    const metas = [...html.matchAll(VERSION_META_RE)];
+    assert.equal(metas.length, 1);
+    assert.equal(metas[0][1], "2.13.40");
+    assert.equal(res.appVersion, "2.13.40");
+    assert.doesNotMatch(html, /@@[A-Za-z0-9_]+@@/);
+    assert.ok(!html.includes("@@"));
+    // 緊接 emt-build-id 之後（模板順序保留）
+    assert.ok(html.includes(`<meta name="emt-build-id" content="${res.buildId}">\n<meta name="emt-app-version" content="2.13.40">`));
+    assert.match(lines.join("\n"), /版本號：2\.13\.40/);
+    // 部署目錄 index.html 同一份（VR-9）
+    assert.ok(fs.readFileSync(path.join(fx.siteDir, "index.html")).equals(fs.readFileSync(fx.out)));
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("B-17 APP_VERSION_TEMPLATE：PWA 模式缺佔位、佔位 2 次、佔位在 meta 外、meta 在 </head> 後、程式或資料含佔位 → 中止且不寫檔", async () => {
+  const cases = [
+    PWA_TEMPLATE_HTML.replace(VERSION_META_TPL + "\n", ""),
+    PWA_TEMPLATE_HTML.replace("<body>", "<body>\n<!-- @@APP_VERSION@@ -->"),
+    PWA_TEMPLATE_HTML.replace(VERSION_META_TPL, '<meta name="x-version" content="@@APP_VERSION@@">'),
+    PWA_TEMPLATE_HTML.replace(VERSION_META_TPL + "\n", "").replace("<body>", "<body>\n" + VERSION_META_TPL),
+  ];
+  for (const tpl of cases) await expectPwaAbort({ "app/index.html": tpl }, "APP_VERSION_TEMPLATE");
+  await expectPwaAbort({ "app/core/z.js": "var p = '@@APP_VERSION@@';\n" }, "APP_VERSION_TEMPLATE");
+  await expectPwaAbort({ "data/part5.js": 'window.PART5_QUESTION_BANK = [{ "id": "@@APP_VERSION@@" }];' }, "APP_VERSION_TEMPLATE");
+});
+
+test("B-18 APP_VERSION：package 不存在、非 JSON、缺 version、v1.0.0、1.0、1.0.0-beta、1.0.0+1、01.0.0、數字 → 中止且不寫檔（訊息含實際值）", async () => {
+  await expectPwaAbort({ "package.json": null }, "APP_VERSION");
+  await expectPwaAbort({ "package.json": "{ not json" }, "APP_VERSION");
+  await expectPwaAbort({ "package.json": JSON.stringify({ name: "x" }) }, "APP_VERSION");
+  await expectPwaAbort({ "package.json": "[]" }, "APP_VERSION");
+  for (const v of ["v1.0.0", "1.0", "1.0.0-beta", "1.0.0+1", "01.0.0", " 1.0.0", ""]) {
+    await expectPwaAbort({ "package.json": pkgJson(v) }, "APP_VERSION");
+  }
+  await expectPwaAbort({ "package.json": JSON.stringify({ version: 1 }) }, "APP_VERSION");
+  const { readAppVersion } = await loadBuild();
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "emt-ver-"));
+  try {
+    const p = path.join(dir, "package.json");
+    fs.writeFileSync(p, pkgJson("v1.0.0"));
+    assert.throws(() => readAppVersion(p, VERSION), (e) => e.code === "APP_VERSION" && e.message.includes('"v1.0.0"'));
+    // 去 BOM、其他欄位不影響
+    fs.writeFileSync(p, "﻿" + pkgJson("0.10.3", { scripts: { build: "x" }, devDependencies: { a: "1" } }));
+    assert.equal(readAppVersion(p, VERSION), "0.10.3");
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("V-VER-02 (a)(b)(c)：同輸入兩次三檔相同；只改 version → meta 為 1.0.1、BUILD_ID 與 sw.js 不同；只改 1 個進入 HTML 的字元 → meta 不變、BUILD_ID 不同", async () => {
+  const { build } = await loadBuild();
+  const three = (r) => ({
+    html: r.html,
+    manifest: r.site.files.find((f) => f.path === "manifest.webmanifest").bytes.toString("utf8"),
+    sw: r.site.files.find((f) => f.path === "sw.js").bytes.toString("utf8"),
+  });
+  const once = (over) => {
+    const fx = pwaFixture(over);
+    try {
+      const r = build(Object.assign({}, fx.opts, { write: false }));
+      assert.equal(fs.existsSync(fx.out), false);
+      return r;
+    } finally {
+      fx.cleanup();
+    }
+  };
+  const meta = (r) => [...r.html.matchAll(VERSION_META_RE)].map((m) => m[1]);
+  const a = once();
+  const b = once();
+  assert.deepEqual(three(a), three(b));
+  assert.equal(a.buildId, b.buildId);
+  assert.deepEqual(meta(a), ["1.0.0"]);
+
+  const v101 = once({ "package.json": pkgJson("1.0.1") });
+  assert.deepEqual(meta(v101), ["1.0.1"]);
+  assert.notEqual(v101.buildId, a.buildId);
+  assert.notEqual(three(v101).sw, three(a).sw);
+  assert.equal(three(v101).manifest, three(a).manifest);
+
+  // 只改 package.json 的其他欄位 → 完全相同（只讀 version）
+  const other = once({ "package.json": pkgJson("1.0.0", { description: "changed", scripts: { x: "y" } }) });
+  assert.deepEqual(three(other), three(a));
+
+  const oneChar = once({ "app/core/a.js": "/* APP_B */ var a = 1;\n" });
+  assert.deepEqual(meta(oneChar), ["1.0.0"]);
+  assert.notEqual(oneChar.buildId, a.buildId);
+});
+
+test("VR-4：以 computeBuildId 對 HTML₀′（含版本號、emt-build-id 為佔位）重算 = 回傳 buildId；以仍含版本佔位的 HTML₀ 計算則不同", async () => {
+  const { computeBuildId } = await loadBuild();
+  const { res, fx } = await pwaBuild();
+  try {
+    const files = pwaFiles();
+    const html0v = res.html.replace(`content="${res.buildId}"`, 'content="@@BUILD_ID@@"');
+    assert.equal(html0v.split("@@BUILD_ID@@").length - 1, 1);
+    const records = (indexHtml) => [
+      { path: "index.html", bytes: Buffer.from(indexHtml, "utf8") },
+      { path: "manifest.webmanifest", bytes: res.site.files.find((f) => f.path === "manifest.webmanifest").bytes },
+      ...PWA.PWA_DEPLOY_FILES.filter((f) => f.sizePx).map((f) => ({
+        path: f.path,
+        bytes: files["app/assets/icons/" + f.path.replace("icons/", "")],
+      })),
+      { path: "sw.js", bytes: Buffer.from(SW_TEMPLATE_REAL, "utf8") },
+    ];
+    assert.equal(computeBuildId(records(html0v)), res.buildId);
+    const html0 = html0v.replace('<meta name="emt-app-version" content="1.0.0">', VERSION_META_TPL);
+    assert.notEqual(html0, html0v);
+    assert.notEqual(computeBuildId(records(html0)), res.buildId);
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("V-VER-06：建置碼 = buildId 前 7 碼 = sw.js BUILD_ID 前 7 碼；versionLineText 以產物兩個 meta 組字", async () => {
+  const { res, fx } = await pwaBuild();
+  try {
+    const sw = fs.readFileSync(path.join(fx.siteDir, "sw.js"), "utf8");
+    const swId = /var BUILD_ID = "([0-9a-f]{16})";/.exec(sw)[1];
+    assert.equal(swId.slice(0, 7), res.buildId.slice(0, 7));
+    assert.equal(VERSION.buildCode(res.buildId), swId.slice(0, 7));
+    const html = fs.readFileSync(fx.out, "utf8");
+    const ver = /<meta name="emt-app-version" content="([^"]*)">/.exec(html)[1];
+    const bid = /<meta name="emt-build-id" content="([^"]*)">/.exec(html)[1];
+    assert.equal(VERSION.versionLineText(ver, bid), `版本 1.0.0（建置 ${res.buildId.slice(0, 7)}）`);
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("非 PWA 舊 fixture：無版本佔位 → 略過版本步驟、appVersion 為 null、產物無版本 meta；非 PWA 但有佔位 → 照樣寫入", async () => {
+  const res = await runBuild({});
+  assert.equal(res.appVersion, null);
+  assert.ok(!res.written.includes("emt-app-version"));
+  const { build } = await loadBuild();
+  const fx = fixture({
+    "app/index.html": TEMPLATE.replace("<title>T</title>", "<title>T</title>\n" + VERSION_META_TPL),
+    "package.json": pkgJson("3.2.1"),
+  });
+  try {
+    const r = build(Object.assign({}, fx.opts, { packageFile: path.join(fx.dir, "package.json"), write: false }));
+    assert.equal(r.appVersion, "3.2.1");
+    assert.deepEqual([...r.html.matchAll(VERSION_META_RE)].map((m) => m[1]), ["3.2.1"]);
+    assert.ok(!r.html.includes("@@"));
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("B-19 checkAppVersionOutput：meta 0／2 個、值不符、殘留佔位 → 中止；略過模式下出現 meta → 中止", async () => {
+  const { checkAppVersionOutput } = await loadBuild();
+  const N = VERSION.APP_VERSION_META_NAME;
+  const P = VERSION.APP_VERSION_PATTERN;
+  const ok = '<head><meta name="emt-app-version" content="1.0.0"></head>';
+  const code = (html, v) => {
+    try {
+      checkAppVersionOutput(html, v, N, P);
+      return null;
+    } catch (e) {
+      return e.code;
+    }
+  };
+  assert.equal(code(ok, "1.0.0"), null);
+  assert.equal(code("<head></head>", "1.0.0"), "APP_VERSION");
+  assert.equal(code(ok + ok, "1.0.0"), "APP_VERSION");
+  assert.equal(code(ok, "1.0.1"), "APP_VERSION");
+  assert.equal(code(ok + "<!-- @@NEW_THING@@ -->", "1.0.0"), "PWA_HEAD");
+  assert.equal(code(ok, null), "APP_VERSION");
+  assert.equal(code("<head></head>", null), null);
+});
+
+test("build.mjs 常數：APP_VERSION_PLACEHOLDER、APP_VERSION_CORE_FILE 固定專案檔、DEFAULTS.package；專案 package.json 未被測試修改", async () => {
+  const B = await loadBuild();
+  assert.equal(B.APP_VERSION_PLACEHOLDER, "@@APP_VERSION@@");
+  assert.equal(B.APP_VERSION_CORE_FILE, path.join(ROOT, "src", "app", "core", "version.js"));
+  assert.equal(B.DEFAULTS.package, PROJECT_PKG);
+  assert.equal(B.loadVersionCore().APP_VERSION_META_NAME, "emt-app-version");
+  assert.ok(fs.readFileSync(PROJECT_PKG).equals(PROJECT_PKG_BEFORE));
 });

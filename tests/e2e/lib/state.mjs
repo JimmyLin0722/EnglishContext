@@ -1,3 +1,4 @@
+// 第 6 輪（PRD v0.14）：est() 改讀 #cz-st-line、dashGoal／GOAL_LINE 依 AC-39-04 v0.14、新增 injectTpl。
 // QA E2E 共用（第 3 輪，PRD v0.10；第 5 輪 PRD v0.13 改用精簡色級列 .cz-level、目標行 .db-goal、3 格數據、收合的資料備份）：構造 localStorage 狀態、點色級卡片、套用與初始化確認視窗。
 // 依據：契約 v0.10 storage-schema.json（schemaVersion 2）、FB-36（構造既有分數時 draftScore = appliedScore）、
 // architecture v0.6 §7.15（確認視窗）、§7.17（只選色級）。
@@ -85,13 +86,22 @@ export const est = (p) => p.ev(`(() => { const q = (s) => document.querySelector
   const t = (s) => (q(s) ? q(s).textContent : null);
   return { color: t(".cz-est-color"), target: t(".cz-est-target"), daily: t(".cz-est-daily"), weeks: t(".cz-est-weeks"), mastered: t(".cz-est-mastered"),
     achieved: vis(".cz-achieved"), note: vis(".cz-note"), cap: vis(".cz-estimate .cz-warning"), statusCap: vis(".cz-status__cap"),
-    stTarget: t(".cz-st-target"), stEffective: t(".cz-st-effective"),
+    // 第 6 輪（PRD v0.14 AC-01-08、SD-FB-54）：狀態列只剩一行 #cz-st-line「目前色級：{生效}」；stTarget、statusCap 永遠為 null／false。
+    // stEffective 由 #cz-st-line 去掉前綴「目前色級：」取得，前綴不符時回傳整行原文（使斷言失敗）。
+    stLine: t("#cz-st-line"), stTarget: t(".cz-st-target"),
+    stEffective: (() => { const l = t("#cz-st-line"); return l === null ? null : (l.startsWith("目前色級：") ? l.slice(5) : l); })(),
     pressed: [...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((b) => b.dataset.color).join(",") }; })()`);
 
-/** 主控台目標區（第 5 輪，PRD v0.12 AC-39-04）：今日任務卡目標行的可見文字，如「綠級・每日 15 字・變更」 */
-export const dashGoal = (p) => p.ev(`(() => { const g = document.querySelector("#view-dashboard .db-goal"); return g ? g.innerText.replace(/\\s*\\n\\s*/g, "").trim() : ""; })()`);
-/** 第 5 輪：PRD v0.12 目標行期望字串（AC-39-04） */
-export const GOAL_LINE = { orange: "橘級・每日 10 字・變更", brown: "棕級・每日 10 字・變更", green: "綠級・每日 15 字・變更", blue: "目標藍級・生效綠級（內建上限）・每日 15 字・變更", gold: "目標金級・生效綠級（內建上限）・每日 15 字・變更" };
+/** 主控台目標區（第 6 輪，PRD v0.14 AC-39-04、SD-FB-54）：「{.db-goal__text}｜{.db-change}」，例「綠級・每日 15 字｜變更」。
+ *  .db-goal 的完整可見文字若不等於兩者相接（有多餘節點，例如已移除的 .db-goal__sep），在後面附加〔多餘：…〕使斷言失敗。 */
+export const dashGoal = (p) => p.ev(`(() => { const g = document.querySelector("#view-dashboard .db-goal"); if (!g) return "";
+  const t = g.querySelector(".db-goal__text"), b = g.querySelector(".db-change"); const tt = t ? t.innerText.trim() : "", bt = b ? b.innerText.trim() : "";
+  const full = g.innerText.replace(/\\s+/g, ""); return tt + "｜" + bt + (full === (tt + bt).replace(/\\s+/g, "") ? "" : "〔多餘：" + g.innerText.replace(/\\s*\\n\\s*/g, "/") + "〕"); })()`);
+/** 第 6 輪：PRD v0.14 目標行期望字串（AC-39-04：只顯示生效色級，藍、金時為綠） */
+export const GOAL_LINE = { orange: "橘級・每日 10 字｜變更", brown: "棕級・每日 10 字｜變更", green: "綠級・每日 15 字｜變更", blue: "綠級・每日 15 字｜變更", gold: "綠級・每日 15 字｜變更" };
+/** 第 6 輪：v0.14 範本按鈕已隱藏（AC-43-01，hidden＋inert）。需要「v0.13 以前注入的範本單字」作為前置資料時，
+ *  以頁面內既有的 store 動作直接注入（等同 PRD AC-22-02 允許的 DevTools 建立方式），不經畫面、不產生 Toast。回傳注入結果。 */
+export async function injectTpl(p, id) { const r = await p.ev(`EMT.store.actions.injectTemplate(${JSON.stringify(id)})`); await sleep(60); return r; }
 /** 第 5 輪：主控台 3 格數據（AC-39-05）{ streak, mastery, masteredSub, accuracy }，數值為可見文字 */
 export const dashStats = (p) => p.ev(`(() => { const q = (s) => document.querySelector("#view-dashboard " + s); const t = (s) => (q(s) ? q(s).innerText.replace(/\\s+/g, " ").trim() : null);
   return { streak: t(".db-stat--streak .db-stat__value"), mastery: t(".db-stat--mastery .db-stat__value"), masteredSub: t(".db-stat--mastery .db-stat__sub"), accuracy: t(".db-stat--accuracy .db-stat__value"),

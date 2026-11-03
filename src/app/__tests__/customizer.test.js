@@ -1,6 +1,6 @@
 /*
  * customizer.test.js — 目標自訂器顯示文字單元測試（FE-09 測試移入，FE-19）
- * 受測：views/customizer.js 匯出的 helpers（formatInt、cardModels、estimateTexts、statusTexts）；FE-27 色級大卡片
+ * 受測：views/customizer.js 匯出的 helpers（formatInt、cardModels、estimateTexts、statusLine（v0.9 取代 statusTexts））；FE-27 色級大卡片
  * 依據：architecture.md v0.3 §7.1（v0.3 決議：字量 nB／nG ≤ 0 視為資料缺漏，由 goal.js 統一處理，R3-1）
  * 涵蓋：AC-01-01、AC-01-07、AC-02-05、AC-02-06、AC-02-10、AC-26-01～AC-26-04、AC-22-04、C-6（字庫缺漏）；
  *       （FE-40）US-32、AC-32-01、AC-32-02、AC-32-04、AC-32-08、AC-32-11、AC-01-02、AC-03-05、AC-25-02；
@@ -183,12 +183,19 @@ describe("customizer.test.js", () => {
     }
   });
 
-  test("statusTexts（AC-01-07）：不含目標分數（AC-26-05 (b)）", () => {
-    assert.deepEqual(H.statusTexts(G, { appliedScore: 855, appliedColor: "blue", effectiveColor: "green" }),
-      { target: "藍", effective: "綠（內建上限）", greenCap: true });
-    assert.deepEqual(H.statusTexts(G, { appliedScore: 600, appliedColor: "green", effectiveColor: "green" }),
-      { target: "綠", effective: "綠", greenCap: false });
-    assert.ok(!("score" in H.statusTexts(G, { appliedScore: 600, appliedColor: "green", effectiveColor: "green" })));
+  // （v0.9，FE-67；LS-1、AC-01-08、V-LAY-09）statusTexts 改為 statusLine：一行「目前色級：{生效色級}」
+  test("statusLine（AC-01-08）：依序套用橘、棕、綠、藍（855）、金（990）→ 目前色級：橘／棕／綠／綠／綠；不含目標分數", () => {
+    const L = require("../core/layout.js");
+    const seq = [215, 465, 725, 855, 990].map((score) => {
+      const c = G.colorOf(score);
+      return H.statusLine(G, L, { draftScore: score, appliedScore: score, appliedColor: c, effectiveColor: G.effectiveColorOf(c) }).text;
+    });
+    assert.deepEqual(seq, ["目前色級：橘", "目前色級：棕", "目前色級：綠", "目前色級：綠", "目前色級：綠"]);
+    for (const t of seq) for (const w of ["目前目標色級", "目前生效色級", "內建上限", "藍", "金", "分"]) assert.ok(!t.includes(w), w);
+    // 只看 effectiveColor：draftScore、appliedColor 不同也不影響
+    assert.equal(H.statusLine(G, L, { draftScore: 215, appliedScore: 990, appliedColor: "gold", effectiveColor: "green" }).text, "目前色級：綠");
+    assert.deepEqual(Object.keys(H.statusLine(G, L, { effectiveColor: "green" })), ["text"]);
+    assert.equal(typeof H.statusTexts, "undefined", "statusTexts 已移除");
   });
 
   test("畫面文字：一般說明不再提及輸入分數；狀態列與卡片不使用「目前目標分數」與分數單位（GS-6）", () => {
@@ -200,11 +207,11 @@ describe("customizer.test.js", () => {
     assert.ok(!H.TEXT.estColor.includes("分數"));
   });
 
-  test("statusTexts：資料缺漏不拋例外", () => {
-    const t = H.statusTexts(G, null);
-    assert.equal(t.target, "—");
-    assert.equal(t.effective, "—");
-    assert.equal(t.greenCap, false);
+  test("statusLine：資料缺漏不拋例外 → 「目前色級：—」；TEXT 不再有 statusTarget、statusEffective、builtinCap", () => {
+    const L = require("../core/layout.js");
+    assert.equal(H.statusLine(G, L, null).text, "目前色級：—");
+    assert.equal(H.statusLine(G, L, { effectiveColor: "purple" }).text, "目前色級：—");
+    for (const k of ["statusTarget", "statusEffective", "builtinCap"]) assert.ok(!(k in H.TEXT), k);
   });
 });
 
@@ -315,6 +322,8 @@ describe("customizer.test.js：閒置預建", () => {
               const g = state.data.goal;
               g.appliedScore = g.draftScore;
               g.appliedColor = G.colorOf(g.draftScore);
+              // （v0.9，FE-67）與真實 store 相同：套用時依 V-ST-02 重算生效色級（狀態列只看 effectiveColor）
+              g.effectiveColor = G.effectiveColorOf(g.appliedColor);
               state.runtime.entryMode = "main";
               notify(["entry", "goal", "studySet", "flashcard", "quiz", "speech"]);
               return { ok: true, write: "ok" };
@@ -602,13 +611,82 @@ describe("customizer.test.js：閒置預建", () => {
     });
   }
 
-  test("AC-26-05 (b)：狀態列只有「目前目標色級」「目前生效色級」，無「目前目標分數」", () => {
+  // （v0.9，FE-67；LS-1、LS-3、AC-01-08）狀態列恰一行、無 dl、無 .cz-status__cap
+  test("AC-01-08、AC-26-05 (b)：狀態列恰一行 p.cz-status__line#cz-st-line「目前色級：綠」；無 dl、無 .cz-status__cap、無「目前目標分數」", () => {
     const m = mounted();
     const slot = m.all.find((x) => x.className === "cz-status-slot");
-    const labels = walk(slot).filter((x) => x.tag === "dt").map((x) => x.textContent);
-    assert.deepEqual(labels, ["目前目標色級", "目前生效色級"]);
+    const status = walk(slot).find((x) => /(^| )cz-status( |$)/.test(x.className || ""));
+    assert.equal(status.getAttribute("aria-label"), "目前色級");
+    assert.equal(status.children.length, 1, "狀態列只有 1 個子元素");
+    const line = status.children[0];
+    assert.equal(line.tag, "p");
+    assert.equal(line.getAttribute("id"), "cz-st-line");
+    assert.ok(/(^| )cz-status__line( |$)/.test(line.className));
+    assert.equal(line.textContent, "目前色級：綠");
+    assert.equal(textOf(status), "目前色級：綠");
+    assert.ok(!walk(slot).some((x) => x.tag === "dl" || x.tag === "dt" || x.tag === "dd"));
+    assert.ok(!m.all.some((x) => /(^| )cz-status__cap( |$)/.test(x.className || "")));
+    assert.ok(!m.all.some((x) => / ?cz-st-(score|target|effective)( |$)/.test(x.className || "")));
     assert.ok(!textOf(slot).includes("目前目標分數"));
-    assert.ok(!m.all.some((x) => / ?cz-st-score( |$)/.test(x.className || "")));
+  });
+
+  test("（v0.9，FE-67；LS-2）套用綠（既有 600）後點棕卡片（未套用）→ 狀態列仍「目前色級：綠」", () => {
+    const m = mounted();
+    const line = () => walk(m.f.host).find((x) => x.getAttribute("id") === "cz-st-line").textContent;
+    assert.equal(line(), "目前色級：綠");
+    card(m, "brown").on.click();
+    assert.equal(m.f.state.data.goal.draftScore, 465);
+    assert.deepEqual(m.pressed(), ["brown"]);
+    assert.equal(line(), "目前色級：綠", "未套用不改變狀態列");
+    card(m, "gold").on.click();
+    assert.equal(line(), "目前色級：綠");
+  });
+
+  test("（v0.9，FE-67；LS-2、LS-5）以 appliedColor blue（855）重新 init → 「目前色級：綠」且藍列 aria-pressed；資料不變", () => {
+    for (const [score, color] of [[855, "blue"], [990, "gold"]]) {
+      const m = mounted({ score });
+      const before = JSON.stringify(m.f.state.data.goal);
+      assert.equal(m.f.state.data.goal.appliedColor, color);
+      assert.equal(walk(m.f.host).find((x) => x.getAttribute("id") === "cz-st-line").textContent, "目前色級：綠");
+      assert.deepEqual(m.pressed(), [color]);
+      // 試算區（不屬狀態列）照常：「藍（即將開放）」與內建字庫上限提示（AC-01-07、AC-02-10）
+      const estColor = walk(m.f.host).find((x) => cls(x, "cz-est-color"));
+      assert.equal(estColor.textContent, (color === "blue" ? "藍" : "金") + "（即將開放）");
+      const caps = walk(m.f.host).filter((x) => x.textContent === "目前內建字庫到綠色為止" && /(^| )cz-warning( |$)/.test(x.className || ""));
+      assert.equal(caps.length, 1, "lockedNotice 只在試算區 1 處");
+      assert.ok(caps[0].hidden !== true, "試算區提示顯示");
+      // 整頁可見文字無舊標籤與「內建上限」
+      const text = visibleText(m.f.host);
+      for (const w of ["目前目標色級", "目前生效色級", "內建上限"]) assert.ok(!text.includes(w), w);
+      assert.equal(JSON.stringify(m.f.state.data.goal), before, "渲染不改 goal（LS-5）");
+    }
+  });
+
+  test("（v0.9，FE-67；LS-2、CI-9）初始化確認取消 → 狀態列不變", async () => {
+    const m = mountedAt("brown", { applyStatus: "confirm" });
+    const line = () => walk(m.f.host).find((x) => x.getAttribute("id") === "cz-st-line").textContent;
+    assert.equal(line(), "目前色級：綠");
+    walk(m.f.host).find((x) => x.getAttribute("id") === "cz-apply").on.click();
+    m.f.dialogCalls[0].resolve(false);
+    await new Promise((r) => setImmediate(r));
+    assert.equal(line(), "目前色級：綠");
+  });
+
+  test("（v0.9，FE-67）原始碼不含「目前目標色級」「目前生效色級」「（內建上限）」、statusTexts；20-customizer.css 無 .cz-rows--status、.cz-status__line 單行", () => {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const src = fs.readFileSync(path.join(__dirname, "..", "views", "customizer.js"), "utf8");
+    for (const w of ["目前目標色級", "目前生效色級", "（內建上限）", "statusTexts", "refs.stTarget", "refs.stEffective", "statusCap"]) {
+      assert.ok(!src.includes(w), w);
+    }
+    const css = fs.readFileSync(path.join(__dirname, "..", "styles", "20-customizer.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    assert.ok(!css.includes("cz-rows--status"));
+    const m = /\.cz-status__line\s*\{([^}]*)\}/.exec(css);
+    assert.ok(m);
+    assert.match(m[1], /margin:\s*0;/);
+    assert.match(m[1], /font-size:\s*1rem;/);
+    assert.match(m[1], /font-weight:\s*600;/);
+    assert.match(m[1], /white-space:\s*nowrap;/);
   });
 
   test("說明文字：一般頁 intro 為「選擇色級即時試算，按「套用」後才會更新單字卡的單字集。」", () => {
@@ -769,7 +847,7 @@ describe("customizer.test.js：閒置預建", () => {
     assert.equal(p.estimate.hidden, false);
     assert.equal(p.intro.hidden, false);
     // 狀態列已更新為套用後的色級
-    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-target")).textContent, "棕");
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-status__line")).textContent, "目前色級：棕");
     // 卡片與分數區未重建：同一批節點，只新增「套用」1 個按鈕
     const after = walk(m.f.host).filter((x) => x.tag === "button" && x.getAttribute("data-color"));
     assert.deepEqual(after, cardsBefore);
@@ -795,7 +873,7 @@ describe("customizer.test.js：閒置預建", () => {
     m.f.notify(["goal", "studySet", "flashcard", "stats", "entry"]);
     assert.deepEqual(parts(m).buttons.map((b) => b.text), ["套用"]);
     assert.deepEqual(m.pressed(), ["brown"]);
-    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-target")).textContent, "棕");
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-status__line")).textContent, "目前色級：棕");
     // 模式未變的後續通知不重建按鈕區
     const nodes = m.f.counter.nodes;
     m.f.notify(["entry"]);
@@ -860,8 +938,8 @@ describe("customizer.test.js：閒置預建", () => {
     assert.equal(m.f.counter.cancelApplyGoal, 0);
     assert.equal(m.f.counter.applyGoal, 0);
     assert.equal(m.f.state.data.goal.appliedScore, 465);
-    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-target")).textContent, "棕");
-    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-effective")).textContent, "棕");
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-status__line")).textContent, "目前色級：棕");
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-status__line")).textContent, "目前色級：棕");
     assert.deepEqual(m.pressed(), ["brown"]);
     assert.ok(!m.f.toasts.some((t) => t.text === "儲存空間不足，未套用"));
   });
@@ -877,7 +955,7 @@ describe("customizer.test.js：閒置預建", () => {
       assert.equal(m.f.state.data.goal.draftScore, 600, reason);
       assert.deepEqual(m.pressed(), ["green"], reason);
       assert.equal(estDailyOf(m), "15 字/天", reason);
-      assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-effective")).textContent, "綠", reason);
+      assert.equal(walk(m.f.host).find((x) => cls(x, "cz-status__line")).textContent, "目前色級：綠", reason);
     }
   });
 
@@ -897,7 +975,7 @@ describe("customizer.test.js：閒置預建", () => {
     assert.deepEqual(m.cards.map((b) => b.getAttribute("aria-pressed")), ["false", "false", "true", "false", "false"]);
     assert.equal(estDailyOf(m), "15 字/天");
     assert.equal(estColor.textContent, "綠");
-    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-effective")).textContent, "綠");
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-status__line")).textContent, "目前色級：綠");
     assert.equal(m.f.toasts.length, 0);
     assert.equal(m.f.counter.nodes, nodes, "不建立新節點");
   });
@@ -912,7 +990,7 @@ describe("customizer.test.js：閒置預建", () => {
     assert.equal(m.f.counter.setDraftScore, 0);
     assert.deepEqual(m.f.toasts, [{ text: "已套用目標", kind: "success" }]);
     assert.equal(m.f.state.data.goal.appliedScore, 465);
-    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-target")).textContent, "棕");
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-status__line")).textContent, "目前色級：棕");
     const n = mountedAt("brown", { applyStatus: "ignored" });
     applyBtn(n).on.click();
     await tick();
@@ -988,7 +1066,7 @@ describe("customizer.test.js：閒置預建", () => {
     assert.equal(d.goal.effectiveColor, "brown");
     assert.equal(d.masteredWordKeys.length, 0);
     assert.equal(d.part5.totalAnswered, 0);
-    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-st-effective")).textContent, "棕");
+    assert.equal(walk(m.f.host).find((x) => cls(x, "cz-status__line")).textContent, "目前色級：棕");
     assert.ok(!m.f.toasts.some((t) => t.kind === "error"));
 
     const q = learnedStore();

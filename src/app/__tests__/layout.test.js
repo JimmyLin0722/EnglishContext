@@ -86,6 +86,8 @@ const EXPECTED = {
     lockedNotice: "目前內建字庫到綠色為止",
     startLearning: "開始學習",
     restoreFromBackup: "從備份還原",
+    // （v0.14，FE-65）最後一鍵：難易度設定頁狀態列（LS-1；全形冒號 U+FF1A）
+    levelStatus: "目前色級：{color}",
   },
 };
 
@@ -244,6 +246,55 @@ describe("goalLine（DB-4）", () => {
   test("任一參數缺 → 「—」", () => {
     assert.deepStrictEqual(layout.goalLine(null, LV("green")), { text: "—", capped: false });
     assert.deepStrictEqual(layout.goalLine(LV("green"), undefined), { text: "—", capped: false });
+  });
+});
+
+describe("goalLineText（v0.14 DB-4，FE-65）", () => {
+  test("5 色以生效色級呼叫：橘、棕、綠、藍→綠、金→綠 逐字", () => {
+    const cases = [
+      ["orange", "橘級・每日 10 字"],
+      ["brown", "棕級・每日 10 字"],
+      ["green", "綠級・每日 15 字"],
+      ["blue", "綠級・每日 15 字"], // 藍套用時生效色級為綠
+      ["gold", "綠級・每日 15 字"], // 金套用時生效色級為綠
+    ];
+    for (const [applied, text] of cases) {
+      const effective = LV(applied === "blue" || applied === "gold" ? "green" : applied);
+      const r = layout.goalLineText(effective);
+      assert.equal(r, text, applied);
+      assert.ok(!r.endsWith("・"), "結尾不是「・」");
+      for (const w of ["目標", "生效", "內建上限", "藍", "金", "變更"]) assert.ok(!r.includes(w), w);
+    }
+  });
+
+  test("缺參數 → 「—」", () => {
+    assert.equal(layout.goalLineText(null), "—");
+    assert.equal(layout.goalLineText(undefined), "—");
+  });
+});
+
+describe("levelStatusText（v0.14 LS-1，FE-65）", () => {
+  test("依序套用 5 色（以生效色級呼叫）→ 目前色級：橘／棕／綠／綠／綠", () => {
+    const seq = ["orange", "brown", "green", "green", "green"].map((id) => layout.levelStatusText(LV(id)));
+    assert.deepStrictEqual(seq, ["目前色級：橘", "目前色級：棕", "目前色級：綠", "目前色級：綠", "目前色級：綠"]);
+    for (const t of seq) {
+      assert.ok(t.includes("："), "全形冒號 U+FF1A");
+      assert.ok(!t.includes("： "), "冒號後無空白");
+      for (const w of ["目標", "生效", "內建上限"]) assert.ok(!t.includes(w), w);
+    }
+  });
+
+  test("缺參數 → 「目前色級：—」", () => {
+    assert.equal(layout.levelStatusText(null), "目前色級：—");
+    assert.equal(layout.levelStatusText(undefined), "目前色級：—");
+  });
+
+  test("goalLineText、levelStatusText 已匯出；goalLine 標記 @deprecated 但保留", () => {
+    assert.equal(typeof layout.goalLineText, "function");
+    assert.equal(typeof layout.levelStatusText, "function");
+    assert.equal(typeof layout.goalLine, "function");
+    const src = fs.readFileSync(path.join(__dirname, "..", "core", "layout.js"), "utf8");
+    assert.match(src, /@deprecated[^\n]*goalLineText/);
   });
 });
 

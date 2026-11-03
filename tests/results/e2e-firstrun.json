@@ -39,14 +39,14 @@
     "tc": "TC-25-02",
     "ac": "AC-25-02",
     "result": "通過",
-    "note": "點棕 → 選中 brown；按「開始學習」→ 確認視窗=false、main/dashboard、導覽 4 鈕；主控台 棕級・每日 10 字・變更；單字集 2809；寫入 schemaVersion 2、goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}"
+    "note": "點棕 → 選中 brown；按「開始學習」→ 確認視窗=false、main/dashboard、導覽 4 鈕；主控台 棕級・每日 10 字｜變更；單字集 2809；寫入 schemaVersion 2、goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}"
   },
   {
     "suite": "e2e-firstrun",
     "tc": "TC-25-06",
     "ac": "AC-25-06",
     "result": "通過",
-    "note": "{\"entry\":\"main\",\"tab\":\"customizer\",\"cards\":\"orange,brown,green,blue,gold\",\"pressed\":\"brown\",\"input\":null,\"slider\":false,\"estimate\":true,\"summary\":null,\"start\":false,\"restore\":false,\"apply\":true,\"nav\":true,\"navBtns\":4,\"toggle\":false,\"dashboard\":false,\"entries\":0,\"custom\":true,\"form\":true,\"templates\":3,\"status\":true,\"footerSources\":true}"
+    "note": "{\"entry\":\"main\",\"tab\":\"customizer\",\"cards\":\"orange,brown,green,blue,gold\",\"pressed\":\"brown\",\"input\":null,\"slider\":false,\"estimate\":true,\"summary\":null,\"start\":false,\"restore\":false,\"apply\":true,\"nav\":true,\"navBtns\":4,\"toggle\":false,\"dashboard\":false,\"entries\":0,\"custom\":true,\"form\":true,\"templates\":0,\"status\":true,\"footerSources\":true}；狀態列「目前色級：棕」"
   },
   {
     "suite": "e2e-firstrun",
@@ -60,7 +60,7 @@
     "tc": "TC-25-03",
     "ac": "AC-25-03、AC-26-04（首次畫面）",
     "result": "通過",
-    "note": "點藍 → {\"draft\":855,\"cap\":true,\"summary\":\"藍級・每日 20 字　預計 41 週（以綠試算）\",\"pressed\":\"blue\"}；開始學習後主控台 目標藍級・生效綠級（內建上限）・每日 15 字・變更；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}"
+    "note": "點藍 → {\"draft\":855,\"cap\":true,\"summary\":\"藍級・每日 20 字　預計 41 週（以綠試算）\",\"pressed\":\"blue\"}；開始學習後主控台 綠級・每日 15 字｜變更；難易度設定頁狀態列「目前色級：綠」；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}"
   },
   {
     "suite": "e2e-firstrun",
@@ -81,7 +81,7 @@
     "tc": "TC-25-10",
     "ac": "AC-25-10、AC-24-03",
     "result": "通過",
-    "note": "首次畫面點金（990）後還原 300 棕備份：匯入確認框=true、初始化確認視窗=false、提示 [\"已匯入，略過 0 筆\"] → main/dashboard、導覽=true；主控台 棕級・每日 10 字・變更；goal {\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；localStorage appliedScore 300；重新載入 → main、棕級・每日 10 字・變更、localStorage 300；難易度設定選中 brown"
+    "note": "首次畫面點金（990）後還原 300 棕備份：匯入確認框=true、初始化確認視窗=false、提示 [\"已匯入，略過 0 筆\"] → main/dashboard、導覽=true；主控台 棕級・每日 10 字｜變更；goal {\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；localStorage appliedScore 300；重新載入 → main、棕級・每日 10 字｜變更、localStorage 300；難易度設定選中 brown"
   },
   {
     "suite": "e2e-firstrun",
@@ -137,7 +137,7 @@
     "tc": "TC-26-05",
     "ac": "AC-26-05",
     "result": "通過",
-    "note": "375px｜(a) 首次畫面：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(c) 主控台：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(b) 一般頁：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(b) 一般頁點 5 卡並套用後：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(c) 主控台（套用金後）：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0 ／ 1366px｜(a) 首次畫面：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(c) 主控台：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(b) 一般頁：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(b) 一般頁點 5 卡並套用後：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 21 個焦點中分數元件 0｜(c) 主控台（套用金後）：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0；未處理錯誤 0"
+    "note": "375px｜(a) 首次畫面：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(c) 主控台：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(b) 一般頁：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 18 個焦點中分數元件 0｜(b) 一般頁點 5 卡並套用後：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 18 個焦點中分數元件 0｜(c) 主控台（套用金後）：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0 ／ 1366px｜(a) 首次畫面：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(c) 主控台：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0｜(b) 一般頁：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 18 個焦點中分數元件 0｜(b) 一般頁點 5 卡並套用後：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 18 個焦點中分數元件 0｜(c) 主控台（套用金後）：滑桿 0、輸入框 0、範圍文字 []、「目標分數」false、錯誤提示 false、無障礙樹分數元件 []、Tab 8 個焦點中分數元件 0；未處理錯誤 0"
   },
   {
     "suite": "e2e-firstrun",

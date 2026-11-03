@@ -10,6 +10,9 @@
  * - L1 模組：載入時不取用任何其他模組（LD-1）、不讀 DOM 與 window 資料；
  *   goalLine／summaryLine 以參數接收 COLOR_LEVELS 項目，不自行取用 constants／goal。
  * - 所有回傳字串都不做 HTML 跳脫：呼叫端一律以 textContent 寫入。
+ * - （v0.9，FE-65；契約 v0.14 §13、README §12.2 LS-1、§11.4 DB-4）LAYOUT_TEXTS 新增最後一鍵 levelStatus；
+ *   新增 goalLineText（主控台目標行，只以生效色級組字）與 levelStatusText（難易度設定頁狀態列）。
+ *   goalLineCapped、goalLineSeparator 兩鍵保留（契約仍含），但 view 不得再使用；goalLine 標記 @deprecated。
  */
 (function (root, factory) {
   var api = factory();
@@ -110,7 +113,10 @@
     summaryLockedSuffix: "（以綠試算）",
     lockedNotice: "目前內建字庫到綠色為止",
     startLearning: "開始學習",
-    restoreFromBackup: "從備份還原"
+    restoreFromBackup: "從備份還原",
+
+    // ── 難易度設定頁（v0.14，US-01）──
+    levelStatus: "目前色級：{color}"
   };
 
   // ── 架構常數（architecture.md §4.8；CSS 以同值寫死）──
@@ -164,6 +170,7 @@
   }
 
   /**
+   * @deprecated v0.9（契約 v0.14 DB-4）起 view 不得呼叫，改用 goalLineText；保留供既有測試（T-70）。
    * DB-4 目標行（不含「・變更」，view 另建可點擊節點）。
    * @param {object} applied 已套用色級（COLOR_LEVELS 項目）
    * @param {object} effective 生效色級（COLOR_LEVELS 項目）
@@ -179,6 +186,29 @@
       text: fill(LAYOUT_TEXTS.goalLineCapped, { target: applied.nameZh, effective: effective.nameZh, daily: daily }),
       capped: true
     };
+  }
+
+  /**
+   * （v0.9）DB-4 v0.14 主控台目標行：一律以「生效」色級組字 goalLineSame（結尾不帶「・」，不附註記）。
+   * 例：橘「橘級・每日 10 字」、棕「棕級・每日 10 字」、綠「綠級・每日 15 字」；呼叫端以生效色級呼叫，藍、金自然為綠。
+   * @param {object} effective 生效色級（COLOR_LEVELS 項目）
+   * @returns {string} 缺參數 → statNoData「—」
+   */
+  function goalLineText(effective) {
+    if (!effective) { return LAYOUT_TEXTS.statNoData; }
+    return fill(LAYOUT_TEXTS.goalLineSame, {
+      color: effective.nameZh,
+      daily: formatInt(effective.dailyNewWords)
+    });
+  }
+
+  /**
+   * （v0.9）LS-1 難易度設定頁狀態列：「目前色級：{生效色級}」（只看已套用的 effectiveColor）。
+   * @param {object} effective 生效色級（COLOR_LEVELS 項目）
+   * @returns {string} 缺參數 → 「目前色級：—」
+   */
+  function levelStatusText(effective) {
+    return fill(LAYOUT_TEXTS.levelStatus, { color: effective ? effective.nameZh : LAYOUT_TEXTS.statNoData });
   }
 
   /**
@@ -244,6 +274,8 @@
     fill: fill,
     formatInt: formatInt,
     goalLine: goalLine,
+    goalLineText: goalLineText,
+    levelStatusText: levelStatusText,
     summaryLine: summaryLine,
     chartIsEmpty: chartIsEmpty,
     part5Progress: part5Progress

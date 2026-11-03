@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, storageMode } from "./lib/inits.mjs";
-import { stateRecord, seed, readState, scoreVisibility, dashGoal, GOAL_LINE, expandBackup } from "./lib/state.mjs";
+import { stateRecord, seed, readState, scoreVisibility, dashGoal, GOAL_LINE, expandBackup, injectTpl } from "./lib/state.mjs";
 // 第 3 輪（PRD v0.10 R-19、Q-39）：首次預設 725、只點卡片；導覽 4 項（v0.9 R-18 三）
 // 第 5 輪（PRD v0.13）：色級列改精簡列表 .cz-level（AC-26-01）；首次畫面試算結果卡改為固定底部列摘要行（AC-25-01、AC-41-02）；
 // 主控台目標區改為今日任務卡目標行（AC-39-04）；近 7 天無資料為空狀態（AC-24-10、AC-39-07）
@@ -63,7 +63,7 @@ let BACKUP_V2, BACKUP_V1;
   await p.goto(); await p.startLearning();
   await seed(p, stateRecord(300));
   await p.go("customizer");
-  await p.click('[data-template="cs"]'); await sleep(100);
+  await injectTpl(p, "cs"); await sleep(100);
   await p.go("flashcards"); await p.click(".fc-flip"); await p.click(".fc-next"); await sleep(400); await p.click(".fc-flip");
   await p.go("part5"); await p.click("[data-p5=option]", 0);
   BACKUP_V2 = await p.ev(`EMT.store.actions.exportBackup().json`);
@@ -170,8 +170,10 @@ let BACKUP_V2, BACKUP_V1;
   await R.check("TC-25-06", "AC-25-06", async () => {
     await p.go("customizer"); await sleep(300);
     const a = await firstRunInfo(p);
-    const ok = a.entry === "main" && a.nav && a.custom && a.form && a.templates === 3 && a.apply && !a.start && !a.restore && a.status;
-    return { ok, note: JSON.stringify(a) };
+    // 第 6 輪（PRD v0.14 AC-25-06）：不顯示領域範本區（AC-43-01）；狀態列為「目前色級：{生效色級}」（AC-01-08）
+    const line = await p.ev(`(document.getElementById("cz-st-line") || {}).textContent || null`);
+    const ok = a.entry === "main" && a.nav && a.custom && a.form && a.templates === 0 && a.apply && !a.start && !a.restore && a.status && line === "目前色級：棕";
+    return { ok, note: JSON.stringify(a) + `；狀態列「${line}」` };
   });
   await R.check("TC-25-05", "AC-25-05", async () => {
     await p.reload(); const a = await firstRunInfo(p);
@@ -188,9 +190,10 @@ let BACKUP_V2, BACKUP_V1;
     const pre = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, cap: [...document.querySelectorAll(".cz-firstbar__locked")].some((e) => !e.hidden && e.getClientRects().length && e.textContent === "目前內建字庫到綠色為止"), summary: (document.querySelector(".cz-firstbar__summary") || {}).textContent, pressed: [...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((b) => b.dataset.color).join() })`);
     await p.click("#cz-start"); await sleep(400);
     const g = await goalTexts(p); const k = JSON.parse(await stored(p) || "null");
-    const ok = pre.draft === 855 && pre.cap && pre.pressed === "blue" && g === GOAL_LINE.blue && pre.summary === "藍級・每日 20 字　預計 41 週（以綠試算）" && !g.includes("分數")
+    await p.go("customizer"); await sleep(200); const line = await p.ev(`(document.getElementById("cz-st-line") || {}).textContent || null`); // 第 6 輪：AC-25-03 v0.14
+    const ok = line === "目前色級：綠" && pre.draft === 855 && pre.cap && pre.pressed === "blue" && g === GOAL_LINE.blue && pre.summary === "藍級・每日 20 字　預計 41 週（以綠試算）" && !g.includes("分數")
       && k && k.data.goal.appliedScore === 855 && k.data.goal.effectiveColor === "green";
-    return { ok, note: `點藍 → ${JSON.stringify(pre)}；開始學習後主控台 ${g}；localStorage goal ${k && JSON.stringify(k.data.goal)}` };
+    return { ok, note: `點藍 → ${JSON.stringify(pre)}；開始學習後主控台 ${g}；難易度設定頁狀態列「${line}」；localStorage goal ${k && JSON.stringify(k.data.goal)}` };
   });
   await p.close();
 }
@@ -203,7 +206,7 @@ let BACKUP_V2, BACKUP_V1;
     await p.click("#cz-start"); await sleep(400);
     const b = await firstRunInfo(p);
     await p.go("flashcards"); await p.click(".fc-flip"); const fl = await p.ev(`document.querySelector(".fc-card").dataset.flipped`);
-    await p.go("customizer"); await p.click('[data-template="cs"]'); await sleep(100); const cv = await p.ev(`EMT.store.getState().data.customVocab.length`);
+    await p.go("customizer"); await injectTpl(p, "cs"); await sleep(100); const cv = await p.ev(`EMT.store.getState().data.customVocab.length`);
     await p.reload(); const c = await firstRunInfo(p); const banner2 = await p.ev(`document.getElementById("app-banner").innerText`);
     const ok = a.entry === "firstRun" && banner.includes("進度將無法保存") && b.entry === "main" && b.dashboard && b.nav && fl === "true" && cv === 10 && c.entry === "firstRun" && banner2.includes("進度將無法保存") && p.log.exceptions.length === 0;
     return { ok, note: `開啟 ${a.entry}、警示「${banner.trim()}」；開始學習 → ${b.entry}、可翻卡=${fl}、注入範本 ${cv} 字；重新開啟 → ${c.entry}、警示「${banner2.trim()}」；例外 ${p.log.exceptions.length}` };
@@ -350,7 +353,7 @@ let BACKUP_V2, BACKUP_V1;
     const a = await cards();
     await p.click('.cz-level[data-color="green"]');
     const b = await cards();
-    const e = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, color: document.querySelector(".cz-est-color").textContent, daily: document.querySelector(".cz-est-daily").textContent, eff: document.querySelector(".cz-st-effective").textContent, n: EMT.store.getState().runtime.studySet.length, eff2: EMT.store.getState().data.goal.effectiveColor, dialog: !!document.querySelector(".dialog") })`);
+    const e = await p.ev(`({ draft: EMT.store.getState().data.goal.draftScore, color: document.querySelector(".cz-est-color").textContent, daily: document.querySelector(".cz-est-daily").textContent, eff: document.getElementById("cz-st-line").textContent.replace("目前色級：", ""), /* 第 6 輪：AC-01-08 狀態列只剩 #cz-st-line */ n: EMT.store.getState().runtime.studySet.length, eff2: EMT.store.getState().data.goal.effectiveColor, dialog: !!document.querySelector(".dialog") })`);
     await p.click('.cz-level[data-color="orange"]');
     const c = await p.ev(`({ eff: EMT.store.getState().data.goal.effectiveColor, n: EMT.store.getState().runtime.studySet.length, pressed: [...document.querySelectorAll(".cz-level[aria-pressed=true]")].map((x) => x.dataset.color).join(), dialog: !!document.querySelector(".dialog") })`);
     const ok = a.filter((x) => x.pressed === "true").map((x) => x.c).join() === "brown" && b.filter((x) => x.pressed === "true").map((x) => x.c).join() === "green" && e.draft === 725 && e.color === "綠" && e.daily === "15 字/天"
@@ -394,6 +397,8 @@ R.na("TC-26-03", "AC-26-03", "PRD v0.10 標「v0.10 暫停（分數輸入隱藏�
       const k = `${a.tag}#${a.id}.${a.cls}@${a.text}`; seen.add(k);
       if (a.id === "cz-score-range" || a.id === "cz-score-input" || a.type === "range" || a.type === "number") hit.push(k);
     }
+    // 第 6 輪：v0.14 範本按鈕移出 Tab 順序後，80 次 Tab 的終點可能落在自訂單字輸入欄，窄螢幕依 AC-27-03 會隱藏底部導覽列；結束時移除焦點（tests/results/diag/r6-tabnav.json）
+    await p.ev(`document.activeElement && document.activeElement.blur()`); await sleep(100);
     return { visited: seen.size, hit };
   };
   for (const [w, h] of [[375, 667], [1366, 900]]) {

@@ -1,6 +1,6 @@
 ---
 doc: TEST-REPORT
-version: 0.6
+version: 0.7
 status: in-review
 author: qa-agent
 approved_by:
@@ -9,6 +9,8 @@ approved_at:
 
 # English Master Track — 測試報告（第 5 階段驗收）
 
+> **第 6 輪（v0.7）依據**：`docs/04-qa/test-plan.md` v0.7；PRD v0.14、契約 v0.14、architecture v0.9、tasks.json v0.8（FE-63～FE-69 done）；受測物 `dist/english-master-track.html`＋`dist/site/` 8 檔（BUILD_ID `436e27b40282d4af`，版本行「版本 1.0.0（建置 436e27b）」）；第一次全套因系統記憶體不足被停止，依主控指示改為逐一執行各套件完成；結論見 §0、詳情見 §17。
+>
 > **第 5 輪（v0.6）依據**：`docs/04-qa/test-plan.md` v0.6；PRD v0.13、契約 v0.13、architecture v0.8、tasks.json v0.7（CT-24、FE-54～FE-62 done）；受測物 `dist/english-master-track.html` 3,308,145 bytes＋`dist/site/` 8 檔（BUILD_ID `962e0f286c63e9e6`）；結論見 §0、詳情見 §16。
 >
 > **第 4 輪（v0.5）依據**：`docs/04-qa/test-plan.md` v0.5；PRD v0.11、契約 v0.11、architecture v0.7、tasks.json（FE-45～FE-53 done）；受測物 `dist/english-master-track.html` 3,278,334 bytes＋`dist/site/` 8 檔（BUG-003 修正後 BUILD_ID `5b5ae7a6d4bd0164`；初測 `d7085fd3fb24c46f`）；結論見 §0、詳情見 §15（BUG-003 複驗見 §15.11）。
@@ -17,7 +19,26 @@ approved_at:
 >
 > （第 1～2 輪）依據：`docs/04-qa/test-plan.md` v0.3；PRD v0.7、契約 v0.7、architecture v0.3、tasks.json v0.2。受測物（v0.2，退回修正第 1 輪）`dist/english-master-track.html` 3,030,574 bytes（QA 以 `tools/build.mjs --out` 重建後與 `dist/` 位元組相同）；初版受測物 3,022,217 bytes。（v0.3，退回修正第 2 輪）受測物 3,047,158 bytes，只驗證 BUG-002 並回歸 AC-01-*、AC-02-*、AC-04-*、AC-05-*、AC-16-*、AC-20-02、AC-22-*，詳見 §12。執行日期 2026-10-30。v0.2 範圍只驗證 BUG-001、BUG-002，並回歸 AC-08-*、AC-15-*、AC-16-*、AC-20-02、AC-22-*、靜態與越界檢查，詳見 §11；其餘 TC 沿用 v0.1 結果（本輪 `npm run test:e2e` 全套重跑，其餘 TC 結果不變）。
 
-## 0. 目前有效結論（第 5 輪，PRD v0.13 版面風格，2026-11-03）
+## 0. 目前有效結論（第 6 輪，PRD v0.14 版本號與介面精簡，2026-11-03）
+
+> 本節與 §17 為第 6 輪（PRD v0.14：新增 US-42、US-43、AC-01-08 共 8 個 AC，修改 13 個 AC，暫停 AC-05-01～05）的結論，取代第 5 輪結論（保留於 §0.0、§16）。
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 受測物 | `dist/english-master-track.html`、`dist/site/` 8 檔（BUILD_ID `436e27b40282d4af`，版本行「版本 1.0.0（建置 436e27b）」）；QA 重建與 `dist/` 逐位元組相同（TC-S09、TC-42-04a） |
+| TC 總數 | 367（自動化 334、QA 檢視 7、人工 26） |
+| TC 結果 | 通過 318、**失敗 0**、待人工 26、不適用（暫停）23；Edge 冒煙 54 項：通過 44、失敗 0、其餘不適用 |
+| AC 覆蓋率 | 應驗收 251 個 AC，未涵蓋 0（覆蓋 100%）；暫停 27 個標「不適用（暫停）」 |
+| AC 判定 | 通過 242（其中 55 個另待人工確認）、待人工 9、**失敗 0**、不適用（暫停）27 |
+| 新增 8 個 AC | 通過 8 / 8（AC-42-01、AC-42-02、AC-42-04 另待人工確認） |
+| 修改 13 個 AC | 應驗收 12 個全部通過（AC-01-06 暫停中） |
+| 待人工的 AC | AC-23-04、AC-27-03、AC-33-01、AC-33-02、AC-34-02、AC-34-03、AC-34-05、AC-35-03、AC-36-07（與第 5 輪相同，皆為實機必要項） |
+| 缺陷 | 本輪新開 0 張；BUG-001～BUG-003 維持 verified；無 open 缺陷 |
+| 越界檢查 | 通過：與 git HEAD `8a266c3` 比對，PG 變動 33 檔全部在 FE-63～FE-69 paths 內（超出 0）；授權例外 `package.json`（只改 version）與上游文件 |
+| 安全檢查 | 通過：版本行 `textContent`、無請求、不寫入儲存；`file://` 請求 0；http 只有同源預先快取 GET；XSS 回歸通過 |
+| 需要人類 | 見 §17.7 |
+
+### 0.0 第 5 輪結論（歷史，PRD v0.13，2026-11-03）
 
 > 本節與 §16 為第 5 輪（PRD v0.13：US-38～US-41 版面與視覺，修改 30 個 AC）的結論，取代第 4 輪結論（保留於 §0.1、§15）。
 
@@ -1458,7 +1479,121 @@ PG 回報超出設計字面之處（主控指示範圍 4）：
 | :--- | :--- |
 | SD（architecture §10.5） | 鍵盤 E2E 以 CDP 送 Enter 時需帶 `text`（否則按鈕預設動作不觸發）；Tab 序列量測前需重新載入或重設循序焦點起點，建議在 §10.5 註明 |
 
-## 17. 變更紀錄
+## 17. 第 6 輪驗收（PRD v0.14：版本號與介面精簡）
+
+範圍：PRD v0.14（43 個 US、278 個 AC；應驗收 37 個 US、251 個 AC，暫停 27），重點為新增 8 個 AC（AC-42-01～04、AC-43-01～03、AC-01-08）與修改 13 個 AC，並全套回歸。契約 v0.14（§12、§5.8 HT-6～HT-9）、architecture v0.9（§7.20、§10.6）、tasks.json v0.8（FE-63～FE-69 done）。執行日期 2026-11-03。
+
+### 17.1 執行紀錄
+
+| 項目 | 指令 | 結果 |
+| :--- | :--- | :--- |
+| PG 單元測試 | `npm test` | 1,196 / 1,196 通過、fail 0（93 個 suite）（參考，非驗收依據） |
+| 資料自驗 | `npm run validate:data` | 錯誤 0、警告 61、結果通過（與前幾輪相同） |
+| 第一次全套 | `npm run test:e2e`（`tests/results/tmp/r6-run-all.txt`） | 跑到 e2e-mic 時整個背景程序因本機記憶體嚴重不足被 Claude Code 停止（非測試或產品造成）；已完成部分出現 3 個失敗與 e2e-firstrun 中途結束（§17.2） |
+| 重跑（主控指示） | 依 run-all 同樣步驟與參數**逐一執行**各套件（每個套件結束即關閉瀏覽器，同時只開 1 個瀏覽器）；輸出 `tests/results/tmp/r6-rerun.txt`、`r6-<套件>.txt` | 資料、紀錄、靜態 18/18、越界、PWA 靜態、Chrome 18 個 E2E 套件、Edge 冒煙（e2e-goal、e2e-hidden、e2e-pwa、e2e-version）全部結束碼 0；結束後埠 8080 已關閉 |
+| QA 檢視與彙整 | `qa-review-r6.mjs`、`rebuild-summary.mjs`、`ac-matrix.mjs`、`tc-list.mjs` | `tests/results/qa-review.json`、`summary.json`、`ac-matrix.json`；test-plan §5、§7 |
+
+各套件結果（彙整後）：
+
+| 套件 | 通過 | 失敗 | 待人工 | 不適用 |
+| :--- | :--- | :--- | :--- | :--- |
+| data | 17 | 0 | 0 | 0 |
+| e2e-cards | 33 | 0 | 0 | 4 |
+| e2e-content | 9 | 0 | 0 | 10 |
+| e2e-env | 18 | 0 | 0 | 3 |
+| e2e-firstrun | 25 | 0 | 0 | 1 |
+| e2e-goal | 22 | 0 | 0 | 5 |
+| e2e-hidden | 5 | 0 | 0 | 0 |
+| e2e-layout | 28 | 0 | 0 | 0 |
+| e2e-mic | 11 | 0 | 0 | 0 |
+| e2e-motion | 15 | 0 | 0 | 0 |
+| e2e-persist | 1 | 0 | 0 | 0 |
+| e2e-progress | 18 | 0 | 0 | 0 |
+| e2e-pwa | 23 | 0 | 0 | 0 |
+| e2e-pwa-update | 7 | 0 | 1 | 0 |
+| e2e-reinit | 15 | 0 | 0 | 0 |
+| e2e-speech | 20 | 0 | 0 | 0 |
+| e2e-version（新） | 14 | 0 | 0 | 0 |
+| pwa-static | 12 | 0 | 1 | 0 |
+| qa-review | 7 | 0 | 24 | 0 |
+| static | 18 | 0 | 0 | 0 |
+| **合計** | **318** | **0** | **26** | **23** |
+
+Edge 冒煙：e2e-goal 22 通過／5 不適用、e2e-hidden 5、e2e-pwa 8、e2e-version 9 通過／5 不適用（建置與 http 類只在 Chrome 跑）；失敗 0。
+
+### 17.2 失敗項目的判讀（6 項，皆為 QA 測試程式未依 v0.14 更新，不是產品缺陷；修正後重跑通過）
+
+| TC | 原因 | 處理 | 重跑 |
+| :--- | :--- | :--- | :--- |
+| TC-18-05 | 寫死舊目標行字串「綠級・每日 15 字・變更」，與本輪 `dashGoal` 格式「綠級・每日 15 字｜變更」不符；4 種損壞資料的實際結果皆正確 | 改用 `GOAL_LINE.green` | 通過 |
+| TC-26-02 | 讀取已移除的 `.cz-st-effective`（SD-FB-54） | 改讀 `#cz-st-line` | 通過 |
+| TC-30-07c | 點擊已隱藏（`hidden`＋`inert`）的範本按鈕，正是 AC-43-01 要求的行為 | 改用 `injectTpl` | 通過 |
+| TC-32-01 | 讀取已移除的 `.cz-st-effective` | 改讀 `#cz-st-line` | 通過 |
+| TC-38-03 | 期望目標行色點在套用藍、金時為藍、金色；v0.14 色點改依生效色級（architecture §7.20.4、SD-FB-53 指示 QA 以「色點色＝目標行顯示的色級色值」判定），實測 `#e8833a,#8b5a2b,#2e9e5b,#2e9e5b,#2e9e5b`，色值本身與 v0.11 相同 | 期望改為生效色級 | 通過 |
+| e2e-firstrun 375px 中途結束（TC-26-05 區塊） | 單獨重跑可重現，以診斷 `diag-r6-tabnav.mjs` 確認：AC-26-05 檢查內走 80 次 Tab，v0.14 範本按鈕移出 Tab 順序後，終點落在自訂單字輸入欄 `#cv-collocation`；窄螢幕輸入時依 AC-27-03 隱藏底部導覽列（設計行為），測試程式接著用導覽列切頁才找不到按鈕。移除焦點後導覽列立即恢復（`tests/results/diag/r6-tabnav.json`）。**判定為測試問題，不開 BUG** | Tab 走完後 `blur()` | 25 項全過 |
+
+### 17.3 新增 AC 的結果（e2e-version，Chrome 14 / 14、Edge 9 / 9 通過）
+
+| TC | AC | 重點結果 |
+| :--- | :--- | :--- |
+| TC-42-01a | AC-42-01 (a)、AC-41-04、AC-27-03、E-95、E-96 | `file://` 375×667、1366×768 的 6 個畫面各 1 行「版本 1.0.0（建置 436e27b）」，在 `#footer-sources` 正下方、`<p>`、單行、對比 5.4、Tab 不可達、點擊不導覽；375 捲到底：首次畫面版本行下緣 459 ≤ 固定底部列上緣 515，其他畫面 587 ≤ 導覽列上緣 611 |
+| TC-42-01b | AC-42-01 (b)、AC-42-03 (b)、AC-37-05 | `tools/serve.mjs`（即 `npm run serve`）同上全部通過；請求只有預先快取 7 項＋`sw.js` 的同源 GET，沒有 `package.json`；文字與 `file://` 相同 |
+| TC-42-02 | AC-42-02、AC-36-02、AC-36-07 | package.json 1.0.0 = `emt-app-version`；建置碼 = `emt-build-id` 前 7 碼 = `sw.js` BUILD_ID 前 7 碼；dist 與 `site/index.html` 相同；無 `@@` 殘留 |
+| TC-42-03a | AC-42-03 (a)、E-98 | 連網與斷網請求 0；localStorage 前後相同、只有 1 個鍵、不含版本號與建置碼；備份頂層 5 欄、不含版本號 |
+| TC-42-04a～c | AC-42-04、AC-36-01 | 兩次建置逐位元組相同；只改版本為 1.0.1 → BUILD_ID `436e27b4…`→`6b739743…`、sw 改變；改 1 個字 → 版本不變、BUILD_ID 改變 |
+| TC-42-04d | AC-42-04 (b)、AC-36-03、E-97 | 已造訪 1.0.0 後部署 1.0.1，重新載入 1.8 秒出現「有新版本，重新整理」，按下後版本行為「版本 1.0.1（建置 6b73974）」 |
+| TC-43-01 | AC-43-01、AC-25-06 | 範本區 `hidden`＋`inert`、`display:none`、高 0；Tab、focus()、點擊、Enter、空白鍵皆無法觸發；卡片間距 12px；交付檔仍含 3 個範本與注入程式；首次畫面無範本；Console 無錯誤 |
+| TC-43-02 | AC-43-02、AC-06-06、E-100 | 10 個畫面與狀態（含 3 種對話框、資料來源頁）及所有 Toast，可見文字與 aria-label／title 中「範本」0 次；兩段空狀態文字逐字符合 DS-27 |
+| TC-43-03a／b | AC-43-03、AC-04-06、AC-04-07、AC-23-01、AC-24-08 | 以 v0.13 交付檔（git `8a266c3`）實際注入「資工」產生的 localStorage 與備份：直接進主控台；11 字逐欄不變、只標「自訂擴充」；範本字可 TTS、STT 100；新增 latency 提示「單字已存在」；刪除 1 字其餘不變；匯出 10 字、origin／templateId 保留 |
+| TC-01-08 | AC-01-08、AC-01-07 | 兩種寬度：「目前色級：橘→棕→綠→綠→綠」皆單行；未套用不變；套用藍後重新載入仍為「目前色級：綠」且藍列選中；無「目前目標色級」「目前生效色級」「內建上限」 |
+| TC-39-04v | AC-39-04、AC-38-01、AC-38-04、AC-38-06、AC-38-09 | 目標行只顯示生效色級；「變更」為 `<button type=button class="btn db-change">`、白底＋1px `#0866ad` 外框、無底線、對比 5.98、62×44、焦點框 3px；滑鼠、觸控、Enter、空白鍵都到一般難易度設定頁且 localStorage 不變；減少動態無動畫 |
+
+修改 AC 回歸（應驗收 12 個全部通過）：AC-01-02、AC-01-07、AC-17-06、AC-22-02（30 個自訂單字，套用最大 18.1 ms；另待人工 TC-M07）、AC-25-02、AC-25-03（含狀態列「目前色級：綠」）、AC-25-06（無範本區、狀態列）、AC-26-06（12 個分數的狀態列）、AC-32-05（藍、金套用時狀態列「目前色級：綠」）、AC-36-02、AC-39-04、AC-41-04（另待人工 TC-LAY-H1、TC-VER-H1）。AC-01-06 暫停中。
+
+### 17.4 測試程式更新（QA）
+
+| 檔案 | 異動 |
+| :--- | :--- |
+| `tests/e2e/e2e-version.mjs`（新） | US-42、US-43、AC-01-08、AC-39-04 的 14 個 TC（§17.3） |
+| `tests/e2e/lib/state.mjs` | `est()` 讀 `#cz-st-line`（`stLine`；`stEffective` 改由該行取得）；`dashGoal` 改為「`.db-goal__text`｜`.db-change`」並偵測多餘節點；`GOAL_LINE` 藍、金改為綠；新增 `injectTpl` |
+| e2e-goal、e2e-reinit、e2e-firstrun、e2e-layout | TC-01-07、TC-26-06、TC-32-05、TC-32-01、TC-25-03、TC-25-06、TC-26-02 依 v0.14 改寫（狀態列、無範本區）；TC-26-05 的 Tab 走完後移除焦點；TC-38-03 色點期望改為生效色級 |
+| e2e-cards | TC-05-01～05 記「不適用（暫停）」；前置資料改用 `injectTpl` |
+| e2e-env、e2e-speech、e2e-progress、e2e-firstrun、e2e-goal | 範本按鈕點擊改用 `injectTpl`；TC-20-02 觸控清單移除範本按鈕；TC-18-05 期望字串 |
+| `tests/static/static-check.mjs` | 新增 TC-V-S01～S03（不讀 package.json、不寫死版本、meta 與佔位、「範本」字串只在隱藏容器、CSS 不用強調橘） |
+| `tests/static/boundary-r6.mjs`（新）、`tests/run-all.mjs` | 越界改與 `8a266c3` 比對 FE-63～FE-69；run-all 加入 e2e-version（Chrome、Edge） |
+| `tests/tools/qa-review-r6.mjs`（新）、`tc-list.mjs`、`tc-desc.json` | 第 6 輪 QA 檢視、人工 TC-VER-H1～H3 |
+| `tests/e2e/diag-r6-tabnav.mjs`（診斷） | 確認 e2e-firstrun 375px 中途結束為 Tab 終點落在輸入欄、導覽列依 AC-27-03 隱藏 |
+| `tests/e2e/diag-r6-importerr.mjs`（診斷） | 確認 `persist.js` 內部驗證原因「…範本代碼」不會顯示（畫面只顯示「備份檔格式錯誤，未匯入」） |
+
+### 17.5 越界與安全
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 增量越界（boundary-r6） | 與 git HEAD `8a266c3` 比對：PG 變動 33 檔全部在 FE-63～FE-69 paths 內，**超出 0**；`90-overrides.css` 未變動（允許）。授權例外：`package.json`（git diff 只有 version 0.1.0→1.0.0）、PRD、契約 3 檔、design 2 檔 |
+| 檔案歸屬（boundary-check） | 不屬於任何任務 0 |
+| tests/、docs/04-qa | QA 開始前 git status 無變動，PG 未寫入；`src/data/` 無變動 |
+| 安全 | 版本行以 `textContent` 寫入；版本模組無 fetch、XHR、import()、儲存 API；`file://` 請求 0；http 只有同源預先快取 GET；禁用 DOM API 0（TC-S03）；XSS 回歸 TC-04-04 通過 |
+
+### 17.6 缺陷
+
+本輪新開 0 張。BUG-001～BUG-003 維持 verified，目前沒有 open 缺陷。
+
+### 17.6.1 觀察事項（不構成缺陷）
+
+| 編號 | 內容 |
+| :--- | :--- |
+| O-6-1 | 本機記憶體不足時整個背景全套會被停止；建議之後在記憶體充足時執行全套，或比照本輪逐一執行套件 |
+| O-6-2 | `core/persist.js` 匯入驗證的內部原因字串含「範本」，只進 errors 陣列、畫面不顯示（`tests/results/diag/r6-importerr.json`），不違反 HT-7 |
+| O-6-3 | 窄螢幕聚焦於自訂單字輸入欄時底部導覽列隱藏（AC-27-03 設計行為），v0.14 範本按鈕移出 Tab 順序後，鍵盤使用者會較早進入輸入欄；屬既有設計，無 AC 違反 |
+
+### 17.7 需要人類處理的事項
+
+| 編號 | 事項 |
+| :--- | :--- |
+| H-6-1 | 實機人工：TC-VER-H1（實機版本行不被底部列遮住）、TC-VER-H2（push 後正式網址 meta、頁尾建置碼、sw.js 一致）、TC-VER-H3（下次只改版本號時已安裝 App 更新）；步驟見 test-plan §6.3 |
+| H-6-2 | 沿用的實機項目：TC-LAY-H1～H3、TC-PWA-H1～H5、V-MIC-1～5、TC-M01～M10（TC-M03／M05／M07 範本步驟已改寫） |
+
+## 18. 變更紀錄
 
 | 版本 | 日期 | 作者 | 說明 |
 | :--- | :--- | :--- | :--- |
@@ -1468,3 +1603,4 @@ PG 回報超出設計字面之處（主控指示範圍 4）：
 | 0.4 | 2026-11-02 | qa-agent | 第 3 輪驗收（§0、§14）：範圍 PRD v0.10（v0.8 + v0.9 + v0.10），192 個 AC 應驗收、22 個不適用（暫停）。264 個 TC：通過 230、失敗 0、待人工 15、不適用 19；AC 通過 188（其中 37 另待人工確認）、待人工 4、失敗 0；新開缺陷 0。更新與新增測試程式（§14.2）；TC-22-01m 全套執行 1 次不符、單獨重跑 2 次符合，判定通過並列觀察（§14.3）；新增觀察 O-7～O-13、需人類決定 H-1～H-5、回饋上游 QA-FB-03、QA-FB-04。原 §13 變更紀錄改為 §15 |
 | 0.5 | 2026-11-03 | qa-agent | 第 4 輪驗收（§0、§15）：範圍 PRD v0.11（新增 PWA），221 個 AC 應驗收、22 個不適用（暫停）。311 個 TC：通過 271、失敗 1、待人工 20、不適用 19；AC 通過 212（47 個另待人工確認）、待人工 8、失敗 1（AC-34-03）。新開 BUG-003（minor，主控 MC-01）。新增 Playwright（devDependency `playwright-core`）與 PWA 測試；第 3 輪結論移至 §0.1；變更紀錄改為 §16 ；同日 BUG-003 複驗通過改 verified（§15.11），最終 TC 通過 272、失敗 0、待人工 20、不適用 19，AC 通過 212（47 另待人工）、待人工 9、失敗 0；新增 §15.12 清單 |
 | 0.6 | 2026-11-03 | qa-agent | 第 5 輪驗收（§0、§16）：範圍 PRD v0.13（版面風格調整，新增 US-38～US-41、修改 30 個 AC），248 個 AC 應驗收、22 個不適用（暫停）。351 個 TC：通過 309、失敗 0、待人工 23、不適用 19；AC 通過 239（52 個另待人工確認）、待人工 9、失敗 0。新開缺陷 0。新增 e2e-layout 等測試程式並依 SD-FB-45 更新既有 E2E（§16.2）；判定 PG 超出設計字面 4 處皆不違反 AC（§16.4）；「cz-color__range」靜態規則改為只查程式與 CSS 規則（§16.5）。第 4 輪結論移至 §0.1；變更紀錄改為 §17 |
+| 0.7 | 2026-11-03 | qa-agent | 第 6 輪驗收（§0、§17）：PRD v0.14，251 個 AC 應驗收、27 個不適用（暫停）。367 個 TC：通過 318、失敗 0、待人工 26、不適用 23；AC 通過 242（55 個另待人工確認）、待人工 9、失敗 0；新開缺陷 0。新增 e2e-version、TC-V-S01～S03、boundary-r6，依 SD-FB-54 更新既有 E2E；第一次全套因記憶體不足中斷，改逐一執行；測試程式未更新造成的 6 個失敗修正後重跑通過（§17.2）。第 5 輪結論移至 §0.0；原 §17 變更紀錄改為 §18 |

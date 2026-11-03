@@ -44,7 +44,8 @@ PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin�
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="emt-build-id" content="962e0f286c63e9e6">
+<meta name="emt-build-id" content="436e27b40282d4af">
+<meta name="emt-app-version" content="1.0.0">
 <link rel="icon" href="data:,">
 <style>
 /* 00-base.css */
@@ -273,6 +274,15 @@ pre {
   border-top: 1px solid var(--line);
   text-align: center;
   color: var(--text-muted);
+}
+
+/* （v0.9，FE-64）頁尾版本行：「資料來源與授權」正下方、純文字、單行（VR-7；architecture.md §7.20.1） */
+.app-footer__version {
+  margin: 4px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 /* ─── 導覽：行動版（< 768px）選單鈕展開 2 欄（v0.5 起 4 鈕 = 2 × 2） ─── */
@@ -872,7 +882,7 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   min-height: 44px;
   margin: 12px 0 0;
   min-width: 0;
@@ -898,14 +908,23 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   overflow-wrap: anywhere;
 }
 
-.db-goal__sep {
-  color: var(--text-muted);
-}
-
+/* （v0.9，FE-66；AC-39-04、Q-61、V-LAY-10）「變更」外框按鈕：白底、四邊 1px 深藍框、無底線、≥ 44×44，置於行末 */
 .db-change {
   min-height: 44px;
   min-width: 44px;
-  padding: 0 8px;
+  margin-left: auto;
+  padding: 0 14px;
+  background: var(--surface);
+  border: 1px solid var(--brand-deep);
+  color: var(--brand-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .db-change:hover {
+    background: var(--tint);
+  }
 }
 
 /* ─── (2) 3 格數據（同一張卡片內；格本身無邊框、無背景，VC-4） ─── */
@@ -1188,19 +1207,12 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   min-width: 0;
 }
 
-/* 狀態列：寬螢幕三欄並排 */
-@media (min-width: 768px) {
-  .cz-rows--status {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .cz-rows--status .cz-row {
-    flex-direction: column;
-    align-items: flex-start;
-    border-bottom: 0;
-    padding-bottom: 0;
-  }
+/* 狀態列（v0.9，FE-67；LS-1、AC-01-08）：恰一行「目前色級：…」，最長 6 字，375px 不裁切 */
+.cz-status__line {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 /* ─── 色級列（v0.12，FE-57；architecture.md §7.19.5；契約 FT-3；AC-26-01～AC-26-04）───
@@ -4829,6 +4841,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - L1 模組：載入時不取用任何其他模組（LD-1）、不讀 DOM 與 window 資料；
  *   goalLine／summaryLine 以參數接收 COLOR_LEVELS 項目，不自行取用 constants／goal。
  * - 所有回傳字串都不做 HTML 跳脫：呼叫端一律以 textContent 寫入。
+ * - （v0.9，FE-65；契約 v0.14 §13、README §12.2 LS-1、§11.4 DB-4）LAYOUT_TEXTS 新增最後一鍵 levelStatus；
+ *   新增 goalLineText（主控台目標行，只以生效色級組字）與 levelStatusText（難易度設定頁狀態列）。
+ *   goalLineCapped、goalLineSeparator 兩鍵保留（契約仍含），但 view 不得再使用；goalLine 標記 @deprecated。
  */
 (function (root, factory) {
   var api = factory();
@@ -4929,7 +4944,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     summaryLockedSuffix: "（以綠試算）",
     lockedNotice: "目前內建字庫到綠色為止",
     startLearning: "開始學習",
-    restoreFromBackup: "從備份還原"
+    restoreFromBackup: "從備份還原",
+
+    // ── 難易度設定頁（v0.14，US-01）──
+    levelStatus: "目前色級：{color}"
   };
 
   // ── 架構常數（architecture.md §4.8；CSS 以同值寫死）──
@@ -4983,6 +5001,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
+   * @deprecated v0.9（契約 v0.14 DB-4）起 view 不得呼叫，改用 goalLineText；保留供既有測試（T-70）。
    * DB-4 目標行（不含「・變更」，view 另建可點擊節點）。
    * @param {object} applied 已套用色級（COLOR_LEVELS 項目）
    * @param {object} effective 生效色級（COLOR_LEVELS 項目）
@@ -4998,6 +5017,29 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       text: fill(LAYOUT_TEXTS.goalLineCapped, { target: applied.nameZh, effective: effective.nameZh, daily: daily }),
       capped: true
     };
+  }
+
+  /**
+   * （v0.9）DB-4 v0.14 主控台目標行：一律以「生效」色級組字 goalLineSame（結尾不帶「・」，不附註記）。
+   * 例：橘「橘級・每日 10 字」、棕「棕級・每日 10 字」、綠「綠級・每日 15 字」；呼叫端以生效色級呼叫，藍、金自然為綠。
+   * @param {object} effective 生效色級（COLOR_LEVELS 項目）
+   * @returns {string} 缺參數 → statNoData「—」
+   */
+  function goalLineText(effective) {
+    if (!effective) { return LAYOUT_TEXTS.statNoData; }
+    return fill(LAYOUT_TEXTS.goalLineSame, {
+      color: effective.nameZh,
+      daily: formatInt(effective.dailyNewWords)
+    });
+  }
+
+  /**
+   * （v0.9）LS-1 難易度設定頁狀態列：「目前色級：{生效色級}」（只看已套用的 effectiveColor）。
+   * @param {object} effective 生效色級（COLOR_LEVELS 項目）
+   * @returns {string} 缺參數 → 「目前色級：—」
+   */
+  function levelStatusText(effective) {
+    return fill(LAYOUT_TEXTS.levelStatus, { color: effective ? effective.nameZh : LAYOUT_TEXTS.statNoData });
   }
 
   /**
@@ -5063,6 +5105,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     fill: fill,
     formatInt: formatInt,
     goalLine: goalLine,
+    goalLineText: goalLineText,
+    levelStatusText: levelStatusText,
     summaryLine: summaryLine,
     chartIsEmpty: chartIsEmpty,
     part5Progress: part5Progress
@@ -7157,6 +7201,112 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     displayDays: displayDays,
     dayNumber: dayNumber
   };
+});
+
+/* core/version.js */
+/*
+ * EMT.core.version — 網站版本號契約常數與純函式（FE-63）
+ * 依據：architecture.md v0.9 §4.9「EMT.core.version」、§5.4；契約 data-schema.ts §14、README §12.1 VR-1～VR-9、
+ *       §12.4 V-VER-01、V-VER-04
+ * 涵蓋：US-42、AC-42-01、AC-42-02、AC-42-04、AC-36-02
+ *
+ * - 4 個契約常數與 data-schema.ts §14 逐字相同（version.test.js 以測試內複製的契約原文比對）。
+ * - 純函式：不碰 DOM、不讀 window 資料、不讀任何檔案；版本號只由建置寫入 HTML 的 meta，再由 ui/version-line.js
+ *   讀 DOM 後交給本檔組字（VR-5）。本檔不得寫死任何版本號，也不得含建置佔位字串。
+ * - 本檔同時由 tools/build.mjs 以 createRequire 讀取（B-18 驗證建置讀到的版本號格式）：
+ *   Node 下 module.exports 即同一個 api 物件，不得依賴 window 與 DOM。
+ * - L1 模組：載入時不取用任何其他模組（LD-1）；buildCode 需要的 PWA_BUILD_ID_PATTERN 在「呼叫時」才向
+ *   core/pwa.js 取用（Node：require("./pwa.js")；瀏覽器：EMT.core.pwa），取不到 → 視為不合法（回 null）。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.core = root.EMT.core || {};
+    root.EMT.core.version = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (root) {
+  "use strict";
+
+  // ── data-schema.ts §14 常數（逐字複製，不得自行修改）──
+
+  /** HTML 中記錄網站版本號的 <meta> name（VR-2；日後不得改名） */
+  var APP_VERSION_META_NAME = "emt-app-version";
+
+  /** 版本號 X.Y.Z 格式（SemVer 主.次.修訂，無前綴、無預發布與建置中繼資料；VR-3） */
+  var APP_VERSION_PATTERN = "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$";
+
+  /** 建置碼長度：BUILD_ID 的前 7 個字元（AC-42-02） */
+  var BUILD_CODE_LENGTH = 7;
+
+  /** 頁尾版本行格式字串（全形括號；「版本」「建置」後各 1 個半形空白；VR-7） */
+  var VERSION_LINE_TEXT = "版本 {version}（建置 {build}）";
+
+  var VERSION_RE = new RegExp(APP_VERSION_PATTERN);
+
+  /**
+   * 版本號是否合法：必須是字串且符合 APP_VERSION_PATTERN（建置與頁面共用）。
+   * @param {*} v
+   * @returns {boolean}
+   */
+  function isValidVersion(v) {
+    return typeof v === "string" && VERSION_RE.test(v);
+  }
+
+  /**
+   * 呼叫時才取用 core/pwa.js（LD-1：載入時不取用其他模組）。取不到 → null。
+   * @returns {object|null}
+   */
+  function pwaCore() {
+    try {
+      if (typeof module === "object" && module.exports && typeof require === "function") {
+        return require("./pwa.js");
+      }
+    } catch (e) {
+      return null;
+    }
+    var emt = root && root.EMT;
+    return emt && emt.core && emt.core.pwa ? emt.core.pwa : null;
+  }
+
+  /**
+   * 建置碼：buildId 為字串且符合 PWA_BUILD_ID_PATTERN → 前 BUILD_CODE_LENGTH 個字元；否則 null。
+   * @param {*} buildId
+   * @returns {string|null}
+   */
+  function buildCode(buildId) {
+    if (typeof buildId !== "string") { return null; }
+    var pwa = pwaCore();
+    if (!pwa || typeof pwa.PWA_BUILD_ID_PATTERN !== "string") { return null; }
+    if (!new RegExp(pwa.PWA_BUILD_ID_PATTERN).test(buildId)) { return null; }
+    return buildId.slice(0, BUILD_CODE_LENGTH);
+  }
+
+  /**
+   * 頁尾版本行文字。兩者皆合法 → VERSION_LINE_TEXT 的 {version}、{build} 各替換 1 次
+   * （以 split/join，避免 replace 的 $ 樣式被解讀）；任一不合法 → null（VR-8：不產生部分文字）。
+   * @param {*} version emt-app-version 的 content
+   * @param {*} buildId emt-build-id 的 content
+   * @returns {string|null}
+   */
+  function versionLineText(version, buildId) {
+    if (!isValidVersion(version)) { return null; }
+    var code = buildCode(buildId);
+    if (code === null) { return null; }
+    return VERSION_LINE_TEXT.split("{version}").join(version).split("{build}").join(code);
+  }
+
+  return Object.freeze({
+    APP_VERSION_META_NAME: APP_VERSION_META_NAME,
+    APP_VERSION_PATTERN: APP_VERSION_PATTERN,
+    BUILD_CODE_LENGTH: BUILD_CODE_LENGTH,
+    VERSION_LINE_TEXT: VERSION_LINE_TEXT,
+    isValidVersion: isValidVersion,
+    buildCode: buildCode,
+    versionLineText: versionLineText
+  });
 });
 
 /* core/vocab.js */
@@ -11538,6 +11688,149 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   EMT.ui.toast = { show: show };
 })(typeof self !== "undefined" ? self : this);
 
+/* ui/version-line.js */
+/*
+ * ui/version-line.js — 頁尾版本行（FE-64）
+ * 依據：architecture.md v0.9 §4.9「EMT.ui.versionLine」、§7.20.1；契約 data-schema.ts §14、README §12.1 VR-5～VR-8、
+ *       §12.4 V-VER-03～V-VER-05、§11.2 VC-3、VC-7、§9.7 DS-30
+ * 涵蓋：US-42、AC-42-01、AC-42-02、AC-42-03、AC-41-04、AC-36-02、AC-23-02
+ *
+ * EMT.ui.versionLine.init(doc?)
+ * - 只從 DOM 讀 name 為 emt-app-version 與 emt-build-id 兩個 meta 的 content（各須恰 1 個），
+ *   交給 EMT.core.version.versionLineText 組字；同一份 document 只讀一次（結果存模組變數）。
+ * - 文字合法且有 #footer-sources → 以 core/dom.js 建立 <p id="app-version" class="app-footer__version">（textContent），
+ *   插在 #footer-sources 之後（「正下方」）；已存在則只更新文字（重入安全）。不設 tabindex、role、事件。
+ * - 文字不合法（任一 meta 缺少／重複、版本或 BUILD_ID 不符格式）或找不到 #footer-sources → 不建節點，已存在則移除（VR-8）。
+ * - 整個 init 包在 try 內：任何例外回 { rendered: false, text: null }，不拋出、不輸出錯誤訊息到主控台。
+ * - 不發任何請求、不讀檔、不碰 store 與瀏覽器儲存；版本號一律來自 meta，本檔不寫死任何版本號（VR-5、VR-6）。
+ * - 頁尾位於 #app-main 之外，所有畫面共用同一個節點 → 每個畫面恰 1 行（由 DOM 結構保證）。
+ * 載入時只做登錄，不讀 document、不取用其他模組（LD-2）；Node 下 module.exports 供測試。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.ui = root.EMT.ui || {};
+    root.EMT.ui.versionLine = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (root) {
+  "use strict";
+
+  /** 版本行元素 id 與 class（architecture.md §7.20.1） */
+  var LINE_ID = "app-version";
+  var LINE_CLASS = "app-footer__version";
+  /** 版本行的錨點：頁尾「資料來源與授權」連結 */
+  var ANCHOR_ID = "footer-sources";
+
+  /** 已讀取的 document 與組好的文字（同一份 document 只讀一次） */
+  var readDoc = null;
+  var readText = null;
+
+  /**
+   * 呼叫時才取用 core 模組（LD-2）：Node 以 require，瀏覽器以 EMT.core.<name>；取不到 → null。
+   * @param {"version"|"pwa"|"dom"} name
+   * @returns {object|null}
+   */
+  function core(name) {
+    if (typeof module === "object" && module.exports && typeof require === "function") {
+      try {
+        if (name === "version") return require("../core/version.js");
+        if (name === "pwa") return require("../core/pwa.js");
+        if (name === "dom") return require("../core/dom.js");
+      } catch (e) {
+        return null;
+      }
+      return null;
+    }
+    var emt = root && root.EMT;
+    return emt && emt.core && emt.core[name] ? emt.core[name] : null;
+  }
+
+  /**
+   * 讀取 <meta name="…"> 的 content：恰 1 個才回傳，否則 null。
+   * @param {Document} doc
+   * @param {string} name
+   * @returns {string|null}
+   */
+  function readMeta(doc, name) {
+    var list = doc.querySelectorAll('meta[name="' + name + '"]');
+    if (!list || list.length !== 1) return null;
+    var v = list[0].getAttribute("content");
+    return typeof v === "string" ? v : null;
+  }
+
+  /**
+   * 依 meta 組出版本行文字（同一份 document 只讀一次）；不合法 → null。
+   * @param {Document} doc
+   * @returns {string|null}
+   */
+  function lineTextOf(doc) {
+    if (readDoc === doc) return readText;
+    var ver = core("version");
+    var pwa = core("pwa");
+    var text = null;
+    if (ver && pwa) {
+      text = ver.versionLineText(readMeta(doc, ver.APP_VERSION_META_NAME), readMeta(doc, pwa.PWA_BUILD_ID_META_NAME));
+    }
+    readDoc = doc;
+    readText = typeof text === "string" ? text : null;
+    return readText;
+  }
+
+  /** 移除既有的版本行（若有） */
+  function removeLine(doc) {
+    var old = doc.getElementById(LINE_ID);
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+  }
+
+  /**
+   * 建立或更新頁尾版本行。
+   * @param {Document} [doc] 預設 root.document
+   * @returns {{ rendered: boolean, text: string|null }}
+   */
+  function init(doc) {
+    var d = doc || null;
+    try {
+      if (!d) d = root && root.document;
+      if (!d) return { rendered: false, text: null };
+      var text = lineTextOf(d);
+      var anchor = d.getElementById(ANCHOR_ID);
+      if (text === null || !anchor || !anchor.parentNode) {
+        removeLine(d);
+        return { rendered: false, text: null };
+      }
+      var dom = core("dom");
+      var line = d.getElementById(LINE_ID);
+      if (line) {
+        if (dom && typeof dom.setText === "function") dom.setText(line, text);
+        else line.textContent = text;
+      } else {
+        if (!dom || typeof dom.el !== "function") return { rendered: false, text: null };
+        line = dom.el("p", { className: LINE_CLASS, attrs: { id: LINE_ID }, text: text });
+      }
+      if (anchor.nextSibling !== line) anchor.parentNode.insertBefore(line, anchor.nextSibling);
+      return { rendered: true, text: text };
+    } catch (e) {
+      // VR-8：不拋出、不輸出錯誤；盡量移除可能殘留的部分節點
+      try {
+        if (d) removeLine(d);
+      } catch (e2) {
+        /* 忽略 */
+      }
+      return { rendered: false, text: null };
+    }
+  }
+
+  return {
+    LINE_ID: LINE_ID,
+    LINE_CLASS: LINE_CLASS,
+    readMeta: readMeta,
+    init: init
+  };
+});
+
 /* views/custom-vocab.js */
 /*
  * views/custom-vocab.js — 自訂單字表單、自訂清單（刪除）與領域範本注入（FE-10）
@@ -11558,6 +11851,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *      已掛上的節點原地保留（以項目物件為鍵重用），最多再同步多掛 FIRST_BATCH 筆，其餘照樣閒置補上。
  *      離開頁面時卸下第 FIRST_BATCH 筆之後的節點（保留於快取），下次切回只需繪製少量節點。
  *   筆數文字、空狀態、「顯示更多」按鈕一律在同一事件內依完整清單更新，不受分批影響。
+ *
+ * （v0.14，FE-68；契約 README §5.8 HT-6～HT-9、DS-27、DS-28、FB-51；architecture.md v0.9 §7.20.2）
+ * - 領域範本區塊（buildTemplates 回傳的 section.card.cv-section，即 HT-6 的「同一個外層容器」）建立時即帶
+ *   hidden 與 inert 兩個屬性，之後任何路徑都不改回可見；容器內的標題、說明、按鈕、注入結果與 onTemplate、
+ *   injectMessage、templateButtons、templateLabel、TEMPLATE_ORDER 全部保留（HT-8），只是不可觸發。
+ * - 畫面文字不得出現「範本」二字（HT-7；隱藏容器內文字豁免）：origin = "template" 的清單項目只顯示「自訂擴充」，
+ *   不另顯示領域名稱（FB-51 由 SD 定案）；自訂清單空狀態改為 EMPTY_TEXT（DS-27 定案文字）。
+ *   已注入的範本單字照原值保留、照常顯示與刪除（HT-9），本檔不需特別處理。
  *
  * 純邏輯（訊息文字、欄位錯誤文字、清單截取、分批筆數）另以 module.exports 匯出供 Node 測試；
  * 瀏覽器下載入時只做登錄與 load 事件登記，不讀取 document、不操作 DOM（LD-2）。
@@ -11586,6 +11887,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   /** 自訂字標記文字（AC-04-02） */
   var CUSTOM_BADGE = "自訂擴充";
+
+  /** 自訂清單空狀態文字（v0.14 DS-27 定案；仍引導使用表單，不提及已隱藏的功能，HT-7 (a)） */
+  var EMPTY_TEXT = "尚未新增自訂單字。可用上方表單新增。";
 
   /** 範本按鈕順序與預設名稱（AC-05-01）；名稱優先使用 DOMAIN_TEMPLATES 的 label */
   var TEMPLATE_ORDER = [
@@ -11723,7 +12027,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     });
   }
 
-  /** 範本代碼 → 名稱（清單中顯示來源用） */
+  /** 範本代碼 → 名稱（v0.14 起清單不再顯示來源名稱，FB-51；保留供日後開放，HT-8） */
   function templateLabel(buttons, id) {
     for (var i = 0; i < buttons.length; i++) {
       if (buttons[i].id === id) return buttons[i].label;
@@ -11923,7 +12227,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       });
       tplStatus = d.el("p", { className: "cv-templates__status", attrs: { role: "status", "aria-live": "polite" } });
       tplStatus.hidden = true;
-      return d.el("section", { className: "card cv-section", attrs: { "aria-labelledby": "cv-tpl-title" } }, [
+      // （v0.14，HT-6）外層容器同時帶 hidden 與 inert：不渲染、不可聚焦、不可觸發；之後任何路徑都不改回可見
+      return d.el("section", {
+        className: "card cv-section",
+        attrs: { "aria-labelledby": "cv-tpl-title", hidden: true, inert: "" }
+      }, [
         d.el("h2", { className: "cv-section__title", attrs: { id: "cv-tpl-title" }, text: "領域範本" }),
         d.el("p", { className: "cv-section__desc", text: "一鍵加入領域常用單字，已存在的字會自動略過。" }),
         d.el("div", { className: "btn-row cv-templates" }, btns),
@@ -11943,11 +12251,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
     function buildItem(item) {
       var d = dom();
+      // （v0.14，HT-7 (b)、FB-51）origin = "template" 的項目與表單新增的字相同，只標「自訂擴充」
       var meta = [d.el("span", { className: "cv-badge", text: CUSTOM_BADGE })];
-      if (item.origin === "template") {
-        var lbl = templateLabel(buttons, item.templateId);
-        if (lbl) meta.push(d.el("span", { className: "cv-item__source", text: "範本：" + lbl }));
-      }
       var main = d.el("div", { className: "cv-item__main" }, [
         d.el("div", { className: "cv-item__head" }, [
           d.el("span", { className: "cv-item__word", attrs: { lang: "en" }, text: s(item.word) }),
@@ -12060,7 +12365,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     function buildList() {
       var d = dom();
       countEl = d.el("p", { className: "cv-list__count", attrs: { "aria-live": "polite" } });
-      emptyEl = d.el("p", { className: "cv-list__empty", text: "尚未新增自訂單字。可用上方表單新增，或注入領域範本。" });
+      emptyEl = d.el("p", { className: "cv-list__empty", text: EMPTY_TEXT });
       listEl = d.el("ul", { className: "cv-list", attrs: { "aria-label": "自訂單字清單" } });
       moreBtn = d.el("button", {
         className: "btn btn--secondary cv-list__more",
@@ -12199,6 +12504,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     syncCount: syncCount,
     fillCount: fillCount,
     CUSTOM_BADGE: CUSTOM_BADGE,
+    EMPTY_TEXT: EMPTY_TEXT,
     FIELDS: FIELDS,
     fieldErrorText: fieldErrorText,
     injectMessage: injectMessage,
@@ -12226,7 +12532,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - 「套用」「開始學習」不讀輸入框，直接以 store 的 draftScore 套用（GS-3、AC-26-06）
  *
  * 版面（掛在 #customizer-goal）：
- * - 狀態列（.cz-status-slot）：「目前目標色級」「目前生效色級」（藍、金套用後生效顯示「綠（內建上限）」）
+ * - 狀態列（.cz-status-slot）：（v0.9，FE-67；契約 v0.14 LS-1～LS-5、AC-01-08）恰一行 p.cz-status__line#cz-st-line
+ *   「目前色級：{已套用的生效色級}」（layout.levelStatusText）；藍、金套用後為「目前色級：綠」，不附加任何註記
  * - 色級區：橘、棕、綠、藍、金 5 張大卡片（整張為 <button>，aria-pressed 表示選中）；點擊呼叫 actions.clickColor
  *   （GS-2：draftScore = 該色 scoreMax）；選中卡片 = colorOf(draftScore)；只切換 aria-pressed 與選中 class，
  *   不重建卡片（AC-26-03、AC-22-04）
@@ -12248,7 +12555,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - DOM 只建立一次（啟動後閒置預建，或第一次 mount，以先到者為準）；之後的更新只改既有節點的文字與屬性，
  *   不重建（AC-02-07、AC-22-04）。閒置預建讓第一次切到本頁時不必在點擊事件內建 DOM（AC-22-01，BUG-002）。
  * - 所有文字以 textContent 寫入（經 EMT.core.dom），不使用任何 HTML 字串 API（C-7）。
- * - 純顯示邏輯（levelRows、firstRunSummary、estimateTexts、statusTexts、formatInt）不碰 DOM，Node 下可 require 測試。
+ * - 純顯示邏輯（levelRows、firstRunSummary、estimateTexts、statusLine、formatInt）不碰 DOM，Node 下可 require 測試。
  *
  * （v0.12，FE-57；architecture.md v0.8 §4.8、§7.19.5；契約 README §11.5 FT-1～FT-6、LAYOUT_TEXTS 首次畫面段）
  * - 色級大卡片改為 5 列精簡色級列（.cz-level，兩種模式共用；cardModels → levelRows）；列表上方說明行恰 1 個
@@ -12288,9 +12595,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   var T = {
     title: "難易度設定",
     intro: "選擇色級即時試算，按「套用」後才會更新單字卡的單字集。",
-    statusTarget: "目前目標色級",
-    statusEffective: "目前生效色級",
-    builtinCap: "（內建上限）",
     colorHeading: "色級",
     vocabNote: "本系統建議字量",
     // （v0.12，FE-57；SD-FB-41）色級列表上方說明行 = LAYOUT_TEXTS.vocabNoteLead + 本段（整個列表上方 1 次）
@@ -12455,22 +12759,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
-   * 狀態列文字（AC-01-02、AC-01-06、AC-01-07）。（v0.10，AC-26-05 (b)）不含目標分數。
+   * （v0.9，FE-67；LS-1、AC-01-08）狀態列一行文字「目前色級：{color}」。
+   * 只看已套用的 goal.effectiveColor（不看 draftScore、appliedColor）；藍、金套用時生效為綠 →「目前色級：綠」。
+   * 色級無法辨識 → 「目前色級：—」。不含目標分數（AC-26-05 (b)）。
    * @param {object} G core/goal.js
-   * @param {{appliedColor: string, effectiveColor: string}} goal
-   * @returns {{target: string, effective: string, greenCap: boolean}}
+   * @param {object} L core/layout.js
+   * @param {{effectiveColor: string}} goal
+   * @returns {{text: string}}
    */
-  function statusTexts(G, goal) {
-    var applied = goal && goal.appliedColor;
-    var eff = goal && goal.effectiveColor;
-    var lvEff = G.levelOf(eff);
-    var lvApplied = G.levelOf(applied);
-    var capped = !!lvApplied && !G.isOpenColor(applied);
-    return {
-      target: lvApplied ? lvApplied.nameZh : T.unknown,
-      effective: lvEff ? (capped ? lvEff.nameZh + T.builtinCap : lvEff.nameZh) : T.unknown,
-      greenCap: capped
-    };
+  function statusLine(G, L, goal) {
+    return { text: L.levelStatusText(G.levelOf(goal && goal.effectiveColor)) };
   }
 
   /**
@@ -12549,7 +12847,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     levelRows: levelRows,
     firstRunSummary: firstRunSummary,
     estimateTexts: estimateTexts,
-    statusTexts: statusTexts
+    statusLine: statusLine
   };
 
   // ── 頁面模組（瀏覽器）──
@@ -12697,15 +12995,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         cap
       ]);
 
-      var statusCap = D.el("p", { className: "cz-warning cz-status__cap", text: T.greenCap });
-      refs.statusCap = statusCap;
-      var status = D.el("section", { className: "card cz-status", attrs: { "aria-label": "目前目標狀態" } }, [
-        D.el("dl", { className: "cz-rows cz-rows--status" }, [
-          row(T.statusTarget, "stTarget", "cz-st-target"),
-          row(T.statusEffective, "stEffective", "cz-st-effective")
-        ]),
-        statusCap
-      ]);
+      // （v0.9，FE-67；LS-1、LS-3）狀態列恰一行「目前色級：…」；不再有兩列 dl 與內建字庫上限提示
+      var stLine = D.el("p", { className: "cz-status__line", attrs: { id: "cz-st-line" }, text: "" });
+      refs.stLine = stLine;
+      var status = D.el("section", { className: "card cz-status", attrs: { "aria-label": "目前色級" } }, [stLine]);
 
       // 狀態列與按鈕區各放獨立容器（FE-32 首次模式只替換這兩區，不動卡片與分數區）
       var statusSlot = D.el("div", { className: "cz-status-slot" }, [status]);
@@ -12855,12 +13148,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       refs.firstBar.hidden = !m.showFirstBar;
     }
 
-    /** 狀態列：目前目標色級、目前生效色級（v0.10 不顯示目標分數） */
+    /** 狀態列：「目前色級：{生效色級}」一行（v0.9，LS-1；呼叫時機不變：init、goal tag 等，點色級列不呼叫） */
     function renderStatus() {
-      var t = statusTexts(G, goalState());
-      D.setText(refs.stTarget, t.target);
-      D.setText(refs.stEffective, t.effective);
-      refs.statusCap.hidden = !t.greenCap;
+      D.setText(refs.stLine, statusLine(G, L, goalState()).text);
     }
 
     /** 隱藏錯誤提示 */
@@ -13156,7 +13446,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - h2「學習主控台」
  * - (1) 今日任務卡 section.card.db-today：h3「今日任務」→ 列（主環形圖 88px：中央只顯示 X，SD-FB-40；
  *   右側「今日已學 X / D 字」、「今日目標達成」、button「開始今日學習」[data-go=flashcards]）→ 目標行
- *   （色點 + layout.goalLine + 「・」+ button「變更」[data-go=customizer]；依已套用色級，DB-4）
+ *   （色點 + layout.goalLineText + button.btn.db-change「變更」[data-go=customizer]；v0.14 起只依生效色級，DB-4）
+ * - （v0.9，FE-66；契約 v0.14 DB-4、AC-39-04、Q-61）目標行一律以生效色級組字（藍、金套用時為「綠級・每日 15 字」），
+ *   不再顯示目標與生效兩個色級的對照註記與「・」分隔；色點亦依生效色級；「變更」改為外框按鈕（10-dashboard.css）。
  * - (2) 3 格數據 section.card.db-stats（aria-label「學習數據」）：連續打卡天數（強調橘圖示 + 數字 + 天）→
  *   單字掌握率（大字 % + 小字「已掌握 N 字」）→ 模擬測驗正確率；無資料「—」（DB-5）
  * - (3) 近 7 天圖表 section.card.db-chart：ol.db-bars（7 根）或空狀態「開始學習後會顯示紀錄」（layout.chartIsEmpty）
@@ -13231,7 +13523,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   var TEXT = {
     title: "學習主控台",
     accuracy: "模擬測驗正確率",
-    builtinCap: "（內建上限）",
     // （v0.12，SD-FB-41）今日任務卡標題、3 格數據區的 aria-label、近 7 天圖表標題
     todayTitle: "今日任務",
     statsLabel: "學習數據",
@@ -13270,8 +13561,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   // ── 純邏輯 ──
 
   /**
-   * 已套用色級與生效色級（AC-17-06、AC-01-07；DB-4 依已套用值，FB-45）。
-   * 目標色級為藍、金時，生效色級顯示「綠（內建上限）」；其餘兩者相同。
+   * 已套用色級與生效色級（AC-17-06、AC-01-07）。
+   * （v0.9，DB-4 v0.14）目標色級為藍、金時生效色級為「綠」（不再附加任何註記）；其餘兩者相同。
    * 每日新字量取生效色級的 dailyNewWords（藍、金顯示綠的 15）。
    * （v0.10）回傳不含 appliedScore（目標分數只存在資料中，畫面不顯示）。
    * @param {object|null} goal GoalState
@@ -13291,7 +13582,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     var applied = K.GOAL.levelOf(appliedId);
     var effective = K.GOAL.levelOf(effectiveId);
     var effectiveText = effective ? effective.nameZh : TEXT.empty;
-    if (effective && appliedId !== effectiveId) effectiveText += TEXT.builtinCap;
 
     // 每日新字量依「生效色級」顯示（人類決議 R6-2，2026-10-30）：藍、金生效為綠 → 15
     var daily = effective && typeof effective.dailyNewWords === "number" ? effective.dailyNewWords : null;
@@ -13462,7 +13752,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * @param {string} today 本地日期 YYYY-MM-DD
    * @returns {{
    *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
-   *   goal: { text: string, colorId: (string|null), capped: boolean },
+   *   goal: { text: string, colorId: (string|null) },
    *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, accuracyText: string },
    *   chart: { empty: boolean, bars: object[] },
    *   backupExpanded: boolean
@@ -13477,9 +13767,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
     var p = progressModel(st, today);
 
-    // 目標行（DB-4）：依已套用色級（goalInfoOf 以 appliedScore 推導）
+    // 目標行（DB-4 v0.14）：只以生效色級組字與上色（goalInfoOf 以 appliedScore 推導生效色級）
     var info = goalInfoOf(d.goal || null);
-    var gl = LAY.goalLine(K.GOAL.levelOf(info.appliedColorId), K.GOAL.levelOf(info.effectiveColorId));
 
     // 3 格數據（DB-5）
     var streakDays = K.STREAK.displayDays(d.streak || null, today);
@@ -13487,7 +13776,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
     return {
       today: p.today,
-      goal: { text: gl.text, colorId: info.appliedColorId, capped: gl.capped },
+      goal: { text: LAY.goalLineText(K.GOAL.levelOf(info.effectiveColorId)), colorId: info.effectiveColorId },
       stats: {
         streakValue: LAY.formatInt(streakDays),
         streakUnit: LT.statStreakUnit,
@@ -13630,7 +13919,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       D.setText(refs.doneText, m.today.doneText);
       refs.doneText.hidden = !m.today.done;
 
-      // 目標行（DB-4）
+      // 目標行（DB-4 v0.14：文字與色點皆為生效色級）
       D.setText(refs.goalText, m.goal.text);
       refs.goalLine.setAttribute("data-color", m.goal.colorId || "");
 
@@ -13819,15 +14108,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         text: LT.startToday
       });
       var goalText = D.el("span", { className: "db-goal__text", text: "" });
+      // （v0.9，Q-61、AC-39-04）「變更」為外框按鈕（不再是連結樣式）；行為沿用 router 的 [data-go] 委派
       var changeBtn = D.el("button", {
-        className: "btn btn--link db-change",
+        className: "btn db-change",
         attrs: { type: "button", "data-go": "customizer" },
         text: LT.changeLink
       });
       var goalLine = D.el("p", { className: "db-goal", attrs: { "data-color": "" } }, [
         D.el("span", { className: "db-goal__dot", attrs: { "aria-hidden": "true" } }),
         goalText,
-        D.el("span", { className: "db-goal__sep", attrs: { "aria-hidden": "true" }, text: LT.goalLineSeparator }),
         changeBtn
       ]);
       var section = D.el("section", { className: "card db-today", attrs: { "aria-labelledby": "db-today-h" } }, [
@@ -15410,7 +15699,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     ui.empty = el("div", { className: "card fc-empty", attrs: { hidden: true } }, [
       el("p", { className: "fc-empty__msg", text: "目前單字集是空的，沒有可以顯示的單字卡。" }),
       // （v0.10，FE-43；AC-06-06、R-19）提示不再提及目標分數：畫面只選色級
-      el("p", { className: "fc-empty__hint", text: "請到難易度設定選擇色級並按「套用」，或新增自訂單字、注入領域範本。" }),
+      el("p", { className: "fc-empty__hint", text: "請到難易度設定選擇色級並按「套用」，或新增自訂單字。" }),
       el("button", {
         className: "btn btn--primary fc-empty__go",
         text: "前往難易度設定",
@@ -18309,6 +18598,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   → EMT.ui.bottomNav.init()（v0.4，FE-26）
  * （v0.7，FE-50）banner.render 之後 EMT.services.pwa.start({ onChange → store.actions.setPwa })（PE-1 判定；file:// 只判定即返回，
  *   service worker 延到 window load 後註冊，PE-4）；bottomNav.init 之後 EMT.ui.pwaNotice.init({ onReload → services.pwa.requestReload })。
+ * （v0.9，FE-64）banner.render 之後、pwa.start 之前 EMT.ui.versionLine.init()：讀 emt-app-version、emt-build-id 兩個 meta，
+ *   合法才在頁尾「資料來源與授權」正下方建立版本行（VR-5～VR-8）；放在 router.start 前，首次繪製即含版本行。
  * emt-ready 位置不變：一般模式量到主控台入口可點擊，首次模式量到「開始學習」可點擊（AC-22-05）。
  * 最後 performance.mark("emt-ready")，並設 document.documentElement.dataset.ready = "1"。
  */
@@ -18355,6 +18646,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     });
     step("banner.render", function () {
       if (EMT.ui && EMT.ui.banner && typeof EMT.ui.banner.render === "function") EMT.ui.banner.render();
+    });
+    // （v0.9，FE-64）頁尾版本行（只讀 DOM meta，不請求、不儲存；不合法時不建立）
+    step("versionLine.init", function () {
+      if (EMT.ui && EMT.ui.versionLine && typeof EMT.ui.versionLine.init === "function") EMT.ui.versionLine.init();
     });
     // （v0.7，FE-50）PWA：PE-1 判定、動態連結、安裝事件；狀態經 store.actions.setPwa 寫入 runtime.pwa（不寫 localStorage）
     step("pwa.start", function () {

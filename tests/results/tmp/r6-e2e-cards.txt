@@ -1,0 +1,37 @@
+  PASS TC-04-01 AC-04-01 英文單字（必填）、中文釋義（必填）、音標（選填）、詞性（選填）、搭配詞（選填）、論文例句（選填）
+  PASS TC-04-03 AC-04-03 英文空白 → 「此欄位為必填，請輸入內容」；釋義空白 → 「此欄位為必填，請輸入內容」；自訂字數 0 → 0
+  PASS TC-04-02 AC-04-02 toast ["已新增「kubernetes」"]；清單「kubernetes /ˌkubɚˈnɛtiz/ n. 容器編排平台 自訂擴充 刪除」；單字集 5620 → 5621；卡片 kubernetes、第 5621 / 5621 張、TTS 1.0x/0.75x、麥克風=true；朗讀 [{"text":"kubernetes","lang":"en-US","rate":1,"voice":"QA en-US local","queueBefore":false}]
+  PASS TC-04-04 AC-04-04 第二筆（英文單字欄為 XSS 字串）結果 {"word":"","meaning":"","phonetic":"","pos":"","collocation":"","example":"","message":""}；清單含原文字元 2 筆、img/script 元素 0；卡片顯示原文=true；整頁 img/額外 script 0；腳本未執行=true；alert 對話框 0（studySet 索引 5621/5621）
+  PASS TC-04-06 AC-04-06 內建 Office → 「單字已存在」；自訂已有 Latency 再加 LATENCY → 「單字已存在」
+  PASS TC-04-05 AC-04-05 重載前後自訂單字 13 / 13 筆，內容完全相同=true
+  N/A TC-05-01 AC-05-01 PRD v0.14 暫停（領域範本隱藏，R-22 二、Q-59）；改由 TC-43-01、TC-43-03 驗證
+  N/A TC-05-02 AC-05-02、AC-05-04 PRD v0.14 暫停（領域範本隱藏，R-22 二、Q-59）；改由 TC-43-01、TC-43-03 驗證
+  N/A TC-05-03 AC-05-03 PRD v0.14 暫停（領域範本隱藏，R-22 二、Q-59）；改由 TC-43-01、TC-43-03 驗證
+  N/A TC-05-05 AC-05-05 PRD v0.14 暫停（領域範本隱藏，R-22 二、Q-59）；改由 TC-43-01、TC-43-03 驗證
+  PASS TC-04-07 AC-04-07 刪除前 5640 張、刪除後 共 5639 張；確認對話框：無；重載後清單含 Monetization=false
+  PASS TC-04-08 AC-04-08 刪除目前卡 Rebranding（第 5635 張）後顯示 Upselling（預期下一張 Upselling、第 5635 / 5638 張）；刪除最後一張 Divestiture 後顯示 Churn（預期前一張 Churn、第 5637 / 5637 張）
+  PASS TC-06-01 AC-06-01 正面：the /ðə/、欄位 多益常考搭配詞、TTS 1.0x/0.75x、麥克風=true、標示「需要連網」
+  PASS TC-06-02 AC-06-02、AC-06-03 點卡片 → 背面（stadium）：詞性=n. 名詞；中文釋義=露天大型運動場；學術文獻應用情境=Stadium construction；完整例句=The concert will tak；再點 → 正面=true；「翻面」鈕 → true
+  PASS TC-06-04 AC-06-04、AC-06-05 第 1 張：上一張停用=true、點擊後 第 1 / 5620 張；背面按下一張 → 第 2 / 5620 張、正面=true；最後一張：下一張停用=true、點擊後 第 5620 / 5620 張
+  PASS TC-06-07 AC-06-07 the 背面欄位 詞性/中文釋義/完整例句｜抽查 500 張問題 0｜自訂卡正面 多益常考搭配詞=—；背面 詞性=—；中文釋義=只填必填；學術文獻應用情境=—；完整例句=—；音標 —
+  PASS TC-23-01 AC-23-01 檢查 257 張內建卡；不一致 0；範例 the「單字來源：NGSL 1.2（CC BY-SA 4.0） ／ 音標：原創；釋義：ECDICT（MIT，已修改）」；café「單字來源：TSL 1.2（CC BY-SA 4.0） ／ 音標：原創；釋義：原創」；gay「單字來源：NGSL 1.2（CC BY-SA 4.0） ／ 音標：原創；釋義：原創」；client「單字來源：TSL 1.2（CC BY-SA 4.0）、BSL 1.2（CC BY-SA 4.0）、NAWL 1.2（CC BY-SA 4.0） ／ 音標：原創；釋義：ECDICT（MIT，已修改）」；自訂卡見 TC-05-05
+  PASS TC-09-01 AC-09-01 測驗模式：he、4 選項；再點 → 抽認卡=true
+  PASS TC-09-02 AC-09-02 the：課程；學程 | 檢查；檢閱；檢驗 | 山；山脈；大堆 | （定冠詞）那；a：戲劇；戲劇藝術 | （不定冠詞）一個 | 贏得；獲勝；成功；勝利 | 主意；辦法；概念；意見；claim：不穩定的；可變的；揮發性的 | 多數；大半 | 任命；指定 | 要求；主張；斷言；認領；stadium：露天大型運動場 | 嫩的；溫柔的；投標；提出 | 詩人 | 繁榮；興旺；茁壯成長；undergraduate：大學部學生；大學生的 | 嚴肅地；認真地；嚴重地 | 明白地說；口才好的；發音清晰的 | 提醒的人；暗示；催單（單字集相異釋義 5606）
+  PASS TC-09-03 AC-09-03、AC-17-03 答對：狀態 correct,neutral,neutral,neutral、鎖定=true、再點不變=true；答錯：neutral(rgb(255, 255, 255)),correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226)),neutral(rgb(255, 255, 255))；同字答對兩次後掌握數 1（主控台「已掌握 1 字」）、答題 2/2
+  PASS TC-09-04 AC-09-04 localStorage：答題 3、答對 2、已掌握 ["do"]
+  PASS TC-09-05 AC-09-05 qaquizword：指責；控告；歸咎於 | 四選一自訂測試 | 方式；樣子；禮貌 | 種族的；人種的
+  PASS TC-09-07 AC-09-07 20 次正解位置：CDCCDACDDADBADBDDABB
+  PASS TC-17-02 AC-17-02 初始 0 天；D 翻卡 1 天；D 再做 Part 5 1 天；D+1 開啟 1 天；D+1 翻卡 2 天；中斷一天（D+3）開啟 0 天；D+3 四選一作答 1 天；lastActiveDate=2026-04-02
+  PASS TC-17-05 AC-17-05 4/3 學習後 2 天；時鐘調回 3/20 開啟 2 天、學習後 2 天（days 2 → 2、lastActiveDate 2026-04-03）
+  PASS TC-24-01 AC-24-01、AC-24-02 檔名 english-master-track-backup-20261103.json（本地日期 20261103）；網路請求 0；6947 bytes；format=english-master-track-backup、schemaVersion=2；欄位齊全=true；不含內建內容=true；goal={"draftScore":300,"appliedScore":300,"appliedColor":"brown","effectiveColor":"brown"}；自訂 10、已掌握 1、測驗 {"answered":1,"correct":1}、part5 {"currentIndex":1,"lockedSelection":null,"phase":"question","roundAnswered":1,"roundCorrect":1,"totalAnswered":1,"totalCorrect":1}、streak {"days":1,"lastActiveDate":"2026-11-03"}、STT 已讀 true、todayLearned {"date":"2026-11-03","wordKeys":["the"]}、learnedHistory {"2026-11-03":1}
+  PASS TC-24-03 AC-24-03 對話框「匯入備份  匯入將覆蓋目前所有進度  取消 匯入」；提示 ["已匯入，略過 0 筆"]；匯入後與匯出內容相同=true；重載後相同=true
+  PASS TC-24-04 AC-24-04 取消後 localStorage 不變=true、記憶體不變=true；提示 []
+  PASS TC-24-05 AC-24-05 非 JSON：備份檔格式錯誤，未匯入；空檔：備份檔格式錯誤，未匯入；缺少 data：備份檔格式錯誤，未匯入；缺少 goal：備份檔格式錯誤，未匯入；型別錯誤：備份檔格式錯誤，未匯入；頂層為陣列：備份檔格式錯誤，未匯入；format 錯：備份檔格式錯誤，未匯入；未處理例外 0
+  PASS TC-24-06 AC-24-06 版本缺失：「備份檔版本不相容（檔案版本：無；支援版本：1、2）」；版本 99：「備份檔版本不相容（檔案版本：99；支援版本：1、2）」；版本字串：「備份檔版本不相容（檔案版本：無；支援版本：1、2）」
+  PASS TC-24-07 AC-24-07 提示 ["已匯入，略過 0 筆"]；清單原文=true；卡片原文=true；img 元素 0；alert 0
+  PASS TC-24-08 AC-24-08 提示 ["已匯入，略過 3 筆"]（預期略過 3 筆：內建重複 1、檔內重複 1、不存在的已掌握 1）；匯入後自訂 10 筆、掌握數「已掌握 1 字」
+  PASS TC-X-cards （全套件）無未處理例外 例外：[]
+  PASS TC-06-06 AC-06-06 空狀態「目前單字集是空的，沒有可以顯示的單字卡。  請到難易度設定選擇色級並按「套用」，或新增自訂單字。  前往難易度設定」；顯示卡片=false；按鈕導向 customizer（以無內建資料的 fixture 建置驗證）
+  PASS TC-09-06 AC-09-06 3 字時按測驗模式：提示 ["單字數不足 4 個，無法產生選項"]；模式 card
+  PASS TC-04-08b AC-04-08、AC-06-06 刪光後空狀態顯示=true、空白卡=false
+  PASS TC-X-fixture （fixture）無未處理例外 []

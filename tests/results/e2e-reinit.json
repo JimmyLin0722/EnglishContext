@@ -11,7 +11,7 @@
     "tc": "TC-32-02",
     "ac": "AC-32-02",
     "result": "通過",
-    "note": "確定後視窗關閉=true；localStorage goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；主控台 棕級・每日 10 字・變更、今日已學 0 / 10 字、長條 0,0,0,0,0,0,0、近 7 天「開始學習後會顯示紀錄」、3 格 0 天｜0%｜已掌握 0 字｜—；試算 c=0 字、棕 41 週；單字卡 第 1 / 2812 張/false；模擬測驗 第 1 / 200 題（未作答=true）；重新載入後相同=true；匯出備份 6 欄 {\"masteredWordKeys\":[],\"vocabQuiz\":{\"answered\":0,\"correct\":0},\"part5\":{\"currentIndex\":0,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":0,\"roundCorrect\":0,\"totalAnswered\":0,\"totalCorrect\":0},\"streak\":{\"days\":0,\"lastActiveDate\":null},\"todayLearned\":{\"date\":null,\"wordKeys\":[]},\"learnedHistory\":{}} 與首次啟動預設相同=true"
+    "note": "確定後視窗關閉=true；localStorage goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；主控台 棕級・每日 10 字｜變更、今日已學 0 / 10 字、長條 0,0,0,0,0,0,0、近 7 天「開始學習後會顯示紀錄」、3 格 0 天｜0%｜已掌握 0 字｜—；試算 c=0 字、棕 41 週；單字卡 第 1 / 2812 張/false；模擬測驗 第 1 / 200 題（未作答=true）；重新載入後相同=true；匯出備份 6 欄 {\"masteredWordKeys\":[],\"vocabQuiz\":{\"answered\":0,\"correct\":0},\"part5\":{\"currentIndex\":0,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":0,\"roundCorrect\":0,\"totalAnswered\":0,\"totalCorrect\":0},\"streak\":{\"days\":0,\"lastActiveDate\":null},\"todayLearned\":{\"date\":null,\"wordKeys\":[]},\"learnedHistory\":{}} 與首次啟動預設相同=true"
   },
   {
     "suite": "e2e-reinit",
@@ -46,7 +46,7 @@
     "tc": "TC-32-05",
     "ac": "AC-32-05",
     "result": "通過",
-    "note": "green：視窗=false、localStorage 725、綠級・每日 15 字・變更、學習紀錄不變=true；blue：視窗=false、localStorage 855、目標藍級・生效綠級（內建上限）・每日 15 字・變更、學習紀錄不變=true；gold：視窗=false、localStorage 990、目標金級・生效綠級（內建上限）・每日 15 字・變更、學習紀錄不變=true；green：視窗=false、localStorage 725、綠級・每日 15 字・變更、學習紀錄不變=true"
+    "note": "green：視窗=false、localStorage 725、狀態列「目前色級：綠」、綠級・每日 15 字｜變更、學習紀錄不變=true；blue：視窗=false、localStorage 855、狀態列「目前色級：綠」、綠級・每日 15 字｜變更、學習紀錄不變=true；gold：視窗=false、localStorage 990、狀態列「目前色級：綠」、綠級・每日 15 字｜變更、學習紀錄不變=true；green：視窗=false、localStorage 725、狀態列「目前色級：綠」、綠級・每日 15 字｜變更、學習紀錄不變=true"
   },
   {
     "suite": "e2e-reinit",
@@ -81,7 +81,7 @@
     "tc": "TC-32-11a",
     "ac": "AC-32-11（a）",
     "result": "通過",
-    "note": "停用時：翻卡後 今日已學 1 / 15 字 → 確認視窗=true 按確定 → 今日已學 0 / 10 字、棕級・每日 10 字・變更；警示「進度將無法保存」；toast [\"已套用目標\"]；例外 0"
+    "note": "停用時：翻卡後 今日已學 1 / 15 字 → 確認視窗=true 按確定 → 今日已學 0 / 10 字、棕級・每日 10 字｜變更；警示「進度將無法保存」；toast [\"已套用目標\"]；例外 0"
   },
   {
     "suite": "e2e-reinit",

@@ -385,15 +385,22 @@ describe("flashcards.test.js", () => {
 });
 
 // （v0.10，FE-43；AC-06-06、R-19）空狀態提示不再引導使用者輸入或查看目標分數
-describe("flashcards.test.js：空狀態提示（FE-43）", () => {
-  test("fc-empty__hint 為「請到難易度設定選擇色級並按「套用」，或新增自訂單字、注入領域範本。」，且畫面文字不含「目標分數」", () => {
+// （v0.14，FE-68；HT-7、DS-27、AC-43-02）空狀態提示不再提及領域範本；字串常值不含「範本」
+describe("flashcards.test.js：空狀態提示（FE-43、FE-68）", () => {
+  test("fc-empty__hint 為「請到難易度設定選擇色級並按「套用」，或新增自訂單字。」，且畫面文字不含「目標分數」「範本」", () => {
     const fs = require("node:fs");
     const path = require("node:path");
     const src = fs.readFileSync(path.join(__dirname, "..", "views", "flashcards.js"), "utf8");
-    assert.ok(src.includes('className: "fc-empty__hint", text: "請到難易度設定選擇色級並按「套用」，或新增自訂單字、注入領域範本。"'));
+    assert.ok(src.includes('className: "fc-empty__hint", text: "請到難易度設定選擇色級並按「套用」，或新增自訂單字。"'));
+    assert.ok(!src.includes("注入領域範本"));
     // 只檢查字串常值（註解可提及版本說明）
     const lits = src.match(/"[^"\n]*"/g) || [];
     assert.ok(!lits.some((s) => s.includes("目標分數")));
+    assert.ok(!lits.some((s) => s.includes("範本")), "flashcards.js 字串常值不含「範本」");
     assert.ok(lits.includes('"前往難易度設定"'));
+    // 刪字後文句完整：以「。」結尾，不以「或」「、」「，」結尾
+    const hint = "請到難易度設定選擇色級並按「套用」，或新增自訂單字。";
+    assert.ok(hint.endsWith("。"));
+    assert.ok(!/[或、，]$/.test(hint.slice(0, -1)));
   });
 });

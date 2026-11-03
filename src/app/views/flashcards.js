@@ -493,7 +493,7 @@
     ui.empty = el("div", { className: "card fc-empty", attrs: { hidden: true } }, [
       el("p", { className: "fc-empty__msg", text: "目前單字集是空的，沒有可以顯示的單字卡。" }),
       // （v0.10，FE-43；AC-06-06、R-19）提示不再提及目標分數：畫面只選色級
-      el("p", { className: "fc-empty__hint", text: "請到難易度設定選擇色級並按「套用」，或新增自訂單字、注入領域範本。" }),
+      el("p", { className: "fc-empty__hint", text: "請到難易度設定選擇色級並按「套用」，或新增自訂單字。" }),
       el("button", {
         className: "btn btn--primary fc-empty__go",
         text: "前往難易度設定",

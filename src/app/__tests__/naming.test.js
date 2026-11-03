@@ -246,7 +246,9 @@ describe("naming.test.js", () => {
     assert.ok(czLits.includes("選擇色級即時試算，按「套用」後才會更新單字卡的單字集。"));
     assert.ok(!czLits.includes("選擇色級或輸入目標分數即時試算，按「套用」後才會更新單字卡的單字集。"));
     assert.ok(fcLits.includes("單字卡"));
-    assert.ok(fcLits.includes("請到難易度設定選擇色級並按「套用」，或新增自訂單字、注入領域範本。"));
+    // （v0.14，FE-68；DS-27、AC-43-02）空狀態不再提及領域範本
+    assert.ok(fcLits.includes("請到難易度設定選擇色級並按「套用」，或新增自訂單字。"));
+    assert.ok(!fcLits.some((s) => s.includes("範本")), "單字卡畫面文字不含「範本」");
     assert.ok(!fcLits.some((s) => s.includes("目標分數")), "單字卡畫面文字不提目標分數");
     assert.ok(fcLits.includes("前往難易度設定"));
     assert.ok(stringLiterals(p5src).includes("模擬測驗"));

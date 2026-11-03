@@ -3,19 +3,20 @@
   "$id": "https://english-master-track.local/contract/storage-schema.json",
   "meta": {
     "doc": "CONTRACT-STORAGE",
-    "version": "0.13",
+    "version": "0.14",
     "status": "approved",
     "author": "sa-agent",
     "approved_by": "JimmyLin（授權主控代核）",
     "approved_at": "2026-11-03",
-    "upstream": "docs/01-PRD.md v0.13（approved，JimmyLin，2026-11-03）",
-    "covers": ["FR-6.1", "FR-6.2", "AC-08-13", "AC-09-04", "AC-11-05", "AC-11-07", "AC-17-02", "AC-17-03", "AC-17-05", "AC-18-01", "AC-18-02", "AC-18-05", "AC-24-02", "AC-24-05", "AC-24-06", "AC-24-08", "AC-24-10", "AC-24-11", "AC-25-01", "AC-25-04", "AC-25-09", "AC-30-03", "AC-30-06", "AC-30-07", "AC-30-09", "AC-30-11", "AC-30-12", "AC-30-13", "R-17", "AC-26-06", "R-19", "Q-39", "AC-21-03", "AC-35-01", "AC-36-04", "AC-36-05", "AC-37-05", "AC-37-06", "R-20", "AC-38-10", "AC-39-08", "E-94", "R-21"],
+    "upstream": "docs/01-PRD.md v0.14（approved，JimmyLin，2026-11-03）",
+    "covers": ["FR-6.1", "FR-6.2", "AC-08-13", "AC-09-04", "AC-11-05", "AC-11-07", "AC-17-02", "AC-17-03", "AC-17-05", "AC-18-01", "AC-18-02", "AC-18-05", "AC-24-02", "AC-24-05", "AC-24-06", "AC-24-08", "AC-24-10", "AC-24-11", "AC-25-01", "AC-25-04", "AC-25-09", "AC-30-03", "AC-30-06", "AC-30-07", "AC-30-09", "AC-30-11", "AC-30-12", "AC-30-13", "R-17", "AC-26-06", "R-19", "Q-39", "AC-21-03", "AC-35-01", "AC-36-04", "AC-36-05", "AC-37-05", "AC-37-06", "R-20", "AC-38-10", "AC-39-08", "E-94", "R-21", "AC-42-03", "AC-43-03", "AC-01-08", "R-22"],
     "browserStoragePolicy": {
       "description": "（v0.11，PRD R-20、AC-21-03）本系統在瀏覽器各種儲存區允許存放的內容。只是說明（JSON Schema 不驗證 meta），不改變下方任何結構關鍵字。PWA 不新增任何 localStorage 鍵或欄位，schemaVersion 維持 2。詳細規則見 README §10.10 PV-1～PV-7。",
       "localStorage": {
         "file": "鍵只有 englishMasterTrack:state（本檔根結構，schemaVersion 2）與 englishMasterTrack:unreadable（原始字串）；與 v0.10 相同。",
         "https": "與 file:// 相同（鍵名、欄位集合、schemaVersion 2 皆不變，AC-36-04、AC-37-06）。PWA 狀態（安裝按鈕、新版提示、更新檢查時間）只在記憶體，不寫入 localStorage。不同來源（file://、GitHub Pages、iOS Safari、iOS 主畫面 App）各自一份，不同步（AC-24-12、E-81）。",
-        "layout": "（v0.12，R-21）版面與視覺不新增任何鍵或欄位：主控台「資料備份」展開狀態（RuntimeState.dashboard.backupExpanded）只在記憶體，展開、收合、切頁、重新載入前後本系統 localStorage 內容完全相同（AC-39-08）。App 顯示名稱改為「EnglishContext」（Q-49）不影響鍵名 englishMasterTrack:state／englishMasterTrack:unreadable、備份 format 識別字串 english-master-track-backup、匯出檔名前綴 english-master-track-backup-（AC-38-10 (2)、E-94）。"
+        "layout": "（v0.12，R-21）版面與視覺不新增任何鍵或欄位：主控台「資料備份」展開狀態（RuntimeState.dashboard.backupExpanded）只在記憶體，展開、收合、切頁、重新載入前後本系統 localStorage 內容完全相同（AC-39-08）。App 顯示名稱改為「EnglishContext」（Q-49）不影響鍵名 englishMasterTrack:state／englishMasterTrack:unreadable、備份 format 識別字串 english-master-track-backup、匯出檔名前綴 english-master-track-backup-（AC-38-10 (2)、E-94）。",
+        "versionAndTemplates": "（v0.14，R-22）不新增任何鍵或欄位：(1) 頁尾版本行的版本號 X.Y.Z 與建置碼只取自交付 HTML 的 <meta name=\"emt-app-version\">、<meta name=\"emt-build-id\">，不寫入 localStorage，也不寫入備份檔（AC-42-03，README §12.1 VR-6）；(2) 領域範本畫面入口隱藏（US-43），既有 customVocab 中 origin = \"template\" 的項目（含 templateId）照原值保留，讀取、匯入、匯出都不刪除、不轉換為 manual（AC-43-03，README §5.8 HT-9）；(3) 難易度設定頁狀態列只顯示生效色級（AC-01-08），GoalState 4 欄（含 appliedColor 目標色級）照常保存。"
       },
       "cacheStorage": {
         "file": "本系統建立的快取數 = 0（不註冊 service worker、不呼叫 caches API，AC-37-01、AC-21-03）。",
@@ -38,7 +39,8 @@
       { "version": "0.10", "date": "2026-11-02", "author": "sa-agent", "note": "修訂已核准的 v0.8（v0.9 契約未改本檔），依 PRD v0.10 R-19、Q-39；status 改回 draft、核准欄位清空，上游改為 PRD v0.10。只改 description 與 examples：(1) GoalState 預設分數 600 → 725（Q-39 決議 B，綠色上限）；(2) draftScore 說明由「滑桿／輸入框」改為「選中卡片的分數，點卡片設為該色上限」；(3) Score 說明註明只用於資料層驗證、不四捨五入、既有分數不轉換（R-19 六）；(4) examples 第 1 筆（預設狀態）goal 改為 725，第 2 筆保留 600 作為 v0.9 以前既有分數的合法範例。properties、required、additionalProperties、type、minimum、maximum、multipleOf、const／enum 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" },
       { "version": "0.11", "date": "2026-11-02", "author": "sa-agent", "note": "修訂已核准的 v0.10（主控代核），依 PRD v0.11 R-20（PWA）、US-34～US-37、AC-21-03 修訂；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.11。只改 meta：(1) 版本、狀態、上游、covers 補 AC-21-03、AC-35-01、AC-36-04、AC-36-05、AC-37-05、AC-37-06、R-20；(2) 新增 meta.browserStoragePolicy，說明 localStorage、Cache Storage、IndexedDB 在 file:// 與 https 兩種版本下允許的內容（AC-21-03）。$defs、properties、required、additionalProperties、type、const／enum 與 examples 皆未改動；PWA 不寫入 localStorage，持久化結構不變，schemaVersion 維持 2，不需遷移。" },
       { "version": "0.12", "date": "2026-11-03", "author": "sa-agent", "note": "修訂已核准的 v0.11（主控代核），原因：PRD v0.12 R-21（版面與視覺，US-38～US-41，Q-49～Q-57，JimmyLin 2026-11-03 核准）；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.12。只改 meta：(1) 版本、狀態、上游，covers 補 AC-38-10、AC-39-08、E-94、R-21；(2) browserStoragePolicy.localStorage 新增 layout 說明（資料備份展開狀態只在記憶體；App 改名為 EnglishContext 不影響鍵名、備份 format 與匯出檔名前綴）；cacheStorage.https 註明快取前綴不改。$id、$defs、properties、required、additionalProperties、type、const／enum 與 examples 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" },
-      { "version": "0.13", "date": "2026-11-03", "author": "sa-agent", "note": "修訂已核准的 v0.12（主控代核），原因：PRD v0.13 修改 AC-38-01（標題列品牌圖示的橘色「EC」對話框不受強調橘用途限制，SD-FB-39，JimmyLin 2026-11-03 核准）；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.13。只改 meta 的 version、status、approved_by、approved_at、upstream；$defs、properties、required、additionalProperties、type、const／enum 與 examples 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" }
+      { "version": "0.13", "date": "2026-11-03", "author": "sa-agent", "note": "修訂已核准的 v0.12（主控代核），原因：PRD v0.13 修改 AC-38-01（標題列品牌圖示的橘色「EC」對話框不受強調橘用途限制，SD-FB-39，JimmyLin 2026-11-03 核准）；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.13。只改 meta 的 version、status、approved_by、approved_at、upstream；$defs、properties、required、additionalProperties、type、const／enum 與 examples 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" },
+      { "version": "0.14", "date": "2026-11-03", "author": "sa-agent", "note": "修訂已核准的 v0.13（主控代核），原因：PRD v0.14 R-22（US-42 頁尾版本號、US-43 隱藏領域範本、AC-01-08 狀態列只顯示生效色級、AC-39-04「變更」改為按鈕，Q-58～Q-62，JimmyLin 2026-11-03 核准）；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.14。只改 meta：版本、狀態、上游，covers 補 AC-42-03、AC-43-03、AC-01-08、R-22；browserStoragePolicy.localStorage 新增 versionAndTemplates 說明（版本號與建置碼不寫入 localStorage 與備份檔；origin = template 的自訂單字照原值保留）。$id、$defs、properties、required、additionalProperties、type、const／enum（含 origin 的 \"template\"、templateId 的 cs／business／biostat）與 examples 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" }
     ]
   },
   "title": "StorageRecord（localStorage: englishMasterTrack:state，schemaVersion 2）",

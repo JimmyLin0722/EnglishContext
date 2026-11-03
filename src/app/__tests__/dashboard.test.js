@@ -44,16 +44,18 @@ describe("dashboard.test.js", () => {
     assert.equal(g.daily, "15 字/天");
   });
 
-  test("目標：855 藍 → 生效「綠（內建上限）」；990 金；每日新字量依生效色級（R6-2）", () => {
+  // （v0.9，FE-66；DB-4 v0.14、E-92）生效色級不再附加「（內建上限）」
+  test("目標：855 藍 → 生效「綠」（無「內建上限」）；990 金；每日新字量依生效色級（R6-2）", () => {
     let g = D.goalInfoOf({ draftScore: 855, appliedScore: 855, appliedColor: "blue", effectiveColor: "green" });
     assert.equal("appliedScore" in g, false);
     assert.equal(g.appliedColor, "藍");
-    assert.equal(g.effectiveColor, "綠（內建上限）");
+    assert.equal(g.effectiveColor, "綠");
     assert.equal(g.effectiveColorId, "green");
     assert.equal(g.daily, "15 字/天");
     g = D.goalInfoOf({ draftScore: 990, appliedScore: 990, appliedColor: "gold", effectiveColor: "green" });
     assert.equal(g.appliedColor, "金");
-    assert.equal(g.effectiveColor, "綠（內建上限）");
+    assert.equal(g.effectiveColor, "綠");
+    assert.ok(!g.effectiveColor.includes("內建上限"));
     assert.equal(g.daily, "15 字/天");
   });
 
@@ -353,19 +355,22 @@ describe("dashboard.test.js", () => {
     assert.equal(m.today.doneText, "今日目標達成");
   });
 
-  test("dashboardModel 目標行 5 色逐字（DB-4；依已套用色級，不看 draftScore）", () => {
+  // （v0.9，FE-66；DB-4 v0.14、AC-39-04）目標行只以生效色級組字，colorId 為生效色級，不再有 capped
+  test("dashboardModel 目標行 5 色逐字（DB-4 v0.14；只看生效色級，不看 draftScore、appliedColor）", () => {
     const want = [
-      [215, "橘級・每日 10 字", "orange", false],
-      [465, "棕級・每日 10 字", "brown", false],
-      [725, "綠級・每日 15 字", "green", false],
-      [855, "目標藍級・生效綠級（內建上限）・每日 15 字", "blue", true],
-      [990, "目標金級・生效綠級（內建上限）・每日 15 字", "gold", true],
+      [215, "橘級・每日 10 字", "orange"],
+      [465, "棕級・每日 10 字", "brown"],
+      [725, "綠級・每日 15 字", "green"],
+      [855, "綠級・每日 15 字", "green"],
+      [990, "綠級・每日 15 字", "green"],
     ];
-    for (const [score, text, colorId, capped] of want) {
+    for (const [score, text, colorId] of want) {
       const g = { ...goalOf(score), draftScore: 10 }; // 草稿不同也不影響
       const m = D.dashboardModel(stateOf({ goal: g }), TODAY);
-      assert.deepEqual(m.goal, { text, colorId, capped }, String(score));
+      assert.deepEqual(m.goal, { text, colorId }, String(score));
       assert.ok(!/分/.test(m.goal.text));
+      assert.ok(!m.goal.text.endsWith("・"), "結尾無「・」");
+      for (const w of ["目標", "生效", "內建上限", "藍", "金"]) assert.ok(!m.goal.text.includes(w), score + "：" + w);
     }
     assert.equal(D.dashboardModel(stateOf({ goal: null }), TODAY).goal.text, "—");
   });
@@ -548,7 +553,15 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     if (!o.noService) {
       sandbox.EMT.services = { pwa: { requestInstall: () => { calls.install++; return Promise.resolve(); } } };
     }
-    const { store, a, storage } = F.makeStore({ firstRun: o.firstRun });
+    let preset;
+    if (o.goal) {
+      // （v0.9，FE-66）以指定 goal 預寫 schemaVersion 2 主鍵（模擬已套用藍／金後重新載入）
+      const PERSIST = require("../core/persist.js");
+      const data = PERSIST.defaultData();
+      data.goal = o.goal;
+      preset = F.fakeStorage({ "englishMasterTrack:state": JSON.stringify(PERSIST.buildRecord(data, new Date("2026-10-29T00:00:00Z"))) });
+    }
+    const { store, a, storage } = F.makeStore({ firstRun: o.firstRun, storage: preset });
     if (o.pwa) a.setPwa(o.pwa);
     if (o.tab) a.setTab(o.tab);
     // （v0.12，FE-58）預設展開「資料備份」（v0.11 既有案例檢查的是展開後的內容；收合行為另有案例）
@@ -722,17 +735,36 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.ok(start.classList.contains("btn--accent"));
     const goal = byClass(today, "db-goal")[0];
     assert.ok(today.childNodes.indexOf(goal) > today.childNodes.indexOf(row), "目標行在列之後");
-    assert.equal(goal.textContent, "綠級・每日 15 字・變更");
+    // （v0.9，FE-66）子節點恰為 dot、text、db-change；無「・」分隔
+    assert.equal(goal.textContent, "綠級・每日 15 字變更");
     assert.equal(goal.getAttribute("data-color"), "green");
+    const kids = goal.childNodes.filter((n) => n.nodeType === 1);
+    assert.deepEqual(kids.map((n) => n.className), ["db-goal__dot", "db-goal__text", "btn db-change"]);
+    assert.equal(byClass(goal, "db-goal__sep").length, 0);
+    assert.ok(!byClass(goal, "db-goal__text")[0].textContent.endsWith("・"));
     const change = byClass(goal, "db-change")[0];
+    assert.equal(change.tagName, "BUTTON");
+    assert.equal(change.getAttribute("type"), "button");
     assert.equal(change.textContent, "變更");
     assert.equal(change.getAttribute("data-go"), "customizer");
-    assert.ok(change.classList.contains("btn--link"));
+    assert.ok(!change.classList.contains("btn--link"));
+    assert.ok(change.classList.contains("btn"));
     // 環形圖中央只顯示 X（aria-hidden）
     const center = byClass(today, "db-ring__value")[0];
     assert.equal(center.getAttribute("aria-hidden"), "true");
     assert.equal(center.textContent, "0");
     assert.equal(byClass(today, "db-today__text")[0].textContent, "今日已學 0 / 15 字");
+  });
+
+  test("（v0.9，FE-66）已套用藍（855）／金（990）：目標行「綠級・每日 15 字」、色點為生效色級 green；無「目標」「生效」「內建上限」", () => {
+    for (const [score, color] of [[855, "blue"], [990, "gold"]]) {
+      const s = setup({ expanded: false, goal: { draftScore: score, appliedScore: score, appliedColor: color, effectiveColor: "green" } });
+      assert.equal(s.store.getState().data.goal.appliedColor, color, "資料不變（LS-5）");
+      const goal = byClass(s.rootEl, "db-goal")[0];
+      assert.equal(byClass(goal, "db-goal__text")[0].textContent, "綠級・每日 15 字");
+      assert.equal(goal.getAttribute("data-color"), "green");
+      for (const w of ["目標", "生效", "內建上限", "藍", "金", "・變更"]) assert.ok(!goal.textContent.includes(w), w);
+    }
   });
 
   test("點「開始今日學習」「變更」：view 不改 store（setItem 0 次、currentTab 不變，由 router 的 [data-go] 委派處理）", () => {
@@ -849,6 +881,39 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.equal(v(rule(".db-bars__item--today .db-bars__fill"), "background"), "var(--brand-deep)");
     assert.equal(v(rule(".db-stat__icon"), "fill"), "var(--accent)");
     assert.doesNotMatch(css, /\.dash-entr|\.db-mini/);
+  });
+
+  test("（v0.9，FE-66）原始碼不含 goalLineCapped、goalLineSeparator、builtinCap、btn--link、LAY.goalLine(、db-goal__sep", () => {
+    const src = read("views/dashboard.js");
+    for (const w of ["goalLineCapped", "goalLineSeparator", "builtinCap", "btn--link", "LAY.goalLine(", "db-goal__sep", "內建上限"]) {
+      assert.ok(!src.includes(w), w);
+    }
+    assert.ok(src.includes("LAY.goalLineText("));
+  });
+
+  test("（v0.9，FE-66）10-dashboard.css：.db-change 外框按鈕（V-LAY-10）；.db-goal gap 8px；無 .db-goal__sep；無禁止色", () => {
+    const css = read("styles/10-dashboard.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    const rule = (sel) => {
+      const m = new RegExp("(?:^|\\})\\s*" + sel.replace(/[.[\]="():]/g, "\\$&") + "\\s*\\{([^}]*)\\}").exec(css);
+      assert.ok(m, sel);
+      return m[1];
+    };
+    const v = (r, p) => (new RegExp("(?:^|;|\\s)" + p + ":\\s*([^;]+);").exec(r) || [])[1];
+    const c = rule(".db-change");
+    assert.equal(v(c, "min-height"), "44px");
+    assert.equal(v(c, "min-width"), "44px");
+    assert.equal(v(c, "margin-left"), "auto");
+    assert.equal(v(c, "padding"), "0 14px");
+    assert.equal(v(c, "background"), "var(--surface)");
+    assert.equal(v(c, "border"), "1px solid var(--brand-deep)");
+    assert.equal(v(c, "color"), "var(--brand-deep)");
+    assert.equal(v(c, "font-weight"), "600");
+    assert.equal(v(c, "text-decoration"), "none");
+    assert.equal(v(rule(".db-goal"), "gap"), "8px");
+    assert.match(css, /@media \(hover: hover\)\s*\{\s*\.db-change:hover\s*\{\s*background: var\(--tint\);\s*\}/);
+    assert.doesNotMatch(css, /\.db-goal__sep/);
+    const block = css.slice(css.indexOf(".db-change"), css.indexOf("}", css.lastIndexOf(".db-change:hover")) + 1);
+    for (const w of ["var(--accent)", "var(--border)", "#d5d9e0", "#f7893b", "color: var(--brand);"]) assert.ok(!block.includes(w), w);
   });
 
   test("10-dashboard.css：.dash-backup__origin 同 .dash-backup__hint 字級、overflow-wrap: anywhere、無 nowrap；.dash-install ≥ 44px", () => {

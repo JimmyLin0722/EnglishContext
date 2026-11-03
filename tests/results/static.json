@@ -11,7 +11,7 @@
     "tc": "TC-S02",
     "ac": "AC-19-04",
     "result": "通過",
-    "note": "3,308,145 bytes（上限 5,242,880）"
+    "note": "3,322,315 bytes（上限 5,242,880）"
   },
   {
     "suite": "static",
@@ -60,7 +60,7 @@
     "tc": "TC-S10",
     "ac": "AC-31-04",
     "result": "通過",
-    "note": "外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,308,145 bytes（AC-19-01 外部資源見 TC-S01）"
+    "note": "外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,322,315 bytes（AC-19-01 外部資源見 TC-S01）"
   },
   {
     "suite": "static",
@@ -99,9 +99,30 @@
   },
   {
     "suite": "static",
+    "tc": "TC-V-S01",
+    "ac": "AC-42-03、AC-42-02（VR-5、V-VER-05）",
+    "result": "通過",
+    "note": "src/app 非測試 .js 含「package.json」：無；版本模組（去註解）禁用 API：無；寫死版本字串 \"1.0.0\"：無"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-V-S02",
+    "ac": "AC-42-02（V-VER-01、VR-2、HD-1）",
+    "result": "通過",
+    "note": "產物 emt-app-version 1 個、值 1.0.0（package.json 1.0.0）；位於 emt-build-id 之後、</head> 之前=true；產物 @@ 佔位殘留 0；模板 @@APP_VERSION@@ 1 次"
+  },
+  {
+    "suite": "static",
+    "tc": "TC-V-S03",
+    "ac": "AC-43-02、AC-39-04、AC-42-01（HT-7、V-LAY-10、VR-7）",
+    "result": "通過",
+    "note": "含「範本」字串常值 3 處（custom-vocab.js 隱藏容器內與 persist.js 內部驗證原因 3、其他 0）；範本容器建立屬性含 hidden＋inert=true；.db-change 規則「min-height: 44px; min-width: 44px; margin-left: auto; padding: 0 14px; background: var(--surface); border: 1px solid var(--brand-deep); color: var(--brand-deep)」；.app-footer__version 規則「margin: 4px 0 0; font-size: 0.75rem; line-height: 1.5; color: var(--text-muted); white-space: nowrap;」；用強調橘／灰框線或缺 nowrap／無底線=false"
+  },
+  {
+    "suite": "static",
     "tc": "TC-S09",
     "ac": "AC-19-01（交付物可追溯）",
     "result": "通過",
-    "note": "重建產物 3,308,145 bytes；與 dist 位元組相同=true"
+    "note": "重建產物 3,322,315 bytes；與 dist 位元組相同=true"
   }
 ]

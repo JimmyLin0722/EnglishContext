@@ -4,7 +4,7 @@
 // v0.10 依 R-19：分數滑桿與輸入框隱藏，一律以點卡片設定（該色上限），目標分數以 localStorage 驗證，不從畫面讀取。
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER } from "./lib/inits.mjs";
-import { KEY, CAP, NAME, stateRecord, seed, readState, clickCard, apply, est, dashGoal, dialogInfo, dashStats, GOAL_LINE } from "./lib/state.mjs";
+import { KEY, CAP, NAME, stateRecord, seed, readState, clickCard, apply, est, dashGoal, dialogInfo, dashStats, GOAL_LINE, injectTpl } from "./lib/state.mjs";
 
 const R = recorder("e2e-goal");
 const p = await launch();
@@ -160,9 +160,9 @@ await R.check("TC-01-07", "AC-01-07、AC-03-03", async () => {
   const ra = await apply(p, "leave"); const b = await est(p); const gb = await applied(); const t1 = await fcTotal();
   await p.go("customizer"); await clickCard(p, "gold"); const rc = await apply(p, "leave"); const d = await est(p); const gd = await applied(); const t2 = await fcTotal();
   const st = await readState(p);
-  const ok = a.pressed === "blue" && a.color === "藍（即將開放）" && a.cap && !ra.dialog && b.stTarget === "藍" && b.stEffective === "綠（內建上限）" && b.statusCap && gb.appliedScore === 855 && t1 === "共 5620 張"
-    && !rc.dialog && d.stTarget === "金" && d.stEffective === "綠（內建上限）" && gd.appliedScore === 990 && t2 === "共 5620 張" && st.data.masteredWordKeys.length === 1;
-  return { ok, note: `點藍 → 選中 ${a.pressed}、「${a.color}」、提示=${a.cap}；套用（視窗=${!!ra.dialog}）後目標 ${b.stTarget}、生效「${b.stEffective}」、localStorage ${gb.appliedScore}、${t1}；點金套用（視窗=${!!rc.dialog}）→ 目標 ${d.stTarget}、生效「${d.stEffective}」、${gd.appliedScore}、${t2}；學習紀錄保留=${st.data.masteredWordKeys.length === 1}` };
+  const ok = a.pressed === "blue" && a.color === "藍（即將開放）" && a.cap && !ra.dialog && b.stLine === "目前色級：綠" && b.stTarget === null && !b.statusCap && gb.appliedScore === 855 && t1 === "共 5620 張"
+    && !rc.dialog && d.stLine === "目前色級：綠" && d.stTarget === null && gd.appliedScore === 990 && t2 === "共 5620 張" && st.data.masteredWordKeys.length === 1;
+  return { ok, note: `點藍 → 選中 ${a.pressed}、「${a.color}」、提示=${a.cap}；套用（視窗=${!!ra.dialog}）後狀態列「${b.stLine}」（v0.14 只顯示生效色級，AC-01-08）、localStorage ${gb.appliedScore}、${t1}；點金套用（視窗=${!!rc.dialog}）→ 狀態列「${d.stLine}」、${gd.appliedScore}、${t2}；學習紀錄保留=${st.data.masteredWordKeys.length === 1}` };
 });
 
 // ── AC-17-06（v0.12 改寫）：目標行（每日新字量依生效色級、無目標分數）、無功能入口、各頁可由「開始今日學習」「變更」、導覽與頁尾到達 ──
@@ -247,11 +247,11 @@ await R.check("TC-26-06", "AC-26-06", async () => {
     const d = await dash(); const g1 = await applied();
     await p.reload(); const g2 = await applied(); const st = await readState(p);
     await p.go("customizer"); const e2 = await est(p);
-    const c = expC[i]; const effTxt = c === "blue" || c === "gold" ? "綠（內建上限）" : NAME[c];
+    const c = expC[i]; const effTxt = c === "blue" || c === "gold" ? "綠" : NAME[c]; // 第 6 輪：AC-01-08 只顯示生效色級
     const good = e.pressed === c && e.daily === `${expD[i]} 字/天` && !r.dialog && d === GOAL_LINE[c]
-      && g1.appliedScore === s && g1.draftScore === s && g2.appliedScore === s && g2.draftScore === s && st.schemaVersion === 2 && e2.pressed === c;
+      && g1.appliedScore === s && g1.draftScore === s && g2.appliedScore === s && g2.draftScore === s && st.schemaVersion === 2 && e2.pressed === c && e2.stLine === "目前色級：" + effTxt;
     ok = ok && good;
-    rows.push(`${s}→${e.pressed}/${e.daily}/主控台「${d}」/存 ${g1.appliedScore}→重載 ${g2.appliedScore}${good ? "" : "（不符）"}`);
+    rows.push(`${s}→${e.pressed}/${e.daily}/主控台「${d}」/存 ${g1.appliedScore}→重載 ${g2.appliedScore}/狀態列「${e2.stLine}」${good ? "" : "（不符）"}`);
   }
   return { ok, note: rows.join("；") };
 });
@@ -260,7 +260,7 @@ await R.check("TC-26-06", "AC-26-06", async () => {
 await R.check("TC-22-02", "AC-22-02", async () => {
   await p.ev(`localStorage.clear()`); await p.reload();
   await p.go("customizer");
-  for (const t of ["cs", "business", "biostat"]) { await p.click(`[data-template="${t}"]`); await sleep(80); }
+  for (const t of ["cs", "business", "biostat"]) { await injectTpl(p, t); await sleep(80); }
   const t0 = await fcTotal();
   await p.go("customizer");
   const r = await p.ev(`(async () => { const out = []; const btn = document.getElementById("cz-apply"); let dialogs = 0;

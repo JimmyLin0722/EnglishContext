@@ -79,7 +79,7 @@ const DEFAULTS = await freshDefaults();
     for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) await p.send("Input.dispatchMouseEvent", { type, x: pt.x, y: pt.y, button: "left", clickCount: 1 });
     await sleep(100);
     const tab1 = await p.ev(`EMT.router.current()`); const stillOpen = !!(await dialogInfo(p));
-    during = { eff: await p.ev(`EMT.store.getState().data.goal.effectiveColor`), n: await p.ev(`EMT.store.getState().runtime.studySet.length`), ls: await p.ev(`localStorage.getItem(${JSON.stringify(KEY)})`), st: await p.ev(`document.querySelector(".cz-st-effective").textContent`) };
+    during = { eff: await p.ev(`EMT.store.getState().data.goal.effectiveColor`), n: await p.ev(`EMT.store.getState().runtime.studySet.length`), ls: await p.ev(`localStorage.getItem(${JSON.stringify(KEY)})`), st: await p.ev(`document.getElementById("cz-st-line").textContent.replace("目前色級：", "")`) /* 第 6 輪：AC-01-08 */ };
     const msgOk = !!dlg && dlg.message.includes("目前已有學習統計資料，切換難易度將初始化學習紀錄") && dlg.message.includes("建議先按「取消」，到主控台按「匯出備份」保存目前紀錄");
     const ok = msgOk && dlg.buttons.length === 2 && dlg.buttons.includes("確定") && dlg.buttons.includes("取消") && dlg.modal === "true" && !pt.hit && tab1 === tab0 && stillOpen
       && during.eff === "green" && during.st === "綠" && during.n === n0 && during.ls === beforeApply;
@@ -166,10 +166,10 @@ const DEFAULTS = await freshDefaults();
     const s0 = await readState(p);
     const out = []; let ok = true;
     for (const [c, sc, tgt, eff] of [["green", 725, "綠", "綠"], ["blue", 855, "藍", "綠（內建上限）"], ["gold", 990, "金", "綠（內建上限）"], ["green", 725, "綠", "綠"]]) {
-      await p.go("customizer"); await clickCard(p, c); const r = await apply(p, "leave");
+      await p.go("customizer"); await clickCard(p, c); const r = await apply(p, "leave"); const sl = (await est(p)).stLine; // 第 6 輪：AC-32-05 狀態列皆「目前色級：綠」（AC-01-08）
       const st = await readState(p); await p.go("dashboard"); await sleep(150); const d = await dashGoal(p);
-      const good = !r.dialog && st.data.goal.appliedScore === sc && same(pick(st.data, LEARN), pick(s0.data, LEARN)) && d === GOAL_LINE[c];
-      ok = ok && good; out.push(`${c}：視窗=${!!r.dialog}、localStorage ${st.data.goal.appliedScore}、${d}、學習紀錄不變=${same(pick(st.data, LEARN), pick(s0.data, LEARN))}`);
+      const good = !r.dialog && st.data.goal.appliedScore === sc && same(pick(st.data, LEARN), pick(s0.data, LEARN)) && d === GOAL_LINE[c] && sl === "目前色級：綠";
+      ok = ok && good; out.push(`${c}：視窗=${!!r.dialog}、localStorage ${st.data.goal.appliedScore}、狀態列「${sl}」、${d}、學習紀錄不變=${same(pick(st.data, LEARN), pick(s0.data, LEARN))}`);
       if (r.dialog) await p.click('.dialog [data-action="cancel"]');
     }
     return { ok, note: out.join("；") };

@@ -10,6 +10,8 @@
  *   → EMT.ui.bottomNav.init()（v0.4，FE-26）
  * （v0.7，FE-50）banner.render 之後 EMT.services.pwa.start({ onChange → store.actions.setPwa })（PE-1 判定；file:// 只判定即返回，
  *   service worker 延到 window load 後註冊，PE-4）；bottomNav.init 之後 EMT.ui.pwaNotice.init({ onReload → services.pwa.requestReload })。
+ * （v0.9，FE-64）banner.render 之後、pwa.start 之前 EMT.ui.versionLine.init()：讀 emt-app-version、emt-build-id 兩個 meta，
+ *   合法才在頁尾「資料來源與授權」正下方建立版本行（VR-5～VR-8）；放在 router.start 前，首次繪製即含版本行。
  * emt-ready 位置不變：一般模式量到主控台入口可點擊，首次模式量到「開始學習」可點擊（AC-22-05）。
  * 最後 performance.mark("emt-ready")，並設 document.documentElement.dataset.ready = "1"。
  */
@@ -56,6 +58,10 @@
     });
     step("banner.render", function () {
       if (EMT.ui && EMT.ui.banner && typeof EMT.ui.banner.render === "function") EMT.ui.banner.render();
+    });
+    // （v0.9，FE-64）頁尾版本行（只讀 DOM meta，不請求、不儲存；不合法時不建立）
+    step("versionLine.init", function () {
+      if (EMT.ui && EMT.ui.versionLine && typeof EMT.ui.versionLine.init === "function") EMT.ui.versionLine.init();
     });
     // （v0.7，FE-50）PWA：PE-1 判定、動態連結、安裝事件；狀態經 store.actions.setPwa 寫入 runtime.pwa（不寫 localStorage）
     step("pwa.start", function () {

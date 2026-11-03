@@ -199,6 +199,50 @@ const stripCss = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
   rec("TC-L-S04", "AC-38-05（NM-2）", ok, `內嵌 svg.app-logo ${Buffer.byteLength(svg)} bytes（≤ 1,500）；含 xmlns/image/text/href/icons 路徑=${/xmlns|<image|<text|href|icons\//.test(svg)}；aria-hidden=${/aria-hidden="true"/.test(svg)}；產物 <img> ${(html.match(/<img\b/gi) || []).length}`);
 }
 
+// ── 第 6 輪（PRD v0.14，契約 §12.1 VR-5／VR-6、V-VER-05、§5.8 HT-7、architecture §7.20） ──
+// TC-V-S01 AC-42-03、VR-5：頁面不讀 package.json、版本模組不發請求、不碰儲存；src/app 不寫死版本號
+{
+  const rel = (f) => path.relative(ROOT, f).split(path.sep).join("/");
+  const js = srcApp.filter((f) => f.endsWith(".js"));
+  const pkgHit = js.filter((f) => fs.readFileSync(f, "utf8").includes("package.json")).map(rel);
+  const verFiles = ["src/app/ui/version-line.js", "src/app/core/version.js"].map((f) => path.join(ROOT, f));
+  const banned = verFiles.flatMap((f) => { const s = fs.existsSync(f) ? fs.readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "") : "（缺檔）"; return ["fetch(", "XMLHttpRequest", "import(", "localStorage", "sessionStorage", "indexedDB", "sendBeacon", "WebSocket"].filter((k) => s.includes(k)).map((k) => rel(f) + ":" + k); });
+  const ver = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version;
+  const verLit = js.filter((f) => new RegExp(`["'\`]v?${ver.replace(/\./g, "\\.")}["'\`]`).test(fs.readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, ""))).map(rel);
+  rec("TC-V-S01", "AC-42-03、AC-42-02（VR-5、V-VER-05）", pkgHit.length === 0 && banned.length === 0 && verLit.length === 0 && verFiles.every((f) => fs.existsSync(f)),
+    `src/app 非測試 .js 含「package.json」：${pkgHit.join("、") || "無"}；版本模組（去註解）禁用 API：${banned.join("、") || "無"}；寫死版本字串 "${ver}"：${verLit.join("、") || "無"}`);
+}
+// TC-V-S02 AC-42-02（V-VER-01）、HD-1：產物 meta 與佔位
+{
+  const pkgV = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version;
+  const metas = html.match(/<meta name="emt-app-version" content="([^"]*)">/g) || [];
+  const v = (metas[0] || "").replace(/.*content="([^"]*)".*/, "$1");
+  const order = html.indexOf('name="emt-app-version"') > html.indexOf('name="emt-build-id"') && html.indexOf('name="emt-app-version"') < html.indexOf("</head>");
+  const ph = html.match(/@@[A-Za-z0-9_]+@@/g) || [];
+  const tpl = fs.readFileSync(path.join(ROOT, "src", "app", "index.html"), "utf8");
+  rec("TC-V-S02", "AC-42-02（V-VER-01、VR-2、HD-1）", metas.length === 1 && v === pkgV && /^\d+\.\d+\.\d+$/.test(v) && order && ph.length === 0 && (tpl.match(/@@APP_VERSION@@/g) || []).length === 1,
+    `產物 emt-app-version ${metas.length} 個、值 ${v}（package.json ${pkgV}）；位於 emt-build-id 之後、</head> 之前=${order}；產物 @@ 佔位殘留 ${ph.length}；模板 @@APP_VERSION@@ ${(tpl.match(/@@APP_VERSION@@/g) || []).length} 次`);
+}
+// TC-V-S03 AC-43-02（HT-7）、AC-39-04（V-LAY-10）、AC-42-01（VR-7）：原始碼中可見字串含「範本」者只在隱藏容器建立程式內；CSS 不用強調橘
+{
+  const rel = (f) => path.relative(ROOT, f).split(path.sep).join("/");
+  const hits = [];
+  for (const f of srcApp.filter((x) => x.endsWith(".js"))) {
+    const s = fs.readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
+    for (const m of s.matchAll(/(["'`])((?:\\.|(?!\1).)*範本(?:\\.|(?!\1).)*)\1/g)) hits.push(`${rel(f)}「${m[2].slice(0, 40)}」`);
+  }
+  // 允許：custom-vocab.js 中 buildTemplates()（hidden＋inert 容器）內的標題、說明、缺資料提示、注入結果（HT-7 豁免）
+  const cv = fs.readFileSync(path.join(ROOT, "src", "app", "views", "custom-vocab.js"), "utf8");
+  // 另允許：core/persist.js 匯入驗證的內部錯誤原因（只進 errors 陣列；畫面只顯示「備份檔格式錯誤，未匯入」，見 tests/results/diag/r6-importerr.json）
+  const outside = hits.filter((h) => !h.startsWith("src/app/views/custom-vocab.js") && h !== "src/app/core/persist.js「origin 為 template 時須為範本代碼」");
+  const css = (n) => fs.readFileSync(path.join(ROOT, "src", "app", "styles", n), "utf8");
+  const rule = (src, sel) => { const m = src.match(new RegExp(sel.replace(/[.]/g, "\\.") + "\\s*\\{([^}]*)\\}")); return m ? m[1] : ""; };
+  const dc = rule(css("10-dashboard.css"), ".db-change"), fv = rule(css("00-base.css"), ".app-footer__version");
+  const cssBad = [dc, fv].some((r) => /--accent|#f7893b|--border\b|#d5d9e0/i.test(r)) || !/white-space:\s*nowrap/.test(fv) || !/text-decoration:\s*none/.test(dc);
+  rec("TC-V-S03", "AC-43-02、AC-39-04、AC-42-01（HT-7、V-LAY-10、VR-7）", outside.length === 0 && !cssBad && /hidden:\s*true,\s*inert/.test(cv),
+    `含「範本」字串常值 ${hits.length} 處（custom-vocab.js 隱藏容器內與 persist.js 內部驗證原因 ${hits.length - outside.length}、其他 ${outside.length}${outside.length ? "：" + outside.join("、") : ""}）；範本容器建立屬性含 hidden＋inert=${/hidden:\s*true,\s*inert/.test(cv)}；.db-change 規則「${dc.replace(/\s+/g, " ").trim().slice(0, 160)}」；.app-footer__version 規則「${fv.replace(/\s+/g, " ").trim()}」；用強調橘／灰框線或缺 nowrap／無底線=${cssBad}`);
+}
+
 // TC-S09 產物與原始碼一致（以 QA 自行重建的產物比對）
 if (rebuilt && fs.existsSync(rebuilt)) {
   const b2 = fs.readFileSync(rebuilt);

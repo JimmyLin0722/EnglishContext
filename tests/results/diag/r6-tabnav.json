@@ -1,0 +1,49 @@
+{
+  "before": {
+    "active": "cz-apply",
+    "bodyClass": "",
+    "navDisplay": "grid",
+    "navW": 93.75,
+    "navH": 55
+  },
+  "after": {
+    "active": "cv-collocation",
+    "bodyClass": "",
+    "navDisplay": "none",
+    "navW": 0,
+    "navH": 0
+  },
+  "afterBlur": {
+    "active": "BODY.",
+    "bodyClass": "",
+    "navDisplay": "grid",
+    "navW": 93.75,
+    "navH": 55
+  },
+  "last10": [
+    "button.cz-level",
+    "button.cz-level",
+    "button.cz-level",
+    "button.cz-level",
+    "cz-apply",
+    "cv-word",
+    "cv-meaning",
+    "cv-phonetic",
+    "cv-pos",
+    "cv-collocation"
+  ],
+  "uniq": [
+    "cv-word",
+    "cv-meaning",
+    "cv-phonetic",
+    "cv-pos",
+    "cv-collocation",
+    "cv-example",
+    "button.btn",
+    "footer-sources",
+    "body.",
+    "button.app-nav__btn",
+    "button.cz-level",
+    "cz-apply"
+  ]
+}

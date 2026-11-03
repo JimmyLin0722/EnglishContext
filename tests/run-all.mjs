@@ -7,6 +7,8 @@
 // 無內建資料 fixture 改為「只含 sources.js 的資料目錄＋--no-site」（PWA 模式下缺 PROJECT_LICENSE.copyrightYear 會 LICENSE_YEAR 中止，architecture §5.1）。
 // PWA 套件需要 devDependency playwright-core（npm install）與空閒的埠 8080。
 // 第 5 輪（PRD v0.13 版面風格）：新增 e2e-layout（US-38～US-41）；越界增量檢查改用 boundary-r5.mjs（與 git HEAD 比對，CT-24、FE-54～FE-62），輸出仍為 boundary-delta.json。
+// 第 6 輪（PRD v0.14 版本號與介面精簡）：新增 e2e-version（US-42、US-43、AC-01-08、AC-39-04 v0.14；Chrome 全套、Edge 只跑畫面類）；
+// 越界增量檢查改用 boundary-r6.mjs（與 git HEAD 8a266c3 比對，FE-63～FE-69），輸出仍為 boundary-delta.json。
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -33,7 +35,7 @@ const rebuilt = path.join(TMP, "rebuilt.html");
 spawnSync(process.execPath, ["tools/build.mjs", "--out", rebuilt], { cwd: ROOT, stdio: "ignore" });
 run(["tests/static/static-check.mjs", path.join(RES, "static.json"), rebuilt]);
 run(["tests/static/boundary-check.mjs", path.join(RES, "boundary.json")]);
-run(["tests/static/boundary-r5.mjs", path.join(RES, "boundary-delta.json")]);
+run(["tests/static/boundary-r6.mjs", path.join(RES, "boundary-delta.json")]);
 
 // 2. 無內建資料的 fixture 建置（AC-06-06、AC-09-06、AC-30-10）
 const empty = path.join(TMP, "emptydata"); fs.mkdirSync(empty, { recursive: true });
@@ -52,6 +54,9 @@ for (const s of ["e2e-goal", "e2e-hidden"]) run([`tests/e2e/${s}.mjs`], { QA_BRO
 run(["tests/e2e/e2e-pwa.mjs"]);
 run(["tests/e2e/e2e-pwa-update.mjs"]);
 run(["tests/e2e/e2e-pwa.mjs"], { QA_BROWSER: "edge" });
+// 第 6 輪：版本號、隱藏領域範本、狀態列、「變更」按鈕（含 npm run serve 與建置可重現；埠 8080）
+run(["tests/e2e/e2e-version.mjs"], { QA_FIXTURE_NODATA: fixture });
+run(["tests/e2e/e2e-version.mjs"], { QA_BROWSER: "edge", QA_FIXTURE_NODATA: fixture });
 
 // 4. 彙整（-edge.json 為跨瀏覽器重跑，於報告以 TC-X-edge 一項計）
 const all = [];
