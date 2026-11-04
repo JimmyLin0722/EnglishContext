@@ -99,23 +99,29 @@ describe("sources-page.test.js", () => {
     assert.ok(P.derivedAttribution([], null).includes("修改者 JimmyLin"));
   });
 
+  // （v0.12，FE-78）固定文字逐字照契約 README §4.3 L-8（LT-3、LT-4、LT-5）
+  const LT_3 = "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權";
+  const BRAND = "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0";
+  const LT_5 = "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。";
+
   test("三段授權聲明逐字與 AC-23-02 相同", () => {
     assert.equal(P.TEXT.codeLicense, "程式碼以 MIT 授權（Copyright JimmyLin）");
     assert.equal(P.TEXT.dataLicense, "單字資料以 CC BY-SA 4.0 授權");
-    assert.equal(P.TEXT.originalLicense, "原創內容（例句、解析、Part 5 題目、長難句、句型）以 CC BY-SA 4.0 授權，著作權人 JimmyLin");
+    assert.equal(P.TEXT.originalLicense, LT_3);
     assert.equal(P.TEXT.ecdictPhonetic, "音標改寫為美式 IPA，標為原創，不屬 ECDICT");
   });
 
-  // ── （v0.11，FE-52）PWA 圖示與名稱的品牌標識聲明（AC-23-02、Q-48） ──
+  test("（FE-78）TEXT.trademarkNotice 逐字等於 LT-5", () => {
+    assert.equal(P.TEXT.trademarkNotice, LT_5);
+  });
 
-  /** PRD AC-23-02 品牌標識聲明原文（逐字複製） */
-  const BRAND = "PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin，保留所有權利，不適用 MIT 與 CC BY-SA 4.0";
+  // ── （v0.11，FE-52；v0.12，FE-78）PWA 圖示與名稱的品牌標識聲明（AC-23-02、Q-48） ──
 
-  test("（FE-52）brandStatement 逐字等於 AC-23-02；copyrightHolder 缺漏時仍為 JimmyLin", () => {
+  test("（FE-78）brandStatement 為單一參數，逐字等於 LT-4，名稱確實取自引數", () => {
     const pwa = require("../core/pwa.js");
-    assert.equal(P.brandStatement(pwa.PWA_APP_NAME, "JimmyLin"), BRAND);
-    assert.equal(P.brandStatement(pwa.PWA_APP_NAME, undefined), BRAND);
-    assert.equal(P.brandStatement(pwa.PWA_APP_NAME, ""), BRAND);
+    assert.equal(P.brandStatement.length, 1);
+    assert.equal(P.brandStatement(pwa.PWA_APP_NAME), BRAND);
+    assert.equal(P.brandStatement("測試名稱"), BRAND.replace("EnglishContext", "測試名稱"));
   });
 
   /**
@@ -172,14 +178,29 @@ describe("sources-page.test.js", () => {
     return rootEl;
   }
 
-  test("（FE-52）render：聲明清單 4 條，第 4 條逐字為品牌標識聲明，既有 3 條不變；copyrightHolder 缺漏仍為 JimmyLin", () => {
+  test("（FE-78）render：聲明清單 5 條，依序為 codeLicense、dataLicense、LT-3、LT-4、LT-5；copyrightHolder 缺漏時文字不變", () => {
     for (const license of [F.license(), Object.assign(F.license(), { copyrightHolder: undefined }), undefined]) {
       const rootEl = renderInSandbox(license);
       const ul = findAll(rootEl, (n) => n.className === "src-statements")[0];
       assert.ok(ul);
       const items = ul.childNodes.map((li) => li.textContent);
-      assert.deepEqual(items, [P.TEXT.codeLicense, P.TEXT.dataLicense, P.TEXT.originalLicense, BRAND]);
+      assert.deepEqual(items, [P.TEXT.codeLicense, P.TEXT.dataLicense, LT_3, BRAND, LT_5]);
     }
+  });
+
+  test("（FE-78）整頁文字含 LT-3～LT-5 各 1 次，不含舊聲明；derivedAttribution 署名仍取 copyrightHolder（V-LGL-03、T-93）", () => {
+    const rootEl = renderInSandbox(Object.assign(F.license(), { copyrightHolder: "署名測試" }));
+    const text = rootEl.textContent;
+    for (const lt of [LT_3, BRAND, LT_5]) {
+      assert.equal(text.split(lt).length - 1, 1, lt);
+    }
+    assert.ok(!text.includes("著作權人 JimmyLin"));
+    assert.ok(!text.includes("著作權人"));
+    assert.ok(!text.includes("保留所有權利"));
+    const attrib = findAll(rootEl, (n) => n.className === "src-attrib")[0];
+    assert.ok(attrib.textContent.endsWith("修改者 署名測試。"));
+    const fallback = findAll(renderInSandbox(undefined), (n) => n.className === "src-attrib")[0];
+    assert.ok(fallback.textContent.endsWith("修改者 JimmyLin。"));
   });
 
   test("（FE-52）core/pwa 未載入時 render 丟出含模組名稱的錯誤（LD-3）", () => {
@@ -246,7 +267,7 @@ describe("sources-page.test.js", () => {
     const rootEl = renderWithRegistry(REG.filter((e) => e.code !== "ORIGINAL"));
     assert.equal(findAll(rootEl, (n) => n.className === "src-original").length, 0);
     const ul = findAll(rootEl, (n) => n.className === "src-statements")[0];
-    assert.deepEqual(ul.childNodes.map((li) => li.textContent), [P.TEXT.codeLicense, P.TEXT.dataLicense, P.TEXT.originalLicense, BRAND]);
+    assert.deepEqual(ul.childNodes.map((li) => li.textContent), [P.TEXT.codeLicense, P.TEXT.dataLicense, P.TEXT.originalLicense, BRAND, P.TEXT.trademarkNotice]);
   });
 
   test("畫面文字（render 結果與 TEXT）不分大小寫無「English Master Track」（AC-38-10 (1)、NM-6）；外部資料清單仍不列 ORIGINAL", () => {
@@ -337,10 +358,10 @@ describe("sources-page.test.js", () => {
     assert.equal(text.split(CONTACT).length - 1, 1);
   });
 
-  test("（FE-77）加入聯絡行後，既有聲明 4 條與「原創內容來源」照常", () => {
+  test("（FE-77、FE-78）加入聯絡行後，既有聲明 5 條與「原創內容來源」照常", () => {
     const { rootEl } = renderContact();
     const ul = findAll(rootEl, (n) => n.className === "src-statements")[0];
-    assert.deepEqual(ul.childNodes.map((li) => li.textContent), [P.TEXT.codeLicense, P.TEXT.dataLicense, P.TEXT.originalLicense, BRAND]);
+    assert.deepEqual(ul.childNodes.map((li) => li.textContent), [P.TEXT.codeLicense, P.TEXT.dataLicense, P.TEXT.originalLicense, BRAND, P.TEXT.trademarkNotice]);
     assert.equal(findAll(rootEl, (n) => n.className === "src-original")[0].textContent, "原創內容來源：EnglishContext 原創內容");
   });
 });

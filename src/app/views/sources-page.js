@@ -14,7 +14,9 @@
  * - 所有文字經 EMT.core.dom（textContent）寫入，不解析 HTML（契約 C-7）。
  *
  * - （v0.11，FE-52）授權聲明清單在既有 3 條之後加「PWA 圖示與名稱」品牌標識聲明（AC-23-02、Q-48）；
- *   名稱於 render 時取 EMT.core.pwa.PWA_APP_NAME（LD-2；不存在依 LD-3 丟出錯誤），著作權人取 PROJECT_LICENSE.copyrightHolder。
+ *   名稱於 render 時取 EMT.core.pwa.PWA_APP_NAME（LD-2；不存在依 LD-3 丟出錯誤）。
+ * - （v0.12，FE-78；architecture.md v0.12 §7.23.1、契約 README §4.3 L-8）原創內容聲明 = LT-3、品牌標識聲明 = LT-4，
+ *   品牌標識聲明之後加第 5 條商標聲明 = LT-5；品牌標識聲明不再使用 copyrightHolder，該欄位仍供 derivedAttribution 署名。
  * - （v0.11，FE-77；architecture.md v0.11 §7.22.2、契約 data-schema.ts §16、README §4.3 L-7、AC-23-07）
  *   .src-page 最後（授權聲明區之後）加 1 行聯絡資訊 p.src-muted.src-contact，以 textContent 寫入常數 SOURCES_CONTACT_TEXT。
  *   防爬蟲：常數為帶空格的原值，不做任何字串處理；不是連結、不可聚焦（無 href／tabindex／role／title／data-go）、
@@ -38,7 +40,7 @@
 })(typeof self !== "undefined" ? self : this, function (root) {
   "use strict";
 
-  /** 畫面固定文字（AC-23-02、Q-31 原文） */
+  /** 畫面固定文字（AC-23-02、Q-31 原文；originalLicense、trademarkNotice 逐字照契約 L-8 LT-3、LT-5） */
   var TEXT = {
     title: "資料來源與授權",
     intro: "本檔案使用下列外部資料。網址僅以文字列出，需要時請自行複製到瀏覽器開啟。",
@@ -50,7 +52,8 @@
     licenseHeading: "本系統的授權",
     codeLicense: "程式碼以 MIT 授權（Copyright JimmyLin）",
     dataLicense: "單字資料以 CC BY-SA 4.0 授權",
-    originalLicense: "原創內容（例句、解析、Part 5 題目、長難句、句型）以 CC BY-SA 4.0 授權，著作權人 JimmyLin",
+    originalLicense: "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權",
+    trademarkNotice: "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。",
     codeLicenseUrlLabel: "MIT 條款網址",
     dataLicenseUrlLabel: "CC BY-SA 4.0 條款網址",
     // （v0.12，FE-60；NM-3、SD-FB-49）原創內容來源一行的前綴；名稱取 registry 中 ORIGINAL 的 fullName，不寫死
@@ -197,14 +200,13 @@
   }
 
   /**
-   * （v0.11，FE-52）PWA 圖示與名稱的品牌標識聲明（AC-23-02、AC-23-06、Q-48）。
+   * （v0.11，FE-52；v0.12，FE-78）PWA 圖示與名稱的品牌標識聲明（AC-23-02、AC-23-06、Q-48）。
+   * 組字結果須與契約 L-8 LT-4 逐字相同；名稱取 PWA_APP_NAME（NM-3）。
    * @param {string} appName PWA_APP_NAME
-   * @param {string} holder 著作權人（PROJECT_LICENSE.copyrightHolder；缺漏時用保底值）
    * @returns {string}
    */
-  function brandStatement(appName, holder) {
-    var who = isText(holder) ? holder : LICENSE_FALLBACK.copyrightHolder;
-    return "PWA 圖示與名稱「" + appName + "」為品牌標識，著作權人 " + who + "，保留所有權利，不適用 MIT 與 CC BY-SA 4.0";
+  function brandStatement(appName) {
+    return "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「" + appName + "」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0";
   }
 
   /** （v0.11）取得 core/pwa（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
@@ -329,7 +331,8 @@
         dom.el("li", { text: TEXT.codeLicense }),
         dom.el("li", { text: TEXT.dataLicense }),
         dom.el("li", { text: TEXT.originalLicense }),
-        dom.el("li", { className: "src-statements__brand", text: brandStatement(pwaCore().PWA_APP_NAME, holder) })
+        dom.el("li", { className: "src-statements__brand", text: brandStatement(pwaCore().PWA_APP_NAME) }),
+        dom.el("li", { text: TEXT.trademarkNotice })
       ]),
       dom.el("p", { className: "src-attrib", text: derivedAttribution(wordlists, holder) }),
       dom.el("dl", { className: "src-fields" }, [

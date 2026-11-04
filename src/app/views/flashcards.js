@@ -207,7 +207,7 @@
     }
 
     var front = [];
-    push(front, "collocation", "多益常考搭配詞", item.collocation);
+    push(front, "collocation", "常用搭配詞", item.collocation);
 
     var back = [];
     push(back, "pos", "詞性", posText(card, c.posLabels));

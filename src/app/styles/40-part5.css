@@ -38,7 +38,7 @@
   transition: none;
 }
 
-/* 標題下說明「題型對應多益 Part 5」（FE-23 新增；樣式同難易度設定頁 .cz-intro：次要色、較小字級） */
+/* 標題下說明（文字為契約 L-8 LT-2，FE-78；FE-23 新增；樣式同難易度設定頁 .cz-intro：次要色、較小字級） */
 .p5-heading-note {
   margin: 0 0 var(--gap);
   color: var(--text-muted);

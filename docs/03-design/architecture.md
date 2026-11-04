@@ -1,16 +1,17 @@
 ---
 doc: ARCH
-version: 0.11
+version: 0.12
 status: approved
 author: sd-agent
-approved_by: JimmyLin（對話中授權「修正好測試沒問題就直接推」，主控代填欄位）
+approved_by: JimmyLin（對話中回覆「核准」，主控代填欄位）
 approved_at: 2026-11-04
 ---
 
 # English Master Track — 系統架構與設計
 
-> 上游：`docs/01-PRD.md` v0.16（approved，JimmyLin，2026-11-04；R-24）、`docs/02-contract/` v0.16（三檔 approved，主控代核，2026-11-04；只改文字常數與規則）。v0.10 時的上游：`docs/01-PRD.md` v0.15（approved，JimmyLin，2026-11-04）、`docs/02-contract/` v0.15（README.md、data-schema.ts、storage-schema.json 三檔 approved，JimmyLin 核准 Q-63 持久化結構變更，2026-11-04）、`package.json` `version` 本版由主控改為 `1.1.0`（Q-70 A，tasks.json MC-04）。v0.9 以前的內容仍有效，除非本版明文修改。**契約 C-8 同樣適用本文件**：v0.4～v0.9 段落中描述「目前」持久化結構的「`schemaVersion` 2」「`PersistedData` 9 欄」「欄位集合不變」，v0.10 起讀作「`CURRENT_SCHEMA_VERSION`（3）、12 欄，且該段所述操作不改變版本與欄位集合」；遷移 MG-1～MG-4 等歷史敘述照原意。
-> 搭配文件：`docs/03-design/tasks.json` v0.10（共 102 個任務：既有 101 個全部 `done` 不變；v0.11 新增 FE-77 共 1 個，見 §12.10）。v0.10 時為 v0.9（101 個任務：v0.10 新增 FE-70～FE-76 共 7 個、CT-25 共 1 個，另有主控手動項目 MC-04，見 §12.9）。
+> 上游：`docs/01-PRD.md` v0.17（approved，JimmyLin，2026-11-04；R-25）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.17（approved，主控代核，2026-11-04；只改文字規則與註解）、`storage-schema.json` 維持 v0.16（無實質變動）。v0.11 時的上游：`docs/01-PRD.md` v0.16（approved，JimmyLin，2026-11-04；R-24）、`docs/02-contract/` v0.16（三檔 approved，主控代核，2026-11-04；只改文字常數與規則）。v0.10 時的上游：`docs/01-PRD.md` v0.15（approved，JimmyLin，2026-11-04）、`docs/02-contract/` v0.15（README.md、data-schema.ts、storage-schema.json 三檔 approved，JimmyLin 核准 Q-63 持久化結構變更，2026-11-04）、`package.json` `version` 本版由主控改為 `1.1.0`（Q-70 A，tasks.json MC-04）。v0.9 以前的內容仍有效，除非本版明文修改。**契約 C-8 同樣適用本文件**：v0.4～v0.9 段落中描述「目前」持久化結構的「`schemaVersion` 2」「`PersistedData` 9 欄」「欄位集合不變」，v0.10 起讀作「`CURRENT_SCHEMA_VERSION`（3）、12 欄，且該段所述操作不改變版本與欄位集合」；遷移 MG-1～MG-4 等歷史敘述照原意。
+> 搭配文件：`docs/03-design/tasks.json` v0.11（共 105 個任務：既有 102 個全部 `done` 不變；v0.12 新增 CT-26、FE-78、FE-79 共 3 個，另有主控手動項目 MC-05，見 §12.11）。v0.11 時為 v0.10（共 102 個任務：既有 101 個全部 `done` 不變；v0.11 新增 FE-77 共 1 個，見 §12.10）。v0.10 時為 v0.9（101 個任務：v0.10 新增 FE-70～FE-76 共 7 個、CT-25 共 1 個，另有主控手動項目 MC-04，見 §12.9）。
+> **v0.12 增量導讀**（上游改為 PRD v0.17（approved，JimmyLin，2026-11-04；R-25）、契約 v0.17（`README.md`、`data-schema.ts` approved，主控代核：L-8 LT-1～LT-6、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64）；新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）：**只改文字與驗證規則**，不改持久化結構（`schemaVersion` 3、鍵數 2）、不改建置程式、不新增外部資源；`package.json` 維持 1.1.0；AC-23-07、`p5-103`、頁尾不動。修改點集中於 §7.23，任務為 CT-26、FE-78、FE-79（§12.11），測試與給 QA 的項目見 §10.9。**375px 注意**：模擬測驗標題說明預期換成 2 行，須實測不裁切、無水平捲軸（AC-10-02、E-123，§7.23.4）。**改讀規則**：v0.11 以前段落（§3 的 FE-47、FE-52 註記、§4.7、§7.13、§7.19.6、§7.21.4、§10.1、§10.4、§12.6、§13.4 等）提到的舊標題說明、搭配詞標籤、原創內容聲明與品牌標識聲明，現行文字一律以 LT-1～LT-5 為準；這些段落記載已完成任務的歷史，除下方已就地標註者外，不逐字回改。同步修訂 §1、§3（D-17）、§5.7、§7.23、§10.9、§11（T-91～T-95）、§12.11、§13.9、§14、§15（SD-FB-68～SD-FB-71）。
 > **v0.11 增量導讀**（上游改為 PRD v0.16（approved，JimmyLin，2026-11-04；R-24）、契約 v0.16（三檔 approved，主控代核：`PWA_TEXTS` 新文字、`SOURCES_CONTACT_TEXT`、L-7、DS-40、FB-61、FB-62）；新增 AC-23-07，修改 AC-36-03、AC-42-04 文字，E-118～E-120）：**只改文字**，不改持久化結構（`schemaVersion` 3、鍵數 2）、不改 `src/data/`、不改建置程式、網站版本維持 1.1.0。(1) 新版提示文字改為「有新版本，請更新版本」、按鈕「更新版本」，行為依 Q-43 決議 A 不變（§7.22.1）；**改讀規則**：v0.10 以前段落（§1、§7.18、§10.4、§12.6～§12.9、T-49、SD-FB-63 等）提到的「有新版本，重新整理」「按『重新整理』」一律讀作新文字，歷史敘述照原意。(2) 「資料來源與授權」頁內容區末端新增 1 行聯絡資訊（`SOURCES_CONTACT_TEXT`，純文字、非連結、防爬蟲，§7.22.2）。(3) 單元測試與交付 HTML 靜態檢查（§10.8），重新建置取代人類手改的 `dist/`（FB-61、QA BUG-004）。(4) 使用者決定本次**不另跑 QA 輪次**：驗收由 PG 自測＋主控檢查（§10.8）。任務只有 FE-77（§12.10）。同步修訂 §1、§3（D-16）、§5.6、§7.22、§10.8、§11（T-87～T-90）、§12.10、§13.8、§14、§15（SD-FB-65～SD-FB-67）。
 > **v0.10 增量導讀**（PRD R-23、US-44～US-47、AC-44-01～AC-47-08，修改 AC-18-01／24-02／32-02／42-02，E-102～E-117，Q-63～Q-71；契約 v0.15 C-8、§5.3 MG-5～MG-8、RD-3、RD-4、§5.10 FP-1～FP-9、§5.11 CR-1～CR-9、UO-1～UO-9、§5.12 WR-1～WR-5、§6 IM-9、IM-10、§7 V-P5-08、V-ST-18～V-ST-22、§5.7 CI 修改、data-schema §15、§9.8 DS-32～DS-39、FB-54～FB-60）：**持久化結構 `schemaVersion` 2 → 3**（鍵名、鍵數不變；`PersistedData` 加 3 個選填欄位）。(1) 遷移與讀取：`core/persist.js` 新增 `MIGRATIONS[2]`（MG-6）、**任何版本**遷移後一律先做 RD-1 再做 RD-3（修正現行「遷移過就跳過 RD-1」的寫法，T-76）；測試夾具改用 v0.14 交付檔實際寫出的 localStorage 與備份原文（FE-70，§7.21.1）。(2) 單字卡位置：新 L1 模組 `core/position.js`（FP-2 解析）；store 以單一入口 `gotoCard` 寫入、`placeCard` 統一處理單字集重建（取代刪除自訂單字的舊定位邏輯，§7.21.2）。(3) 模擬測驗：新 L1 模組 `core/part5flow.js` 集中「作答、下一題、重新開始、開關、全部再練、清除紀錄」的狀態轉移與 UO-3 畫面種類（§7.21.3）；畫面新增「已答對 K / Q 題」、「✓ 曾答對」、開關、「全部答對」畫面與確認對話框，文字定稿見 §7.21.4。(4) 容量不足提示收斂為 store 單一函式 `commitWrite`，整個工作階段最多提示 1 次（§7.21.5）。(5) 題目 id 穩定性檢查列為 CT-25（§7.21.6）；網站版本 1.1.0 由主控 MC-04 修改（§7.21.7）。同步修訂 §1、§2、§3（D-15）、§4.10、§5.5、§6.6、§10.7、§11（T-75～T-86）、§12.9、§13.7、§14、§15（SD-FB-57～SD-FB-64）。
 > **v0.9 增量導讀**（PRD R-22、US-42、US-43、AC-01-08、改寫 AC-39-04 等 13 條、暫停 AC-05-01～05、Q-58～Q-62；契約 §12 VR／LS／V-VER、§5.8 HT-6～HT-9、data-schema §14、§9.7 DS-26～DS-31、FB-50～FB-53）：**不改持久化結構**（`schemaVersion` 2）、不改 `src/data/`。(1) 網站版本號：建置讀 `package.json` `version` → SemVer 驗證 → 取代 `@@APP_VERSION@@` → **之後**才算 BUILD_ID（§5.4）；新模組 `core/version.js`（§14 常數與純函式，建置與頁面共用）與 `ui/version-line.js`（啟動時讀兩個 meta、在頁尾「資料來源與授權」正下方建立版本行，不合法整行不建，§7.20.1）。(2) 領域範本區塊 `hidden` + `inert`；空狀態文字定案、自訂清單來源標示只留「自訂擴充」（§7.20.2）。(3) 難易度設定頁狀態列改為一行「目前色級：{生效色級}」（§7.20.3）。(4) 主控台目標行一律 `goalLineSame`（依生效色級）、移除「・」，「變更」改外框按鈕（§7.20.4）。同步修訂 §1、§3、§4.9、§5.4、§6.5、§10.6、§11（T-67～T-74）、§12.8、§13.6、§14、§15（SD-FB-50～SD-FB-56）。
@@ -65,6 +66,9 @@ approved_at: 2026-11-04
 | （v0.11）更新提示文字 | 只改 `core/pwa.js` `PWA_TEXTS.updateNotice`「有新版本，請更新版本」、`updateButton`「更新版本」；`ui/pwa-notice.js`、`services/pwa.js` 本來就逐字取常數，**不改**；顯示條件與按下後行為不變 | R-24 一、UP-4～UP-7、AC-36-03、E-120 |
 | （v0.11）資料來源頁聯絡行 | 常數 `SOURCES_CONTACT_TEXT` 定義在 `views/sources-page.js`（唯一一處字面值，帶空格）；`render` 在 `.src-page` 最後加 1 個 `<p class="src-muted src-contact">`，以 `textContent` 寫入；不是連結、無 `tabindex`、無事件；樣式 `font-size: 0.8125rem`、`overflow-wrap: anywhere`（§7.22.2） | R-24 二、L-7、AC-23-07、E-118、E-119 |
 | （v0.11）交付物 | 以 `npm run build` 重新產生 `dist/`，取代人類手改的 `dist/english-master-track.html`（FB-61、QA BUG-004）；版本仍 1.1.0，BUILD_ID 隨內容改變屬預期 | DS-40 (4)、AC-36-07 |
+| （v0.12）權利與商標文字 | 固定文字一律逐字取自契約 L-8（LT-1～LT-6）；常數留在各 view 的既有位置，不新增共用模組；商標聲明（LT-5）只放「資料來源與授權」頁；`brandStatement` 改為單一參數，文字不再依賴 `copyrightHolder`（§7.23） | R-25、L-8、V-LGL-01～04、AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-10 |
+| （v0.12）無佐證說法 | `p5-009` 解析改為 LT-6；新測試 `legal-static.test.js` 掃描交付 HTML 與資料字串，防止舊說法再進入（§10.9） | R-25 四、AC-23-08、V-LGL-05、V-LGL-06 |
+| （v0.12）交付物 | 只由 `npm run build` 重新產生 `dist/`，版本仍 1.1.0，新舊版以建置碼區分；375px 標題說明預期 2 行，須實測 | DS-41、Q-74 決議 B、AC-10-02、E-123 |
 
 ---
 
@@ -205,7 +209,7 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
    │     └─ CT-23-summary.md           CT-23
    └─ app/                             pg-frontend（v0.4 修改者以「→」接在原任務之後，依序執行）
       ├─ index.html                    FE-01 建最小模板 → FE-02 完成殼 → FE-23 更名 → FE-26 底部導覽圖示 → FE-32 首次模式（body[data-entry]、返回鈕）→ FE-38（v0.5：導覽移除解碼器、句型庫 2 鈕；兩個 section 保留但去掉 aria-label）→ FE-50（v0.7：HD-1 靜態元素、`emt-build-id` 佔位、`#pwa-update` 掛載點）
-      ├─ license-header.txt            FE-01  授權標頭模板（{{YEAR}}）（v0.4 不改：授權文字中的「Part 5」屬授權聲明，R-15 保留）→ FE-47（v0.7：加品牌標識聲明，AC-23-06）
+      ├─ license-header.txt            FE-01  授權標頭模板（{{YEAR}}）（v0.4 不改：授權文字中的「Part 5」屬授權聲明，R-15 保留）→ FE-47（v0.7：加品牌標識聲明，AC-23-06）→ FE-78（v0.12：LT-3、LT-4，AC-23-06）
       ├─ main.js                       FE-02 → FE-26（呼叫 bottomNav.init）→ FE-32（依 entryMode 啟動）→ FE-50（v0.7：pwa.start、pwaNotice.init）
       ├─ pwa/                          （v0.7 新增；不打包進 HTML：建置的 listAppFiles 只收 core／state／services／ui／views 與 main.js）
       │  └─ sw.template.js             FE-46  service worker 範本（含 `@@BUILD_ID@@`、`/* @@PRECACHE_URLS@@ */` 佔位，§7.18.3）
@@ -264,7 +268,7 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
       │  ├─ part5.js                   FE-14 → FE-23（更名）→ FE-29（答題回饋）
       │  ├─ decoder.js                 FE-15（v0.5 不改、不刪；入口隱藏，HT-5）
       │  ├─ phrasebank.js              FE-16（v0.5 不改、不刪；入口隱藏，HT-5）
-      │  └─ sources-page.js            FE-17 → FE-52（v0.7：品牌標識聲明，AC-23-02）
+      │  └─ sources-page.js            FE-17 → FE-52（v0.7：品牌標識聲明，AC-23-02）→ FE-77（v0.11：聯絡行）→ FE-78（v0.12：LT-3～LT-5，AC-23-02）
       ├─ styles/
       │  ├─ 00-base.css                FE-02 → FE-26（底部導覽）→ FE-32（首次模式隱藏規則）→ FE-38（v0.5：底部導覽 4 欄）
       │  ├─ 05-motion.css              FE-24（v0.4 新增）動畫時間 CSS 變數、換頁動畫、減少動態總開關
@@ -369,6 +373,7 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | :--- | :--- |
 | D-15 | （v0.10）同 D-6～D-14：v0.10 對既有檔案的修改由 FE-70～FE-76、CT-25 承接；**同一批次的任務沒有任何共用 path**。被兩個 v0.10 任務修改的檔案只有 `__tests__/store.test.js`（FE-73 只改 `schemaVersion` 等字面值與因 v3 而必須調整的斷言 → FE-74 改行為斷言），以 `dependsOn` 串到不同批次。`package.json` 只由主控 MC-04 修改一次（Q-70 A），任何 PG 任務仍不得修改。`__tests__/_samples/` 由 FE-70 建立後**唯讀**：後續任務不得重新產生或改寫（它代表 v0.14 已交付程式的輸出，改寫即失去比對意義） |
 | D-16 | （v0.11）v0.11 只有 1 個任務 FE-77，修改 `core/pwa.js`、`views/sources-page.js`、`styles/70-sources.css`、`__tests__/pwa-core.test.js`、`__tests__/pwa-notice.test.js`、`__tests__/sources-page.test.js`，新增 `__tests__/contact-static.test.js`，並重新產生 `dist/` 9 檔；與已 `done` 任務的檔案重疊不影響平行（無其他待執行任務）。**不改**：`ui/pwa-notice.js`、`services/pwa.js`、`pwa/sw.template.js`（註解中的舊按鈕名稱不影響行為，不進入本任務範圍，SD-FB-66）、`core/constants.js`、`tools/build.mjs`、`index.html`、`src/data/`、`package.json` |
+| D-17 | （v0.12）CT-26 只改 `src/data/part5.js` 與新增 `_records/CT-26.md`；FE-78 修改 `views/flashcards.js`、`views/part5.js`、`views/sources-page.js`、`license-header.txt`、`styles/40-part5.css`（只改註解）與 4 個測試檔；FE-79 新增 `__tests__/legal-static.test.js` 並重新產生 `dist/` 9 檔。CT-26 與 FE-78 同批、paths 不重疊；唯一被兩個 v0.12 任務列入的檔案是 `40-part5.css`（FE-78 → FE-79，後者只在實測不合格時才改），以 `dependsOn` 分批。**不改**：`styles/70-sources.css`（`.src-project` 已有 `overflow-wrap: anywhere`）、`core/constants.js`、`tools/build.mjs`、`index.html`、`src/data/sources.js`、`src/data/NOTICE.md`、`src/data/_tools/`、`_records/part5-ids.json`、`package.json`。`tests/`、`docs/04-qa/` 屬 QA 範圍，不派給 PG（§10.9） |
 
 （v0.8 記載）不改：`core/constants.js`（`STORAGE_KEYS` 等屬 `FROZEN_IDENTIFIERS`）、`core/backup.js`、`core/persist.js`、`main.js`、`ui/router.js`（「開始今日學習」「變更」沿用既有 `[data-go]` 委派）、`views/flashcards.js`、`views/speech-panel.js`、`views/flashcard-quiz.js`、`styles/05-motion.css`、`pwa/sw.template.js`、`src/app/assets/icons/`、`styles/50-decoder.css`、`styles/60-phrasebank.css`（隱藏頁）。
 
@@ -585,7 +590,7 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 
 **`views/dashboard.js`（FE-51）**——備份區塊結構（由上而下）：`h3`（`TEXT.backupTitle`，不變）→ 既有 `p.dash-backup__hint` → `div.btn-row`（「匯出備份」「匯入備份」）→ **`p.dash-backup__origin`**（`PWA_TEXTS.backupOriginNotice`，常駐、不受 `eligible`／`storageStatus` 影響）→ **`div.dash-backup__install`**（IN-1 成立時才含 `<button type="button" class="btn btn--secondary dash-install" data-action="install-app">安裝 App</button>`；不成立時容器 `hidden` 且無子節點，不佔版面）→ 隱藏的檔案輸入。點擊 → `EMT.services.pwa.requestInstall()`；store 回呼會在 `prompt()` 前同步把 `installPromptAvailable` 設 `false`、`installSuppressed` 設 `true`，訂閱回呼收到 `"pwa"` tag 即移除按鈕。`show()` 時也重繪安裝區。
 
-**`views/sources-page.js`（FE-52）**——既有聲明清單（`src-statements`）在 3 條授權聲明之後新增 1 條：「PWA 圖示與名稱「`PWA_APP_NAME`」為品牌標識，著作權人 `PROJECT_LICENSE.copyrightHolder`（缺漏時用既有保底值 JimmyLin），保留所有權利，不適用 MIT 與 CC BY-SA 4.0」，組字後必須與 PRD AC-23-02 原文逐字相同。`PWA_APP_NAME` 於 render 時取 `EMT.core.pwa`（LD-2；不存在依 LD-3 丟出錯誤）。
+**`views/sources-page.js`（FE-52）**——既有聲明清單（`src-statements`）在 3 條授權聲明之後新增 1 條：「PWA 圖示與名稱「`PWA_APP_NAME`」為品牌標識，著作權人 `PROJECT_LICENSE.copyrightHolder`（缺漏時用既有保底值 JimmyLin），保留所有權利，不適用 MIT 與 CC BY-SA 4.0」，組字後必須與 PRD AC-23-02 原文逐字相同。`PWA_APP_NAME` 於 render 時取 `EMT.core.pwa`（LD-2；不存在依 LD-3 丟出錯誤）。（v0.12：本段聲明文字已由 LT-4 取代，`brandStatement` 改為單一參數，見 §7.23.1；取得 `PWA_APP_NAME` 的方式不變。）
 
 ### 4.8 v0.8 新增與修改的模組介面（版面與視覺）
 
@@ -975,6 +980,18 @@ jobs:
 | BUILD_ID | HTML 內容改變（提示文字、聯絡行、CSS）→ BUILD_ID、`sw.js` 快取名稱、建置碼必然改變；已造訪 1.1.0（舊 BUILD_ID）https 版的使用者會看到舊版程式內的「有新版本，重新整理」提示（E-120，預期），更新後新頁面使用新文字 |
 | 取代手改產物 | FE-77 最後執行 `npm run build`，覆寫 `dist/english-master-track.html` 與 `dist/site/` 8 檔；交付以建置產物為準（FB-61）。完成後 `dist/english-master-track.html` 與 `dist/site/index.html` 逐位元組相同（修正 QA BUG-004 指出的「交付檔被手改、與部署版不同、換行改為 LF」） |
 | 可重現 | 連續兩次 `npm run build`，`dist/english-master-track.html`、`dist/site/index.html`、`manifest.webmanifest`、`sw.js` 的 SHA-256 皆相同（AC-36-01 (a)、AC-42-04 (a)） |
+
+### 5.7 v0.12 建置（不改建置程式；契約 DS-41、Q-74 決議 B）
+
+| 項目 | 決定 |
+| :--- | :--- |
+| 建置程式 | `tools/build.mjs` **不改**。權利文字檢查放在 `__tests__/legal-static.test.js`（§10.9），不加入 build 中止規則 |
+| 授權標頭 | `license-header.txt` 內容改寫後仍由 B-6 檢查（無連續兩個減號、不以 `>` 開頭）；標頭位於 `<meta charset>` 之後，字數增加不影響 charset 位置 |
+| 版本號 | `package.json` 維持 `1.1.0`，任何任務不得修改；新舊版以建置碼區分（AC-42-04 (c)） |
+| BUILD_ID | HTML 內容改變 → BUILD_ID、`sw.js` 快取名稱、建置碼必然改變，屬預期；舊版 PWA 更新前仍顯示舊文字（E-121） |
+| 交付 | FE-79 依序 `npm test`、`npm run build` 兩次，覆寫 `dist/english-master-track.html` 與 `dist/site/` 8 檔；不得手改；檢查項目同 §5.6 的「可重現」與兩份 HTML 相同 |
+| 大小 | 文字增減合計少於 1 KB，對 AC-19-04 的影響可忽略，不另列估算 |
+| 外部資源 | 不新增；LT-1～LT-6 都不含網址，B-7 檢查不受影響 |
 
 ---
 
@@ -1411,7 +1428,7 @@ click（卡片）：now < suppressClickUntil → 忽略；點在按鈕、語音�
 | 主控台統計標籤 | Part 5 正確率 | 模擬測驗正確率 | AC-17-01、AC-17-04 |
 | 難易度設定頁標題、說明 | 目標與字庫自訂器；「…才會更新抽認卡的單字集。」 | 難易度設定；「選擇色級或輸入目標分數即時試算，按「套用」後才會更新單字卡的單字集。」 | AC-01-01 |
 | 單字卡頁標題、空狀態 | 抽認卡；「請到自訂器…」「前往自訂器」 | 單字卡；「請到難易度設定套用目標分數，或新增自訂單字、注入領域範本。」「前往難易度設定」 | AC-06-06 |
-| 模擬測驗頁標題 | Part 5 模擬測驗 | 標題「模擬測驗」，標題下說明「題型對應多益 Part 5」 | AC-10-02 |
+| 模擬測驗頁標題 | Part 5 模擬測驗 | 標題「模擬測驗」，標題下說明 LT-2（v0.12 起；原文「題型對應多益 Part 5」已廢止，§7.23.1） | AC-10-02 |
 | **不改** | 識別字（`TabId`、`data-tab`、`#view-*`、CSS 類名前綴、檔名、函式與變數名）、localStorage 鍵與結構、授權與資料來源文字中的「Part 5」（`license-header.txt`、`sources-page.js`、`build.test.js`、`sources-page.test.js` 的斷言）、`PART5_TYPE_LABELS`、「測驗模式」「自訂單字」「自訂擴充」「自訂清單」 | — | R-15 |
 | 程式註解 | 可順手更新，不強制 | — | — |
 
@@ -1928,7 +1945,7 @@ div.p5                                           max-width: var(--content-narrow
 ├─ h2.page-title.p5-heading 「模擬測驗」
 ├─ div.p5-progress [role=progressbar][aria-label=作答進度][aria-valuemin=0][aria-valuemax=N][aria-valuenow=i]
 │  └─ span.p5-progress__fill  style.width = percent + "%"
-├─ p.p5-heading-note 「題型對應多益 Part 5」
+├─ p.p5-heading-note LT-2（v0.12，§7.23.1）
 └─ （題目卡／結算卡／空狀態，既有）
 ```
 
@@ -2231,7 +2248,7 @@ div.p5
  │   └ label.p5-only[data-p5=only-label]
  │       ├ input[type=checkbox][data-p5=only]        checked = part5UnansweredOnly
  │       └ span.p5-only__text「只練沒答對的題目」
- ├ p.p5-heading-note「題型對應多益 Part 5」
+ ├ p.p5-heading-note LT-2（v0.12，§7.23.1）
  └ 主體：
      question   → div.card.p5-question
                     div.p5-meta：h3.p5-number「第 i / N 題」、span.p5-type、span.p5-badge[data-p5=correct-badge]「✓ 曾答對」（曾答對才建）
@@ -2374,6 +2391,75 @@ div.src-page
 | `dist/site/sw.js` | 不含 `mailto:`、不含去空格位址 |
 | `src/app/` 非測試原始碼（`__tests__/` 以外的 `.js`、`.css`、`.html`、`.txt`） | 不含 `mailto:`、不含去空格位址；`SOURCES_CONTACT_TEXT` 原值只出現在 `views/sources-page.js` 且 1 次 |
 | 測試檔 | 去空格位址只能在測試執行期由常數推導（例：`SOURCES_CONTACT_TEXT.slice("email: ".length).split(" ").join("")`），測試原始碼不得寫出去空格位址的字面值；`__tests__/` 依 D-1 不打包 |
+
+### 7.23 文字修訂：權利與商標文字（v0.12；PRD R-25、AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-08、AC-38-08、AC-38-10、E-121～E-123；契約 v0.17 L-8、§7.8、DS-41、DS-42、FB-63、FB-64）
+
+LT 文字本身以契約 README §4.3 L-8 表為唯一來源；實作時從該表複製，本節不重抄，只定修改位置。
+
+#### 7.23.1 畫面文字修改點（FE-78）
+
+| LT | 檔案與位置（依現況確認） | 做法 | 對應 |
+| :--- | :--- | :--- | :--- |
+| LT-1 | `views/flashcards.js:210`，`push(front, "collocation", …)` 的標籤 | 只換標籤文字；欄位鍵、元素順序、按鈕不變；自訂單字表單的「搭配詞（選填）」不在範圍 | AC-06-01、AC-38-08、V-LGL-01 |
+| LT-2 | `views/part5.js:66`，`TEXT.headingNote`；節點為 `part5.js:836` 的 `p.p5-heading-note` | 只換常數；結算、全部答對畫面共用同一節點，不需另改；第 2 行註解同步改寫 | AC-10-02、V-LGL-02 |
+| LT-3 | `views/sources-page.js:53`，`TEXT.originalLicense` | 只換常數；`originalLicense` 仍為 `.src-statements` 第 3 項 | AC-23-02、V-LGL-03 |
+| LT-4 | `views/sources-page.js:205-208`，`brandStatement` | 改為 `brandStatement(appName)`，名稱取 `PWA_APP_NAME`，組字後須與 LT-4 逐字相同；呼叫處（`:332`）移除 `holder` 引數；`holder` 仍供 `derivedAttribution` 使用（`copyrightHolder` 用途見 data-schema `ProjectLicenseInfo`） | AC-23-02、NM-3、V-LGL-03 |
+| LT-5 | `views/sources-page.js`，新增 `TEXT.trademarkNotice` | `.src-statements` 新增第 5 個 `li`，排在品牌標識聲明之後，以 `textContent` 寫入；不加入 HTML 開頭註解 | AC-23-02、V-LGL-03、V-LGL-04 |
+
+| 不改 | 理由 |
+| :--- | :--- |
+| `TEXT.codeLicense`、`TEXT.dataLicense`、「原創內容來源」一行、`derivedAttribution`、`SOURCES_CONTACT_TEXT` | L-8、V-LGL-03、AC-23-07 |
+| `styles/70-sources.css` | `.src-project` 已設 `overflow-wrap: anywhere`，新增 `li` 沿用既有樣式；375px 可完整閱讀由 FE-79 實測 |
+| `styles/40-part5.css` 的規則 | `.p5-heading-note` 沒有禁止換行的設定，不改版面規則（R-25 限制）；FE-78 只改第 41 行註解 |
+| `core/constants.js`（`TAB_LABELS`） | 標題仍為 `TAB_LABELS.part5`（V-LGL-02） |
+
+**舊文字清除範圍**（FB-64）：契約規定其他程式註解不算違反；本版仍一併改寫 `views/part5.js:2`、`styles/40-part5.css:41`、`views/sources-page.js:17`、`:202` 的註解，使 FE-79 能對整份 HTML 直接搜尋，不必區分註解。新註解不得重複寫出舊文字。
+
+#### 7.23.2 HTML 開頭註解（FE-78，`license-header.txt`）
+
+第 27～31 行改為下列結構，其餘（第一行名稱、MIT 全文、第 33 行）不變。`{LT-3}`、`{LT-4}` 代表該段逐字文字，行尾另加全形句號（V-LGL-04 檢查「含 LT」，句號不影響判定）：
+
+```
+資料授權：
+單字資料以 CC BY-SA 4.0 授權。
+{LT-3}。
+條款網址：https://creativecommons.org/licenses/by-sa/4.0/
+
+{LT-4}。
+```
+
+單字資料與原創內容必須分成兩句（R-25 PM 判斷 (b)）；LT-5 不放此處（R-25 PM 判斷 (c)）。
+
+#### 7.23.3 資料（CT-26，DS-42）
+
+| 項目 | 決定 |
+| :--- | :--- |
+| 修改 | `src/data/part5.js:13`，`p5-009` 的 `explanation.coreStrategy` = LT-6；該檔只有這 1 行異動 |
+| 不改 | `p5-103`（Q-75 決議 A）；該題其他欄位（Q-71）；來源標記 `ORIGINAL`（Q-76 決議 A） |
+| V-P5-08 | 快照指紋只含 `sentence` 與正解，本次都未改，比對直接通過；不需也不得執行 `--accept`、`--update-snapshot` |
+| 現況確認 | SD 以 ripgrep 搜尋 `src/`（排除 `_records/`）：A＋B 同句命中只有 `p5-009`（資料）、`flashcards.js:210` 與其測試；單獨出現的「常考」「必考」沒有其他命中。CT-26 仍須依 V-LGL-05 的分句規則逐一字串欄位重驗 |
+
+#### 7.23.4 375px 版面與實測方法（FE-79；AC-10-02、AC-20-01、AC-40-02、E-123）
+
+**預期**：`.p5-heading-note` 字級 0.9rem（14.4px），LT-2 估計寬約 370～380 px，375px 可用寬度約 343 px，**預期換成 2 行**，內容下移約 23 px（PRD R-25 為靜態估算，尚未實測）。沒有 AC 限制此說明為 1 行，首屏免捲動條件也不含模擬測驗頁，2 行不是缺陷；**裁切或水平捲軸才是缺陷**。
+
+| 量測項 | 方法 | 判定 |
+| :--- | :--- | :--- |
+| 行數 | `const r = document.createRange(); r.selectNodeContents(el); new Set([...r.getClientRects()].map((x) => Math.round(x.top))).size` | 回報實際值，預期 2；不是 2 不算失敗，但須回報 |
+| 不裁切 | `el.scrollWidth ≤ el.clientWidth`、`el.scrollHeight ≤ el.clientHeight`；`getBoundingClientRect` 的 left ≥ 0、right ≤ 視窗寬；底緣 ≤ 下一個同層元素的頂緣 | 全部符合 |
+| 無水平捲軸 | `document.documentElement.scrollWidth ≤ clientWidth` | 符合 |
+| 文字 | `el.textContent.trim()` = LT-2 | 逐字相同 |
+| 計算後樣式 | `white-space` 不是 `nowrap`；`text-overflow` 不是 `ellipsis` | 符合 |
+
+**注意**：不可用 `el.getClientRects().length` 計算行數——`p` 為 block 元素，結果恆為 1（見 SD-FB-69）。
+
+| 情境 | 必測 | 備註 |
+| :--- | :--- | :--- |
+| 375×667，題目畫面、作答後 | 是 | 主要情境；結算與全部答對畫面共用同一節點，不重複量測 |
+| 768×1024、1366×768 | 是 | 回歸（AC-20-01、AC-40-02） |
+| 375px，`html { font-size: 150% }` | 是 | E-123 放大字級；說明本身不得裁切；水平溢出若來自其他既有元素，回報不修 |
+
+**不合格時**：只能在 `.p5-heading-note` 加換行相關屬性（如 `overflow-wrap: anywhere`）；不得縮小字級、改寫 LT-2、加 `nowrap`。原因若在共用容器，FE-79 標 `blocked` 回報主控。
 
 ---
 
@@ -2629,7 +2715,7 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | `interaction.test.js`（新） | FE-21 | `classifySwipe` 邊界（dx = ±49、±50；`|dx| = |dy|`；垂直為主）；`swipeTarget` 首尾不動；`isTap`；`UI` 每個值 ≤ §7.12 的 PRD 上限；`patternTotal(vibratePattern("correct"｜"wrong")) ≤ 200`；`UI` 凍結 |
 | `persist.test.js`、`backup.test.js`（改） | FE-22 | §7.8 每條路徑：v1 遷移（7 欄原值不動、兩欄為預設、即使 v1 內含這兩鍵也覆寫）、v1 `data` 非物件 → unreadable／`format`、v2 RD-1 只重設壞欄、`schemaVersion` 3／0／`"2"` → unreadable／`version`；匯出為 2 且兩欄已正規化；匯入 v1（AC-24-10）、v2 shape 錯 → `format`、v2 項目層級無效 → 捨棄且不計入略過數（AC-24-11）；支援版本字串「1、2」 |
 | `dashboard.test.js`（改） | FE-22、FE-31 | （FE-22）版本不相容訊息改為「支援版本：1、2」；（FE-31）`progressModel`：AC-30-02（橘 10、綠 15、730 → 15）、AC-30-05（14/15 未達、15/15 達成金色、18/15）、AC-30-07（跨午夜：同一 data、`today` 前進一天 → X = 0、長條最右為新日期、前一日保留）、AC-30-08、AC-30-10（`—`）；統計標籤「模擬測驗正確率」 |
-| `naming.test.js`（新） | FE-23 | 讀 `index.html` 與 `views/*.js` 的字串常值：不得含「抽認卡」「自訂器」；「Part 5」只允許出現在授權／來源文字與模擬測驗頁說明「題型對應多益 Part 5」；導覽 6 個按鈕文字依序 = `TAB_LABELS[NAV_TAB_ORDER[i]]`；各 `section` 的 `aria-label` = `TAB_LABELS` |
+| `naming.test.js`（新） | FE-23 | 讀 `index.html` 與 `views/*.js` 的字串常值：不得含「抽認卡」「自訂器」；「Part 5」只允許出現在授權／來源文字與模擬測驗頁說明（v0.12 起為 LT-2，FE-78 同步修改此測試）；導覽 6 個按鈕文字依序 = `TAB_LABELS[NAV_TAB_ORDER[i]]`；各 `section` 的 `aria-label` = `TAB_LABELS` |
 | `router-motion.test.js`（新） | FE-24、FE-32 | 極簡假 DOM（`getElementById`、`classList`、`hidden`、`setAttribute`、`dataset`）＋ `vm` 載入 `ui/motion.js`、`ui/router.js`：連續 `go` 3 頁 → 只有最後一頁 `hidden = false` 且其餘無 `view--entering`；`reduced()` 為真時不加 class；`05-motion.css` 的 5 個 CSS 變數 = `interaction.UI` 對應值且 ≤ 上限；含 `prefers-reduced-motion: reduce` 全域規則（`animation: none`、`transition: none`）；（FE-32）首次模式 `go("dashboard")` 回 `false`、`go("sources")` 可、收到 `"entry"` tag 後切到主控台並設 `data-entry="main"` |
 | `store.test.js`（改） | FE-25、FE-30 | （FE-25）§7.7 記錄點表每列、LR-7（quota：X 增加、`learningQuota` tag 只一次、storage 原值不變、無 `storage` tag 重複提示）、AC-30-06、AC-30-11（重建 store 讀回）、AC-30-12（v1 → 寫回 v2、無 unreadable 鍵）、AC-30-13；寫出的每筆 `data` 通過 `validatePersistedData(…, { written: true })`。（FE-30）FS-1～FS-7、V-ST-13：首次模式下 `setDraftScore`、`clickColor`、`setTab("sources")` 後 `setItem` 呼叫數 0；`startLearning` 一次寫入且 `schemaVersion` 2；`startLearning` 遇 quota 仍進入 main、主鍵不存在；`unavailable` 每次 init 都 firstRun；主鍵為 `""` → main + unreadable 流程；首次還原成功 → main 且資料 = 備份（300、棕）；四種失敗 → firstRun、主鍵不存在 |
 | `shell.test.js`（新） | FE-26 | `index.html` 導覽 6 鈕順序 = `NAV_TAB_ORDER`、`data-tab` 不變、每鈕含 `<svg` 且無 `xmlns`、無 `http`、無 `<img`；`00-base.css` 含 `@media (max-width: 640px)` 區塊內 `position: fixed`、`bottom: 0`、`min-height` ≥ 44px（或 `var(--touch)`）；`ui/bottom-nav.js` 在假 DOM 下 focusin 輸入框加 `is-typing`、focusout 移除、按鈕聚焦不加 |
@@ -2963,6 +3049,65 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | H-3 | 其他畫面不顯示聯絡行 | DevTools Console：切到主控台、難易度設定、單字卡、模擬測驗後 `document.querySelectorAll(".src-contact").length` 在可見畫面中為 0 或所在 `#view-sources` 為 `hidden` |
 | H-4 | 更新提示新文字（https） | 可留待部署後實機自然觸發時目視；或比照 §10.4 以 `npm run serve` 模擬 V1 → V2。不阻擋發布（文字已由單元測試與產物字串檢查保證） |
 
+### 10.9 v0.12 測試範圍（PRD v0.17；契約 L-8、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64）
+
+**中間狀態的已知失敗**：`npm test` 預期無。FE-78 在同一任務內改文字與測試；檢查正式 `p5-009` 的斷言放在 FE-79（CT-26 之後）。`tests/`（QA）在更新前會有下方列出的預期失敗，不算缺陷。
+
+**單元測試（`npm test`）**
+
+| 檔案 | 任務 | 修改位置與必含案例 | AC／契約 |
+| :--- | :--- | :--- | :--- |
+| `flashcards.test.js`（改） | FE-78 | `:52` 期望改為 LT-1；新增：`m.front` 全部標籤不含「多益」 | AC-06-01、V-LGL-01 |
+| `naming.test.js`（改） | FE-78 | `:6`、`:135`、`:142`、`:147`、`:257` 改為 LT-2；新增：`views/*.js` 字串常值不含舊說明 | AC-10-02、V-LGL-02 |
+| `sources-page.test.js`（改） | FE-78 | `:105` 改為 LT-3；`:112` 的 `BRAND` 改為 LT-4；`:114-119` 改為單一參數（名稱確實取自引數）；`:181`、`:249`、`:343` 的清單加入 `TEXT.trademarkNotice`；新增：`TEXT.trademarkNotice` = LT-5、整頁 `textContent` 含 LT-3～LT-5 各 1 次、不含「著作權人 JimmyLin」「保留所有權利」；既有聯絡行案例照常 | AC-23-02、AC-23-07、V-LGL-03 |
+| `build.test.js`（改） | FE-78 | `:438-442` 改為分別檢查「單字資料以 CC BY-SA 4.0 授權」與 LT-3；`:445-449` 改為 LT-4 + 「。」成一行；新增：第一行 = `EnglishContext`、不含「原創內容著作權人 JimmyLin」「保留所有權利」、不含 LT-5 | AC-23-06、AC-38-10、V-LGL-04 |
+| `legal-static.test.js`（新） | FE-79 | 見下表 | V-LGL-02～06 |
+
+**`legal-static.test.js` 必含案例**（`build({ write: false, log() {}, warn() {} })` 對專案實際原始碼建置，寫法同 `contact-static.test.js`）
+
+| 對象 | 判定 | 依據 |
+| :--- | :--- | :--- |
+| 交付 HTML 第一個註解區（`@@LICENSE@@` 位置） | 第一行 = `EnglishContext`；含 MIT 聲明與條款全文、「單字資料以 CC BY-SA 4.0 授權」、LT-3、LT-4、CC BY-SA 條款網址；不含 LT-5 | V-LGL-04 |
+| 交付 HTML 全文 | 「多益常考」「多益最常見」「題型對應多益 Part 5」「著作權人 JimmyLin」「保留所有權利」皆 0 次；LT-2、LT-5 各至少 1 次 | V-LGL-01～04、§7.23.1 |
+| `src/data/` 頂層 `.js` 的字串值（以 `vm` 載入後遞迴走訪；不含 `_tools/`、`_records/`） | 逐一字串、依 V-LGL-05 分句符號切句：A 組與 B 組同句 0 筆；`p5-009` 的 `coreStrategy` = LT-6；字表名稱「TOEIC Service List」不算違反（無 B 組字詞） | V-LGL-05、V-LGL-06 |
+| `styles/40-part5.css` 的 `.p5-heading-note` 規則 | 不含 `nowrap`、`text-overflow`、`overflow: hidden`、`height`、`max-height` | V-LGL-02、E-123 |
+
+**建置與交付檢查（FE-79，附指令與輸出）**
+
+| 檢查 | 判定 | AC／契約 |
+| :--- | :--- | :--- |
+| `npm test`、`npm run validate:data` | 全數通過、錯誤 0 | V-P5-08 |
+| `npm run build` 兩次 | 4 檔 SHA-256 兩次相同；兩份 HTML SHA-256 相同；`emt-app-version` = 1.1.0；回報新舊 BUILD_ID | AC-36-01 (a)、AC-36-07、AC-42-04 |
+| `dist/english-master-track.html` 舊文字 | 「多益常考」「多益最常見」「題型對應多益 Part 5」「著作權人 JimmyLin」「保留所有權利」皆 0 次 | AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-08 |
+| `dist/english-master-track.html` 新文字 | LT-1、LT-2、LT-5 各至少 1 次；LT-3、LT-6 至少 1 次；`SOURCES_CONTACT_TEXT` 恰 1 次；`mailto:` 0 次 | L-8、AC-23-07 |
+| 375px 與其他寬度實測 | 依 §7.23.4 | AC-10-02、AC-20-01、AC-40-02、E-123 |
+
+**主控檢查（FE-79 完成後）**
+
+| # | 項目 | 方法 |
+| :--- | :--- | :--- |
+| M-1 | FE-79 回報的實測結果齊全；若本機無瀏覽器而未完成，主控以 Windows Chrome、`file://`、DevTools 375 寬執行 §7.23.4 的運算式 | 讀回報或實測 |
+| M-2 | 回報的測試、建置、字串檢查輸出齊全且符合上表 | 讀回報，必要時重跑 |
+| M-3 | CT-26、FE-78、FE-79 未越界（`tests/`、`docs/`、`package.json`、`tools/` diff 為 0） | `git status` |
+
+**給 QA 的項目（不派給 PG；是否本次執行由人類決定，見 SD-FB-68）**
+
+| 檔案 | 位置 | 要做的事 | 對應 |
+| :--- | :--- | :--- | :--- |
+| `tests/static/static-check.mjs` | `:118`、`:120` | TC-S06 改為 V-LGL-04：兩句分開、LT-3、LT-4；加不含舊文字與 LT-5 的斷言 | AC-23-06 |
+| `tests/e2e/e2e-cards.mjs` | `:189` | TC-06-01 標籤改為 LT-1 | AC-06-01 |
+| `tests/e2e/e2e-content.mjs` | `:119` | `statements` 的原創內容聲明改為 LT-3，加入 LT-5 | AC-23-02 |
+| `tests/e2e/e2e-layout.mjs` | `:298`、`:299` | 品牌標識聲明改為 LT-4；輸出說明文字同步 | AC-38-10 |
+| `tests/e2e/e2e-pwa.mjs` | `:158` | TC-23-02c 的 `BRAND` 改為 LT-4 | AC-23-02 |
+| `tests/tools/tc-desc.json` | `:160` | TC-23-02c 描述配合更新；其他 TC 描述一併確認 | AC-23-02 |
+| `docs/04-qa/test-plan.md` | `:332`（TC-06-01）、`:415`（TC-23-02c）、`:631`（TC-D06）、`:684`（TC-S06） | 期望文字改為現行 AC。TC-S06 不在 PRD R-25 的 QA 清單內，為 SD 盤點時追加 | AC-06-01、AC-23-02、AC-23-06 |
+| 新增 TC | — | AC-23-08（V-LGL-05、V-LGL-06，含 `p5-103` 不變）；AC-10-02（LT-2 逐字、375×667 量測依 §7.23.4）；AC-23-02（LT-5、不含舊文字）；AC-38-08（標籤以外結構不變） | V-LGL-01～06、E-122、E-123 |
+| AC-23-07 行數量測 | — | 依 SD-FB-69 改用 Range 量測 | AC-23-07 (1)(6) |
+
+`tests/results/` 為歷史結果，不回改。`tests/e2e/` 沒有比對舊標題說明的斷言（已搜尋），也沒有使用 `.p5-heading-note` 的定位，模擬測驗既有 E2E 不受 2 行影響。
+
+**人工驗收**：沒有新增項目；AC-23-08 單獨出現的「常考」「必考」由 CT-26 與 QA 依判讀規則處理（現況 0 筆）。法律適當性不屬測試範圍（PRD R-25 風險 (3)）。
+
 ---
 
 ## 11. 技術風險與對策
@@ -3059,6 +3204,11 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | T-88 | （v0.11）程式或註解在其他位置寫出位址（例如註解中示範去空格形式、以 `replace` 產生複製用字串） | 防爬蟲失效（FB-62） | `contact-static.test.js` 掃描交付 HTML 與 `src/app/` 非測試原始碼；常數只允許 1 處；L-7 (3) 禁止字串處理 |
 | T-89 | （v0.11）`dist/` 再次被手動修改，或只建置 `--no-site`，使兩份 HTML 不同 | AC-36-07 不通過（QA BUG-004 重演） | FE-77 只以 `npm run build`（同時產生兩者）；doneWhen 比對 SHA-256；交付以建置產物為準（FB-61、SD-FB-67） |
 | T-90 | （v0.11）QA 既有 E2E（`e2e-pwa-update.mjs`、`e2e-version.mjs`）等待舊文字「有新版本，重新整理」／按鈕「重新整理」 | 下次 QA 輪次 E2E 誤判失敗 | 本次不跑 QA（使用者決定）；SD-FB-65 知會 QA 下次輪次先更新定位文字 |
+| T-91 | （v0.12）375px 標題說明超過 2 行、被裁切或造成水平捲軸（字型寬度因系統而異，PRD 估算未經實測） | AC-10-02、AC-40-02 不通過 | FE-79 依 §7.23.4 實測；不合格只能加換行屬性，不得縮字級或改文字；放大字級另測（E-123） |
+| T-92 | （v0.12）LT 文字改寫或漏字（全形括號、`®`、`＋`、`……`、「」容易打錯） | AC 逐字比對不通過、法律文字失準 | 從契約 L-8 複製；單元測試與 `legal-static.test.js` 逐字比對 |
+| T-93 | （v0.12）`brandStatement` 仍組出舊文字，或 `holder` 被一併移除，使 `derivedAttribution` 的署名缺漏 | AC-23-02 不通過 | §7.23.1 明定 `holder` 仍供署名；既有 `derivedAttribution` 測試保留；整頁斷言不含舊文字 |
+| T-94 | （v0.12）`tests/` 未更新就跑 QA，舊文字斷言誤判失敗（TC-06-01、TC-S06、TC-23-02c 等） | QA 誤判缺陷 | §10.9 列出檔案與行號；QA 先更新再跑；PG 不得代改 |
+| T-95 | （v0.12）只跑 `--no-site` 或手改 `dist/`，兩份 HTML 不同 | AC-36-07 不通過（同 T-89） | FE-79 只以 `npm run build`，並比對 SHA-256 |
 
 ---
 
@@ -3323,6 +3473,35 @@ FE-19 與 FE-18 的先後（v0.3）：**FE-19 在前**。理由：FE-18 的 done
 說明：(1) FE-77 是交付關卡：`npm test`、`npm run build`（兩次）全數成功並附檢查輸出。(2) 驗收由 PG 自測＋主控檢查（§10.8 H-1～H-4），不另跑 QA 輪次。(3) 完成後主控依既有流程 commit、push 到 `main`，workflow 自動部署；已安裝 1.1.0 舊 BUILD_ID 的使用者會看到舊程式內的「有新版本，重新整理」，更新後即為新文字（E-120）。(4) QA BUG-004 的狀態更新由主控處理（FE-77 回報可作為修正證據），SD 不改 `docs/04-qa/`。
 
 任務數（全專案）：pg-content 25（CT-01～CT-25）、pg-frontend 77（FE-01～FE-77），共 102 個；主控手動項目 MC-01～MC-04。
+
+### 12.11 v0.12 增量任務與執行批次（PRD v0.17、契約 v0.17）
+
+既有 102 個任務全部 `done`，內容與 status 不變。依 DS-41、DS-42 新增 3 個任務；`tasks.json` 中已完成任務的舊文字不回改（PRD R-25）。本版須人類核准才能開工，不適用主控代核。
+
+| ID | 標題 | owner | 批次 | dependsOn | paths |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| CT-26 | `p5-009` 解析改為 LT-6 | pg-content | v0.12-1 | CT-25（已 done） | `src/data/part5.js`、`src/data/_records/CT-26.md` |
+| FE-78 | 前端文字 LT-1～LT-5、HTML 開頭註解、固定舊文字的單元測試 | pg-frontend | v0.12-1 | FE-77（已 done） | `views/flashcards.js`、`views/part5.js`、`views/sources-page.js`、`license-header.txt`、`styles/40-part5.css`（只改註解）、`__tests__/flashcards.test.js`、`__tests__/naming.test.js`、`__tests__/sources-page.test.js`、`__tests__/build.test.js` |
+| FE-79 | 權利文字靜態檢查、375px 實測、重新建置 `dist/` | pg-frontend | v0.12-2 | CT-26、FE-78 | `__tests__/legal-static.test.js`（新）、`styles/40-part5.css`（只在實測不合格時）、`dist/english-master-track.html`、`dist/site/` 下 8 檔 |
+
+（FE 任務的 paths 省略前綴 `src/app/`，`dist/` 除外。）
+
+| 批次 | 任務 | 前置 | 共用檔案檢查 |
+| :--- | :--- | :--- | :--- |
+| v0.12 第 1 批 | CT-26、FE-78（可平行） | 無待執行前置 | paths 不重疊 |
+| v0.12 第 2 批 | FE-79 | CT-26、FE-78 | `40-part5.css` 與 FE-78 分屬不同批次（D-17） |
+| 收尾（主控） | MC-05：移除 `sources/pwa/README.md:5` 的「待 PRD 修訂」字樣 | 核准後任何時間 | 不影響建置，不阻擋 PG 任務 |
+
+**PG 不得越界的目錄**
+
+| 代理 | 可寫 | 不得寫入 |
+| :--- | :--- | :--- |
+| pg-content（CT-26） | 只有上表 paths | `src/app/`、`src/data/_tools/`、`_records/part5-ids.json`、其他資料檔、`tests/`、`docs/`、`dist/`、`tools/`、`package.json` |
+| pg-frontend（FE-78、FE-79） | 只有上表 paths | `src/data/`、`tests/`、`docs/`、`tools/`、`package.json`；FE-78 不得寫 `dist/` |
+
+說明：(1) FE-79 是交付關卡，必須最後執行，否則 `dist/` 不含 CT-26 的修改。(2) `tests/`、`docs/04-qa/` 的舊文字由 QA 更新（§10.9）。(3) 本次由主控或人類 commit，SD 與 PG 不 commit。
+
+任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 79（FE-01～FE-79），共 105 個；主控手動項目 MC-01～MC-05。
 
 ---
 
@@ -3889,6 +4068,29 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 
 **回歸**：AC-23-02（聲明 4 條與原創內容來源不變）、AC-36-01、AC-36-02、AC-36-07（兩份 HTML 相同，BUG-004）、AC-19-01、AC-21-01 (a)（無新增請求）、AC-27-03（不被底部導覽遮住）、AC-38-01、AC-38-04 由 FE-77 的既有與新增測試、建置檢查涵蓋。其餘 287 個應驗收 AC 的對照與 §13～§13.7 相同；**288 個應驗收 AC 全部至少有 1 個任務涵蓋**。
 
+### 13.9 v0.12 追加對照（PRD v0.17：316 個 AC，本版應驗收 289 個）
+
+**新增 AC（1）**
+
+| AC | 任務 | 設計 | 驗證 |
+| :--- | :--- | :--- | :--- |
+| AC-23-08 | CT-26（資料）、FE-78（畫面文字）、FE-79（靜態檢查） | §7.23.1、§7.23.3 | CT-26 自驗 V-LGL-05 (a)、V-LGL-06；`legal-static.test.js`；QA 新增 TC（§10.9） |
+
+**v0.17 修改的 AC（6，追加任務）**
+
+| AC | 修改重點 | 追加任務 | 驗證 |
+| :--- | :--- | :--- | :--- |
+| AC-06-01 | 搭配詞標籤 = LT-1 | FE-78、FE-79 | `flashcards.test.js`；`dist/` 字串檢查；FE-79 實測；QA TC-06-01、TC-D06 |
+| AC-10-02 | 標題說明 = LT-2；375px 可換行，不裁切、無水平捲軸 | FE-78、FE-79 | `naming.test.js`；`legal-static.test.js`；§7.23.4 實測 |
+| AC-23-02 | LT-3、LT-4、LT-5；不再出現舊文字 | FE-78、FE-79 | `sources-page.test.js`；FE-79 實測；QA TC-23-02c |
+| AC-23-06 | HTML 開頭註解拆句、LT-3、LT-4；不再出現舊文字 | FE-78、FE-79 | `build.test.js`；`legal-static.test.js`；QA TC-S06 |
+| AC-38-08 | 標籤文字依 AC-06-01，不視為差異；其他結構不變 | FE-78、FE-79 | `flashcards.test.js` 既有案例；FE-78 diff 檢查 |
+| AC-38-10 | 開頭註解與品牌聲明依 AC-23-02、AC-23-06；其他不變項不動 | FE-78、FE-79 | `build.test.js`；`legal-static.test.js`；QA `e2e-layout.mjs` |
+
+**邊界情況**：E-121（舊版 PWA 更新前顯示舊文字）屬預期，不需任務；E-122（使用者內容含「多益常考」）不過濾，程式不改；E-123（換行）→ FE-79 實測。
+
+**回歸**：AC-20-01、AC-40-02（FE-79 實測）；AC-23-07（聯絡行不變，`contact-static.test.js` 照常；FE-79 回報行數）；AC-19-01、AC-21-01、AC-36-01、AC-36-07、AC-42-04（FE-79 建置檢查）。其餘 282 個應驗收 AC 的對照與 §13～§13.8 相同；**289 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。
+
 ---
 
 ## 14. 回應契約 §9 指名 SD 的回饋
@@ -3950,6 +4152,10 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | DS-38（v0.10） | 主控手動項目 MC-04（FE-76 之前）；建置與測試不改 | §5.5、§7.21.7 |
 | DS-39（v0.10） | 同意範圍；另加選擇性的 CT-25。持久化結構變更已由人類於契約 v0.15 核准，tasks.json v0.9 仍需人類核准後才開工（CLAUDE.md） | §12.9 |
 | DS-40（v0.16） | 同意範圍，建立 1 個任務 FE-77：(1) `PWA_TEXTS` 改值（§7.22.1）；(2) 聯絡行為 `.src-page` 最後一個子元素、`textContent` 寫入、`src-muted src-contact`（§7.22.2）；(3) 靜態檢查放在新測試檔 `contact-static.test.js`（交付 HTML 不含 `mailto:`、去空格位址、舊文字，含常數原值），**不改** `tools/build.mjs`（§5.6）；(4) FE-77 以 `npm run build` 取代手改 `dist/`；版本 1.1.0 不變 | §5.6、§7.22、§10.8、FE-77 |
+| DS-41（v0.17） | 同意範圍，拆為 FE-78（LT-1～LT-5、開頭註解、測試）與 FE-79（靜態檢查、實測、重新建置）；`package.json`、AC-23-07、ECDICT 音標標示不改 | §5.7、§7.23.1、§7.23.2、§10.9 |
+| DS-42（v0.17） | 同意範圍，列 1 個任務 CT-26，自驗 V-P5-08、V-LGL-05、V-LGL-06；`p5-103` 不改 | §7.23.3 |
+| FB-63（v0.17，知會） | 依 V-LGL-05 定案的分句符號實作 `legal-static.test.js`；現有 `scenarioZh`「入門：最高頻的生活基礎字彙」不算命中 | §10.9 |
+| FB-64（v0.17，知會） | 依契約，其他程式註解不算違反；SD 另一併改寫 4 處註解，讓 FE-79 能直接對整份 HTML 搜尋，判定標準比契約嚴格但結果相容 | §7.23.1、§10.9 |
 | FB-61、FB-62（v0.16，知會） | FB-61：交付以建置產物為準，FE-77 重新建置並比對兩份 HTML 相同（T-89、SD-FB-67）；FB-62：檢查範圍擴及 `src/app/` 非測試原始碼與 `sw.js`，測試以執行期推導去空格位址，原始碼不寫字面值（§7.22.2 防爬蟲表、T-88） | §7.22.2、§10.8 |
 | FB-54～FB-60（v0.15，知會） | 依契約定案實作：FB-54 同生效色級套用位置不變（`appliedGoalState`）；FB-55 其後無未答對 → 進結算（`normalizeOnly`）；FB-56 兩個選擇本輪歸 0（`replayKeepRecords`、`clearAndRestart`）；FB-57 列 T-80、SD-FB-63；FB-58 不列入 CI-2（`reinit` 不改）；FB-59 `flashcardPosition: null` 合法（`migrate-v3.test.js` 有案例）；FB-60 清除寫入失敗依 WR-2（`commitWrite`） | §7.21 |
 | FB-50～FB-53（v0.14，知會） | FB-50 已由主控修正 PRD；FB-51 依 HT-7 (b) 定案（不顯示領域名稱，SD-FB-51）；FB-52 文字見 DS-27；FB-53 依 VR-4 實作（只讀 `version` 一欄，不把 `package.json` 整檔納入雜湊） | §5.4、§7.20.2 |
@@ -4028,6 +4234,10 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | SD-FB-65 | （v0.11）QA 既有資產仍寫舊文字：`tests/e2e/e2e-pwa-update.mjs`、`tests/e2e/e2e-version.mjs`（以及 `e2e-firstrun.mjs`、`e2e-reinit.mjs`、`e2e-mic.mjs` 中的「重新整理」字樣需逐一確認是否為按鈕定位）、`tests/tools/tc-desc.json`、`docs/04-qa/test-plan.md` TC-36-03c、TC-42-04d、TC-VER-H3、TC-TRK-H1 的期望文字 | QA、主控 | 待辦（知會） | 本次使用者決定不跑 QA；下次 QA 輪次先把定位與期望文字改為「有新版本，請更新版本」「更新版本」，並新增 AC-23-07 的 TC |
 | SD-FB-66 | （v0.11）`services/pwa.js`、`pwa/sw.template.js` 的註解仍寫「按『重新整理』」（UP-4 舊稱）。不影響行為與 AC（交付 HTML 的靜態檢查只禁止完整舊提示句「有新版本，重新整理」），且改 `sw.template.js` 只會讓 `sw.js` 多一個無意義差異，因此不納入 FE-77 | 主控 | 待辦（知會） | 下次有任務修改這兩個檔案時順帶更新註解 |
 | SD-FB-67 | （v0.11，契約 FB-61、QA BUG-004）R-24 起因是人類直接改 `dist/`；`dist/` 是建置產物，下次建置會被覆寫，且手改會造成交付檔與部署版不一致 | 人類、主控 | 待辦（知會） | 日後文字調整請改需求（PRD）或請主控派任務改 `src/app/` 後重建；主控以 FE-77 回報確認 BUG-004 可結案 |
+| SD-FB-68 | （v0.12）R-25 列出 QA 需更新的測試，但沒有決定本次是否跑 QA 輪次（v0.11 由使用者決定不跑）。本版新增 AC-23-08，也修改 AC-23-06 等法律文字；`tests/` 未更新前，E2E 與靜態檢查會有預期失敗（§10.9） | 人類、主控 | 待決定 | SD 建議本次跑**針對性 QA**：先更新 §10.9 列出的項目，再跑相關套件與新 TC；若不跑，驗收由 FE-79 與主控 M-1～M-3 擔任，§10.9 的 QA 項目留待下次輪次 |
+| SD-FB-69 | （v0.12）SD 自身修正：§10.8 的 FE-77 量測與主控 H-2 以 `.src-contact` 的 `getClientRects().length === 1` 判定「1 行」，但 `p` 為 block 元素，結果恆為 1，**無法證明沒有折行**；因此 AC-23-07 (1)(6) 的 375px 1 行可能未被有效驗證 | QA、主控 | 待辦（知會） | FE-79 改以 Range 量測並回報 `.src-contact` 行數（§7.23.4）；若不是 1 行，由主控依 BUG 流程處理，不在本版任務修改（AC-23-07 不動）。§10.8 保留原文作為歷史 |
+| SD-FB-70 | （v0.12）PRD R-25 的 QA 回饋清單沒有列 `docs/04-qa/test-plan.md` TC-S06（第 684 行仍是舊的合併聲明），也沒有列 `tests/tools/tc-desc.json:160` | PM、QA | 待辦（知會） | 不需改 PRD；已列入 §10.9 |
+| SD-FB-71 | （v0.12）R-25 指名 SD 修訂的 architecture.md 行號中，現行設計敘述已就地標註（原第 208、267、588、1414、1931、2234、2632 行）；原第 2760、3198、3705、3706 行屬 v0.7 已完成任務的歷史紀錄，只以 v0.12 導讀的改讀規則處理，不逐字回改 | PM、QA | 待辦（知會） | 不需改 PRD；現行文字以 §7.23 與契約 L-8 為準 |
 
 ---
 
@@ -4048,3 +4258,4 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | 0.9 | 2026-11-03 | sd-agent | 修訂已核准的 v0.8（JimmyLin 核准），原因：PRD v0.13（AC-38-01 標題列圖示例外）與 v0.14（approved，JimmyLin，2026-11-03；R-22：US-42 網站版本號、US-43 隱藏領域範本、AC-01-08 狀態列只顯示生效色級、AC-39-04 目標行與「變更」按鈕、修改 13 條、暫停 AC-05-01～05、Q-58～Q-62）、契約 v0.14（三檔 approved，主控代核；§12 VR-1～VR-9、LS-1～LS-5、V-VER-01～06、V-LAY-09～10、§5.8 HT-6～HT-9、data-schema §14、§9.7 DS-26～DS-31、FB-50～FB-53）、`package.json` `version` 1.0.0（Q-62）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §1 新增 4 列；§2 新模組層別 `core/version.js`（L1，建置共用）、`ui/version-line.js`（L4）；§3 檔案異動表與 D-14；(2) §4.9 模組介面（`core.version`、`ui.versionLine`、`layout.goalLineText`／`levelStatusText`、dashboard／customizer／custom-vocab 變更）；(3) §5.4 建置 B-17～B-19：佔位 `@@APP_VERSION@@`、讀 `package.json` `version` 並以 `APP_VERSION_PATTERN` 驗證、寫入後才算 BUILD_ID、產物無 `@@` 殘留、`--package` 參數、三情境；§6.5 大小（約 +3 KB）；(4) 新增 §7.20：頁尾版本行（DOM、讀取時機、異常值、對比、底部遮擋與 AC-41-04 確認不需新留白）、隱藏範本區與 DS-27 文字定案（範本單字只標「自訂擴充」）、狀態列一行、目標行與「變更」外框按鈕、效能與無障礙；(5) §10.5 註記 SD-FB-39 結案；新增 §10.6 單元／E2E 分工；(6) §11 新增 T-67～T-74；(7) §12.8 新任務 FE-63～FE-69 與 3 個批次；(8) §13.6 新增 8 個 AC、修改 13 個 AC 對照（應驗收 251 個全部涵蓋）；(9) §14 回應 DS-26～DS-31、FB-50～FB-53；§15 新增 SD-FB-50～SD-FB-56。tasks.json 同步升為 v0.8（只新增 FE-63～FE-69，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）、不改 `src/data/` |
 | 0.10 | 2026-11-04 | sd-agent | 修訂已核准的 v0.9（JimmyLin 核准），原因：PRD v0.15（approved，JimmyLin，2026-11-04；R-23：US-44 單字卡記住位置、US-45 模擬測驗答對紀錄、US-46 只練沒答對的題目、US-47 保存與相容，AC-44-01～AC-47-08 共 36 條，修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71）與契約 v0.15（三檔 approved，Q-63 持久化結構變更由人類核准；`schemaVersion` 2 → 3、C-8、MG-5～MG-8、RD-3、RD-4、FP-1～FP-9、CR-1～CR-9、UO-1～UO-9、WR-1～WR-5、IM-9、IM-10、V-P5-08、V-ST-18～V-ST-22、CI-4／CI-5／CI-8 修改、data-schema §15、§9.8 DS-32～DS-39、FB-54～FB-60）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首加註 C-8 改讀規則與 v0.10 導讀；§1 新增 5 列；§2 新模組層別 `core/position.js`、`core/part5flow.js`（皆 L1）與資料流；§3 檔案異動表、不改清單與 D-15；(2) 新增 §4.10 模組介面（position、part5flow、layout、constants、persist、backup、reinit、store 新增與修改 action、`commitWrite`、`placeCard`、part5 view）；(3) 新增 §5.5（建置不改、順序限制）、§6.6（約 +28 KB、localStorage < 3 KB）；(4) 新增 §7.21：v2 → v3 讀取與匯入流程、測試樣本來源與產生方式、既有測試 `schemaVersion` 2 位置表（DS-32）；單字卡位置掛點表、不變式 INV-FP、取代舊定位邏輯的等價性（DS-33）；模擬測驗狀態轉移表與邊界保證（DS-34）；畫面文字定稿（全部答對說明句、確認對話框標題與內文）、DOM 結構、樣式、互動與焦點（DS-35）；`commitWrite` 與容量不足提示收斂（DS-36）；V-P5-08 快照檢查（DS-37）；版本 1.1.0（DS-38）；效能與無障礙；(5) 新增 §10.7 單元／E2E／人工驗收分工；(6) §11 新增 T-75～T-86；(7) 新增 §12.9 任務 FE-70～FE-76、CT-25、MC-04 與 5 個批次；(8) 新增 §13.7 對照（應驗收 287 個 AC 全部涵蓋）；(9) §14 回應 DS-32～DS-39、FB-54～FB-60；§15 新增 SD-FB-57～SD-FB-64。tasks.json 同步升為 v0.9（只新增任務，既有任務不變）。不改 PRD、不改契約；`src/data/` 資料檔不改（CT-25 只改 `_tools/`、`_records/`） |
 | 0.11 | 2026-11-04 | sd-agent | 修訂已核准的 v0.10（JimmyLin 授權、主控代填），原因：PRD v0.16（approved，JimmyLin，2026-11-04；R-24：人類手改產物後決定併入 1.1.0——更新提示文字改為「有新版本，請更新版本」／「更新版本」、「資料來源與授權」頁新增 1 行聯絡 email；新增 AC-23-07，修改 AC-36-03、AC-42-04 文字，E-118～E-120）與契約 v0.16（三檔 approved，主控代核：`PWA_TEXTS` 新文字、`SOURCES_CONTACT_TEXT`、L-7、DS-40、FB-61、FB-62）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件與 v0.11 導讀（含舊提示文字的改讀規則）；§1 新增 3 列；§3 新增 D-16；(2) 新增 §5.6（不改建置程式、靜態檢查放測試、重新建置取代手改 `dist/`、版本 1.1.0）；(3) 新增 §7.22：提示文字修改點與不改清單、聯絡行常數位置、DOM 位置、非連結與不可聚焦、樣式與字級理由（0.8125rem，備援 0.75rem）、防爬蟲靜態規則；(4) 新增 §10.8：單元測試、建置與交付檢查、可選量測、主控檢查 H-1～H-4（使用者決定本次不跑 QA）；(5) §11 新增 T-87～T-90；(6) 新增 §12.10 任務 FE-77 與 1 個批次；(7) 新增 §13.8 對照（應驗收 288 個 AC 全部涵蓋）；(8) §14 回應 DS-40、FB-61、FB-62；§15 新增 SD-FB-65～SD-FB-67。tasks.json 同步升為 v0.10（只新增 FE-77，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3）、不改 `src/data/`、不改 `package.json` |
+| 0.12 | 2026-11-04 | sd-agent | 修訂已核准的 v0.11（JimmyLin 授權、主控代填），原因：PRD v0.17（approved，JimmyLin，2026-11-04；R-25：權利與商標文字修訂；新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）與契約 v0.17（`README.md`、`data-schema.ts` approved，主控代核：L-8、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空，須人類核准，不代核。增量內容：(1) 文首上游、搭配文件、v0.12 導讀與舊文字改讀規則；§1 新增 3 列；§3 新增 D-17 並更新 2 個檔案註記；(2) 就地標註舊標題說明與品牌標識聲明段落（§4.7、§7.13、§7.19.6、§7.21.4、§10.1）；(3) 新增 §5.7（不改建置程式、版本 1.1.0）；(4) 新增 §7.23：畫面文字修改點、HTML 開頭註解結構、`p5-009`、375px 預期 2 行與實測方法；(5) 新增 §10.9：單元測試、`legal-static.test.js`、交付檢查、主控檢查 M-1～M-3、給 QA 的項目；(6) §11 新增 T-91～T-95；(7) 新增 §12.11 任務 CT-26、FE-78、FE-79、MC-05 與批次；(8) 新增 §13.9 對照（應驗收 289 個 AC 全部涵蓋）；(9) §14 回應 DS-41、DS-42、FB-63、FB-64；§15 新增 SD-FB-68～SD-FB-71。tasks.json 同步升為 v0.11（只新增任務，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3）、不改 `package.json`、`p5-103`、頁尾與 AC-23-07；不新增外部資源 |

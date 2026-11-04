@@ -1,7 +1,7 @@
 /**
  * ---
  * doc: CONTRACT-SCHEMA
- * version: 0.16
+ * version: 0.17
  * status: approved
  * author: sa-agent
  * approved_by: JimmyLin（授權主控代核）
@@ -11,7 +11,11 @@
  * English Master Track — 資料契約（型別定義）
  *（專案代號仍為 English Master Track；v0.12 起 App 內顯示名稱為「EnglishContext」，見 §13 APP_DISPLAY_NAME 與 FROZEN_IDENTIFIERS。）
  *
- * 上游：docs/01-PRD.md v0.16（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-24 為準。
+ * 上游：docs/01-PRD.md v0.17（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-25 為準。
+ * v0.17（PRD R-25：模擬測驗標題說明、TOEIC® 商標聲明、單字卡搭配詞標籤、p5-009 解析、原創內容聲明、圖示與名稱聲明；
+ *   修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，新增 AC-23-08）**只修訂註解**，
+ *   不新增型別與常數、不改任何常數值；不改持久化結構（schemaVersion 維持 3，PersistedData 12 欄不變）。
+ *   固定文字集中於 README §4.3 L-8（LT-1～LT-6），驗證見 README §7.8 V-LGL。storage-schema.json 未修改，維持 v0.16。
  * v0.16（PRD R-24：AC-36-03／AC-42-04 更新提示文字、新增 AC-23-07 資料來源頁聯絡 email）**只做文字層級修訂**，
  *   不改持久化結構（schemaVersion 維持 3，PersistedData 12 欄不變）：PWA_TEXTS.updateNotice／updateButton 改值；
  *   新增 §16 SOURCES_CONTACT_TEXT（README §4.3 L-7）。
@@ -172,6 +176,11 @@
  * |      |            |          |     PwaPageToSwMessage、PwaRuntimeState.reloadRequested 註解同步（行為不變，Q-43 決議 A）。
  * |      |            |          | (2) 契約原本沒有「資料來源與授權」頁的固定文字常數，新增 §16 SOURCES_CONTACT_TEXT（README §4.3 L-7）。
  * |      |            |          | 型別數 69 不變；契約常數 41 → 42；localStorage 鍵數 2 不變；schemaVersion 維持 3，不需遷移；src/data/ 不變。 |
+ * | 0.17 | 2026-11-04 | sa-agent | 修訂已核准的 v0.16（主控代核），原因：PRD v0.17 R-25（JimmyLin 2026-11-04 核准）的文字修訂。status 改為 draft、
+ * |      |            |          | 核准欄位清空。**只改註解**：ProjectLicenseInfo 與 copyrightHolder（只供 MIT 聲明與署名，不再組「著作權人」文字）、
+ * |      |            |          | BuiltinVocabItem.collocation（標籤「常用搭配詞」）、§5 標題與 PART5_QUESTION_BANK（「題型參考 TOEIC®（多益）Part 5」）、
+ * |      |            |          | Part5Explanation.coreStrategy（AC-23-08）、TAB_LABELS（模擬測驗標題說明由「可註明」改為逐字顯示）。
+ * |      |            |          | 型別數 69、契約常數 42、localStorage 鍵數 2 皆不變；schemaVersion 維持 3，不需遷移；內容資料檔格式不變。 |
  */
 
 // ════════════════════════════════════════════════════════════════════
@@ -424,10 +433,15 @@ export interface VocabManifest {
 
 /**
  * 專案授權資訊。對應：AC-23-02、AC-23-06、Q-31、R-06。
- * 聲明文字由 pg-frontend 依 AC-23-02 原文組字；本物件只提供數值。
+ * 聲明文字由 pg-frontend 依 AC-23-02、AC-23-06 原文組字；本物件只提供數值。
+ * （v0.17，R-25 五、六）原創內容聲明、圖示與名稱聲明的現行文字見 README §4.3 L-8（LT-3、LT-4），組字結果須逐字相同。
  */
 export interface ProjectLicenseInfo {
-  /** 必填。著作權人，固定 "JimmyLin"（Q-31）。 */
+  /**
+   * 必填。MIT 聲明的著作權人，固定 "JimmyLin"（Q-31）。
+   * （v0.17，R-25）本欄仍供 MIT 聲明（Copyright JimmyLin）與衍生資料署名使用；
+   *   畫面與 HTML 開頭註解不得再組出「著作權人 JimmyLin」「原創內容著作權人 JimmyLin」「保留所有權利」（AC-23-02、AC-23-06）。
+   */
   copyrightHolder: "JimmyLin";
   /** 必填。MIT 聲明年份（R-06(5)：交付年份）。例：2026。 */
   copyrightYear: number;
@@ -512,7 +526,7 @@ export interface BuiltinVocabItem {
    * 不得含「例項」（V-VOC-15）。ECDICT 原檔錯字（決竅→訣竅、遭透→糟透）依原意更正，meaningSource 維持 "ECDICT"（M-2）。
    */
   meaning: string;
-  /** 必填，非空。多益常考搭配詞（卡片正面，AC-06-01）。原創。例："address the issue；mailing address"。 */
+  /** 必填，非空。搭配詞（卡片正面，欄位標籤逐字為「常用搭配詞」，AC-06-01，v0.17，R-25 三）。原創。例："address the issue；mailing address"。 */
   collocation: string;
   /**
    * 必填（鍵必須存在），值可為 ""。學術文獻應用情境（卡片背面，AC-06-02）。原創。
@@ -593,7 +607,7 @@ export interface DomainTemplate {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// §5 模擬測驗題庫（題型對應多益 Part 5；識別字沿用 part5／Part5*，R-15）— 提供者：pg-content（src/data/part5.js）
+// §5 模擬測驗題庫（題型參考 TOEIC®（多益）Part 5；識別字沿用 part5／Part5*，R-15）— 提供者：pg-content（src/data/part5.js）
 //    全域變數：window.PART5_QUESTION_BANK（Part5Question[]）
 // ════════════════════════════════════════════════════════════════════
 
@@ -620,7 +634,10 @@ export type OptionIndex = 0 | 1 | 2 | 3;
 
 /** Part 5 解析。對應：FR-3.2、AC-11-02。 */
 export interface Part5Explanation {
-  /** 必填，非空。「解題核心思路」（繁中，可夾英文）。 */
+  /**
+   * 必填，非空。「解題核心思路」（繁中，可夾英文）。
+   * （v0.17，R-25 四）不得宣稱「多益常考」「多益最常見」等無佐證說法（AC-23-08、README V-LGL-05）；p5-009 的值見 README LT-6。
+   */
   coreStrategy: string;
   /** 必填，非空。「句型語法拆解（S + V + O + 修飾語）」。例："S: The manager / V: approved / O: the budget / 修飾語: despite the delay"。 */
   structure: string;
@@ -1182,7 +1199,8 @@ export type TabId = "dashboard" | "customizer" | "flashcards" | "part5" | "decod
 
 /**
  * 頁面畫面名稱（契約常數，v0.8 依 PRD R-15、AC-20-03、AC-10-02、AC-23-02）。
- * 導覽、頁面標題一律使用此文字。模擬測驗頁說明可另註「題型對應多益 Part 5」（AC-10-02）。
+ * 導覽、頁面標題一律使用此文字。
+ * （v0.17，R-25 一）模擬測驗頁必須顯示標題說明，逐字為「題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容」（AC-10-02、README LT-2）。
  * （v0.12，Q-50 決議 A）主控台不再有模組入口；主控台頁面標題為 LAYOUT_TEXTS.dashboardTitle「學習主控台」（AC-39-01），
  *   導覽項文字仍為 dashboard「主控台」。
  * （v0.9）decoder、phrasebank 的文字保留供未來開放使用；本版畫面任何導覽、入口、標題都不得顯示這兩項（AC-20-04、HT-4）。
@@ -1397,7 +1415,7 @@ declare global {
     PROJECT_LICENSE?: ProjectLicenseInfo;
     /** src/data/templates.js，領域範本，恰好 3 筆。（v0.14）畫面入口隱藏，但照常載入、打包，不得刪除此全域變數（README HT-8）。 */
     DOMAIN_TEMPLATES?: DomainTemplate[];
-    /** src/data/part5.js，模擬測驗題庫（題型對應多益 Part 5），至少 200 題（每題型至少 50）。 */
+    /** src/data/part5.js，模擬測驗題庫（題型參考 TOEIC®（多益）Part 5），至少 200 題（每題型至少 50）。 */
     PART5_QUESTION_BANK?: Part5Question[];
     /** src/data/decoder.js，長難句，至少 50 句。 */
     DECODER_SENTENCES?: DecoderSentence[];

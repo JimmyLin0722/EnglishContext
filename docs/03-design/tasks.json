@@ -1,13 +1,13 @@
 {
   "meta": {
     "doc": "TASKS",
-    "version": "0.10",
+    "version": "0.11",
     "status": "approved",
     "author": "sd-agent",
-    "approved_by": "JimmyLin（對話中授權「修正好測試沒問題就直接推」，主控代填欄位）",
+    "approved_by": "JimmyLin（對話中回覆「核准」，主控代填欄位）",
     "approved_at": "2026-11-04",
-    "upstream": "docs/01-PRD.md v0.16（approved，JimmyLin，2026-11-04；R-24）、docs/02-contract/ v0.16（README、data-schema.ts、storage-schema.json 三檔 approved，主控代核：PWA_TEXTS 新文字、SOURCES_CONTACT_TEXT、L-7、DS-40、FB-61、FB-62）、package.json version 維持 1.1.0、docs/03-design/architecture.md v0.11",
-    "changelog": "v0.10（2026-11-04，sd-agent）：修訂已核准的 v0.9（JimmyLin 授權、主控代填），原因：PRD v0.16（R-24：更新提示文字改為「有新版本，請更新版本」／按鈕「更新版本」、「資料來源與授權」頁新增 1 行聯絡 email；新增 AC-23-07，修改 AC-36-03、AC-42-04 文字，E-118～E-120）與契約 v0.16（PWA_TEXTS 新值、SOURCES_CONTACT_TEXT、L-7、§9.9 DS-40、FB-61、FB-62）。status 改為 in-review、核准欄位清空。依 DS-40 只新增 FE-77 共 1 個 pg-frontend 任務（status todo、retries 0、batch v0.11-1，dependsOn FE-76）；既有 101 個任務與 MC-01～MC-04 的內容、status、retries 皆未修改。不需 CT 任務（src/data/ 不變）、不需主控手動項目（package.json 維持 1.1.0）。使用者決定本次只改文字、不另跑 QA 輪次：FE-77 的驗收為 PG 自測＋主控檢查（architecture.md §10.8 H-1～H-4）。AC 對照見 architecture.md §13.8（應驗收 288 個 AC 全部涵蓋）。不改 PRD、不改契約、不改持久化結構（schemaVersion 3）。共 102 個任務：pg-content 25、pg-frontend 77。｜v0.9（2026-11-04，sd-agent）：修訂已核准的 v0.8（JimmyLin 核准），原因：PRD v0.15（R-23：US-44～US-47、AC-44-01～AC-47-08，修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71）與契約 v0.15（schemaVersion 2 → 3、C-8、MG-5～MG-8、RD-3、RD-4、FP-1～FP-9、CR-1～CR-9、UO-1～UO-9、WR-1～WR-5、IM-9、IM-10、V-P5-08、V-ST-18～V-ST-22、CI 修改、§9.8 DS-32～DS-39、FB-54～FB-60）。status 改為 in-review、核准欄位清空。只新增 FE-70～FE-76 共 7 個 pg-frontend 任務、CT-25 共 1 個 pg-content 任務（status todo、retries 0，batch v0.10-1～v0.10-5），以及主控手動項目 MC-04（package.json 1.1.0，FE-76 以 manualPrereqs 引用）；既有 93 個任務與 MC-01～MC-03 的內容、status、retries 皆未修改。批次：v0.10-1 FE-70、FE-71、FE-72、CT-25（＋MC-04）；v0.10-2 FE-73；v0.10-3 FE-74；v0.10-4 FE-75；v0.10-5 FE-76（architecture.md §12.9）。同批任務沒有共用 path；唯一被兩個 v0.10 任務修改的檔案 src/app/__tests__/store.test.js 由 FE-73 → FE-74 依序修改（D-15）。AC 對照見 architecture.md §13.7（應驗收 287 個 AC 全部涵蓋）。本版實作持久化結構變更（契約已由人類核准），不改 PRD、不改契約；src/data/ 資料檔不改（CT-25 只改 _tools/validate.mjs 與 _records/）。共 101 個任務：pg-content 25、pg-frontend 76。｜v0.8（2026-11-03，sd-agent）：修訂已核准的 v0.7（JimmyLin 核准），原因：PRD v0.14（R-22：US-42 網站版本號、US-43 隱藏領域範本、AC-01-08、AC-39-04 改寫等 13 條、暫停 AC-05-01～05、Q-58～Q-62）與契約 v0.14（§12 VR／LS／V-VER、§5.8 HT-6～HT-9、data-schema §14、§9.7 DS-26～DS-31）。status 改為 in-review、核准欄位清空。只新增 FE-63～FE-69 共 7 個 pg-frontend 任務（status todo、retries 0），新任務另加 batch 欄位（v0.9-1：FE-63、FE-65、FE-68；v0.9-2：FE-64、FE-66、FE-67；v0.9-3：FE-69）；既有 86 個任務的內容、status、retries 皆未修改。同批任務沒有共用 path，且本版每個檔案只屬於 1 個 v0.9 任務（architecture.md §3 D-14、§12.8）。不需 CT 任務（src/data/ 不改，DS-31）、不需主控手動項目。AC 對照見 architecture.md §13.6（應驗收 251 個 AC 全部涵蓋；AC-05-01～05 暫停）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 93 個任務：pg-content 24、pg-frontend 69。｜v0.7（2026-11-03，sd-agent）：修訂已核准的 v0.6（JimmyLin 核准），原因：PRD v0.12（R-21 版面與視覺、US-38～US-41、Q-49～Q-57；新增 27 條、修改 30 條 AC）與契約 v0.12（§11 NM／VC／DB／FT／MT／V-LAY、data-schema §13、§9.6 DS-19～DS-25）。status 改為 in-review、核准欄位清空。只新增 CT-24（pg-content，ORIGINAL fullName，DS-19）與 FE-54～FE-62 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 76 個任務的內容、status、retries 皆未修改。批次：第 1 批 CT-24、FE-54、FE-55、FE-56；第 2 批 FE-57～FE-61；第 3 批 FE-62（architecture.md §12.7）。同批任務沒有共用 path；core/pwa.js 與 __tests__/pwa-core.test.js 由 FE-56 → FE-58 依序修改（D-13）。AC 對照見 architecture.md §13.5（應驗收 248 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）；不需主控手動項目。共 86 個任務：pg-content 24、pg-frontend 62。｜v0.6（2026-11-02，sd-agent）：修訂已核准的 v0.5（JimmyLin 核准），原因：PRD v0.11（R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48；修改 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）與契約 v0.11（§10 PWA、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）。status 改為 in-review、核准欄位清空。只新增 FE-45～FE-53 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 67 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-18）。FE-45～FE-53 彼此沒有任何共用 path；FE-53 負責重新建置 dist/english-master-track.html 與部署目錄 dist/site/。新增頂層 manualSteps（MC-01 複製 ads.txt 到 sources/deploy/、MC-02 放置 4 張 PNG 到 src/app/assets/icons/、MC-03 修改 .github/workflows/static.yml），owner 為主控、不派給 PG；FE 任務以 manualPrereqs 引用（architecture.md §12.6、SD-FB-32）。批次見 architecture.md §12.6，AC 對照見 §13.4（應驗收 221 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 76 個任務：pg-content 23、pg-frontend 53。｜v0.5（2026-11-02，sd-agent）：修訂已核准的 v0.4（JimmyLin 核准），原因：PRD v0.10（R-19 只選色級不顯示分數、Q-39 預設 725、Q-40、AC-26-05、AC-26-06、AC-22-04 改寫、6 條分數輸入 AC 暫停）與契約 v0.10（§5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）。status 改為 in-review、核准欄位清空。只新增 FE-42～FE-44 共 3 個 pg-frontend 任務（status todo、retries 0），依序執行（FE-42 → FE-43 → FE-44）；既有 64 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-10）。FE-42～FE-44 彼此沒有任何共用 path；FE-44 負責重新建置 dist/。批次見 architecture.md §12.5，AC 對照見 §13.3（應驗收 192 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 67 個任務：pg-content 23、pg-frontend 44。｜v0.4（2026-11-02，sd-agent）：修訂已核准的 v0.3，原因：PRD v0.9（R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（§5.7、§5.8、§9.3 DS-01～DS-06）。status 改為 in-review、核准欄位清空。只新增 FE-34～FE-41 共 8 個 pg-frontend 任務（status todo、retries 0）；既有 56 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-06）。FE-34～FE-41 彼此沒有任何共用 path；FE-41 負責重新建置 dist/。批次見 architecture.md §12.4，AC 對照見 §13.2（應驗收 196 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 64 個任務：pg-content 23、pg-frontend 41。｜v0.3（2026-10-30，sd-agent）：依 PRD v0.8（R-15～R-17、US-25～US-31）與契約 v0.8 增量修訂；v0.2 已核准，依 CLAUDE.md 改回 draft、核准欄位清空。只新增 FE-20～FE-33 共 14 個 pg-frontend 任務（status todo、retries 0）；既有 42 個任務的內容、status、retries 皆未修改；src/data/ 不需改動，不新增 CT 任務。批次見 architecture.md §12.3，AC 對照見 §13.1。本版含持久化結構 schemaVersion 1 → 2 的實作任務（FE-22、FE-25），須由人類核准。共 56 個任務：pg-content 23、pg-frontend 33。 主控代核（2026-10-30）：持久化結構變更已由人類於契約 v0.8 核准，本版僅實作該契約，不改 PRD、不另改持久化結構；check_tasks 驗證新任務間無共用 paths（共用僅發生於與已 done 舊任務之間）。 主控代核（2026-11-02）：FE-41 paths 追加 src/app/__tests__/backup.test.js，修正因執行日期而失敗的既有測試（FE-34／FE-35 回報）；不改 PRD、不改持久化結構。 主控代核（2026-11-02）：FE-43 paths 追加 views/flashcards.js、__tests__/flashcards.test.js，改寫單字卡空狀態提示（人類決議，AC-06-06 未規定文字，不改 PRD）。",
+    "upstream": "docs/01-PRD.md v0.17（approved，JimmyLin，2026-11-04；R-25）、docs/02-contract/ README.md 與 data-schema.ts v0.17（approved，主控代核：L-8、§7.8 V-LGL、DS-41、DS-42、FB-63、FB-64）、storage-schema.json 維持 v0.16（無實質變動）、package.json version 維持 1.1.0（Q-74 決議 B）、docs/03-design/architecture.md v0.12",
+    "changelog": "v0.11（2026-11-04，sd-agent）：修訂已核准的 v0.10（JimmyLin 授權、主控代填），原因：PRD v0.17（R-25：權利與商標文字修訂；新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）與契約 v0.17（L-8 LT-1～LT-6、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64）。status 改為 in-review、核准欄位清空，本版須人類核准，不代核。只新增 CT-26（pg-content）、FE-78、FE-79（pg-frontend）共 3 個任務（status todo、retries 0）與主控手動項目 MC-05；既有 102 個任務與 MC-01～MC-04 的內容、status、retries 皆未修改。批次：v0.12-1 CT-26、FE-78（可平行，paths 不重疊）；v0.12-2 FE-79（dependsOn CT-26、FE-78）。40-part5.css 由 FE-78 → FE-79 依序修改（D-17）。tests/ 與 docs/04-qa/ 的舊文字不派給 PG，列給 QA（architecture.md §10.9）。AC 對照見 architecture.md §13.9（應驗收 289 個 AC 全部涵蓋）。不改 PRD、不改契約、不改持久化結構（schemaVersion 3）、不改 package.json、p5-103、頁尾與 AC-23-07。共 105 個任務：pg-content 26、pg-frontend 79。｜v0.10（2026-11-04，sd-agent）：修訂已核准的 v0.9（JimmyLin 授權、主控代填），原因：PRD v0.16（R-24：更新提示文字改為「有新版本，請更新版本」／按鈕「更新版本」、「資料來源與授權」頁新增 1 行聯絡 email；新增 AC-23-07，修改 AC-36-03、AC-42-04 文字，E-118～E-120）與契約 v0.16（PWA_TEXTS 新值、SOURCES_CONTACT_TEXT、L-7、§9.9 DS-40、FB-61、FB-62）。status 改為 in-review、核准欄位清空。依 DS-40 只新增 FE-77 共 1 個 pg-frontend 任務（status todo、retries 0、batch v0.11-1，dependsOn FE-76）；既有 101 個任務與 MC-01～MC-04 的內容、status、retries 皆未修改。不需 CT 任務（src/data/ 不變）、不需主控手動項目（package.json 維持 1.1.0）。使用者決定本次只改文字、不另跑 QA 輪次：FE-77 的驗收為 PG 自測＋主控檢查（architecture.md §10.8 H-1～H-4）。AC 對照見 architecture.md §13.8（應驗收 288 個 AC 全部涵蓋）。不改 PRD、不改契約、不改持久化結構（schemaVersion 3）。共 102 個任務：pg-content 25、pg-frontend 77。｜v0.9（2026-11-04，sd-agent）：修訂已核准的 v0.8（JimmyLin 核准），原因：PRD v0.15（R-23：US-44～US-47、AC-44-01～AC-47-08，修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71）與契約 v0.15（schemaVersion 2 → 3、C-8、MG-5～MG-8、RD-3、RD-4、FP-1～FP-9、CR-1～CR-9、UO-1～UO-9、WR-1～WR-5、IM-9、IM-10、V-P5-08、V-ST-18～V-ST-22、CI 修改、§9.8 DS-32～DS-39、FB-54～FB-60）。status 改為 in-review、核准欄位清空。只新增 FE-70～FE-76 共 7 個 pg-frontend 任務、CT-25 共 1 個 pg-content 任務（status todo、retries 0，batch v0.10-1～v0.10-5），以及主控手動項目 MC-04（package.json 1.1.0，FE-76 以 manualPrereqs 引用）；既有 93 個任務與 MC-01～MC-03 的內容、status、retries 皆未修改。批次：v0.10-1 FE-70、FE-71、FE-72、CT-25（＋MC-04）；v0.10-2 FE-73；v0.10-3 FE-74；v0.10-4 FE-75；v0.10-5 FE-76（architecture.md §12.9）。同批任務沒有共用 path；唯一被兩個 v0.10 任務修改的檔案 src/app/__tests__/store.test.js 由 FE-73 → FE-74 依序修改（D-15）。AC 對照見 architecture.md §13.7（應驗收 287 個 AC 全部涵蓋）。本版實作持久化結構變更（契約已由人類核准），不改 PRD、不改契約；src/data/ 資料檔不改（CT-25 只改 _tools/validate.mjs 與 _records/）。共 101 個任務：pg-content 25、pg-frontend 76。｜v0.8（2026-11-03，sd-agent）：修訂已核准的 v0.7（JimmyLin 核准），原因：PRD v0.14（R-22：US-42 網站版本號、US-43 隱藏領域範本、AC-01-08、AC-39-04 改寫等 13 條、暫停 AC-05-01～05、Q-58～Q-62）與契約 v0.14（§12 VR／LS／V-VER、§5.8 HT-6～HT-9、data-schema §14、§9.7 DS-26～DS-31）。status 改為 in-review、核准欄位清空。只新增 FE-63～FE-69 共 7 個 pg-frontend 任務（status todo、retries 0），新任務另加 batch 欄位（v0.9-1：FE-63、FE-65、FE-68；v0.9-2：FE-64、FE-66、FE-67；v0.9-3：FE-69）；既有 86 個任務的內容、status、retries 皆未修改。同批任務沒有共用 path，且本版每個檔案只屬於 1 個 v0.9 任務（architecture.md §3 D-14、§12.8）。不需 CT 任務（src/data/ 不改，DS-31）、不需主控手動項目。AC 對照見 architecture.md §13.6（應驗收 251 個 AC 全部涵蓋；AC-05-01～05 暫停）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 93 個任務：pg-content 24、pg-frontend 69。｜v0.7（2026-11-03，sd-agent）：修訂已核准的 v0.6（JimmyLin 核准），原因：PRD v0.12（R-21 版面與視覺、US-38～US-41、Q-49～Q-57；新增 27 條、修改 30 條 AC）與契約 v0.12（§11 NM／VC／DB／FT／MT／V-LAY、data-schema §13、§9.6 DS-19～DS-25）。status 改為 in-review、核准欄位清空。只新增 CT-24（pg-content，ORIGINAL fullName，DS-19）與 FE-54～FE-62 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 76 個任務的內容、status、retries 皆未修改。批次：第 1 批 CT-24、FE-54、FE-55、FE-56；第 2 批 FE-57～FE-61；第 3 批 FE-62（architecture.md §12.7）。同批任務沒有共用 path；core/pwa.js 與 __tests__/pwa-core.test.js 由 FE-56 → FE-58 依序修改（D-13）。AC 對照見 architecture.md §13.5（應驗收 248 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）；不需主控手動項目。共 86 個任務：pg-content 24、pg-frontend 62。｜v0.6（2026-11-02，sd-agent）：修訂已核准的 v0.5（JimmyLin 核准），原因：PRD v0.11（R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48；修改 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）與契約 v0.11（§10 PWA、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）。status 改為 in-review、核准欄位清空。只新增 FE-45～FE-53 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 67 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-18）。FE-45～FE-53 彼此沒有任何共用 path；FE-53 負責重新建置 dist/english-master-track.html 與部署目錄 dist/site/。新增頂層 manualSteps（MC-01 複製 ads.txt 到 sources/deploy/、MC-02 放置 4 張 PNG 到 src/app/assets/icons/、MC-03 修改 .github/workflows/static.yml），owner 為主控、不派給 PG；FE 任務以 manualPrereqs 引用（architecture.md §12.6、SD-FB-32）。批次見 architecture.md §12.6，AC 對照見 §13.4（應驗收 221 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 76 個任務：pg-content 23、pg-frontend 53。｜v0.5（2026-11-02，sd-agent）：修訂已核准的 v0.4（JimmyLin 核准），原因：PRD v0.10（R-19 只選色級不顯示分數、Q-39 預設 725、Q-40、AC-26-05、AC-26-06、AC-22-04 改寫、6 條分數輸入 AC 暫停）與契約 v0.10（§5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）。status 改為 in-review、核准欄位清空。只新增 FE-42～FE-44 共 3 個 pg-frontend 任務（status todo、retries 0），依序執行（FE-42 → FE-43 → FE-44）；既有 64 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-10）。FE-42～FE-44 彼此沒有任何共用 path；FE-44 負責重新建置 dist/。批次見 architecture.md §12.5，AC 對照見 §13.3（應驗收 192 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 67 個任務：pg-content 23、pg-frontend 44。｜v0.4（2026-11-02，sd-agent）：修訂已核准的 v0.3，原因：PRD v0.9（R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（§5.7、§5.8、§9.3 DS-01～DS-06）。status 改為 in-review、核准欄位清空。只新增 FE-34～FE-41 共 8 個 pg-frontend 任務（status todo、retries 0）；既有 56 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-06）。FE-34～FE-41 彼此沒有任何共用 path；FE-41 負責重新建置 dist/。批次見 architecture.md §12.4，AC 對照見 §13.2（應驗收 196 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 64 個任務：pg-content 23、pg-frontend 41。｜v0.3（2026-10-30，sd-agent）：依 PRD v0.8（R-15～R-17、US-25～US-31）與契約 v0.8 增量修訂；v0.2 已核准，依 CLAUDE.md 改回 draft、核准欄位清空。只新增 FE-20～FE-33 共 14 個 pg-frontend 任務（status todo、retries 0）；既有 42 個任務的內容、status、retries 皆未修改；src/data/ 不需改動，不新增 CT 任務。批次見 architecture.md §12.3，AC 對照見 §13.1。本版含持久化結構 schemaVersion 1 → 2 的實作任務（FE-22、FE-25），須由人類核准。共 56 個任務：pg-content 23、pg-frontend 33。 主控代核（2026-10-30）：持久化結構變更已由人類於契約 v0.8 核准，本版僅實作該契約，不改 PRD、不另改持久化結構；check_tasks 驗證新任務間無共用 paths（共用僅發生於與已 done 舊任務之間）。 主控代核（2026-11-02）：FE-41 paths 追加 src/app/__tests__/backup.test.js，修正因執行日期而失敗的既有測試（FE-34／FE-35 回報）；不改 PRD、不改持久化結構。 主控代核（2026-11-02）：FE-43 paths 追加 views/flashcards.js、__tests__/flashcards.test.js，改寫單字卡空狀態提示（人類決議，AC-06-06 未規定文字，不改 PRD）。 主控代核（2026-11-04）：FE-78 paths 追加 __tests__/shell.test.js，更新 license-header.txt 的固定 SHA-256（FE-78 回報 architecture.md §10.9 漏列）；不改 PRD、不改持久化結構。",
     "note": "（以下為 v0.2 記載，任務數以 changelog 為準）v0.2 依 architecture v0.3 新增 FE-19（主控代核）；FE-18 dependsOn 加 FE-19；CT-02 doneWhen 的驗證方式改依 architecture.md §8.4（v0.1 由 JimmyLin 於 2026-10-30 核准；依 CLAUDE.md 修改已核准文件須改回 draft，待主控代核）。共 42 個任務：pg-content 23（CT-01～CT-23）、pg-frontend 19（FE-01～FE-19）。批次見 architecture.md §12；AC 對照見 §13。所有任務只能寫入自己的 paths；sources/ 唯讀且不得打包；建置驗證一律 --out 到 scratchpad（只有 FE-18 寫 dist/）。"
   },
   "tasks": [
@@ -4887,6 +4887,149 @@
       ],
       "status": "done",
       "retries": 0
+    },
+    {
+      "id": "CT-26",
+      "title": "v0.17 資料文字修訂：p5-009 解析改為 LT-6",
+      "owner": "pg-content",
+      "batch": "v0.12-1",
+      "paths": [
+        "src/data/part5.js",
+        "src/data/_records/CT-26.md"
+      ],
+      "dependsOn": ["CT-25"],
+      "covers": [
+        "US-23",
+        "AC-23-08"
+      ],
+      "contractRefs": [
+        "README §4.3 L-8 LT-6",
+        "README §7.8 V-LGL-05、V-LGL-06",
+        "README §7.4 V-P5-08",
+        "README §9 DS-42",
+        "PRD Q-71、Q-75 決議 A"
+      ],
+      "description": "依 architecture.md v0.12 §7.23.3、PRD R-25 四、契約 DS-42。只把 src/data/part5.js 題目 p5-009 的 explanation.coreStrategy 逐字改為 LT-6：be interested in 表示「對……有興趣」，是常見的形容詞＋介系詞搭配。（從 README §4.3 L-8 表複製，不得改寫）。id、type、sentence、options、correctIndex、explanation.structure、source 不變；檔案其餘內容（含換行格式）不變。p5-103 不改（Q-75 決議 A）。sentence 與正解未改，V-P5-08 快照比對應直接通過，不需也不得執行 --accept 或 --update-snapshot。自驗 V-LGL-05 (a) 與 V-LGL-06 的一次性腳本放 scratchpad，不新增到 _tools/；指令與輸出寫入 _records/CT-26.md。不改 src/data/_tools/、src/data/_records/part5-ids.json、sources.js、NOTICE.md 與其他資料檔。不得寫入 src/app/、tests/、docs/、dist/、package.json。",
+      "doneWhen": [
+        "p5-009 的 explanation.coreStrategy 逐字等於 LT-6；與 HEAD 比對，該題其他 6 個欄位皆相同，p5-103 整筆相同（V-LGL-06，附指令與輸出）",
+        "git diff src/data/part5.js 只有 1 行異動（p5-009 所在行），換行格式不變",
+        "`npm run validate:data` 錯誤 0；V-P5-08、V-P5-08W 對 p5-009 無錯誤與警告；part5-ids.json 未變更（附輸出）",
+        "V-LGL-05 (a)：src/data/ 下進入交付 HTML 的 .js 資料檔逐一字串欄位搜尋，「多益常考」「多益最常見」0 筆；依契約分句符號判定的 A＋B 同句 0 筆；單獨出現的「常考」「必考」逐筆列出並人工判讀（附輸出）",
+        "src/data/_records/CT-26.md 已記錄修改前後文字、上述指令與結果",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-78",
+      "title": "v0.17 前端文字修訂：LT-1～LT-5、HTML 開頭註解與固定舊文字的單元測試",
+      "owner": "pg-frontend",
+      "batch": "v0.12-1",
+      "paths": [
+        "src/app/views/flashcards.js",
+        "src/app/views/part5.js",
+        "src/app/views/sources-page.js",
+        "src/app/license-header.txt",
+        "src/app/styles/40-part5.css",
+        "src/app/__tests__/flashcards.test.js",
+        "src/app/__tests__/naming.test.js",
+        "src/app/__tests__/sources-page.test.js",
+        "src/app/__tests__/build.test.js",
+        "src/app/__tests__/shell.test.js"
+      ],
+      "dependsOn": ["FE-77"],
+      "covers": [
+        "US-06",
+        "US-10",
+        "US-23",
+        "US-38",
+        "AC-06-01",
+        "AC-10-02",
+        "AC-23-02",
+        "AC-23-06",
+        "AC-38-08",
+        "AC-38-10"
+      ],
+      "contractRefs": [
+        "README §4.3 L-8 LT-1～LT-5",
+        "README §7.8 V-LGL-01～V-LGL-04",
+        "README §9 DS-41、FB-64",
+        "data-schema.ts ProjectLicenseInfo（v0.17 註解）"
+      ],
+      "description": "依 architecture.md v0.12 §7.23.1、§7.23.2，修改點見該節對照表。固定文字一律從 README §4.3 L-8 表複製，不得改寫。(1) flashcards.js 搭配詞標籤 = LT-1，只改文字，元素順序與按鈕不變。(2) part5.js TEXT.headingNote = LT-2；第 2 行註解同步改寫。(3) sources-page.js：TEXT.originalLicense = LT-3；brandStatement 改為單一參數 brandStatement(appName)，組字結果 = LT-4，不再用 holder；新增 TEXT.trademarkNotice = LT-5，在 .src-statements 第 5 個 li 顯示，以 textContent 寫入；holder 仍供 derivedAttribution 使用；codeLicense、dataLicense、SOURCES_CONTACT_TEXT、「原創內容來源」一行不變；同步改寫第 17 行與 brandStatement 的註解。(4) license-header.txt 第 28、31 行依 §7.23.2 改寫，單字資料與原創內容分成兩句，不加入 LT-5。(5) 40-part5.css 只改第 41 行註解，規則不變。註解不得重複寫出舊文字（FB-64 雖不算違反，但本任務一併清除，讓 FE-79 能對整份 HTML 搜尋）。(6) 依 §10.9 表更新 4 個測試檔，文字與測試同一任務完成，npm test 不留中間失敗。不改 AC-23-07 聯絡行、package.json、tools/build.mjs、core/constants.js、頁尾、localStorage 結構；不新增外部資源。不得寫入 src/data/、tests/、docs/、dist/；tests/ 的舊文字由 QA 更新，§10.9 已列出。",
+      "doneWhen": [
+        "畫面常數與 L-8 逐字相同：搭配詞標籤 = LT-1、P5.TEXT.headingNote = LT-2、TEXT.originalLicense = LT-3、brandStatement(PWA_APP_NAME) = LT-4、TEXT.trademarkNotice = LT-5",
+        "render 後 .src-statements 依序為 codeLicense、dataLicense、LT-3、LT-4、LT-5 共 5 項；.src-contact 仍為 .src-page 最後一個子元素且文字不變",
+        "license-header.txt：第一行為 EnglishContext；含 MIT 全文、「單字資料以 CC BY-SA 4.0 授權」、LT-3、LT-4、CC BY-SA 條款網址；不含「原創內容著作權人 JimmyLin」「保留所有權利」與 LT-5；不含連續兩個減號",
+        "src/app/ 的 __tests__ 以外檔案（含註解）搜尋「多益常考」「多益最常見」「題型對應多益」「著作權人」「保留所有權利」皆 0 筆（附指令與輸出）",
+        "§10.9 列出的 4 個測試檔已更新，且含舊文字不再出現的斷言；`npm test` 全數通過（附輸出）",
+        "git diff 顯示 flashcards.js 與 part5.js 沒有文字與註解以外的行為異動；40-part5.css 只有註解異動",
+        "package.json、tools/、src/data/、tests/、docs/、dist/ 未被修改；只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-79",
+      "title": "v0.17 交付關卡：權利文字靜態檢查、375px 實測、重新建置 dist/",
+      "owner": "pg-frontend",
+      "batch": "v0.12-2",
+      "paths": [
+        "src/app/__tests__/legal-static.test.js",
+        "src/app/styles/40-part5.css",
+        "dist/english-master-track.html",
+        "dist/site/index.html",
+        "dist/site/manifest.webmanifest",
+        "dist/site/sw.js",
+        "dist/site/ads.txt",
+        "dist/site/icons/icon-192.png",
+        "dist/site/icons/icon-512.png",
+        "dist/site/icons/icon-maskable-512.png",
+        "dist/site/icons/apple-touch-icon-180.png"
+      ],
+      "dependsOn": ["CT-26", "FE-78"],
+      "covers": [
+        "US-06",
+        "US-10",
+        "US-23",
+        "US-38",
+        "AC-06-01",
+        "AC-10-02",
+        "AC-23-02",
+        "AC-23-06",
+        "AC-23-08",
+        "AC-38-08",
+        "AC-38-10",
+        "AC-20-01",
+        "AC-40-02",
+        "AC-23-07",
+        "AC-19-01",
+        "AC-21-01",
+        "AC-36-01",
+        "AC-36-07",
+        "AC-42-04"
+      ],
+      "contractRefs": [
+        "README §4.3 L-8",
+        "README §7.8 V-LGL-01～V-LGL-06",
+        "README §9 DS-41、FB-63、FB-64",
+        "PRD E-121、E-123",
+        "PRD Q-74 決議 B"
+      ],
+      "description": "依 architecture.md v0.12 §5.7、§7.23.4、§10.9。(1) 新增 legal-static.test.js：以 build({ write: false, log() {}, warn() {} }) 對專案實際原始碼建置後掃描，並以 vm 讀 src/data/ 下進入交付 HTML 的 .js 資料檔逐一字串欄位檢查（V-LGL-04、V-LGL-05、V-LGL-06）；不改 tools/build.mjs。(2) 先 npm test，再 npm run build 兩次，只以建置產生 dist/，不得手改。(3) 以 playwright-core 搭配本機 Chrome 或 Edge（headless，channel 為 chrome 或 msedge）對 dist/english-master-track.html 以 file:// 實測，腳本放 scratchpad，不寫入 tests/。行數一律以 Range 量測文字節點的 getClientRects（block 元素本身的 getClientRects 恆為 1，不可用），方法見 §7.23.4。LT-2 在 375px 預期 2 行；不是 2 行時回報實際行數，判定只看不裁切、無水平捲軸（AC-10-02、E-123）。(4) 40-part5.css 只有在實測確實裁切或造成水平捲軸時才可修改 .p5-heading-note，且只能加換行相關屬性，不得縮小字級、改寫文字或加 nowrap；原因在共用容器時標 blocked 回報。(5) 實測若發現 .src-contact 不是 1 行，只回報給主控，不在本任務修改（AC-23-07 不動）。本機確實沒有 Chrome 與 Edge 時，回報中明列「375px 實測未完成」並交主控以 §10.9 M-1 完成，不得視為通過。package.json 維持 1.1.0。不得寫入 src/data/、tools/、tests/、docs/、其他 src/app 檔案。",
+      "doneWhen": [
+        "legal-static.test.js 已新增並通過：開頭註解區符合 V-LGL-04；交付 HTML 全文「多益常考」「多益最常見」「題型對應多益 Part 5」「著作權人 JimmyLin」「保留所有權利」皆 0 次；資料字串 A＋B 同句 0 筆（分句符號依 V-LGL-05）；p5-009 的 coreStrategy = LT-6；.p5-heading-note 規則不含 nowrap、text-overflow、overflow: hidden、固定 height 或 max-height",
+        "`npm test` 全數通過（含 contact-static.test.js）；`npm run validate:data` 錯誤 0（附輸出）",
+        "`npm run build` 連續兩次成功：dist/english-master-track.html、dist/site/index.html、manifest.webmanifest、sw.js 兩次 SHA-256 相同；dist/english-master-track.html 與 dist/site/index.html SHA-256 相同；emt-app-version 為 1.1.0；回報新舊 BUILD_ID（附指令與輸出）",
+        "dist/english-master-track.html 字串檢查：§10.9 交付檢查表全部符合（附指令與輸出）",
+        "375×667 模擬測驗頁（題目與作答後各 1 次）：.p5-heading-note 文字 = LT-2、回報行數（預期 2）、scrollWidth ≤ clientWidth、scrollHeight ≤ clientHeight、左右邊界在視窗內、底緣不壓到下一個元素、document.documentElement.scrollWidth ≤ clientWidth（附結果）",
+        "1366×768、768×1024 與 375px 放大字級 150% 量測同上，說明不裁切；其中放大字級的水平溢出若來自說明以外的既有元素，回報不修",
+        "375×667 資料來源與授權頁：LT-3、LT-4、LT-5 各 1 次，無水平捲軸；回報 .src-contact 行數（AC-23-07 回歸）；單字卡正面標籤 = LT-1；全程 Console 無錯誤、file:// 請求 0（附結果），或依 description 明列交主控 M-1",
+        "package.json、tools/、src/data/、tests/、docs/ 未被修改；只寫入本任務 paths；40-part5.css 若有修改須回報實測原因"
+      ],
+      "status": "done",
+      "retries": 0
     }
   ],
   "manualSteps": [
@@ -4956,6 +5099,21 @@
       "doneWhen": [
         "package.json version 為 1.1.0，其他內容 diff 為 0",
         "`npm test` 照常通過（build.test.js 以暫存 package.json 測試，不受影響）"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "MC-05",
+      "title": "移除 sources/pwa/README.md 第 5 行的暫時註記",
+      "owner": "主控",
+      "batch": "v0.12-2",
+      "paths": ["sources/pwa/README.md"],
+      "before": [],
+      "covers": [],
+      "contractRefs": ["PRD R-25 回饋下游（主控）"],
+      "description": "依 PRD R-25 回饋下游。PRD v0.17 已核准，移除 sources/pwa/README.md 第 5 行的「Q-48 的現行聲明待 PRD 修訂」字樣，其餘內容不動。此檔不進入交付物，不影響建置與任何 PG 任務，不阻擋 CT-26、FE-78、FE-79。PG 不得修改此檔。",
+      "doneWhen": [
+        "sources/pwa/README.md 不含「待 PRD 修訂」，其他內容 diff 為 0"
       ],
       "status": "done"
     }

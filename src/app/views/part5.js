@@ -1,5 +1,5 @@
 /*
- * views/part5.js — 模擬測驗頁（FE-14；題型對應多益 Part 5；R-15 畫面名稱更新，FE-23）
+ * views/part5.js — 模擬測驗頁（FE-14；標題說明為契約 L-8 LT-2，FE-78；R-15 畫面名稱更新，FE-23）
  * 依據：architecture.md §4.2（頁面登錄）、§4.3（Store API：answerPart5／nextPart5／restartPart5）；
  *       契約 data-schema.ts Part5Question、Part5Explanation、PART5_TYPE_LABELS、PART5_BLANK、Part5Progress；
  *       README §7.4 V-P5-01～07、§7.7 V-ST-05、FB-13（lockedSelection 重載後維持鎖定）。
@@ -63,7 +63,7 @@
   var TEXT = {
     empty: "題庫尚未載入",
     heading: "模擬測驗",
-    headingNote: "題型對應多益 Part 5",
+    headingNote: "題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容",
     progressLabel: "作答進度", // （v0.12，FE-61）進度條 aria-label（architecture.md §7.19.6）
     blank: "空格",
     next: "下一題",

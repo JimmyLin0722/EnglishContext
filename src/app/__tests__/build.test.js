@@ -435,18 +435,25 @@ test("AC-23-06：專案 license-header.txt 含 MIT 全文與 CC BY-SA 4.0 聲明
   assert.ok(txt.includes("Permission is hereby granted, free of charge, to any person obtaining a copy"));
   assert.ok(txt.includes("The above copyright notice and this permission notice shall be included in all"));
   assert.ok(txt.includes('THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND'));
+  // （v0.12，FE-78）單字資料與原創內容分成兩句；固定文字逐字照契約 L-8 LT-3（V-LGL-04）
+  assert.ok(txt.includes("單字資料以 CC BY-SA 4.0 授權"));
   assert.ok(
     txt.includes(
-      "單字資料與原創內容（例句、解析、Part 5 題目、長難句、句型）以 CC BY-SA 4.0 授權，原創內容著作權人 JimmyLin"
+      "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權"
     )
   );
   assert.ok(txt.includes("https://creativecommons.org/licenses/by-sa/4.0/"));
-  // （v0.11，FE-47）品牌標識聲明逐字一行（AC-23-06、Q-48）
+  // （v0.11，FE-47；v0.12，FE-78）品牌標識聲明 LT-4 + 全形句號，逐字一行（AC-23-06、Q-48）
   assert.ok(
     txt.split(/\r?\n/).includes(
-      "PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin，保留所有權利，不適用 MIT 與 CC BY-SA 4.0。"
+      "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。"
     )
   );
+  // （v0.12，FE-78）第一行名稱不變（NM-4）；舊聲明與 LT-5 不得出現（R-25 PM 判斷 (c)）
+  assert.equal(txt.split(/\r?\n/)[0], "EnglishContext");
+  assert.equal(txt.includes("原創內容著作權人 JimmyLin"), false);
+  assert.equal(txt.includes("保留所有權利"), false);
+  assert.equal(txt.includes("TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。"), false);
 });
 
 // ─── B-8 報告 ───

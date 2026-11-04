@@ -1,6 +1,6 @@
 ---
 doc: CONTRACT
-version: 0.16
+version: 0.17
 status: approved
 author: sa-agent
 approved_by: JimmyLin（授權主控代核）
@@ -9,7 +9,7 @@ approved_at: 2026-11-04
 
 # English Master Track — 資料契約總覽
 
-> 上游：`docs/01-PRD.md` v0.16（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-24 為準（v0.12 修訂內容見 §13 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列；v0.15 見 §5.3、§5.10～§5.12、§6、§8 v0.15 表與 0.15 列；v0.16 見 §4.3 L-7、§10.7 UP-6、§8 末表與 0.16 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
+> 上游：`docs/01-PRD.md` v0.17（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-25 為準（v0.12 修訂內容見 §13 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列；v0.15 見 §5.3、§5.10～§5.12、§6、§8 v0.15 表與 0.15 列；v0.16 見 §4.3 L-7、§10.7 UP-6、§8 v0.16 表與 0.16 列；v0.17 見 §4.3 L-8、§7.8、§8 末表與 0.17 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
 > 本契約共 3 個檔案，視為一組審核：本檔、`data-schema.ts`（型別）、`storage-schema.json`（localStorage 與備份檔的 JSON Schema）。核准方式：把本檔 frontmatter 改為 `status: approved`，並同步填寫 `data-schema.ts` 開頭註解與 `storage-schema.json` `meta` 的 `status`、`approved_by`、`approved_at`（v0.5 起三檔狀態一律一致，SD-FB-04）。
 > 欄位的必填、值域、範例以 `data-schema.ts` 註解為準；本檔放總覽、規則、驗證與待辦。
 > v0.2：依主控 2026-10-29 連網查證結果，四份字表與 ECDICT 授權改為已確認、可收錄；原始字表已置於 `sources/wordlists/`；`N_B`、`N_G` 改為實際值（§4.2）。
@@ -24,6 +24,7 @@ approved_at: 2026-11-04
 > **v0.14：依 PRD v0.14（R-22、US-42、US-43、AC-01-08，修改 13 條 AC、暫停 AC-05-01～AC-05-05，Q-58～Q-62）增量修訂，不改持久化結構（`schemaVersion` 維持 2，localStorage 鍵數 2，`PersistedData` 9 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) 新增 **§12.1 網站版本號**（VR-1～VR-9）：版本號由建置寫入 `<meta name="emt-app-version">`，**在計算 BUILD_ID 之前寫入**，只改版本號也會改變 BUILD_ID（AC-42-04）；頁尾版本行格式 `VERSION_LINE_TEXT`；HD-1、HD-5、SW-2、V-PWA-04、V-PWA-06 同步；(2) §5.8 新增 HT-6～HT-9：領域範本區塊 `hidden` + `inert`、程式與資料保留、畫面文字不得出現「範本」、已注入單字照原值保留（US-43）；(3) §12.2 色級狀態列只顯示生效色級（`LAYOUT_TEXTS.levelStatus`，AC-01-08）；DB-4 改寫：目標行一律 `goalLineSame` + 「變更」按鈕，`goalLineCapped`、`goalLineSeparator` 停用（AC-39-04）；(4) `data-schema.ts` 新增 §14（4 個常數）。原「§12 變更紀錄」改為 §13。
 > **v0.15：依 PRD v0.15（R-23、US-44～US-47、AC-44-01～AC-47-08，修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71）修訂，含持久化結構變更 `schemaVersion` 2 → 3（Q-63 已由人類核准）。依 CLAUDE.md，本版須由人類核准，不適用主控代核。** 重點：(1) `PersistedData` 新增 3 個**選填**欄位 `flashcardPosition`（新型別 `FlashcardPosition`）、`part5CorrectIds`、`part5UnansweredOnly`；v2 → v3 遷移 MG-5～MG-8、欄位層級讀取 RD-3、RD-4；鍵名 `englishMasterTrack:state` 不變、鍵數維持 2；(2) 新增 §5.10 單字卡上次位置 FP-1～FP-9、§5.11 答對紀錄 CR-1～CR-9 與「只練沒答對」UO-1～UO-9、§5.12 寫入時機與失敗 WR-1～WR-5；(3) `LEARNING_PROGRESS_FIELDS` 6 → 7 欄（Q-67 A），CI-4、CI-5、CI-8 修改；(4) 備份匯出 3、匯入 `[1, 2, 3]`，新增 IM-9、IM-10；(5) 新增 V-ST-18～V-ST-22、V-P5-08；(6) 網站版本 1.1.0（Q-70 A）只在 §12.1 註記，契約無版本值常數。**C-8 解讀規則**：本檔 v0.8～v0.14 段落中描述「目前」的「`schemaVersion` 2」「`PersistedData` 9 欄」，v0.15 起讀作 3 與 12 欄。
 > **v0.16：依 PRD v0.16（R-24，新增 AC-23-07，修改 AC-36-03、AC-42-04 文字）做文字層級修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) `PWA_TEXTS.updateNotice` 改為「有新版本，請更新版本」、`updateButton` 改為「更新版本」，UP-4～UP-7 等引用同步，更新流程行為不變（Q-43 決議 A）；(2) 新增契約常數 `SOURCES_CONTACT_TEXT`（`data-schema.ts` §16）與規則 **L-7**（§4.3）：「資料來源與授權」頁 1 行聯絡資訊，逐字、純文字、非連結、不得出現 `mailto:` 或不帶空格的完整位址、不發網路請求、不持久化。`storage-schema.json` 只改 meta。
+> **v0.17：依 PRD v0.17（R-25，新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）做文字層級修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) 新增規則 **L-8**（§4.3）集中 6 段固定文字 LT-1～LT-6；(2) 新增 §7.8 驗證規則 V-LGL-01～V-LGL-06；(3) NM-3、NM-4、L-7 (7)、§8 品牌標識對照列同步；(4) `data-schema.ts` 只改註解，型別與常數不增減。**三檔同步的例外**（比照 v0.9）：`storage-schema.json` 本版未修改，維持 v0.16 approved；本版契約組合 = 本檔 v0.17 + `data-schema.ts` v0.17 + `storage-schema.json` v0.16（其內容對 v0.17 仍正確）。
 > 專案代號、文件標題與識別字仍為 English Master Track；App 顯示名稱自 v0.12 起為「EnglishContext」（§11.1）。
 
 ---
@@ -37,7 +38,7 @@ approved_at: 2026-11-04
 | `VocabManifest`、`RankSegment` | 內建字庫摘要（`N_B`、`N_G`、排名區段） | pg-content | pg-content 自驗、QA | AC-03-06、AC-03-08、AC-03-09 |
 | `BuiltinVocabItem`、`PartOfSpeech`、`POS_LABELS` | 內建單字 | pg-content | pg-frontend | FR-1.3、FR-2.1、AC-03-01～AC-03-09、AC-06-01～AC-06-08、AC-23-01、AC-23-03、AC-23-04 |
 | `DomainTemplate`、`TemplateWord` | 資工／商管／生醫統計範本（v0.14 畫面入口隱藏，資料照常交付，HT-6～HT-9） | pg-content | pg-frontend（v0.14 只保留程式，不渲染） | FR-1.4、AC-43-01、AC-43-03；AC-05-01～AC-05-05（v0.14 暫停） |
-| `Part5Question`、`Part5Explanation`、`PART5_TYPE_LABELS`、`PART5_BLANK` | 模擬測驗題庫（題型對應多益 Part 5；識別字沿用 `Part5*`，R-15） | pg-content | pg-frontend | FR-3.1、FR-3.2、AC-10-01、AC-10-02、AC-11-01、AC-11-02 |
+| `Part5Question`、`Part5Explanation`、`PART5_TYPE_LABELS`、`PART5_BLANK` | 模擬測驗題庫（題型參考 TOEIC®（多益）Part 5；識別字沿用 `Part5*`，R-15） | pg-content | pg-frontend | FR-3.1、FR-3.2、AC-10-01、AC-10-02、AC-11-01、AC-11-02 |
 | `DecoderSentence`、`DecoderSegment`、`SyntaxRole` | 長難句與語法標籤 | pg-content | pg-frontend | FR-4.1、FR-4.2、AC-12-01～AC-12-03、AC-13-01、AC-13-03 |
 | `ReadingStrategy` | 閱讀策略 3 主題 | pg-content | pg-frontend | FR-4.3、AC-14-01、AC-14-02 |
 | `PhraseTemplate`、`PhraseCategory`、`PHRASE_CATEGORY_LABELS` | 學術句型庫 | pg-content | pg-frontend | FR-5.1、FR-5.2、AC-15-01～AC-16-03 |
@@ -62,6 +63,9 @@ approved_at: 2026-11-04
 | `APP_VERSION_META_NAME`、`APP_VERSION_PATTERN`、`BUILD_CODE_LENGTH`、`VERSION_LINE_TEXT`（v0.14） | 網站版本號的 HTML meta、SemVer 格式、建置碼長度、頁尾版本行格式（不持久化） | 契約常數 → 建置寫入 meta（SD 安排）、pg-frontend 渲染 | pg-frontend、QA | US-42、AC-42-01～AC-42-04、AC-36-02、AC-41-04、§12.1 |
 | `LAYOUT_TEXTS.levelStatus`（v0.14 新增鍵）；`goalLineCapped`、`goalLineSeparator`（v0.14 停用）；`changeLink`（v0.14 改按鈕） | 難易度設定頁狀態列「目前色級：{生效色級}」；主控台目標行只顯示生效色級 | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-01-08、AC-39-04、AC-17-06、E-92、§12.2、§11.4 DB-4 |
 | `SOURCES_CONTACT_TEXT`（v0.16） | 「資料來源與授權」頁 1 行聯絡資訊（逐字、字母間含空格、純文字、非連結；不持久化） | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-23-07、E-118、E-119、R-24 二、§4.3 L-7 |
+| 固定文字 LT-1～LT-6（v0.17，規則 L-8，非型別、非常數） | 搭配詞標籤、模擬測驗標題說明、原創內容聲明、圖示與名稱聲明、TOEIC® 商標聲明、`p5-009` 解析（不持久化） | pg-frontend（LT-1～LT-5）、pg-content（LT-6） | pg-frontend、pg-content、QA | AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-08、AC-38-08、AC-38-10、R-25、§4.3 L-8、§7.8 |
+
+型別數（v0.17）：與 v0.16 相同 **69** 個（34 個 `interface`、35 個 `type`），契約常數 **42** 個，無增減、無欄位變更、無常數值變更（只改註解）。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變；localStorage 鍵數維持 2。
 
 型別數（v0.16）：與 v0.15 相同 **69** 個（34 個 `interface`、35 個 `type`），無增減、無欄位變更。契約常數 41 → **42**（新增 `SOURCES_CONTACT_TEXT`，§16）；值變更：`PWA_TEXTS.updateNotice`「有新版本，重新整理」→「有新版本，請更新版本」、`PWA_TEXTS.updateButton`「重新整理」→「更新版本」（R-24 一）。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變；localStorage 鍵數維持 2。
 
@@ -266,7 +270,19 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | L-3 | `DATA_SOURCE_REGISTRY` 的每筆資料必須與本表一致（名稱、版本、授權、網址、確認日期、確認人） |
 | L-4 | 衍生的單字資料以 CC BY-SA 4.0 釋出，署名列原字表作者與修改者 JimmyLin。`modifications` 與 AC-23-02 一致：四份字表至少列出「合併、去重、重新編排頻率排名、補充欄位」（v0.4 未變）；ECDICT **恰為** `["簡體轉繁體台灣用語", "精簡釋義"]`；ORIGINAL 為 `[]`。**音標改寫不列入 ECDICT 的 `modifications`**（音標屬原創，不屬 ECDICT）；AC-23-02 要求的說明「音標改寫為美式 IPA，標為原創，不屬 ECDICT」由 pg-frontend 在「資料來源與授權」頁 ECDICT 區塊以固定文字顯示（R-06、R-13） |
 | L-6 | （v0.4）卡片出處顯示（AC-23-01，pg-frontend）：字表出處依 `sources` 逐一顯示「`name` `version`（`licenseName`）」，例「單字來源：NGSL 1.2（CC BY-SA 4.0）」；音標、釋義**分開**依 `phoneticSource`、`meaningSource` 顯示：`"ECDICT"` →「ECDICT（MIT，已修改）」（= `name` +「（」+ `licenseName` +「，已修改）」），`"ORIGINAL"` →「原創」，例「音標：原創；釋義：ECDICT（MIT，已修改）」。顯示文字必須由該筆資料的來源標記推導，不得寫死同一段文字（NFR-3「卡片出處與欄位來源標記不一致數 = 0」） |
-| L-7 | （v0.16，R-24 二，pg-frontend）**「資料來源與授權」頁聯絡資訊**：(1) **逐字**：該頁內容區（頁尾連結與版本行之上）恰 1 行，`textContent`（trim 後）與契約常數 `SOURCES_CONTACT_TEXT` 逐字元相同——`email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m`（小寫 `email:` + 1 個半形空格，其後每個字元之間各 1 個半形空格 U+0020，含 `.`、`@` 前後；無全形字元）；(2) **純文字**：以 `textContent` 寫入（C-7）；該行及祖先元素皆不是 `<a>`，無 `href`、`tabindex`、點擊處理器，Tab 不可取得焦點，點擊不開郵件程式、不換頁；(3) **防爬蟲**：交付 HTML（含內嵌 JS 與 CSS）不得含 `mailto:`，也不得含「去掉空格後的完整位址」字串；程式不得以字串處理（去空格、拼接、`replace`、`join` 等）在執行期組出無空格位址，常數值本身即帶空格；(4) **不發網路請求**、不寫入 localStorage、不寫入備份檔（`storage-schema.json` 不變）；(5) 只在「資料來源與授權」頁顯示；首次畫面、4 個功能區、各畫面頁尾、對話框、Toast 皆不顯示；`file://` 與 https 兩種形態皆顯示且相同，斷網照常；(6) 樣式為該頁說明性次要文字（對比 ≥ 4.5:1、不使用 `COLOR_TOKENS.accent`，VC-3、VC-7）；375px 預設字級維持 1 行、不產生水平捲軸（放大字級時換行可接受，E-119）；樣式與確切位置屬設計層；(7) AC-23-02 既有聲明內容不變；`sources.js`（pg-content）格式與值不變。對應：AC-23-07、E-118、E-119、AC-21-01、AC-37-05、AC-38-01、AC-38-04 |
+| L-7 | （v0.16，R-24 二，pg-frontend）**「資料來源與授權」頁聯絡資訊**：(1) **逐字**：該頁內容區（頁尾連結與版本行之上）恰 1 行，`textContent`（trim 後）與契約常數 `SOURCES_CONTACT_TEXT` 逐字元相同——`email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m`（小寫 `email:` + 1 個半形空格，其後每個字元之間各 1 個半形空格 U+0020，含 `.`、`@` 前後；無全形字元）；(2) **純文字**：以 `textContent` 寫入（C-7）；該行及祖先元素皆不是 `<a>`，無 `href`、`tabindex`、點擊處理器，Tab 不可取得焦點，點擊不開郵件程式、不換頁；(3) **防爬蟲**：交付 HTML（含內嵌 JS 與 CSS）不得含 `mailto:`，也不得含「去掉空格後的完整位址」字串；程式不得以字串處理（去空格、拼接、`replace`、`join` 等）在執行期組出無空格位址，常數值本身即帶空格；(4) **不發網路請求**、不寫入 localStorage、不寫入備份檔（`storage-schema.json` 不變）；(5) 只在「資料來源與授權」頁顯示；首次畫面、4 個功能區、各畫面頁尾、對話框、Toast 皆不顯示；`file://` 與 https 兩種形態皆顯示且相同，斷網照常；(6) 樣式為該頁說明性次要文字（對比 ≥ 4.5:1、不使用 `COLOR_TOKENS.accent`，VC-3、VC-7）；375px 預設字級維持 1 行、不產生水平捲軸（放大字級時換行可接受，E-119）；樣式與確切位置屬設計層；(7) 新增此行不連帶改動 AC-23-02 的聲明（v0.17 註：現行聲明以 AC-23-02 與 L-8 為準，R-25 PM 判斷 (d)）；`sources.js`（pg-content）格式與值不變。對應：AC-23-07、E-118、E-119、AC-21-01、AC-37-05、AC-38-01、AC-38-04 |
+| L-8 | （v0.17，R-25）**權利與商標固定文字**：下表 LT-1～LT-6 一律逐字使用，不得改寫。畫面文字以 `textContent` 寫入（C-7）；不發網路請求、不寫入 localStorage、不寫入備份檔；`file://` 與 https 文字相同。AC-23-02 其餘聲明（「程式碼以 MIT 授權（Copyright JimmyLin）」「單字資料以 CC BY-SA 4.0 授權」）不變。「資料來源與授權」頁不再出現「著作權人 JimmyLin」「保留所有權利」；HTML 開頭註解區不再出現「原創內容著作權人 JimmyLin」「保留所有權利」。「原創」標示與 `"ORIGINAL"` 來源標記、ORIGINAL 的 `fullName` 沿用（Q-76 決議 A）；聲明涵蓋範圍只限 LT-3 列出的 5 類（Q-72 決議 A）。對應：AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-08、AC-38-08、AC-38-10 |
+
+**L-8 固定文字表**（文字欄不含外層引號）
+
+| 代號 | 提供者 | 位置 | 文字 | 對應 |
+| :--- | :--- | :--- | :--- | :--- |
+| LT-1 | pg-frontend | 單字卡的搭配詞欄位標籤 | 常用搭配詞 | AC-06-01、AC-38-08 |
+| LT-2 | pg-frontend | 模擬測驗頁標題說明（必須顯示；標題仍為 `TAB_LABELS.part5`；375px 可換行，不裁切、無水平捲軸，E-123） | 題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容 | AC-10-02、AC-20-01、AC-40-02 |
+| LT-3 | pg-frontend | 「資料來源與授權」頁、HTML 開頭註解區（開頭註解區須與「單字資料以 CC BY-SA 4.0 授權」分成兩句，並附條款網址） | 原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權 | AC-23-02、AC-23-06、AC-38-10 (3)、Q-31、Q-72 |
+| LT-4 | pg-frontend | 「資料來源與授權」頁、HTML 開頭註解區（名稱「EnglishContext」可取 `PWA_APP_NAME`，組字結果須逐字相同，NM-3） | PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0 | AC-23-02、AC-23-06、AC-38-10 (3)、Q-48 |
+| LT-5 | pg-frontend | 只放「資料來源與授權」頁，不加入 HTML 開頭註解區（R-25 PM 判斷 (c)） | TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。 | AC-23-02 |
+| LT-6 | pg-content | `src/data/part5.js` 題目 `p5-009` 的 `explanation.coreStrategy`（該題其他欄位不變） | be interested in 表示「對……有興趣」，是常見的形容詞＋介系詞搭配。 | AC-23-08 (2)、Q-71 |
 
 ---
 
@@ -679,7 +695,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 
 （v0.14）US-05 暫停，但 V-TPL-01～04 **照常適用**（資料保留且仍打包，HT-8；AC-43-01 要求交付檔仍含 3 個範本資料）。對應 AC 欄的 AC-05-xx 本版不驗收，改由 AC-43-01 驗證資料存在。
 
-### 7.4 模擬測驗題庫（`part5.js`，題型對應多益 Part 5）
+### 7.4 模擬測驗題庫（`part5.js`，題型參考 TOEIC®（多益）Part 5）
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
@@ -741,6 +757,17 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | V-ST-21 | （v0.15）遷移與相容：(a) v0.14 程式寫入的 localStorage（`schemaVersion` 2）以 v0.15 開啟 → 直接進主控台、不提示錯誤；遷移後 localStorage 為 `schemaVersion` 3、`data` 前 9 欄與遷移前深度相等、3 個新欄位為 `null`、`[]`、`false`；再重新載入，localStorage 內容不變（不重複升級）；(b) v0.7（1）同樣直接升到 3；(c) v0.14、v0.7 匯出的備份匯入成功且既有欄位逐一相等；(d) RD-3：3 個新欄位任一 shape 錯誤只重設該欄，其他欄位深度相等、`unreadable` 鍵不被寫入、不提示「資料讀取失敗」；`part5CorrectIds` 的非字串項目被捨棄、其餘保留 | AC-47-03、AC-47-04、AC-47-05、E-113、E-114 |
 | V-ST-22 | （v0.15）寫入失敗依 §5.12 WR-2、WR-3：容量不足時畫面照常、「儲存空間不足」整個工作階段只出現 1 次（與學習紀錄共用），localStorage 原值不變；停用時本工作階段照常運作，重新載入為預設值；全程不拋出未處理錯誤、無網路請求 | AC-44-10、AC-47-07、AC-47-08 |
 | V-IMP-01 | 匯入依 §6.2 順序與 IM-1～IM-10；任何失敗或取消不改動記憶體與 localStorage。（v0.15）匯出檔符合 `$defs/PersistedDataWritten`、`schemaVersion` 3；IM-9 的每種 shape 錯誤皆為 `format`；IM-10 的項目層級無效皆不計入略過筆數 | AC-24-04～AC-24-06、AC-24-09、AC-24-10、AC-24-11、AC-25-11、AC-47-02、AC-47-03、AC-47-06 |
+
+### 7.8 權利與商標文字（V-LGL；v0.17，PRD R-25）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| V-LGL-01 | 單字卡搭配詞標籤 = LT-1；畫面不出現「多益常考搭配詞」；元素順序、按鈕數量與卡片內容不因本條改變 | AC-06-01、AC-38-08 |
+| V-LGL-02 | 模擬測驗頁標題 = `TAB_LABELS.part5`，標題說明 `textContent`（trim 後）= LT-2；畫面不出現「題型對應多益 Part 5」；375px 下可換行，說明不裁切，`scrollWidth` ≤ `clientWidth` | AC-10-02、AC-20-01、AC-40-02、E-123 |
+| V-LGL-03 | 「資料來源與授權」頁含 LT-3、LT-4、LT-5 各 1 次且逐字相同；「程式碼以 MIT 授權（Copyright JimmyLin）」「單字資料以 CC BY-SA 4.0 授權」與 `SOURCES_CONTACT_TEXT` 不變；頁面不出現「著作權人 JimmyLin」「保留所有權利」；375px 可完整閱讀 | AC-23-02、AC-23-07 |
+| V-LGL-04 | HTML 開頭註解區：第一行 = 「EnglishContext」；含 MIT 聲明與條款全文、「單字資料以 CC BY-SA 4.0 授權」、LT-3、LT-4、CC BY-SA 條款網址；不出現「原創內容著作權人 JimmyLin」「保留所有權利」；不含 LT-5 | AC-23-06、AC-38-10 (1)(3) |
+| V-LGL-05 | **無佐證說法檢查**。範圍：(a) `src/data/` 下進入交付 HTML 的資料檔（含 `decoder.js`、`phrasebank.js`）的字串值，逐一字串欄位搜尋；(b) 首次畫面、4 個功能區、「資料來源與授權」頁、對話框與 Toast 的畫面文字，逐一元素搜尋。不在範圍：程式與資料的註解、`src/data/_records/`、`src/data/_tools/`、NOTICE 檔、使用者輸入的自訂單字與匯入的備份內容（E-122）。判定：逐字搜尋「多益常考」「多益最常見」= 0；任一句同時含 A 組（「多益」「TOEIC」）與 B 組（「常考」「必考」「最常考」「最常見」「最常用」「高頻」）= 0；單獨出現的「常考」「必考」人工判讀，只能是與考試頻率無關的一般語意。**分句符號**（SA 定案，FB-63）：全形「。」「；」「？」「！」、半形 `;`、`?`、`!`、後接空白或位於字串結尾的半形 `.`，以及換行。維持不變且不算違反：一般描述的 TOEIC 字樣、字表名稱「TOEIC Service List」、LT-2、LT-5 | AC-23-08 (1)(3)、E-122 |
+| V-LGL-06 | `p5-009` 的 `explanation.coreStrategy` = LT-6；與上一個交付版本相比，該題 `id`、`sentence`、`options`、`correctIndex`、`type`、`explanation.structure`、`source` 皆相同；`p5-103` 整筆不變（Q-75 決議 A） | AC-23-08 (2)、V-P5-08、Q-71 |
 
 ---
 
@@ -818,7 +845,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-21-01、AC-21-03（v0.11 修訂） | §10.10 PV-3、PV-5、PV-6；`storage-schema.json` `meta.browserStoragePolicy` |
 | AC-19-01（v0.11 修訂） | §10.2 DP-2、§10.4 HD-3（同目錄相對路徑、`file://` 下不得產生請求） |
 | AC-24-12 | `PWA_TEXTS.backupOriginNotice`、§10.9 NT-1；（v0.12 收合規則）`RuntimeState.dashboard.backupExpanded`、DB-6 |
-| AC-23-02、AC-23-06（v0.11 品牌標識聲明） | 聲明文字由 pg-frontend 依 PRD 原文組字，名稱取 `PWA_APP_NAME`、著作權人取 `ProjectLicenseInfo.copyrightHolder`；`sources.js` 格式不變。（v0.12）「資料來源與授權」只由頁尾連結開啟（HT-2）；ORIGINAL `fullName` 改為「EnglishContext 原創內容」（§4.3，pg-content 修改值，DS-19） |
+| AC-23-02、AC-23-06（v0.11 品牌標識聲明；v0.17 文字修訂） | 聲明文字由 pg-frontend 依 PRD 原文組字（v0.17 現行文字見 §4.3 LT-4），名稱取 `PWA_APP_NAME`；`sources.js` 格式不變。（v0.12）「資料來源與授權」只由頁尾連結開啟（HT-2）；ORIGINAL `fullName` 改為「EnglishContext 原創內容」（§4.3，pg-content 修改值，DS-19） |
 | AC-24-01、AC-24-10、AC-30-12、AC-32-02（v0.12 改寫部分） | AC-24-01：DB-6（先展開「資料備份」）、§6.1 檔名不變；AC-24-10、AC-30-12、AC-32-02：§5.4 末段近 7 天空狀態、`LAYOUT_TEXTS.chartEmpty`；AC-32-02「已掌握 0 字」：`LAYOUT_TEXTS.statMasteredCount` |
 | AC-25-01～AC-25-03、AC-25-06、AC-25-10、AC-26-06（v0.12 改寫部分） | §5.5 FS-3、§11.5 FT-1～FT-6（首次畫面標題、摘要行）；§11.4 DB-4（目標行格式、依 `goal.appliedColor`／`effectiveColor`）；資料行為依 FS-4、FS-5、GS-3 不變 |
 | AC-33-02（v0.12 刪除「主控台入口」字樣） | HT-2（主控台無模組入口）；`RuntimeState.currentTab` 註解（離開 `flashcards` 釋放麥克風）不變 |
@@ -898,6 +925,18 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-42-04（v0.16 文字修改） | §12.1 VR-4 (b)（提示文字同步）；建置規則不變 |
 | E-120 | 不需契約欄位：舊版頁面顯示舊版程式內的文字屬預期；UP 流程不變 |
 
+**v0.17 新增與修改（PRD R-25）**
+
+| AC／E | 契約欄位／規則 |
+| :--- | :--- |
+| AC-06-01、AC-38-08（v0.17 文字修改） | `BuiltinVocabItem.collocation`、§4.3 LT-1、V-LGL-01；卡片結構與 `RuntimeState.flashcard` 不變 |
+| AC-10-02（v0.17 由「可註明」改為逐字顯示）、E-123 | `TAB_LABELS.part5`、§4.3 LT-2、V-LGL-02；`Part5Question` 與 V-P5-03、V-P5-04 不變 |
+| AC-23-02（v0.17 文字修改） | §4.3 L-8、LT-3、LT-4、LT-5、NM-3、V-LGL-03；`DataSourceEntry`、`ProjectLicenseInfo` 欄位不變 |
+| AC-23-06（v0.17 文字修改） | §4.3 L-8、LT-3、LT-4、NM-4、V-LGL-04；`ProjectLicenseInfo` 欄位不變 |
+| AC-23-08（新增）、E-122 | `Part5Explanation.coreStrategy`、§4.3 LT-6、V-LGL-05、V-LGL-06、V-P5-08 |
+| AC-38-10（v0.17 文字修改） | NM-3、NM-4、V-LAY-05、V-LAY-06、V-LGL-04；(2) 的 `schemaVersion` 依 C-8 讀作 3 |
+| E-121 | 不需契約欄位：舊版頁面顯示舊文字屬預期；UP 流程不變；網站版本維持 1.1.0，新舊版靠建置碼區分（Q-74 決議 B、VR 規則不變） |
+
 ---
 
 ## 9. 回饋上游
@@ -968,6 +1007,8 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | FB-60 | （v0.15 新增）PRD 未規定「清除答對紀錄，重新來過」確定時寫入 localStorage 失敗的行為（AC-47-07 只列作答與開關） | PM | 待辦（知會，SA 定案） | 契約依一般寫入規則 WR-2：畫面與記憶體照常清除、提示「儲存空間不足」（同一工作階段一次），localStorage 保留舊紀錄，下次寫入再試；未採用初始化（CI-7）的「整個不套用」。PM 若希望改為不套用並提示「儲存空間不足，未清除」，補 AC 後契約再改 |
 | FB-61 | （v0.16 新增）R-24 的 2 處變更是人類直接手改建置產物 `dist/english-master-track.html`；下次執行建置會由 `src/app/` 重新產生並**覆蓋**手改內容，且手改後的 HTML 與 `sw.js` 快取名稱的 BUILD_ID 可能不一致（SW-2、AC-36-02） | 主控、SD | 待辦（知會） | 不需改 PRD。契約已把兩段文字收為常數（`PWA_TEXTS`、`SOURCES_CONTACT_TEXT`），須由 pg-frontend 改 `src/app/` 後重新建置，交付以建置產物為準，不以手改檔為準（§9.9 DS-40） |
 | FB-62 | （v0.16 新增）AC-23-07 (2) 的「原始碼中不出現不帶空格的完整位址」只約束交付 HTML；契約文件、PRD、`src/app/` 原始碼只出現帶空格的形式，L-7 (3) 另禁止執行期以字串處理組出無空格位址（否則 DOM 或記憶體中會出現完整位址，違背防爬蟲目的） | QA | 待辦（知會，SA 定案） | QA 除檢查交付 HTML 外，可在 DevTools 以 `document.documentElement.outerHTML` 搜尋無空格位址確認為 0 |
+| FB-63 | （v0.17 新增）AC-23-08 的「以句號、分號、問號、驚嘆號或換行分句」未說明全形或半形，也未說明搜尋單位；英文的半形句點另有縮寫的情況 | PM、QA | 待辦（知會，SA 定案） | 契約定案見 V-LGL-05：全形與半形都算分句符號，半形句點須後接空白或位於字串結尾；資料逐一字串欄位、畫面逐一元素搜尋。現有文字 `scenarioZh`「入門：最高頻的生活基礎字彙」含 B 組字詞但同句無 A 組字詞，不算命中。PM 可在下次修訂 AC-23-08 時補上定義 |
+| FB-64 | （v0.17 新增）AC-10-02 的「不再出現」、AC-23-08 的範圍是畫面文字或排除註解；若內嵌程式保留註解，對整份交付 HTML 全文搜尋可能命中程式註解（目前 `src/app/views/part5.js` 第 2 行註解含舊說明） | QA、SD | 待辦（知會，SA 定案） | 舊文字檢查以畫面文字、資料值與 HTML 開頭註解區為準（V-LGL-02～V-LGL-05），其他程式註解不算違反。不需改 PRD |
 
 ### 9.1 下游回饋處理紀錄（v0.5，/pg-run 階段）
 
@@ -1065,6 +1106,13 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | 編號 | 事項 | 契約的立場 | 請 SD 處理 |
 | :--- | :--- | :--- | :--- |
 | DS-40 | 工作範圍（AC-23-07、AC-36-03、AC-42-04） | **文字層級修訂**：`PWA_TEXTS.updateNotice`／`updateButton` 改值；新增 `SOURCES_CONTACT_TEXT` 與 L-7；持久化結構不變（`schemaVersion` 3、鍵數 2）；`src/data/` 不變 | 不需 CT 任務。FE 任務：(1) 更新提示與按鈕改用新常數值；(2) 「資料來源與授權」頁內容區末段（頁尾連結與版本行之上）新增 1 行，以 `textContent` 寫入常數，樣式沿用該頁次要文字；(3) 建置或測試期靜態檢查：交付 HTML 不含 `mailto:`、不含無空格位址（FB-62）、含 `SOURCES_CONTACT_TEXT` 原值（帶空格形式）、不含舊文字「有新版本，重新整理」；(4) 重新建置取代人類手改的 `dist/`（FB-61）；網站版本維持 1.1.0（PRD R-24），BUILD_ID 隨內容改變屬預期 |
+
+### 9.10 回饋下游（v0.17，給 SD；PRD R-25）
+
+| 編號 | 事項 | 契約的立場 | 請 SD 處理 |
+| :--- | :--- | :--- | :--- |
+| DS-41 | FE 工作範圍（AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10） | **文字層級修訂**：套用 §4.3 LT-1～LT-5；型別、常數、持久化結構（`schemaVersion` 3、鍵數 2）皆不變 | 新開 FE 任務修改標籤、標題說明、頁面聲明與 HTML 開頭註解，並依 V-LGL-01～V-LGL-05 更新測試；由原始碼重新建置 `dist/`，不得手改。網站版本維持 1.1.0（Q-74 決議 B），BUILD_ID 隨內容改變屬預期。`package.json`、AC-23-07、ECDICT 音標標示不改 |
+| DS-42 | CT 工作範圍（AC-23-08） | `p5-009` 的 `explanation.coreStrategy` 改為 LT-6；id、題目句、選項、正解、`structure`、來源標記不變；`p5-103` 不改（Q-75 決議 A）；其他資料值與格式不變 | 列 1 個 CT 任務，並自驗 V-P5-08、V-LGL-05、V-LGL-06 |
 
 ---
 
@@ -1252,8 +1300,8 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | :--- | :--- | :--- |
 | NM-1 | HTML `<title>` = `APP_DISPLAY_NAME`「EnglishContext」（HD-1、V-PWA-04 同步） | AC-38-10 (1)、AC-34-01、AC-34-02 |
 | NM-2 | 頁面頂端標題列（首次畫面、4 個功能區、「資料來源與授權」頁）由左到右：品牌小圖示 + 名稱文字 `APP_DISPLAY_NAME`。圖示為 PWA `any` 圖示的縮小版，**內嵌**於 HTML（`data:` 網址或內嵌 SVG），不得參照 `icons/` 檔案（`file://` 請求數須為 0）；裝飾用（`alt=""` 或 `aria-hidden="true"`），名稱以文字呈現 | AC-38-05、AC-19-01、AC-21-01 |
-| NM-3 | 「資料來源與授權」頁原創內容來源名稱取 `DATA_SOURCE_REGISTRY` 中 ORIGINAL 的 `fullName`（v0.12 值「EnglishContext 原創內容」，§4.3），pg-frontend 不得寫死；品牌標識聲明（AC-23-02、Q-48）文字不變，名稱仍取 `PWA_APP_NAME` | AC-38-10 (1)、AC-23-02 |
-| NM-4 | HTML 開頭授權註解**第一行**的作品名稱 = 「EnglishContext」；其餘聲明文字（MIT、CC BY-SA 4.0、著作權人 JimmyLin、品牌標識聲明）逐字不變 | AC-38-10 (1)(3)、AC-23-06 |
+| NM-3 | 「資料來源與授權」頁原創內容來源名稱取 `DATA_SOURCE_REGISTRY` 中 ORIGINAL 的 `fullName`（v0.12 值「EnglishContext 原創內容」，§4.3），pg-frontend 不得寫死；（v0.17，R-25 五、六）原創內容聲明與品牌標識聲明（AC-23-02、Q-31、Q-48）文字依 §4.3 LT-3、LT-4，品牌標識聲明的名稱仍取 `PWA_APP_NAME` | AC-38-10 (1)(3)、AC-23-02 |
+| NM-4 | HTML 開頭授權註解**第一行**的作品名稱 = 「EnglishContext」；其餘聲明文字依 AC-23-06（v0.17，R-25 五、六）：MIT 聲明（`Copyright (c) <年份> JimmyLin` 與條款全文）不變，「單字資料以 CC BY-SA 4.0 授權」與 LT-3 分成兩句並附條款網址，品牌標識聲明為 LT-4；不再出現「原創內容著作權人 JimmyLin」「保留所有權利」；LT-5 不加入開頭註解 | AC-38-10 (1)(3)、AC-23-06 |
 | NM-5 | **不改清單**（`FROZEN_IDENTIFIERS`，與 v0.11 逐字相同）：localStorage 鍵 `englishMasterTrack:state`、`englishMasterTrack:unreadable`；備份 `format` `english-master-track-backup` 與 `schemaVersion` 2、欄位；匯出檔名前綴 `english-master-track-backup-`；交付檔 `dist/english-master-track.html`；快取前綴 `english-master-track-pwa-`（**改了會讓 SW-9 認不出 v0.11 的舊快取，舊快取永遠清不掉**）；`emt-build-id`。不得新增別名鍵、不得做「新舊鍵名」遷移 | AC-38-10 (2)、AC-36-04、AC-36-05、AC-24-03、E-94 |
 | NM-6 | App 的畫面文字（首次畫面、4 個功能區、「資料來源與授權」頁、對話框、Toast、更新提示）不得出現「English Master Track」（不分大小寫），也不得把 NM-5 的識別字或下載檔名當作文字顯示。瀏覽器下載介面、DevTools、程式註解、文件不屬畫面文字（FB-49） | AC-38-10 (1) |
 
@@ -1419,6 +1467,7 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 | 0.15（核准） | 2026-11-04 | 主控 | 核准欄位由主控代填：持久化結構變更已由人類於 PRD v0.15 Q-63 核准（JimmyLin，2026-11-04，對話中回覆「核准」，Q-63～Q-71 依建議，Q-63 建議 A 明載由 SA 判斷是否升 schemaVersion），且使用者授權「修正好測試沒問題就直接推」。三檔同步改為 approved。 |
 | 0.16 | 2026-11-04 | sa-agent | 修訂已核准的 v0.15，原因：PRD v0.16（approved，JimmyLin，2026-11-04）R-24：人類手改產物後決定 (一) PWA 新版提示文字改為「有新版本，請更新版本」、按鈕改為「更新版本」（修改 AC-36-03、AC-42-04 文字，Q-43 行為不變）；(二) 「資料來源與授權」頁新增 1 行聯絡 email（新增 AC-23-07、E-118～E-120）。三檔 `status` 改為 `in-review`、`version` 0.16、核准欄位清空並同步，上游改為 PRD v0.16。**只做文字層級修訂**：(1) `data-schema.ts` `PWA_TEXTS.updateNotice`／`updateButton` 改值，UP-4、UP-6、UP-7、V-PWA-10、VR-4 (b)、FB-39、FB-57 引用同步（歷史紀錄保留舊文字）；(2) 契約原本未定義「資料來源與授權」頁的固定文字常數（聲明由 pg-frontend 依 PRD 組字），本版新增 `data-schema.ts` §16 常數 `SOURCES_CONTACT_TEXT` 與 §4.3 規則 **L-7**（逐字、純文字、非 `<a>`、無 `mailto:`、交付 HTML 不得含無空格位址、不得於執行期組出、不發網路請求、不持久化、只在該頁顯示）；(3) §1 新增 1 列與 v0.16 型別數；§8 新增 v0.16 對照表；新增回饋上游 FB-61、FB-62、回饋下游 §9.9 DS-40。`storage-schema.json` 只改 meta（版本、上游）。型別數 69 不變、契約常數 41 → 42、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，不需遷移**；`src/data/` 不受影響。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 | 0.16（核准） | 2026-11-04 | 主控 | 主控代核：只改文字常數與規則（PWA_TEXTS、SOURCES_CONTACT_TEXT、L-7），不改 PRD、不改持久化結構（schemaVersion 3 不變）。 |
+| 0.17 | 2026-11-04 | sa-agent | 修訂已核准的 v0.16（主控代核），原因：PRD v0.17（approved，JimmyLin，2026-11-04）R-25 的文字修訂（新增 AC-23-08；修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10；E-121～E-123；Q-72～Q-76 已決議，以 PRD 為準）。本檔與 `data-schema.ts` 的 `status` 改為 `draft`、`version` 0.17、核准欄位清空，上游改為 PRD v0.17；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved（比照 v0.9 的三檔同步例外）。(1) §4.3 新增 L-8 與固定文字 LT-1～LT-6；L-7 (7) 改為「新增此行不連帶改動聲明」，現行聲明以 AC-23-02 與 L-8 為準；(2) §7.8 新增 V-LGL-01～V-LGL-06；(3) NM-3、NM-4 移除「聲明文字不變」；§8 品牌標識對照列移除舊的著作權人組字，新增 §8 v0.17 表；(4) §1、§7.4 標題的「題型對應多益 Part 5」改為「題型參考 TOEIC®（多益）Part 5」；§1 新增固定文字列與 v0.17 型別數；(5) 新增回饋上游 FB-63、FB-64，回饋下游 §9.10 DS-41、DS-42；(6) `data-schema.ts` 只改註解。歷史敘述與舊變更紀錄保留原文；N-3、FB-26 的「多益高頻字」是 v0.6 內容任務的契約內部說明，不屬 AC-23-08 範圍，不改。型別數 69、契約常數 42、localStorage 鍵數 2 皆不變；**持久化結構不變，`schemaVersion` 維持 3，不需遷移**；`src/data/` 格式不變，只有 `p5-009` 一個值要改（DS-42）。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 
 > **主控代核（2026-11-02）**：v0.9 依 PRD v0.9（JimmyLin 核准）增量修訂，未改 PRD、未改持久化結構（schemaVersion 維持 2、備份格式不變），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 內容無變動，維持 v0.8 approved，三檔版本不同步屬本版例外。FB-33～FB-35 接受 SA 處理方式，於下次 PRD 修訂時交 PM 確認。
 
@@ -1431,3 +1480,5 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 > **主控代核（2026-11-03，v0.13）**：依 PRD v0.13（JimmyLin 核准）只修 VC-3、V-LAY-01、§11.2 accent 列與 COLOR_TOKENS.accent 註解，加入「標題列品牌圖示（AC-38-05）除外」；§11.2 一併修改接受。未改持久化結構（schemaVersion 2），符合主控代核範圍。
 
 > **主控代核（2026-11-03，v0.14）**：依 PRD v0.14（JimmyLin 核准）新增 §12 版本號與狀態列規則、HT-6～HT-9；未改持久化結構（schemaVersion 2、無新鍵），符合主控代核範圍。FB-50 已由主控修正 PRD Q-62 表格錯位與兩處「待人類決定」文字（記錄人類決議）；FB-51 接受契約定案（範本單字來源標示不得出現「範本」，顯示「自訂擴充」），下次 PRD 修訂時交 PM 補文字；FB-52、FB-53 接受。
+
+> **主控代核（2026-11-04，v0.17）**：依 PRD v0.17（JimmyLin 核准）R-25 修訂固定文字與驗證規則（L-8、LT-1～LT-6、V-LGL-01～06）；只改文字規則與註解，未改 PRD、未改持久化結構（schemaVersion 3、localStorage 2 鍵、無遷移），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 無實質變動，維持 v0.16。FB-63、FB-64 接受 SA 定案。

@@ -521,7 +521,7 @@ describe("shell.test.js：名稱 EnglishContext 與標題列圖示（v0.12，FE-
     assert.equal(prop(rulesOf(base, ".app-title"), "display"), "flex");
   });
 
-  test("NM-4：license-header.txt 第一行 = EnglishContext，第 2 行起與 v0.11 逐字相同（SHA-256）", () => {
+  test("NM-4：license-header.txt 第一行 = EnglishContext，第 2 行起與 v0.12（FE-78）逐字相同（SHA-256）", () => {
     const crypto = require("node:crypto");
     // 換行一律正規化為 LF（Windows checkout 可能為 CRLF）
     const lines = read("license-header.txt").replace(/\r\n/g, "\n").split("\n");
@@ -529,7 +529,7 @@ describe("shell.test.js：名稱 EnglishContext 與標題列圖示（v0.12，FE-
     const rest = lines.slice(1).join("\n");
     assert.equal(
       crypto.createHash("sha256").update(rest).digest("hex"),
-      "14b65a247fcbfd5267d285e2d6df749ba6ed589f8fcdde49f40da7081f765e07"
+      "a219f926540d5c4e6435448b225ce0af283b6574869fe065b204dd6b9fba1fa0"
     );
     assert.doesNotMatch(read("license-header.txt"), /english\s*master\s*track/i);
   });

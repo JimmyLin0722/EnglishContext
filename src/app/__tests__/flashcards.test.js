@@ -49,7 +49,8 @@ describe("flashcards.test.js", () => {
     const m = L.cardModel(the, opt);
     assert.deepEqual(m.back.map((f) => f.key), ["pos", "meaning", "example"]);
     assert.equal(m.back[0].value, "art. 冠詞");
-    assert.equal(m.front[0].label, "多益常考搭配詞");
+    assert.equal(m.front[0].label, "常用搭配詞"); // （v0.12，FE-78）契約 L-8 LT-1、V-LGL-01
+    assert.ok(m.front.every((f) => !f.label.includes("多益")), "單字卡正面標籤不含「多益」");
     noBad(m);
   });
 

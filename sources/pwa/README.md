@@ -2,7 +2,7 @@
 
 | 項目 | 內容 |
 | :--- | :--- |
-| 來源檔 | `sources/pwa/PWA_Icon.jpg`（2048×2048 JPG，JimmyLin 提供構想後由 AI 生成，2026-11-04 JimmyLin 說明；作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0；Q-48 的現行聲明待 PRD 修訂） |
+| 來源檔 | `sources/pwa/PWA_Icon.jpg`（2048×2048 JPG，JimmyLin 提供構想後由 AI 生成，2026-11-04 JimmyLin 說明；作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0） |
 | 決議 | PRD Q-41 A（裁灰邊、保留「EnglishContext」字樣）、Q-45 A（主控預先產生） |
 | 產生者 | 主控，2026-11-02 初版；2026-11-03 依 BUG-003 重新產生；工具 Python 3 + Pillow 12.3.0 |
 
