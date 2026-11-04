@@ -3,8 +3,8 @@
     "suite": "pwa-static",
     "tc": "TC-PS-01",
     "ac": "AC-36-07、AC-19-01（V-PWA-01）",
-    "result": "失敗",
-    "note": "dist/site 檔案 8 個 [\"ads.txt\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"sw.js\"]，與契約 8 檔相同=true；全小寫=true；index.html 與 dist/english-master-track.html 位元組相同=false；ads.txt 與 sources/deploy/ads.txt 相同=true、與 dist/ads.txt 相同=（無）（\"google.com, pub-4051803210893105, DIRECT, f08c47fec0942fa0\"）；4 張 PNG 與 src/app/assets/icons 位元組相同=true；不得出現的檔案 0"
+    "result": "通過",
+    "note": "dist/site 檔案 8 個 [\"ads.txt\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"sw.js\"]，與契約 8 檔相同=true；全小寫=true；index.html 與 dist/english-master-track.html 位元組相同=true；ads.txt 與 sources/deploy/ads.txt 相同=true、與 dist/ads.txt 相同=（無）（\"google.com, pub-4051803210893105, DIRECT, f08c47fec0942fa0\"）；4 張 PNG 與 src/app/assets/icons 位元組相同=true；不得出現的檔案 0"
   },
   {
     "suite": "pwa-static",
@@ -25,14 +25,14 @@
     "tc": "TC-PS-04",
     "ac": "AC-34-04、AC-34-05、AC-36-02、AC-37-01、AC-19-01（V-PWA-04）",
     "result": "通過",
-    "note": "HD-1 各元素（全檔／head 內）次數 1/1、1/1、1/1、1/1、1/1、1/1；emt-build-id=33dcbafd5b611fc6；禁止元素命中 0；<link> 標籤 [\"<link rel=\\\"icon\\\" href=\\\"data:,\\\">\"]；<title>EnglishContext</title>；殘留佔位 @@=false"
+    "note": "HD-1 各元素（全檔／head 內）次數 1/1、1/1、1/1、1/1、1/1、1/1；emt-build-id=be5c8e6ad7ed6061；禁止元素命中 0；<link> 標籤 [\"<link rel=\\\"icon\\\" href=\\\"data:,\\\">\"]；<title>EnglishContext</title>；殘留佔位 @@=false"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-PS-05",
     "ac": "AC-36-02、AC-37-05、AC-35-01（V-PWA-05）",
     "result": "通過",
-    "note": "sw.js BUILD_ID=33dcbafd5b611fc6（HTML 33dcbafd5b611fc6）；CACHE_NAME = 前綴 + BUILD_ID；PRECACHE_URLS [\"./\",\"./index.html\",\"./manifest.webmanifest\",\"./icons/icon-192.png\",\"./icons/icon-512.png\",\"./icons/icon-maskable-512.png\",\"./icons/apple-touch-icon-180.png\"]；禁用字串命中 無；監聽 install、activate、fetch、message；無 self.onX 指派；UTF-8 無 BOM"
+    "note": "sw.js BUILD_ID=be5c8e6ad7ed6061（HTML be5c8e6ad7ed6061）；CACHE_NAME = 前綴 + BUILD_ID；PRECACHE_URLS [\"./\",\"./index.html\",\"./manifest.webmanifest\",\"./icons/icon-192.png\",\"./icons/icon-512.png\",\"./icons/icon-maskable-512.png\",\"./icons/apple-touch-icon-180.png\"]；禁用字串命中 無；監聽 install、activate、fetch、message；無 self.onX 指派；UTF-8 無 BOM"
   },
   {
     "suite": "pwa-static",
@@ -46,42 +46,42 @@
     "tc": "TC-36-01a",
     "ac": "AC-36-01 (a)（V-PWA-06）",
     "result": "通過",
-    "note": "連續建置 2 次：HTML／index.html／manifest／sw.js 逐位元組相同 [true,true,true,true]、部署目錄全部相同=true（sha 8c2974965865）；與 dist/ 現有產物相同=false；BUILD_ID 33dcbafd5b611fc6"
+    "note": "連續建置 2 次：HTML／index.html／manifest／sw.js 逐位元組相同 [true,true,true,true]、部署目錄全部相同=true（sha 8bb507ba7e3a）；與 dist/ 現有產物相同=true；BUILD_ID be5c8e6ad7ed6061"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-36-01b",
     "ac": "AC-36-01 (b)、AC-36-02",
     "result": "通過",
-    "note": "src/app/main.js 改 1 字（註解「。」→「，」）：BUILD_ID c0556075e7fe73cf（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；src/data/templates.js 改 1 字（內容「延遲」→「延時」）：BUILD_ID 67c0f5d4d38a4b47（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；全程未手動修改版本號、快取名稱或 sw 範本"
+    "note": "src/app/main.js 改 1 字（註解「。」→「，」）：BUILD_ID f363c59cb0abafa7（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；src/data/templates.js 改 1 字（內容「延遲」→「延時」）：BUILD_ID 635c7b2f495f8fa9（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；全程未手動修改版本號、快取名稱或 sw 範本"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-36-01c",
     "ac": "AC-36-01 (c)",
     "result": "通過",
-    "note": "換 icons/icon-192.png（單色 192×192 RGB）：BUILD_ID f3044978d0dcce87（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true"
+    "note": "換 icons/icon-192.png（單色 192×192 RGB）：BUILD_ID e9d53ac55d70824d（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-36-02",
     "ac": "AC-36-02",
     "result": "通過",
-    "note": "HTML <meta name=\"emt-build-id\"> = sw.js BUILD_ID = 33dcbafd5b611fc6（畫面不顯示，meta 標籤）；(b) 兩版識別碼 33dcbafd5b611fc6 ≠ c0556075e7fe73cf；只改 ads.txt：BUILD_ID 33dcbafd5b611fc6（不同=false）、sw.js 不同=false、HTML 與 sw 識別碼一致=true（ads.txt 不納入，SW-2）"
+    "note": "HTML <meta name=\"emt-build-id\"> = sw.js BUILD_ID = be5c8e6ad7ed6061（畫面不顯示，meta 標籤）；(b) 兩版識別碼 be5c8e6ad7ed6061 ≠ f363c59cb0abafa7；只改 ads.txt：BUILD_ID be5c8e6ad7ed6061（不同=false）、sw.js 不同=false、HTML 與 sw 識別碼一致=true（ads.txt 不納入，SW-2）"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-36-01obs",
     "ac": "AC-36-01（觀察）",
     "result": "通過",
-    "note": "src/data/templates.js 只改第 1 行註解 1 字（觀察） → BUILD_ID 不變、HTML 不同：資料檔以 JSON 重新序列化，註解不進入交付 HTML，因此交付物不變、無需更新；列觀察與回饋上游（AC-36-01 (b)「任一處」的解讀）"
+    "note": "src/data/templates.js 只改第 1 行註解 1 字（觀察） → BUILD_ID 不變、HTML 與原產物相同：資料檔以 JSON 重新序列化，註解不進入交付 HTML，因此交付物不變、無需更新；列觀察與回饋上游（AC-36-01 (b)「任一處」的解讀）"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-36-07a",
     "ac": "AC-36-07（本機模擬 MC-03 新 workflow）",
     "result": "通過",
-    "note": "取 architecture §5.2 workflow：Build「npm run build」、上傳 path「dist/site」、不執行 npm ci=true；以不含 .git／node_modules／dist 的複本（35 個文字檔轉 LF，模擬 .gitattributes eol=lf 的 CI checkout）執行 npm run build → 結束碼 0；Verify 步驟（逐字取自 §5.2，以 Git Bash 執行）結束碼 0；dist/site 恰 8 個檔案 [\"ads.txt\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"sw.js\"]；CI 模擬 BUILD_ID 4a70f6b751d9c9c8（本機 CRLF 工作目錄 33dcbafd5b611fc6；不同，屬 SD-FB-37 已知事項）；CI 建置所需但尚未被 git 追蹤的檔案 0 個"
+    "note": "取 architecture §5.2 workflow：Build「npm run build」、上傳 path「dist/site」、不執行 npm ci=true；以不含 .git／node_modules／dist 的複本（37 個文字檔轉 LF，模擬 .gitattributes eol=lf 的 CI checkout）執行 npm run build → 結束碼 0；Verify 步驟（逐字取自 §5.2，以 Git Bash 執行）結束碼 0；dist/site 恰 8 個檔案 [\"ads.txt\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"sw.js\"]；CI 模擬 BUILD_ID dcece0396ee88d95（本機 CRLF 工作目錄 be5c8e6ad7ed6061；不同，屬 SD-FB-37 已知事項）；CI 建置所需但尚未被 git 追蹤的檔案 0 個"
   },
   {
     "suite": "pwa-static",

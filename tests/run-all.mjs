@@ -11,6 +11,7 @@
 // 越界增量檢查改用 boundary-r6.mjs（與 git HEAD 8a266c3 比對，FE-63～FE-69），輸出仍為 boundary-delta.json。
 // 第 7 輪（PRD v0.15 學習位置與作答紀錄）：新增 e2e-track（US-44、US-47）、e2e-track-p5（US-45、US-46；Edge 冒煙跑 file:// 部分）；
 // 越界增量檢查改用 boundary-r7.mjs（與 git HEAD a5eee06 比對，FE-70～FE-76、CT-25）。環境變數 QA_V100 指向 v1.0.0 舊交付檔（TC-47-04b）。
+// 第 8 輪（PRD v0.18 R-26）：新增 e2e-lock（US-48）、e2e-legal、legal-check（補 v0.16、v0.17 的 TC）；越界增量檢查改用 boundary-r8.mjs（與 git HEAD f57145a 比對，FE-80～FE-82）；逐一執行請用 tests/tools/run-r8.mjs。
 // 本機記憶體不足時整個程序可能被系統停止（第 6 輪 O-6-1）：可改為逐一執行各套件（每個套件結束即關閉瀏覽器）。
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
@@ -38,7 +39,8 @@ const rebuilt = path.join(TMP, "rebuilt.html");
 spawnSync(process.execPath, ["tools/build.mjs", "--out", rebuilt], { cwd: ROOT, stdio: "ignore" });
 run(["tests/static/static-check.mjs", path.join(RES, "static.json"), rebuilt]);
 run(["tests/static/boundary-check.mjs", path.join(RES, "boundary.json")]);
-run(["tests/static/boundary-r7.mjs", path.join(RES, "boundary-delta.json")]);
+run(["tests/static/boundary-r8.mjs", path.join(RES, "boundary-delta.json")]);
+run(["tests/static/legal-check.mjs", path.join(RES, "legal.json")]);
 
 // 2. 無內建資料的 fixture 建置（AC-06-06、AC-09-06、AC-30-10）
 const empty = path.join(TMP, "emptydata"); fs.mkdirSync(empty, { recursive: true });
@@ -64,6 +66,9 @@ run(["tests/e2e/e2e-version.mjs"], { QA_BROWSER: "edge", QA_FIXTURE_NODATA: fixt
 run(["tests/e2e/e2e-track.mjs"], { QA_FIXTURE_NODATA: fixture });
 run(["tests/e2e/e2e-track-p5.mjs"]);
 run(["tests/e2e/e2e-track-p5.mjs"], { QA_BROWSER: "edge" });
+// 第 8 輪：已答對鎖定檢視（US-48）、法律文字與聯絡行（e2e-legal 的 http 區塊使用埠 8080）
+run(["tests/e2e/e2e-lock.mjs"]);
+run(["tests/e2e/e2e-legal.mjs"]);
 
 // 4. 彙整（-edge.json 為跨瀏覽器重跑，於報告以 TC-X-edge 一項計）
 const all = [];
@@ -74,7 +79,7 @@ for (const f of fs.readdirSync(RES).filter((x) => x.endsWith(".json") && !x.ends
 const edge = fs.readdirSync(RES).filter((x) => x.endsWith("-edge.json")).flatMap((f) => JSON.parse(fs.readFileSync(path.join(RES, f), "utf8")).map((r) => ({ file: f, ...r })));
 const count = (k) => all.filter((r) => r.result === k).length;
 const summary = {
-  date: new Date().toISOString(), total: all.length, pass: count("通過"), fail: count("失敗"), manual: count("待人工"), na: count("不適用（暫停）"),
+  date: new Date().toISOString(), total: all.length, pass: count("通過"), fail: count("失敗"), manual: count("待人工"), na: all.filter((r) => String(r.result).startsWith("不適用")).length,
   failed: all.filter((r) => r.result === "失敗").map((r) => `${r.file} ${r.tc} ${r.ac}`),
   edge: { total: edge.length, pass: edge.filter((r) => r.result === "通過").length, failed: edge.filter((r) => r.result === "失敗").map((r) => `${r.file} ${r.tc}`) },
   exits,

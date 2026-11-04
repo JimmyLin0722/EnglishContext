@@ -1,6 +1,6 @@
 ---
 doc: CONTRACT
-version: 0.17
+version: 0.18
 status: approved
 author: sa-agent
 approved_by: JimmyLin（授權主控代核）
@@ -9,7 +9,7 @@ approved_at: 2026-11-04
 
 # English Master Track — 資料契約總覽
 
-> 上游：`docs/01-PRD.md` v0.17（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-25 為準（v0.12 修訂內容見 §13 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列；v0.15 見 §5.3、§5.10～§5.12、§6、§8 v0.15 表與 0.15 列；v0.16 見 §4.3 L-7、§10.7 UP-6、§8 v0.16 表與 0.16 列；v0.17 見 §4.3 L-8、§7.8、§8 末表與 0.17 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
+> 上游：`docs/01-PRD.md` v0.18（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-26 為準（v0.12 修訂內容見 §13 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列；v0.15 見 §5.3、§5.10～§5.12、§6、§8 v0.15 表與 0.15 列；v0.16 見 §4.3 L-7、§10.7 UP-6、§8 v0.16 表與 0.16 列；v0.17 見 §4.3 L-8、§7.8、§8 v0.17 表與 0.17 列；v0.18 見 §5.11、§7.7 V-ST-23～V-ST-27、§8 末表、§9.11 與 0.18 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
 > 本契約共 3 個檔案，視為一組審核：本檔、`data-schema.ts`（型別）、`storage-schema.json`（localStorage 與備份檔的 JSON Schema）。核准方式：把本檔 frontmatter 改為 `status: approved`，並同步填寫 `data-schema.ts` 開頭註解與 `storage-schema.json` `meta` 的 `status`、`approved_by`、`approved_at`（v0.5 起三檔狀態一律一致，SD-FB-04）。
 > 欄位的必填、值域、範例以 `data-schema.ts` 註解為準；本檔放總覽、規則、驗證與待辦。
 > v0.2：依主控 2026-10-29 連網查證結果，四份字表與 ECDICT 授權改為已確認、可收錄；原始字表已置於 `sources/wordlists/`；`N_B`、`N_G` 改為實際值（§4.2）。
@@ -25,6 +25,7 @@ approved_at: 2026-11-04
 > **v0.15：依 PRD v0.15（R-23、US-44～US-47、AC-44-01～AC-47-08，修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71）修訂，含持久化結構變更 `schemaVersion` 2 → 3（Q-63 已由人類核准）。依 CLAUDE.md，本版須由人類核准，不適用主控代核。** 重點：(1) `PersistedData` 新增 3 個**選填**欄位 `flashcardPosition`（新型別 `FlashcardPosition`）、`part5CorrectIds`、`part5UnansweredOnly`；v2 → v3 遷移 MG-5～MG-8、欄位層級讀取 RD-3、RD-4；鍵名 `englishMasterTrack:state` 不變、鍵數維持 2；(2) 新增 §5.10 單字卡上次位置 FP-1～FP-9、§5.11 答對紀錄 CR-1～CR-9 與「只練沒答對」UO-1～UO-9、§5.12 寫入時機與失敗 WR-1～WR-5；(3) `LEARNING_PROGRESS_FIELDS` 6 → 7 欄（Q-67 A），CI-4、CI-5、CI-8 修改；(4) 備份匯出 3、匯入 `[1, 2, 3]`，新增 IM-9、IM-10；(5) 新增 V-ST-18～V-ST-22、V-P5-08；(6) 網站版本 1.1.0（Q-70 A）只在 §12.1 註記，契約無版本值常數。**C-8 解讀規則**：本檔 v0.8～v0.14 段落中描述「目前」的「`schemaVersion` 2」「`PersistedData` 9 欄」，v0.15 起讀作 3 與 12 欄。
 > **v0.16：依 PRD v0.16（R-24，新增 AC-23-07，修改 AC-36-03、AC-42-04 文字）做文字層級修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) `PWA_TEXTS.updateNotice` 改為「有新版本，請更新版本」、`updateButton` 改為「更新版本」，UP-4～UP-7 等引用同步，更新流程行為不變（Q-43 決議 A）；(2) 新增契約常數 `SOURCES_CONTACT_TEXT`（`data-schema.ts` §16）與規則 **L-7**（§4.3）：「資料來源與授權」頁 1 行聯絡資訊，逐字、純文字、非連結、不得出現 `mailto:` 或不帶空格的完整位址、不發網路請求、不持久化。`storage-schema.json` 只改 meta。
 > **v0.17：依 PRD v0.17（R-25，新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）做文字層級修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) 新增規則 **L-8**（§4.3）集中 6 段固定文字 LT-1～LT-6；(2) 新增 §7.8 驗證規則 V-LGL-01～V-LGL-06；(3) NM-3、NM-4、L-7 (7)、§8 品牌標識對照列同步；(4) `data-schema.ts` 只改註解，型別與常數不增減。**三檔同步的例外**（比照 v0.9）：`storage-schema.json` 本版未修改，維持 v0.16 approved；本版契約組合 = 本檔 v0.17 + `data-schema.ts` v0.17 + `storage-schema.json` v0.16（其內容對 v0.17 仍正確）。
+> **v0.18：依 PRD v0.18（R-26，新增 US-48、AC-48-01～AC-48-12，修改 13 條 AC，移除 AC-46-07，E-124～E-134，Q-77～Q-80）修訂行為規則，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) §5.11 新增已答對鎖定檢視 LV-1～LV-7，由 `lockedSelection`、`part5UnansweredOnly`、`currentIndex`、`part5CorrectIds` 推導，本次作答結果優先；(2) 新增 UO-10（開關關閉的「下一題」）、SM-1～SM-3（結算與 y = 0）、CR-10（K ≥ 1 常駐清除入口）、HN-1（開關說明文字）；(3) 修改 CR-2、CR-4～CR-7、UO-1～UO-3、UO-5～UO-8，開關在 allCorrect 畫面關閉時本輪歸 0（AC-48-10）；(4) **移除** `PART5_RECORD_TEXTS.replayKeepRecords` 與 `replayPart5KeepRecords` 動作（Q-77 A，理由見 UO-7）；(5) 新增型別 `Part5QuestionState` 與 4 段固定文字；(6) 網站版本 1.2.0（Q-79 A）。**三檔同步的例外**（比照 v0.9、v0.17）：`storage-schema.json` 本版未修改，維持 v0.16 approved；本版契約組合 = 本檔 v0.18 + `data-schema.ts` v0.18 + `storage-schema.json` v0.16。其中 `lockedSelection` 描述的「未作答為 null」，v0.18 起讀作「沒有本次作答結果為 null」（LV-1），不影響驗證結果。
 > 專案代號、文件標題與識別字仍為 English Master Track；App 顯示名稱自 v0.12 起為「EnglishContext」（§11.1）。
 
 ---
@@ -64,6 +65,9 @@ approved_at: 2026-11-04
 | `LAYOUT_TEXTS.levelStatus`（v0.14 新增鍵）；`goalLineCapped`、`goalLineSeparator`（v0.14 停用）；`changeLink`（v0.14 改按鈕） | 難易度設定頁狀態列「目前色級：{生效色級}」；主控台目標行只顯示生效色級 | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-01-08、AC-39-04、AC-17-06、E-92、§12.2、§11.4 DB-4 |
 | `SOURCES_CONTACT_TEXT`（v0.16） | 「資料來源與授權」頁 1 行聯絡資訊（逐字、字母間含空格、純文字、非連結；不持久化） | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-23-07、E-118、E-119、R-24 二、§4.3 L-7 |
 | 固定文字 LT-1～LT-6（v0.17，規則 L-8，非型別、非常數） | 搭配詞標籤、模擬測驗標題說明、原創內容聲明、圖示與名稱聲明、TOEIC® 商標聲明、`p5-009` 解析（不持久化） | pg-frontend（LT-1～LT-5）、pg-content（LT-6） | pg-frontend、pg-content、QA | AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-08、AC-38-08、AC-38-10、R-25、§4.3 L-8、§7.8 |
+| `Part5QuestionState`、`PART5_RECORD_TEXTS.lockedReviewFeedback`／`summaryNoNewAnswers`／`filterHint`／`filterHintAllCorrect`（v0.18；移除 `replayKeepRecords`） | 題目畫面 3 種狀態（推導，不持久化）；已答對鎖定檢視、y = 0 結算與開關說明的固定文字 | pg-frontend | pg-frontend、QA | FR-3.1、FR-3.2、FR-6.2、US-48、AC-48-01～AC-48-12、R-26、§5.11 |
+
+型別數（v0.18）：69 → **70** 個（34 個 `interface`、36 個 `type`）；新增 `Part5QuestionState`（type）。契約常數 **42** 個不變；`PART5_RECORD_TEXTS` 內容變更（新增 4 個鍵、移除 `replayKeepRecords`）。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變；localStorage 鍵數維持 2。
 
 型別數（v0.17）：與 v0.16 相同 **69** 個（34 個 `interface`、35 個 `type`），契約常數 **42** 個，無增減、無欄位變更、無常數值變更（只改註解）。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變；localStorage 鍵數維持 2。
 
@@ -335,7 +339,7 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | 啟動：`schemaVersion` = 3（含遷移後） | 先依 RD-1 處理 `todayLearned`、`learnedHistory`，（v0.15）再依 RD-3 處理 `flashcardPosition`、`part5CorrectIds`、`part5UnansweredOnly`，最後以根結構與完整 V-ST-03 驗證 | AC-30-13、E-52、AC-44-06、AC-47-05、E-116 |
 | 啟動：成功讀取後 | 以 `appliedScore` 重算 `appliedColor`、`effectiveColor` 覆蓋；`part5.currentIndex` 超出題庫時依 V-ST-05 重設；（v0.8）以啟動當下的本地日期為今天，依 V-ST-09～V-ST-11 正規化 `todayLearned`、`learnedHistory`；（v0.15）依 UO-4 正規化模擬測驗目前題目（V-ST-05 之後）；建立單字集後依 FP-2 解析 `flashcard.index`。皆只改記憶體，不因此呼叫 `setItem`（RD-4；遷移寫回 MG-7 除外） | AC-01-04、AC-11-05、AC-30-09、AC-30-13、AC-44-01、AC-46-04 |
 | 寫入 | 任何 `PersistedData` 變更後，整筆 `StorageRecord` 以**一次** `setItem` 寫入（不分鍵、不部分寫入） | AC-18-01、AC-18-06 |
-| 寫入：容量不足 | 新增自訂單字：記憶體回滾、不新增、提示「儲存空間不足」；其他寫入：保留記憶體狀態並提示，下次寫入再試。（v0.8）學習紀錄寫入（LR-7）：畫面照常計數，提示「儲存空間不足」**同一工作階段只一次**（`RuntimeState.learningQuotaNoticeShown`）。（v0.9）**例外**：切換難易度初始化（§5.7）寫入拋出任何例外 → 整個不套用、記憶體不變，提示「儲存空間不足，未套用」（CI-7）。原有 localStorage 值因 `setItem` 失敗而不變。「容量不足」的判定見 IM-7。（v0.15）單字卡位置、模擬測驗作答（含答對紀錄）、開關、「全部題目再練一次」、「清除答對紀錄」的寫入依 §5.12 WR-2：與學習紀錄共用「同一工作階段只提示一次」 | AC-18-04、AC-30-14、AC-32-11、AC-44-10、AC-47-07 |
+| 寫入：容量不足 | 新增自訂單字：記憶體回滾、不新增、提示「儲存空間不足」；其他寫入：保留記憶體狀態並提示，下次寫入再試。（v0.8）學習紀錄寫入（LR-7）：畫面照常計數，提示「儲存空間不足」**同一工作階段只一次**（`RuntimeState.learningQuotaNoticeShown`）。（v0.9）**例外**：切換難易度初始化（§5.7）寫入拋出任何例外 → 整個不套用、記憶體不變，提示「儲存空間不足，未套用」（CI-7）。原有 localStorage 值因 `setItem` 失敗而不變。「容量不足」的判定見 IM-7。（v0.15）單字卡位置、模擬測驗作答（含答對紀錄）、開關、「下一題」、「重新開始」、「清除答對紀錄」的寫入依 §5.12 WR-2：與學習紀錄共用「同一工作階段只提示一次」 | AC-18-04、AC-30-14、AC-32-11、AC-44-10、AC-47-07 |
 
 **讀取失敗時的重設時機**（v0.6，FE-07 #1；適用上表「JSON 解析失敗…」「`schemaVersion` 缺失…」兩列，以及遷移後驗證失敗）：
 
@@ -533,7 +537,7 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | FP-8 | **不提示**：還原位置不顯示「從上次位置繼續」等提示、對話框、Toast；由導覽「單字卡」與主控台「開始今日學習」進入結果相同（DB-3 進入時不寫入） | AC-44-01、AC-39-03 |
 | FP-9 | **儲存不可用或失敗**：`storageStatus = "unavailable"` → 只更新記憶體，同一工作階段回到單字卡頁仍為該張，重新載入為第 1 張（AC-44-10 (a)）；寫入失敗依 WR-2 | AC-44-10、E-102、E-103 |
 
-### 5.11 模擬測驗答對紀錄與「只練沒答對」（v0.15，pg-frontend；PRD US-45、US-46、R-23 二、Q-64～Q-67、Q-69、Q-71）
+### 5.11 模擬測驗答對紀錄與「只練沒答對」（v0.15，pg-frontend；PRD US-45、US-46、R-23 二、Q-64～Q-67、Q-69、Q-71；v0.18 PRD US-48、R-26、Q-77～Q-80）
 
 名詞：**題庫** = `PART5_QUESTION_BANK`（陣列順序 = 題庫順序）；**Q** = 題庫長度；**答對集合** = `new Set(part5CorrectIds)`；**曾答對(j)** = `題庫[j].id` 在答對集合中；**K** = 題庫中曾答對的題數（= 答對集合 ∩ 題庫 id 的大小，0 ≤ K ≤ Q）；**未答對(j)** = 非曾答對(j)（含從未作答與答錯過）；**next(f)** = 最小的 j ≥ f 且 未答對(j)，沒有則「無」；**開關** = `part5UnansweredOnly`。題庫為空（Q = 0）時沿用既有空題庫處理，本節不適用、不顯示 K 與開關。
 
@@ -542,34 +546,62 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
 | CR-1 | **資料**：`part5CorrectIds` 只記「曾答對」的題目 id（Q-64 A），依首次答對先後附加、不重複；不記答錯、次數或最近一次結果 | AC-45-01、AC-45-03 |
-| CR-2 | **記錄**：作答（`lockedSelection` 由 null 變非 null）時，若所選 = `correctIndex` 且該題 id 不在答對集合 → 附加到陣列末尾。與該次作答的 `part5` 計數（AC-11-03）、打卡變更**同一次** `setItem`。答錯不移除、不改變；已鎖定後重複點擊不變（AC-11-06）；曾答對的題目再答對不重複附加 | AC-45-01～AC-45-03 |
+| CR-2 | **記錄**：作答（`lockedSelection` 由 null 變非 null）時，若所選 = `correctIndex` 且該題 id 不在答對集合 → 附加到陣列末尾。與該次作答的 `part5` 計數（AC-11-03）、打卡變更**同一次** `setItem`。答錯不移除、不改變；已鎖定後重複點擊不變（AC-11-06）。（v0.18）曾答對的題目不接受作答（LV-3）；陣列已含該 id 時仍不得重複附加（防禦） | AC-45-01～AC-45-03 |
 | CR-3 | **推導，不另存**：K、Q、曾答對(j) 每次繪製時計算；不得把 K 寫入任何儲存。答對紀錄中題庫不存在的 id **不顯示、不計入 K、不報錯、不刪除**（Q-71 A）；題庫新增的題目一律為未答對 | AC-45-05、AC-45-07、E-109 |
-| CR-4 | **顯示**：(a) 「✓ 曾答對」（`PART5_RECORD_TEXTS.correctBadge`）：目前題目曾答對時，在題目畫面顯示（未作答與已作答皆顯示），位置與樣式限制見該常數註解；(b) 「已答對 K / Q 題」（`correctCount`）：question、summary、allCorrect 三種畫面（UO-3）各恰 1 次，進度條附近、題目之上；作答後 ≤ 100ms 更新；(c) 主控台**不**新增 K 的顯示 | AC-45-01、AC-45-04、AC-45-05、AC-45-06 |
-| CR-5 | **既有計算不變**：累計答題數／答對數（AC-11-03、AC-11-06、AC-11-07）、本輪結算（AC-11-04）、主控台「模擬測驗正確率」= `totalCorrect ÷ totalAnswered`（AC-17-04、§5.4 末段）、打卡（模擬測驗作答照常打卡）、今日已學（不計入）完全與 v0.14 相同；曾答對的題目再作答照常計入；不以 K / Q 取代任何既有數字 | AC-45-06、PRD 共通規則 3 |
-| CR-6 | **「清除答對紀錄，重新來過」**（只出現在 allCorrect 畫面，UO-7）：先顯示確認對話框（文字須包含 `clearConfirmMustInclude` 兩段，只有「確定」「取消」）。「確定」→ `part5CorrectIds = []`；開關**維持原值**（開啟）；`part5` = `{ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 原值, totalCorrect: 原值 }`（本輪歸 0，同「重新開始」；累計不變）；一次 `setItem`。「取消」（含 Esc、點視窗外）→ 留在 allCorrect 畫面，資料完全不變、不呼叫 `setItem` | AC-46-08、Q-65 C |
-| CR-7 | **不清除的情況**：「重新開始」（AC-11-07）、「全部題目再練一次（保留紀錄）」（UO-7）、開關切換、匯出、生效色級未改變的套用、無學習紀錄時直接套用（FB-58）都不清除答對紀錄 | AC-45-06、AC-46-07 |
+| CR-4 | **顯示**：(a) 「✓ 曾答對」（`PART5_RECORD_TEXTS.correctBadge`）：目前題目曾答對時，在題目畫面顯示（`Part5QuestionState` 為 `answered` 或 `lockedReview` 皆顯示；`idle` 的題目一律不是曾答對，不顯示），位置與樣式限制見該常數註解；(b) 「已答對 K / Q 題」（`correctCount`）：question、summary、allCorrect 三種畫面（UO-3）各恰 1 次，進度條附近、題目之上；作答後 ≤ 100ms 更新；(c) 主控台**不**新增 K 的顯示 | AC-45-01、AC-45-04、AC-45-05、AC-45-06 |
+| CR-5 | **既有計算不變**：累計答題數／答對數（AC-11-03、AC-11-06、AC-11-07）、本輪結算（AC-11-04）、主控台「模擬測驗正確率」= `totalCorrect ÷ totalAnswered`（AC-17-04、§5.4 末段）、打卡（模擬測驗作答照常打卡）、今日已學（不計入）完全與 v0.14 相同；實際作答照常計入，（v0.18）經過已答對鎖定檢視不計入（LV-3）；不以 K / Q 取代任何既有數字 | AC-45-06、AC-48-02、PRD 共通規則 3 |
+| CR-6 | **「清除答對紀錄，重新來過」**（入口依 CR-10）：先顯示確認對話框（文字須包含 `clearConfirmMustInclude` 兩段，只有「確定」「取消」）。「確定」→ `part5CorrectIds = []`（題庫不存在的 id 一併清空）；開關**維持原值**；`part5` = `{ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 原值, totalCorrect: 原值 }`（本輪歸 0；累計不變；本次作答結果一併放棄，E-133）；不打卡；一次 `setItem`。此時 K = 0，第 1 題為 `idle`，入口依 CR-10 消失。「取消」（含 Esc、點視窗外）→ 留在原畫面，資料完全不變、不呼叫 `setItem` | AC-46-08、AC-48-11、E-133、Q-65、Q-78 B |
+| CR-7 | **不清除的情況**：「重新開始」（AC-11-07）、「下一題」、開關切換（含 UO-8 的本輪歸 0）、匯出、生效色級未改變的套用、無學習紀錄時直接套用（FB-58）都不清除答對紀錄 | AC-45-06、AC-48-10 |
 | CR-8 | **清除的情況**：初始化「確定」（CI-4，`LEARNING_PROGRESS_FIELDS` (7)）、CR-6「確定」、讀取失敗整體重設（AC-18-05）；匯入時整欄由備份值取代（舊版備份 → `[]`） | AC-45-08、AC-32-02、AC-47-03 |
 | CR-9 | **安全**：題目 id 不顯示在畫面；匯入的 id 只做字串比對，不以 HTML 插入（C-7） | AC-47-08 |
+| CR-10 | （v0.18）**常駐清除入口**：K ≥ 1 時，question（3 種狀態）、summary、allCorrect 每個畫面恰 1 個 `clearAndRestart` 按鈕，開關開啟與關閉皆同。question、summary 畫面位於「已答對 K / Q 題」與開關附近，為次要按鈕樣式；allCorrect 畫面即該畫面唯一的按鈕，不重複顯示。K = 0 不顯示，含答對紀錄為空、只含題庫不存在的 id（這些 id 依 Q-71 保留，E-132）。K 依 CR-3 計算。觸控目標 ≥ 44×44 CSS px、可用鍵盤操作、不使用 `accent`、375px 不裁切 | AC-48-07、AC-48-11、E-126、E-132、Q-78 B |
 
 **只練沒答對（UO）**
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| UO-1 | **開關**：`part5UnansweredOnly`，預設 `false`；切換即寫入（一次 `setItem`，開啟時與 UO-4 的正規化結果同一次寫入）。切換本身不改變 `roundAnswered`、`roundCorrect`、`totalAnswered`、`totalCorrect`。屬偏好設定：初始化保留（Q-67 A）、隨備份保存與還原（Q-69 A）、不屬 CI-2 判定。控制項規格（原生核取方塊或 `role="switch"`、≥ 44×44 CSS px、鍵盤可操作、不只靠顏色）見 PRD AC-46-01，屬設計層 | AC-46-01、AC-46-04、AC-46-10 |
-| UO-2 | **開關關閉**：題目順序、「下一題」、結算、「重新開始」與 v0.14 完全相同（AC-11-01～AC-11-07、AC-40-01）；曾答對的題目照常出現並顯示「✓ 曾答對」 | AC-46-02、AC-46-09 |
-| UO-3 | **畫面種類推導**（`Part5ViewKind`，每次繪製時計算，不持久化）：設 `allDone` = 開關開啟 且 K = Q（Q > 0）。(1) `allDone` 且**不是**「`phase = "question"` 且 `lockedSelection ≠ null`」→ `"allCorrect"`（`phase = "summary"` 時同時顯示本輪結算「答對 x / y」）；(2) 否則 `phase = "summary"` → `"summary"`；(3) 否則 → `"question"`。(1) 的排除條件讓「剛答對最後一題、尚未按下一題」時仍顯示該題結果與解析（AC-46-04 (b)） | AC-46-06、E-111 |
+| UO-1 | **開關**：`part5UnansweredOnly`，預設 `false`；切換即寫入（一次 `setItem`，開啟時與 UO-4 的正規化結果同一次寫入，關閉時與 UO-8 的結果同一次寫入）。切換不改變 `totalAnswered`、`totalCorrect`；也不改變 `roundAnswered`、`roundCorrect`，唯一例外是 UO-8 (a)（AC-48-10）。屬偏好設定：初始化保留（Q-67 A）、隨備份保存與還原（Q-69 A）、不屬 CI-2 判定。控制項規格（原生核取方塊或 `role="switch"`、≥ 44×44 CSS px、鍵盤可操作、不只靠顏色）見 PRD AC-46-01，屬設計層 | AC-46-01、AC-46-04、AC-46-10 |
+| UO-2 | **開關關閉**（v0.18 改寫）：題目順序與題號計算與 v0.14 相同，不跳過任何題目（AC-40-01）。曾答對的題目顯示「✓ 曾答對」，沒有本次作答結果時為 `lockedReview`（LV-1），不可作答；未曾答對的題目行為與 v0.14 相同（AC-11-01～AC-11-07）。「下一題」依 UO-10，「重新開始」依 UO-6。K = Q 時畫面仍為 question 或 summary，不是 allCorrect（E-126） | AC-46-02、AC-46-09、AC-48-03、AC-48-07 |
+| UO-3 | **畫面種類推導**（`Part5ViewKind`，每次繪製時計算，不持久化）：設 `allDone` = 開關開啟 且 K = Q（Q > 0）。(1) `allDone` 且**不是**「`phase = "question"` 且 `lockedSelection ≠ null`」→ `"allCorrect"`（`phase = "summary"` 時同時顯示本輪結算「答對 x / y」）；(2) 否則 `phase = "summary"` → `"summary"`；(3) 否則 → `"question"`。(1) 的排除條件讓「剛答對最後一題、尚未按下一題」時仍顯示該題結果與解析（AC-46-04 (b)）。（v0.18）推導邏輯不變；`"question"` 內容再依 LV-1 分 3 種狀態；同時顯示本輪結算的條件改依 SM-3 | AC-46-06、AC-48-07、E-111 |
 | UO-4 | **不變式正規化**（開關開啟期間，以未作答狀態顯示的題目一律不是曾答對的題目，AC-46-04）：當 開關開啟 且 `phase = "question"` 且 `lockedSelection = null` 且 曾答對(`currentIndex`) 且 K < Q → j = next(`currentIndex`)：有 → `currentIndex = j`；無（其後已無未答對，但之前仍有）→ `phase = "summary"`（本輪計數不變；結算畫面「重新開始」依 UO-6 從第一題未答對開始，FB-55）。K = Q 時不移動（UO-3 顯示 allCorrect）。**執行時機**：開關由關變開時（與開關同一次寫入）、啟動讀取後（V-ST-05 之後，只改記憶體，RD-4）、匯入步驟 7（IM-10）。`lockedSelection ≠ null` 的題目（已作答鎖定）不移動，等按「下一題」 | AC-46-04、E-110 |
-| UO-5 | **「下一題」（開關開啟）**：j = next(`currentIndex + 1`)：有 → `currentIndex = j`、`lockedSelection = null`、`phase = "question"`；無 → 以 v0.14 進入本輪結算的方式設 `phase = "summary"`（進度條 100%）。被跳過的題目不作答、不計入本輪與累計。顯示 ≤ 100ms。「第 i / N 題」與進度條仍以題庫題號計算（例：p5-001 之後跳到 p5-004 顯示「第 4 / 200 題」，Q-66 A） | AC-46-03、AC-46-05、E-112 |
-| UO-6 | **「重新開始」**（summary 畫面）：本輪歸 0、累計不變（AC-11-07）；`lockedSelection = null`、`phase = "question"`；`currentIndex` = 開關開啟 ? next(0) : 0。開關開啟且 next(0) 為「無」（K = Q）時不會出現此按鈕（UO-3 為 allCorrect）；若仍被觸發，`currentIndex = 0` 並依 UO-3 顯示 allCorrect，不得出現空白題目或無限跳題 | AC-46-05、AC-11-07 |
-| UO-7 | **allCorrect 畫面**：顯示 `allCorrectTitle`（{q} = Q，例「200 題全部答對！」）、「已答對 Q / Q 題」、開關；以 `replayKeepRecords`、`clearAndRestart` 兩個按鈕**取代**「重新開始」；不顯示任何未作答題目、不顯示「第 i / N 題」；進度條 100%（`aria-valuenow` = N，同 MT-1 結算）。(a) `replayKeepRecords` → 開關 = `false`；`part5` = `{ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, 累計原值 }`；答對紀錄不變（K 仍為 Q，p5-001 顯示「✓ 曾答對」）；一次 `setItem`（FB-56）。(b) `clearAndRestart` → CR-6 | AC-46-06、AC-46-07、AC-46-08 |
-| UO-8 | **開關由開變關**：`part5` 不變（目前顯示的題目或結算維持）；之後依 UO-2。在 allCorrect 畫面關閉開關 → 依 UO-3 變為 question（顯示目前題目，帶「✓ 曾答對」）或 summary | AC-46-09 |
+| UO-5 | **「下一題」（開關開啟）**：前提 `phase = "question"` 且 `lockedSelection ≠ null`，否則不變、不寫入（開關開啟時沒有 `lockedReview`）。j = next(`currentIndex + 1`)：有 → `currentIndex = j`、`lockedSelection = null`、`phase = "question"`；無 → 以 v0.14 進入本輪結算的方式設 `phase = "summary"`（進度條 100%）。被跳過的題目不作答、不計入本輪與累計。顯示 ≤ 100ms。「第 i / N 題」與進度條仍以題庫題號計算（例：p5-001 之後跳到 p5-004 顯示「第 4 / 200 題」，Q-66 A） | AC-46-03、AC-46-05、E-112 |
+| UO-6 | **「重新開始」**（summary 畫面）：本輪歸 0、累計不變（AC-11-07）；`lockedSelection = null`、`phase = "question"`；`currentIndex` = 開關開啟 ? next(0) : 0。（v0.18）開關關閉時第 1 題的狀態依 LV-1 推導：曾答對為 `lockedReview`，未曾答對為 `idle`（AC-48-04）；K、答對紀錄不變。開關開啟且 next(0) 為「無」（K = Q）時不會出現此按鈕（UO-3 為 allCorrect）；若仍被觸發，`currentIndex = 0` 並依 UO-3 顯示 allCorrect，不得出現空白題目或無限跳題 | AC-46-05、AC-11-07、AC-48-04、AC-48-07 |
+| UO-7 | **allCorrect 畫面**（v0.18 改寫，Q-77 A）：顯示 `allCorrectTitle`（{q} = Q，例「200 題全部答對！」）、「已答對 Q / Q 題」、開關、`filterHintAllCorrect`（HN-1）；只有 `clearAndRestart` 1 個按鈕，**取代**「重新開始」，行為依 CR-6；本輪結算依 SM-3；不顯示任何未作答題目、不顯示「第 i / N 題」；進度條 100%（`aria-valuenow` = N，同 MT-1 結算）。**移除**原 (a) `replayKeepRecords`：常數 `PART5_RECORD_TEXTS.replayKeepRecords`、store 動作 `replayPart5KeepRecords`、`part5flow.replayKeepRecords` 一併刪除，不保留為隱藏程式。理由：(1) Q-77 決議移除按鈕，AC-46-06 禁止此文字，沒有任何入口會呼叫；(2) 原有效果（開關關閉、回第 1 題、本輪歸 0、累計與紀錄不變）已由 UO-8 (a) 完整涵蓋，保留會有兩條路徑；(3) 按鈕與動作沒有持久化資料，移除不影響舊資料與備份。此處與領域範本等「隱藏但保留」不同：那些是暫停功能，本項是人類決定不要的功能 | AC-46-06、AC-46-08、AC-48-10、Q-77 A |
+| UO-8 | **開關由開變關**（v0.18 改寫）：依切換**前**的 `Part5ViewKind` 分流。(a) 為 `"allCorrect"`（不論由作答結束、K = Q 時開啟開關或重新載入進入）→ `part5` = `{ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, 累計原值 }`，顯示第 1 題 `lockedReview`，K、答對紀錄不變（AC-48-10）。(b) 其他（含 K = Q 但顯示本次作答結果，UO-3 排除條件）→ `part5` 不變，目前顯示的題目或結算維持（AC-46-09）。兩者與開關同一次 `setItem`；之後依 UO-2。第 1 題資料不完整時依 LV-6 | AC-46-04、AC-46-09、AC-48-07、AC-48-10、E-111 |
 | UO-9 | **效能與邊界**：next() 為線性掃描（Q ≈ 200），須在 ≤ 100ms 內完成換題；任何情況不得產生無限迴圈、空白題目、`currentIndex` ≥ Q（V-ST-05 仍適用） | AC-46-03、AC-46-04、AC-46-06 |
+| UO-10 | （v0.18）**「下一題」（開關關閉）**：前提 `phase = "question"` 且 `Part5QuestionState` 為 `answered` 或 `lockedReview`；`idle` 時不變、不寫入（維持 v0.14 作答前沒有「下一題」，AC-48-03）。`currentIndex < Q − 1` → `currentIndex + 1`、`lockedSelection = null`；最後一題 → `lockedSelection = null`、`phase = "summary"`。只改這些欄位並寫入一次（AC-11-05 重新載入要回到原題）；**不**改任何計數、答對紀錄、`streak`、`todayLearned`。由第 i 題 `lockedReview` 起，K = Q 時恰 Q − i + 1 次進入 summary（AC-48-07、AC-48-10），不無限跳題 | AC-11-04、AC-48-02、AC-48-03、AC-48-06、AC-48-07、E-27、E-126 |
+
+**已答對鎖定檢視（LV，v0.18）**
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| LV-1 | **狀態推導**（`Part5QuestionState`，只在 `Part5ViewKind = "question"` 時有意義；每次繪製時計算，不持久化）：依序判定 (1) `lockedSelection ≠ null` → `"answered"`；(2) 開關關閉 且 曾答對(`currentIndex`) → `"lockedReview"`；(3) 否則 → `"idle"`。本次作答結果優先於鎖定檢視。開關開啟時不變式由 UO-3、UO-4 保證（AC-46-04）：`idle` 的題目不是曾答對 | US-48、AC-11-04、AC-46-02、AC-46-04、AC-48-01、AC-48-03、AC-48-05 |
+| LV-2 | **`lockedReview` 顯示**：「第 i / N 題」與 `correctBadge`；正確選項用與 AC-38-03 答對時相同的綠色（`SEMANTIC_COLORS.correct`）並顯示「正確答案」；其他 3 個選項為鎖定樣式，不標紅、不標綠；4 個選項皆 `disabled`，沒有選項的 `aria-pressed` 為 `true`；回饋文字逐字為 `lockedReviewFeedback`；顯示「解題核心思路」與「句型語法拆解」；顯示「下一題」。不得出現「你的選擇」「答對了！」「答錯了」、單題重做或「上一題」按鈕。紀錄沒有當時選項（Q-64 A），不得推測。≤ 100ms 顯示；375px 不裁切、無水平捲軸；減少動態時結果相同 | AC-48-01、AC-45-04、AC-38-03、AC-40-02 |
+| LV-3 | **作答防護**：作答只在 `phase = "question"`、`lockedSelection = null`、**非曾答對**(`currentIndex`) 時生效，不論開關狀態。不符合時完全不動作：不改 `part5`、答對紀錄、`streak`、`todayLearned`，不呼叫 `setItem`、`navigator.vibrate`，不播放強調或晃動動畫。防護須同時放在 store 層，不可只靠 `disabled` | AC-48-02、AC-45-03、E-124 |
+| LV-4 | **不是作答**：不得為了顯示鎖定而寫入 `lockedSelection`，否則回饋文字與統計會被當成本次作答。到達、停留、重新載入 `lockedReview` 都不寫入（RD-4）；只有「下一題」依 UO-10 寫入題號 | AC-48-02、AC-48-05 |
+| LV-5 | **本次結果與鎖定檢視的轉換**：剛答對的題目維持 `answered`（回饋「答對了！」），重新載入、切換功能區、關閉分頁都不變，因為 `lockedSelection` 已持久化；按「下一題」離開並再回到該題時才是 `lockedReview`。在 `lockedReview` 開啟開關時，依 UO-4 移開或進入 allCorrect | AC-48-05、AC-46-04 |
+| LV-6 | **資料不完整**（曾答對但 `sentence` 非字串或空字串、`options` 長度不是 4，或 `correctIndex` 不是 0～3 的整數）：仍為 `lockedReview`，`correctBadge` 照常、K 照常；沒有選項標綠，選項全鎖定；回饋位置逐字顯示「這一題的資料不完整。」，全畫面恰 1 次，取代 `lockedReviewFeedback`；解析只顯示非空的部分；「下一題」可用。沒有合法 id 的題目永遠不是曾答對（CR-3），為 `idle`、不顯示標示。不白屏、不拋出未處理錯誤 | AC-48-09 (c)(d)(e)、E-130 |
+| LV-7 | **舊資料**：不需遷移、不改任何欄位，v1.1.0 的答對紀錄讀入後直接依 LV-1 推導（AC-48-08 (a)(b)）。v1.1.0 留下的答錯結果（曾答對且 `lockedSelection` ≠ `correctIndex`）為 `answered`，顯示所選標紅、正確標綠；不重新計分；按「下一題」離開後回到該題才是 `lockedReview`（AC-48-08 (c)）。localStorage 停用或容量已滿時，記憶體中的答對紀錄照常推導（WR-2、WR-3，E-129）。舊版 PWA 更新前仍是舊行為（E-131） | AC-48-08、AC-48-09 (a)(b)、AC-45-03 (d)、E-127～E-129、E-131 |
+
+**本輪結算（SM，v0.18）**
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| SM-1 | **y ≥ 1**（y = `roundAnswered`，x = `roundCorrect`）：summary 畫面依 AC-11-04 顯示「答對 x / y」，不變 | AC-11-04、AC-48-06 |
+| SM-2 | **y = 0**（summary 畫面，開關開啟或關閉皆適用）：顯示「本輪結算」標題與逐字 `summaryNoNewAnswers`，取代「答對 x / y」；a = `totalAnswered`、c = `totalCorrect`：a ≥ 1 顯示「累計答對 c / a」，a = 0 不顯示累計行；進度條 100%；有「重新開始」。結算區不得出現「0 / 0」「NaN」「Infinity」「undefined」「%」 | AC-48-06、AC-46-04、AC-46-05、E-27、E-112、E-125 |
+| SM-3 | **allCorrect 畫面的本輪結算**：`phase = "summary"` 且 y ≥ 1 才同時顯示「答對 x / y」；其他情況不顯示本輪結算數字，也不顯示 `summaryNoNewAnswers`，不得出現「答對 0 / 0」（FB-65） | AC-46-06、E-125 |
+
+**開關說明文字（HN，v0.18）**
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| HN-1 | question、summary 畫面：開關附近逐字顯示 `filterHint` 恰 1 次，開關開啟或關閉都顯示。allCorrect 畫面：開關下方逐字顯示 `filterHintAllCorrect` 恰 1 次，不顯示 `filterHint`。題庫為空時（無開關）兩句都不顯示。對比 ≥ 4.5:1、不使用 `accent`；375px 不裁切、無水平捲軸，可換行（E-134），不與開關及 `correctCount` 重疊；開關觸控目標仍符合 AC-46-01。開關標籤 `unansweredOnlyLabel` 不變（Q-80 C） | AC-48-12、E-134 |
 
 ### 5.12 v0.15 新資料的寫入時機與失敗處理（WR；PRD US-47、AC-44-10、AC-47-07、E-102、E-103、E-115）
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| WR-1 | **寫入時機總表**（皆為整筆 `StorageRecord` 一次 `setItem`，同一事件的其他變更合併寫入）：換卡（FP-3）；生效色級改變（FP-4，與 `goal` 同次）；新增／刪除自訂單字（FP-5，同次）；模擬測驗作答（CR-2，與計數同次）；開關切換（UO-1）；「全部題目再練一次」（UO-7 (a)）；「清除答對紀錄」確定（CR-6）；初始化確定（CI-5）；匯入（步驟 8）；遷移寫回（MG-7）。**不寫入**：啟動讀取、解析（FP-2）、正規化（RD-3、UO-4 啟動時）、進入任何頁面、切換單字卡／測驗模式（翻面仍依 LR-3 寫入學習紀錄，該次寫入一併寫出目前紀錄） | AC-44-01、AC-44-02、AC-45-01、AC-46-10、AC-47-01 |
+| WR-1 | **寫入時機總表**（皆為整筆 `StorageRecord` 一次 `setItem`，同一事件的其他變更合併寫入）：換卡（FP-3）；生效色級改變（FP-4，與 `goal` 同次）；新增／刪除自訂單字（FP-5，同次）；模擬測驗作答（CR-2，與計數同次）；「下一題」（UO-5、UO-10，含由 `lockedReview` 前進）；「重新開始」（UO-6）；開關切換（UO-1、UO-8）；「清除答對紀錄」確定（CR-6）；初始化確定（CI-5）；匯入（步驟 8）；遷移寫回（MG-7）。**不寫入**：啟動讀取、解析（FP-2）、正規化（RD-3、UO-4 啟動時）、進入任何頁面、切換單字卡／測驗模式（翻面仍依 LR-3 寫入學習紀錄，該次寫入一併寫出目前紀錄） | AC-44-01、AC-44-02、AC-45-01、AC-46-10、AC-47-01 |
 | WR-2 | **容量不足**（IM-7）：記憶體保留新值，畫面照常（換卡、標示、K、開關照常運作）；若 `RuntimeState.learningQuotaNoticeShown` 為 false → 提示「儲存空間不足」並設為 true（**同一工作階段只提示一次，與 AC-30-14 學習紀錄共用同一旗標**）；localStorage 原值不變（既有已儲存資料不被破壞），下一次寫入再試。其他寫入例外：同樣保留記憶體、不提示。**不適用**的例外（維持原規則）：新增自訂單字回滾（AC-18-04）、初始化（CI-7）、匯入（步驟 8 `quota`／`write_failed`） | AC-44-10 (b)、AC-47-07 (b)、E-103 |
 | WR-3 | **localStorage 停用**（`storageStatus = "unavailable"`）：只更新記憶體；本工作階段內位置、「✓ 曾答對」、K、開關照常運作，持續顯示「進度將無法保存」；重新載入後回到預設值（第 1 張、K = 0、開關關閉） | AC-44-10 (a)、AC-47-07 (a)、E-102 |
 | WR-4 | **不產生網路請求**：上述寫入、匯出、匯入皆為本機操作（AC-18-06）；不引入外部函式庫 | AC-47-08 |
@@ -752,10 +784,15 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | V-ST-16 | （v0.10）目標分數依 §5.9 GS-1～GS-8：點卡片後 `draftScore` ∈ {215, 465, 725, 855, 990} 且等於該色 `scoreMax`；預設值為 725；合法的既有分數在讀取、遷移、匯入、未點卡片直接套用後皆維持原值；不合法分數只在讀取（AC-18-05）與匯入（`format`）時處理，不四捨五入；畫面不出現分數數值、分數範圍與分數輸入錯誤提示 | AC-01-05、AC-18-02、AC-25-04、AC-26-05、AC-26-06 |
 | V-ST-17 | （v0.14）領域範本依 §5.8 HT-6～HT-9：範本區塊外層容器同時有 `hidden`、`inert`，計算後 `display: none`；Tab 順序不含範本按鈕；畫面可見文字（含 `aria-label`、`title`）以「範本」搜尋結果 = 0（使用者輸入內容除外）；`window.DOMAIN_TEMPLATES` 仍為 3 筆；含 `origin = "template"` 項目的 v0.13 localStorage 與備份在載入、匯入、匯出、初始化前後各欄位值逐一相同 | AC-43-01～AC-43-03、E-100 |
 | V-ST-18 | （v0.15）單字卡位置依 §5.10 FP-1～FP-9：(a) 每次 `flashcard.index` 由使用者操作改變後，localStorage 中 `flashcardPosition` = `{ wordKey: studySet[index].wordKey, ordinal: index + 1 }`（`setItem` 在同一事件內呼叫 1 次）；(b) 解析結果符合 FP-2 四種情況（含 AC-44-04 以單字找回、AC-44-05 (a)(b)(c) 的 min(i, N)、AC-44-07 空集合紀錄不動）；(c) 生效色級改變後為 `null`，取消或未改變生效色級時不變；(d) 進入單字卡頁、啟動讀取時 `setItem` 呼叫次數 = 0；(e) 重新載入一律 `mode = "card"`、正面；(f) 換卡不改 `todayLearned`、`learnedHistory`、`streak` | AC-44-01～AC-44-10 |
-| V-ST-19 | （v0.15）答對紀錄依 §5.11 CR-1～CR-9：答對未曾答對的題 → 陣列多 1 個 id；答錯、重複點擊、再次答對 → 陣列不變；K = 題庫 id ∩ 答對集合的大小（不存在的 id、重複 id 不計，且仍保留於 localStorage）；`totalAnswered`、`totalCorrect`、`roundAnswered`、`roundCorrect`、主控台正確率、`streak`、`todayLearned` 的變化與 v0.14 同一操作序列完全相同；「重新開始」與「全部題目再練一次」後陣列不變；CR-6「確定」後為 `[]` 且累計不變，「取消」時 `setItem` 呼叫次數 = 0 | AC-45-01～AC-45-08、AC-46-07、AC-46-08 |
-| V-ST-20 | （v0.15）只練沒答對依 §5.11 UO-1～UO-9：開關開啟期間，任何時刻（含開啟當下、重新載入、匯入後、「重新開始」後）以未作答狀態顯示的題目皆不是曾答對的題目；「下一題」跳到 next(`currentIndex + 1`)，跳過的題目不計入本輪；`currentIndex` 永遠 < Q；K = Q 時畫面為 allCorrect（剛作答鎖定的題目除外），不出現空白題目或無限跳題；「第 i / N 題」i = `currentIndex + 1`；開關切換不改任何計數；開關值在重新載入、匯出→清除→匯入後不變，初始化後不變 | AC-46-01～AC-46-10、E-110～E-112 |
+| V-ST-19 | （v0.15，v0.18 修訂）答對紀錄依 §5.11 CR-1～CR-10：答對未曾答對的題 → 陣列多 1 個 id；答錯、重複點擊、點擊 `lockedReview` 的選項 → 陣列不變；K = 題庫 id ∩ 答對集合的大小（不存在的 id、重複 id 不計，且仍保留於 localStorage）；`totalAnswered`、`totalCorrect`、`roundAnswered`、`roundCorrect`、主控台正確率、`streak`、`todayLearned` 的變化，對實際作答與 v0.14 相同，經過 `lockedReview` 不變；「重新開始」、開關切換後陣列不變；CR-6「確定」後為 `[]` 且累計不變，「取消」時 `setItem` 呼叫次數 = 0 | AC-45-01～AC-45-08、AC-46-08 |
+| V-ST-20 | （v0.15，v0.18 修訂）只練沒答對依 §5.11 UO-1～UO-10：開關開啟期間，任何時刻（含開啟當下、重新載入、匯入後、「重新開始」後）以未作答狀態顯示的題目皆不是曾答對的題目；「下一題」跳到 next(`currentIndex + 1`)，跳過的題目不計入本輪；`currentIndex` 永遠 < Q；K = Q 時畫面為 allCorrect（剛作答鎖定的題目除外），不出現空白題目或無限跳題；「第 i / N 題」i = `currentIndex + 1`；開關切換不改任何計數（例外：UO-8 (a) 本輪歸 0）；開關開啟期間 `Part5QuestionState` 不為 `lockedReview`；開關值在重新載入、匯出→清除→匯入後不變，初始化後不變 | AC-46-01～AC-46-10、E-110～E-112 |
 | V-ST-21 | （v0.15）遷移與相容：(a) v0.14 程式寫入的 localStorage（`schemaVersion` 2）以 v0.15 開啟 → 直接進主控台、不提示錯誤；遷移後 localStorage 為 `schemaVersion` 3、`data` 前 9 欄與遷移前深度相等、3 個新欄位為 `null`、`[]`、`false`；再重新載入，localStorage 內容不變（不重複升級）；(b) v0.7（1）同樣直接升到 3；(c) v0.14、v0.7 匯出的備份匯入成功且既有欄位逐一相等；(d) RD-3：3 個新欄位任一 shape 錯誤只重設該欄，其他欄位深度相等、`unreadable` 鍵不被寫入、不提示「資料讀取失敗」；`part5CorrectIds` 的非字串項目被捨棄、其餘保留 | AC-47-03、AC-47-04、AC-47-05、E-113、E-114 |
 | V-ST-22 | （v0.15）寫入失敗依 §5.12 WR-2、WR-3：容量不足時畫面照常、「儲存空間不足」整個工作階段只出現 1 次（與學習紀錄共用），localStorage 原值不變；停用時本工作階段照常運作，重新載入為預設值；全程不拋出未處理錯誤、無網路請求 | AC-44-10、AC-47-07、AC-47-08 |
+| V-ST-23 | （v0.18）鎖定檢視依 LV-1～LV-7：狀態推導表（`lockedSelection` 非 null／null × 開關 × 曾答對）每種組合結果符合 LV-1；`lockedReview` 畫面符合 LV-2；到達、點選項、重新載入 `lockedReview` 時 `setItem` 與 `navigator.vibrate` 呼叫次數 = 0，且 a、c、x、y、K、`streak`、`todayLearned` 不變；`lockedSelection` 維持 null；含答錯結果的 v1.1.0 夾具依 LV-7；資料不完整依 LV-6 | AC-48-01～AC-48-05、AC-48-08、AC-48-09、AC-45-03、AC-45-04、AC-46-02 |
+| V-ST-24 | （v0.18）「下一題」依 UO-5、UO-10：`idle` 時 `part5` 不變且不寫入；`lockedReview` 只改 `currentIndex` 或 `phase`、`lockedSelection`；K = Q 且開關關閉，由第 i 題恰 Q − i + 1 次進入 summary；「重新開始」後第 1 題狀態依 AC-48-04；全程不出現空白題目 | AC-11-04、AC-11-07、AC-48-03、AC-48-04、AC-48-07 |
+| V-ST-25 | （v0.18）結算依 SM-1～SM-3：y = 0 時開關開啟與關閉皆顯示 `summaryNoNewAnswers`，a = 0 無累計行；結算區搜尋「0 / 0」「NaN」「Infinity」「undefined」「%」皆為 0；y ≥ 1 顯示「答對 x / y」；allCorrect 畫面只在 `phase = "summary"` 且 y ≥ 1 時顯示本輪結算 | AC-48-06、AC-46-05、AC-46-06、AC-11-04 |
+| V-ST-26 | （v0.18）開關關閉與清除依 UO-8、CR-6、CR-10：allCorrect 三種進入方式關閉開關後皆為第 1 題 `lockedReview`、本輪 0、K = Q、a、c 不變，重新載入不變，恰 Q 次「下一題」進入 summary；顯示本次作答結果時關閉開關 `part5` 不變；K ≥ 1 時每個畫面恰 1 個清除按鈕，K = 0 為 0 個；確定、取消結果符合 CR-6，確定時 `streak` 不變 | AC-48-07、AC-48-10、AC-48-11、AC-46-04、AC-46-08、AC-46-09 |
+| V-ST-27 | （v0.18）固定文字：`PART5_RECORD_TEXTS` 新 4 個鍵與 PRD 逐字相同；HN-1 兩句的出現次數符合各畫面規定；交付 HTML 與 `src/app/`（測試除外）搜尋「全部題目再練一次」「再練一次」「replayKeepRecords」「replayPart5KeepRecords」皆為 0；v0.18 發布時 `package.json` `version` 與版本行為 1.2.0；匯出備份欄位集合與 `schemaVersion` 3 不變 | AC-46-06、AC-48-01、AC-48-06、AC-48-08、AC-48-12、AC-42-02 |
 | V-IMP-01 | 匯入依 §6.2 順序與 IM-1～IM-10；任何失敗或取消不改動記憶體與 localStorage。（v0.15）匯出檔符合 `$defs/PersistedDataWritten`、`schemaVersion` 3；IM-9 的每種 shape 錯誤皆為 `format`；IM-10 的項目層級無效皆不計入略過筆數 | AC-24-04～AC-24-06、AC-24-09、AC-24-10、AC-24-11、AC-25-11、AC-47-02、AC-47-03、AC-47-06 |
 
 ### 7.8 權利與商標文字（V-LGL；v0.17，PRD R-25）
@@ -900,7 +937,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-46-03、AC-46-05、E-112 | UO-5、UO-6、MT-1（題庫題號，Q-66 A） |
 | AC-46-04、E-110 | UO-4、UO-3 排除條件、IM-10 (4)、§5.3 啟動列 |
 | AC-46-06、E-111 | UO-3、UO-7、`Part5ViewKind` `"allCorrect"`、`PART5_RECORD_TEXTS.allCorrectTitle` |
-| AC-46-07 | UO-7 (a)、`replayKeepRecords` |
+| AC-46-07 | （v0.18 移除，Q-77 A）無對應欄位；見 UO-7、§8 v0.18 表 |
 | AC-46-08 | CR-6、`clearAndRestart`、`clearConfirmMustInclude`、`confirmOk`、`confirmCancel` |
 | AC-46-10 | UO-1、§6.1、§6.3、CI-2（不列入） |
 | AC-47-01、AC-18-01（v0.15 修改） | §5.1（不新增鍵）、§5.2、WR-1、`$defs/PersistedDataWritten` |
@@ -936,6 +973,37 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-23-08（新增）、E-122 | `Part5Explanation.coreStrategy`、§4.3 LT-6、V-LGL-05、V-LGL-06、V-P5-08 |
 | AC-38-10（v0.17 文字修改） | NM-3、NM-4、V-LAY-05、V-LAY-06、V-LGL-04；(2) 的 `schemaVersion` 依 C-8 讀作 3 |
 | E-121 | 不需契約欄位：舊版頁面顯示舊文字屬預期；UP 流程不變；網站版本維持 1.1.0，新舊版靠建置碼區分（Q-74 決議 B、VR 規則不變） |
+
+**v0.18 新增與修改（PRD R-26）**
+
+| AC／E | 契約欄位／規則 |
+| :--- | :--- |
+| AC-11-04（修改）、E-27 | UO-5、UO-10、LV-1、SM-1、SM-2 |
+| AC-11-05（修改） | `Part5Progress` 不變、LV-1、LV-4、UO-10（題號寫入）、RD-4 |
+| AC-11-07（修改） | UO-6、LV-1 |
+| AC-42-02（修改，1.2.0） | §12.1 VR-1～VR-3（版本值只來自 `package.json`，Q-79 A）、V-ST-27 |
+| AC-45-03（修改） | LV-3、LV-7、CR-2、UO-4、UO-5 |
+| AC-45-04（修改） | CR-4、LV-1、LV-2 |
+| AC-45-06（修改） | CR-5、LV-3、V-ST-19 |
+| AC-46-01（修改） | UO-1、UO-8、`unansweredOnlyLabel`；控制項樣式屬設計層 |
+| AC-46-02、AC-46-09（修改） | UO-2、UO-8 (b)、UO-10、LV-1 |
+| AC-46-04（修改）、E-110 | UO-3、UO-4、UO-8、LV-1、SM-2 |
+| AC-46-05（修改）、E-112 | UO-5、UO-6、SM-1、SM-2 |
+| AC-46-06（修改）、E-111 | UO-3、UO-7、SM-3、HN-1、`allCorrectTitle`、`clearAndRestart`、V-ST-27 |
+| AC-46-07（移除） | 無；`replayKeepRecords` 刪除（UO-7） |
+| AC-48-01、E-124 | `Part5QuestionState`、`lockedReviewFeedback`、LV-1、LV-2 |
+| AC-48-02 | LV-3、LV-4、UO-10、V-ST-23 |
+| AC-48-03 | LV-1、UO-2、UO-10 |
+| AC-48-04 | UO-6、LV-1 |
+| AC-48-05 | LV-1、LV-4、LV-5 |
+| AC-48-06、E-125 | `summaryNoNewAnswers`、SM-2、SM-3、V-ST-25 |
+| AC-48-07、E-126 | UO-2、UO-3、UO-8 (a)、UO-10、CR-10 |
+| AC-48-08、E-127、E-128 | LV-1、LV-7；`storage-schema.json` 不變 |
+| AC-48-09、E-129、E-130 | LV-6、LV-7、WR-2、WR-3、CR-3 |
+| AC-48-10 | UO-8 (a)、UO-3 排除條件、V-ST-26 |
+| AC-48-11、E-132、E-133 | CR-6、CR-10、CR-3、`clearAndRestart`、`clearConfirmMustInclude` |
+| AC-48-12、E-134 | HN-1、`filterHint`、`filterHintAllCorrect` |
+| E-131 | LV-7；不需契約欄位，舊版頁面屬預期，UP 流程不變 |
 
 ---
 
@@ -1000,7 +1068,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | FB-53 | （v0.14 新增）AC-42-04 (b) 要求只改 `package.json` 版本號也要改變 BUILD_ID，但 v0.13 契約 SW-2 只以 HTML、manifest、圖示、sw 範本計算，若版本號在 BUILD_ID 之後才寫入或只在執行期讀取，(b) 無法成立（PRD Q-58 亦已提醒） | SD、QA | 待辦（知會，SA 定案） | 契約以 VR-2、VR-4 規定版本號寫入 HTML meta 且**在計算 BUILD_ID 之前**寫入，SW-2 輸入 (1) 改為「已含版本號、`emt-build-id` 仍為佔位的 HTML」；不另把 `package.json` 整檔納入雜湊（避免 `scripts`、`devDependencies` 等與交付無關的修改也觸發 PWA 更新）。QA 以 V-VER-02 驗證 |
 | FB-54 | （v0.15 新增）AC-03-05、AC-44-08 寫「套用不同色級」回到第 1 張，未說明**生效色級未改變**的套用（綠 → 藍、綠 → 金、綠 → 綠重套用；單字集相同）是否也回到第 1 張 | PM、QA | 待辦（知會，SA 定案） | 契約定為只有 `goal.effectiveColor` 改變才回到第 1 張並把位置設為 `null`；生效色級未改變時單字集不變，位置保留（FP-4）。與 AC-32-05「綠↔藍↔金不跳確認、學習進度不變」同一判準。PM 若希望任何套用都回到第 1 張，改 FP-4 即可（不涉持久化結構） |
 | FB-55 | （v0.15 新增）AC-46-04 (a)、E-110 規定開關開啟時目前題目為曾答對且未作答 → 改顯示「其後」第一題未答對題目，但未規定**其後已無未答對、之前仍有**（K < Q）時顯示什麼 | PM、QA | 待辦（知會，SA 定案） | 契約定為進入本輪結算（`phase = "summary"`），「重新開始」從題庫順序第一題未答對開始（UO-4），與 AC-46-05「按下一題後其後已無未答對」一致，不出現空白題目、不回頭跳題 |
-| FB-56 | （v0.15 新增）AC-46-07、AC-46-08 只寫「顯示第 1 題未作答」「累計不變」，未說明本輪計數（`roundAnswered`、`roundCorrect`）是否歸 0 | QA | 待辦（知會，SA 定案） | 契約定為兩個選擇都等同「重新開始」：本輪歸 0、累計不變（UO-7 (a)、CR-6），之後的本輪結算只計新一輪 |
+| FB-56 | （v0.15 新增）AC-46-07、AC-46-08 只寫「顯示第 1 題未作答」「累計不變」，未說明本輪計數（`roundAnswered`、`roundCorrect`）是否歸 0 | QA | 待辦（知會，SA 定案） | 契約定為兩個選擇都等同「重新開始」：本輪歸 0、累計不變（UO-7 (a)、CR-6），之後的本輪結算只計新一輪。（v0.18）AC-46-07 與 UO-7 (a) 已移除，CR-6 的定案不變 |
 | FB-57 | （v0.15 新增）**降版與舊版分頁**：(a) `schemaVersion` 升為 3 後，若使用者改用 v0.14 以前的交付檔（`file://` 舊檔，或 https 版尚未更新的 PWA 頁面）開啟同一來源，舊程式會把 3 視為無法讀取並依其 AC-18-05 重設（原字串保留在 `englishMasterTrack:unreadable`，可人工救回）；舊程式匯入新版備份顯示「版本不相容」（PRD E-117 預期）。(b) 同一來源若有 v0.14 分頁仍開著，它的下一次寫入會以 v2 格式覆蓋（新欄位遺失、其記憶體中較舊的進度覆蓋新進度），新版下次開啟時再遷移（E-115 範圍外） | 人類 | 待辦（知會） | 不需改 PRD。不升版也無法避免 (a)（v0.14 對多餘欄位同樣整體重設），升版反而讓備份錯誤訊息正確。建議發布說明提醒「更新後請關閉舊分頁、勿再用舊檔案開啟」；PWA 依既有 UP 流程按「重新整理」（v0.16 起按鈕文字為「更新版本」）即全部分頁換新版 |
 | FB-58 | （v0.15 新增）PRD 共通規則 3 規定「有學習紀錄」判定不變，因此以 DevTools／匯入構造「答對紀錄非空、但 (a)～(f) 皆不成立」時，切換色級不跳確認視窗、不初始化，答對紀錄保留；與 AC-45-08「切換色級清空答對紀錄」的前提（有學習紀錄）不衝突 | QA | 待辦（知會，SA 定案） | 正常操作下不會出現（答對必伴隨累計答題數 > 0）。QA 不以此情境判定 AC-45-08 |
 | FB-59 | （v0.15 新增）AC-47-06 (c) 寫「上次位置不是物件」視為格式錯誤；契約以 `null` 表示「無紀錄」（首次使用、切換色級後、v0.14 以前資料遷移後皆為 `null`，本版匯出檔也可能是 `null`），`null` 屬合法值、不是格式錯誤 | PM、QA | 待辦（知會，SA 定案） | 不需改 PRD；QA 構造 AC-47-06 (c) 時使用陣列、字串、數字或缺鍵的物件，不使用 `null`。PM 可在 AC-47-06 (c) 補「（`null` 表示無紀錄，合法）」 |
@@ -1009,6 +1077,11 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | FB-62 | （v0.16 新增）AC-23-07 (2) 的「原始碼中不出現不帶空格的完整位址」只約束交付 HTML；契約文件、PRD、`src/app/` 原始碼只出現帶空格的形式，L-7 (3) 另禁止執行期以字串處理組出無空格位址（否則 DOM 或記憶體中會出現完整位址，違背防爬蟲目的） | QA | 待辦（知會，SA 定案） | QA 除檢查交付 HTML 外，可在 DevTools 以 `document.documentElement.outerHTML` 搜尋無空格位址確認為 0 |
 | FB-63 | （v0.17 新增）AC-23-08 的「以句號、分號、問號、驚嘆號或換行分句」未說明全形或半形，也未說明搜尋單位；英文的半形句點另有縮寫的情況 | PM、QA | 待辦（知會，SA 定案） | 契約定案見 V-LGL-05：全形與半形都算分句符號，半形句點須後接空白或位於字串結尾；資料逐一字串欄位、畫面逐一元素搜尋。現有文字 `scenarioZh`「入門：最高頻的生活基礎字彙」含 B 組字詞但同句無 A 組字詞，不算命中。PM 可在下次修訂 AC-23-08 時補上定義 |
 | FB-64 | （v0.17 新增）AC-10-02 的「不再出現」、AC-23-08 的範圍是畫面文字或排除註解；若內嵌程式保留註解，對整份交付 HTML 全文搜尋可能命中程式註解（目前 `src/app/views/part5.js` 第 2 行註解含舊說明） | QA、SD | 待辦（知會，SA 定案） | 舊文字檢查以畫面文字、資料值與 HTML 開頭註解區為準（V-LGL-02～V-LGL-05），其他程式註解不算違反。不需改 PRD |
+| FB-65 | （v0.18 新增）AC-46-06 的「作答結束」未定義。K = Q 且開關關閉、停在結算畫面（y ≥ 1）時開啟開關，以及開關開啟、題目畫面中途 y ≥ 1 時，是否顯示本輪結算不明確 | PM、QA | 待辦（知會，SA 定案） | 契約以持久化欄位判定：`phase = "summary"` 且 y ≥ 1 才顯示（SM-3）。前者顯示，後者不顯示；重新載入後結果相同。不需改 PRD，PM 可在下次修訂時補上定義 |
+| FB-66 | （v0.18 新增）AC-48-09 (c) 只規定顯示「這一題的資料不完整。」、不標綠、選項鎖定、「下一題」可用，未說明「✓ 曾答對」、`lockedReviewFeedback`、解析是否顯示；AC-48-01 的解析非空條件在資料不完整時不一定成立 | PM、QA | 待辦（知會，SA 定案） | 契約定為：標示與 K 照常（紀錄中確實曾答對），資料不完整的文字取代鎖定回饋且全畫面恰 1 次，解析只顯示非空的部分（LV-6）。QA 不以 AC-48-01 的解析條件判定此情境 |
+| FB-67 | （v0.18 新增）US-48 狀態表的「未作答：其他情況」字面上包含「開關開啟、無本次作答結果、曾答對」，與 AC-46-04 不變式相反 | PM | 待辦（知會，SA 定案） | 不變式優先：該組合依 UO-3、UO-4 不會顯示；防禦上作答防護不接受曾答對的題目，不論開關狀態（LV-3）。不影響任何 AC |
+| FB-68 | （v0.18 新增）FB-60 的寫入失敗行為在清除入口擴大後影響範圍變大：K < Q 時也能清除，容量已滿時畫面已清除、localStorage 保留舊紀錄，重新載入後答對紀錄會回來。AC-48-09、AC-48-11 都未涵蓋此組合 | PM | 待辦（知會，SA 定案） | 契約維持 WR-2：畫面照常、提示「儲存空間不足」、下次寫入再試。不會遺失資料。PM 若希望改為不套用並提示，補 AC 後契約再改，不涉持久化結構 |
+| FB-69 | （v0.18 新增）Q-80 選項 C 的文字為「…答對過的題目會鎖定」，AC-48-12 與 R-26 為「…會以綠色鎖定。」 | QA | 待辦（知會，SA 定案） | US-48 明載 AC-48-12 為定稿，契約 `filterHint` 取 AC-48-12 文字 |
 
 ### 9.1 下游回饋處理紀錄（v0.5，/pg-run 階段）
 
@@ -1094,7 +1167,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | :--- | :--- | :--- | :--- |
 | DS-32 | 遷移 v2 → v3（AC-47-03、AC-47-04） | §5.3 MG-5～MG-8、RD-3、RD-4；`CURRENT_SCHEMA_VERSION` 3、`SUPPORTED_SCHEMA_VERSIONS` `[1, 2, 3]` | 安排遷移任務：讀取鏈 1 → 2 → 3、匯入步驟 4 串接、寫回一次；以 v0.14 實際寫入的 localStorage 與匯出檔（含 v0.7 樣本）建立測試夾具；更新既有斷言 `schemaVersion === 2` 的測試（C-8）；V-ST-21 |
 | DS-33 | 單字卡位置的模組歸屬（US-44） | §5.10 FP-1～FP-9（資料與時機已定） | 決定「解析（FP-2）」放在單字集建立處或單字卡模組、換卡寫入的掛點（按鈕、滑動、測驗模式換題共用一個入口）、寫入時機相對於畫面更新（須維持 AC-44-02 ≤ 100ms）；確認現行「刪除自訂單字後回到單字卡頁」的程式改由 FP-2 (4) 取代，避免兩套邏輯；V-ST-18 |
-| DS-34 | 模擬測驗狀態機（US-45、US-46） | §5.11 CR-1～CR-9、UO-1～UO-9；`Part5ViewKind` 為推導值 | 把「下一題」「重新開始」「開關切換」「全部再練一次」「清除答對紀錄」整理為單一狀態轉移模組（純函式易測）；UO-4 正規化的呼叫點（啟動、開關開啟、匯入）；進度條在 allCorrect 畫面 100%（MT-1 擴充）；V-ST-19、V-ST-20 |
+| DS-34 | 模擬測驗狀態機（US-45、US-46） | §5.11 CR-1～CR-9、UO-1～UO-9；`Part5ViewKind` 為推導值 | 把「下一題」「重新開始」「開關切換」「全部再練一次」（v0.18 已移除，見 DS-43）「清除答對紀錄」整理為單一狀態轉移模組（純函式易測）；UO-4 正規化的呼叫點（啟動、開關開啟、匯入）；進度條在 allCorrect 畫面 100%（MT-1 擴充）；V-ST-19、V-ST-20 |
 | DS-35 | 畫面文字與版面（AC-45-04、AC-45-05、AC-46-01、AC-46-06、AC-46-08） | `PART5_RECORD_TEXTS` 只收 PRD 原文 | 定案：「全部答對」畫面除標題外的說明句（若有）、確認對話框完整句子與標題（須含兩段必要文字、只有確定／取消）；標示、計數行、開關的位置、樣式（不用強調橘、對比 ≥ 4.5:1、tabular-nums、375px 不裁切、44×44）與減少動態；確認對話框可沿用 US-32 的對話框元件（Esc／點外部 = 取消） |
 | DS-36 | 寫入失敗提示（AC-44-10、AC-47-07） | §5.12 WR-2：與 `learningQuotaNoticeShown` 共用 | 把現行各處寫入（學習紀錄、作答、位置、開關）的容量不足處理收斂為同一個函式；新增自訂單字、初始化、匯入維持各自的既有處理 |
 | DS-37 | 題目 id 穩定（Q-71） | V-P5-08；本版 `src/data/` 不需修改 | 不需 CT 任務；若 SD 認為需要，可加一個建置期或測試期檢查：比對前一版 `part5.js` 的 id → 題目指紋（如 `sentence` + `options[correctIndex]`），變更即警告 |
@@ -1113,6 +1186,15 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | :--- | :--- | :--- | :--- |
 | DS-41 | FE 工作範圍（AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10） | **文字層級修訂**：套用 §4.3 LT-1～LT-5；型別、常數、持久化結構（`schemaVersion` 3、鍵數 2）皆不變 | 新開 FE 任務修改標籤、標題說明、頁面聲明與 HTML 開頭註解，並依 V-LGL-01～V-LGL-05 更新測試；由原始碼重新建置 `dist/`，不得手改。網站版本維持 1.1.0（Q-74 決議 B），BUILD_ID 隨內容改變屬預期。`package.json`、AC-23-07、ECDICT 音標標示不改 |
 | DS-42 | CT 工作範圍（AC-23-08） | `p5-009` 的 `explanation.coreStrategy` 改為 LT-6；id、題目句、選項、正解、`structure`、來源標記不變；`p5-103` 不改（Q-75 決議 A）；其他資料值與格式不變 | 列 1 個 CT 任務，並自驗 V-P5-08、V-LGL-05、V-LGL-06 |
+
+### 9.11 回饋下游（v0.18，給 SD；PRD R-26、Q-77～Q-80）
+
+| 編號 | 事項 | 契約的立場 | 請 SD 處理 |
+| :--- | :--- | :--- | :--- |
+| DS-43 | 狀態轉移（US-48、AC-48-02、AC-48-10） | LV-1、LV-3、UO-5、UO-8、UO-10、CR-6；`Part5QuestionState` 為推導值 | 在狀態轉移模組加入狀態推導函式；`next` 的前提改為 `answered` 或 `lockedReview`；開關關閉分流依切換前畫面種類；作答防護放在 store 層；刪除 `replayKeepRecords`、`replayPart5KeepRecords` 與相關測試。V-ST-23、V-ST-24、V-ST-26 |
+| DS-44 | 畫面與文字（AC-48-01、AC-48-06、AC-48-11、AC-48-12、AC-46-06） | LV-2、LV-6、SM-1～SM-3、CR-10、HN-1；4 段新文字為契約常數 | 定案版面位置與樣式；清除按鈕與說明文字的 375px 排版；更新 `architecture.md` 文字定稿表。現有「全部答對」說明句含「再練一次」，須刪除或改寫，AC-46-06 不要求此句，建議刪除，避免與 `filterHintAllCorrect` 重複 |
+| DS-45 | 版本（AC-42-02、Q-79 A） | §12.1 規則不變；契約與 `src/app/` 不寫死版本值 | `package.json` `version` 改為 `1.2.0` 由主控一次性修改，不列 PG 任務；由原始碼重新建置 `dist/` |
+| DS-46 | 工作範圍 | **持久化結構不變**（`schemaVersion` 3、鍵數 2）、無遷移、`src/data/` 不變 | 不需 CT 任務；FE 任務依 DS-43、DS-44；QA 依 V-ST-19、V-ST-20、V-ST-23～V-ST-27 與 PRD R-26 列出的測試清單驗收。若設計認為必須改持久化結構，須退回 PM 並由人類決定 |
 
 ---
 
@@ -1344,9 +1426,10 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 | 狀態 | 存放 | 持久化 | 說明 |
 | :--- | :--- | :--- | :--- |
 | 單字卡上次位置 | `PersistedData.flashcardPosition` | 是（v0.15） | FP-1～FP-9 |
-| 模擬測驗答對紀錄 | `PersistedData.part5CorrectIds` | 是（v0.15） | CR-1～CR-9 |
+| 模擬測驗答對紀錄 | `PersistedData.part5CorrectIds` | 是（v0.15） | CR-1～CR-10 |
 | 「只練沒答對」開關 | `PersistedData.part5UnansweredOnly` | 是（v0.15） | UO-1 |
 | 模擬測驗畫面種類、K、Q | 推導 | 否 | UO-3、CR-3 |
+| 題目畫面狀態 `Part5QuestionState`（v0.18） | 推導 | 否 | LV-1；已答對鎖定檢視不寫入任何儲存 |
 
 ### 11.4 主控台（DB；US-39、Q-50、Q-52、Q-56）
 
@@ -1374,7 +1457,7 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| MT-1 | **進度推導**（不新增狀態）：N = 畫面「第 i / N 題」所用的題數（題庫長度 `PART5_QUESTION_BANK.length`）；`part5.phase = "question"` 時 i = `part5.currentIndex + 1`、填滿 i ÷ N、`aria-valuenow` = i；`phase = "summary"` 時填滿 100%、`aria-valuenow` = N（FB-47）；`aria-valuemax` = N、`role="progressbar"`。「重新開始」後依既有規則 `currentIndex` = 0 → 1 ÷ N；重新載入後由持久化的 `part5` 推導（AC-11-05）。N = 0（題庫為空）時不顯示進度條，沿用既有空題庫處理。（v0.15）開關開啟時仍以題庫題號計算（跳號顯示，如「第 4 / 200 題」，Q-66 A、UO-5）；`Part5ViewKind` = `"allCorrect"` 時同結算：填滿 100%、`aria-valuenow` = N、不顯示「第 i / N 題」（UO-7） | AC-40-01、AC-11-05、AC-46-03、AC-46-06 |
+| MT-1 | **進度推導**（不新增狀態）：N = 畫面「第 i / N 題」所用的題數（題庫長度 `PART5_QUESTION_BANK.length`）；`part5.phase = "question"` 時 i = `part5.currentIndex + 1`、填滿 i ÷ N、`aria-valuenow` = i；`phase = "summary"` 時填滿 100%、`aria-valuenow` = N（FB-47）；`aria-valuemax` = N、`role="progressbar"`。「重新開始」後依既有規則 `currentIndex` = 0 → 1 ÷ N；重新載入後由持久化的 `part5` 推導（AC-11-05）。N = 0（題庫為空）時不顯示進度條，沿用既有空題庫處理。（v0.15）開關開啟時仍以題庫題號計算（跳號顯示，如「第 4 / 200 題」，Q-66 A、UO-5）；`Part5ViewKind` = `"allCorrect"` 時同結算：填滿 100%、`aria-valuenow` = N、不顯示「第 i / N 題」（UO-7）。（v0.18）`lockedReview` 同題目畫面，計算不變 | AC-40-01、AC-11-05、AC-46-03、AC-46-06、AC-48-01、AC-48-06 |
 | MT-2 | 進度條填色 `COLOR_TOKENS.brand`；作答選項對錯色 `SEMANTIC_COLORS.correct`／`wrong` 不變；`Part5Progress` 欄位與寫入時機不變 | AC-40-01、AC-40-03、AC-38-03 |
 
 ### 11.7 驗證規則（V-LAY；pg-frontend 單元測試、QA 驗收）
@@ -1400,7 +1483,9 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 
 （v0.15 註記，Q-70 A、AC-42-02 修改）**v0.15 發布的版本號為 `1.1.0`**（新增功能、相容舊資料，屬次版號），由主控在本次實作時一次性修改 `package.json`，之後仍由人類維護。契約**沒有**版本值常數（VR-5 禁止在 `src/app/` 寫死版本號），本節規則全部不變；頁尾顯示「版本 1.1.0（建置 xxxxxxx）」。網站版本號與 `schemaVersion`（3）、契約文件版本（0.15）是三個互不相關的編號。
 
-名詞：**版本號** X.Y.Z = 建置時專案根目錄 `package.json` 的 `version`（人類發布時手動維護，v0.14 發布 1.0.0，v0.15 發布 1.1.0）；**建置碼** = BUILD_ID（`<meta name="emt-build-id">` 的 `content`，SW-2）前 `BUILD_CODE_LENGTH`（7）個字元；**版本行** = 頁尾的「版本 X.Y.Z（建置 xxxxxxx）」。
+（v0.18 註記，Q-79 A、AC-42-02 修改）**v0.18 發布的版本號為 `1.2.0`**，由主控在本次實作時一次性修改 `package.json`，之後仍由人類維護。契約仍沒有版本值常數，本節規則全部不變；頁尾顯示「版本 1.2.0（建置 xxxxxxx）」。此時 `schemaVersion` 仍為 3，契約文件版本為 0.18。
+
+名詞：**版本號** X.Y.Z = 建置時專案根目錄 `package.json` 的 `version`（人類發布時手動維護，v0.14 發布 1.0.0，v0.15 發布 1.1.0，v0.18 發布 1.2.0）；**建置碼** = BUILD_ID（`<meta name="emt-build-id">` 的 `content`，SW-2）前 `BUILD_CODE_LENGTH`（7）個字元；**版本行** = 頁尾的「版本 X.Y.Z（建置 xxxxxxx）」。
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
@@ -1468,6 +1553,7 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 | 0.16 | 2026-11-04 | sa-agent | 修訂已核准的 v0.15，原因：PRD v0.16（approved，JimmyLin，2026-11-04）R-24：人類手改產物後決定 (一) PWA 新版提示文字改為「有新版本，請更新版本」、按鈕改為「更新版本」（修改 AC-36-03、AC-42-04 文字，Q-43 行為不變）；(二) 「資料來源與授權」頁新增 1 行聯絡 email（新增 AC-23-07、E-118～E-120）。三檔 `status` 改為 `in-review`、`version` 0.16、核准欄位清空並同步，上游改為 PRD v0.16。**只做文字層級修訂**：(1) `data-schema.ts` `PWA_TEXTS.updateNotice`／`updateButton` 改值，UP-4、UP-6、UP-7、V-PWA-10、VR-4 (b)、FB-39、FB-57 引用同步（歷史紀錄保留舊文字）；(2) 契約原本未定義「資料來源與授權」頁的固定文字常數（聲明由 pg-frontend 依 PRD 組字），本版新增 `data-schema.ts` §16 常數 `SOURCES_CONTACT_TEXT` 與 §4.3 規則 **L-7**（逐字、純文字、非 `<a>`、無 `mailto:`、交付 HTML 不得含無空格位址、不得於執行期組出、不發網路請求、不持久化、只在該頁顯示）；(3) §1 新增 1 列與 v0.16 型別數；§8 新增 v0.16 對照表；新增回饋上游 FB-61、FB-62、回饋下游 §9.9 DS-40。`storage-schema.json` 只改 meta（版本、上游）。型別數 69 不變、契約常數 41 → 42、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，不需遷移**；`src/data/` 不受影響。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 | 0.16（核准） | 2026-11-04 | 主控 | 主控代核：只改文字常數與規則（PWA_TEXTS、SOURCES_CONTACT_TEXT、L-7），不改 PRD、不改持久化結構（schemaVersion 3 不變）。 |
 | 0.17 | 2026-11-04 | sa-agent | 修訂已核准的 v0.16（主控代核），原因：PRD v0.17（approved，JimmyLin，2026-11-04）R-25 的文字修訂（新增 AC-23-08；修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10；E-121～E-123；Q-72～Q-76 已決議，以 PRD 為準）。本檔與 `data-schema.ts` 的 `status` 改為 `draft`、`version` 0.17、核准欄位清空，上游改為 PRD v0.17；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved（比照 v0.9 的三檔同步例外）。(1) §4.3 新增 L-8 與固定文字 LT-1～LT-6；L-7 (7) 改為「新增此行不連帶改動聲明」，現行聲明以 AC-23-02 與 L-8 為準；(2) §7.8 新增 V-LGL-01～V-LGL-06；(3) NM-3、NM-4 移除「聲明文字不變」；§8 品牌標識對照列移除舊的著作權人組字，新增 §8 v0.17 表；(4) §1、§7.4 標題的「題型對應多益 Part 5」改為「題型參考 TOEIC®（多益）Part 5」；§1 新增固定文字列與 v0.17 型別數；(5) 新增回饋上游 FB-63、FB-64，回饋下游 §9.10 DS-41、DS-42；(6) `data-schema.ts` 只改註解。歷史敘述與舊變更紀錄保留原文；N-3、FB-26 的「多益高頻字」是 v0.6 內容任務的契約內部說明，不屬 AC-23-08 範圍，不改。型別數 69、契約常數 42、localStorage 鍵數 2 皆不變；**持久化結構不變，`schemaVersion` 維持 3，不需遷移**；`src/data/` 格式不變，只有 `p5-009` 一個值要改（DS-42）。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
+| 0.18 | 2026-11-04 | sa-agent | 修訂已核准的 v0.17（主控代核），原因：PRD v0.18（approved，JimmyLin，2026-11-04）R-26：新增 US-48、AC-48-01～AC-48-12、E-124～E-134；修改 AC-11-04、AC-11-05、AC-11-07、AC-42-02、AC-45-03、AC-45-04、AC-45-06、AC-46-01、AC-46-02、AC-46-04、AC-46-05、AC-46-06、AC-46-09；移除 AC-46-07；Q-77～Q-80 已決議。本檔與 `data-schema.ts` 的 `status` 改為 `draft`、`version` 0.18、核准欄位清空，上游改為 PRD v0.18；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved。(1) §5.11 新增 LV-1～LV-7、SM-1～SM-3、HN-1、CR-10、UO-10；修改 CR-2、CR-4、CR-5、CR-6、CR-7、UO-1、UO-2、UO-3、UO-5、UO-6、UO-7、UO-8；(2) 移除 `replayKeepRecords` 與 `replayPart5KeepRecords` 動作，理由見 UO-7，原效果由 UO-8 (a) 涵蓋；(3) §5.3 寫入列、WR-1、MT-1、§11.3、§12.1（版本 1.2.0）同步；(4) 修改 V-ST-19、V-ST-20，新增 V-ST-23～V-ST-27；(5) §1 新增 1 列與 v0.18 型別數；§8 新增 v0.18 表，AC-46-07 列標示移除；(6) 新增回饋上游 FB-65～FB-69，回饋下游 §9.11 DS-43～DS-46；FB-56、DS-34 補註；(7) `data-schema.ts` 新增 `Part5QuestionState`，`PART5_RECORD_TEXTS` 新增 4 鍵、移除 1 鍵，其餘只改註解。型別數 69 → 70、契約常數 42 不變、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，備份格式不變，不需遷移**；`src/data/` 不變。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 
 > **主控代核（2026-11-02）**：v0.9 依 PRD v0.9（JimmyLin 核准）增量修訂，未改 PRD、未改持久化結構（schemaVersion 維持 2、備份格式不變），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 內容無變動，維持 v0.8 approved，三檔版本不同步屬本版例外。FB-33～FB-35 接受 SA 處理方式，於下次 PRD 修訂時交 PM 確認。
 
@@ -1482,3 +1568,5 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 > **主控代核（2026-11-03，v0.14）**：依 PRD v0.14（JimmyLin 核准）新增 §12 版本號與狀態列規則、HT-6～HT-9；未改持久化結構（schemaVersion 2、無新鍵），符合主控代核範圍。FB-50 已由主控修正 PRD Q-62 表格錯位與兩處「待人類決定」文字（記錄人類決議）；FB-51 接受契約定案（範本單字來源標示不得出現「範本」，顯示「自訂擴充」），下次 PRD 修訂時交 PM 補文字；FB-52、FB-53 接受。
 
 > **主控代核（2026-11-04，v0.17）**：依 PRD v0.17（JimmyLin 核准）R-25 修訂固定文字與驗證規則（L-8、LT-1～LT-6、V-LGL-01～06）；只改文字規則與註解，未改 PRD、未改持久化結構（schemaVersion 3、localStorage 2 鍵、無遷移），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 無實質變動，維持 v0.16。FB-63、FB-64 接受 SA 定案。
+
+> **主控代核（2026-11-04，v0.18）**：依 PRD v0.18（JimmyLin 核准）R-26 新增 LV、SM、HN-1、CR-10、UO-10 等規則並移除 replay 動作；鎖定狀態由既有欄位推導，未改 PRD、未改持久化結構（schemaVersion 3、localStorage 2 鍵、備份格式不變、無遷移），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 無實質變動，維持 v0.16。FB-65～FB-69 接受 SA 定案。

@@ -374,7 +374,9 @@ describe("part5.test.js — 作答進度條（v0.12，FE-61）", () => {
 // （v0.15，FE-75）答對紀錄：計數行、「✓ 曾答對」、只練沒答對開關、全部答對畫面、清除確認對話框
 // 依據：architecture.md v0.10 §4.10、§7.21.4、§10.7 part5.test.js 列；契約 data-schema §15 PART5_RECORD_TEXTS、
 //       README §5.11 CR-4、CR-6、CR-9、UO-1、UO-3、UO-7、§11.6 MT-1
-// 涵蓋：AC-45-04、AC-45-05、AC-46-01、AC-46-06～AC-46-08、AC-47-08
+// 涵蓋：AC-45-04、AC-45-05、AC-46-01、AC-46-06、AC-46-08、AC-47-08
+// （v0.18，FE-81；architecture.md v0.13 §7.24.2、§10.10；契約 LV-2、LV-6、SM-1～SM-3、HN-1、CR-10；
+//   AC-48-01、AC-48-06、AC-48-09、AC-48-10、AC-48-11、AC-48-12；V-ST-23、V-ST-25、V-ST-26、V-ST-27）
 // 做法：node:vm 依瀏覽器方式載入 core 模組與 views/part5.js；假 DOM 支援事件、[data-*] 選擇器與焦點；
 //       store 分為假 store（固定狀態、記錄 action 呼叫）與真 store（F.makeStore 整合）。
 // ─────────────────────────────────────────────────────────────
@@ -466,11 +468,13 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     sandbox.EMT.views = { register: (tab, m) => { if (tab === "part5") view = m; } };
     sandbox.EMT.content = { part5: o.bank };
     sandbox.EMT.store = o.store;
+    env.vibrations = [];
+    env.animations = [];
     sandbox.EMT.ui = {
       dialog: { confirm: o.confirm || (() => Promise.resolve(false)) },
-      motion: { enter() {} }
+      motion: { enter(node, cls) { env.animations.push(cls); } }
     };
-    sandbox.EMT.services = { haptics: { vibrate() {} } };
+    sandbox.EMT.services = { haptics: { vibrate(kind) { env.vibrations.push(kind); } } };
     vm.runInContext(fs.readFileSync(path.join(APP, "views/part5.js"), "utf8"), sandbox, { filename: "views/part5.js" });
     const rootEl = env.doc.createElement("section");
     view.mount(rootEl);
@@ -482,7 +486,7 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     const calls = [];
     const subs = [];
     const actions = {};
-    for (const name of ["answerPart5", "nextPart5", "restartPart5", "setPart5UnansweredOnly", "replayPart5KeepRecords", "clearPart5CorrectIds"]) {
+    for (const name of ["answerPart5", "nextPart5", "restartPart5", "setPart5UnansweredOnly", "clearPart5CorrectIds"]) {
       actions[name] = (...args) => {
         calls.push({ name, args });
         return (results && results[name]) || { ok: true, changed: true };
@@ -507,6 +511,9 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 0, totalCorrect: 0
   }, over);
   const dataOf = (part5, ids, only) => ({ part5, part5CorrectIds: ids || [], part5UnansweredOnly: only === true });
+  /** 文字在字串中出現的次數 */
+  const countOf = (text, needle) => text.split(needle).length - 1;
+  const cardOf = (rootEl, name) => findAll(rootEl, (n) => n.className === name)[0];
 
   // ── buildViewModel ──
 
@@ -534,9 +541,14 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     // allCorrect：開關開啟、K = Q、未鎖定的題目畫面
     v = P.buildViewModel(prog({ currentIndex: 2 }), bank, null, { ids: idsOf(bank), only: true });
     assert.deepEqual(v, { kind: "allCorrect", inSummary: false, roundCorrect: 0, roundAnswered: 0, k: 4, q: 4, only: true });
-    // allCorrect：作答結束進入（phase summary）→ inSummary
+    // allCorrect：phase summary 且 y ≥ 1 → inSummary（SM-3）
     v = P.buildViewModel(prog({ phase: "summary", roundAnswered: 3, roundCorrect: 2 }), bank, null, { ids: idsOf(bank), only: true });
     assert.deepEqual(v, { kind: "allCorrect", inSummary: true, roundCorrect: 2, roundAnswered: 3, k: 4, q: 4, only: true });
+    // allCorrect：phase summary 但 y = 0、或題目畫面中途 y ≥ 1 → 不顯示本輪結算（SM-3、FB-65）
+    v = P.buildViewModel(prog({ phase: "summary" }), bank, null, { ids: idsOf(bank), only: true });
+    assert.equal(v.inSummary, false);
+    v = P.buildViewModel(prog({ roundAnswered: 3, roundCorrect: 2 }), bank, null, { ids: idsOf(bank), only: true });
+    assert.equal(v.inSummary, false);
     // K = Q 但鎖定作答中 → 仍為 question（UO-3 排除條件）
     v = P.buildViewModel(prog({ currentIndex: 3, lockedSelection: 1 }), bank, null, { ids: idsOf(bank), only: true });
     assert.equal(v.kind, "question");
@@ -548,8 +560,59 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.deepEqual([v.k, v.only], [0, false]);
   });
 
-  test("RECORD_TEXT 為 §7.21.4 定稿文字；確認內文逐字包含契約兩段；fillText 以 split／join 代入", () => {
-    assert.equal(P.RECORD_TEXT.allCorrectNote, "每一題都至少答對過一次了。可以保留紀錄、全部題目再練一次，或清除答對紀錄後重新來過。");
+  test("buildViewModel questionState（LV-1）與選項狀態（LV-2、LV-6）：3 種狀態；本次作答結果優先；超出題庫以防禦後題號推導", () => {
+    const bank = bankOf(4); // fixture 第 1 題為第一筆
+    const c0 = bank[0].correctIndex;
+    const wrong0 = (c0 + 1) % 4;
+    const states = (v) => v.options.map((o) => o.state);
+    // idle
+    let v = P.buildViewModel(prog(), bank, null, { ids: [], only: false });
+    assert.equal(v.questionState, "idle");
+    assert.ok(states(v).every((s) => s === "idle"));
+    // lockedReview：只有正解 correct，其餘 locked；locked 欄位維持 null（LV-4）
+    v = P.buildViewModel(prog(), bank, null, { ids: ["p5-001"], only: false });
+    assert.equal(v.questionState, "lockedReview");
+    assert.equal(v.locked, null);
+    assert.deepEqual(states(v), [0, 1, 2, 3].map((i) => (i === c0 ? "correct" : "locked")));
+    // answered：曾答對仍以本次結果為準（含 v1.1.0 答錯殘留，LV-7）
+    v = P.buildViewModel(prog({ lockedSelection: wrong0 }), bank, null, { ids: ["p5-001"], only: false });
+    assert.equal(v.questionState, "answered");
+    assert.equal(v.options[wrong0].state, "wrong");
+    assert.equal(v.options[c0].state, "correct");
+    // 開關開啟且曾答對：不會顯示，推導為 idle；K = Q 時為 allCorrect
+    assert.equal(P.buildViewModel(prog(), bank, null, { ids: ["p5-001"], only: true }).questionState, "idle");
+    // 超出題庫 → 第 1 題
+    v = P.buildViewModel(prog({ currentIndex: 99 }), bank, null, { ids: ["p5-001"], only: false });
+    assert.equal(v.number, 1);
+    assert.equal(v.questionState, "lockedReview");
+    // 資料不完整（LV-6）：全部 locked
+    const bad = bankOf(2);
+    bad[0] = Object.assign({}, bad[0], { correctIndex: 9 });
+    v = P.buildViewModel(prog(), bad, null, { ids: ["p5-001"], only: false });
+    assert.equal(v.questionState, "lockedReview");
+    assert.equal(v.valid, false);
+    assert.ok(states(v).every((s) => s === "locked"));
+    // 正解合法但句子為空：同樣不標綠
+    bad[0] = Object.assign({}, bankOf(1)[0], { sentence: "" });
+    v = P.buildViewModel(prog(), bad, null, { ids: ["p5-001"], only: false });
+    assert.ok(states(v).every((s) => s === "locked"));
+    // 沒有合法 id → idle（AC-48-09 (d)）
+    bad[0] = Object.assign({}, bankOf(1)[0], { id: "" });
+    v = P.buildViewModel(prog(), bad, null, { ids: ["", "null"], only: false });
+    assert.equal(v.questionState, "idle");
+    assert.equal(v.correctBadge, false);
+  });
+
+  test("FALLBACK_RECORD_TEXTS 與 constants.PART5_RECORD_TEXTS 逐字、逐鍵順序相同（§4.11）", () => {
+    const src = fs.readFileSync(path.join(APP, "views", "part5.js"), "utf8").replace(/\r\n/g, "\n");
+    const m = /var FALLBACK_RECORD_TEXTS = (\{[\s\S]*?\n  \});/.exec(src);
+    assert.ok(m, "找不到 FALLBACK_RECORD_TEXTS");
+    const fallback = vm.runInNewContext("(" + m[1] + ")");
+    assert.equal(JSON.stringify(fallback), JSON.stringify(C.PART5_RECORD_TEXTS));
+  });
+
+  test("RECORD_TEXT 為定稿文字（§7.24.3）；確認內文逐字包含契約兩段；fillText 以 split／join 代入", () => {
+    assert.deepEqual(Object.keys(P.RECORD_TEXT), ["confirmTitle", "confirmMessage"]);
     assert.equal(P.RECORD_TEXT.confirmTitle, "清除答對紀錄");
     assert.equal(P.RECORD_TEXT.confirmMessage, "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。");
     for (const part of T.clearConfirmMustInclude) assert.ok(P.RECORD_TEXT.confirmMessage.includes(part), part);
@@ -605,9 +668,9 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.equal(findAll(rootEl, (n) => n.className === "p5-record").length, 0);
   });
 
-  test("曾答對題（未作答、已作答）顯示「✓ 曾答對」於 .p5-meta 題型標籤後；選項未停用（AC-45-04）", () => {
+  test("曾答對題（lockedReview、answered）顯示「✓ 曾答對」於 .p5-meta 題型標籤後；lockedReview 選項全部停用（AC-45-04、LV-2）", () => {
     const bank = bankOf(10);
-    // 未作答
+    // 已答對鎖定檢視
     let { rootEl } = mountWith({ store: fakeStore(dataOf(prog({ currentIndex: 4 }), ["p5-005"])), bank });
     let badge = q$(rootEl, "correct-badge");
     assert.equal(badge.length, 1);
@@ -619,7 +682,7 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.deepEqual(kids, ["number", "type", "correct-badge"]);
     const opts = q$(rootEl, "option");
     assert.equal(opts.length, 4);
-    assert.ok(opts.every((b) => !b.hasAttribute("disabled")), "標示不影響作答");
+    assert.ok(opts.every((b) => b.hasAttribute("disabled")), "曾答對不可作答（LV-3）");
     // 已作答
     ({ rootEl } = mountWith({ store: fakeStore(dataOf(prog({ currentIndex: 4, lockedSelection: 0 }), ["p5-005"])), bank }));
     assert.equal(q$(rootEl, "correct-badge").length, 1);
@@ -631,24 +694,272 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.doesNotMatch(rootEl.textContent, /未答對|答錯過|曾答對/);
   });
 
-  test("allCorrect：標題、說明句、無題號與選項、兩個按鈕逐字、進度條 100%；作答結束進入時另有「答對 x / y」（AC-46-06）", () => {
+  // ── 題目畫面 3 種狀態（LV-1、LV-2、LV-6） ──
+
+  test("lockedReview（AC-48-01、LV-2）：題號、標示、正解綠色與「正確答案」、其餘 locked、4 個 disabled、無 aria-pressed=true、回饋逐字、兩段解析、「下一題」", () => {
+    const bank = bankOf(10);
+    const correctIndex = bank[4].correctIndex;
+    const store = fakeStore(dataOf(prog({ currentIndex: 4 }), ["p5-005"]));
+    const { rootEl, env } = mountWith({ store, bank });
+    assert.equal(one(rootEl, "number").textContent, "第 5 / 10 題");
+    assert.equal(one(rootEl, "correct-badge").textContent, "✓ 曾答對");
+    const opts = q$(rootEl, "option");
+    assert.equal(opts.length, 4);
+    opts.forEach((b, i) => {
+      assert.ok(b.hasAttribute("disabled"), "選項 " + i);
+      assert.equal(b.getAttribute("aria-pressed"), "false", "選項 " + i);
+      if (i === correctIndex) {
+        assert.equal(b.getAttribute("data-state"), "correct");
+        assert.match(b.className, /p5-option--correct/);
+        assert.ok(b.textContent.includes("正確答案"));
+      } else {
+        assert.equal(b.getAttribute("data-state"), "locked");
+        assert.match(b.className, /p5-option--locked/);
+        assert.ok(!b.textContent.includes("正確答案"));
+      }
+    });
+    const fb = one(rootEl, "feedback");
+    assert.equal(fb.textContent, "你之前答對過這一題");
+    assert.match(fb.className, /p5-feedback--correct/);
+    assert.equal(one(rootEl, "core-title").textContent, "解題核心思路");
+    assert.equal(one(rootEl, "core").textContent, bank[4].explanation.coreStrategy);
+    assert.equal(one(rootEl, "structure-title").textContent, "句型語法拆解（S + V + O + 修飾語）");
+    assert.ok(one(rootEl, "structure").childNodes.length >= 1);
+    assert.equal(q$(rootEl, "next").length, 1);
+    for (const bad of ["你的選擇", "答對了！", "答錯了", "上一題", "重做"]) {
+      assert.ok(!rootEl.textContent.includes(bad), bad);
+    }
+    // 即使事件到達（繞過 disabled）：假 store 回 ok false → 不動畫、不震動（LV-3）
+    store.actions.answerPart5 = (i) => { store.calls.push({ name: "answerPart5", args: [i] }); return { ok: false }; };
+    opts[0].click();
+    assert.deepEqual(env.vibrations, []);
+    assert.deepEqual(env.animations, []);
+    // 「下一題」呼叫 nextPart5
+    one(rootEl, "next").click();
+    assert.equal(store.calls.filter((c) => c.name === "nextPart5").length, 1);
+  });
+
+  test("idle、answered 行為不變：idle 無回饋與「下一題」、未停用；answered 依作答標色、aria-pressed、回饋（AC-11-01、AC-48-03）", () => {
+    const bank = bankOf(4);
+    const c0 = bank[0].correctIndex;
+    const wrong0 = (c0 + 1) % 4;
+    let { rootEl } = mountWith({ store: fakeStore(dataOf(prog(), [])), bank });
+    assert.equal(q$(rootEl, "feedback").length, 0);
+    assert.equal(q$(rootEl, "next").length, 0);
+    assert.equal(q$(rootEl, "explanation").length, 0);
+    q$(rootEl, "option").forEach((b) => {
+      assert.ok(!b.hasAttribute("disabled"));
+      assert.ok(!b.hasAttribute("aria-pressed"));
+    });
+    // 答對（曾答對且本次作答結果優先，LV-5）
+    ({ rootEl } = mountWith({ store: fakeStore(dataOf(prog({ lockedSelection: c0 }), ["p5-001"])), bank }));
+    assert.equal(one(rootEl, "feedback").textContent, "答對了！");
+    assert.ok(!rootEl.textContent.includes("你之前答對過這一題"));
+    assert.equal(q$(rootEl, "next").length, 1);
+    assert.equal(q$(rootEl, "option")[c0].getAttribute("aria-pressed"), "true");
+    // v1.1.0 留下的答錯結果（LV-7）：所選標紅、正解標綠、「你的選擇」
+    ({ rootEl } = mountWith({ store: fakeStore(dataOf(prog({ lockedSelection: wrong0 }), ["p5-001"])), bank }));
+    assert.equal(one(rootEl, "feedback").textContent, "答錯了，正確答案是 " + P.LETTERS[c0] + ".");
+    assert.equal(q$(rootEl, "option")[wrong0].getAttribute("data-state"), "wrong");
+    assert.equal(q$(rootEl, "option")[c0].getAttribute("data-state"), "correct");
+    assert.ok(rootEl.textContent.includes("你的選擇"));
+    assert.equal(one(rootEl, "correct-badge").textContent, "✓ 曾答對");
+  });
+
+  /** 第 1 題資料不完整的題庫 */
+  function badBank(patch) {
+    const bank = bankOf(3);
+    bank[0] = Object.assign({}, bank[0], patch);
+    return bank;
+  }
+
+  for (const [label, patch] of [
+    ["correctIndex 不合法", { correctIndex: 7 }],
+    ["correctIndex 非整數", { correctIndex: 1.5 }],
+    ["sentence 為空字串", { sentence: "" }],
+    ["sentence 非字串", { sentence: null }],
+    ["options 長度不是 4", { options: ["a", "b", "c"] }]
+  ]) {
+    test("資料不完整的 lockedReview（LV-6；" + label + "）：無選項 correct、4 個 disabled、文字全畫面恰 1 次、「下一題」可點、不拋例外", () => {
+      const store = fakeStore(dataOf(prog(), ["p5-001"]));
+      const { rootEl } = mountWith({ store, bank: badBank(patch) });
+      const opts = q$(rootEl, "option");
+      assert.equal(opts.length, 4);
+      assert.ok(opts.every((b) => b.getAttribute("data-state") === "locked"));
+      assert.ok(opts.every((b) => b.hasAttribute("disabled")));
+      assert.ok(opts.every((b) => b.getAttribute("aria-pressed") === "false"));
+      assert.equal(one(rootEl, "correct-badge").textContent, "✓ 曾答對");
+      assert.equal(one(rootEl, "correct-count").textContent, "已答對 1 / 3 題");
+      assert.equal(countOf(rootEl.textContent, "這一題的資料不完整。"), 1);
+      assert.equal(one(rootEl, "feedback").textContent, "這一題的資料不完整。");
+      assert.match(one(rootEl, "feedback").className, /p5-feedback--wrong/);
+      assert.equal(findAll(rootEl, (n) => n.className === "p5-warning").length, 0);
+      assert.ok(!rootEl.textContent.includes("你之前答對過這一題"));
+      assert.ok(!rootEl.textContent.includes("正確答案"));
+      one(rootEl, "next").click();
+      assert.deepEqual(store.calls.map((c) => c.name), ["nextPart5"]);
+    });
+  }
+
+  test("資料不完整的 lockedReview：解析只顯示非空段落；兩段皆空時不建解析區（LV-6）", () => {
+    const render = (explanation) => mountWith({
+      store: fakeStore(dataOf(prog(), ["p5-001"])),
+      bank: badBank({ correctIndex: 7, explanation })
+    }).rootEl;
+    let r = render({ coreStrategy: "核心", structure: "" });
+    assert.equal(one(r, "core").textContent, "核心");
+    assert.equal(q$(r, "structure-title").length, 0);
+    assert.equal(q$(r, "structure").length, 0);
+    r = render({ coreStrategy: "   ", structure: "S: a / V: b" });
+    assert.equal(q$(r, "core-title").length, 0);
+    assert.equal(q$(r, "core").length, 0);
+    assert.equal(one(r, "structure").childNodes.length, 2);
+    r = render({ coreStrategy: "", structure: "" });
+    assert.equal(q$(r, "explanation").length, 0);
+    assert.equal(q$(r, "feedback").length, 1);
+    r = render(undefined);
+    assert.equal(q$(r, "explanation").length, 0);
+    assert.equal(q$(r, "next").length, 1);
+  });
+
+  test("資料不完整但非 lockedReview：idle、answered 維持原行為（.p5-warning，SD-FB-74）；無合法 id → idle、無標示（AC-48-09 (d)）", () => {
+    let { rootEl } = mountWith({ store: fakeStore(dataOf(prog(), [])), bank: badBank({ correctIndex: 7 }) });
+    assert.equal(findAll(rootEl, (n) => n.className === "p5-warning").length, 1);
+    assert.equal(q$(rootEl, "feedback").length, 0);
+    assert.ok(q$(rootEl, "option").every((b) => !b.hasAttribute("disabled")));
+    ({ rootEl } = mountWith({ store: fakeStore(dataOf(prog({ lockedSelection: 0 }), [])), bank: badBank({ correctIndex: 7 }) }));
+    assert.equal(findAll(rootEl, (n) => n.className === "p5-warning").length, 1);
+    assert.equal(q$(rootEl, "next").length, 1);
+    ({ rootEl } = mountWith({ store: fakeStore(dataOf(prog(), ["p5-001"])), bank: badBank({ id: "" }) }));
+    assert.equal(q$(rootEl, "correct-badge").length, 0);
+    assert.equal(one(rootEl, "correct-count").textContent, "已答對 0 / 3 題");
+    assert.ok(q$(rootEl, "option").every((b) => !b.hasAttribute("disabled")));
+  });
+
+  // ── 結算（SM-1～SM-3） ──
+
+  /** 結算區不得出現的字串（SM-2、V-ST-25） */
+  function assertCleanSummary(text) {
+    for (const bad of ["0 / 0", "NaN", "Infinity", "undefined", "%"]) {
+      assert.ok(!text.includes(bad), bad + " 出現於：" + text);
+    }
+  }
+
+  for (const only of [false, true]) {
+    test("結算 y = 0（SM-2；開關" + (only ? "開啟" : "關閉") + "）：標題與 summaryNoNewAnswers；a ≥ 1 有累計行、a = 0 沒有；有「重新開始」、進度條 100%", () => {
+      const bank = bankOf(4);
+      const ids = only ? ["p5-001"] : idsOf(bank);
+      let { rootEl } = mountWith({ store: fakeStore(dataOf(prog({ phase: "summary", currentIndex: 3, totalAnswered: 7, totalCorrect: 5 }), ids, only)), bank });
+      let card = cardOf(rootEl, "card p5-summary");
+      assert.equal(one(rootEl, "summary-title").textContent, "本輪結算");
+      const none = one(rootEl, "summary-none");
+      assert.equal(none.tagName, "P");
+      assert.equal(none.className, "p5-summary__none");
+      assert.equal(none.textContent, "本輪沒有新作答的題目");
+      assert.equal(q$(rootEl, "summary-score").length, 0);
+      assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total")[0].textContent, "累計答對 5 / 7");
+      assert.equal(q$(rootEl, "restart").length, 1);
+      assertCleanSummary(card.textContent);
+      const bar = findAll(rootEl, (n) => n.className === "p5-progress")[0];
+      assert.equal(bar.childNodes[0].style.width, "100%");
+      // a = 0
+      ({ rootEl } = mountWith({ store: fakeStore(dataOf(prog({ phase: "summary", currentIndex: 3 }), ids, only)), bank }));
+      card = cardOf(rootEl, "card p5-summary");
+      assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total").length, 0);
+      assert.equal(one(rootEl, "summary-none").textContent, "本輪沒有新作答的題目");
+      assertCleanSummary(card.textContent);
+    });
+  }
+
+  test("結算 y ≥ 1（SM-1）：「答對 x / y」與累計行；無 summaryNoNewAnswers", () => {
+    const { rootEl } = mountWith({
+      store: fakeStore(dataOf(prog({ phase: "summary", roundAnswered: 3, roundCorrect: 0, totalAnswered: 3, totalCorrect: 0 }), [])),
+      bank: bankOf(4)
+    });
+    assert.equal(one(rootEl, "summary-score").textContent, "答對 0 / 3");
+    assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total")[0].textContent, "累計答對 0 / 3");
+    assert.equal(q$(rootEl, "summary-none").length, 0);
+    assert.ok(!rootEl.textContent.includes("本輪沒有新作答的題目"));
+  });
+
+  // ── 開關說明（HN-1）與常駐清除（CR-10） ──
+
+  const b4 = bankOf(4);
+  const c1 = b4[1].correctIndex;
+  const nonAllCorrect = [
+    ["idle 開關關閉、K = 0", dataOf(prog(), []), 0],
+    ["idle 開關開啟、K = 0", dataOf(prog(), [], true), 0],
+    ["idle 只含不存在的 id", dataOf(prog(), ["p5-999"]), 0],
+    ["idle 開關關閉、K ≥ 1", dataOf(prog({ currentIndex: 1 }), ["p5-001"]), 1],
+    ["idle 開關開啟、K ≥ 1", dataOf(prog({ currentIndex: 1 }), ["p5-001"], true), 1],
+    ["answered K = 0", dataOf(prog({ lockedSelection: 0 }), []), 0],
+    ["answered K ≥ 1", dataOf(prog({ currentIndex: 1, lockedSelection: c1 }), ["p5-002"]), 1],
+    ["answered K = Q、開關開啟（UO-3 排除條件）", dataOf(prog({ lockedSelection: 0 }), idsOf(b4), true), 1],
+    ["lockedReview", dataOf(prog(), ["p5-001"]), 1],
+    ["lockedReview K = Q", dataOf(prog(), idsOf(b4)), 1],
+    ["summary K = 0", dataOf(prog({ phase: "summary" }), []), 0],
+    ["summary 只含不存在的 id", dataOf(prog({ phase: "summary" }), ["p5-999"], true), 0],
+    ["summary K ≥ 1 開關關閉", dataOf(prog({ phase: "summary" }), ["p5-001"]), 1],
+    ["summary K ≥ 1 開關開啟", dataOf(prog({ phase: "summary" }), ["p5-001"], true), 1],
+    ["summary K = Q 開關關閉", dataOf(prog({ phase: "summary" }), idsOf(b4)), 1]
+  ];
+  for (const [label, data, clears] of nonAllCorrect) {
+    test("HN-1、CR-10（" + label + "）：filterHint 恰 1 次、不顯示 filterHintAllCorrect；清除按鈕 " + clears + " 個", () => {
+      const { rootEl } = mountWith({ store: fakeStore(data), bank: b4 });
+      assert.equal(countOf(rootEl.textContent, T.filterHint), 1);
+      assert.equal(countOf(rootEl.textContent, T.filterHintAllCorrect), 0);
+      const hints = q$(rootEl, "filter-hint");
+      assert.equal(hints.length, 1);
+      assert.equal(hints[0].tagName, "P");
+      assert.equal(hints[0].className, "p5-record__hint");
+      assert.equal(hints[0].textContent, "關閉時顯示全部題目，答對過的題目會以綠色鎖定。");
+      const buttons = q$(rootEl, "clear");
+      assert.equal(buttons.length, clears);
+      // .p5-record 子節點順序：計數、開關、說明、（K ≥ 1）清除
+      const rec = findAll(rootEl, (n) => n.className === "p5-record")[0];
+      const order = rec.childNodes.map((n) => n.getAttribute("data-p5"));
+      assert.deepEqual(order, clears ? ["correct-count", "only-label", "filter-hint", "clear"] : ["correct-count", "only-label", "filter-hint"]);
+      if (clears) {
+        const b = buttons[0];
+        assert.equal(b.tagName, "BUTTON");
+        assert.equal(b.getAttribute("type"), "button");
+        assert.equal(b.className, "btn btn--secondary p5-record__clear");
+        assert.equal(b.textContent, "清除答對紀錄，重新來過");
+      }
+    });
+  }
+
+  test("題庫為空：兩句說明與清除按鈕都不顯示（HN-1、CR-10）", () => {
+    const { rootEl } = mountWith({ store: fakeStore(dataOf(prog(), ["p5-001"], true)), bank: [] });
+    assert.equal(q$(rootEl, "filter-hint").length, 0);
+    assert.equal(q$(rootEl, "clear").length, 0);
+    assert.ok(!rootEl.textContent.includes(T.filterHint));
+    assert.ok(!rootEl.textContent.includes(T.filterHintAllCorrect));
+  });
+
+  test("allCorrect：標題、無題號與選項、唯一按鈕 clearAndRestart、filterHintAllCorrect 恰 1 次、進度條 100%；phase = summary 且 y ≥ 1 另有「答對 x / y」（AC-46-06、SM-3）", () => {
     const store = fakeStore(screens[2][1]);
     const { rootEl } = mountWith({ store, bank: bank200 });
     const title = one(rootEl, "allcorrect-title");
     assert.equal(title.textContent, "200 題全部答對！");
     assert.equal(title.tagName, "H3");
     assert.equal(title.getAttribute("tabindex"), "-1");
-    assert.ok(findAll(rootEl, (n) => n.className === "p5-allcorrect__note")[0].textContent === P.RECORD_TEXT.allCorrectNote);
+    assert.equal(findAll(rootEl, (n) => n.className === "p5-allcorrect__note").length, 0, "說明句已刪除（§7.24.3）");
     assert.equal(q$(rootEl, "number").length, 0);
     assert.equal(q$(rootEl, "option").length, 0);
-    assert.equal(q$(rootEl, "restart").length, 0, "以兩個按鈕取代「重新開始」");
-    assert.equal(one(rootEl, "replay").textContent, "全部題目再練一次（保留紀錄）");
+    assert.equal(q$(rootEl, "restart").length, 0, "以清除按鈕取代「重新開始」");
+    assert.equal(q$(rootEl, "replay").length, 0);
+    assert.ok(!rootEl.textContent.includes("再練一次"));
+    assert.equal(findAll(rootEl, (n) => n.tagName === "BUTTON").length, 1, "全畫面恰 1 個按鈕");
+    assert.equal(q$(rootEl, "clear").length, 1);
     assert.equal(one(rootEl, "clear").textContent, "清除答對紀錄，重新來過");
-    assert.equal(one(rootEl, "replay").tagName, "BUTTON");
-    assert.equal(one(rootEl, "replay").getAttribute("type"), "button");
-    assert.match(one(rootEl, "replay").className, /(^| )btn( |$)/);
-    assert.match(one(rootEl, "clear").className, /(^| )btn( |$)/);
-    assert.doesNotMatch(one(rootEl, "clear").className, /btn--accent/);
+    assert.equal(one(rootEl, "clear").tagName, "BUTTON");
+    assert.equal(one(rootEl, "clear").className, "btn", "不用主要按鈕或強調橘（§7.24.2）");
+    assert.ok(findAll(cardOf(rootEl, "card p5-allcorrect"), matcher('[data-p5="clear"]')).length === 1);
+    assert.equal(countOf(rootEl.textContent, T.filterHintAllCorrect), 1);
+    assert.equal(countOf(rootEl.textContent, T.filterHint), 0);
+    assert.equal(one(rootEl, "filter-hint").textContent, "要檢視全部題目，請關閉上方的「只練沒答對的題目」。");
+    assert.ok(!rootEl.textContent.includes(T.summaryNoNewAnswers));
     assert.equal(one(rootEl, "summary-score").textContent, "答對 2 / 2");
     assert.ok(rootEl.textContent.includes("本輪結算"));
     const bar = findAll(rootEl, (n) => n.className === "p5-progress")[0];
@@ -661,6 +972,14 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.equal(q$(r2, "summary-score").length, 0);
     assert.ok(!r2.textContent.includes("本輪結算"));
     assert.equal(one(r2, "allcorrect-title").textContent, "200 題全部答對！");
+    assert.equal(q$(r2, "clear").length, 1);
+    // phase = summary 但 y = 0：不得出現「答對 0 / 0」、不顯示 summaryNoNewAnswers（SM-3）
+    const s3 = fakeStore(dataOf(prog({ phase: "summary", currentIndex: 199 }), idsOf(bank200), true));
+    const r3 = mountWith({ store: s3, bank: bank200 }).rootEl;
+    assert.equal(q$(r3, "summary-score").length, 0);
+    assert.ok(!r3.textContent.includes("本輪結算"));
+    assert.ok(!r3.textContent.includes("0 / 0"));
+    assert.ok(!r3.textContent.includes(T.summaryNoNewAnswers));
   });
 
   test("開關 change 與 Enter 皆呼叫 setPart5UnansweredOnly(input.checked)；焦點留在開關（AC-46-01）", () => {
@@ -695,13 +1014,6 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.notEqual(one(rootEl, "only"), input);
   });
 
-  test("「全部題目再練一次」→ replayPart5KeepRecords 1 次", () => {
-    const store = fakeStore(screens[2][1]);
-    const { rootEl } = mountWith({ store, bank: bank200 });
-    one(rootEl, "replay").click();
-    assert.deepEqual(store.calls.map((c) => c.name), ["replayPart5KeepRecords"]);
-  });
-
   test("清除：confirm 參數逐字（標題、內文含契約兩段、確定／取消）；取消 → action 0 次、焦點回清除按鈕（CR-6、AC-46-08）", async () => {
     const store = fakeStore(screens[2][1]);
     const seen = [];
@@ -720,6 +1032,32 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.equal(env.focused, one(rootEl, "clear"));
     assert.equal(one(rootEl, "allcorrect-title").textContent, "200 題全部答對！", "留在全部答對畫面");
   });
+
+  for (const [label, data] of [
+    ["lockedReview", dataOf(prog(), ["p5-001"])],
+    ["answered", dataOf(prog({ lockedSelection: 0 }), ["p5-001"])],
+    ["idle", dataOf(prog({ currentIndex: 1 }), ["p5-001"])],
+    ["summary", dataOf(prog({ phase: "summary" }), ["p5-001"])]
+  ]) {
+    test("清除（" + label + " 畫面，CR-10）：取消 → action 0 次、焦點回清除按鈕；確定 → clearPart5CorrectIds 1 次；對話框文字不變", async () => {
+      const store = fakeStore(data);
+      let answer = false;
+      const seen = [];
+      const { rootEl, env } = mountWith({ store, bank: bankOf(4), confirm: (o) => { seen.push(o); return Promise.resolve(answer); } });
+      one(rootEl, "clear").click();
+      await tick();
+      assert.equal(store.calls.length, 0);
+      assert.equal(env.focused, one(rootEl, "clear"));
+      answer = true;
+      one(rootEl, "clear").click();
+      await tick();
+      assert.deepEqual(store.calls.map((c) => c.name), ["clearPart5CorrectIds"]);
+      assert.equal(seen[1].title, "清除答對紀錄");
+      assert.equal(seen[1].message, "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。");
+      assert.equal(seen[1].okText, "確定");
+      assert.equal(seen[1].cancelText, "取消");
+    });
+  }
 
   test("清除：確定 → clearPart5CorrectIds 1 次；對話框開啟中再按不重複開啟", async () => {
     const store = fakeStore(screens[2][1]);
@@ -744,13 +1082,15 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
 
   // ── 真 store 整合（F.makeStore；fixture 題庫 4 題） ──
 
-  test("整合：答對後 K +1 與標示出現；開關開啟跳過曾答對題；全部答對畫面兩個按鈕（AC-45-01、AC-46-03、AC-46-06～08）", async () => {
+  test("整合：答對後 K +1 與標示出現；開關開啟跳過曾答對題；全部答對關閉開關 → lockedReview → y = 0 結算 → 重新開始（AC-45-01、AC-46-03、AC-46-06、AC-46-08、AC-48-06、AC-48-10）", async () => {
     const content = F.loadContent();
     const { store, storage } = F.makeStore({ content });
     const bank = content.part5;
     assert.equal(bank.length, 4);
     let answer = true;
     const { rootEl, env } = mountWith({ store, bank, confirm: () => Promise.resolve(answer) });
+    const vibrations = env.vibrations;
+    const animations = env.animations;
     const count = () => one(rootEl, "correct-count").textContent;
     const clickOpt = (i) => findAll(rootEl, matcher('[data-p5="option"][data-index="' + i + '"]'))[0].click();
     const right = (j) => bank[j].correctIndex;
@@ -799,15 +1139,61 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.equal(q$(rootEl, "option").length, 0);
     const totals = () => { const p = store.getState().data.part5; return [p.totalAnswered, p.totalCorrect]; };
     const t0 = totals();
+    assert.equal(q$(rootEl, "replay").length, 0);
+    assert.equal(findAll(rootEl, (n) => n.tagName === "BUTTON").length, 1);
+    const vib0 = vibrations.slice();
+    const anim0 = animations.slice();
 
-    // 全部題目再練一次 → 開關關閉、第 1 題帶標示、K 仍為 Q、累計不變、焦點在題號（AC-46-07）
-    one(rootEl, "replay").click();
+    // 全部答對畫面關閉開關（UO-8 (a)）→ 第 1 題 lockedReview、本輪 0、K 仍為 Q、累計不變、1 次寫入、焦點留在開關（AC-48-10）
+    const off0 = storage.setCalls.length;
+    one(rootEl, "only").click();
+    assert.equal(storage.setCalls.length, off0 + 1);
     assert.equal(store.getState().data.part5UnansweredOnly, false);
     assert.equal(one(rootEl, "only").checked, false);
-    assert.equal(one(rootEl, "number").textContent, "第 1 / 4 題");
-    assert.equal(one(rootEl, "correct-badge").textContent, "✓ 曾答對");
-    assert.equal(count(), "已答對 4 / 4 題");
+    assert.equal(env.focused, one(rootEl, "only"));
+    const assertLocked = (n) => {
+      assert.equal(one(rootEl, "number").textContent, "第 " + n + " / 4 題");
+      assert.equal(one(rootEl, "correct-badge").textContent, "✓ 曾答對");
+      assert.equal(one(rootEl, "feedback").textContent, "你之前答對過這一題");
+      assert.ok(q$(rootEl, "option").every((b) => b.hasAttribute("disabled")));
+      assert.equal(q$(rootEl, "clear").length, 1);
+      assert.equal(q$(rootEl, "filter-hint")[0].textContent, T.filterHint);
+      assert.equal(count(), "已答對 4 / 4 題");
+      assert.deepEqual(totals(), t0);
+      assert.equal(store.getState().data.part5.lockedSelection, null);
+    };
+    assertLocked(1);
+    assert.equal(store.getState().data.part5.roundAnswered, 0);
+
+    // 嘗試作答（繞過 disabled，事件仍到 store）：不計分、不寫入、不震動、無動畫（LV-3、AC-48-02）
+    const try0 = storage.setCalls.length;
+    const before0 = store.getState().data;
+    [0, 1, 2, 3].forEach(clickOpt);
+    assert.equal(storage.setCalls.length, try0);
+    assert.equal(store.getState().data, before0);
+    assert.deepEqual(vibrations, vib0);
+    assert.deepEqual(animations, anim0);
+    assertLocked(1);
+
+    // 連按「下一題」：每次 1 次寫入、不計分；恰 Q 次進入 y = 0 結算（AC-48-06、AC-48-07）
+    for (let n = 2; n <= 4; n++) {
+      const w = storage.setCalls.length;
+      one(rootEl, "next").click();
+      assert.equal(storage.setCalls.length, w + 1);
+      assert.equal(env.focused, one(rootEl, "number"));
+      assertLocked(n);
+    }
+    one(rootEl, "next").click();
+    assert.equal(one(rootEl, "summary-none").textContent, "本輪沒有新作答的題目");
+    assert.equal(q$(rootEl, "summary-score").length, 0);
+    assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total")[0].textContent, "累計答對 " + t0[1] + " / " + t0[0]);
+    assert.equal(env.focused, one(rootEl, "summary-title"));
+    assert.equal(q$(rootEl, "clear").length, 1);
     assert.deepEqual(totals(), t0);
+
+    // 重新開始 → 第 1 題仍為 lockedReview（AC-48-04）
+    one(rootEl, "restart").click();
+    assertLocked(1);
     assert.equal(env.focused, one(rootEl, "number"));
 
     // K = Q 時開啟開關 → 全部答對（無本輪結算）
@@ -836,6 +1222,39 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.equal(one(rootEl, "number").textContent, "第 1 / 4 題");
     assert.deepEqual(totals(), t0);
     assert.equal(env.focused, one(rootEl, "number"));
+    assert.equal(q$(rootEl, "clear").length, 0, "K = 0 入口消失（CR-6）");
+  });
+
+  test("整合（CR-10、AC-48-11）：開關關閉時由題目畫面清除 → K = 0、第 1 題 idle、可重新作答；本次作答結果一併放棄（E-133）", async () => {
+    const content = F.loadContent();
+    const { store, storage } = F.makeStore({ content });
+    const bank = content.part5;
+    const { rootEl, env } = mountWith({ store, bank, confirm: () => Promise.resolve(true) });
+    const clickOpt = (i) => findAll(rootEl, matcher('[data-p5="option"][data-index="' + i + '"]'))[0].click();
+    assert.equal(q$(rootEl, "clear").length, 0);
+    clickOpt(bank[0].correctIndex);
+    assert.equal(env.vibrations.length, 1, "實際作答照常震動");
+    assert.equal(q$(rootEl, "clear").length, 1);
+    one(rootEl, "next").click();
+    clickOpt(bank[1].correctIndex); // 第 2 題作答結果未按下一題
+    const p = store.getState().data.part5;
+    const w = storage.setCalls.length;
+    one(rootEl, "clear").click();
+    await tick();
+    assert.equal(storage.setCalls.length, w + 1);
+    assert.equal(one(rootEl, "number").textContent, "第 1 / 4 題");
+    assert.equal(one(rootEl, "correct-count").textContent, "已答對 0 / 4 題");
+    assert.equal(q$(rootEl, "feedback").length, 0);
+    assert.equal(q$(rootEl, "clear").length, 0);
+    assert.equal(q$(rootEl, "next").length, 0);
+    assert.ok(q$(rootEl, "option").every((b) => !b.hasAttribute("disabled")));
+    const d = store.getState().data;
+    assert.equal(d.part5.lockedSelection, null);
+    assert.equal(d.part5.roundAnswered, 0);
+    assert.equal(d.part5.totalAnswered, p.totalAnswered);
+    assert.equal(d.part5.totalCorrect, p.totalCorrect);
+    assert.equal(d.part5UnansweredOnly, false);
+    assert.equal(env.focused, one(rootEl, "number"));
   });
 
   // ── 原始碼與樣式掃描 ──
@@ -847,9 +1266,17 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.doesNotMatch(src, /role:\s*"switch"|"aria-live"[^\n]*correct-count/);
   });
 
+  test("V-ST-27：views/part5.js、40-part5.css 不含已移除的 replay 與全部答對說明句字串", () => {
+    const words = ["再練" + "一次", "replay" + "KeepRecords", "replayPart5" + "KeepRecords", 'data-p5="' + 'replay"', "allCorrect" + "Note", "p5-allcorrect__" + "note"];
+    for (const rel of ["views/part5.js", "styles/40-part5.css"]) {
+      const src = fs.readFileSync(path.join(APP, rel), "utf8");
+      for (const w of words) assert.equal(src.indexOf(w), -1, rel + "：" + w);
+    }
+  });
+
   test("40-part5.css：新選擇器無 --accent、十六進位色值、transition、animation；.p5-only min-height var(--touch)；計數 tabular-nums", () => {
     const css = fs.readFileSync(path.join(APP, "styles", "40-part5.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    const NEW = /\.p5-(record|only|badge|allcorrect)/;
+    const NEW = /\.p5-(record|only|badge|allcorrect|summary__none)/;
     const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({ sel: m[1].trim(), body: m[2] }));
     const fresh = rules.filter((r) => NEW.test(r.sel));
     assert.ok(fresh.length >= 10, "新規則數 " + fresh.length);
@@ -869,5 +1296,18 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.match(body(".p5-badge"), /color:\s*var\(--correct\)/);
     assert.match(body(".p5-only input"), /accent-color:\s*var\(--brand-deep\)/);
     assert.match(body(".p5-allcorrect__actions .btn"), /min-height:\s*var\(--touch\)/);
+    // （v0.18，FE-81；§7.24.2）
+    const hint = body(".p5-record__hint");
+    assert.match(hint, /flex:\s*1 1 100%/);
+    assert.match(hint, /font-size:\s*0\.875rem/);
+    assert.match(hint, /color:\s*var\(--text-muted\)/);
+    assert.match(hint, /overflow-wrap:\s*anywhere/);
+    assert.doesNotMatch(hint, /nowrap|text-overflow|overflow:\s*hidden/);
+    assert.match(body(".p5-record__clear"), /flex:\s*0 1 auto/);
+    const none = body(".p5-summary__none");
+    assert.match(none, /font-size:\s*1\.125rem/);
+    assert.match(none, /font-weight:\s*600/);
+    assert.match(none, /color:\s*var\(--text\)/);
+    assert.ok(rules.some((r) => r.sel === ".p5-allcorrect__caption"), "caption 保留");
   });
 });

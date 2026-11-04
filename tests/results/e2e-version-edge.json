@@ -4,14 +4,14 @@
     "tc": "TC-42-01a",
     "ac": "AC-42-01 (a)、AC-41-04、AC-27-03、AC-23-02、E-95、E-96",
     "result": "通過",
-    "note": "【file:// 375×667】firstRun：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 459 ≤ cz-firstbar 上緣 515=true；dashboard：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；customizer：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587 ≤ app-nav 上緣 611=true；flashcards：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.7 ≤ app-nav 上緣 611=true；part5：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；sources：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587.3 ≤ app-nav 上緣 611=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0 ／ 【file:// 1366×768】firstRun：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752 ≤ 無固定列 上緣 768=true；dashboard：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.5 ≤ 無固定列 上緣 768=true；customizer：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.8 ≤ 無固定列 上緣 768=true；flashcards：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.3 ≤ 無固定列 上緣 768=true；part5：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 653.3 ≤ 無固定列 上緣 768=true；sources：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.7 ≤ 無固定列 上緣 768=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0"
+    "note": "【file:// 375×667】firstRun：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 459 ≤ cz-firstbar 上緣 515=true；dashboard：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；customizer：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587 ≤ app-nav 上緣 611=true；flashcards：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.7 ≤ app-nav 上緣 611=true；part5：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.5 ≤ app-nav 上緣 611=true；sources：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587.3 ≤ app-nav 上緣 611=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0 ／ 【file:// 1366×768】firstRun：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752 ≤ 無固定列 上緣 768=true；dashboard：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.5 ≤ 無固定列 上緣 768=true；customizer：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.8 ≤ 無固定列 上緣 768=true；flashcards：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.3 ≤ 無固定列 上緣 768=true；part5：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 676.8 ≤ 無固定列 上緣 768=true；sources：1 行「版本 1.2.0（建置 be5c8e6）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.7 ≤ 無固定列 上緣 768=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0"
   },
   {
     "suite": "e2e-version",
     "tc": "TC-42-03a",
     "ac": "AC-42-03 (a)、AC-21-01 (a)、E-98",
     "result": "通過",
-    "note": "連網：6 畫面版本行皆正常=true、文字 版本 1.1.0（建置 33dcbaf）；主文件以外請求 0；斷網：6 畫面版本行皆正常=true、文字 版本 1.1.0（建置 33dcbaf）；主文件以外請求 0；localStorage 鍵 englishMasterTrack:state、schemaVersion 3、切換 5 個畫面前後相同=true、含版本號或建置碼=false；備份頂層 format,schemaVersion,exportedAt,contentDataVersion,data（5 欄）、含版本號或建置碼=false"
+    "note": "連網：6 畫面版本行皆正常=true、文字 版本 1.2.0（建置 be5c8e6）；主文件以外請求 0；斷網：6 畫面版本行皆正常=true、文字 版本 1.2.0（建置 be5c8e6）；主文件以外請求 0；localStorage 鍵 englishMasterTrack:state、schemaVersion 3、切換 5 個畫面前後相同=true、含版本號或建置碼=false；備份頂層 format,schemaVersion,exportedAt,contentDataVersion,data（5 欄）、含版本號或建置碼=false"
   },
   {
     "suite": "e2e-version",
@@ -24,8 +24,8 @@
     "suite": "e2e-version",
     "tc": "TC-42-02",
     "ac": "AC-42-02、AC-36-02、AC-36-07、E-96",
-    "result": "失敗",
-    "note": "package.json version 1.1.0；emt-app-version 1.1.0（1 個）；emt-build-id 33dcbafd5b611fc6；sw.js BUILD_ID 33dcbafd5b611fc6、CACHE_NAME CACHE_PREFIX + BUILD_ID；畫面「版本 1.1.0（建置 33dcbaf）」；dist 與 site/index.html 逐位元組相同=false；@@ 殘留 HTML 0／sw 0；site 內 package 檔 0（共 8 檔）"
+    "result": "通過",
+    "note": "package.json version 1.2.0；emt-app-version 1.2.0（1 個）；emt-build-id be5c8e6ad7ed6061；sw.js BUILD_ID be5c8e6ad7ed6061、CACHE_NAME CACHE_PREFIX + BUILD_ID；畫面「版本 1.2.0（建置 be5c8e6）」；dist 與 site/index.html 逐位元組相同=true；@@ 殘留 HTML 0／sw 0；site 內 package 檔 0（共 8 檔）"
   },
   {
     "suite": "e2e-version",

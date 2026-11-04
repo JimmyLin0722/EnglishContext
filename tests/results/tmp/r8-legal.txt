@@ -1,0 +1,5 @@
+  PASS TC-23-08a AC-23-08 (1)(3)、E-122（V-LGL-05 (a)） src/data 頂層 20 檔、全域變數 9 個、字串 69,106 筆：「多益常考」「多益最常見」0 筆；A 組與 B 組同句 0 筆；單獨「常考」「必考」0 筆，判讀為考試頻率語意 0 筆
+  PASS TC-23-08b AC-23-08 (2)、Q-71、Q-75（V-LGL-06） p5-009 coreStrategy 逐字 LT-6=true；與上一交付版本（f547158）相比變動欄位 無、structure 相同=true（舊 coreStrategy「be interested in 表示「對……有興趣」，是多益最常見的形容詞＋介…」）；p5-103 整筆相同=true；其他題目變動 0 題
+  PASS TC-LGL-S01 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-07、AC-23-08（V-LGL-01～04、交付檔字串） 舊文字 0 次；LT-1 1 次、LT-2 1 次、LT-3 2 次、LT-5 1 次、LT-6 1 次；聯絡行字串 1 次、mailto 0、無空格位址 0
+  PASS TC-LGL-S02 AC-10-02、AC-48-12（V-LGL-02、E-123、HN-1、E-134） .p5-heading-note 禁用規則 無；.p5-record__hint 禁用規則 無
+法律文字靜態檢查：通過 4、失敗 0

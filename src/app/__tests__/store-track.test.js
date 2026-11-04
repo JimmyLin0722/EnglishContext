@@ -5,6 +5,8 @@
  *       §6.2 步驟 9（FP-6）、§7.7 V-ST-18～V-ST-20、V-ST-22。
  * 涵蓋：AC-44-01～AC-44-10、AC-45-01～AC-45-03、AC-45-06、AC-45-08、AC-46-02～AC-46-05、AC-46-07～AC-46-10、
  *       AC-47-01、AC-47-02、AC-47-04、AC-47-07、AC-18-01、AC-32-02、AC-03-05、AC-04-08、AC-30-14
+ * （v0.18，FE-80；architecture.md v0.13 §7.24.1、§10.10）LV-1～LV-7、UO-8、UO-10、CR-6、CR-10；
+ *       AC-48-02、AC-48-05、AC-48-08、AC-48-09、AC-48-10、AC-48-11；V-ST-23、V-ST-24、V-ST-26
  *
  * 做法：
  * - 以注入的假 storage（計數 setItem、可設定 quota／一般例外／停用）與假 content（21 個內建字、6 題模擬測驗）測試 createStore。
@@ -495,7 +497,7 @@ test("AC-45-01、CR-2：答對 → part5CorrectIds +1，與計數、打卡同一
   assert.deepEqual(store.getState().data.part5CorrectIds, ["p5-001"]);
 });
 
-test("AC-45-02、AC-45-03：答錯不記錄；曾答對的題目再答對不重複；鎖定後重點不變、不寫入", () => {
+test("AC-45-02、AC-45-03、LV-3：答錯不記錄；鎖定後重點不變、不寫入；曾答對的題目作答被拒、K 不變、setItem 0 次", () => {
   const { store, storage, a } = makeStore();
   a.answerPart5(1); // 答錯 p5-001
   assert.deepEqual(storedData(storage).part5CorrectIds, []);
@@ -505,31 +507,176 @@ test("AC-45-02、AC-45-03：答錯不記錄；曾答對的題目再答對不重�
   a.nextPart5();
   a.answerPart5(0); // 答對 p5-003
   assert.deepEqual(storedData(storage).part5CorrectIds, ["p5-002", "p5-003"]);
-  // 回到第 1 輪：再答對 p5-002 不重複、答錯 p5-003 不移除
   a.nextPart5(); a.answerPart5(2); a.nextPart5(); a.answerPart5(2); a.nextPart5(); a.answerPart5(2); a.nextPart5();
   assert.equal(store.getState().data.part5.phase, "summary");
   a.restartPart5();
-  a.answerPart5(0); // p5-001 答對 → 附加到末尾
+  a.answerPart5(0); // p5-001 答錯過、未曾答對 → 可作答；答對附加到末尾
+  assert.deepEqual(storedData(storage).part5CorrectIds, ["p5-002", "p5-003", "p5-001"]);
   a.nextPart5();
-  a.answerPart5(0); // p5-002 再答對
-  a.nextPart5();
-  a.answerPart5(3); // p5-003 答錯
+  // p5-002 曾答對 → 為 lockedReview，作答被拒（LV-3）
+  const before = store.getState().data;
+  [0, 3].forEach((i) => {
+    let r;
+    assert.equal(writesDuring(storage, () => { r = a.answerPart5(i); }), 0);
+    assert.deepEqual(r, { ok: false });
+  });
+  assert.equal(store.getState().data, before, "狀態為同一參考");
+  assert.equal(before.part5.lockedSelection, null);
   assert.deepEqual(storedData(storage).part5CorrectIds, ["p5-002", "p5-003", "p5-001"]);
 });
 
-/** v0.14 的模擬測驗規則（參考模型，與開關無關） */
+test("LV-3、V-ST-23、AC-48-02：lockedReview 嘗試作答 → a、c、x、y、K、答對紀錄、streak、todayLearned 全部不變，setItem 0 次", () => {
+  const { store, storage, a } = storeWithData((d) => {
+    d.part5CorrectIds = ["p5-003", "p5-999"];
+    Object.assign(d.part5, { currentIndex: 2, roundAnswered: 2, roundCorrect: 1, totalAnswered: 8, totalCorrect: 5 });
+    d.streak = { days: 4, lastActiveDate: "2026-10-28" };
+    d.todayLearned = { date: TODAY, wordKeys: ["alpha"] };
+  });
+  const before = JSON.stringify(store.getState().data);
+  const ref = store.getState().data;
+  const log = tagLog(store);
+  [0, 1, 2, 3].forEach((i) => {
+    let r;
+    assert.equal(writesDuring(storage, () => { r = a.answerPart5(i); }), 0, "選項 " + i);
+    assert.deepEqual(r, { ok: false }, "選項 " + i);
+  });
+  assert.equal(store.getState().data, ref);
+  assert.equal(JSON.stringify(store.getState().data), before);
+  assert.deepEqual(log, [], "不通知訂閱者");
+});
+
+test("LV-4、V-ST-23、AC-48-05：到達與重新載入 lockedReview → setItem 0 次（到達僅「下一題」寫題號 1 次）；lockedSelection 維持 null；重新載入不變", () => {
+  const { store, storage, a } = storeWithData((d) => { d.part5CorrectIds = ["p5-002"]; });
+  a.answerPart5(1);
+  // 按「下一題」到達 lockedReview：只有「下一題」寫入題號 1 次（UO-10）
+  assert.equal(writesDuring(storage, () => a.nextPart5()), 1);
+  assert.equal(store.getState().data.part5.currentIndex, 1);
+  assert.equal(store.getState().data.part5.lockedSelection, null);
+  assert.equal(storedData(storage).part5.lockedSelection, null);
+  const text = storage.map.get(KEY);
+  const calls = storage.setCalls.length;
+  // 重新載入：不寫入、狀態不變
+  const again = makeStore({ storage });
+  assert.equal(storage.setCalls.length, calls, "啟動不寫入");
+  assert.equal(storage.map.get(KEY), text);
+  const p = again.store.getState().data.part5;
+  assert.equal(p.currentIndex, 1);
+  assert.equal(p.lockedSelection, null);
+  assert.equal(PF.questionState(p, ["p5-001", "p5-002", "p5-003", "p5-004", "p5-005", "p5-006"], PF.correctSet(["p5-002"]), false), "lockedReview");
+});
+
+test("UO-10、V-ST-24：lockedReview「下一題」1 次 setItem 只改題號；idle「下一題」0 次；K = Q 由第 i 題恰 Q − i + 1 次進入結算；重新開始回 lockedReview", () => {
+  const all = ["p5-001", "p5-002", "p5-003", "p5-004", "p5-005", "p5-006"];
+  const { store, storage, a } = storeWithData((d) => {
+    d.part5CorrectIds = all.slice();
+    Object.assign(d.part5, { currentIndex: 3, roundAnswered: 2, roundCorrect: 1, totalAnswered: 8, totalCorrect: 5 });
+    d.streak = { days: 4, lastActiveDate: "2026-10-28" };
+  });
+  const streak = store.getState().data.streak;
+  const today = store.getState().data.todayLearned;
+  let steps = 0;
+  while (store.getState().data.part5.phase === "question" && steps < 10) {
+    assert.equal(writesDuring(storage, () => a.nextPart5()), 1);
+    steps++;
+  }
+  assert.equal(steps, 6 - 4 + 1, "第 4 題起恰 3 次");
+  const p = storedData(storage).part5;
+  assert.deepEqual(p, { currentIndex: 5, lockedSelection: null, phase: "summary", roundAnswered: 2, roundCorrect: 1, totalAnswered: 8, totalCorrect: 5 });
+  assert.deepEqual(store.getState().data.part5CorrectIds, all);
+  assert.equal(store.getState().data.streak, streak);
+  assert.equal(store.getState().data.todayLearned, today);
+  assert.equal(kindOf(store), "summary", "E-126：開關關閉時不是 allCorrect");
+  assert.equal(writesDuring(storage, () => a.restartPart5()), 1);
+  assert.equal(kindOf(store), "question");
+  assert.equal(store.getState().data.part5.currentIndex, 0);
+  assert.equal(writesDuring(storage, () => assert.deepEqual(a.answerPart5(0), { ok: false })), 0, "AC-48-04：重新開始後仍鎖定");
+
+  const idle = makeStore();
+  assert.equal(writesDuring(idle.storage, () => idle.a.nextPart5()), 0, "idle 不前進、不寫入（AC-48-03）");
+  assert.equal(idle.store.getState().data.part5.currentIndex, 0);
+});
+
+test("LV-7、AC-48-08 (c)：v1.1.0 留下曾答對題目的答錯結果 → 不重新計分；可「下一題」離開；回到該題時作答被拒", () => {
+  const { store, storage, a } = storeWithData((d) => {
+    d.part5CorrectIds = ["p5-001"];
+    Object.assign(d.part5, { currentIndex: 0, lockedSelection: 2, roundAnswered: 2, roundCorrect: 1, totalAnswered: 9, totalCorrect: 5 });
+  });
+  assert.deepEqual(storage.setCalls, [], "不遷移、不寫入");
+  const p0 = store.getState().data.part5;
+  assert.equal(p0.lockedSelection, 2);
+  assert.deepEqual(a.answerPart5(0), { ok: false });
+  assert.equal(store.getState().data.part5, p0);
+  a.nextPart5();
+  const p1 = store.getState().data.part5;
+  assert.equal(p1.currentIndex, 1);
+  assert.equal(p1.lockedSelection, null);
+  assert.equal(p1.totalAnswered, 9);
+  assert.equal(p1.totalCorrect, 5);
+  a.restartPart5();
+  assert.equal(store.getState().data.part5.currentIndex, 0);
+  assert.equal(store.getState().data.part5.lockedSelection, null);
+  assert.deepEqual(a.answerPart5(0), { ok: false }, "回到該題為 lockedReview");
+  assert.deepEqual(store.getState().data.part5CorrectIds, ["p5-001"]);
+});
+
+test("AC-48-09 (a)：localStorage 停用時工作階段內答對紀錄照常推導，p5-001 重新開始後被鎖定；重新載入後 K = 0", () => {
+  const content = fakeContent();
+  const storage = fakeStorage({});
+  storage.getThrows = true;
+  const store = S.createStore({ storage, content, rand: seq(), now: () => new Date("2026-10-30T10:00:00") });
+  store.init();
+  const a = store.actions;
+  assert.deepEqual(a.answerPart5(0), { ok: true, correct: true });
+  assert.deepEqual(store.getState().data.part5CorrectIds, ["p5-001"]);
+  for (let i = 0; i < 6 && store.getState().data.part5.phase === "question"; i++) {
+    a.nextPart5();
+    if (store.getState().data.part5.phase === "question") { a.answerPart5(1); }
+  }
+  assert.equal(store.getState().data.part5.phase, "summary");
+  a.restartPart5();
+  assert.equal(store.getState().data.part5.currentIndex, 0);
+  const before = store.getState().data;
+  assert.deepEqual(a.answerPart5(0), { ok: false }, "工作階段內為 lockedReview");
+  assert.equal(store.getState().data, before);
+  const again = S.createStore({ storage, content, rand: seq(), now: () => new Date("2026-10-30T10:00:00") });
+  again.init();
+  assert.deepEqual(again.getState().data.part5CorrectIds, [], "重新載入後 K = 0");
+  assert.deepEqual(again.actions.answerPart5(0), { ok: true, correct: true }, "回到未作答");
+});
+
+test("AC-48-09 (b)：容量已滿時工作階段內同為 lockedReview；不白屏；寫入狀態為 quota", () => {
+  const { store, storage, a } = makeStore();
+  storage.quota = true;
+  assert.deepEqual(a.answerPart5(0), { ok: true, correct: true });
+  assert.equal(store.getWriteStatus(), "quota");
+  for (let i = 0; i < 6 && store.getState().data.part5.phase === "question"; i++) {
+    a.nextPart5();
+    if (store.getState().data.part5.phase === "question") { a.answerPart5(1); }
+  }
+  a.restartPart5();
+  const before = store.getState().data;
+  assert.deepEqual(before.part5CorrectIds, ["p5-001"]);
+  assert.deepEqual(a.answerPart5(0), { ok: false });
+  assert.equal(store.getState().data, before);
+});
+
+/**
+ * 開關關閉的模擬測驗規則（參考模型）：未曾答對的題目與 v0.14 相同；
+ * （v0.18）曾答對且無本次作答結果的題目不可作答（LV-3），「下一題」可前進（UO-10）。
+ */
 function v014Model(bank) {
-  const m = { p: { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 0, totalCorrect: 0 } };
+  const m = { p: { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 0, totalCorrect: 0 }, correct: new Set() };
   m.answer = (i) => {
     const p = m.p;
-    if (p.phase !== "question" || p.lockedSelection !== null) { return; }
+    if (p.phase !== "question" || p.lockedSelection !== null || m.correct.has(bank[p.currentIndex].id)) { return; }
     const ok = i === bank[p.currentIndex].correctIndex;
+    if (ok) { m.correct.add(bank[p.currentIndex].id); }
     m.p = Object.assign({}, p, { lockedSelection: i, roundAnswered: p.roundAnswered + 1, roundCorrect: p.roundCorrect + (ok ? 1 : 0),
       totalAnswered: p.totalAnswered + 1, totalCorrect: p.totalCorrect + (ok ? 1 : 0) });
   };
   m.next = () => {
     const p = m.p;
-    if (p.phase !== "question" || p.lockedSelection === null) { return; }
+    if (p.phase !== "question" || (p.lockedSelection === null && !m.correct.has(bank[p.currentIndex].id))) { return; }
     m.p = p.currentIndex >= bank.length - 1 ? Object.assign({}, p, { lockedSelection: null, phase: "summary" })
       : Object.assign({}, p, { currentIndex: p.currentIndex + 1, lockedSelection: null });
   };
@@ -539,7 +686,7 @@ function v014Model(bank) {
   return m;
 }
 
-test("AC-45-06、CR-5、UO-2：開關關閉時計數、結算、主控台正確率與 v0.14 同一操作序列完全相同", () => {
+test("AC-45-06、CR-5、UO-2、LV-3、UO-10：開關關閉時計數、結算、主控台正確率與參考模型同一操作序列完全相同", () => {
   const { store, storage, a } = makeStore();
   const m = v014Model(part5Bank());
   const ops = [
@@ -560,6 +707,29 @@ test("AC-45-06、CR-5、UO-2：開關關閉時計數、結算、主控台正確�
   });
   assert.deepEqual(store.getState().data.streak, { days: 1, lastActiveDate: TODAY });
   assert.deepEqual(store.getState().data.todayLearned, { date: null, wordKeys: [] }, "模擬測驗不計入今日已學");
+});
+
+test("AC-48-03：只含未曾答對題目的操作序列，計數與寫入與 v0.14 相同（每題作答 1 次寫入，idle 不可按「下一題」）", () => {
+  const { store, storage, a } = makeStore();
+  const v014 = { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 0, totalCorrect: 0 };
+  let p = v014;
+  // 全部答錯（皆未曾答對）；重新開始後仍可作答
+  for (let round = 0; round < 2; round++) {
+    for (let q = 0; q < 6; q++) {
+      assert.equal(writesDuring(storage, () => a.nextPart5()), 0, "idle 不前進");
+      assert.equal(writesDuring(storage, () => a.answerPart5(1)), 1);
+      p = Object.assign({}, p, { lockedSelection: 1, roundAnswered: p.roundAnswered + 1, totalAnswered: p.totalAnswered + 1 });
+      assert.deepEqual(store.getState().data.part5, p);
+      assert.equal(writesDuring(storage, () => a.nextPart5()), 1);
+      p = q === 5 ? Object.assign({}, p, { lockedSelection: null, phase: "summary" })
+        : Object.assign({}, p, { lockedSelection: null, currentIndex: p.currentIndex + 1 });
+      assert.deepEqual(store.getState().data.part5, p);
+    }
+    assert.equal(writesDuring(storage, () => a.restartPart5()), 1);
+    p = Object.assign({}, p, { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0 });
+    assert.deepEqual(store.getState().data.part5, p);
+  }
+  assert.deepEqual(store.getState().data.part5CorrectIds, []);
 });
 
 test("AC-46-03、UO-5：開關開啟，p5-002、p5-003 曾答對 → p5-001 作答後「下一題」跳到 p5-004（第 4 題）；被跳過的題目不計入", () => {
@@ -592,8 +762,7 @@ test("AC-46-04、UO-1、UO-4：開啟當下目前題目曾答對且未作答 →
 
 test("AC-46-04 (b)、UO-4：已作答鎖定的曾答對題 → 開啟時不移動；其後皆曾答對 → summary", () => {
   // (b) 鎖定中
-  const s1 = storeWithData((d) => { d.part5CorrectIds = ["p5-001"]; });
-  s1.a.answerPart5(0);
+  const s1 = storeWithData((d) => { d.part5CorrectIds = ["p5-001"]; d.part5.lockedSelection = 0; });
   s1.a.setPart5UnansweredOnly(true);
   assert.equal(s1.store.getState().data.part5.currentIndex, 0);
   assert.equal(s1.store.getState().data.part5.lockedSelection, 0);
@@ -647,7 +816,6 @@ test("UO-1：非布林、與原值相同 → { changed: false }、不寫入；�
   assert.deepEqual(empty.a.answerPart5(0), { ok: false });
   empty.a.nextPart5();
   empty.a.restartPart5();
-  assert.deepEqual(empty.a.replayPart5KeepRecords(), { ok: false });
   assert.deepEqual(empty.a.clearPart5CorrectIds(), { ok: false });
   assert.deepEqual(empty.storage.setCalls, []);
   assert.equal(empty.store.getState().data, before.data);
@@ -670,30 +838,127 @@ test("UO-3、UO-7、AC-46-06：K = Q − 1 時答對最後一題 → 鎖定時�
   assert.equal(store.getState().data.part5.roundAnswered, 1);
 });
 
-test("UO-7 (a)、AC-46-07、FB-56：replay 只在 allCorrect 有效 → 開關關閉、第 1 題、本輪歸 0、答對紀錄與累計不變、1 次 setItem", () => {
-  const all = ["p5-001", "p5-002", "p5-003", "p5-004", "p5-005", "p5-006"];
-  // 非 allCorrect → { ok: false }、不寫入
-  const n = storeWithData((d) => { d.part5CorrectIds = all.slice(); });
-  assert.equal(writesDuring(n.storage, () => assert.deepEqual(n.a.replayPart5KeepRecords(), { ok: false })), 0);
-  assert.equal(writesDuring(n.storage, () => assert.deepEqual(n.a.clearPart5CorrectIds(), { ok: false })), 0);
-
-  const { store, storage, a } = storeWithData((d) => {
-    d.part5UnansweredOnly = true; d.part5CorrectIds = all.slice();
-    Object.assign(d.part5, { currentIndex: 5, phase: "summary", roundAnswered: 3, roundCorrect: 2, totalAnswered: 40, totalCorrect: 30 });
-  });
-  assert.equal(kindOf(store), "allCorrect");
-  let r;
-  assert.equal(writesDuring(storage, () => { r = a.replayPart5KeepRecords(); }), 1);
-  assert.deepEqual(r, { ok: true });
-  const d = storedData(storage);
-  assert.equal(d.part5UnansweredOnly, false);
-  assert.deepEqual(d.part5, { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 40, totalCorrect: 30 });
-  assert.deepEqual(d.part5CorrectIds, all);
-  assert.equal(kindOf(store), "question");
-  assert.deepEqual(a.replayPart5KeepRecords(), { ok: false }, "已不是 allCorrect");
+test("UO-7：replay 動作已移除，不再匯出", () => {
+  const { store } = makeStore();
+  assert.equal(store.actions["replayPart5" + "KeepRecords"], undefined);
 });
 
-test("CR-6、AC-46-08、FB-60：clear 只在 allCorrect 有效 → ids []、開關維持、第 1 題、累計不變、1 次 setItem；未呼叫時 0 次", () => {
+test("UO-8 (a)、AC-48-10、V-ST-26：allCorrect 三種進入方式關閉開關 → 第 1 題 lockedReview、本輪 0、K = Q、a、c 不變、1 次 setItem；重新載入不變；恰 Q 次進入 y = 0 結算", () => {
+  const all = ["p5-001", "p5-002", "p5-003", "p5-004", "p5-005", "p5-006"];
+  const entries = {
+    // 作答結束進入：答對最後一題後按「下一題」
+    answering() {
+      const s = storeWithData((d) => {
+        d.part5UnansweredOnly = true; d.part5CorrectIds = all.slice(0, 5);
+        Object.assign(d.part5, { currentIndex: 5, totalAnswered: 39, totalCorrect: 29 });
+      });
+      s.a.answerPart5(0);
+      s.a.nextPart5();
+      return s;
+    },
+    // K = Q 時開啟開關進入：結算畫面（y ≥ 1）開啟
+    toggle() {
+      const s = storeWithData((d) => {
+        d.part5CorrectIds = all.slice();
+        Object.assign(d.part5, { currentIndex: 5, phase: "summary", roundAnswered: 2, roundCorrect: 2, totalAnswered: 40, totalCorrect: 30 });
+      });
+      s.a.setPart5UnansweredOnly(true);
+      return s;
+    },
+    // 重新載入進入：開關開啟、K = Q 的舊資料
+    reload() {
+      return storeWithData((d) => {
+        d.part5UnansweredOnly = true; d.part5CorrectIds = all.slice();
+        Object.assign(d.part5, { currentIndex: 2, totalAnswered: 40, totalCorrect: 30 });
+      });
+    }
+  };
+  Object.keys(entries).forEach((name) => {
+    const { store, storage, a } = entries[name]();
+    assert.equal(kindOf(store), "allCorrect", name);
+    let r;
+    assert.equal(writesDuring(storage, () => { r = a.setPart5UnansweredOnly(false); }), 1, name);
+    assert.deepEqual(r, { changed: true }, name);
+    const d = storedData(storage);
+    assert.equal(d.part5UnansweredOnly, false, name);
+    assert.deepEqual(d.part5, { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 40, totalCorrect: 30 }, name);
+    assert.deepEqual(d.part5CorrectIds, all, name);
+    assert.equal(kindOf(store), "question", name);
+    assert.deepEqual(a.answerPart5(0), { ok: false }, name + "：lockedReview");
+    // 重新載入不變
+    const again = makeStore({ storage });
+    assert.deepEqual(again.store.getState().data.part5, d.part5, name);
+    assert.equal(again.store.getState().data.part5UnansweredOnly, false, name);
+    // 恰 Q 次「下一題」進入 y = 0 結算
+    for (let i = 0; i < 6; i++) {
+      assert.equal(store.getState().data.part5.phase, "question", name + " 第 " + i + " 次");
+      a.nextPart5();
+    }
+    assert.equal(store.getState().data.part5.phase, "summary", name);
+    assert.equal(store.getState().data.part5.roundAnswered, 0, name);
+    assert.equal(kindOf(store), "summary", name);
+  });
+});
+
+test("UO-8 (b)、AC-46-09 (a)：K = Q 但顯示本次作答結果時關閉開關 → part5 同一參考、1 次 setItem", () => {
+  const all = ["p5-001", "p5-002", "p5-003", "p5-004", "p5-005", "p5-006"];
+  const { store, storage, a } = storeWithData((d) => {
+    d.part5UnansweredOnly = true; d.part5CorrectIds = all.slice(0, 5); d.part5.currentIndex = 5;
+  });
+  a.answerPart5(0);
+  const p = store.getState().data.part5;
+  assert.equal(kindOf(store), "question");
+  assert.equal(writesDuring(storage, () => a.setPart5UnansweredOnly(false)), 1);
+  assert.equal(store.getState().data.part5, p);
+  assert.equal(store.getState().data.part5.lockedSelection, 0);
+});
+
+test("CR-6、CR-10、AC-48-11、AC-46-08、FB-60：K ≥ 1 時開關開啟與關閉、question、summary、allCorrect 皆生效 → ids []、開關維持、第 1 題、累計不變、streak 不變、1 次 setItem", () => {
+  const all = ["p5-001", "p5-002", "p5-003", "p5-004", "p5-005", "p5-006", "p5-999"];
+  [
+    ["關閉 lockedReview", (d) => { d.part5CorrectIds = ["p5-001"]; }, "question"],
+    ["關閉 idle", (d) => { d.part5CorrectIds = ["p5-001"]; d.part5.currentIndex = 1; }, "question"],
+    ["關閉 answered（E-133）", (d) => { d.part5CorrectIds = ["p5-001"]; d.part5.currentIndex = 1; d.part5.lockedSelection = 2; }, "question"],
+    ["關閉 summary", (d) => { d.part5CorrectIds = ["p5-001"]; d.part5.phase = "summary"; d.part5.roundAnswered = 2; }, "summary"],
+    ["開啟 idle", (d) => { d.part5UnansweredOnly = true; d.part5CorrectIds = ["p5-001"]; d.part5.currentIndex = 1; }, "question"],
+    ["開啟 summary", (d) => { d.part5UnansweredOnly = true; d.part5CorrectIds = ["p5-006"]; d.part5.phase = "summary"; }, "summary"],
+    ["開啟 allCorrect", (d) => { d.part5UnansweredOnly = true; d.part5CorrectIds = all.slice(); }, "allCorrect"]
+  ].forEach(([name, patch, kind]) => {
+    const { store, storage, a } = storeWithData((d) => {
+      patch(d);
+      d.part5.totalAnswered = 12; d.part5.totalCorrect = 9;
+      d.streak = { days: 4, lastActiveDate: "2026-10-28" };
+    });
+    const only = store.getState().data.part5UnansweredOnly;
+    assert.equal(kindOf(store), kind, name);
+    assert.deepEqual(storage.setCalls, [], name);
+    let r;
+    assert.equal(writesDuring(storage, () => { r = a.clearPart5CorrectIds(); }), 1, name);
+    assert.deepEqual(r, { ok: true }, name);
+    const d = storedData(storage);
+    assert.deepEqual(d.part5CorrectIds, [], name);
+    assert.equal(d.part5UnansweredOnly, only, name);
+    assert.deepEqual(d.part5, { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 12, totalCorrect: 9 }, name);
+    assert.deepEqual(d.streak, { days: 4, lastActiveDate: "2026-10-28" }, name + "：不打卡");
+    assert.equal(kindOf(store), "question", name);
+    // 此時 K = 0，再次呼叫不動作
+    assert.equal(writesDuring(storage, () => assert.deepEqual(a.clearPart5CorrectIds(), { ok: false })), 0, name);
+  });
+});
+
+test("CR-10、E-132：K = 0、答對紀錄只含題庫不存在的 id → { ok: false }、setItem 0 次、紀錄保留", () => {
+  [[], ["p5-999", "p5-888"]].forEach((ids) => {
+    [true, false].forEach((only) => {
+      const { store, storage, a } = storeWithData((d) => { d.part5CorrectIds = ids.slice(); d.part5UnansweredOnly = only; });
+      const before = store.getState().data;
+      assert.equal(writesDuring(storage, () => assert.deepEqual(a.clearPart5CorrectIds(), { ok: false })), 0);
+      assert.equal(store.getState().data, before);
+      assert.deepEqual(before.part5CorrectIds, ids);
+    });
+  });
+});
+
+test("CR-6、AC-46-08、FB-60：clear 通知 part5、stats；未呼叫時 0 次；題庫不存在的 id 一併清空", () => {
   const all = ["p5-001", "p5-002", "p5-003", "p5-004", "p5-005", "p5-006", "p5-999"];
   const { store, storage, a } = storeWithData((d) => {
     d.part5UnansweredOnly = true; d.part5CorrectIds = all.slice();

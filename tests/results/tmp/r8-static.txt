@@ -1,0 +1,20 @@
+  PASS TC-S01 AC-19-01 dist 建置產物：english-master-track.html＋PWA 部署目錄 site（人類自放檔案 無 不列入）；白名單 data: 圖示連結 1 次；<style> 區塊 1；外部資源樣式命中：無；程式網路 API：無
+  PASS TC-S02 AC-19-04 3,384,030 bytes（上限 5,242,880）
+  PASS TC-S03 AC-04-09 src/app 命中 0；產物程式命中 無
+  PASS TC-S04 AC-21-02 命中：無
+  PASS TC-S05 AC-21-03（程式面） (1) MediaRecorder：產物 0 次、src/app 0 檔；(2) getUserMedia 出現於：src/app/services/mic.js；產物 8 次 = mic.js 8 次：true；(3) mic.js 禁用字串命中：無；(4) speech-panel store action：setSttStatus(s)、setSttResult(null)、setSttResult(res)、recordSttScored()、acknowledgeSttNotice()；含音量參數 0
+  PASS TC-S06 AC-23-06、AC-38-10（V-LGL-04） 第一行「EnglishContext」；舊文字與 LT-5 無；開頭註解含 MIT 全文與 Copyright=true；CC BY-SA 聲明與網址=true；LT-4=true；<meta charset> 結束於第 70 byte
+  PASS TC-S07 AC-04-04、AC-24-07（產物） <script> 開 2／關 2；javascript: 連結=false
+  PASS TC-S08 AC-19-01（D-1 不打包） 命中：無
+  PASS TC-S10 AC-31-04 外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,384,030 bytes（AC-19-01 外部資源見 TC-S01）
+  PASS TC-S11 AC-26-05、AC-01-01（程式面） 產物原始字串命中 1 次（CSS 註解）；去除註解後：程式 0 次、CSS 規則 0 次
+  PASS TC-L-S01 AC-38-07、AC-19-01（VC-8） @font-face 0；CSS url( 0；font-family 宣告 3 種：font-family: var(--font)｜font-family: Consolas, "Courier New", monospace｜font-family: var(--font-ipa)
+  PASS TC-L-S02 AC-38-10 (1)、AC-34-01、AC-34-02（V-LAY-05、NM-1、NM-4） <title>EnglishContext</title>；授權註解第一行「EnglishContext」；HTML 文字節點命中=false；程式字串常值（空白分隔）命中 0；src/data（不含 _records）命中 無
+  PASS TC-L-S03 AC-38-10 (2)（NM-5 FROZEN_IDENTIFIERS） 缺少 無；匯出檔名前綴 english-master-track-backup- 存在=true；交付檔 dist/english-master-track.html 存在=true（匯出檔名實測見 TC-38-10）
+  PASS TC-L-S04 AC-38-05（NM-2） 內嵌 svg.app-logo 406 bytes（≤ 1,500）；含 xmlns/image/text/href/icons 路徑=false；aria-hidden=true；產物 <img> 0
+  PASS TC-V-S01 AC-42-03、AC-42-02（VR-5、V-VER-05） src/app 非測試 .js 含「package.json」：無；版本模組（去註解）禁用 API：無；寫死版本字串 "1.2.0"：無
+  PASS TC-V-S02 AC-42-02（V-VER-01、VR-2、HD-1） 產物 emt-app-version 1 個、值 1.2.0（package.json 1.2.0）；位於 emt-build-id 之後、</head> 之前=true；產物 @@ 佔位殘留 0；模板 @@APP_VERSION@@ 1 次
+  PASS TC-V-S03 AC-43-02、AC-39-04、AC-42-01（HT-7、V-LAY-10、VR-7） 含「範本」字串常值 3 處（custom-vocab.js 隱藏容器內與 persist.js 內部驗證原因 3、其他 0）；範本容器建立屬性含 hidden＋inert=true；.db-change 規則「min-height: 44px; min-width: 44px; margin-left: auto; padding: 0 14px; background: var(--surface); border: 1px solid var(--brand-deep); color: var(--brand-deep)」；.app-footer__version 規則「margin: 4px 0 0; font-size: 0.75rem; line-height: 1.5; color: var(--text-muted); white-space: nowrap;」；用強調橘／灰框線或缺 nowrap／無底線=false
+  PASS TC-T-S01 AC-47-08、AC-45-04、AC-45-05、AC-46-01、AC-46-06、AC-48-12（WR-4、CR-9、C-7、V-ST-27） V-ST-27 舊字串：交付 HTML 0 筆、src/app 0 筆；L1 新模組（position、part5flow）去註解後禁用 API／DOM／儲存：無；part5 view／store／persist／backup／reinit 網路 API 與 HTML 插入：無；畫面文字 13 則缺 0；40-part5.css 新規則 16 條（用強調橘／色碼／動畫：無；.p5-only min-height var(--touch)=true；.p5-record__count tabular-nums=true）；交付檔 3,384,030 bytes ≤ 5 MB=true；外部函式庫或外部 script=false
+  PASS TC-S09 AC-19-01（交付物可追溯） 重建產物 3,384,030 bytes；與 dist 位元組相同=true
+靜態檢查：通過 19、失敗 0

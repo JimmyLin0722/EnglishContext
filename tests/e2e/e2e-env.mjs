@@ -204,6 +204,8 @@ const LAYOUT = `(() => {
       if (mode === "strategies") await p.ev(`document.querySelectorAll(".dc-strategy").forEach((d) => d.open = true)`);
       if (mode === "details") await p.ev(`document.querySelectorAll("#view-sources details").forEach((d) => d.open = true)`);
       await sleep(60);
+      // 第 8 輪：等答題 pop 動畫結束再量版面（動畫中 transform 放大使選項暫時重疊，高負載時才會量到；diag-r8-quizpop）
+      await p.ev(`Promise.race([Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {}))), new Promise((r) => setTimeout(r, 1500))]).then(() => 1)`);
       const r = await p.ev(LAYOUT);
       results.push({ vp: `${w}x${h}`, page: tab + (mode ? "/" + mode : ""), ...r });
       if (mode === "quiz") await p.click(".fc-mode-btn");

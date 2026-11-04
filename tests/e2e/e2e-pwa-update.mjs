@@ -57,10 +57,10 @@ async function prepare({ seed = true, reduced } = {}) {
   const sw = await waitSW(page); await sleep(1500);
   return { env, page, sw };
 }
-const A = await prepare({ reduced: "reduce" });     // 有學習資料、按「重新整理」、減少動態
+const A = await prepare({ reduced: "reduce" });     // 有學習資料、按「更新版本」、減少動態
 const Bf = await prepare({ seed: false });          // 首次畫面（無狀態鍵）
 const C = await prepare();                           // 離線時已部署 V2
-const D = await prepare();                           // 不按「重新整理」
+const D = await prepare();                           // 不按「更新版本」
 await A.page.evaluate(async () => { const c = await caches.open("other-project-cache"); await c.put("/other-project/data.txt", new Response("keep-me", { headers: { "Content-Type": "text/plain" } })); });
 
 await R.check("TC-36-03a", "AC-36-03（首次安裝不提示、不重新載入）、AC-35-01", async () => {
@@ -87,7 +87,7 @@ await R.check("TC-36-06", "AC-36-06", async () => {
   return { ok, note: `離線（伺服器停止）開啟：識別碼 ${id1}、${e1}、提示=${n1.vis}、錯誤 ${errs.length}${errs.length ? JSON.stringify(errs) : ""}；恢復連網（V2 已部署）重新開啟 → ${n2.ms} ms 後顯示提示=${n2.vis}` };
 });
 
-// ── A：連網重新載入 → 60 秒內提示 → 按「重新整理」（AC-36-03、AC-36-04、AC-36-05、AC-31-03、AC-27-03）──
+// ── A：連網重新載入 → 60 秒內提示 → 按「更新版本」（AC-36-03、AC-36-04、AC-36-05、AC-31-03、AC-27-03）──
 const storeA0 = await readStore(A.page);
 await R.check("TC-36-03b", "AC-36-03、AC-31-03、AC-27-03", async () => {
   await A.page.reload(); const t0 = Date.now();
@@ -100,10 +100,10 @@ await R.check("TC-36-03b", "AC-36-03、AC-31-03、AC-27-03", async () => {
   const pageId = await pageBuildId(A.page);
   const narrow = await (async () => { await A.page.setViewportSize({ width: 375, height: 740 }); await sleep(200); const l = await layoutCheck(A.page, ".pwa-update__btn"); await A.page.setViewportSize({ width: 1366, height: 900 }); return l; })();
   const noAnim = n.anim.every((a) => /^none\/0s$/.test(a));
-  const ok = n.vis && n.ms !== null && n.ms <= 60000 && n.text === "有新版本，重新整理" && n.btn === "重新整理" && n.media === 0 && !n.dialog && noAnim && lay.covered === 0 && narrow.covered === 0 && !narrow.clipped && htmlId === V2 && htmlId2 === V2 && pageId === V1;
+  const ok = n.vis && n.ms !== null && n.ms <= 60000 && n.text === "有新版本，請更新版本" && n.btn === "更新版本" && n.media === 0 && !n.dialog && noAnim && lay.covered === 0 && narrow.covered === 0 && !narrow.clipped && htmlId === V2 && htmlId2 === V2 && pageId === V1;
   return { ok, note: `重新載入後 ${n.ms} ms 顯示「${n.text}」＋按鈕「${n.btn}」（role=${n.role}、圖像 ${n.media}、非彈窗=${!n.dialog}）；減少動態下 animation/transition ${JSON.stringify(n.anim)}；1366 遮住點 ${lay.covered}/5、375 按鈕遮住點 ${narrow.covered}/5 裁切=${narrow.clipped}；按下前頁面識別碼 ${pageId}（V1 照常運作）；本專案快取 ${JSON.stringify(mine)}（更新等待期間 2 份，FB-39）；V2 快取中 ./ 與 ./index.html 的識別碼 ${htmlId}、${htmlId2}（取自伺服器而非 HTTP 快取；伺服器 Cache-Control: max-age=600，距 V1 安裝 ${Math.round((Date.now() - t0) / 1000)} 秒內）` };
 });
-await R.check("TC-36-03c", "AC-36-03（按「重新整理」）、AC-36-04、AC-36-05", async () => {
+await R.check("TC-36-03c", "AC-36-03（按「更新版本」）、AC-36-04、AC-36-05", async () => {
   const nav0 = A.env.log.navigations.length;
   await A.page.click(".pwa-update__btn"); await sleep(400);
   await A.page.click(".pwa-update__btn", { timeout: 300 }).catch(() => {});
@@ -121,11 +121,11 @@ await R.check("TC-37-05b", "AC-37-05、AC-21-01（經過 1 次更新）", async 
   const all = A.env.log.requests.filter((r) => !/^(blob|data):/.test(r.url));
   const bad = all.filter((r) => !ALLOWED.has(r.url) || r.method !== "GET" || r.body || new URL(r.url).search !== "" || new URL(r.url).origin !== ORIGIN);
   const ok = bad.length === 0 && !all.some((r) => r.url.endsWith("/favicon.ico"));
-  return { ok, note: `情境 A（V1 安裝、V2 更新、按重新整理）環境層請求 ${all.length} 筆（service worker 發出 ${all.filter((r) => r.sw).length}）：${JSON.stringify([...new Set(all.map((r) => r.method + " " + r.url.replace(ORIGIN, "")))])}；違規 ${bad.length}${bad.length ? JSON.stringify(bad.map((r) => r.method + " " + r.url)) : ""}` };
+  return { ok, note: `情境 A（V1 安裝、V2 更新、按更新版本）環境層請求 ${all.length} 筆（service worker 發出 ${all.filter((r) => r.sw).length}）：${JSON.stringify([...new Set(all.map((r) => r.method + " " + r.url.replace(ORIGIN, "")))])}；違規 ${bad.length}${bad.length ? JSON.stringify(bad.map((r) => r.method + " " + r.url)) : ""}` };
 });
 
 // ── B：首次畫面也提示；不按 → 關閉全部分頁後重開為 V2，仍為首次畫面且無狀態鍵（AC-36-04 後半、UP-6、UP-7）──
-await R.check("TC-36-04b", "AC-36-04（首次畫面）、AC-36-03（不按重新整理）", async () => {
+await R.check("TC-36-04b", "AC-36-04（首次畫面）、AC-36-03（不按更新版本）", async () => {
   await Bf.page.reload(); const n = await waitNotice(Bf.page, 60000);
   const e1 = await Bf.page.evaluate(() => document.body.dataset.entry); const id1 = await pageBuildId(Bf.page);
   await Bf.page.click('.cz-level[data-color="brown"]').catch(() => {}); await sleep(300);

@@ -13,7 +13,8 @@ const qa = (r) => r.startsWith("tests/");
 // 第 3 輪：非 PG 產出、人類自行放置的檔案（主控指示 dist/Ads.txt 不算缺陷；LICENSE、.github/ 於 2026-11-02 出現，不屬任何任務，列出待人類確認）
 // 第 4 輪（PRD v0.11）授權例外：src/app/assets/icons/（主控 MC-01，SD-FB-33）、.gitignore／.gitattributes（主控依人類決定新增）；
 // package-lock.json 為 QA 新增 devDependency（playwright-core，E2E 用）時 npm 產生
-const nonPg = (r) => r.toLowerCase() === "dist/ads.txt" || r === "LICENSE" || r.startsWith(".github/")
+// 第 8 輪：NOTICE.md、src/data/NOTICE.md 由 commit c10d5f0（「補上 repo 授權聲明」，第 8 輪前已提交）新增，不屬任何 PG 任務，列出待人類確認
+const nonPg = (r) => r.toLowerCase() === "dist/ads.txt" || r === "LICENSE" || r === "NOTICE.md" || r === "src/data/NOTICE.md" || r.startsWith(".github/")
   || r.startsWith("src/app/assets/icons/") || r === ".gitignore" || r === ".gitattributes" || r === "package-lock.json";
 const rows = { owned: [], human: [], qa: [], nonPg: [], orphan: [] };
 for (const r of files) { if (owner.has(r)) rows.owned.push(`${r} ← ${owner.get(r).join("、")}`); else if (human(r)) rows.human.push(r); else if (qa(r)) rows.qa.push(r); else if (nonPg(r)) rows.nonPg.push(r); else rows.orphan.push(r); }

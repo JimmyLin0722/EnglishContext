@@ -252,6 +252,14 @@
   font-weight: 700;
 }
 
+/* y = 0 不沿用分數字級（SM-2、AC-48-06） */
+.p5-summary__none {
+  margin-bottom: 4px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
 .p5-summary__total {
   color: var(--text-muted);
 }
@@ -315,6 +323,21 @@
   outline-offset: 2px;
 }
 
+/* 開關說明：獨佔一行、位於開關下方，可換行（HN-1、E-134） */
+.p5-record__hint {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* 常駐清除入口：尺寸與底色沿用 .btn、.btn--secondary（CR-10） */
+.p5-record__clear {
+  flex: 0 1 auto;
+}
+
 /* 「✓ 曾答對」：外框膠囊（同 .p5-type 尺寸），位於 .p5-meta 題型標籤之後（AC-45-04） */
 .p5-badge {
   display: inline-block;
@@ -348,7 +371,6 @@
   outline-offset: 2px;
 }
 
-.p5-allcorrect__note,
 .p5-allcorrect__caption {
   color: var(--text-muted);
 }

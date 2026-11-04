@@ -523,7 +523,7 @@ if (V100 && fs.existsSync(V100)) {
     await p.go("part5"); const q = await p5info(p); await p.go("flashcards"); const c = await fc(p);
     const ok = oldVer === "1.0.0" && old.schemaVersion === 2 && Object.keys(old.data).length === 9 && entry === "main" && sets1 === 1 && sets2 === 0 && raw1 === raw2 && st.schemaVersion === SV && same
       && q.number === `第 ${old.data.part5.currentIndex + 1} / 200 題` && q.count === "已答對 0 / 200 題" && q.only === false && c.pos.startsWith("第 1 /") && p.log.exceptions.length === 0;
-    return { ok, note: `v1.0.0（emt-app-version ${oldVer}）學習後主鍵 schemaVersion ${old.schemaVersion}、${Object.keys(old.data).length} 欄（part5 ${J(old.data.part5)}）→ 以 1.1.0 開啟：${entry}、setItem ${sets1} 次、再載入 ${sets2} 次且位元組不變=${raw1 === raw2}；schemaVersion ${st.schemaVersion}；9 欄逐欄相同=${same}；模擬測驗「${q.number}」「${q.count}」、開關 ${q.only}；單字卡「${c.pos}」；未處理例外 ${p.log.exceptions.length}` };
+    return { ok, note: `v1.0.0（emt-app-version ${oldVer}）學習後主鍵 schemaVersion ${old.schemaVersion}、${Object.keys(old.data).length} 欄（part5 ${J(old.data.part5)}）→ 以目前版本 1.2.0 開啟：${entry}、setItem ${sets1} 次、再載入 ${sets2} 次且位元組不變=${raw1 === raw2}；schemaVersion ${st.schemaVersion}；9 欄逐欄相同=${same}；模擬測驗「${q.number}」「${q.count}」、開關 ${q.only}；單字卡「${c.pos}」；未處理例外 ${p.log.exceptions.length}` };
   });
   await p.close();
 } else R.fail("TC-47-04b", "AC-47-04", "未提供 QA_V100（v1.0.0 舊交付檔），無法執行");

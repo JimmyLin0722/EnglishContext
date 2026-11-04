@@ -510,9 +510,11 @@ describe("load-order.test.js：單字卡位置與答對紀錄（v0.15，FE-76）
     for (const fn of ["isShape", "normalize", "resolve", "fromIndex", "sameCard"]) {
       assert.equal(typeof EMT.core.position[fn], "function", "缺少 position." + fn);
     }
-    for (const fn of ["normalizeIds", "countCorrect", "viewKind", "normalizeOnly", "next", "restart", "setOnly", "recordAnswer", "replayKeepRecords", "clearAndRestart"]) {
+    for (const fn of ["normalizeIds", "countCorrect", "viewKind", "questionState", "canAnswer", "normalizeOnly", "next", "restart", "setOnly", "recordAnswer", "clearAndRestart"]) {
       assert.equal(typeof EMT.core.part5flow[fn], "function", "缺少 part5flow." + fn);
     }
+    // （v0.18，UO-7）replay 函式已移除，不保留為隱藏程式
+    assert.equal(EMT.core.part5flow["replay" + "KeepRecords"], undefined);
     // persist 本身仍正常登錄（陷阱的 setter 有保存）
     assert.equal(typeof EMT.core.persist, "object");
     // 瀏覽器環境下可用：position 取到 wordkey（以字找回）；
@@ -532,8 +534,9 @@ describe("load-order.test.js：單字卡位置與答對紀錄（v0.15，FE-76）
     assert.ok(Object.isFrozen(T), "PART5_RECORD_TEXTS 應凍結");
     assert.ok(Object.isFrozen(T.clearConfirmMustInclude), "clearConfirmMustInclude 應凍結");
     assert.deepEqual(Object.keys(T), [
-      "correctBadge", "correctCount", "unansweredOnlyLabel", "allCorrectTitle",
-      "replayKeepRecords", "clearAndRestart", "clearConfirmMustInclude", "confirmOk", "confirmCancel"
+      "correctBadge", "correctCount", "unansweredOnlyLabel", "allCorrectTitle", "clearAndRestart",
+      "lockedReviewFeedback", "summaryNoNewAnswers", "filterHint", "filterHintAllCorrect",
+      "clearConfirmMustInclude", "confirmOk", "confirmCancel"
     ]);
     assert.equal(T.correctBadge, "✓ 曾答對");
     assert.equal(T.correctCount, "已答對 {k} / {q} 題");

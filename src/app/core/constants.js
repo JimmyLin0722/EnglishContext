@@ -7,6 +7,7 @@
  * （FE-42）v0.10：SCORE_DEFAULT 600 → 725（= 綠色 scoreMax；PRD Q-39、契約 GS-7、DS-08）。
  * （FE-73）契約 v0.15 持久化升版：CURRENT_SCHEMA_VERSION 2 → 3、SUPPORTED_SCHEMA_VERSIONS [1, 2] → [1, 2, 3]；
  *   LEARNING_PROGRESS_FIELDS 6 → 7 項（加 part5CorrectIds，Q-67 A）；新增 PART5_RECORD_TEXTS（data-schema.ts §15）。
+ * （FE-80）契約 v0.18：PART5_RECORD_TEXTS 新增 4 個鍵並移除 1 個鍵，共 12 個鍵（UO-7、Q-77 A）；持久化結構不變。
  * 契約變更時必須同步更新本檔與 src/app/__tests__/goal.test.js 的字面值斷言。
  * 本模組不碰 DOM；Node 以 require 載入，瀏覽器掛到 EMT.core.constants。
  */
@@ -117,15 +118,18 @@
   // §10（v0.9）隱藏頁面（AC-20-04、HT-1～HT-5）：currentTab 不得為這些值；TAB_LABELS 保留其文字供未來開放
   var HIDDEN_TAB_IDS = ["decoder", "phrasebank"];
 
-  // §15（v0.15）模擬測驗答對紀錄與「只練沒答對」的畫面文字（AC-45-04、AC-45-05、AC-46-01、AC-46-06～AC-46-08）；
+  // §15（v0.15，v0.18 修訂）模擬測驗答對紀錄與「只練沒答對」的畫面文字（AC-45-04、AC-45-05、AC-46-01、AC-46-06、AC-46-08、AC-48-01、AC-48-06、AC-48-11、AC-48-12）；
   // 鍵、值、鍵順序與 data-schema.ts §15 逐字相同；{k}、{q} 為佔位符；以 textContent 寫入（C-7）
   var PART5_RECORD_TEXTS = {
     correctBadge: "✓ 曾答對",
     correctCount: "已答對 {k} / {q} 題",
     unansweredOnlyLabel: "只練沒答對的題目",
     allCorrectTitle: "{q} 題全部答對！",
-    replayKeepRecords: "全部題目再練一次（保留紀錄）",
     clearAndRestart: "清除答對紀錄，重新來過",
+    lockedReviewFeedback: "你之前答對過這一題",
+    summaryNoNewAnswers: "本輪沒有新作答的題目",
+    filterHint: "關閉時顯示全部題目，答對過的題目會以綠色鎖定。",
+    filterHintAllCorrect: "要檢視全部題目，請關閉上方的「只練沒答對的題目」。",
     clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
     confirmOk: "確定",
     confirmCancel: "取消"

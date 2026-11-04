@@ -116,7 +116,7 @@ await R.check("TC-23-02", "AC-23-02", async () => {
   const reg = await p.ev(`DATA_SOURCE_REGISTRY.filter((r) => r.code !== "ORIGINAL")`);
   const miss = [];
   for (const r of reg) for (const v of [r.name, r.version, r.licenseName, r.licenseUrl, r.homepageUrl, ...r.authors]) if (!t.includes(v)) miss.push(r.code + ":" + v);
-  const statements = ["程式碼以 MIT 授權（Copyright JimmyLin）", "單字資料以 CC BY-SA 4.0 授權", "原創內容（例句、解析、Part 5 題目、長難句、句型）以 CC BY-SA 4.0 授權，著作權人 JimmyLin", "音標改寫為美式 IPA，標為原創，不屬 ECDICT", "簡體轉繁體台灣用語", "精簡釋義", "合併", "去重", "重新編排頻率排名", "補充", "修改者 JimmyLin"];
+  const statements = ["程式碼以 MIT 授權（Copyright JimmyLin）", "單字資料以 CC BY-SA 4.0 授權", "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權", "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。", "音標改寫為美式 IPA，標為原創，不屬 ECDICT", "簡體轉繁體台灣用語", "精簡釋義", "合併", "去重", "重新編排頻率排名", "補充", "修改者 JimmyLin"];
   const missS = statements.filter((s) => !t.includes(s));
   const wl = await p.ev(`[...document.querySelectorAll("#view-sources h3, #view-sources h4")].map((h) => h.textContent).filter((x) => /NGSL|TSL|BSL|NAWL/.test(x)).length`);
   const used = await p.ev(`new Set(MASTER_VOCAB_DATABASE.flatMap((w) => w.sources)).size`);

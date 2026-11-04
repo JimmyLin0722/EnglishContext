@@ -1,0 +1,15 @@
+e2e-lock：結束碼 0、171 秒、FAIL 0；12:08:36；可用記憶體 5303 MB
+e2e-legal：結束碼 0、47 秒、FAIL 0；12:09:22；可用記憶體 5322 MB
+e2e-env：結束碼 0、302 秒、FAIL 5：FAIL TC-22-01 AC-22-01 本機無頭 Chrome 參考值（非｜FAIL TC-22-01m AC-22-01、AC-31-03 本機無頭 Ch｜FAIL TC-22-04b AC-22-04 本機無頭 Chrome 參考值（｜FAIL TC-22-02b AC-22-02 本機無頭 Chrome 參考值（｜FAIL TC-22-03b AC-22-03 本機無頭 Chrome 參考值（；12:14:25；可用記憶體 5457 MB
+e2e-reinit：結束碼 0、47 秒、FAIL 0；12:15:12；可用記憶體 6232 MB
+e2e-goal：結束碼 0、48 秒、FAIL 0；12:16:00；可用記憶體 6226 MB
+e2e-firstrun：結束碼 0、128 秒、FAIL 0；12:18:08；可用記憶體 6198 MB
+e2e-speech：結束碼 0、30 秒、FAIL 0；12:18:38；可用記憶體 6130 MB
+e2e-mic：結束碼 0、51 秒、FAIL 0；12:19:29；可用記憶體 6001 MB
+e2e-hidden：結束碼 0、26 秒、FAIL 0；12:19:55；可用記憶體 6057 MB
+e2e-goal（edge）：結束碼 0、49 秒、FAIL 0；12:20:44；可用記憶體 6068 MB
+e2e-hidden（edge）：結束碼 0、27 秒、FAIL 0；12:21:12；可用記憶體 6053 MB
+e2e-pwa（edge）：結束碼 0、67 秒、FAIL 0；12:22:18；可用記憶體 6134 MB
+e2e-version（edge）：結束碼 0、95 秒、FAIL 0；12:23:53；可用記憶體 6234 MB
+e2e-track-p5（edge）：結束碼 0、71 秒、FAIL 0；12:25:05；可用記憶體 6146 MB
+e2e-lock（edge）：結束碼 0、175 秒、FAIL 0；12:27:59；可用記憶體 5966 MB

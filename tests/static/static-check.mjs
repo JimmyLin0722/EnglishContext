@@ -115,11 +115,13 @@ rec("TC-S02", "AC-19-04", buf.length <= 5242880, `${buf.length.toLocaleString()}
   const c = head.match(/<!--([\s\S]*?)-->/);
   const t = c ? c[1] : "";
   const mitFull = ["Permission is hereby granted, free of charge", "The above copyright notice and this permission notice shall be included", 'THE SOFTWARE IS PROVIDED "AS IS"'].every((s) => t.includes(s));
-  const ok = /Copyright \(c\) \d{4} JimmyLin/.test(t) && mitFull && t.includes("單字資料與原創內容（例句、解析、Part 5 題目、長難句、句型）以 CC BY-SA 4.0 授權，原創內容著作權人 JimmyLin") && t.includes("https://creativecommons.org/licenses/by-sa/4.0/");
-  // 第 4 輪（v0.11 AC-23-06 修訂，Q-48）：品牌標識聲明
-  const brand = t.includes("PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin，保留所有權利，不適用 MIT 與 CC BY-SA 4.0");
+  const ok = /Copyright \(c\) \d{4} JimmyLin/.test(t) && mitFull && t.includes("單字資料以 CC BY-SA 4.0 授權") && t.includes("原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權") && t.includes("https://creativecommons.org/licenses/by-sa/4.0/");
+  // 第 8 輪（v0.17 AC-23-06、V-LGL-04）：第一行 EnglishContext、LT-4，不含舊文字與 LT-5
+  const brand = t.includes("PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0");
+  const firstLine = t.split(/\r?\n/).map((x) => x.trim()).find(Boolean);
+  const oldHead = ["原創內容著作權人 JimmyLin", "保留所有權利", "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。"].filter((x) => t.includes(x));
   const charsetEnd = Buffer.byteLength(html.slice(0, html.indexOf('<meta charset="utf-8">') + 22), "utf8");
-  rec("TC-S06", "AC-23-06", ok && brand && charsetEnd <= 1024, `開頭註解含 MIT 全文與 Copyright=${mitFull}；CC BY-SA 聲明與網址=${ok}；品牌標識聲明（v0.11）=${brand}；<meta charset> 結束於第 ${charsetEnd} byte`);
+  rec("TC-S06", "AC-23-06、AC-38-10（V-LGL-04）", ok && brand && firstLine === "EnglishContext" && oldHead.length === 0 && charsetEnd <= 1024, `第一行「${firstLine}」；舊文字與 LT-5 ${oldHead.join("／") || "無"}；開頭註解含 MIT 全文與 Copyright=${mitFull}；CC BY-SA 聲明與網址=${ok}；LT-4=${brand}；<meta charset> 結束於第 ${charsetEnd} byte`);
 }
 
 // TC-S07 安全：內嵌資料不得提前結束 <script>、無 javascript: 連結
@@ -252,9 +254,13 @@ const stripCss = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
   const l1 = ["src/app/core/position.js", "src/app/core/part5flow.js"];
   const l1Bad = l1.flatMap((f) => [...NET, "document.", "localStorage", "sessionStorage", "indexedDB", "innerHTML", "window."].filter((k) => nc(f).includes(k)).map((k) => f + ":" + k));
   const viewBad = ["src/app/views/part5.js", "src/app/state/store.js", "src/app/core/persist.js", "src/app/core/backup.js", "src/app/core/reinit.js"].flatMap((f) => [...NET, "innerHTML", "insertAdjacentHTML"].filter((k) => nc(f).includes(k)).map((k) => f + ":" + k));
-  const texts = ["✓ 曾答對", "已答對 {k} / {q} 題", "只練沒答對的題目", "{q} 題全部答對！", "全部題目再練一次（保留紀錄）", "清除答對紀錄，重新來過", "將清除全部題目的答對紀錄", "累計答題數與正確率不受影響",
-    "每一題都至少答對過一次了。可以保留紀錄、全部題目再練一次，或清除答對紀錄後重新來過。", "清除答對紀錄", "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。"];
+  const texts = ["✓ 曾答對", "已答對 {k} / {q} 題", "只練沒答對的題目", "{q} 題全部答對！", "清除答對紀錄，重新來過", "你之前答對過這一題", "本輪沒有新作答的題目", "關閉時顯示全部題目，答對過的題目會以綠色鎖定。", "要檢視全部題目，請關閉上方的「只練沒答對的題目」。", "將清除全部題目的答對紀錄", "累計答題數與正確率不受影響",
+    "清除答對紀錄", "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。"];
   const miss = texts.filter((t) => !appJs.includes(t) && !appJs.includes(JSON.stringify(t).slice(1, -1)));
+  // 第 8 輪（V-ST-27）：交付 HTML 與 src/app 非 __tests__ 檔案中 4 個舊字串皆 0 次
+  const GONE = ["全部題目再練一次", "再練一次", "replayKeepRecords", "replayPart5KeepRecords"];
+  const goneHtml = GONE.filter((t) => html.includes(t));
+  const goneSrc = [...walk(path.join(ROOT, "src", "app")), path.join(ROOT, "src", "app", "license-header.txt")].flatMap((f) => GONE.filter((t) => fs.readFileSync(f, "utf8").includes(t)).map((t) => path.basename(f) + ":" + t));
   const p5css = stripCss(fs.readFileSync(path.join(ROOT, "src", "app", "styles", "40-part5.css"), "utf8"));
   const newRules = [...p5css.matchAll(/([^{}]*\.(?:p5-record|p5-only|p5-badge|p5-allcorrect)[^{}]*)\{([^}]*)\}/g)].map((m) => ({ sel: m[1].trim(), body: m[2] }));
   const cssBad = newRules.filter((r) => /--accent|#f7893b|transition|animation|#[0-9a-f]{3,8}\b/i.test(r.body)).map((r) => r.sel);
@@ -262,8 +268,8 @@ const stripCss = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
   const okCss = cssBad.length === 0 && !!only && /min-height:\s*var\(--touch\)/.test(only.body) && !!cnt && /tabular-nums/.test(cnt.body);
   const sizeOk = buf.length <= 5242880;
   const extLib = /cdn\.|unpkg|jsdelivr|googleapis|<script[^>]+src=/i.test(html);
-  rec("TC-T-S01", "AC-47-08、AC-45-04、AC-45-05、AC-46-01（WR-4、CR-9、C-7）", l1Bad.length === 0 && viewBad.length === 0 && miss.length === 0 && okCss && sizeOk && !extLib,
-    `L1 新模組（position、part5flow）去註解後禁用 API／DOM／儲存：${l1Bad.join("、") || "無"}；part5 view／store／persist／backup／reinit 網路 API 與 HTML 插入：${viewBad.join("、") || "無"}；畫面文字 ${texts.length} 則缺 ${miss.length}${miss.length ? "：" + miss.join("、") : ""}；40-part5.css 新規則 ${newRules.length} 條（用強調橘／色碼／動畫：${cssBad.join("、") || "無"}；.p5-only min-height var(--touch)=${!!only && /min-height:\s*var\(--touch\)/.test(only.body)}；.p5-record__count tabular-nums=${!!cnt && /tabular-nums/.test(cnt.body)}）；交付檔 ${buf.length.toLocaleString()} bytes ≤ 5 MB=${sizeOk}；外部函式庫或外部 script=${extLib}`);
+  rec("TC-T-S01", "AC-47-08、AC-45-04、AC-45-05、AC-46-01、AC-46-06、AC-48-12（WR-4、CR-9、C-7、V-ST-27）", goneHtml.length === 0 && goneSrc.length === 0 && l1Bad.length === 0 && viewBad.length === 0 && miss.length === 0 && okCss && sizeOk && !extLib,
+    `V-ST-27 舊字串：交付 HTML ${goneHtml.join("、") || "0 筆"}、src/app ${goneSrc.join("、") || "0 筆"}；L1 新模組（position、part5flow）去註解後禁用 API／DOM／儲存：${l1Bad.join("、") || "無"}；part5 view／store／persist／backup／reinit 網路 API 與 HTML 插入：${viewBad.join("、") || "無"}；畫面文字 ${texts.length} 則缺 ${miss.length}${miss.length ? "：" + miss.join("、") : ""}；40-part5.css 新規則 ${newRules.length} 條（用強調橘／色碼／動畫：${cssBad.join("、") || "無"}；.p5-only min-height var(--touch)=${!!only && /min-height:\s*var\(--touch\)/.test(only.body)}；.p5-record__count tabular-nums=${!!cnt && /tabular-nums/.test(cnt.body)}）；交付檔 ${buf.length.toLocaleString()} bytes ≤ 5 MB=${sizeOk}；外部函式庫或外部 script=${extLib}`);
 }
 
 // TC-S09 產物與原始碼一致（以 QA 自行重建的產物比對）

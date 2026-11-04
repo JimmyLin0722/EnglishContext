@@ -154,8 +154,9 @@ async function ntLayout(tc, url, label) {
 await ntLayout("TC-24-12a", FILE_URL, "file://");
 
 // AC-23-02（v0.11 修訂，Q-48）：資料來源與授權頁的品牌標識聲明，375px 可完整閱讀
-if (!SMOKE) await R.check("TC-23-02c", "AC-23-02（v0.11 品牌標識聲明）", async () => {
-  const BRAND = "PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin，保留所有權利，不適用 MIT 與 CC BY-SA 4.0";
+if (!SMOKE) await R.check("TC-23-02c", "AC-23-02（v0.17 品牌標識聲明 LT-4、商標聲明 LT-5）", async () => {
+  const BRAND = "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0";
+  const LT5 = "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。";
   const out = []; let ok = true;
   for (const w of [375, 1366]) {
     const env = await newEnv(browser, { width: w, height: 740, inits: INITS }); const page = await env.newPage();
@@ -165,8 +166,9 @@ if (!SMOKE) await R.check("TC-23-02c", "AC-23-02（v0.11 品牌標識聲明）",
       const e = els[0]; if (!e) return { found: false, body: document.body.innerText.includes(b) };
       const r = e.getBoundingClientRect(); return { found: true, exact: e.textContent.trim() === b || e.textContent.includes(b), left: r.left, right: r.right, vw: window.innerWidth, hscroll: document.documentElement.scrollWidth > window.innerWidth,
         others: ["程式碼以 MIT 授權（Copyright JimmyLin）", "單字資料以 CC BY-SA 4.0 授權"].map((t) => document.body.innerText.includes(t)) }; }, BRAND);
-    const good = a.found && a.exact && a.left >= 0 && a.right <= a.vw + 0.5 && !a.hscroll && a.others.every(Boolean);
-    ok = ok && good; out.push(`${w}px：聲明逐字存在=${a.found && a.exact}、在視窗內=${a.left >= 0 && a.right <= a.vw + 0.5}、水平捲軸=${a.hscroll}、既有 MIT／CC BY-SA 聲明仍在=${JSON.stringify(a.others)}`);
+    const lt5 = await page.evaluate((t) => { const s = document.getElementById("view-sources").textContent; return { n: s.split(t).length - 1, old: ["著作權人 JimmyLin", "保留所有權利"].filter((x) => s.includes(x)) }; }, LT5);
+    const good = a.found && a.exact && a.left >= 0 && a.right <= a.vw + 0.5 && !a.hscroll && a.others.every(Boolean) && lt5.n === 1 && lt5.old.length === 0;
+    ok = ok && good; out.push(`${w}px：LT-5 ${lt5.n} 次、舊文字 ${lt5.old.join("/") || "無"}；LT-4 逐字存在=${a.found && a.exact}、在視窗內=${a.left >= 0 && a.right <= a.vw + 0.5}、水平捲軸=${a.hscroll}、既有 MIT／CC BY-SA 聲明仍在=${JSON.stringify(a.others)}`);
     await env.ctx.close();
   }
   return { ok, note: out.join("；") };

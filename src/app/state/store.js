@@ -38,7 +38,7 @@
  *   一般寫入一律經 commitWrite（容量不足：記憶體保留、整個工作階段最多發 1 次 "learningQuota"，不發 "storage"；
  *   其他例外不提示）；writeData 寫出前呼叫 persist.ensureWritable。單字集重建一律經 placeCard（position.resolve，
  *   FP-2、FP-5、FP-6）；gotoCard 換卡即寫入 flashcardPosition（FP-3）；生效色級改變 → 位置 null、第 1 張，
- *   未改變 → 單字卡狀態全部不變（FP-4、FB-54）。模擬測驗轉移集中在 core/part5flow（CR-2、UO-1～UO-9），
+ *   未改變 → 單字卡狀態全部不變（FP-4、FB-54）。模擬測驗轉移集中在 core/part5flow（CR-2、LV-1、LV-3、UO-1～UO-10），
  *   題庫為空時 part5 action 一律不動作。
  *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
@@ -1010,6 +1010,9 @@
 
     /**
      * Part 5 作答（AC-11-03、AC-11-06）。已鎖定、結算中、題庫為空或（v0.15）畫面為 allCorrect → 忽略。
+     * （v0.18，LV-3；AC-48-02）作答防護放在 store 層：part5flow.canAnswer 不符合（含曾答對的題目，不論開關）
+     * → { ok: false }，part5、答對紀錄、streak、todayLearned 皆不變，不寫入。
+     * 到達與重新載入已答對鎖定檢視皆不寫入 lockedSelection（LV-4）。
      * （v0.15，CR-2）答對且該題 id 未曾記錄 → 附加到 part5CorrectIds 末尾，與計數、打卡同一次 commitWrite。
      * @param {number} i 選項索引 0～3
      * @returns {{ok: true, correct: boolean} | {ok: false}}
@@ -1024,7 +1027,7 @@
         return { ok: false };
       }
       var ctx = part5Ctx();
-      if (ctx.kind === "allCorrect") { return { ok: false }; }
+      if (ctx.kind === "allCorrect" || !core().PF.canAnswer(p, ctx.ids, ctx.set)) { return { ok: false }; }
       var correct = i === bank[p.currentIndex].correctIndex;
       var part5 = assign(p, {
         lockedSelection: i,
@@ -1041,8 +1044,8 @@
     }
 
     /**
-     * 下一題（AC-11-04）：須已作答；開關關閉 → 最後一題後進入本輪結算，
-     * 開關開啟 → 跳到其後第一題未答對，沒有則結算（UO-5）。題庫為空或 changed 為 false → 不寫入。
+     * 下一題（AC-11-04）：須為本次作答結果或（v0.18）已答對鎖定檢視；開關關閉 → 依序前進，最後一題後進入本輪結算（UO-10），
+     * 開關開啟 → 跳到其後第一題未答對，沒有則結算（UO-5）。題庫為空或 changed 為 false → 不寫入。計數不變。
      */
     function nextPart5() {
       ensureInit();
@@ -1072,8 +1075,8 @@
     /**
      * （v0.15，UO-1、UO-4、UO-8）切換「只練沒答對的題目」。
      * 非布林、題庫為空、與原值相同 → { changed: false }、不寫入；
-     * 否則 part5flow.setOnly（關 → 開 時同時做 UO-4 正規化）→ 開關與正規化結果同一次 commitWrite，tags ["part5"]。
-     * 不改任何計數。
+     * 否則 part5flow.setOnly（關 → 開 做 UO-4 正規化；開 → 關 依切換前畫面分流，UO-8）→ 開關與 part5 同一次 commitWrite，tags ["part5"]。
+     * 累計不變；本輪只有 UO-8 (a) 歸 0。
      * @param {boolean} on
      * @returns {{changed: boolean}}
      */
@@ -1090,30 +1093,16 @@
     }
 
     /**
-     * （v0.15，UO-7 (a)）allCorrect 畫面「全部題目再練一次（保留紀錄）」：
-     * 第 1 題、本輪歸 0、累計與答對紀錄不變、開關 = false；一次 commitWrite，tags ["part5"]。
-     * 畫面不是 allCorrect（含題庫為空）→ { ok: false }、不寫入。
-     * @returns {{ok: boolean}}
-     */
-    function replayPart5KeepRecords() {
-      ensureInit();
-      if (part5Ctx().kind !== "allCorrect") { return { ok: false }; }
-      var d = state.data;
-      var part5 = core().PF.replayKeepRecords(d.part5);
-      commitWrite(assign(d, { part5: part5, part5UnansweredOnly: false }), state.runtime, ["part5"]);
-      return { ok: true };
-    }
-
-    /**
-     * （v0.15，CR-6）allCorrect 畫面「清除答對紀錄，重新來過」確認「確定」後由 view 呼叫：
+     * （v0.15，CR-6；v0.18，CR-10）「清除答對紀錄，重新來過」確認「確定」後由 view 呼叫：
      * part5CorrectIds = []、第 1 題、本輪歸 0、累計不變、開關維持；一次 commitWrite，tags ["part5", "stats"]
      * （失敗依 WR-2，FB-60）。確認對話框由 view 顯示，「取消」時 view 不呼叫本 action（setItem 0 次）。
-     * 畫面不是 allCorrect（含題庫為空）→ { ok: false }、不寫入。
+     * 題庫為空或 K = 0（含答對紀錄只含題庫不存在的 id）→ { ok: false }、不寫入；K ≥ 1 時不限畫面種類與開關。
      * @returns {{ok: boolean}}
      */
     function clearPart5CorrectIds() {
       ensureInit();
-      if (part5Ctx().kind !== "allCorrect") { return { ok: false }; }
+      var ctx = part5Ctx();
+      if (ctx.ids.length === 0 || core().PF.countCorrect(ctx.ids, ctx.set) < 1) { return { ok: false }; }
       var d = state.data;
       var r = core().PF.clearAndRestart(d.part5);
       commitWrite(assign(d, { part5: r.part5, part5CorrectIds: r.ids }), state.runtime, ["part5", "stats"]);
@@ -1402,7 +1391,6 @@
         nextPart5: nextPart5,
         restartPart5: restartPart5,
         setPart5UnansweredOnly: setPart5UnansweredOnly,
-        replayPart5KeepRecords: replayPart5KeepRecords,
         clearPart5CorrectIds: clearPart5CorrectIds,
         recordSttScored: recordSttScored,
         acknowledgeSttNotice: acknowledgeSttNotice,

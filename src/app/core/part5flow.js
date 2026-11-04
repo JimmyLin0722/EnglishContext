@@ -3,7 +3,11 @@
  * 依據：architecture.md v0.10 §4.10「EMT.core.part5flow」、§7.21.3；
  *       契約 README §5.11 CR-1～CR-8、UO-1～UO-9、§5.3 RD-3 (c)、§6.2 IM-10 (2)、(4)、§11.6 MT-1（v0.15）、
  *       data-schema.ts §15 Part5ViewKind、§7.7 V-ST-19、V-ST-20、§9.8 DS-34。
- * 涵蓋：AC-45-01～AC-45-03、AC-45-05、AC-45-07、AC-46-02～AC-46-09、AC-47-05
+ * 涵蓋：AC-45-01～AC-45-03、AC-45-05、AC-45-07、AC-46-02～AC-46-06、AC-46-08、AC-46-09、AC-47-05
+ *
+ * （v0.18，FE-80；architecture.md v0.13 §4.11、§7.24.1；契約 README §5.11 LV-1、LV-3、LV-4、UO-8、UO-10；
+ *   AC-48-01～AC-48-05、AC-48-07、AC-48-10）新增 questionState、canAnswer；next 可由已答對鎖定檢視前進；
+ *   開關由開變關依切換前畫面種類分流。鎖定狀態為推導值，本模組不為了顯示鎖定而設定 lockedSelection（LV-4）。
  *
  * - L1 模組：載入時不取用任何其他模組（LD-1）；不讀 DOM、不讀 window 資料、不碰儲存。
  * - 全部為純函式：不修改傳入值、對任何輸入不拋例外、不遞迴；nextUnanswered 為單一有界迴圈（UO-9）。
@@ -225,13 +229,47 @@
   }
 
   /**
-   * 「下一題」。前提：phase = "question" 且已鎖定作答，否則不變。
-   * 開關關閉 → v0.14 規則（最後一題 → summary，否則 +1）；
+   * LV-1：題目畫面狀態（每次繪製時推導，不持久化），依序判定：
+   * lockedSelection 非 null、非 undefined → "answered"（本次作答結果優先）；
+   * 開關關閉且目前題目曾答對 → "lockedReview"；否則 "idle"。p5 不是物件 → "idle"。
+   * 只在 viewKind = "question" 時有意義。
+   * @param {object} p5 Part5Progress
+   * @param {Array<string|null>} bankIds
+   * @param {Set<string>} set
+   * @param {boolean} only
+   * @returns {"answered"|"lockedReview"|"idle"}
+   */
+  function questionState(p5, bankIds, set, only) {
+    if (!isProgress(p5)) {
+      return "idle";
+    }
+    if (p5.lockedSelection !== null && p5.lockedSelection !== undefined) {
+      return "answered";
+    }
+    return only !== true && isCorrectAt(bankIds, set, p5.currentIndex) ? "lockedReview" : "idle";
+  }
+
+  /**
+   * LV-3：作答防護。phase = "question"、lockedSelection = null、目前題目不是曾答對才可作答；不看開關。
+   * @param {object} p5 Part5Progress
+   * @param {Array<string|null>} bankIds
+   * @param {Set<string>} set
+   * @returns {boolean}
+   */
+  function canAnswer(p5, bankIds, set) {
+    return isProgress(p5) && p5.phase === "question" && p5.lockedSelection === null &&
+      !isCorrectAt(bankIds, set, p5.currentIndex);
+  }
+
+  /**
+   * 「下一題」。前提：phase = "question" 且 questionState 不是 "idle"，否則回傳原值、changed false。
+   * 開關關閉 → UO-10（answered、lockedReview 皆可前進；最後一題 → summary，否則 +1）；
    * 開關開啟 → UO-5：j = next(currentIndex + 1)，有 → 該題，無 → summary。
+   * 只改 currentIndex 或 phase 與 lockedSelection，計數不變。
    * @returns {{part5: object, changed: boolean}}
    */
   function next(p5, bankIds, set, only) {
-    if (!isProgress(p5) || p5.phase !== "question" || p5.lockedSelection === null || p5.lockedSelection === undefined) {
+    if (!isProgress(p5) || p5.phase !== "question" || questionState(p5, bankIds, set, only) === "idle") {
       return { part5: p5, changed: false };
     }
     var q = idsOf(bankIds).length;
@@ -267,8 +305,9 @@
 
   /**
    * UO-1、UO-8：切換「只練沒答對」。
-   * on 非布林或與原值相同 → changed false；關 → 開 時再套 UO-4 正規化；開 → 關 時 part5 不變。
-   * 不改任何計數。
+   * on 非布林或與原值相同 → changed false；關 → 開 時再套 UO-4 正規化；
+   * 開 → 關 時依切換前畫面種類分流（UO-8）：allCorrect → (a) 第 1 題、本輪歸 0；其他 → (b) part5 同一參考。
+   * 累計不變；本輪只有 UO-8 (a) 歸 0（UO-1）。
    * @param {{part5: object, ids: string[], only: boolean}} state
    * @param {Array<string|null>} bankIds
    * @param {boolean} on
@@ -283,10 +322,12 @@
       var r = normalizeOnly(st.part5, bankIds, correctSet(st.ids), true);
       return { part5: r.part5, only: true, changed: true };
     }
-    return { part5: st.part5, only: false, changed: true };
+    var wasAllCorrect = st.only === true && isProgress(st.part5) &&
+      viewKind(st.part5, bankIds, correctSet(st.ids), true) === "allCorrect";
+    return { part5: wasAllCorrect ? freshRound(st.part5) : st.part5, only: false, changed: true };
   }
 
-  /** 本輪歸 0、回第 1 題、累計保留的新 Part5Progress（UO-7 (a)、CR-6 共用） */
+  /** 本輪歸 0、回第 1 題、累計保留的新 Part5Progress（UO-8 (a)、CR-6 共用） */
   function freshRound(p5) {
     var p = isProgress(p5) ? p5 : {};
     return {
@@ -301,17 +342,7 @@
   }
 
   /**
-   * UO-7 (a)「全部題目再練一次（保留紀錄）」：回第 1 題、本輪歸 0、累計不變。
-   * 呼叫端另設 only = false、答對紀錄不變。
-   * @param {object} p5
-   * @returns {object} Part5Progress
-   */
-  function replayKeepRecords(p5) {
-    return freshRound(p5);
-  }
-
-  /**
-   * CR-6「清除答對紀錄，重新來過」（確認後）：part5 同 replayKeepRecords、ids = []。呼叫端保留 only。
+   * CR-6「清除答對紀錄，重新來過」（確認後）：第 1 題、本輪歸 0、累計不變、ids = []。呼叫端保留 only。
    * @param {object} p5
    * @returns {{part5: object, ids: string[]}}
    */
@@ -327,12 +358,13 @@
     isCorrectAt: isCorrectAt,
     nextUnanswered: nextUnanswered,
     viewKind: viewKind,
+    questionState: questionState,
+    canAnswer: canAnswer,
     normalizeOnly: normalizeOnly,
     recordAnswer: recordAnswer,
     next: next,
     restart: restart,
     setOnly: setOnly,
-    replayKeepRecords: replayKeepRecords,
     clearAndRestart: clearAndRestart
   });
 });

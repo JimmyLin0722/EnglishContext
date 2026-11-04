@@ -149,7 +149,7 @@ test("契約常數 v0.9（FE-34）／v0.15（FE-73）：LEARNING_PROGRESS_FIELDS
   assert.ok(!C.LEARNING_PROGRESS_FIELDS.includes("flashcardPosition"));
 });
 
-// ── v0.15 契約常數（FE-73）────────────────────────────────────────
+// ── v0.15 契約常數（FE-73）；v0.18 改為 12 個鍵（FE-80，V-ST-27）──────
 
 // data-schema.ts §15 PART5_RECORD_TEXTS 原文（逐字複製，含鍵順序）
 const CONTRACT_PART5_RECORD_TEXTS = {
@@ -157,8 +157,11 @@ const CONTRACT_PART5_RECORD_TEXTS = {
   correctCount: "已答對 {k} / {q} 題",
   unansweredOnlyLabel: "只練沒答對的題目",
   allCorrectTitle: "{q} 題全部答對！",
-  replayKeepRecords: "全部題目再練一次（保留紀錄）",
   clearAndRestart: "清除答對紀錄，重新來過",
+  lockedReviewFeedback: "你之前答對過這一題",
+  summaryNoNewAnswers: "本輪沒有新作答的題目",
+  filterHint: "關閉時顯示全部題目，答對過的題目會以綠色鎖定。",
+  filterHintAllCorrect: "要檢視全部題目，請關閉上方的「只練沒答對的題目」。",
   clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
   confirmOk: "確定",
   confirmCancel: "取消",

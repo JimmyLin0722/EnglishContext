@@ -4,7 +4,7 @@
     "tc": "TC-44-01-375",
     "ac": "AC-44-01、AC-39-03、AC-22-01、FP-3、FP-8",
     "result": "通過",
-    "note": "375px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 1.6 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」7.9 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
+    "note": "375px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 2.4 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」11.2 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
   },
   {
     "suite": "e2e-track",
@@ -18,7 +18,7 @@
     "tc": "TC-44-02",
     "ac": "AC-44-02、AC-28-03、FP-3",
     "result": "通過",
-    "note": "上一張 1.6 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it；向右滑動 16.6 ms →「第 8 / 5620 張」have（setItem 1 次、紀錄 {\"wordKey\":\"have\",\"ordinal\":8}）→ 重新載入「第 8 / 5620 張」have；下一張 1.6 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it"
+    "note": "上一張 2.9 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it；向右滑動 14.6 ms →「第 8 / 5620 張」have（setItem 1 次、紀錄 {\"wordKey\":\"have\",\"ordinal\":8}）→ 重新載入「第 8 / 5620 張」have；下一張 3.3 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it"
   },
   {
     "suite": "e2e-track",
@@ -39,7 +39,7 @@
     "tc": "TC-44-01-1366",
     "ac": "AC-44-01、AC-39-03、AC-22-01、FP-3、FP-8",
     "result": "通過",
-    "note": "1366px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 1.9 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」1.7 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
+    "note": "1366px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 2.4 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」1.6 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
   },
   {
     "suite": "e2e-track",
@@ -172,6 +172,6 @@
     "tc": "TC-47-04b",
     "ac": "AC-47-04（以 v1.0.0 交付檔實測，SD-FB-58）、AC-36-04",
     "result": "通過",
-    "note": "v1.0.0（emt-app-version 1.0.0）學習後主鍵 schemaVersion 2、9 欄（part5 {\"currentIndex\":3,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":3,\"roundCorrect\":2,\"totalAnswered\":3,\"totalCorrect\":2}）→ 以 1.1.0 開啟：main、setItem 1 次、再載入 0 次且位元組不變=true；schemaVersion 3；9 欄逐欄相同=true；模擬測驗「第 4 / 200 題」「已答對 0 / 200 題」、開關 false；單字卡「第 1 / 2810 張」；未處理例外 0"
+    "note": "v1.0.0（emt-app-version 1.0.0）學習後主鍵 schemaVersion 2、9 欄（part5 {\"currentIndex\":3,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":3,\"roundCorrect\":2,\"totalAnswered\":3,\"totalCorrect\":2}）→ 以目前版本 1.2.0 開啟：main、setItem 1 次、再載入 0 次且位元組不變=true；schemaVersion 3；9 欄逐欄相同=true；模擬測驗「第 4 / 200 題」「已答對 0 / 200 題」、開關 false；單字卡「第 1 / 2810 張」；未處理例外 0"
   }
 ]

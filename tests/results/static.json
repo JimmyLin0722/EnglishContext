@@ -11,7 +11,7 @@
     "tc": "TC-S02",
     "ac": "AC-19-04",
     "result": "通過",
-    "note": "3,373,421 bytes（上限 5,242,880）"
+    "note": "3,384,030 bytes（上限 5,242,880）"
   },
   {
     "suite": "static",
@@ -37,9 +37,9 @@
   {
     "suite": "static",
     "tc": "TC-S06",
-    "ac": "AC-23-06",
+    "ac": "AC-23-06、AC-38-10（V-LGL-04）",
     "result": "通過",
-    "note": "開頭註解含 MIT 全文與 Copyright=true；CC BY-SA 聲明與網址=true；品牌標識聲明（v0.11）=true；<meta charset> 結束於第 70 byte"
+    "note": "第一行「EnglishContext」；舊文字與 LT-5 無；開頭註解含 MIT 全文與 Copyright=true；CC BY-SA 聲明與網址=true；LT-4=true；<meta charset> 結束於第 70 byte"
   },
   {
     "suite": "static",
@@ -60,7 +60,7 @@
     "tc": "TC-S10",
     "ac": "AC-31-04",
     "result": "通過",
-    "note": "外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,373,421 bytes（AC-19-01 外部資源見 TC-S01）"
+    "note": "外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,384,030 bytes（AC-19-01 外部資源見 TC-S01）"
   },
   {
     "suite": "static",
@@ -102,14 +102,14 @@
     "tc": "TC-V-S01",
     "ac": "AC-42-03、AC-42-02（VR-5、V-VER-05）",
     "result": "通過",
-    "note": "src/app 非測試 .js 含「package.json」：無；版本模組（去註解）禁用 API：無；寫死版本字串 \"1.1.0\"：無"
+    "note": "src/app 非測試 .js 含「package.json」：無；版本模組（去註解）禁用 API：無；寫死版本字串 \"1.2.0\"：無"
   },
   {
     "suite": "static",
     "tc": "TC-V-S02",
     "ac": "AC-42-02（V-VER-01、VR-2、HD-1）",
     "result": "通過",
-    "note": "產物 emt-app-version 1 個、值 1.1.0（package.json 1.1.0）；位於 emt-build-id 之後、</head> 之前=true；產物 @@ 佔位殘留 0；模板 @@APP_VERSION@@ 1 次"
+    "note": "產物 emt-app-version 1 個、值 1.2.0（package.json 1.2.0）；位於 emt-build-id 之後、</head> 之前=true；產物 @@ 佔位殘留 0；模板 @@APP_VERSION@@ 1 次"
   },
   {
     "suite": "static",
@@ -121,15 +121,15 @@
   {
     "suite": "static",
     "tc": "TC-T-S01",
-    "ac": "AC-47-08、AC-45-04、AC-45-05、AC-46-01（WR-4、CR-9、C-7）",
+    "ac": "AC-47-08、AC-45-04、AC-45-05、AC-46-01、AC-46-06、AC-48-12（WR-4、CR-9、C-7、V-ST-27）",
     "result": "通過",
-    "note": "L1 新模組（position、part5flow）去註解後禁用 API／DOM／儲存：無；part5 view／store／persist／backup／reinit 網路 API 與 HTML 插入：無；畫面文字 11 則缺 0；40-part5.css 新規則 14 條（用強調橘／色碼／動畫：無；.p5-only min-height var(--touch)=true；.p5-record__count tabular-nums=true）；交付檔 3,373,421 bytes ≤ 5 MB=true；外部函式庫或外部 script=false"
+    "note": "V-ST-27 舊字串：交付 HTML 0 筆、src/app 0 筆；L1 新模組（position、part5flow）去註解後禁用 API／DOM／儲存：無；part5 view／store／persist／backup／reinit 網路 API 與 HTML 插入：無；畫面文字 13 則缺 0；40-part5.css 新規則 16 條（用強調橘／色碼／動畫：無；.p5-only min-height var(--touch)=true；.p5-record__count tabular-nums=true）；交付檔 3,384,030 bytes ≤ 5 MB=true；外部函式庫或外部 script=false"
   },
   {
     "suite": "static",
     "tc": "TC-S09",
     "ac": "AC-19-01（交付物可追溯）",
-    "result": "失敗",
-    "note": "重建產物 3,375,522 bytes；與 dist 位元組相同=false"
+    "result": "通過",
+    "note": "重建產物 3,384,030 bytes；與 dist 位元組相同=true"
   }
 ]

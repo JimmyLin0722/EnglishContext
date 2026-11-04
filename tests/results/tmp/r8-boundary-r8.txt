@@ -1,0 +1,147 @@
+  OK [M] dist/english-master-track.html FE-82
+  OK [ignored-modified] dist/site/ads.txt FE-82
+  OK [ignored-modified] dist/site/icons/apple-touch-icon-180.png FE-82
+  OK [ignored-modified] dist/site/icons/icon-192.png FE-82
+  OK [ignored-modified] dist/site/icons/icon-512.png FE-82
+  OK [ignored-modified] dist/site/icons/icon-maskable-512.png FE-82
+  OK [ignored-modified] dist/site/index.html FE-82
+  OK [ignored-modified] dist/site/manifest.webmanifest FE-82
+  OK [ignored-modified] dist/site/sw.js FE-82
+  OK [M] docs/01-PRD.md （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/02-contract/README.md （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/02-contract/data-schema.ts （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/03-design/architecture.md （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/03-design/tasks.json （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/04-qa/test-plan.md （QA 自有）
+  OK [M] package.json （MC-06、Q-79 決議 A：主控修改 version 1.1.0 → 1.2.0，git diff 只有此行，授權例外）
+  OK [M] src/app/__tests__/goal.test.js FE-80
+  OK [M] src/app/__tests__/load-order.test.js FE-80
+  OK [??] src/app/__tests__/part5-static.test.js FE-82
+  OK [M] src/app/__tests__/part5.test.js FE-81
+  OK [M] src/app/__tests__/part5flow.test.js FE-80
+  OK [M] src/app/__tests__/store-track.test.js FE-80
+  OK [M] src/app/core/constants.js FE-80
+  OK [M] src/app/core/part5flow.js FE-80
+  OK [M] src/app/state/store.js FE-80
+  OK [M] src/app/styles/40-part5.css FE-81、FE-82
+  OK [M] src/app/views/part5.js FE-81
+  OK [??] tests/e2e/diag-r8-perf.mjs （QA 自有）
+  OK [??] tests/e2e/diag-r8-quizpop.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-cards.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-content.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-env.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-layout.mjs （QA 自有）
+  OK [??] tests/e2e/e2e-legal.mjs （QA 自有）
+  OK [??] tests/e2e/e2e-lock.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-pwa-update.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-pwa.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-track-p5.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-track.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-version.mjs （QA 自有）
+  OK [M] tests/results/ac-matrix.json （QA 自有）
+  OK [M] tests/results/boundary-delta.json （QA 自有）
+  OK [M] tests/results/boundary.json （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-1366-flashcards.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-1366-part5.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-1366-sources.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-375-firstrun.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-375-flashcards.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-375-part5.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-375-sources.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-1920.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-375.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-1920x1080.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-390x844.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-412x915.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-768x1024.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-fc-v012-1366.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-fc-v012-375.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-1920x1080.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-375x667.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-375x812.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-390x844.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-412x915.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-768x1024.png （QA 自有）
+  OK [M] tests/results/diag/perf-runs.json （QA 自有）
+  OK [??] tests/results/diag/r8-env-v110.json （QA 自有）
+  OK [??] tests/results/diag/r8-perf-ab.json （QA 自有）
+  OK [??] tests/results/diag/r8-quizpop.json （QA 自有）
+  OK [M] tests/results/e2e-cards.json （QA 自有）
+  OK [M] tests/results/e2e-content.json （QA 自有）
+  OK [M] tests/results/e2e-env.json （QA 自有）
+  OK [M] tests/results/e2e-goal-edge.json （QA 自有）
+  OK [M] tests/results/e2e-goal.json （QA 自有）
+  OK [M] tests/results/e2e-layout.json （QA 自有）
+  OK [??] tests/results/e2e-legal.json （QA 自有）
+  OK [??] tests/results/e2e-lock-edge.json （QA 自有）
+  OK [??] tests/results/e2e-lock.json （QA 自有）
+  OK [M] tests/results/e2e-mic.json （QA 自有）
+  OK [M] tests/results/e2e-motion.json （QA 自有）
+  OK [M] tests/results/e2e-pwa-edge.json （QA 自有）
+  OK [M] tests/results/e2e-pwa-update.json （QA 自有）
+  OK [M] tests/results/e2e-pwa.json （QA 自有）
+  OK [M] tests/results/e2e-speech.json （QA 自有）
+  OK [M] tests/results/e2e-track-p5-edge.json （QA 自有）
+  OK [M] tests/results/e2e-track-p5.json （QA 自有）
+  OK [M] tests/results/e2e-track.json （QA 自有）
+  OK [M] tests/results/e2e-version-edge.json （QA 自有）
+  OK [M] tests/results/e2e-version.json （QA 自有）
+  OK [??] tests/results/legal.json （QA 自有）
+  OK [M] tests/results/pwa-static.json （QA 自有）
+  OK [M] tests/results/qa-review.json （QA 自有）
+  OK [M] tests/results/static.json （QA 自有）
+  OK [M] tests/results/summary.json （QA 自有）
+  OK [??] tests/results/tmp/r8-ab-done.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-boundary-r8.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-boundary.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-data.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-cards.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-content.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-env-3.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-env-4.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-env-v110.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-env.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-firstrun.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-goal-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-goal.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-hidden-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-hidden.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-layout.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-legal.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-lock-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-lock.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-mic.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-motion.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-persist.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-progress.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-pwa-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-pwa-update.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-pwa.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-reinit.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-speech.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-track-p5-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-track-p5.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-track.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-version-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-e2e-version.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-env4-done.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-legal.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-npmtest.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-pwa-static.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-records.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-run.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-run2.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-static.txt （QA 自有）
+  OK [??] tests/results/tmp/r8-validate.txt （QA 自有）
+  OK [M] tests/run-all.mjs （QA 自有）
+  OK [M] tests/static/boundary-check.mjs （QA 自有）
+  OK [??] tests/static/boundary-r8.mjs （QA 自有）
+  OK [??] tests/static/legal-check.mjs （QA 自有）
+  OK [M] tests/static/static-check.mjs （QA 自有）
+  OK [M] tests/tools/ac-matrix.mjs （QA 自有）
+  OK [??] tests/tools/qa-review-r8.mjs （QA 自有）
+  OK [M] tests/tools/rebuild-summary.mjs （QA 自有）
+  OK [??] tests/tools/run-r8.mjs （QA 自有）
+  OK [M] tests/tools/tc-desc.json （QA 自有）
+  OK [M] tests/tools/tc-list.mjs （QA 自有）
+HEAD f57145a；變動 146 個檔案（PG 任務 20、授權例外與 QA 126）；超出任務 paths 0 個；必須無變動路徑命中 0 個；任務未 done 0 個；任務 paths 中未變動 0 個（）

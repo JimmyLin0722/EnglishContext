@@ -183,7 +183,7 @@ await R.check("TC-42-02", "AC-42-02、AC-36-02、AC-36-07、E-96", async () => {
   const swLeft = sw.match(/@@[A-Za-z0-9_]+@@/g) || [];
   const pkgInSite = fs.readdirSync(SITE).filter((f) => /package/.test(f));
   const fileText = (globalThis.__fileText || [])[0];
-  const ok = PKG.version === "1.1.0" && APP_VER === PKG.version && metaCount === 1 && /^[0-9a-f]{16}$/.test(BUILD_ID) && swId === BUILD_ID && swId.slice(0, 7) === BUILD_ID.slice(0, 7)
+  const ok = PKG.version === "1.2.0" && APP_VER === PKG.version && metaCount === 1 && /^[0-9a-f]{16}$/.test(BUILD_ID) && swId === BUILD_ID && swId.slice(0, 7) === BUILD_ID.slice(0, 7)
     && same && leftovers.length === 0 && swLeft.length === 0 && pkgInSite.length === 0 && fileText === `版本 ${PKG.version}（建置 ${BUILD_ID.slice(0, 7)}）`;
   return { ok, note: `package.json version ${PKG.version}；emt-app-version ${APP_VER}（${metaCount} 個）；emt-build-id ${BUILD_ID}；sw.js BUILD_ID ${swId}、CACHE_NAME ${cacheName && cacheName.trim()}；畫面「${fileText}」；dist 與 site/index.html 逐位元組相同=${same}；@@ 殘留 HTML ${leftovers.length}／sw ${swLeft.length}；site 內 package 檔 ${pkgInSite.length}（共 ${fs.readdirSync(SITE, { recursive: true }).filter((f) => fs.statSync(path.join(SITE, f)).isFile()).length} 檔）` };
 });
@@ -194,7 +194,7 @@ if (!EDGE) {
   const build = (dir, extra = []) => { const r = spawnSync(process.execPath, ["tools/build.mjs", "--out", path.join(dir, "t.html"), ...extra], { cwd: ROOT, encoding: "utf8" }); if (r.status !== 0) throw new Error(dir + " 建置失敗：" + (r.stdout + r.stderr).slice(-500)); return dir; };
   const files = ["t.html", "site/index.html", "site/sw.js", "site/manifest.webmanifest"];
   const A1 = build(path.join(TMP, "a1")), A2 = build(path.join(TMP, "a2"));
-  // 第 7 輪：AC-42-04 (b) 以「目前版本的修訂號 +1」執行（v0.15 為 1.1.0 → 1.1.1；條文例子 1.0.0 → 1.0.1，性質相同）
+  // 第 7 輪起：AC-42-04 (b) 以「目前版本的修訂號 +1」執行（第 8 輪 v0.18 為 1.2.0 → 1.2.1；條文例子 1.0.0 → 1.0.1，性質相同）
   const BUMP = PKG.version.replace(/\d+$/, (n) => String(Number(n) + 1));
   const pkg101 = path.join(TMP, "package-bump.json"); fs.writeFileSync(pkg101, JSON.stringify({ ...PKG, version: BUMP }, null, 2) + "\n");
   const B = build(path.join(TMP, "b"), ["--package", pkg101]);
@@ -216,7 +216,7 @@ if (!EDGE) {
     const ok = ic.ver === PKG.version && ic.id !== ia.id && ic.swId === ic.id;
     return { ok, note: `src/app 複本 main.js 改 1 個字（「。」→「，」）：emt-app-version ${ic.ver}（不變）；BUILD_ID ${ia.id}→${ic.id}；sw.js BUILD_ID ${ic.swId}` };
   });
-  // (b) 的 PWA 更新：已造訪目前版本（第 7 輪 1.1.0）的 https 版（本機 serve），重新部署修訂號 +1 版後出現「有新版本，重新整理」並更新
+  // (b) 的 PWA 更新：已造訪目前版本（第 8 輪 1.2.0）的 https 版（本機 serve），重新部署修訂號 +1 版後出現「有新版本，請更新版本」與「更新版本」按鈕並更新
   await R.check("TC-42-04d", "AC-42-04 (b)（更新流程）、AC-36-03、E-97", async () => {
     await serve(SITE);
     const x = await env({});
@@ -228,10 +228,11 @@ if (!EDGE) {
       await page.reload(); const t0 = Date.now(); let n = null;
       while (Date.now() - t0 < 60000) { n = await page.evaluate(() => { const h = document.querySelector("#pwa-update"); if (!h || h.hidden || getComputedStyle(h).display === "none") return null; return (h.querySelector(".pwa-update__text") || h).textContent; }); if (n) break; await sleep(250); }
       const ms = Date.now() - t0;
+      const btn = n ? await page.evaluate(() => (document.querySelector(".pwa-update__btn") || {}).textContent) : null;
       if (n) { await page.click(".pwa-update__btn"); await sleep(5000); }
       const v2 = await page.evaluate(() => (document.getElementById("app-version") || {}).textContent);
-      const ok = sw.ok && v1 === `版本 ${PKG.version}（建置 ${ia.id.slice(0, 7)}）` && n === "有新版本，重新整理" && v2 === `版本 ${BUMP}（建置 ${ib.id.slice(0, 7)}）`;
-      return { ok, note: `V1 service worker 啟用=${sw.ok}、版本行「${v1}」；部署 ${BUMP} 後重新載入 ${n ? ms + " ms 出現「" + n + "」" : "60 秒內未出現提示"}；按「重新整理」後版本行「${v2}」` };
+      const ok = sw.ok && v1 === `版本 ${PKG.version}（建置 ${ia.id.slice(0, 7)}）` && n === "有新版本，請更新版本" && btn === "更新版本" && v2 === `版本 ${BUMP}（建置 ${ib.id.slice(0, 7)}）`;
+      return { ok, note: `V1 service worker 啟用=${sw.ok}、版本行「${v1}」；部署 ${BUMP} 後重新載入 ${n ? ms + " ms 出現「" + n + "」" : "60 秒內未出現提示"}；按鈕「${btn}」；按下後版本行「${v2}」` };
     } finally { await x.ctx.close(); await stopServer(); }
   });
 } else for (const t of ["TC-42-04a", "TC-42-04b", "TC-42-04c", "TC-42-04d"]) R.na(t, "AC-42-04", "Edge 冒煙不跑建置類 TC（Chrome 已驗）");

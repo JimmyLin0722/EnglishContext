@@ -11,7 +11,7 @@
     "tc": "TC-33-03",
     "ac": "AC-33-03",
     "result": "通過",
-    "note": "待機 5 格、可見=true、00000；聆聽中 11100（亮格連續=true）；麥克風按鈕位置不變=true；音量讀取 14 次、間隔 ms 最大 58.1（中位數 48.8）；結束後回到全暗 結果 0.5ms/00000/idle、逾時 0.2ms/00000/idle、無結果 0.2ms/00000/idle、錯誤 0.3ms/00000/idle、再按停止 71ms/00000/idle"
+    "note": "待機 5 格、可見=true、00000；聆聽中 11100（亮格連續=true）；麥克風按鈕位置不變=true；音量讀取 14 次、間隔 ms 最大 59（中位數 47.8）；結束後回到全暗 結果 0.8ms/00000/idle、逾時 0.5ms/00000/idle、無結果 0.5ms/00000/idle、錯誤 0.6ms/00000/idle、再按停止 73.1ms/00000/idle"
   },
   {
     "suite": "e2e-mic",
@@ -25,7 +25,7 @@
     "tc": "TC-33-02a",
     "ac": "AC-33-02（自動化代理：音軌停止）",
     "result": "通過",
-    "note": "導覽→主控台：離開前 live 1 → 離開後 live 0、持有 0、139ms 內；導覽→難易度設定：離開前 live 1 → 離開後 live 0、持有 0、155ms 內；頁尾→資料來源與授權：離開前 live 1 → 離開後 live 0、持有 0、123ms 內；回單字卡頁再按：getUserMedia 3 → 4、listening；重新整理：pagehide 時音軌 ended,ended,ended,ended、持有 0（瀏覽器麥克風使用中圖示、關閉分頁列 V-MIC-2）"
+    "note": "導覽→主控台：離開前 live 1 → 離開後 live 0、持有 0、173ms 內；導覽→難易度設定：離開前 live 1 → 離開後 live 0、持有 0、186ms 內；頁尾→資料來源與授權：離開前 live 1 → 離開後 live 0、持有 0、155ms 內；回單字卡頁再按：getUserMedia 3 → 4、listening；重新整理：pagehide 時音軌 ended,ended,ended,ended、持有 0（瀏覽器麥克風使用中圖示、關閉分頁列 V-MIC-2）"
   },
   {
     "suite": "e2e-mic",
@@ -46,7 +46,7 @@
     "tc": "TC-33-06",
     "ac": "AC-33-06",
     "result": "通過",
-    "note": "(a) 拔除後再按（仍有麥克風）：getUserMedia 1→2、listening；(a) 拔除後再按（無麥克風）：「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、idle、00000；(b) 聆聽中拔除（前 listening/11100）：0.9ms 回到 idle/00000、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、分數=false；例外 0（實機拔除列 V-MIC-5）"
+    "note": "(a) 拔除後再按（仍有麥克風）：getUserMedia 1→2、listening；(a) 拔除後再按（無麥克風）：「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、idle、00000；(b) 聆聽中拔除（前 listening/11100）：1.8ms 回到 idle/00000、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、分數=false；例外 0（實機拔除列 V-MIC-5）"
   },
   {
     "suite": "e2e-mic",

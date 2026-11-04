@@ -15,7 +15,7 @@ for (const f of fs.readdirSync(RES).filter((x) => x.endsWith(".json") && !x.ends
 const edge = fs.readdirSync(RES).filter((x) => x.endsWith("-edge.json")).flatMap((f) => JSON.parse(fs.readFileSync(path.join(RES, f), "utf8")).map((r) => ({ file: f, ...r })));
 const count = (k) => all.filter((r) => r.result === k).length;
 const summary = {
-  date: new Date().toISOString(), total: all.length, pass: count("通過"), fail: count("失敗"), manual: count("待人工"), na: count("不適用（暫停）"),
+  date: new Date().toISOString(), total: all.length, pass: count("通過"), fail: count("失敗"), manual: count("待人工"), na: all.filter((r) => String(r.result).startsWith("不適用")).length,
   failed: all.filter((r) => r.result === "失敗").map((r) => `${r.file} ${r.tc} ${r.ac}`),
   edge: { total: edge.length, pass: edge.filter((r) => r.result === "通過").length, failed: edge.filter((r) => r.result === "失敗").map((r) => `${r.file} ${r.tc}`) },
   exits: prev.exits || [], rebuilt: true,

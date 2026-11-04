@@ -30,9 +30,9 @@
   {
     "suite": "e2e-pwa",
     "tc": "TC-23-02c",
-    "ac": "AC-23-02（v0.11 品牌標識聲明）",
+    "ac": "AC-23-02（v0.17 品牌標識聲明 LT-4、商標聲明 LT-5）",
     "result": "通過",
-    "note": "375px：聲明逐字存在=true、在視窗內=true、水平捲軸=false、既有 MIT／CC BY-SA 聲明仍在=[true,true]；1366px：聲明逐字存在=true、在視窗內=true、水平捲軸=false、既有 MIT／CC BY-SA 聲明仍在=[true,true]"
+    "note": "375px：LT-5 1 次、舊文字 無；LT-4 逐字存在=true、在視窗內=true、水平捲軸=false、既有 MIT／CC BY-SA 聲明仍在=[true,true]；1366px：LT-5 1 次、舊文字 無；LT-4 逐字存在=true、在視窗內=true、水平捲軸=false、既有 MIT／CC BY-SA 聲明仍在=[true,true]"
   },
   {
     "suite": "e2e-pwa",
@@ -67,14 +67,14 @@
     "tc": "TC-35-01",
     "ac": "AC-35-01、AC-21-03",
     "result": "通過",
-    "note": "啟用 217 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-33dcbafd5b611fc6\"]（BUILD_ID 33dcbafd5b611fc6）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
+    "note": "啟用 212 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-be5c8e6ad7ed6061\"]（BUILD_ID be5c8e6ad7ed6061）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-37-05a",
     "ac": "AC-37-05、AC-21-01、AC-21-03",
     "result": "通過",
-    "note": "整個工作階段請求 10 筆（含 service worker 發出 7 筆：[\"/english-master-track/sw.js\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/icons/apple-touch-icon-180.png\"]）：[\"GET /english-master-track/\",\"GET /english-master-track/sw.js\",\"GET /english-master-track/index.html\",\"GET /english-master-track/manifest.webmanifest\",\"GET /english-master-track/icons/icon-192.png\",\"GET /english-master-track/icons/icon-512.png\",\"GET /english-master-track/icons/icon-maskable-512.png\",\"GET /english-master-track/icons/apple-touch-icon-180.png\"]；不在允許清單／非 GET／帶本文／有查詢字串／跨來源 0；載入完成後操作（難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入）請求 0；Cache Storage {\"english-master-track-pwa-33dcbafd5b611fc6\":7}；IndexedDB []；localStorage 鍵 [\"englishMasterTrack:state\"]；Console 錯誤／警告 0"
+    "note": "整個工作階段請求 10 筆（含 service worker 發出 7 筆：[\"/english-master-track/sw.js\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/icons/apple-touch-icon-180.png\"]）：[\"GET /english-master-track/\",\"GET /english-master-track/sw.js\",\"GET /english-master-track/index.html\",\"GET /english-master-track/manifest.webmanifest\",\"GET /english-master-track/icons/icon-192.png\",\"GET /english-master-track/icons/icon-512.png\",\"GET /english-master-track/icons/icon-maskable-512.png\",\"GET /english-master-track/icons/apple-touch-icon-180.png\"]；不在允許清單／非 GET／帶本文／有查詢字串／跨來源 0；載入完成後操作（難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入）請求 0；Cache Storage {\"english-master-track-pwa-be5c8e6ad7ed6061\":7}；IndexedDB []；localStorage 鍵 [\"englishMasterTrack:state\"]；Console 錯誤／警告 0"
   },
   {
     "suite": "e2e-pwa",
@@ -88,7 +88,7 @@
     "tc": "TC-35-04",
     "ac": "AC-35-04",
     "result": "通過",
-    "note": "離線（伺服器停止＋context 離線）重新載入到主控台「開始今日學習」可點擊：一般 108、102、104、114、114 ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 588、845、745、690、655 ms（門檻每次 ≤ 6000）"
+    "note": "離線（伺服器停止＋context 離線）重新載入到主控台「開始今日學習」可點擊：一般 177、132、166、133、130 ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 1245、1509、1582、1470、1256 ms（門檻每次 ≤ 6000）"
   },
   {
     "suite": "e2e-pwa",

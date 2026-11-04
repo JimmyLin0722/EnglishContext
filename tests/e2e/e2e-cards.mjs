@@ -186,7 +186,7 @@ await p.ev(`localStorage.clear()`); await p.reload();
 await R.check("TC-06-01", "AC-06-01", async () => {
   await gotoCard(0); const c = await card();
   const labels = c.front.map((f) => f.label);
-  return { ok: c.word === "the" && c.phon === "/ðə/" && labels.includes("多益常考搭配詞") && c.tts.join() === "1.0x,0.75x" && c.mic && c.net === "需要連網" && c.frontVisible && !c.backVisible, note: `正面：${c.word} ${c.phon}、欄位 ${labels.join("/")}、TTS ${c.tts.join("/")}、麥克風=${c.mic}、標示「${c.net}」` };
+  return { ok: c.word === "the" && c.phon === "/ðə/" && labels.includes("常用搭配詞") && !labels.includes("多益常考搭配詞") && c.tts.join() === "1.0x,0.75x" && c.mic && c.net === "需要連網" && c.frontVisible && !c.backVisible, note: `正面：${c.word} ${c.phon}、欄位 ${labels.join("/")}、TTS ${c.tts.join("/")}、麥克風=${c.mic}、標示「${c.net}」` };
 });
 await R.check("TC-06-02", "AC-06-02、AC-06-03", async () => {
   await gotoCard(3000);

@@ -1,16 +1,17 @@
 ---
 doc: ARCH
-version: 0.12
+version: 0.13
 status: approved
 author: sd-agent
-approved_by: JimmyLin（對話中回覆「核准」，主控代填欄位）
+approved_by: JimmyLin（對話中授權「調整好後完成測試直接推上去」，主控代核）
 approved_at: 2026-11-04
 ---
 
 # English Master Track — 系統架構與設計
 
-> 上游：`docs/01-PRD.md` v0.17（approved，JimmyLin，2026-11-04；R-25）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.17（approved，主控代核，2026-11-04；只改文字規則與註解）、`storage-schema.json` 維持 v0.16（無實質變動）。v0.11 時的上游：`docs/01-PRD.md` v0.16（approved，JimmyLin，2026-11-04；R-24）、`docs/02-contract/` v0.16（三檔 approved，主控代核，2026-11-04；只改文字常數與規則）。v0.10 時的上游：`docs/01-PRD.md` v0.15（approved，JimmyLin，2026-11-04）、`docs/02-contract/` v0.15（README.md、data-schema.ts、storage-schema.json 三檔 approved，JimmyLin 核准 Q-63 持久化結構變更，2026-11-04）、`package.json` `version` 本版由主控改為 `1.1.0`（Q-70 A，tasks.json MC-04）。v0.9 以前的內容仍有效，除非本版明文修改。**契約 C-8 同樣適用本文件**：v0.4～v0.9 段落中描述「目前」持久化結構的「`schemaVersion` 2」「`PersistedData` 9 欄」「欄位集合不變」，v0.10 起讀作「`CURRENT_SCHEMA_VERSION`（3）、12 欄，且該段所述操作不改變版本與欄位集合」；遷移 MG-1～MG-4 等歷史敘述照原意。
-> 搭配文件：`docs/03-design/tasks.json` v0.11（共 105 個任務：既有 102 個全部 `done` 不變；v0.12 新增 CT-26、FE-78、FE-79 共 3 個，另有主控手動項目 MC-05，見 §12.11）。v0.11 時為 v0.10（共 102 個任務：既有 101 個全部 `done` 不變；v0.11 新增 FE-77 共 1 個，見 §12.10）。v0.10 時為 v0.9（101 個任務：v0.10 新增 FE-70～FE-76 共 7 個、CT-25 共 1 個，另有主控手動項目 MC-04，見 §12.9）。
+> 上游：`docs/01-PRD.md` v0.18（approved，JimmyLin，2026-11-04；R-26）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.18（approved，主控代核，2026-11-04；LV、SM、HN-1、CR-10、UO-10、DS-43～DS-46，持久化結構不變）、`storage-schema.json` 維持 v0.16（無實質變動）。v0.12 時的上游：`docs/01-PRD.md` v0.17（approved，JimmyLin，2026-11-04；R-25）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.17（approved，主控代核，2026-11-04；只改文字規則與註解）。v0.11 時的上游：`docs/01-PRD.md` v0.16（approved，JimmyLin，2026-11-04；R-24）、`docs/02-contract/` v0.16（三檔 approved，主控代核，2026-11-04；只改文字常數與規則）。v0.10 時的上游：`docs/01-PRD.md` v0.15（approved，JimmyLin，2026-11-04）、`docs/02-contract/` v0.15（README.md、data-schema.ts、storage-schema.json 三檔 approved，JimmyLin 核准 Q-63 持久化結構變更，2026-11-04）、`package.json` `version` 本版由主控改為 `1.1.0`（Q-70 A，tasks.json MC-04）。v0.9 以前的內容仍有效，除非本版明文修改。**契約 C-8 同樣適用本文件**：v0.4～v0.9 段落中描述「目前」持久化結構的「`schemaVersion` 2」「`PersistedData` 9 欄」「欄位集合不變」，v0.10 起讀作「`CURRENT_SCHEMA_VERSION`（3）、12 欄，且該段所述操作不改變版本與欄位集合」；遷移 MG-1～MG-4 等歷史敘述照原意。
+> 搭配文件：`docs/03-design/tasks.json` v0.12（共 108 個任務：既有 105 個全部 `done` 不變；v0.13 新增 FE-80、FE-81、FE-82 共 3 個，另有主控手動項目 MC-06，見 §12.12）。v0.12 時為 v0.11（共 105 個任務：v0.12 新增 CT-26、FE-78、FE-79 共 3 個，另有主控手動項目 MC-05，見 §12.11）。v0.11 時為 v0.10（共 102 個任務：既有 101 個全部 `done` 不變；v0.11 新增 FE-77 共 1 個，見 §12.10）。v0.10 時為 v0.9（101 個任務：v0.10 新增 FE-70～FE-76 共 7 個、CT-25 共 1 個，另有主控手動項目 MC-04，見 §12.9）。
+> **v0.13 增量導讀**（上游改為 PRD v0.18（R-26、US-48、AC-48-01～12，修改 13 條 AC，移除 AC-46-07，E-124～E-134，Q-77～Q-80）、契約 v0.18（§5.11 LV-1～LV-7、SM-1～SM-3、HN-1、CR-10、UO-7、UO-8、UO-10、`Part5QuestionState`、V-ST-23～27、DS-43～DS-46、FB-65～FB-69））：模擬測驗「已答對鎖定檢視」、開關說明、常駐清除入口、結算 y = 0、移除 replay 動作。**持久化結構不變**（`schemaVersion` 3、鍵數 2、備份格式不變、無遷移）；`src/data/` 不變、不建 CT 任務；鎖定狀態是推導值，不寫入 `lockedSelection`（LV-4）。設計集中於 §4.11 與 §7.24；任務為 FE-80～FE-82（§12.12）；`package.json` 改為 1.2.0 由主控 MC-06 在 FE-82 之前執行（Q-79 A）；測試與 QA 範圍見 §10.10。**改讀規則**：§4.10、§7.21.3、§7.21.4、§10.7、§12.9、§13.7 中關於 `replayKeepRecords`、`replayPart5KeepRecords`、兩個按鈕、全部答對說明句、`[data-p5=replay]`、`clearPart5CorrectIds` 只在 `allCorrect` 有效，以及「曾答對的題目仍可作答」的敘述，一律以 §4.11、§7.24 為準；現行設計表格已就地標註，已完成任務的歷史敘述不逐字回改。同步修訂 §1、§3（D-18）、§5.8、§10.10、§11（T-96～T-103）、§12.12、§13.10、§14、§15（SD-FB-72～SD-FB-76）。
 > **v0.12 增量導讀**（上游改為 PRD v0.17（approved，JimmyLin，2026-11-04；R-25）、契約 v0.17（`README.md`、`data-schema.ts` approved，主控代核：L-8 LT-1～LT-6、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64）；新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）：**只改文字與驗證規則**，不改持久化結構（`schemaVersion` 3、鍵數 2）、不改建置程式、不新增外部資源；`package.json` 維持 1.1.0；AC-23-07、`p5-103`、頁尾不動。修改點集中於 §7.23，任務為 CT-26、FE-78、FE-79（§12.11），測試與給 QA 的項目見 §10.9。**375px 注意**：模擬測驗標題說明預期換成 2 行，須實測不裁切、無水平捲軸（AC-10-02、E-123，§7.23.4）。**改讀規則**：v0.11 以前段落（§3 的 FE-47、FE-52 註記、§4.7、§7.13、§7.19.6、§7.21.4、§10.1、§10.4、§12.6、§13.4 等）提到的舊標題說明、搭配詞標籤、原創內容聲明與品牌標識聲明，現行文字一律以 LT-1～LT-5 為準；這些段落記載已完成任務的歷史，除下方已就地標註者外，不逐字回改。同步修訂 §1、§3（D-17）、§5.7、§7.23、§10.9、§11（T-91～T-95）、§12.11、§13.9、§14、§15（SD-FB-68～SD-FB-71）。
 > **v0.11 增量導讀**（上游改為 PRD v0.16（approved，JimmyLin，2026-11-04；R-24）、契約 v0.16（三檔 approved，主控代核：`PWA_TEXTS` 新文字、`SOURCES_CONTACT_TEXT`、L-7、DS-40、FB-61、FB-62）；新增 AC-23-07，修改 AC-36-03、AC-42-04 文字，E-118～E-120）：**只改文字**，不改持久化結構（`schemaVersion` 3、鍵數 2）、不改 `src/data/`、不改建置程式、網站版本維持 1.1.0。(1) 新版提示文字改為「有新版本，請更新版本」、按鈕「更新版本」，行為依 Q-43 決議 A 不變（§7.22.1）；**改讀規則**：v0.10 以前段落（§1、§7.18、§10.4、§12.6～§12.9、T-49、SD-FB-63 等）提到的「有新版本，重新整理」「按『重新整理』」一律讀作新文字，歷史敘述照原意。(2) 「資料來源與授權」頁內容區末端新增 1 行聯絡資訊（`SOURCES_CONTACT_TEXT`，純文字、非連結、防爬蟲，§7.22.2）。(3) 單元測試與交付 HTML 靜態檢查（§10.8），重新建置取代人類手改的 `dist/`（FB-61、QA BUG-004）。(4) 使用者決定本次**不另跑 QA 輪次**：驗收由 PG 自測＋主控檢查（§10.8）。任務只有 FE-77（§12.10）。同步修訂 §1、§3（D-16）、§5.6、§7.22、§10.8、§11（T-87～T-90）、§12.10、§13.8、§14、§15（SD-FB-65～SD-FB-67）。
 > **v0.10 增量導讀**（PRD R-23、US-44～US-47、AC-44-01～AC-47-08，修改 AC-18-01／24-02／32-02／42-02，E-102～E-117，Q-63～Q-71；契約 v0.15 C-8、§5.3 MG-5～MG-8、RD-3、RD-4、§5.10 FP-1～FP-9、§5.11 CR-1～CR-9、UO-1～UO-9、§5.12 WR-1～WR-5、§6 IM-9、IM-10、§7 V-P5-08、V-ST-18～V-ST-22、§5.7 CI 修改、data-schema §15、§9.8 DS-32～DS-39、FB-54～FB-60）：**持久化結構 `schemaVersion` 2 → 3**（鍵名、鍵數不變；`PersistedData` 加 3 個選填欄位）。(1) 遷移與讀取：`core/persist.js` 新增 `MIGRATIONS[2]`（MG-6）、**任何版本**遷移後一律先做 RD-1 再做 RD-3（修正現行「遷移過就跳過 RD-1」的寫法，T-76）；測試夾具改用 v0.14 交付檔實際寫出的 localStorage 與備份原文（FE-70，§7.21.1）。(2) 單字卡位置：新 L1 模組 `core/position.js`（FP-2 解析）；store 以單一入口 `gotoCard` 寫入、`placeCard` 統一處理單字集重建（取代刪除自訂單字的舊定位邏輯，§7.21.2）。(3) 模擬測驗：新 L1 模組 `core/part5flow.js` 集中「作答、下一題、重新開始、開關、全部再練、清除紀錄」的狀態轉移與 UO-3 畫面種類（§7.21.3）；畫面新增「已答對 K / Q 題」、「✓ 曾答對」、開關、「全部答對」畫面與確認對話框，文字定稿見 §7.21.4。(4) 容量不足提示收斂為 store 單一函式 `commitWrite`，整個工作階段最多提示 1 次（§7.21.5）。(5) 題目 id 穩定性檢查列為 CT-25（§7.21.6）；網站版本 1.1.0 由主控 MC-04 修改（§7.21.7）。同步修訂 §1、§2、§3（D-15）、§4.10、§5.5、§6.6、§10.7、§11（T-75～T-86）、§12.9、§13.7、§14、§15（SD-FB-57～SD-FB-64）。
@@ -69,6 +70,10 @@ approved_at: 2026-11-04
 | （v0.12）權利與商標文字 | 固定文字一律逐字取自契約 L-8（LT-1～LT-6）；常數留在各 view 的既有位置，不新增共用模組；商標聲明（LT-5）只放「資料來源與授權」頁；`brandStatement` 改為單一參數，文字不再依賴 `copyrightHolder`（§7.23） | R-25、L-8、V-LGL-01～04、AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-10 |
 | （v0.12）無佐證說法 | `p5-009` 解析改為 LT-6；新測試 `legal-static.test.js` 掃描交付 HTML 與資料字串，防止舊說法再進入（§10.9） | R-25 四、AC-23-08、V-LGL-05、V-LGL-06 |
 | （v0.12）交付物 | 只由 `npm run build` 重新產生 `dist/`，版本仍 1.1.0，新舊版以建置碼區分；375px 標題說明預期 2 行，須實測 | DS-41、Q-74 決議 B、AC-10-02、E-123 |
+| （v0.13）已答對鎖定檢視 | `part5flow.questionState` 由既有欄位推導 `answered`／`lockedReview`／`idle`，每次繪製時計算，不持久化；作答防護 `part5flow.canAnswer` 放在 store 層，不靠 `disabled`；「下一題」可由 `lockedReview` 前進並寫入題號，不改計數（§7.24） | R-26、LV-1～LV-7、UO-10、AC-48-01～AC-48-05 |
+| （v0.13）開關與清除 | 開關由開變關時，切換前畫面為 `allCorrect` 才回第 1 題、本輪歸 0（`setOnly`）；`clearPart5CorrectIds` 改為 K ≥ 1 有效；移除 replay 常數、動作與函式，不保留隱藏程式 | UO-7、UO-8、CR-6、CR-10、Q-77 A、Q-78 B |
+| （v0.13）畫面文字 | 4 段新文字取自 `PART5_RECORD_TEXTS`；說明文字與清除按鈕放在 `.p5-record`；y = 0 結算不顯示「0 / 0」；全部答對畫面的 SD 說明句刪除 | SM-1～SM-3、HN-1、DS-44、Q-80 C |
+| （v0.13）交付物 | MC-06 把 `package.json` 改為 1.2.0 後，FE-82 由原始碼重新建置 `dist/` | Q-79 A、DS-45、AC-42-02 |
 
 ---
 
@@ -374,6 +379,7 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | D-15 | （v0.10）同 D-6～D-14：v0.10 對既有檔案的修改由 FE-70～FE-76、CT-25 承接；**同一批次的任務沒有任何共用 path**。被兩個 v0.10 任務修改的檔案只有 `__tests__/store.test.js`（FE-73 只改 `schemaVersion` 等字面值與因 v3 而必須調整的斷言 → FE-74 改行為斷言），以 `dependsOn` 串到不同批次。`package.json` 只由主控 MC-04 修改一次（Q-70 A），任何 PG 任務仍不得修改。`__tests__/_samples/` 由 FE-70 建立後**唯讀**：後續任務不得重新產生或改寫（它代表 v0.14 已交付程式的輸出，改寫即失去比對意義） |
 | D-16 | （v0.11）v0.11 只有 1 個任務 FE-77，修改 `core/pwa.js`、`views/sources-page.js`、`styles/70-sources.css`、`__tests__/pwa-core.test.js`、`__tests__/pwa-notice.test.js`、`__tests__/sources-page.test.js`，新增 `__tests__/contact-static.test.js`，並重新產生 `dist/` 9 檔；與已 `done` 任務的檔案重疊不影響平行（無其他待執行任務）。**不改**：`ui/pwa-notice.js`、`services/pwa.js`、`pwa/sw.template.js`（註解中的舊按鈕名稱不影響行為，不進入本任務範圍，SD-FB-66）、`core/constants.js`、`tools/build.mjs`、`index.html`、`src/data/`、`package.json` |
 | D-17 | （v0.12）CT-26 只改 `src/data/part5.js` 與新增 `_records/CT-26.md`；FE-78 修改 `views/flashcards.js`、`views/part5.js`、`views/sources-page.js`、`license-header.txt`、`styles/40-part5.css`（只改註解）與 4 個測試檔；FE-79 新增 `__tests__/legal-static.test.js` 並重新產生 `dist/` 9 檔。CT-26 與 FE-78 同批、paths 不重疊；唯一被兩個 v0.12 任務列入的檔案是 `40-part5.css`（FE-78 → FE-79，後者只在實測不合格時才改），以 `dependsOn` 分批。**不改**：`styles/70-sources.css`（`.src-project` 已有 `overflow-wrap: anywhere`）、`core/constants.js`、`tools/build.mjs`、`index.html`、`src/data/sources.js`、`src/data/NOTICE.md`、`src/data/_tools/`、`_records/part5-ids.json`、`package.json`。`tests/`、`docs/04-qa/` 屬 QA 範圍，不派給 PG（§10.9） |
+| D-18 | （v0.13）FE-80 修改 `core/part5flow.js`、`core/constants.js`、`state/store.js` 與 `__tests__/part5flow.test.js`、`store-track.test.js`、`goal.test.js`、`load-order.test.js`；FE-81 修改 `views/part5.js`、`styles/40-part5.css`、`__tests__/part5.test.js`；FE-82 新增 `__tests__/part5-static.test.js` 並重新產生 `dist/` 9 檔。三個任務依序執行，唯一重複的檔案是 `40-part5.css`（FE-81 → FE-82，後者只在實測不合格時才改）。`package.json` 由主控 MC-06 一次性修改（Q-79 A），PG 不得修改。**不改**：`core/layout.js`（`part5Progress` 已支援 3 種畫面）、`core/persist.js`、`core/backup.js`、`core/reinit.js`、`core/version.js`、`ui/dialog.js`、`tools/build.mjs`、`index.html`、`src/data/`、`storage-schema.json`、`__tests__/store.test.js`、`__tests__/_samples/`。`tests/`、`docs/04-qa/` 屬 QA 範圍，不派給 PG（§10.10） |
 
 （v0.8 記載）不改：`core/constants.js`（`STORAGE_KEYS` 等屬 `FROZEN_IDENTIFIERS`）、`core/backup.js`、`core/persist.js`、`main.js`、`ui/router.js`（「開始今日學習」「變更」沿用既有 `[data-go]` 委派）、`views/flashcards.js`、`views/speech-panel.js`、`views/flashcard-quiz.js`、`styles/05-motion.css`、`pwa/sw.template.js`、`src/app/assets/icons/`、`styles/50-decoder.css`、`styles/60-phrasebank.css`（隱藏頁）。
 
@@ -686,10 +692,10 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | `viewKind(p5, bankIds, set, only)` | `→ "empty" \| "question" \| "summary" \| "allCorrect"` | Q = 0 → `"empty"`；其餘依 **UO-3**：`allDone = only === true && countCorrect === Q`；`allDone && !(p5.phase === "question" && p5.lockedSelection !== null)` → `"allCorrect"`；否則 `p5.phase === "summary"` → `"summary"`；否則 `"question"` |
 | `normalizeOnly(p5, bankIds, set, only)` | `→ { part5, changed }` | **UO-4**：`only` 且 `phase = "question"` 且 `lockedSelection = null` 且 `isCorrectAt(currentIndex)` 且 K < Q → `j = nextUnanswered(currentIndex)`：`j ≥ 0` → `currentIndex = j`；`-1` → `phase = "summary"`（本輪計數不變）。其他情況 `changed: false` |
 | `recordAnswer(ids, id, correct)` | `→ { ids, changed }` | **CR-2**：`correct === true`、`id` 為非空字串且不在 `ids` → `ids.concat([id])`；否則原陣列、`changed: false` |
-| `next(p5, bankIds, set, only)` | `→ { part5, changed }` | 前提 `phase = "question"` 且 `lockedSelection !== null`，否則不變。`only` 為 false → v0.14 規則（`currentIndex ≥ Q − 1` → `{ lockedSelection: null, phase: "summary" }`，否則 `currentIndex + 1`）；`only` 為 true → **UO-5**：`j = nextUnanswered(currentIndex + 1)`，`j ≥ 0` → `{ currentIndex: j, lockedSelection: null }`，否則 `{ lockedSelection: null, phase: "summary" }` |
+| `next(p5, bankIds, set, only)` | `→ { part5, changed }` | （v0.13 前提改寫，見 §4.11）前提 `phase = "question"` 且 `lockedSelection !== null`，否則不變。`only` 為 false → v0.14 規則（`currentIndex ≥ Q − 1` → `{ lockedSelection: null, phase: "summary" }`，否則 `currentIndex + 1`）；`only` 為 true → **UO-5**：`j = nextUnanswered(currentIndex + 1)`，`j ≥ 0` → `{ currentIndex: j, lockedSelection: null }`，否則 `{ lockedSelection: null, phase: "summary" }` |
 | `restart(p5, bankIds, set, only)` | `→ { part5, changed }` | **UO-6**：`roundAnswered = roundCorrect = 0`、`lockedSelection = null`、`phase = "question"`、`currentIndex = only ? max(nextUnanswered(0), 0) : 0`；累計不變；與原值逐欄相同時 `changed: false`（沿用 v0.14 不寫入的行為） |
-| `setOnly(state, bankIds, on)` | `({ part5, ids, only }, …, boolean) → { part5, only, changed }` | **UO-1／UO-8**：`on` 非布林或與原值相同 → `changed: false`；false → true 時再套 `normalizeOnly`；true → false 時 `part5` 不變 |
-| `replayKeepRecords(p5)` | `→ Part5Progress` | **UO-7 (a)**：`{ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 原值, totalCorrect: 原值 }`（呼叫端另設 `only = false`、`ids` 不變） |
+| `setOnly(state, bankIds, on)` | `({ part5, ids, only }, …, boolean) → { part5, only, changed }` | **UO-1／UO-8**：`on` 非布林或與原值相同 → `changed: false`；false → true 時再套 `normalizeOnly`；true → false 時 `part5` 不變（v0.13 改為依切換前畫面分流，見 §4.11） |
+| `replayKeepRecords(p5)` | `→ Part5Progress` | **（v0.13 移除，§4.11）** **UO-7 (a)**：`{ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 原值, totalCorrect: 原值 }`（呼叫端另設 `only = false`、`ids` 不變） |
 | `clearAndRestart(p5)` | `→ { part5, ids: [] }` | **CR-6**：`part5` 同上；`ids = []`（呼叫端保留 `only`） |
 
 **`EMT.core.layout`（FE-72）**：`part5Progress(kind, number, total)` 增加 `kind === "allCorrect"` → `{ visible: true, now: max, max, percent: 100 }`（同 `"summary"`，MT-1 v0.15）；其他行為與 `LAYOUT_TEXTS` 不變。
@@ -722,8 +728,8 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | action | 簽章 | 說明 |
 | :--- | :--- | :--- |
 | `setPart5UnansweredOnly(on)` | `(boolean) → { changed }` | UO-1：非布林、題庫為空、與原值相同 → `{ changed: false }`、不寫入；否則 `part5flow.setOnly` → `commitWrite`（開關與 UO-4 結果同一次 `setItem`），tags `["part5"]` |
-| `replayPart5KeepRecords()` | `() → { ok }` | 只在 `viewKind === "allCorrect"` 時有效（否則 `{ ok: false }`、不寫入）：`part5 = replayKeepRecords(p5)`、`part5UnansweredOnly = false`、答對紀錄不變 → `commitWrite`，tags `["part5"]` |
-| `clearPart5CorrectIds()` | `() → { ok }` | 只在 `viewKind === "allCorrect"` 時有效：`clearAndRestart` → `part5CorrectIds = []`、開關不變 → `commitWrite`，tags `["part5", "stats"]`。**確認對話框由 view 顯示**；按「取消」時 view 不呼叫本 action（`setItem` 0 次，CR-6） |
+| `replayPart5KeepRecords()` | `() → { ok }` | **（v0.13 移除，§4.11）** 只在 `viewKind === "allCorrect"` 時有效（否則 `{ ok: false }`、不寫入）：`part5 = replayKeepRecords(p5)`、`part5UnansweredOnly = false`、答對紀錄不變 → `commitWrite`，tags `["part5"]` |
+| `clearPart5CorrectIds()` | `() → { ok }` | （v0.13 前提改為 K ≥ 1，§4.11）只在 `viewKind === "allCorrect"` 時有效：`clearAndRestart` → `part5CorrectIds = []`、開關不變 → `commitWrite`，tags `["part5", "stats"]`。**確認對話框由 view 顯示**；按「取消」時 view 不呼叫本 action（`setItem` 0 次，CR-6） |
 
 **Store API——修改的 action 與內部函式**
 
@@ -737,12 +743,53 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | `startLearning()` | 寫入的 `data.flashcardPosition = null`（FP-4 末句）；`commitWrite(…, { bypassFirstRun: true })` |
 | `confirmApplyGoal()` | `buildReinitData` 已設 `null`（FE-73）；寫入失敗行為不變（CI-7） |
 | `addCustomWord`、`injectTemplate`、`deleteCustomWord` | 單字集重建一律 `placeCard`（**FP-5**），解析後的位置與 `customVocab` 同一次寫入；`deleteCustomWord` 不再呼叫 `custom.indexAfterDelete`；新增與注入的容量不足回滾（AC-18-04）一併丟棄位置（因為整個新 `data` 被丟棄） |
-| `answerPart5(i)` | 新增前提：`viewKind !== "allCorrect"`；**CR-2**：`part5CorrectIds = recordAnswer(ids, bankIds[idx], correct).ids`，與計數、打卡同一次 `commitWrite` |
+| `answerPart5(i)` | （v0.13 另加 LV-3 防護，§4.11）新增前提：`viewKind !== "allCorrect"`；**CR-2**：`part5CorrectIds = recordAnswer(ids, bankIds[idx], correct).ids`，與計數、打卡同一次 `commitWrite` |
 | `nextPart5()`、`restartPart5()` | 改用 `part5flow.next`／`restart`（UO-5、UO-6）；`changed` 為 false 時不寫入 |
 | `importBackup(text, confirmFn)` | `ctx.part5Ids = bankIds`；步驟 9 以 `placeCard`（mode 一律 `"card"`、正面）取代 `index: 0`（**FP-6**）；解析結果只改記憶體（步驟 8 已寫入備份值，下次寫入再寫出解析結果，RD-4） |
 | `writeData(data, bypass)` | 寫出前 `persist.ensureWritable` + 既有學習紀錄正規化 |
 
 **`views/part5.js`（FE-75）**：`buildViewModel(progress, bank, consts, record?)` 新增第 4 參數 `record = { ids, only }`（缺省視為 `{ ids: [], only: false }`，既有呼叫與測試相容）；回傳增加 `kind: "allCorrect"`，以及每種 kind 共通的 `k`、`q`、`only`；`"question"` 另有 `correctBadge: boolean`；`"allCorrect"` 另有 `inSummary`、`roundCorrect`、`roundAnswered`。畫面結構、文字、事件見 §7.21.4。新增匯出 `RECORD_TEXT`（SD 定稿文字，供測試）。
+
+### 4.11 v0.13 修改的模組介面（已答對鎖定檢視）
+
+名詞同 §4.10。以下皆為純函式規則同 §4.10：不修改傳入值、對任何輸入不拋例外。
+
+**`EMT.core.part5flow`（FE-80）**
+
+| 成員 | 變更 | 型別／簽章 | 說明 |
+| :--- | :--- | :--- | :--- |
+| `questionState(p5, bankIds, set, only)` | 新 | `→ "answered" \| "lockedReview" \| "idle"` | **LV-1**，依序判定：`lockedSelection` 非 null、非 undefined → `"answered"`；`only !== true` 且 `isCorrectAt(bankIds, set, p5.currentIndex)` → `"lockedReview"`；否則 `"idle"`。`p5` 不是物件 → `"idle"`。只在 `viewKind = "question"` 時有意義 |
+| `canAnswer(p5, bankIds, set)` | 新 | `→ boolean` | **LV-3**：`phase === "question"` 且 `lockedSelection === null` 且 `!isCorrectAt(bankIds, set, p5.currentIndex)`；不看開關 |
+| `next(p5, bankIds, set, only)` | 改 | 不變 | 前提改為 `phase === "question"` 且 `questionState(...) !== "idle"`，否則回傳原值、`changed: false`。`only === true` → UO-5（不變）；否則 **UO-10**：`currentIndex ≥ Q − 1` → `{ lockedSelection: null, phase: "summary" }`，否則 `{ currentIndex + 1, lockedSelection: null }`。計數與 `currentIndex` 以外的欄位不變 |
+| `setOnly(state, bankIds, on)` | 改 | 不變 | **UO-8**：true → false 時，以切換前 `viewKind(part5, bankIds, correctSet(ids), true)` 分流：`"allCorrect"` → `part5 = freshRound(part5)`；其他 → `part5` 不變。false → true 與其他規則不變 |
+| `clearAndRestart(p5)` | 改 | 不變 | 直接呼叫 `freshRound`，行為不變；註解不得再提 replay |
+| `replayKeepRecords` | 移除 | — | 函式與匯出一併刪除（UO-7）。`freshRound` 保留為內部函式，由 `setOnly`、`clearAndRestart` 共用 |
+| `viewKind`、`normalizeOnly`、`restart`、`recordAnswer` | 不變 | — | UO-3、UO-4、UO-6、CR-2 的推導邏輯相同 |
+
+**`EMT.core.constants`（FE-80）**：`PART5_RECORD_TEXTS` 與 data-schema §15 逐字、逐鍵順序相同：`correctBadge`、`correctCount`、`unansweredOnlyLabel`、`allCorrectTitle`、`clearAndRestart`、`lockedReviewFeedback`、`summaryNoNewAnswers`、`filterHint`、`filterHintAllCorrect`、`clearConfirmMustInclude`、`confirmOk`、`confirmCancel`。刪除 `replayKeepRecords`；仍深度凍結。
+
+**Store API（`state/store.js`，FE-80）**
+
+| action | 變更 |
+| :--- | :--- |
+| `answerPart5(i)` | 前提改為 `isOptionIndex(i)`、該題存在、`viewKind !== "allCorrect"`、`part5flow.canAnswer(...)`。不符合 → `{ ok: false }`，`part5`、答對紀錄、`streak`、`todayLearned` 皆不變，不呼叫 `commitWrite`（LV-3）。view 依 `feedbackOf` 判定，所以也不會震動或播放動畫 |
+| `nextPart5()` | 邏輯不變（`part5flow.next`）；tags `["part5"]`；`lockedReview` 前進時寫入 1 次（UO-10） |
+| `restartPart5()` | 不變 |
+| `setPart5UnansweredOnly(on)` | 不變（UO-8 由 `setOnly` 處理），開關與 `part5` 同一次 `commitWrite`；註解同步 |
+| `clearPart5CorrectIds()` | 前提改為題庫非空且 `countCorrect(ids, set) ≥ 1`，不再要求 `allCorrect`（CR-10）；否則 `{ ok: false }`、不寫入。其餘同 CR-6，tags `["part5", "stats"]` |
+| `replayPart5KeepRecords` | 移除，不再匯出 |
+
+**`views/part5.js`（FE-81）**
+
+| 成員 | 變更 | 說明 |
+| :--- | :--- | :--- |
+| `buildViewModel` | 改 | `"question"` 新增 `questionState`；`lockedReview` 時正確選項為 `"correct"`，其餘為 `"locked"`；資料不完整（`valid === false`）時全部為 `"locked"`（LV-6）。推導時以防禦後的 `index` 為題號。`"allCorrect"` 的 `inSummary` 改為 `phase === "summary"` 且 `roundAnswered ≥ 1`（SM-3） |
+| `optionState(i, locked, correctIndex)` | 不變 | `answered`、`idle` 沿用；`lockedReview` 由 `buildViewModel` 另行決定，不新增參數 |
+| `RECORD_TEXT` | 改 | 刪除 `allCorrectNote`；`confirmTitle`、`confirmMessage` 不變 |
+| `FALLBACK_RECORD_TEXTS` | 改 | 與 `PART5_RECORD_TEXTS` 相同 |
+| `renderRecord`、`renderSummary`、`renderAllCorrect`、`renderOptions`、`renderResult`、`renderQuestion` | 改 | 見 §7.24.2 |
+
+`core/layout.js` 不改：`part5Progress(vm.kind, vm.number, total)` 不受題目狀態影響。
 
 ---
 
@@ -992,6 +1039,18 @@ jobs:
 | 交付 | FE-79 依序 `npm test`、`npm run build` 兩次，覆寫 `dist/english-master-track.html` 與 `dist/site/` 8 檔；不得手改；檢查項目同 §5.6 的「可重現」與兩份 HTML 相同 |
 | 大小 | 文字增減合計少於 1 KB，對 AC-19-04 的影響可忽略，不另列估算 |
 | 外部資源 | 不新增；LT-1～LT-6 都不含網址，B-7 檢查不受影響 |
+
+### 5.8 v0.13 建置（不改建置程式；契約 DS-45、Q-79 決議 A）
+
+| 項目 | 決定 |
+| :--- | :--- |
+| 建置程式 | `tools/build.mjs` **不改**。固定文字與移除字樣的檢查放在 `__tests__/part5-static.test.js`（§10.10），不加入 build 中止規則 |
+| 版本號 | **MC-06 必須在 FE-82 之前完成**：主控只把 `package.json` `version` 由 `1.1.0` 改為 `1.2.0`。原因：§5.4 的建置順序是「讀 `version` → 取代 `@@APP_VERSION@@` → 算 BUILD_ID」，版本值會進入 BUILD_ID 的雜湊，先建置再改版會讓版本行、BUILD_ID 與 `sw.js` 全部過期，只能重建 |
+| 版本值位置 | `src/`、`tools/`、`sources/`、`.github/` 搜尋 `1.1.0` 皆 0 筆，除 `package.json` 外不需修改（VR-1～VR-3）。`package-lock.json` 的 `version` 一直是 `0.1.0`，建置不讀取，本版不動（SD-FB-75） |
+| BUILD_ID | HTML 內容與版本號都改變 → BUILD_ID、`sw.js` 快取名稱、建置碼必然改變，已安裝的 https 版依 AC-36-03 出現更新提示；舊版 PWA 更新前仍是舊行為（E-131） |
+| 交付 | FE-82 依序 `npm test`、`npm run validate:data`、`npm run build` 兩次，覆寫 `dist/english-master-track.html` 與 `dist/site/` 8 檔；不得手改；可重現與兩份 HTML 相同的檢查同 §5.6 |
+| 大小 | 新增程式與文字約 +5 KB，移除 replay 與說明句約 −1 KB，對 AC-19-04 的影響可忽略，不另列估算 |
+| 外部資源 | 不新增；B-7 檢查不受影響 |
 
 ---
 
@@ -2200,6 +2259,8 @@ QA 的 `tests/e2e/` 也有 13 處（`e2e-cards.mjs`、`e2e-goal.mjs`、`e2e-firs
 
 全部轉移集中在 `core/part5flow.js`；store 只負責取 `bankIds`、組 `data`、`commitWrite`。
 
+（v0.13）下表的 `answerPart5`、`nextPart5`、開關關閉、`replayPart5KeepRecords`、`clearPart5CorrectIds` 五列已由 §7.24.1 取代。
+
 | 事件（store action） | 開關關閉 | 開關開啟 | 不變的部分 | 寫入 |
 | :--- | :--- | :--- | :--- | :--- |
 | 作答 `answerPart5(i)` | v0.14 計數（本輪、累計）＋打卡；答對且未曾答對 → 附加 id（CR-2） | 同左 | 今日已學不計（LR-1）；`viewKind = "allCorrect"` 時拒絕 | 1 次 |
@@ -2218,6 +2279,8 @@ QA 的 `tests/e2e/` 也有 13 處（`e2e-cards.mjs`、`e2e-goal.mjs`、`e2e-firs
 **邊界保證（UO-9）**：`nextUnanswered` 為單一有界迴圈；`next`、`restart`、`normalizeOnly` 皆不遞迴；`currentIndex` 永遠 < Q（V-ST-05 照舊）；Q = 0 時 store 的 part5 action 一律不動作、view 走既有空題庫畫面、不顯示 K 與開關（§5.11 名詞段）；`bankIds` 含 `null`（資料缺 id）時該題永遠未答對、不可被記錄，不會造成「全部答對」誤判以外的錯誤（K 最大為非 null 題數，此時 `allCorrect` 不會出現，屬資料錯誤，V-P5-02 已防）。
 
 #### 7.21.4 畫面文字與版面（DS-35；AC-45-04、AC-45-05、AC-46-01、AC-46-06～AC-46-08）
+
+（v0.13）本節的「全部答對說明句」「按鈕一」、DOM 結構的 `p5-allcorrect__note` 與 `[data-p5=replay]`、互動表的 replay 列，以及 `.p5-allcorrect__note` 樣式都已移除；`.p5-record` 內容與結算畫面以 §7.24.2、§7.24.3 為準。
 
 **文字定稿**（契約常數以 `C.PART5_RECORD_TEXTS` 引用；SD 文字放 `views/part5.js` 的 `RECORD_TEXT` 並匯出供測試）：
 
@@ -2460,6 +2523,159 @@ LT 文字本身以契約 README §4.3 L-8 表為唯一來源；實作時從該�
 | 375px，`html { font-size: 150% }` | 是 | E-123 放大字級；說明本身不得裁切；水平溢出若來自其他既有元素，回報不修 |
 
 **不合格時**：只能在 `.p5-heading-note` 加換行相關屬性（如 `overflow-wrap: anywhere`）；不得縮小字級、改寫 LT-2、加 `nowrap`。原因若在共用容器，FE-79 標 `blocked` 回報主控。
+
+### 7.24 已答對鎖定檢視、開關說明與常駐清除（v0.13；PRD R-26、US-48、AC-48-01～AC-48-12、Q-77～Q-80；契約 v0.18 §5.11、DS-43～DS-46）
+
+固定文字以 data-schema §15 `PART5_RECORD_TEXTS` 為唯一來源，實作時複製，本節不重抄。
+
+#### 7.24.1 狀態轉移（FE-80；DS-43；LV-1、LV-3、LV-4、UO-5、UO-6、UO-8、UO-10、CR-6）
+
+題目畫面狀態（LV-1，每次繪製時推導，不持久化）：
+
+| 順序 | `lockedSelection` | 開關 | 曾答對 | 狀態 | 可作答 | 「下一題」 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| 1 | 非 null | 任一 | 任一 | `answered` | 否 | 有 |
+| 2 | null | 關閉 | 是 | `lockedReview` | 否 | 有 |
+| 3 | null | 關閉 | 否 | `idle` | 是 | 無 |
+| 3 | null | 開啟 | 否 | `idle` | 是 | 無 |
+| — | null | 開啟 | 是 | 不會顯示：K < Q 由 UO-4 移開，K = Q 為 `allCorrect` | 否（LV-3 防禦） | 無 |
+
+| 事件 | 開關關閉 | 開關開啟 | 計數與打卡 | 寫入 |
+| :--- | :--- | :--- | :--- | :--- |
+| 到達、停留、重新載入 `lockedReview` | 只繪製，不寫 `lockedSelection`（LV-4） | 不會發生 | 不變 | 0 次 |
+| 點 `lockedReview` 的選項 | 按鈕 `disabled`；若事件仍到 store，`canAnswer` 回 false | 同左 | 不變，不震動、無動畫 | 0 次 |
+| 作答 `answerPart5(i)` | 只有 `canAnswer` 為 true 才生效，計數同 v0.14 | 同左 | 計入 | 1 次 |
+| 「下一題」 | **UO-10**：`answered`、`lockedReview` 前進；`idle` 不變 | **UO-5**：`answered` 跳到 next；其他不變 | 不變 | 有變更時 1 次 |
+| 「重新開始」 | **UO-6**：第 1 題，狀態由 LV-1 推導 | **UO-6**：next(0) | 本輪歸 0，累計不變 | 有變更時 1 次 |
+| 開關 開 → 關 | — | **UO-8**：切換前 `allCorrect` → `freshRound`；其他 `part5` 不變 | (a) 本輪歸 0，累計不變；(b) 全部不變 | 1 次 |
+| 開關 關 → 開 | **UO-4**（不變） | — | 不變 | 1 次 |
+| 清除確定 `clearPart5CorrectIds()` | K ≥ 1：`ids = []`、`freshRound`、開關維持 | 同左 | 本輪歸 0，累計不變，不打卡 | 1 次 |
+
+**邊界驗算**：
+
+| 情境 | 走法 | 結果 |
+| :--- | :--- | :--- |
+| K = Q、開關關閉、第 i 題（AC-48-07） | `viewKind` 為 `question`（`allDone` 需要開關開啟）；每次 `next` 加 1，最後一題進 `summary` | 恰 Q − i + 1 次進入結算，迴圈有界 |
+| 全部答對畫面關閉開關（AC-48-10） | `setOnly` 切換前 `viewKind` 為 `allCorrect` → 第 1 題、`lockedReview`、y = 0 | 恰 Q 次進入 y = 0 結算（AC-48-06） |
+| 剛答對最後一題、K = Q、尚未按「下一題」時關閉開關 | 切換前 `viewKind` 為 `question`（UO-3 排除條件）→ `part5` 不變 | 維持本次作答結果（AC-46-09 (a)） |
+| 開關開啟、其後已無未答對且未作答（AC-46-04 (a)） | `normalizeOnly` → `summary`，y 可能為 0 | 依 SM-2 顯示，不出現 0 / 0 |
+| v1.1.0 留下曾答對題目的答錯結果（AC-48-08 (c)） | `lockedSelection` 非 null → `answered`；不重新計分；`next` 離開 | 再回來為 `lockedReview` |
+| 題目沒有合法 id（AC-48-09 (d)） | `isCorrectAt` 恆為 false → `idle` | 不顯示標示、不可被記錄 |
+| 清除時尚有本次作答結果（E-133） | `freshRound` 清掉 `lockedSelection` | 第 1 題 `idle`，已計入的累計不變 |
+| 容量已滿時清除（FB-68） | 依 WR-2，記憶體照常、提示 1 次、localStorage 留舊紀錄 | 重新載入後紀錄回來，屬契約定案行為 |
+
+不改 `normalizeAfterLoad`、匯入流程與初始化：鎖定狀態由既有欄位推導（LV-7），舊資料不需遷移。
+
+#### 7.24.2 畫面（FE-81；DS-44；LV-2、LV-6、SM-1～SM-3、CR-10、HN-1）
+
+**DOM 結構**（`#view-part5`；題庫為空時沿用空畫面，不建 `.p5-record`）：
+
+```
+div.p5-record
+ ├ p.p5-record__count[data-p5=correct-count]      「已答對 K / Q 題」
+ ├ label.p5-only[data-p5=only-label]              開關（不變）
+ ├ p.p5-record__hint[data-p5=filter-hint]          新；question、summary = filterHint；allCorrect = filterHintAllCorrect
+ └ button.btn.btn--secondary.p5-record__clear[data-p5=clear]
+                                                   新；只在 K ≥ 1 且畫面不是 allCorrect 時建立
+
+question → div.card.p5-question
+   meta、句子、選項（狀態依下表）
+   div.p5-live → div.p5-result（answered、lockedReview 才有）
+   p.p5-warning（!valid 且不是 lockedReview 時，沿用）
+   button[data-p5=next]（answered、lockedReview 才有）
+
+summary → div.card.p5-summary
+   h3.p5-summary__title
+   y ≥ 1：p.p5-summary__score[data-p5=summary-score]「答對 x / y」
+   y = 0：p.p5-summary__none[data-p5=summary-none] summaryNoNewAnswers
+   a ≥ 1：p.p5-summary__total「累計答對 c / a」
+   button[data-p5=restart]
+
+allCorrect → div.card.p5-allcorrect
+   h3.p5-allcorrect__title
+   inSummary：p.p5-allcorrect__caption「本輪結算」＋ p.p5-summary__score「答對 x / y」
+   div.btn-row.p5-allcorrect__actions → button.btn[data-p5=clear]（唯一按鈕）
+```
+
+**3 種狀態的題目區**：
+
+| 項目 | `idle` | `answered` | `lockedReview` | `lockedReview` 且 `!valid`（LV-6） |
+| :--- | :--- | :--- | :--- | :--- |
+| 「✓ 曾答對」 | 無（`idle` 的題目不是曾答對） | 曾答對才有 | 有 | 有 |
+| 選項 `data-state` | 全部 `idle` | `correct`、`wrong`、`locked` | 正解 `correct`，其餘 `locked` | 全部 `locked` |
+| 選項 badge | 無 | 「正確答案」「你的選擇」 | 只有「正確答案」 | 無 |
+| `disabled` | 否 | 是 | 是 | 是 |
+| `aria-pressed` | 無此屬性 | 所選為 `"true"` | 全部 `"false"` | 全部 `"false"` |
+| 回饋（`[data-p5=feedback]`） | 無 | 「答對了！」或「答錯了…」 | `lockedReviewFeedback`，`p5-feedback--correct` | `TEXT.badData`，`p5-feedback--wrong`，全畫面恰 1 次 |
+| 解析 | 無 | 兩段（AC-11-02） | 兩段（AC-48-01） | 只顯示非空的段落；兩段皆空時不建 `section.p5-explain` |
+| `.p5-warning` | `!valid` 時有 | `!valid` 時有（現況，SD-FB-74） | 無 | 無（避免重複） |
+| 「下一題」 | 無 | 有 | 有 | 有（不卡關） |
+
+`renderOptions` 的 `disabled`、`aria-pressed` 改以 `vm.questionState !== "idle"` 判斷。`onAnswer`、`feedbackOf` 不改：`lockedSelection` 前後皆為 null 時回傳 null，不播放動畫、不震動。
+
+**焦點**：清除確定、「下一題」、「重新開始」沿用 `pendingFocus = "question"`（題號或結算標題）；清除取消回到 `[data-p5=clear]`；開關操作留在開關。`renderClearButton(T, className)` 為單一函式，`.p5-record` 與全部答對畫面共用，事件都呼叫 `onClearRequest`。
+
+**樣式（`styles/40-part5.css`；只用既有 token，不新增色彩，不使用 `--accent`，不設 `transition`、`animation`）**：
+
+| 選擇器 | 規則 | 依據 |
+| :--- | :--- | :--- |
+| `.p5-record__hint` | `flex: 1 1 100%; margin: 0; font-size: 0.875rem; line-height: 1.4; color: var(--text-muted); overflow-wrap: anywhere` | 獨佔一行、位於開關下方；`#5b6472` 對 `--bg` 約 5.4:1；可換行（E-134） |
+| `.p5-record__clear` | `flex: 0 1 auto` | `.btn` 已有 `min-height`、`min-width` 44px 與 `max-width: 100%`；`.btn--secondary` 為 `--tint` 底 |
+| `.p5-summary__none` | `margin-bottom: 4px; font-size: 1.125rem; font-weight: 600; color: var(--text)` | y = 0 不沿用 1.75rem 的分數字級 |
+| `.p5-allcorrect__note` | 刪除，`.p5-allcorrect__caption` 保留 | DS-44 |
+| `.p5-allcorrect__actions .btn` | 不變 | AC-46-06 44×44 |
+
+全部答對畫面的清除按鈕維持 `.btn`，不改為 `.btn--primary`：這是不可復原的破壞性動作，雖然是唯一按鈕，也不用主要按鈕強調。
+
+**375px 估算**（可用寬 343px，FE-82 實測）：
+
+| 元素 | 估算 | 結果 |
+| :--- | :--- | :--- |
+| 計數行 + 開關 | 約 150 + 12 + 160 = 322px | 同一行；超出時 `flex-wrap` 換行（沿用） |
+| `filterHint` 23 字 × 14px | 約 322px | 預期 1 行，字型較寬時 2 行 |
+| `filterHintAllCorrect` 26 字 × 14px | 約 364px | 預期 2 行，符合 E-134 |
+| 清除按鈕 11 字 × 16px + padding 32px | 約 208px | 1 行 |
+
+K ≥ 1 時題目區約下移 60～90px。AC 未限制此處高度，也未要求模擬測驗頁首屏免捲動，所以不是缺陷；裁切、重疊或水平捲軸才是。
+
+#### 7.24.3 文字定稿（DS-44）
+
+| 用途 | 來源 | 決定 |
+| :--- | :--- | :--- |
+| 已答對鎖定檢視回饋 | `lockedReviewFeedback` | 逐字 |
+| y = 0 結算 | `summaryNoNewAnswers` | 逐字；標題仍為 `TEXT.summaryTitle` |
+| 題目與結算畫面說明 | `filterHint` | 逐字，恰 1 次 |
+| 全部答對畫面說明 | `filterHintAllCorrect` | 逐字，恰 1 次，不同時顯示 `filterHint` |
+| 全部答對說明句 | SD 文字 `allCorrectNote` | **刪除**，不改寫。AC-46-06 不要求此句，`filterHintAllCorrect` 已說明下一步，保留會重複 |
+| 確認對話框 | `RECORD_TEXT.confirmTitle`、`confirmMessage` | 不變。清除入口擴大後內文仍正確（AC-48-11 依 AC-46-08） |
+
+**移除清單**（V-ST-27，連註解一併清除，測試除外）：
+
+| 檔案 | 位置（依現況） | 處理 |
+| :--- | :--- | :--- |
+| `core/constants.js` | `:127` | 刪除 `replayKeepRecords` |
+| `core/part5flow.js` | `:304`～`:311`、`:314` 註解、`:335` | 刪除函式、匯出與相關註解 |
+| `state/store.js` | `:1093`～`:1105`、`:1405` | 刪除 action 與匯出 |
+| `views/part5.js` | `:31` 註解、`:87`、`:96`、`:631` 註解、`:646`～`:658` | 刪除備援文字、說明句與按鈕；`data-p5="replay"` 一併消失 |
+| `styles/40-part5.css` | `:351` | 刪除 `.p5-allcorrect__note` 選擇器 |
+
+#### 7.24.4 實測方法（FE-82；AC-40-02、AC-48-01、AC-48-11、AC-48-12、E-134）
+
+以 playwright-core 搭配本機 Chrome 或 Edge，對 `dist/english-master-track.html` 以 `file://` 實測，腳本放 scratchpad，以 `localStorage.setItem` 建立狀態後重新載入。寬度 375×667、1366×768 都測。
+
+| 畫面（建立方式） | 量測 |
+| :--- | :--- |
+| 題目 `lockedReview`（ids 含目前題目、開關關閉） | 選項 4 個 `disabled`；無 `aria-pressed="true"`；正解標綠並有「正確答案」；回饋文字逐字；解析兩段非空；有「下一題」；無「你的選擇」「答對了！」「答錯了」 |
+| 題目 `idle`（K ≥ 1） | 選項可作答；有清除按鈕 |
+| 題目 `answered` | 回饋「答對了！」；重新載入不變 |
+| 本輪結算 y = 0（a ≥ 1 與 a = 0） | 逐字 `summaryNoNewAnswers`；a = 0 無累計行；結算區無「0 / 0」「NaN」「Infinity」「undefined」「%」 |
+| 全部答對（K = Q、開關開啟） | 只有 1 個按鈕；無「再練一次」；`filterHintAllCorrect` 恰 1 次 |
+| 清除（K ≥ 1，question 畫面） | 取消 `setItem` 0 次；確定後 K = 0、第 1 題 `idle`、按鈕消失 |
+| 操作（`lockedReview`） | `navigator.vibrate` 替身 0 次；連按「下一題」的次數符合 AC-48-07 |
+
+各畫面共通：`[data-p5=clear]` 數量（K ≥ 1 恰 1、K = 0 為 0）；清除按鈕與 `.p5-only` 的 `getBoundingClientRect` 寬高 ≥ 44；`.p5-record` 子元素兩兩不重疊；`.p5-record__hint` 的 `scrollWidth ≤ clientWidth`、左右邊界在視窗內；`document.documentElement.scrollWidth ≤ clientWidth`；說明文字對比 ≥ 4.5:1；Console 無錯誤、`file://` 下非 file 請求 0。行數一律以 Range 量測（§7.23.4），回報實際值，不以行數判定失敗。
+
+**不合格時**：只能修改 `.p5-record__hint`、`.p5-record__clear`、`.p5-summary__none` 的版面規則，不得改文字、不得加 `nowrap`、不得使用 `--accent`。原因若在共用容器或 `views/part5.js`，FE-82 標 `blocked` 回報主控。
 
 ---
 
@@ -3108,6 +3324,138 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 
 **人工驗收**：沒有新增項目；AC-23-08 單獨出現的「常考」「必考」由 CT-26 與 QA 依判讀規則處理（現況 0 筆）。法律適當性不屬測試範圍（PRD R-25 風險 (3)）。
 
+### 10.10 v0.13 測試範圍（PRD v0.18；契約 V-ST-19、V-ST-20、V-ST-23～V-ST-27、DS-43～DS-46）
+
+**中間狀態的已知失敗**：FE-80 完成到 FE-81 完成之間，`npm test` 的 `part5.test.js` 預期失敗（view 仍引用已移除的常數與 action），其他測試檔須全過；FE-81 完成後 `npm test` 全過。`tests/`（QA）在更新前會有下方列出的預期失敗，不算缺陷。
+
+**單元測試（`npm test`）**
+
+| 檔案 | 任務 | 修改位置與必含案例 | AC／契約 |
+| :--- | :--- | :--- | :--- |
+| `part5flow.test.js`（改） | FE-80 | 新增 `questionState` 真值表（`lockedSelection` × 開關 × 曾答對，含 null id 與非物件）；`canAnswer`；`next` 由 `lockedReview` 前進、最後一題進 `summary`、`idle` 不變、計數不變；K = Q 由第 i 題恰 Q − i + 1 次；`setOnly` 開 → 關 分流 (a)(b)；移除 `:322`～`:333` 的 replay 案例，`:339`、`:354` 改寫；`:407` 的參考模型改為含 UO-10（開關關閉且曾答對、未鎖定時前進，其他同 v0.14） | V-ST-23、V-ST-24、V-ST-26、LV-1、LV-3、UO-8、UO-10 |
+| `store-track.test.js`（改） | FE-80 | `:498` 末段改為「曾答對的題目作答被拒、K 不變、`setItem` 0 次」；`:521`～`:560` 的參考模型與操作序列改為含 LV-3、UO-10，並加入「只含未曾答對」的序列確認與 v0.14 相同；`:595`～`:599` 不可再以 `answerPart5` 建立狀態，改為直接設定 `lockedSelection`；`:650` 刪除；`:673` 改為 UO-8 (a) 案例（3 種進入方式、K = Q、a、c 不變、1 次 `setItem`）；`:696` 改為 K ≥ 1 時各畫面有效、K = 0 與只含不存在 id 回 `{ ok: false }` 且 0 次 `setItem`；新增：`lockedReview` 嘗試作答時 a、c、x、y、K、`streak`、`todayLearned` 全部不變；v1.1.0 答錯殘留（LV-7）；到達與重新載入 `lockedReview` 時 `setItem` 0 次；容量已滿與 localStorage 停用（AC-48-09 (a)(b)） | V-ST-19、V-ST-20、V-ST-23、V-ST-24、V-ST-26、AC-45-03、AC-48-02、AC-48-05、AC-48-08 |
+| `goal.test.js`（改） | FE-80 | `:160` 的期望物件改為 v0.18 的 12 個鍵，檢查鍵順序 | V-ST-27 |
+| `load-order.test.js`（改） | FE-80 | `:513` 移除 `replayKeepRecords`，加入 `questionState`、`canAnswer`；`:535`～`:536` 改為新鍵清單 | LD-1、V-ST-27 |
+| `part5.test.js`（改） | FE-81 | 依 §7.24.2 改寫 `:485`、`:552`、`:608`、`:634`、`:698`、`:747` 的 replay 與可作答斷言；新增：3 種狀態的選項、回饋、解析與「下一題」；LV-6 資料不完整恰 1 次；y = 0 結算 a ≥ 1 與 a = 0；allCorrect y = 0 無本輪結算；HN-1 兩句與 3 種畫面的次數；CR-10 按鈕數（K = 0、K ≥ 1、只含不存在 id）；整合測試改走開關關閉路徑（AC-48-10）；`:850` 的 CSS 掃描涵蓋新選擇器 | AC-48-01、AC-48-06、AC-48-09、AC-48-11、AC-48-12、AC-46-06、V-ST-25 |
+| `part5-static.test.js`（新） | FE-82 | 見下表 | V-ST-27、V-ST-25 |
+
+`store.test.js` 不需修改：已確認 `:851`、`:868`、`:1153`、`:1592` 的流程不會重新作答曾答對的題目。
+
+**`part5-static.test.js` 必含案例**（`build({ write: false, log() {}, warn() {} })` 對專案實際原始碼建置，寫法同 `legal-static.test.js`）
+
+| 對象 | 判定 | 依據 |
+| :--- | :--- | :--- |
+| 交付 HTML 全文 | 「全部題目再練一次」「再練一次」「replayKeepRecords」「replayPart5KeepRecords」皆 0 次；`lockedReviewFeedback`、`summaryNoNewAnswers`、`filterHint`、`filterHintAllCorrect` 各至少 1 次 | V-ST-27 |
+| `src/app/` 非 `__tests__` 的 `.js`、`.css`、`.html`、`.txt` | 上述 4 個字串皆 0 筆，含註解 | V-ST-27、§7.24.3 |
+| `constants.PART5_RECORD_TEXTS` | 4 個新鍵與 PRD 逐字相同，且 `filterHintAllCorrect` 括住的文字 = `unansweredOnlyLabel` | V-ST-27、AC-48-12 |
+| `constants.CURRENT_SCHEMA_VERSION` | 仍為 3 | DS-46 |
+| `styles/40-part5.css` 的 `.p5-record__hint` | 不含 `nowrap`、`text-overflow`、`overflow: hidden`、`--accent` | HN-1、E-134 |
+
+版本值 1.2.0 **不寫入**單元測試，否則下次改版就會失敗；FE-82 與 QA 以建置結果檢查（同 §5.4、D-14）。
+
+**建置與交付檢查（FE-82，附指令與輸出）**
+
+| 檢查 | 判定 | AC／契約 |
+| :--- | :--- | :--- |
+| 開工前 | `package.json` `version` = 1.2.0，否則標 `blocked` 回報主控，不得自行修改 | Q-79 A、MC-06 |
+| `npm test`、`npm run validate:data` | 全數通過、錯誤 0 | V-P5-08、DS-46 |
+| `npm run build` 兩次 | 4 檔 SHA-256 兩次相同；兩份 HTML SHA-256 相同；`emt-app-version` = 1.2.0；`emt-build-id` 前 7 碼 = `sw.js` BUILD_ID 前 7 碼；回報新舊 BUILD_ID | AC-42-02、AC-42-04、AC-36-01 (a)、AC-36-07 |
+| `dist/english-master-track.html` 字串 | 同 `part5-static.test.js`；「版本」行由頁面組字，實測顯示「版本 1.2.0（建置 xxxxxxx）」 | V-ST-27、AC-42-02 |
+| 匯出備份 | `schemaVersion` 3，欄位集合與 v1.1.0 相同 | AC-48-08、V-ST-27 |
+| 375px、1366px 實測 | 依 §7.24.4 | AC-48-01、AC-48-11、AC-48-12、AC-40-02 |
+
+**主控檢查（FE-82 完成後）**
+
+| # | 項目 | 方法 |
+| :--- | :--- | :--- |
+| M-1 | MC-06 的 `package.json` diff 只有 `version` 1 行 | `git diff package.json` |
+| M-2 | FE-82 回報的實測結果齊全；若本機無瀏覽器而未完成，主控以 Windows Chrome、`file://`、DevTools 執行 §7.24.4 | 讀回報或實測 |
+| M-3 | FE-80～FE-82 未越界：`tests/`、`tools/`、`src/data/`、`package-lock.json`、`docs/02-contract/storage-schema.json` diff 為 0；`docs/` 只有上游代理與主控的修改；`src/app/` 只有 §12.12 的 paths | `git status`、`git diff --stat` |
+
+**給 QA 的項目（針對性 QA，人類已同意；不派給 PG）**
+
+範圍總覽：
+
+| # | 範圍 | 內容 |
+| :--- | :--- | :--- |
+| Q1 | 新增 AC | AC-48-01～AC-48-12 各至少 1 個 TC；E-124～E-134 併入 |
+| Q2 | R-26 修改的 AC | AC-11-04、AC-11-05、AC-11-07、AC-42-02、AC-45-03、AC-45-04、AC-45-06、AC-46-01、AC-46-02、AC-46-04、AC-46-05、AC-46-06、AC-46-09；AC-46-07 改列「不適用（v0.18 移除）」 |
+| Q3 | 舊文字與舊版本假設 | §10.9 留下的舊文字、v0.11 留下的更新提示文字、版本 1.1.0 寫死的位置，見下方兩張表 |
+| Q4 | v0.17 留下的 TC | AC-23-08、AC-10-02、LT-5（`tests/` 目前對 AC-23-08、V-LGL 與商標聲明的搜尋都是 0 筆） |
+| Q5 | 回歸 | `npm test`、`validate:data`；`tests/static/static-check.mjs`、`pwa-static.mjs`；越界檢查；`e2e-track-p5`、`e2e-track`、`e2e-content`、`e2e-layout`、`e2e-motion`、`e2e-persist`、`e2e-progress`、`e2e-env`、`e2e-cards`、`e2e-pwa`、`e2e-pwa-update`、`e2e-version` |
+| — | 本次可不跑 | `e2e-goal`、`e2e-firstrun`、`e2e-speech`、`e2e-mic`、`e2e-hidden`、`e2e-reinit`：程式未改，SD 已搜尋沒有依賴 R-26 舊行為的步驟（`e2e-reinit.mjs:39`、`:53` 的題號 `p5-011` 未曾答對，選項仍可作答）；由 QA 判斷是否抽跑 |
+
+**Q2：固定舊行為的案例**
+
+| 檔案 | 位置 | 要做的事 | 對應 |
+| :--- | :--- | :--- | :--- |
+| `tests/e2e/e2e-track-p5.mjs` | `:50`、`:51` | `info` 移除 `note`、`replay`；新增 `feedback`、`hint`、`none`、`clearCount`；`locked` 無法區分 `answered` 與 `lockedReview`，請以回饋文字區分 | 全部 |
+| 同上 | `:97`～`:119` TC-45-03 | (a) 不可再對 `p5-005` 作答，改驗鎖定；(b) 改驗開關開啟時跳過；(c) 不變；新增 (d) v1.1.0 答錯殘留 | AC-45-03 |
+| 同上 | `:167`～`:180` TC-45-04-* | `:174`、`:177` 的「標示不影響作答」改為依 AC-48-01 鎖定；未曾答對題仍可作答 | AC-45-04 |
+| 同上 | `:120`～`:134` TC-45-06 | `:124` 不可再作答曾答對的 `p5-003`，操作序列與 `:130`～`:132` 的期望重算 | AC-45-06 |
+| 同上 | `:135`～`:143` TC-45-07 | `:139` 對 `p5-001`～`p5-003` 的 `answer` 不再生效，確認 `p.click` 點到 `disabled` 時的行為並調整流程（PRD 清單未列，SD-FB-72） | AC-45-07 |
+| 同上 | `:233`～`:238` TC-46-02 | `:236` `optEnabled === 4` 改為 0，並驗 `lockedReview` | AC-46-02 |
+| 同上 | `:256`～`:276` TC-46-04 | 預期仍通過；補驗 (a) 開啟前為 `lockedReview`、K = Q 分流與 y = 0 | AC-46-04 |
+| 同上 | `:277`～`:283` TC-46-05 | 預期仍通過；補驗 y = 0 路徑 | AC-46-05 |
+| 同上 | `:284`～`:305` TC-46-06 | `:290`～`:296` 改為 1 個按鈕；移除說明句與 replay 斷言；`b0` 改驗鎖定；加「不出現再練一次」與 `filterHintAllCorrect` | AC-46-06 |
+| 同上 | `:306`～`:313` TC-46-07 | 改列「不適用（v0.18 移除）」；原驗證移到 AC-48-10 的 TC | AC-46-07 |
+| 同上 | `:333`～`:339` TC-46-09 | `:337` `!a.locked` 改為 `lockedReview`；補 (b)(c) | AC-46-09 |
+| 同上 | `:340`～`:362` TC-46-10 | 預期仍通過（開關開啟，匯入後跳到第 3 題 `idle`）；文字描述不需改行為 | AC-46-10 |
+| `tests/e2e/e2e-content.mjs` | `:65`～`:84` TC-11-04 | 預期仍通過（該流程 `p5-001` 答錯，重新開始後仍可作答）；另加第 1 題曾答對的 TC（AC-48-04） | AC-11-04、AC-11-07 |
+| `tests/e2e/e2e-track.mjs`、`e2e-layout.mjs`、`e2e-motion.mjs`、`e2e-progress.mjs`、`e2e-persist.mjs`、`e2e-env.mjs` | 全部 `[data-p5=option]` 步驟 | SD 已搜尋這些步驟並檢視主要流程，作答對象都是未曾答對的題目，預期不需修改（未實際執行）；回歸時確認。`e2e-track.mjs:526` 的「1.1.0」只是輸出說明文字，可順帶更新 | AC-48-03 |
+| `tests/static/static-check.mjs` | `:255`、`:256` TC-T-S01 | 移除 2 段舊文字，加入 4 段新文字；加入 V-ST-27 的 0 次檢查 | V-ST-27 |
+| `tests/tools/tc-desc.json` | `:251`～`:269` | TC-45-03、TC-45-04-*、TC-45-06、TC-46-02、TC-46-04、TC-46-06、TC-46-07、TC-46-09 描述更新；`:266`、`:267` 含舊文字 | Q2 |
+| `docs/04-qa/test-plan.md` | `:364`、`:595`～`:600`、`:605`～`:614`、`:690`、`:692`、`:783` | TC-11-04、TC-45-03、TC-45-04-*、TC-45-06、TC-46-02、TC-46-04、TC-46-05、TC-46-06、TC-46-07、TC-46-09、TC-46-10、TC-T-S01、TC-TRK-H2 改為現行 AC；TC-TRK-H2 加 `lockedReview` 朗讀 | Q2 |
+
+**Q3：舊文字與版本假設**（SD 已逐項搜尋，下列位置仍是舊值）
+
+| 檔案 | 位置 | 要做的事 | 來源 |
+| :--- | :--- | :--- | :--- |
+| `tests/e2e/e2e-version.mjs` | `:186` | `PKG.version === "1.1.0"` 改為 1.2.0（V-ST-27） | AC-42-02 |
+| 同上 | `:197` | 註解改為目前版本的修訂號 +1（1.2.0 → 1.2.1） | AC-42-04 |
+| 同上 | `:219`、`:233`、`:234` | 更新提示改為「有新版本，請更新版本」「更新版本」 | v0.11、SD-FB-65 |
+| `tests/e2e/e2e-pwa-update.mjs` | `:103` | 斷言改為新提示文字與按鈕 | v0.11 |
+| 同上 | `:60`、`:63`、`:90`、`:106`、`:124`、`:128` | 註解與 TC 說明的按鈕名稱更新 | v0.11 |
+| `tests/e2e/e2e-pwa.mjs` | `:158` | TC-23-02c 的 `BRAND` 改為 LT-4；另加 LT-5 | §10.9 |
+| `tests/e2e/e2e-cards.mjs` | `:189` | TC-06-01 標籤改為 LT-1 | §10.9 |
+| `tests/e2e/e2e-content.mjs` | `:119` | `statements` 改為 LT-3，加入 LT-5 | §10.9 |
+| `tests/e2e/e2e-layout.mjs` | `:298`、`:299` | 品牌標識聲明改為 LT-4，輸出說明同步 | §10.9 |
+| `tests/static/static-check.mjs` | `:118`、`:120` | TC-S06 改為 V-LGL-04：兩句分開、LT-3、LT-4；加不含舊文字與 LT-5 的斷言 | §10.9 |
+| 越界檢查 | 新增第 8 輪腳本（可由 `tests/static/boundary-r7.mjs` 複製） | 以目前 HEAD 為基準，檢查 FE-80～FE-82 的 paths；把 MC-06 的 `package.json` 列為授權例外（只允許 `version` 1 行），`:4`、`:29` 的 MC-04 文字勿沿用 | D-18 |
+| `tests/tools/tc-desc.json` | `:160`、`:212`、`:272` | TC-23-02c、TC-42-04d、TC-TRK-H1 描述更新 | §10.9、v0.11 |
+| `docs/04-qa/test-plan.md` | `:332`、`:415`、`:631`、`:684` | TC-06-01、TC-23-02c、TC-D06、TC-S06 期望文字改為現行 AC | §10.9 |
+| 同上 | `:524`、`:572`、`:774`、`:782`、`:691` | TC-36-03c、TC-42-04d、TC-VER-H3、TC-TRK-H1 的提示文字與按鈕名稱更新 | v0.11 |
+
+`tests/results/`、`tests/tools/qa-review-r*.mjs`、`tests/e2e/diag-*.mjs` 為歷史紀錄，不回改。
+
+**Q1、Q4：新增 TC**（編號由 QA 定，建議 `TC-48-01`～`TC-48-12`，套件可放新檔 `tests/e2e/e2e-lock.mjs` 或併入 `e2e-track-p5.mjs`）
+
+| AC | 必驗重點 | 寬度與環境 |
+| :--- | :--- | :--- |
+| AC-48-01 | 逐字回饋、綠色與「正確答案」、4 個 `disabled`、無 `aria-pressed="true"`、無禁止文字、解析非空、「下一題」可鍵盤操作 | 375、1366 |
+| AC-48-02 | 滑鼠、觸控、鍵盤點選項後所有計數不變；`navigator.vibrate` 替身 0 次；重新載入 `setItem` 0 次 | `file://` |
+| AC-48-03 | 4 題混合序列；答錯過的題目可作答且無標示；每次 ≤ 100ms | 1366 |
+| AC-48-04 | 第 1 題曾答對與未曾答對兩種；重新載入不變 | 1366 |
+| AC-48-05 | (a)(b) × 重新載入、切換功能區、關閉分頁重開；「答對了！」轉為鎖定文字的時機 | 1366 |
+| AC-48-06 | 開關關閉與開啟兩條路徑；a ≥ 1 與 a = 0；結算區字串搜尋；y ≥ 1 回歸 | 375、1366 |
+| AC-48-07 | K = Q、恰 Q − i + 1 次；可取 Q = 200、i 接近 200 以縮短時間，另以單元測試涵蓋完整計算 | 1366 |
+| AC-48-08 | 建議以 v1.1.0 交付檔實際產生資料，見下方「v1.1.0 樣本」；(a)(b)(c)；備份欄位比對 | `file://` |
+| AC-48-09 | (a) 停用 localStorage；(b) 容量已滿；(c)(d)(e) 以 `PART5_QUESTION_BANK` 測試資料建立 | `file://` |
+| AC-48-10 | 3 種進入方式；恰 Q 次進入結算；AC-46-09 (a) 例外 | 1366 |
+| AC-48-11 | 3 種題目狀態、結算、全部答對 × 開關 × K；按鈕恰 1 個；取消（含 Esc、點遮罩）與確定；E-132、E-133 | 375、1366 |
+| AC-48-12 | 兩句逐字與次數、對比、不重疊、無水平捲軸；題庫為空都不顯示；放大字級 150% 換行（E-134） | 375、1366 |
+| AC-23-08 | V-LGL-05、V-LGL-06，含 `p5-103` 不變 | 靜態 |
+| AC-10-02 | LT-2 逐字；375×667 量測依 §7.23.4；K ≥ 1 時與 `.p5-record` 不重疊 | 375 |
+| AC-23-02（LT-5） | LT-5 恰 1 次，不含舊文字；AC-38-08 標籤以外結構不變 | 375、1366 |
+| AC-23-07 行數 | 依 SD-FB-69 改用 Range 量測 | 375 |
+| AC-42-02 | 版本行「版本 1.2.0（建置 xxxxxxx）」；建置碼與 `sw.js` 一致；兩份 HTML 相同 | `file://`、serve |
+
+**v1.1.0 樣本**：`dist/english-master-track.html` 有納入版本控制，FE-82 覆寫後仍可由 `git show HEAD:dist/english-master-track.html` 取得（HEAD 為 1.1.0；若主控已 commit，請改用 `f57145a`）。QA 可比照 `QA_V100` 以環境變數指定，用舊檔實際作答產生 localStorage 與備份，再以 1.2.0 開啟。`__tests__/_samples/` 唯讀，不新增（D-15）。
+
+**給 QA 的已知設計行為**：(1) 容量已滿時清除：畫面已清除、重新載入後紀錄回來（FB-68），不開 BUG。(2) AC-48-09 (c) 不以 AC-48-01 的解析條件判定（FB-66）。(3) 全部答對畫面的本輪結算以 `phase = "summary"` 且 y ≥ 1 判定（FB-65）。(4) K ≥ 1 時題目區下移不是缺陷（§7.24.2）。
+
+**人工驗收**（不阻擋本次發布判定，併入既有待人工清單）：TC-TRK-H2 加 `lockedReview` 與清除按鈕的 TalkBack、VoiceOver 朗讀；TC-VER-H2 部署後比對版本 1.2.0；TC-VER-H3 已安裝 App 出現更新提示並顯示 1.2.0（E-131）。
+
 ---
 
 ## 11. 技術風險與對策
@@ -3209,6 +3557,14 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | T-93 | （v0.12）`brandStatement` 仍組出舊文字，或 `holder` 被一併移除，使 `derivedAttribution` 的署名缺漏 | AC-23-02 不通過 | §7.23.1 明定 `holder` 仍供署名；既有 `derivedAttribution` 測試保留；整頁斷言不含舊文字 |
 | T-94 | （v0.12）`tests/` 未更新就跑 QA，舊文字斷言誤判失敗（TC-06-01、TC-S06、TC-23-02c 等） | QA 誤判缺陷 | §10.9 列出檔案與行號；QA 先更新再跑；PG 不得代改 |
 | T-95 | （v0.12）只跑 `--no-site` 或手改 `dist/`，兩份 HTML 不同 | AC-36-07 不通過（同 T-89） | FE-79 只以 `npm run build`，並比對 SHA-256 |
+| T-96 | （v0.13）為了顯示鎖定而寫入 `lockedSelection`，回饋被當成本次作答，統計與 AC-48-05 出錯 | AC-48-01、AC-48-02、AC-48-05 不通過 | `questionState` 只推導；LV-4 單元測試斷言到達、重新載入時 `setItem` 0 次且 `lockedSelection` 維持 null |
+| T-97 | （v0.13）作答防護只靠 `disabled`，以程式或殘留事件仍可計分 | AC-48-02、AC-45-03 不通過 | `canAnswer` 放 store 層，單元測試直接呼叫 `answerPart5` |
+| T-98 | （v0.13）MC-06 未在 FE-82 前完成，產物仍為 1.1.0，或建置後才改版使 BUILD_ID 過期 | AC-42-02 不通過 | FE-82 `manualPrereqs` 含 MC-06；開工先檢查版本，不符就 `blocked`；doneWhen 檢查 meta = 1.2.0 |
+| T-99 | （v0.13）FE-80 移除常數後 `part5.test.js` 暫時失敗，被誤判為缺陷或被單獨修補 | 任務來回 | §10.10 明列中間失敗；FE-80 不改 view；FE-81 緊接執行，兩者不平行 |
+| T-100 | （v0.13）舊註解殘留「再練一次」等字樣 | V-ST-27 不通過 | §7.24.3 移除清單；`part5-static.test.js` 掃描原始碼與交付 HTML |
+| T-101 | （v0.13）說明文字與清除按鈕讓 375px 擁擠、重疊或產生水平捲軸；文字寬度因系統字型而異 | AC-48-11、AC-48-12、AC-40-02 不通過 | `flex-basis: 100%` 獨佔一行、可換行；FE-82 實測 2 種寬度；只調整版面規則 |
+| T-102 | （v0.13）常駐清除入口誤觸，且清除無法復原（PRD R-26 風險 (1)） | 使用者遺失答對紀錄 | 確認對話框防護（AC-46-08）；次要按鈕樣式；不用主要或危險色強調 |
+| T-103 | （v0.13）`tests/` 未更新就跑 QA，舊行為斷言誤判失敗；或 QA 只改 PRD 列出的案例而漏掉 TC-45-07、e2e-version、e2e-pwa-update | QA 誤判缺陷 | §10.10 列出檔案與行號；QA 先更新再跑；PG 不得代改 |
 
 ---
 
@@ -3502,6 +3858,38 @@ FE-19 與 FE-18 的先後（v0.3）：**FE-19 在前**。理由：FE-18 的 done
 說明：(1) FE-79 是交付關卡，必須最後執行，否則 `dist/` 不含 CT-26 的修改。(2) `tests/`、`docs/04-qa/` 的舊文字由 QA 更新（§10.9）。(3) 本次由主控或人類 commit，SD 與 PG 不 commit。
 
 任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 79（FE-01～FE-79），共 105 個；主控手動項目 MC-01～MC-05。
+
+### 12.12 v0.13 增量任務與執行批次（PRD v0.18、契約 v0.18）
+
+既有 105 個任務與 MC-01～MC-05 全部 `done`，內容與 status 不變。本版不需 CT 任務：全部答對說明句與其他舊文字都在 `src/app/`，`src/data/` 搜尋 0 筆（DS-46）。
+
+| ID | 標題 | owner | 批次 | dependsOn | paths |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| FE-80 | 狀態轉移與 store：鎖定推導、作答防護、下一題、開關分流、常駐清除、移除 replay | pg-frontend | v0.13-1 | FE-79（已 done） | `core/part5flow.js`、`core/constants.js`、`state/store.js`、`__tests__/part5flow.test.js`、`__tests__/store-track.test.js`、`__tests__/goal.test.js`、`__tests__/load-order.test.js` |
+| FE-81 | 模擬測驗畫面：鎖定檢視、結算 y = 0、開關說明、清除按鈕 | pg-frontend | v0.13-2 | FE-80 | `views/part5.js`、`styles/40-part5.css`、`__tests__/part5.test.js` |
+| FE-82 | 交付關卡：靜態檢查、單元測試全過、375px 與 1366px 實測、重新建置 `dist/` | pg-frontend | v0.13-3 | FE-81；manualPrereqs MC-06 | `__tests__/part5-static.test.js`（新）、`styles/40-part5.css`（只在實測不合格時）、`dist/english-master-track.html`、`dist/site/` 下 8 檔 |
+
+（FE 任務的 paths 省略前綴 `src/app/`，`dist/` 除外。）
+
+| 順序 | 項目 | 執行者 | 前置 | 說明 |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | FE-80 | pg-frontend | 無 | 完成後只有 `part5.test.js` 預期失敗 |
+| 2 | FE-81 | pg-frontend | FE-80 | 完成後 `npm test` 全過 |
+| 3 | MC-06：`package.json` 改為 1.2.0 | 主控 | FE-81 | Q-79 A 一次性授權；只改 `version` 1 行 |
+| 4 | FE-82 | pg-frontend | FE-81、MC-06 | 必須最後執行，`dist/` 才含全部修改與正確版本 |
+| 5 | 針對性 QA | qa | FE-82 | 範圍見 §10.10 |
+
+三個 FE 任務修改同一功能的連續層次，**不可平行**。
+
+**PG 不得越界的目錄**
+
+| 代理 | 可寫 | 不得寫入 |
+| :--- | :--- | :--- |
+| pg-frontend（FE-80～FE-82） | 只有上表 paths | `src/data/`、`tests/`、`docs/`、`tools/`、`package.json`、`package-lock.json`、`__tests__/_samples/`；FE-80、FE-81 不得寫 `dist/` |
+
+本次由主控或人類 commit，SD 與 PG 不 commit。
+
+任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 82（FE-01～FE-82），共 108 個；主控手動項目 MC-01～MC-06。
 
 ---
 
@@ -4091,6 +4479,57 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 
 **回歸**：AC-20-01、AC-40-02（FE-79 實測）；AC-23-07（聯絡行不變，`contact-static.test.js` 照常；FE-79 回報行數）；AC-19-01、AC-21-01、AC-36-01、AC-36-07、AC-42-04（FE-79 建置檢查）。其餘 282 個應驗收 AC 的對照與 §13～§13.8 相同；**289 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。
 
+### 13.10 v0.13 追加對照（PRD v0.18：327 個 AC，本版應驗收 300 個）
+
+**新增 AC（12）**
+
+| AC | 任務 | 設計 | 驗證 |
+| :--- | :--- | :--- | :--- |
+| AC-48-01 | FE-80（推導）、FE-81（畫面）、FE-82（實測） | §4.11、§7.24.1、§7.24.2 | `part5flow.test.js`、`part5.test.js`、§7.24.4；QA TC |
+| AC-48-02 | FE-80、FE-81、FE-82 | §7.24.1 | `store-track.test.js`、§7.24.4；QA TC |
+| AC-48-03 | FE-80、FE-81、FE-82 | §7.24.1 | `part5flow.test.js`、`part5.test.js`；QA TC |
+| AC-48-04 | FE-80、FE-81、FE-82 | §7.24.1 | `store-track.test.js`、`part5.test.js`；QA TC |
+| AC-48-05 | FE-80、FE-81、FE-82 | §7.24.1、LV-5 | `store-track.test.js`；QA TC |
+| AC-48-06 | FE-81、FE-82 | §7.24.2 | `part5.test.js`、§7.24.4；QA TC |
+| AC-48-07 | FE-80、FE-81、FE-82 | §7.24.1 邊界驗算 | `part5flow.test.js`；QA TC |
+| AC-48-08 | FE-80、FE-81、FE-82 | §7.24.1 | `store-track.test.js`；FE-82 匯出比對；QA TC（v1.1.0 樣本） |
+| AC-48-09 | FE-80、FE-81、FE-82 | §7.24.1、§7.24.2 | `store-track.test.js`、`part5.test.js`；QA TC |
+| AC-48-10 | FE-80、FE-81、FE-82 | UO-8、§7.24.1 | `part5flow.test.js`、`store-track.test.js`、`part5.test.js`；QA TC |
+| AC-48-11 | FE-80、FE-81、FE-82 | §4.11、§7.24.2 | `store-track.test.js`、`part5.test.js`、§7.24.4；QA TC |
+| AC-48-12 | FE-81、FE-82 | §7.24.2、§7.24.3 | `part5.test.js`、`part5-static.test.js`、§7.24.4；QA TC |
+
+**v0.18 修改的 AC（13，追加任務）**
+
+| AC | 修改重點 | 追加任務 | 驗證 |
+| :--- | :--- | :--- | :--- |
+| AC-11-04 | 下一題可由鎖定檢視前進；下一題可能為鎖定；y = 0 結算 | FE-80、FE-81、FE-82 | `part5flow.test.js`、`part5.test.js`；QA TC-11-04 |
+| AC-11-05 | 重新載入保留鎖定檢視 | FE-80、FE-81、FE-82 | `store-track.test.js`；QA TC-11-05、AC-48-05 TC |
+| AC-11-07 | 重新開始後第 1 題依 LV-1 | FE-80、FE-81、FE-82 | `store-track.test.js`；QA AC-48-04 TC |
+| AC-42-02 | 版本 1.2.0 | MC-06、FE-82 | FE-82 建置檢查；QA `e2e-version.mjs` |
+| AC-45-03 | 曾答對的題目不可再作答；LV-7 殘留 | FE-80、FE-81、FE-82 | `store-track.test.js`；QA TC-45-03 |
+| AC-45-04 | 標示與鎖定同時出現 | FE-81、FE-82 | `part5.test.js`；QA TC-45-04-* |
+| AC-45-06 | 經過鎖定檢視不計入 | FE-80、FE-82 | `store-track.test.js`；QA TC-45-06 |
+| AC-46-01 | 全部答對畫面的開關結果依 AC-48-10 | FE-80、FE-81、FE-82 | `part5.test.js`；QA TC-46-01-* |
+| AC-46-02 | 開關關閉時曾答對題為鎖定 | FE-80、FE-81、FE-82 | `part5.test.js`；QA TC-46-02 |
+| AC-46-04 | 不變式、其後無未答對的 y = 0 | FE-80、FE-81、FE-82 | `part5flow.test.js`、`store-track.test.js`；QA TC-46-04 |
+| AC-46-05 | y = 0 依 AC-48-06 | FE-81、FE-82 | `part5.test.js`；QA TC-46-05 |
+| AC-46-06 | 1 個按鈕、無「再練一次」、y = 0 不顯示結算、提示文字 | FE-80、FE-81、FE-82 | `part5.test.js`、`part5-static.test.js`；QA TC-46-06 |
+| AC-46-09 | 下一題到達鎖定檢視 | FE-80、FE-81、FE-82 | `part5flow.test.js`、`store-track.test.js`；QA TC-46-09 |
+
+**移除 AC（1）**：AC-46-07（Q-77 A）。FE-80、FE-81 移除實作與測試，`part5-static.test.js` 確認沒有殘留；不計入應驗收數，QA 改列「不適用」。
+
+**邊界情況**
+
+| E | 任務 | 備註 |
+| :--- | :--- | :--- |
+| E-27、E-110、E-111、E-112 | FE-80、FE-81 | v0.18 修訂 |
+| E-124、E-126、E-128 | FE-80、FE-81 | LV-3、UO-10、LV-7 |
+| E-125、E-130、E-132、E-134 | FE-81 | SM-2、LV-6、CR-10、HN-1 |
+| E-127、E-129、E-133 | FE-80 | 推導與 `freshRound` |
+| E-131 | 不需任務 | 舊版 PWA 更新前屬預期 |
+
+**回歸**：AC-46-08（清除對話框，FE-81 測試保留）；AC-45-01、AC-45-02、AC-45-05、AC-45-07、AC-46-03、AC-46-10、AC-47-01～AC-47-08（FE-80、FE-82）；AC-40-01、AC-40-02（FE-82 實測）；AC-19-01、AC-21-01、AC-36-01、AC-36-07、AC-42-04（FE-82 建置檢查）。其餘 275 個應驗收 AC 的對照與 §13～§13.9 相同（300 − 新增 12 − 修改 13）；**300 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。
+
 ---
 
 ## 14. 回應契約 §9 指名 SD 的回饋
@@ -4154,6 +4593,11 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | DS-40（v0.16） | 同意範圍，建立 1 個任務 FE-77：(1) `PWA_TEXTS` 改值（§7.22.1）；(2) 聯絡行為 `.src-page` 最後一個子元素、`textContent` 寫入、`src-muted src-contact`（§7.22.2）；(3) 靜態檢查放在新測試檔 `contact-static.test.js`（交付 HTML 不含 `mailto:`、去空格位址、舊文字，含常數原值），**不改** `tools/build.mjs`（§5.6）；(4) FE-77 以 `npm run build` 取代手改 `dist/`；版本 1.1.0 不變 | §5.6、§7.22、§10.8、FE-77 |
 | DS-41（v0.17） | 同意範圍，拆為 FE-78（LT-1～LT-5、開頭註解、測試）與 FE-79（靜態檢查、實測、重新建置）；`package.json`、AC-23-07、ECDICT 音標標示不改 | §5.7、§7.23.1、§7.23.2、§10.9 |
 | DS-42（v0.17） | 同意範圍，列 1 個任務 CT-26，自驗 V-P5-08、V-LGL-05、V-LGL-06；`p5-103` 不改 | §7.23.3 |
+| DS-43（v0.18） | 同意範圍：`questionState`、`canAnswer` 放 `part5flow`，`next` 前提改為 `answered` 或 `lockedReview`，`setOnly` 依切換前畫面分流，作答防護放 store 層，刪除 replay 與相關測試 | §4.11、§7.24.1、FE-80 |
+| DS-44（v0.18） | 說明文字與清除按鈕放 `.p5-record`，依序在開關之後；375px 估算與實測方法已列；全部答對說明句**刪除**（不改寫） | §7.24.2、§7.24.3、§7.24.4、FE-81 |
+| DS-45（v0.18） | 主控 MC-06 於 FE-82 前修改，不列 PG 任務；由原始碼重新建置 | §5.8、MC-06、FE-82 |
+| DS-46（v0.18） | 同意：持久化結構不變、無遷移、`src/data/` 不變、不建 CT 任務；不需要改結構，不必退回 PM | §7.24.1、§12.12 |
+| FB-65～FB-69（v0.18，知會） | 依契約定案實作：FB-65 `inSummary` = `phase = "summary"` 且 y ≥ 1；FB-66 依 LV-6（§7.24.2 表）；FB-67 `canAnswer` 不看開關；FB-68 依 WR-2，列入給 QA 的已知設計行為；FB-69 使用 `filterHint` 定稿文字 | §4.11、§7.24、§10.10 |
 | FB-63（v0.17，知會） | 依 V-LGL-05 定案的分句符號實作 `legal-static.test.js`；現有 `scenarioZh`「入門：最高頻的生活基礎字彙」不算命中 | §10.9 |
 | FB-64（v0.17，知會） | 依契約，其他程式註解不算違反；SD 另一併改寫 4 處註解，讓 FE-79 能直接對整份 HTML 搜尋，判定標準比契約嚴格但結果相容 | §7.23.1、§10.9 |
 | FB-61、FB-62（v0.16，知會） | FB-61：交付以建置產物為準，FE-77 重新建置並比對兩份 HTML 相同（T-89、SD-FB-67）；FB-62：檢查範圍擴及 `src/app/` 非測試原始碼與 `sw.js`，測試以執行期推導去空格位址，原始碼不寫字面值（§7.22.2 防爬蟲表、T-88） | §7.22.2、§10.8 |
@@ -4238,6 +4682,11 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | SD-FB-69 | （v0.12）SD 自身修正：§10.8 的 FE-77 量測與主控 H-2 以 `.src-contact` 的 `getClientRects().length === 1` 判定「1 行」，但 `p` 為 block 元素，結果恆為 1，**無法證明沒有折行**；因此 AC-23-07 (1)(6) 的 375px 1 行可能未被有效驗證 | QA、主控 | 待辦（知會） | FE-79 改以 Range 量測並回報 `.src-contact` 行數（§7.23.4）；若不是 1 行，由主控依 BUG 流程處理，不在本版任務修改（AC-23-07 不動）。§10.8 保留原文作為歷史 |
 | SD-FB-70 | （v0.12）PRD R-25 的 QA 回饋清單沒有列 `docs/04-qa/test-plan.md` TC-S06（第 684 行仍是舊的合併聲明），也沒有列 `tests/tools/tc-desc.json:160` | PM、QA | 待辦（知會） | 不需改 PRD；已列入 §10.9 |
 | SD-FB-71 | （v0.12）R-25 指名 SD 修訂的 architecture.md 行號中，現行設計敘述已就地標註（原第 208、267、588、1414、1931、2234、2632 行）；原第 2760、3198、3705、3706 行屬 v0.7 已完成任務的歷史紀錄，只以 v0.12 導讀的改讀規則處理，不逐字回改 | PM、QA | 待辦（知會） | 不需改 PRD；現行文字以 §7.23 與契約 L-8 為準 |
+| SD-FB-72 | （v0.13）PRD R-26 的 QA 清單沒有列 TC-45-07（`e2e-track-p5.mjs:139` 對曾答對題作答）、`e2e-version.mjs`、`e2e-pwa-update.mjs` 與 `tests/static/static-check.mjs` | PM、QA | 待辦（知會） | 不需改 PRD；已列入 §10.10 |
+| SD-FB-73 | （v0.13）SD-FB-68 的 §10.9 項目與 SD-FB-65 的 v0.11 項目至今未更新，已逐項確認仍是舊值；AC-23-08、V-LGL、商標聲明在 `tests/` 為 0 筆。本次針對性 QA 一併處理 | QA | 待辦（知會） | 依 §10.10 Q3、Q4 執行後，SD-FB-65、SD-FB-68 可結案 |
+| SD-FB-74 | （v0.13）`answered` 且資料不完整時，現況會在回饋與 `.p5-warning` 各顯示 1 次「這一題的資料不完整。」。LV-6「恰 1 次」只規範 `lockedReview`，本版保持現況，避免範圍外變更 | SA、QA | 待辦（知會） | 不需改契約；QA 不以 LV-6 判定此情境 |
+| SD-FB-75 | （v0.13）`package-lock.json` 的 `version` 一直是 `0.1.0`，與 `package.json` 不同；建置與 CI（不執行 `npm ci`）都不讀取，MC-04 也未更新 | 主控 | 待辦（知會） | 本版維持不動，只改 `package.json`。日後若要對齊，另行處理 |
+| SD-FB-76 | （v0.13）契約未指定 K = 0 或題庫為空時 store 層 `clearPart5CorrectIds` 的回應。SD 定為 `{ ok: false }`、不寫入，與舊有防護一致；畫面本來就不提供入口（CR-10） | SA、QA | 待辦（知會） | 不需改契約 |
 
 ---
 
@@ -4259,3 +4708,4 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | 0.10 | 2026-11-04 | sd-agent | 修訂已核准的 v0.9（JimmyLin 核准），原因：PRD v0.15（approved，JimmyLin，2026-11-04；R-23：US-44 單字卡記住位置、US-45 模擬測驗答對紀錄、US-46 只練沒答對的題目、US-47 保存與相容，AC-44-01～AC-47-08 共 36 條，修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71）與契約 v0.15（三檔 approved，Q-63 持久化結構變更由人類核准；`schemaVersion` 2 → 3、C-8、MG-5～MG-8、RD-3、RD-4、FP-1～FP-9、CR-1～CR-9、UO-1～UO-9、WR-1～WR-5、IM-9、IM-10、V-P5-08、V-ST-18～V-ST-22、CI-4／CI-5／CI-8 修改、data-schema §15、§9.8 DS-32～DS-39、FB-54～FB-60）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首加註 C-8 改讀規則與 v0.10 導讀；§1 新增 5 列；§2 新模組層別 `core/position.js`、`core/part5flow.js`（皆 L1）與資料流；§3 檔案異動表、不改清單與 D-15；(2) 新增 §4.10 模組介面（position、part5flow、layout、constants、persist、backup、reinit、store 新增與修改 action、`commitWrite`、`placeCard`、part5 view）；(3) 新增 §5.5（建置不改、順序限制）、§6.6（約 +28 KB、localStorage < 3 KB）；(4) 新增 §7.21：v2 → v3 讀取與匯入流程、測試樣本來源與產生方式、既有測試 `schemaVersion` 2 位置表（DS-32）；單字卡位置掛點表、不變式 INV-FP、取代舊定位邏輯的等價性（DS-33）；模擬測驗狀態轉移表與邊界保證（DS-34）；畫面文字定稿（全部答對說明句、確認對話框標題與內文）、DOM 結構、樣式、互動與焦點（DS-35）；`commitWrite` 與容量不足提示收斂（DS-36）；V-P5-08 快照檢查（DS-37）；版本 1.1.0（DS-38）；效能與無障礙；(5) 新增 §10.7 單元／E2E／人工驗收分工；(6) §11 新增 T-75～T-86；(7) 新增 §12.9 任務 FE-70～FE-76、CT-25、MC-04 與 5 個批次；(8) 新增 §13.7 對照（應驗收 287 個 AC 全部涵蓋）；(9) §14 回應 DS-32～DS-39、FB-54～FB-60；§15 新增 SD-FB-57～SD-FB-64。tasks.json 同步升為 v0.9（只新增任務，既有任務不變）。不改 PRD、不改契約；`src/data/` 資料檔不改（CT-25 只改 `_tools/`、`_records/`） |
 | 0.11 | 2026-11-04 | sd-agent | 修訂已核准的 v0.10（JimmyLin 授權、主控代填），原因：PRD v0.16（approved，JimmyLin，2026-11-04；R-24：人類手改產物後決定併入 1.1.0——更新提示文字改為「有新版本，請更新版本」／「更新版本」、「資料來源與授權」頁新增 1 行聯絡 email；新增 AC-23-07，修改 AC-36-03、AC-42-04 文字，E-118～E-120）與契約 v0.16（三檔 approved，主控代核：`PWA_TEXTS` 新文字、`SOURCES_CONTACT_TEXT`、L-7、DS-40、FB-61、FB-62）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件與 v0.11 導讀（含舊提示文字的改讀規則）；§1 新增 3 列；§3 新增 D-16；(2) 新增 §5.6（不改建置程式、靜態檢查放測試、重新建置取代手改 `dist/`、版本 1.1.0）；(3) 新增 §7.22：提示文字修改點與不改清單、聯絡行常數位置、DOM 位置、非連結與不可聚焦、樣式與字級理由（0.8125rem，備援 0.75rem）、防爬蟲靜態規則；(4) 新增 §10.8：單元測試、建置與交付檢查、可選量測、主控檢查 H-1～H-4（使用者決定本次不跑 QA）；(5) §11 新增 T-87～T-90；(6) 新增 §12.10 任務 FE-77 與 1 個批次；(7) 新增 §13.8 對照（應驗收 288 個 AC 全部涵蓋）；(8) §14 回應 DS-40、FB-61、FB-62；§15 新增 SD-FB-65～SD-FB-67。tasks.json 同步升為 v0.10（只新增 FE-77，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3）、不改 `src/data/`、不改 `package.json` |
 | 0.12 | 2026-11-04 | sd-agent | 修訂已核准的 v0.11（JimmyLin 授權、主控代填），原因：PRD v0.17（approved，JimmyLin，2026-11-04；R-25：權利與商標文字修訂；新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）與契約 v0.17（`README.md`、`data-schema.ts` approved，主控代核：L-8、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空，須人類核准，不代核。增量內容：(1) 文首上游、搭配文件、v0.12 導讀與舊文字改讀規則；§1 新增 3 列；§3 新增 D-17 並更新 2 個檔案註記；(2) 就地標註舊標題說明與品牌標識聲明段落（§4.7、§7.13、§7.19.6、§7.21.4、§10.1）；(3) 新增 §5.7（不改建置程式、版本 1.1.0）；(4) 新增 §7.23：畫面文字修改點、HTML 開頭註解結構、`p5-009`、375px 預期 2 行與實測方法；(5) 新增 §10.9：單元測試、`legal-static.test.js`、交付檢查、主控檢查 M-1～M-3、給 QA 的項目；(6) §11 新增 T-91～T-95；(7) 新增 §12.11 任務 CT-26、FE-78、FE-79、MC-05 與批次；(8) 新增 §13.9 對照（應驗收 289 個 AC 全部涵蓋）；(9) §14 回應 DS-41、DS-42、FB-63、FB-64；§15 新增 SD-FB-68～SD-FB-71。tasks.json 同步升為 v0.11（只新增任務，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3）、不改 `package.json`、`p5-103`、頁尾與 AC-23-07；不新增外部資源 |
+| 0.13 | 2026-11-04 | sd-agent | 修訂已核准的 v0.12（JimmyLin 授權、主控代填），原因：PRD v0.18（approved，JimmyLin，2026-11-04；R-26：模擬測驗已答對鎖定檢視、開關說明、常駐清除入口、結算 y = 0、移除「全部題目再練一次（保留紀錄）」；新增 US-48、AC-48-01～12，修改 13 條，移除 AC-46-07，E-124～E-134，Q-77～Q-80）與契約 v0.18（`README.md`、`data-schema.ts` approved，主控代核：LV-1～LV-7、SM-1～SM-3、HN-1、CR-10、UO-7、UO-8、UO-10、V-ST-23～27、DS-43～DS-46、FB-65～FB-69；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件、v0.13 導讀與改讀規則；§1 新增 4 列；§3 新增 D-18；§4.10、§7.21.3、§7.21.4 就地標註；(2) 新增 §4.11 模組介面；(3) 新增 §5.8（不改建置程式、MC-06 順序與理由）；(4) 新增 §7.24：狀態轉移與邊界驗算、DOM 與 3 種狀態對照、樣式、375px 估算、文字定稿與移除清單（全部答對說明句刪除）、實測方法；(5) 新增 §10.10：單元測試、`part5-static.test.js`、交付檢查、主控檢查、QA 範圍 Q1～Q5（AC-48-xx、R-26 修改的 AC、§10.9 與 v0.11 舊文字、版本假設、v0.17 TC）、v1.1.0 樣本；(6) §11 新增 T-96～T-103；(7) 新增 §12.12 任務 FE-80～FE-82、MC-06；(8) 新增 §13.10 對照（應驗收 300 個 AC 全部涵蓋）；(9) §14 回應 DS-43～DS-46、FB-65～FB-69；§15 新增 SD-FB-72～SD-FB-76。tasks.json 同步升為 v0.12（只新增任務，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`。主控代核（2026-11-04）：人類授權「調整好後完成測試直接推上去」；已驗證 tasks.json 可解析、任務編號不重複、相依皆存在 |

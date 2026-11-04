@@ -28,10 +28,17 @@
  * - buildViewModel 第 4 參數 record = { ids, only }（缺省 { ids: [], only: false }）；畫面種類以 part5flow.viewKind 推導
  *   （empty／question／summary／allCorrect，不存在 store）；各 kind 附 k（已答對題數）、q（題庫題數）、only。
  * - 題庫非空時於進度條之後建立 div.p5-record：「已答對 K / Q 題」與原生核取方塊「只練沒答對的題目」；
- *   曾答對的題目在 .p5-meta 題型標籤後顯示「✓ 曾答對」；allCorrect 畫面以兩個按鈕取代「重新開始」。
+ *   曾答對的題目在 .p5-meta 題型標籤後顯示「✓ 曾答對」；allCorrect 畫面以清除按鈕取代「重新開始」。
  * - 「清除答對紀錄，重新來過」先經 EMT.ui.dialog.confirm，回 true 才呼叫 clearPart5CorrectIds；取消不呼叫任何 action。
- * - 契約文字取 constants.PART5_RECORD_TEXTS；SD 定稿文字（說明句、對話框標題與內文）放在 RECORD_TEXT 並匯出。
+ * - 契約文字取 constants.PART5_RECORD_TEXTS；SD 定稿文字（對話框標題與內文）放在 RECORD_TEXT 並匯出。
  *   一律 textContent（C-7），不顯示題目 id（CR-9）。
+ *
+ * （v0.18，FE-81；architecture.md v0.13 §4.11、§7.24.2、§7.24.3；契約 README §5.11 LV-2、LV-6、SM-1～SM-3、HN-1、CR-10、UO-7；
+ *   AC-11-04、AC-46-06、AC-48-01、AC-48-06、AC-48-09、AC-48-11、AC-48-12）
+ * - question 依 part5flow.questionState 分 answered、lockedReview、idle；lockedReview 不可作答，有回饋、解析與「下一題」，
+ *   鎖定只由狀態推導，本檔不寫入任何狀態（LV-4）。資料不完整時回饋為 TEXT.badData，全畫面恰 1 次，解析只顯示非空段落（LV-6）。
+ * - 結算 y = 0 顯示 summaryNoNewAnswers，a ≥ 1 才顯示累計行（SM-2）；allCorrect 只在 phase = summary 且 y ≥ 1 顯示本輪結算（SM-3）。
+ * - .p5-record 於開關後顯示開關說明（HN-1）；K ≥ 1 且不是 allCorrect 時另有清除按鈕；allCorrect 的清除按鈕為唯一按鈕（CR-10、UO-7）。
  *
  * 寫法：純邏輯（splitSentence、splitStructure、optionState、buildViewModel、feedbackOf、shouldIgnoreClick 等）
  * 在 Node 下以 module.exports 匯出供測試；
@@ -84,8 +91,11 @@
     correctCount: "已答對 {k} / {q} 題",
     unansweredOnlyLabel: "只練沒答對的題目",
     allCorrectTitle: "{q} 題全部答對！",
-    replayKeepRecords: "全部題目再練一次（保留紀錄）",
     clearAndRestart: "清除答對紀錄，重新來過",
+    lockedReviewFeedback: "你之前答對過這一題",
+    summaryNoNewAnswers: "本輪沒有新作答的題目",
+    filterHint: "關閉時顯示全部題目，答對過的題目會以綠色鎖定。",
+    filterHintAllCorrect: "要檢視全部題目，請關閉上方的「只練沒答對的題目」。",
     clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
     confirmOk: "確定",
     confirmCancel: "取消"
@@ -93,7 +103,6 @@
 
   // （v0.15，FE-75）SD 定稿文字（architecture.md §7.21.4 文字定稿表，逐字）
   var RECORD_TEXT = {
-    allCorrectNote: "每一題都至少答對過一次了。可以保留紀錄、全部題目再練一次，或清除答對紀錄後重新來過。",
     confirmTitle: "清除答對紀錄",
     confirmMessage: "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。"
   };
@@ -218,7 +227,7 @@
    *   { kind: "summary", roundCorrect, roundAnswered, totalCorrect, totalAnswered }
    *   { kind: "allCorrect", inSummary, roundCorrect, roundAnswered }（v0.15，UO-3、UO-7）
    *   { kind: "question", index, number, total, typeLabel, segments, options[], locked, correctIndex,
-   *     isCorrect, valid, explanation: { coreStrategy, structureLines }, correctBadge }
+   *     isCorrect, valid, explanation: { coreStrategy, structureLines }, correctBadge, questionState }（v0.18，LV-1）
    */
   function buildViewModel(progress, bank, consts, record) {
     var list = Array.isArray(bank) ? bank : [];
@@ -237,11 +246,11 @@
     var roundC = isIndex(p.roundCorrect) ? p.roundCorrect : 0;
     var roundA = isIndex(p.roundAnswered) ? p.roundAnswered : 0;
 
-    // （v0.15，UO-7）全部答對：不顯示題目；作答結束進入（phase = summary）時另顯示本輪結算（AC-46-06）
+    // （v0.15，UO-7；v0.18，SM-3）全部答對：不顯示題目；phase = summary 且 y ≥ 1 才另顯示本輪結算（AC-46-06）
     if (kind === "allCorrect") {
       return {
         kind: "allCorrect",
-        inSummary: p.phase === "summary",
+        inSummary: p.phase === "summary" && roundA >= 1,
         roundCorrect: roundC,
         roundAnswered: roundA,
         k: kCount,
@@ -272,6 +281,9 @@
     var labels = c.labels || FALLBACK_LABELS;
     var typeLabel = typeof q.type === "string" && Object.prototype.hasOwnProperty.call(labels, q.type)
       ? labels[q.type] : "";
+    var valid = typeof q.sentence === "string" && q.sentence !== "" && rawOptions.length === 4 && correctIndex >= 0;
+    // （v0.18，LV-1）以防禦後的題號與作答值推導，畫面狀態與本函式其他欄位一致
+    var qState = PF.questionState({ currentIndex: index, lockedSelection: locked }, bankIds, set, rec.only);
 
     var options = [];
     for (var i = 0; i < 4; i++) {
@@ -280,12 +292,14 @@
         index: i,
         letter: LETTERS[i],
         text: t === null || t === undefined ? "" : String(t),
-        state: optionState(i, locked, correctIndex)
+        // （v0.18，LV-2、LV-6）lockedReview 只標正解；資料不完整時全部為 locked
+        state: qState === "lockedReview"
+          ? (valid && i === correctIndex ? "correct" : "locked")
+          : optionState(i, locked, correctIndex)
       });
     }
 
     var ex = q.explanation && typeof q.explanation === "object" ? q.explanation : {};
-    var valid = typeof q.sentence === "string" && q.sentence !== "" && rawOptions.length === 4 && correctIndex >= 0;
 
     return {
       kind: "question",
@@ -305,6 +319,7 @@
       },
       // （v0.15，CR-4 (a)）目前題目曾答對（未作答、已作答皆顯示標示）
       correctBadge: PF.isCorrectAt(bankIds, set, index),
+      questionState: qState,
       k: kCount,
       q: qCount,
       only: rec.only
@@ -555,7 +570,8 @@
    * （v0.15，FE-75；CR-4 (b)、UO-1；AC-45-05、AC-46-01）計數行與「只練沒答對的題目」開關。
    * 開關為原生核取方塊，整個 label 為觸控目標；change → setPart5UnansweredOnly(input.checked)；
    * 原生核取方塊不回應 Enter，keydown Enter 時補 input.click()（觸發原生切換與 change）。
-   * @param {object} vm buildViewModel 的結果（k、q、only）
+   * （v0.18，HN-1、CR-10）開關之後為說明文字；K ≥ 1 且畫面不是 allCorrect 時再加清除按鈕。
+   * @param {object} vm buildViewModel 的結果（kind、k、q、only）
    * @param {object} T 契約文字 PART5_RECORD_TEXTS
    * @returns {Element}
    */
@@ -585,8 +601,30 @@
       D.el("label", { className: "p5-only", attrs: { "data-p5": "only-label" } }, [
         input,
         D.el("span", { className: "p5-only__text", text: T.unansweredOnlyLabel })
-      ])
+      ]),
+      D.el("p", { className: "p5-record__hint", attrs: { "data-p5": "filter-hint" },
+        text: vm.kind === "allCorrect" ? T.filterHintAllCorrect : T.filterHint }),
+      vm.k >= 1 && vm.kind !== "allCorrect" ? renderClearButton(T, "btn btn--secondary p5-record__clear") : null
     ]);
+  }
+
+  /**
+   * （v0.18，FE-81；CR-10）「清除答對紀錄，重新來過」按鈕：.p5-record 與全部答對畫面共用，事件都走 onClearRequest。
+   * @param {object} T 契約文字 PART5_RECORD_TEXTS
+   * @param {string} className
+   * @returns {Element}
+   */
+  function renderClearButton(T, className) {
+    return dom().el("button", {
+      className: className,
+      attrs: { type: "button", "data-p5": "clear" },
+      text: T.clearAndRestart,
+      on: {
+        click: function () {
+          onClearRequest();
+        }
+      }
+    });
   }
 
   /**
@@ -628,45 +666,22 @@
   }
 
   /**
-   * （v0.15，FE-75；UO-7；AC-46-06～AC-46-08）全部答對畫面：標題、說明句、（作答結束進入時）本輪結算、兩個按鈕。
+   * （v0.15，FE-75；v0.18，FE-81；UO-7、SM-3；AC-46-06、AC-46-08）全部答對畫面：標題、（phase = summary 且 y ≥ 1 時）本輪結算、
+   * 清除按鈕（唯一按鈕，不可復原所以不用主要按鈕樣式）。
    * 不顯示題目、選項與「第 i / N 題」。
    */
   function renderAllCorrect(vm, T) {
     var D = dom();
     var children = [
       D.el("h3", { className: "p5-allcorrect__title", attrs: { tabindex: "-1", "data-p5": "allcorrect-title" },
-        text: fillText(T.allCorrectTitle, { q: vm.q }) }),
-      D.el("p", { className: "p5-allcorrect__note", text: RECORD_TEXT.allCorrectNote })
+        text: fillText(T.allCorrectTitle, { q: vm.q }) })
     ];
     if (vm.inSummary) {
       children.push(D.el("p", { className: "p5-allcorrect__caption", text: TEXT.summaryTitle }));
       children.push(D.el("p", { className: "p5-summary__score", attrs: { "data-p5": "summary-score" },
         text: "答對 " + vm.roundCorrect + " / " + vm.roundAnswered }));
     }
-    children.push(D.el("div", { className: "btn-row p5-allcorrect__actions" }, [
-      D.el("button", {
-        className: "btn btn--primary",
-        attrs: { type: "button", "data-p5": "replay" },
-        text: T.replayKeepRecords,
-        on: {
-          click: function () {
-            pendingFocus = "question";
-            var r = act("replayPart5KeepRecords");
-            if (!r || !r.ok) pendingFocus = null;
-          }
-        }
-      }),
-      D.el("button", {
-        className: "btn",
-        attrs: { type: "button", "data-p5": "clear" },
-        text: T.clearAndRestart,
-        on: {
-          click: function () {
-            onClearRequest();
-          }
-        }
-      })
-    ]));
+    children.push(D.el("div", { className: "btn-row p5-allcorrect__actions" }, [renderClearButton(T, "btn")]));
     return D.el("div", { className: "card p5-allcorrect" }, children);
   }
 
@@ -678,8 +693,8 @@
     ]);
   }
 
-  /** 結算畫面（AC-11-04、AC-11-07） */
-  function renderSummary(vm) {
+  /** 結算畫面（AC-11-04、AC-11-07；v0.18，SM-1、SM-2：y = 0 改顯示 summaryNoNewAnswers，a = 0 無累計行） */
+  function renderSummary(vm, T) {
     var D = dom();
     var restartBtn = D.el("button", {
       className: "btn btn--primary p5-restart",
@@ -694,10 +709,14 @@
     });
     return D.el("div", { className: "card p5-summary" }, [
       D.el("h3", { className: "p5-summary__title", attrs: { tabindex: "-1", "data-p5": "summary-title" }, text: TEXT.summaryTitle }),
-      D.el("p", { className: "p5-summary__score", attrs: { "data-p5": "summary-score" },
-        text: "答對 " + vm.roundCorrect + " / " + vm.roundAnswered }),
-      D.el("p", { className: "p5-summary__total",
-        text: "累計答對 " + vm.totalCorrect + " / " + vm.totalAnswered }),
+      vm.roundAnswered >= 1
+        ? D.el("p", { className: "p5-summary__score", attrs: { "data-p5": "summary-score" },
+          text: "答對 " + vm.roundCorrect + " / " + vm.roundAnswered })
+        : D.el("p", { className: "p5-summary__none", attrs: { "data-p5": "summary-none" }, text: T.summaryNoNewAnswers }),
+      vm.totalAnswered >= 1
+        ? D.el("p", { className: "p5-summary__total",
+          text: "累計答對 " + vm.totalCorrect + " / " + vm.totalAnswered })
+        : null,
       D.el("div", { className: "btn-row" }, [restartBtn])
     ]);
   }
@@ -716,7 +735,7 @@
     return D.el("p", { className: "p5-sentence", attrs: { lang: "en", "data-p5": "sentence" } }, nodes);
   }
 
-  /** 4 個選項按鈕（AC-11-01、AC-11-06） */
+  /** 4 個選項按鈕（AC-11-01、AC-11-06；v0.18，LV-2：lockedReview 全部 disabled，沒有 aria-pressed=true） */
   function renderOptions(vm) {
     var D = dom();
     var items = vm.options.map(function (opt) {
@@ -726,6 +745,7 @@
       ];
       if (opt.state === "correct") children.push(D.el("span", { className: "p5-option__badge", text: TEXT.badgeCorrect }));
       if (opt.state === "wrong") children.push(D.el("span", { className: "p5-option__badge", text: TEXT.badgeWrong }));
+      var inactive = vm.questionState !== "idle";
       var btn = D.el("button", {
         className: "p5-option p5-option--" + opt.state,
         attrs: {
@@ -733,8 +753,8 @@
           "data-p5": "option",
           "data-index": String(opt.index),
           "data-state": opt.state,
-          disabled: vm.locked !== null,
-          "aria-pressed": vm.locked !== null ? (vm.locked === opt.index ? "true" : "false") : null
+          disabled: inactive,
+          "aria-pressed": inactive ? (vm.locked === opt.index ? "true" : "false") : null
         },
         on: {
           click: function () {
@@ -749,25 +769,51 @@
     return list;
   }
 
-  /** 作答結果與解析（AC-11-02） */
-  function renderResult(vm) {
-    var D = dom();
-    var feedback = vm.isCorrect
-      ? D.el("p", { className: "p5-feedback p5-feedback--correct", attrs: { "data-p5": "feedback" }, text: TEXT.correct })
-      : D.el("p", { className: "p5-feedback p5-feedback--wrong", attrs: { "data-p5": "feedback" },
-        text: vm.correctIndex >= 0 ? TEXT.wrongPrefix + LETTERS[vm.correctIndex] + "." : TEXT.badData });
+  /**
+   * 回饋文字（AC-11-02；v0.18，LV-2、LV-6）。
+   * @param {object} vm question 的畫面資料
+   * @param {object} T 契約文字 PART5_RECORD_TEXTS
+   * @returns {{ correct: boolean, text: string }}
+   */
+  function feedbackText(vm, T) {
+    if (vm.questionState === "lockedReview") {
+      return vm.valid ? { correct: true, text: T.lockedReviewFeedback } : { correct: false, text: TEXT.badData };
+    }
+    if (vm.isCorrect) return { correct: true, text: TEXT.correct };
+    return { correct: false, text: vm.correctIndex >= 0 ? TEXT.wrongPrefix + LETTERS[vm.correctIndex] + "." : TEXT.badData };
+  }
 
+  /** 作答結果或已答對鎖定檢視的回饋與解析（AC-11-02、AC-48-01）；資料不完整的鎖定檢視只顯示非空段落（LV-6） */
+  function renderResult(vm, T) {
+    var D = dom();
+    var fb = feedbackText(vm, T);
+    var feedback = D.el("p", {
+      className: "p5-feedback p5-feedback--" + (fb.correct ? "correct" : "wrong"),
+      attrs: { "data-p5": "feedback" },
+      text: fb.text
+    });
+
+    var core = vm.explanation.coreStrategy;
     var lines = vm.explanation.structureLines.map(function (line) {
       return D.el("li", { attrs: { lang: "en" }, text: line });
     });
+    var partial = vm.questionState === "lockedReview" && !vm.valid;
+    var showCore = !partial || core.trim() !== "";
+    var showStructure = !partial || lines.length > 0;
+    var parts = [];
+    if (showCore) {
+      parts.push(D.el("h3", { className: "p5-explain__title", attrs: { "data-p5": "core-title" }, text: TEXT.core }));
+      parts.push(D.el("p", { className: "p5-explain__body", attrs: { "data-p5": "core" }, text: core }));
+    }
+    if (showStructure) {
+      parts.push(D.el("h3", { className: "p5-explain__title", attrs: { "data-p5": "structure-title" }, text: TEXT.structure }));
+      parts.push(D.el("ul", { className: "p5-structure", attrs: { "data-p5": "structure" } }, lines));
+    }
     return D.el("div", { className: "p5-result" }, [
       feedback,
-      D.el("section", { className: "p5-explain", attrs: { "data-p5": "explanation", "aria-label": "解析" } }, [
-        D.el("h3", { className: "p5-explain__title", attrs: { "data-p5": "core-title" }, text: TEXT.core }),
-        D.el("p", { className: "p5-explain__body", attrs: { "data-p5": "core" }, text: vm.explanation.coreStrategy }),
-        D.el("h3", { className: "p5-explain__title", attrs: { "data-p5": "structure-title" }, text: TEXT.structure }),
-        D.el("ul", { className: "p5-structure", attrs: { "data-p5": "structure" } }, lines)
-      ])
+      parts.length > 0
+        ? D.el("section", { className: "p5-explain", attrs: { "data-p5": "explanation", "aria-label": "解析" } }, parts)
+        : null
     ]);
   }
 
@@ -775,7 +821,8 @@
   function renderQuestion(vm, T) {
     var D = dom();
     var badgeText = T && typeof T.correctBadge === "string" ? T.correctBadge : FALLBACK_RECORD_TEXTS.correctBadge;
-    var answered = vm.locked !== null;
+    // （v0.18，LV-1、LV-2）answered、lockedReview 都有回饋、解析與「下一題」
+    var hasResult = vm.questionState !== "idle";
     var children = [
       D.el("div", { className: "p5-meta" }, [
         D.el("h3", { className: "p5-number", attrs: { tabindex: "-1", "data-p5": "number" },
@@ -787,13 +834,14 @@
       renderSentence(vm.segments),
       renderOptions(vm),
       // 作答結果以 live region 宣告
-      D.el("div", { className: "p5-live", attrs: { "aria-live": "polite" } }, [answered ? renderResult(vm) : null])
+      D.el("div", { className: "p5-live", attrs: { "aria-live": "polite" } }, [hasResult ? renderResult(vm, T) : null])
     ];
-    if (!vm.valid) {
+    // 資料不完整的鎖定檢視已在回饋位置顯示，不重複（LV-6）
+    if (!vm.valid && vm.questionState !== "lockedReview") {
       children.push(D.el("p", { className: "p5-warning", text: TEXT.badData }));
     }
-    // 已作答才提供「下一題」（store 的 nextPart5 也只在已作答時才前進）
-    if (answered) {
+    // 未作答（idle）沒有「下一題」（store 的 nextPart5 也不前進，AC-48-03）
+    if (hasResult) {
       children.push(D.el("div", { className: "btn-row p5-actions" }, [
         D.el("button", {
           className: "btn btn--primary p5-next",
@@ -821,7 +869,7 @@
     var vm = buildViewModel(progress(), list, c, record());
     var body;
     if (vm.kind === "empty") body = renderEmpty();
-    else if (vm.kind === "summary") body = renderSummary(vm);
+    else if (vm.kind === "summary") body = renderSummary(vm, T);
     else if (vm.kind === "allCorrect") body = renderAllCorrect(vm, T);
     else body = renderQuestion(vm, T);
 

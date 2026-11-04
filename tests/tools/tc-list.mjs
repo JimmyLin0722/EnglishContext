@@ -11,10 +11,10 @@ const desc = JSON.parse(fs.readFileSync(path.join(ROOT, "tests/tools/tc-desc.jso
 const oldPlan = fs.existsSync(process.argv[2] || "") ? fs.readFileSync(process.argv[2], "utf8") : "";
 const old = new Map();
 for (const m of oldPlan.matchAll(/^\| (TC-[^ |]+) \| [^|]* \| [^|]* \| [^|]* \| ([^|]*) \|$/gm)) old.set(m[1], m[2].trim());
-const SCRIPT = { "data.json": "tests/data/data-check.mjs", "static.json": "tests/static/static-check.mjs", "pwa-static.json": "tests/static/pwa-static.mjs" }; // 第 4 輪加 pwa-static
+const SCRIPT = { "data.json": "tests/data/data-check.mjs", "static.json": "tests/static/static-check.mjs", "pwa-static.json": "tests/static/pwa-static.mjs", "legal.json": "tests/static/legal-check.mjs" }; // 第 4 輪加 pwa-static；第 8 輪加 legal
 const kind = (r) => {
   if (r.file === "data.json") return "自動化（資料檢查）";
-  if (r.file === "static.json") return "自動化（靜態檢查）";
+  if (r.file === "static.json" || r.file === "legal.json") return "自動化（靜態檢查）";
   if (r.file === "pwa-static.json") return r.result === "待人工" ? "人工" : "自動化（靜態與建置檢查）";
   if (r.result === "待人工" && /^TC-(PWA|LAY|VER|TRK)-H/.test(r.tc)) return "人工";
   if (r.file === "qa-review.json") return r.result === "待人工" ? "人工" : "QA 檢視";
@@ -24,7 +24,7 @@ const script = (r) => {
   if (/^TC-(PWA|LAY|VER|TRK)-H/.test(r.tc)) return "§6";
   if (SCRIPT[r.file]) return SCRIPT[r.file];
   if (r.file === "qa-review.json") {
-    if (/^TC-B0[13]/.test(r.tc)) return r.tc === "TC-B01" ? "tests/static/boundary-check.mjs" : "tests/static/boundary-r7.mjs";
+    if (/^TC-B0[13]/.test(r.tc)) return r.tc === "TC-B01" ? "tests/static/boundary-check.mjs" : "tests/static/boundary-r8.mjs";
     if (r.tc === "TC-B02") return "人工判讀（檔案時間、docs 變更紀錄）";
     if (r.tc === "TC-D18") return "tests/data/records-check.mjs＋人工判讀";
     if (/^TC-D/.test(r.tc)) return "src/data/_tools/sample.mjs＋人工判讀";
@@ -38,7 +38,7 @@ const seen = new Set();
 const rows = [];
 for (const r of sum.results) {
   if (seen.has(r.tc)) continue; seen.add(r.tc);
-  const d = r.result === "不適用（暫停）" ? (old.get(r.tc) ? `不適用（暫停）。原驗證：${old.get(r.tc).slice(0, 60)}` : `不適用（暫停）。${String(r.note || "").slice(0, 60)}`)
+  const d = r.result === "不適用（v0.18 移除）" ? `不適用（v0.18 移除）。${String(r.note || "").slice(0, 80)}` : r.result === "不適用（暫停）" ? (old.get(r.tc) ? `不適用（暫停）。原驗證：${old.get(r.tc).slice(0, 60)}` : `不適用（暫停）。${String(r.note || "").slice(0, 60)}`)
     : desc[r.tc] || old.get(r.tc) || String(r.note || "").slice(0, 80);
   rows.push({ tc: r.tc, ac: r.ac, k: kind(r), s: script(r), d: d.replace(/\|/g, "／") });
 }

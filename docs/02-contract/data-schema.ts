@@ -1,7 +1,7 @@
 /**
  * ---
  * doc: CONTRACT-SCHEMA
- * version: 0.17
+ * version: 0.18
  * status: approved
  * author: sa-agent
  * approved_by: JimmyLin（授權主控代核）
@@ -11,7 +11,11 @@
  * English Master Track — 資料契約（型別定義）
  *（專案代號仍為 English Master Track；v0.12 起 App 內顯示名稱為「EnglishContext」，見 §13 APP_DISPLAY_NAME 與 FROZEN_IDENTIFIERS。）
  *
- * 上游：docs/01-PRD.md v0.17（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-25 為準。
+ * 上游：docs/01-PRD.md v0.18（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-26 為準。
+ * v0.18（PRD R-26：US-48 顯示全部時曾答對的題目為綠色鎖定、移除 AC-46-07，Q-77～Q-80）**不改持久化結構**
+ *   （schemaVersion 維持 3，PersistedData 12 欄、BackupFile 不變，不需遷移）：已答對鎖定檢視完全由既有欄位推導。
+ *   §15 新增 type Part5QuestionState；PART5_RECORD_TEXTS 新增 4 個鍵、移除 replayKeepRecords；Part5Progress 只改註解。
+ *   規則見 README §5.11 LV、SM、HN、CR、UO。storage-schema.json 未修改，維持 v0.16。
  * v0.17（PRD R-25：模擬測驗標題說明、TOEIC® 商標聲明、單字卡搭配詞標籤、p5-009 解析、原創內容聲明、圖示與名稱聲明；
  *   修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，新增 AC-23-08）**只修訂註解**，
  *   不新增型別與常數、不改任何常數值；不改持久化結構（schemaVersion 維持 3，PersistedData 12 欄不變）。
@@ -181,6 +185,13 @@
  * |      |            |          | BuiltinVocabItem.collocation（標籤「常用搭配詞」）、§5 標題與 PART5_QUESTION_BANK（「題型參考 TOEIC®（多益）Part 5」）、
  * |      |            |          | Part5Explanation.coreStrategy（AC-23-08）、TAB_LABELS（模擬測驗標題說明由「可註明」改為逐字顯示）。
  * |      |            |          | 型別數 69、契約常數 42、localStorage 鍵數 2 皆不變；schemaVersion 維持 3，不需遷移；內容資料檔格式不變。 |
+ * | 0.18 | 2026-11-04 | sa-agent | 修訂已核准的 v0.17（主控代核），原因：PRD v0.18 R-26（JimmyLin 2026-11-04 核准）。status 改為 draft、核准欄位清空。
+ * |      |            |          | (1) §15 新增 type Part5QuestionState（"answered"｜"lockedReview"｜"idle"，執行期推導，不持久化）。
+ * |      |            |          | (2) PART5_RECORD_TEXTS 新增 lockedReviewFeedback、summaryNoNewAnswers、filterHint、filterHintAllCorrect；
+ * |      |            |          |     **移除 replayKeepRecords**（Q-77 A；理由見 README UO-7 末段）。
+ * |      |            |          | (3) 註解：Part5ViewKind、Part5Progress、part5CorrectIds、APP_VERSION_META_NAME（本次 1.2.0，Q-79 A）。
+ * |      |            |          | 型別數 69 → 70；契約常數 42 不變（PART5_RECORD_TEXTS 鍵值變更）；localStorage 鍵數 2 不變；
+ * |      |            |          | schemaVersion 維持 3，不需遷移；內容資料檔格式與值不變。 |
  */
 
 // ════════════════════════════════════════════════════════════════════
@@ -922,12 +933,19 @@ export type Part5Phase = "question" | "summary";
  *   不放進本物件，理由：初始化（CI-4）整個 part5 回預設值，但開關須保留（Q-67 A）；「清除答對紀錄」不得動到累計（Q-65 C）。
  *   - currentIndex 仍為題庫索引，畫面「第 i / N 題」與進度條仍以題庫題號計算（Q-66 A，README MT-1）。
  *   - 開關開啟時，currentIndex 的移動改依 README §5.11 UO-4～UO-7（跳過曾答對的題目）；跳過的題目不計入 roundAnswered。
- *   - roundAnswered／roundCorrect／totalAnswered／totalCorrect 的計算與 v0.14 完全相同：曾答對的題目再作答仍照常計入（AC-45-06）。
+ *   - roundAnswered／roundCorrect／totalAnswered／totalCorrect 的計算與 v0.14 完全相同（AC-45-06）。
+ * （v0.18，R-26）**本型別欄位仍不變**。v0.18 起曾答對的題目不可再作答（README LV-3），經過已答對鎖定檢視不改變任何計數。
+ *   已答對鎖定檢視不存入本物件，由 lockedSelection、currentIndex、part5CorrectIds、part5UnansweredOnly 推導（Part5QuestionState，README LV-1）；
+ *   不得為了顯示鎖定而把正解寫入 lockedSelection，否則會被當成本次作答（AC-48-02、AC-48-05）。
  */
 export interface Part5Progress {
   /** 必填。目前題目在 PART5_QUESTION_BANK 的索引（0 起算；畫面「第 5 題」= 4）。≥ 題庫長度時視為 0（V-ST-05）。 */
   currentIndex: number;
-  /** 必填。目前題目已作答時所選的索引（鎖定狀態，重新載入後仍鎖定，AC-11-06）；未作答為 null。 */
+  /**
+   * 必填。目前題目已作答時所選的索引（鎖定狀態，重新載入後仍鎖定，AC-11-06）；未作答為 null。
+   * （v0.18）非 null 一律代表「本次作答結果」，優先於已答對鎖定檢視（含 v1.1.0 留下的答錯結果，AC-48-08 (c)）；
+   * null 只表示「沒有本次作答結果」，已答對鎖定檢視時也是 null（README LV-1）。
+   */
   lockedSelection: OptionIndex | null;
   /** 必填。畫面階段。 */
   phase: Part5Phase;
@@ -1066,7 +1084,7 @@ export interface PersistedData {
    * 值域：每項為 trim 後非空的字串，不重複（程式寫出時）。**不**限定 "p5-" 格式、**不**與目前題庫比對：
    *   題庫中已不存在的 id 保留不刪除，只在統計與標示時忽略（Q-71 A，AC-45-07、E-109）。
    * 只記「曾答對」：答錯不移除、不記答錯或最近一次結果（Q-64 A，AC-45-03）。K（已答對數）不另存，由本欄 ∩ 題庫推導（README CR-3）。
-   * 清空時機只有：初始化「確定」（LEARNING_PROGRESS_FIELDS，Q-67 A）、「清除答對紀錄，重新來過」確定（README CR-6，Q-65 C）、
+   * 清空時機只有：初始化「確定」（LEARNING_PROGRESS_FIELDS，Q-67 A）、「清除答對紀錄，重新來過」確定（README CR-6；v0.18 起 K ≥ 1 時各畫面皆有入口，Q-78 B、CR-10）、
    *   讀取失敗整體重設（AC-18-05）、匯入覆蓋（以備份值為準）。「重新開始」（AC-11-07）不清除。
    * 例：["p5-001", "p5-005", "p5-010"]
    */
@@ -1074,7 +1092,8 @@ export interface PersistedData {
   /**
    * 選填（v0.15 新增，schemaVersion 3；US-46、Q-69 A）。「只練沒答對的題目」開關。預設 false。
    * 屬偏好設定（與 sttNoticeAcknowledged 同性質）：初始化時**保留**（Q-67 A）；不屬「有學習紀錄」判定（AC-46-10）；
-   *   隨 localStorage 與備份保存（Q-69 A）。開啟時出題規則見 README §5.11 UO-1～UO-9。
+   *   隨 localStorage 與備份保存（Q-69 A）。開啟時出題規則見 README §5.11 UO-1～UO-10。
+   *   （v0.18，R-26）開關同時決定顯示範圍：開啟 = 只顯示未答對；關閉 = 顯示全部，曾答對的題目為已答對鎖定檢視（Part5QuestionState）。欄位與預設值不變。
    */
   part5UnansweredOnly?: boolean;
 }
@@ -1370,7 +1389,7 @@ export interface RuntimeState {
    * （v0.8）本工作階段是否已因「學習紀錄寫入容量不足」提示過「儲存空間不足」（AC-30-14、E-54：同一工作階段只提示一次）。
    * 啟動時 false；不持久化。只控制學習紀錄（LR-7）的提示，不影響新增自訂單字等其他寫入的提示（AC-18-04）。
    * （v0.15，AC-44-10 (b)、AC-47-07 (b)「同一工作階段只提示一次，與 AC-30-14 共用」）本旗標**同時**控制下列寫入容量不足的提示：
-   *   單字卡位置（FP-3）、模擬測驗作答（含答對紀錄，CR-2）、開關切換（UO-1）、「全部題目再練一次」與「清除答對紀錄」（UO-7、CR-6）。
+   *   單字卡位置（FP-3）、模擬測驗作答（含答對紀錄，CR-2）、開關切換（UO-1）、「下一題」、「重新開始」與「清除答對紀錄」（UO-5、UO-6、UO-10、CR-6；v0.18）。
    *   識別字沿用不改名（README §5.12 WR-2）。
    */
   learningQuotaNoticeShown: boolean;
@@ -1923,7 +1942,8 @@ export interface DashboardRuntimeState {
  * HTML 中記錄網站版本號的 <meta> name（比照 PWA_BUILD_ID_META_NAME）。
  * 寫法：<meta name="emt-app-version" content="X.Y.Z">，屬 HD-1 靜態元素（file:// 與 https 都有，不產生請求）。
  * - 來源：建置時專案根目錄 package.json 的 "version" 欄位（人類發布時手動維護；v0.14 發布 1.0.0，Q-58、Q-62；
- *   v0.15 發布 1.1.0，Q-70 A：授權主控本次實作時一次性修改 package.json，之後仍由人類維護）。契約不寫死版本值。
+ *   v0.15 發布 1.1.0，Q-70 A：授權主控本次實作時一次性修改 package.json，之後仍由人類維護；
+ *   v0.18 發布 1.2.0，Q-79 A：同樣授權主控本次一次性修改，版本行為「版本 1.2.0（建置 xxxxxxx）」，AC-42-02）。契約不寫死版本值。
  * - 原始模板中 content 為**固定佔位字串**（比照 emt-build-id 的佔位規則：以 "@@" 前後包夾、模板中恰出現 1 次且位於本 meta 內；
  *   佔位字串的實際值由 SD 定，建議 "@@APP_VERSION@@"）。建置以 package.json 的 version 取代後，產物不得殘留佔位字串。
  * - **寫入順序**：先寫入版本號，再以「已含版本號、emt-build-id 仍為佔位」的 HTML 計算 BUILD_ID（README SW-2 v0.14），
@@ -1961,23 +1981,40 @@ export const BUILD_CODE_LENGTH = 7;
 export const VERSION_LINE_TEXT = "版本 {version}（建置 {build}）";
 
 // ════════════════════════════════════════════════════════════════════
-// §15 模擬測驗答對紀錄與「只練沒答對」（v0.15，PRD R-23 二、US-45、US-46、Q-64～Q-67、Q-69、Q-71）
+// §15 模擬測驗答對紀錄與「只練沒答對」（v0.15，PRD R-23 二、US-45、US-46、Q-64～Q-67、Q-69、Q-71；
+//     v0.18，PRD R-26、US-48、Q-77～Q-80）
 //     提供者：pg-frontend（src/app/）。pg-content 只需維持 Part5Question.id 不改號（README V-P5-08）。
-//     使用者：pg-frontend、QA（README §5.11 CR-1～CR-9、UO-1～UO-9、V-ST-19～V-ST-21）
+//     使用者：pg-frontend、QA（README §5.11 LV-1～LV-7、SM-1～SM-3、HN-1、CR-1～CR-10、UO-1～UO-10、V-ST-19～V-ST-21、V-ST-23～V-ST-27）
 //     持久化欄位見 §8 PersistedData.part5CorrectIds、part5UnansweredOnly；本節型別與常數本身不持久化。
 // ════════════════════════════════════════════════════════════════════
 
 /**
  * 模擬測驗頁目前顯示的畫面種類（執行期**推導值**，不持久化、不另存；README §5.11 UO-3）。
  * 由 PersistedData.part5、part5CorrectIds、part5UnansweredOnly 與題庫每次繪製時推導；題庫為空時沿用既有空題庫處理，不使用本型別。
- * - "question"：題目畫面（未作答或已作答鎖定）。顯示「第 i / N 題」、進度條、「已答對 K / Q 題」、開關；曾答對時顯示 correctBadge。
- * - "summary"：本輪結算（part5.phase = "summary"，AC-11-04）。顯示「答對 x / y」、「重新開始」、「已答對 K / Q 題」、開關。
+ * - "question"：題目畫面，內容再依 Part5QuestionState 分 3 種。顯示「第 i / N 題」、進度條、「已答對 K / Q 題」、開關、filterHint；曾答對時顯示 correctBadge。
+ * - "summary"：本輪結算（part5.phase = "summary"，AC-11-04）。顯示「答對 x / y」（y = 0 時改顯示 summaryNoNewAnswers，README SM-2）、
+ *   「重新開始」、「已答對 K / Q 題」、開關、filterHint。
  * - "allCorrect"：全部答對（開關開啟且 K = Q，且不是「剛作答、尚未按下一題」的鎖定題目；AC-46-06、E-111）。
- *   顯示 allCorrectTitle、「已答對 K / Q 題」、開關、replayKeepRecords 與 clearAndRestart 兩個按鈕（取代「重新開始」）；
- *   part5.phase = "summary" 時另同時顯示本輪結算「答對 x / y」。進度條 100%、不顯示「第 i / N 題」、不顯示任何未作答題目。
- * 對應：AC-11-04、AC-40-01、AC-45-05、AC-46-04～AC-46-08。
+ *   顯示 allCorrectTitle、「已答對 K / Q 題」、開關、filterHintAllCorrect，以及 clearAndRestart 1 個按鈕（取代「重新開始」，Q-77 A）；
+ *   part5.phase = "summary" 且 y ≥ 1 時另同時顯示本輪結算「答對 x / y」（README SM-3）。進度條 100%、不顯示「第 i / N 題」、不顯示任何未作答題目。
+ *   開關關閉時不會出現本畫面，K = Q 也一樣（AC-48-07）。
+ * K ≥ 1 時，3 種畫面都有 clearAndRestart 入口（README CR-10，AC-48-11）。
+ * 對應：AC-11-04、AC-40-01、AC-45-05、AC-46-04～AC-46-06、AC-46-08、AC-48-06、AC-48-07、AC-48-10～AC-48-12。
  */
 export type Part5ViewKind = "question" | "summary" | "allCorrect";
+
+/**
+ * 題目畫面（Part5ViewKind = "question"）的 3 種狀態（v0.18；執行期**推導值**，不持久化、不另存；README §5.11 LV-1）。
+ * 依序判定，同一時間只有一種：
+ * - "answered"（本次作答結果）：part5.lockedSelection ≠ null。回饋文字「答對了！」或「答錯了，正確答案是 …」（AC-11-01、AC-11-02）；
+ *   優先於鎖定檢視，含 v1.1.0 留下的答錯結果（AC-48-08 (c)）。
+ * - "lockedReview"（已答對鎖定檢視）：lockedSelection = null、part5UnansweredOnly = false、目前題目曾答對。
+ *   依 AC-48-01 顯示；不可作答，「下一題」可前進但不計分（AC-48-02）。
+ * - "idle"（未作答）：其他情況，含答錯過但未曾答對的題目。選項可作答（AC-11-01）。
+ *   開關開啟且 lockedSelection = null 且目前題目曾答對的組合不會顯示：K < Q 時已由 UO-4 移開，K = Q 時畫面為 "allCorrect"。
+ * 對應：US-48、AC-11-04、AC-11-05、AC-45-03、AC-45-04、AC-46-02、AC-46-04、AC-48-01～AC-48-05、AC-48-08、AC-48-09。
+ */
+export type Part5QuestionState = "answered" | "lockedReview" | "idle";
 
 /**
  * 模擬測驗答對紀錄與開關的畫面文字（契約常數；只收 PRD 原文，逐字使用）。
@@ -1985,11 +2022,12 @@ export type Part5ViewKind = "question" | "summary" | "allCorrect";
  * 數字為阿拉伯數字，以 tabular-nums 呈現（AC-45-05）。所有文字以 textContent 寫入（C-7、AC-47-08）。
  * 未列入本常數的文字（「全部答對」畫面的說明句、確認對話框的完整句子與標題）PRD 未給原文，由 SD 定案（README DS-35），
  * 限制：確認對話框必須包含 clearConfirmMustInclude 的兩段文字，且只有 confirmOk、confirmCancel 兩個按鈕（AC-46-08）。
- * 對應：AC-45-01、AC-45-04、AC-45-05、AC-46-01、AC-46-06～AC-46-08。
+ * （v0.18）「全部答對」畫面的說明句若保留，不得出現「再練一次」（AC-46-06）；交付檔不得再含「全部題目再練一次」（README V-ST-27）。
+ * 對應：AC-45-01、AC-45-04、AC-45-05、AC-46-01、AC-46-06、AC-46-08、AC-48-01、AC-48-06、AC-48-11、AC-48-12。
  */
 export const PART5_RECORD_TEXTS = {
   /**
-   * 「曾答對」標示（AC-45-04）：✓ 符號加文字，位於題目區內、題型標籤附近；未作答與已作答皆顯示（只要該題曾答對）。
+   * 「曾答對」標示（AC-45-04）：✓ 符號加文字，位於題目區內、題型標籤附近；"answered" 與 "lockedReview" 皆顯示（只要該題曾答對）。
    * 不得只靠顏色；文字對比 ≥ 4.5:1；不得使用 COLOR_TOKENS.accent。未曾答對的題目不顯示任何標示（不得顯示「未答對」「答錯過」）。
    * ✓ 若以獨立元素呈現，可設 aria-hidden，但「曾答對」文字必須可被輔助技術讀取。
    */
@@ -2000,10 +2038,19 @@ export const PART5_RECORD_TEXTS = {
   unansweredOnlyLabel: "只練沒答對的題目",
   /** 「全部答對」畫面的明確文字（AC-46-06），例「200 題全部答對！」。驚嘆號為全形「！」U+FF01。 */
   allCorrectTitle: "{q} 題全部答對！",
-  /** 「全部答對」畫面按鈕一（AC-46-07，Q-65 C）：關閉開關、保留紀錄、從第 1 題開始（README UO-7）。 */
-  replayKeepRecords: "全部題目再練一次（保留紀錄）",
-  /** 「全部答對」畫面按鈕二（AC-46-08，Q-65 C）：先顯示確認對話框，確定後清除答對紀錄（README CR-6）。 */
+  /**
+   * （v0.18 改）清除入口（AC-46-08、AC-48-11，Q-77 A、Q-78 B）：K ≥ 1 時各畫面恰 1 個，K = 0 時不顯示（README CR-10）；
+   * 先顯示確認對話框，確定後清除答對紀錄（README CR-6）。「全部答對」畫面只有這 1 個按鈕。
+   */
   clearAndRestart: "清除答對紀錄，重新來過",
+  /** （v0.18）已答對鎖定檢視的回饋文字（AC-48-01）。不得沿用「答對了！」，以免假稱本次作答（README LV-2）。 */
+  lockedReviewFeedback: "你之前答對過這一題",
+  /** （v0.18）y = 0 時本輪結算的文字，取代「答對 x / y」（AC-48-06、E-125，README SM-2）。 */
+  summaryNoNewAnswers: "本輪沒有新作答的題目",
+  /** （v0.18）題目與結算畫面，開關附近恰 1 次；開關開啟或關閉都顯示（AC-48-12，Q-80 C，README HN-1）。 */
+  filterHint: "關閉時顯示全部題目，答對過的題目會以綠色鎖定。",
+  /** （v0.18）「全部答對」畫面，開關下方恰 1 次，不同時顯示 filterHint（AC-48-12，README HN-1）。引號為全形「」，括住的文字同 unansweredOnlyLabel。 */
+  filterHintAllCorrect: "要檢視全部題目，請關閉上方的「只練沒答對的題目」。",
   /** 確認對話框文字必須**包含**的兩段（AC-46-08）；完整句子由 SD 組成（DS-35）。 */
   clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
   /** 確認對話框按鈕（AC-46-08：只有這 2 個按鈕）。 */

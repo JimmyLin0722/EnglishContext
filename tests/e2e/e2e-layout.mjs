@@ -204,7 +204,8 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   const a = await take(V011_URL), b = await take(FILE_URL);
   const out = []; let ok = true; const geo = [];
   for (const k of Object.keys(a)) {
-    const sa = a[k].map((x) => `${x.d}|${x.k}|${x.t}`), sb = b[k].map((x) => `${x.d}|${x.k}|${x.t}`);
+    // AC-38-08（v0.17）：搭配詞標籤文字依 AC-06-01，不視為差異（v0.11「多益常考搭配詞」→ LT-1「常用搭配詞」），其餘結構與文字仍須相同
+    const sa = a[k].map((x) => `${x.d}|${x.k}|${x.t === "多益常考搭配詞" ? "常用搭配詞" : x.t}`), sb = b[k].map((x) => `${x.d}|${x.k}|${x.t}`);
     const same = JSON.stringify(sa) === JSON.stringify(sb);
     const diffs = []; for (let i = 0; i < Math.max(sa.length, sb.length); i++) if (sa[i] !== sb[i]) { diffs.push(`#${i} v0.11「${sa[i]}」≠ v0.12「${sb[i]}」`); if (diffs.length > 3) break; }
     const rel = (arr) => arr.map((x) => ({ ...x, x: x.x - arr[0].x, y: x.y - arr[0].y }));
@@ -295,8 +296,8 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   out.push(`(2) 匯出檔名 ${files[0]}；localStorage 鍵 ${JSON.stringify(keys)}、schemaVersion ${st.schemaVersion}；備份 format ${bj.format}、schemaVersion ${bj.schemaVersion}、欄位 ${Object.keys(bj.data || {}).join(",")}；交付檔名 dist/english-master-track.html 存在；sw.js 快取前綴 english-master-track-pwa-`);
   // (3) 授權聲明
   const src = texts.find(([l]) => l === "sources")[1];
-  const ok3 = src.includes("Copyright JimmyLin") && src.includes("PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin，保留所有權利，不適用 MIT 與 CC BY-SA 4.0");
-  ok = ok && ok3; out.push(`(3) 著作權人 JimmyLin 與品牌標識聲明不變=${ok3}`);
+  const ok3 = src.includes("Copyright JimmyLin") && src.includes("PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0");
+  ok = ok && ok3; out.push(`(3) MIT 聲明 Copyright JimmyLin 與品牌標識聲明 LT-4（v0.17）=${ok3}`);
   await p.close();
   // (2) v0.11 寫入的 localStorage 與 v0.11 備份
   const q = await open({ autoStart: false });
