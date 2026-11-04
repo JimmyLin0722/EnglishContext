@@ -1,9 +1,10 @@
 /*
  * EMT.core.backup — 備份匯出物件與匯入步驟（FE-06；architecture.md §7.5；FE-22 v0.8 升版 §7.8；
- *   契約 README §6.1、§6.2、§6.3、IM-1～IM-8、MG-1～MG-4、V-IMP-01）
- * - buildBackup：組成 BackupFile 與檔名（AC-24-01、AC-24-02）；schemaVersion 2，data 先以匯出當天正規化學習紀錄
- * - importSteps：§6.2 步驟 1～5 與 7 的純函式（AC-24-05、AC-24-06、AC-24-08、AC-24-10、AC-24-11）；
- *   支援 schemaVersion 1（步驟 4 遷移 data）與 2；
+ *   FE-73 v0.15 升版 §4.10、§7.21.1；契約 README §6.1、§6.2、§6.3、IM-1～IM-10、MG-1～MG-8、V-IMP-01）
+ * - buildBackup：組成 BackupFile 與檔名（AC-24-01、AC-24-02、AC-47-02）；schemaVersion 3，data 12 欄
+ *   （persist.ensureWritable），並以匯出當天正規化學習紀錄
+ * - importSteps：§6.2 步驟 1～5 與 7 的純函式（AC-24-05、AC-24-06、AC-24-08、AC-24-10、AC-24-11、AC-47-03、AC-47-06）；
+ *   支援 schemaVersion 1、2（步驟 4 逐版遷移 data）與 3；
  *   步驟 6（確認對話框）、8（一次 setItem）、9（套用、重建單字集、提示）由 store 處理。
  * 本模組為純函式，不碰 DOM、不讀寫 localStorage，不修改任何傳入的參數。
  * Node 以 require 載入，瀏覽器掛到 EMT.core.backup（依賴 constants、wordkey、persist、learning，於呼叫時才取用，與載入順序無關）。
@@ -60,7 +61,7 @@
   }
 
   /**
-   * 只取 PersistedData 的 9 個欄位並深拷貝，確保匯出不夾帶執行期狀態或內建內容（AC-24-02）。
+   * 只取 PersistedData 的欄位（v0.15 起 12 欄）並深拷貝，確保匯出不夾帶執行期狀態或內建內容（AC-24-02）。
    */
   function pickPersisted(data) {
     var out = {};
@@ -81,7 +82,8 @@
    */
   function buildBackup(data, contentDataVersion, now) {
     var t = now instanceof Date && !isNaN(now.getTime()) ? now : new Date();
-    var out = pickPersisted(data);
+    // v0.15：補齊並正規化 3 個新欄位，data 一律 12 欄（$defs/PersistedDataWritten）
+    var out = P().ensureWritable(pickPersisted(data));
     // v0.8：以匯出當天正規化 todayLearned、learnedHistory，data 須符合 $defs/PersistedDataWritten（§6.1）
     var learned = L().normalizeLearning(out, P().localDate(t));
     out.todayLearned = learned.todayLearned;
@@ -91,7 +93,7 @@
       schemaVersion: C().CURRENT_SCHEMA_VERSION,
       exportedAt: t.toISOString(),
       contentDataVersion: typeof contentDataVersion === "string" ? contentDataVersion : "",
-      data: out
+      data: pickPersisted(out) // 依 DATA_KEYS 的契約順序輸出 12 欄
     };
     return {
       filename: FILENAME_PREFIX + localYmd(t) + ".json",
@@ -133,10 +135,12 @@
    * 匯入步驟 1～5、7（README §6.2；V-IMP-01）。不拋例外、不修改任何傳入參數。
    * @param {string} text 備份檔文字內容
    * @param {{builtinKeys?: Set<string>|Map<string,*>|string[], part5Length?: number,
-   *          newId?: function(): string, random?: function(): number, today?: string}} [ctx]
+   *          newId?: function(): string, random?: function(): number, today?: string,
+   *          part5Ids?: Array<string|null>}} [ctx]
    *   builtinKeys：全部內建字庫的 wordKey 集合；part5Length：模擬測驗題庫長度（V-ST-05）；
    *   newId：id 重複時的產生器（測試用，可省略）；random：預設產生器的亂數來源；
-   *   today：匯入當天的本地日期 YYYY-MM-DD（步驟 7 的 V-ST-09～V-ST-11，IM-8 (2)），缺省或不合法時以本地今天計。
+   *   today：匯入當天的本地日期 YYYY-MM-DD（步驟 7 的 V-ST-09～V-ST-11，IM-8 (2)），缺省或不合法時以本地今天計；
+   *   part5Ids（v0.15，選填）：題庫 id 陣列（part5flow.bankIdsOf 結果），有傳時步驟 7 依 UO-4 正規化目前題目（IM-10 (4)）。
    * @returns {{ok: false, error: "format"} | {ok: false, error: "version", fileVersion: number|null}
    *          | {ok: true, data: object, skipped: number}}
    */
@@ -177,8 +181,8 @@
       return fail("version", fileVersion);
     }
 
-    // 步驟 4：schemaVersion 1 → 依 MG-1、MG-2 只遷移 data（與 localStorage 共用遷移鏈）；
-    //   data 不是物件 → format（MG-1）。頂層 schemaVersion 原值保留給步驟 5（MG-4），本函式不改寫 file。
+    // 步驟 4：schemaVersion < 3 → 以 persist.migrate 逐版只遷移 data（1 → 2 → 3、2 → 3；與 localStorage 共用遷移鏈）；
+    //   data 不是物件 → format（MG-1、MG-5）。頂層 schemaVersion 原值保留給步驟 5（MG-4、MG-8），本函式不改寫 file。
     var migratedData = file.data;
     if (v < C().CURRENT_SCHEMA_VERSION) {
       if (!P().isPlainObject(file.data)) {
@@ -203,12 +207,13 @@
     if (!P().isPlainObject(migratedData)) {
       return fail("format");
     }
-    // IM-8 (1)：schemaVersion 2 的 data 缺少 todayLearned／learnedHistory 或 shape 不符 → 整份不匯入
+    // IM-8 (1)：schemaVersion 2、3 的 data 缺少 todayLearned／learnedHistory 或 shape 不符 → 整份不匯入
     //   （與讀 localStorage 的 RD-1「只重設該欄」不同）
     if (!hasOwn(migratedData, "todayLearned") || !P().isTodayLearnedShape(migratedData.todayLearned) ||
         !hasOwn(migratedData, "learnedHistory") || !P().isLearnedHistoryShape(migratedData.learnedHistory)) {
       return fail("format");
     }
+    // IM-9：3 個新欄位缺少不算錯誤（步驟 7 補預設值）；存在但 shape 不符由 validatePersistedData 判為錯誤 → format
     if (!P().validatePersistedData(migratedData, { allowCustomDuplicates: true }).ok) {
       return fail("format");
     }
@@ -256,11 +261,15 @@
       return false;
     });
 
+    // v0.15（IM-10 (1)～(3)）：補預設值、答對紀錄與單字卡位置的項目層級正規化；不計入 skipped（IM-10 (5)）
+    data = P().normalizeTrackItems(data);
+
     // 重算色級（V-ST-02）、part5.currentIndex 依 V-ST-05；
     // v0.8：以匯入當天依 V-ST-09～V-ST-11 正規化學習紀錄（IM-8 (2)），捨棄的項目不計入 skipped
-    data = P().normalizeAfterLoad(data, ctx.part5Length, ctx.today);
+    // v0.15：有 part5Ids 時於 V-ST-05 之後依匯入的開關值執行 UO-4（IM-10 (4)）
+    data = P().normalizeAfterLoad(data, ctx.part5Length, ctx.today, ctx.part5Ids);
 
-    // 防禦：清理後必須完全符合 Schema（v2）與 V-ST-03
+    // 防禦：清理後必須完全符合 Schema（v3）與 V-ST-03
     if (!P().validatePersistedData(data).ok) {
       return fail("format");
     }

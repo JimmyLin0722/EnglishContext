@@ -8,7 +8,8 @@ import { pathToFileURL, fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const ROOT = path.resolve(HERE, "../../..");
-export const DIST = path.join(ROOT, "dist", "english-master-track.html");
+// 第 7 輪：QA_DIST 可改指其他交付檔（例如 v1.0.0 舊交付檔做效能對照）；未設定時為 dist/english-master-track.html
+export const DIST = process.env.QA_DIST || path.join(ROOT, "dist", "english-master-track.html");
 export const FILE_URL = pathToFileURL(DIST).href;
 
 const BROWSERS = {

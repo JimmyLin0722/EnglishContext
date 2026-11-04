@@ -142,7 +142,7 @@ await R.check("TC-42-03a", "AC-42-03 (a)、AC-21-01 (a)、E-98", async () => {
   const bj = JSON.parse(bk); const code = BUILD_ID.slice(0, 7);
   const lsText = JSON.stringify(ls1);
   const rec = JSON.parse(ls1[KEY] || "{}");
-  const okLs = JSON.stringify(ls0) === JSON.stringify(ls1) && Object.keys(ls1).join() === KEY && rec.schemaVersion === 2 && !lsText.includes(PKG.version) && !lsText.includes(code) && !/emt-app-version|appVersion|buildId/i.test(lsText);
+  const okLs = JSON.stringify(ls0) === JSON.stringify(ls1) && Object.keys(ls1).join() === KEY && rec.schemaVersion === 3 && !lsText.includes(PKG.version) && !lsText.includes(code) && !/emt-app-version|appVersion|buildId/i.test(lsText);
   const okBk = Object.keys(bj).length === 5 && !bk.includes(PKG.version) && !bk.includes(code) && !/appVersion|buildId|版本/.test(bk);
   await x.ctx.close();
   ok = ok && okLs && okBk;
@@ -183,7 +183,7 @@ await R.check("TC-42-02", "AC-42-02、AC-36-02、AC-36-07、E-96", async () => {
   const swLeft = sw.match(/@@[A-Za-z0-9_]+@@/g) || [];
   const pkgInSite = fs.readdirSync(SITE).filter((f) => /package/.test(f));
   const fileText = (globalThis.__fileText || [])[0];
-  const ok = PKG.version === "1.0.0" && APP_VER === PKG.version && metaCount === 1 && /^[0-9a-f]{16}$/.test(BUILD_ID) && swId === BUILD_ID && swId.slice(0, 7) === BUILD_ID.slice(0, 7)
+  const ok = PKG.version === "1.1.0" && APP_VER === PKG.version && metaCount === 1 && /^[0-9a-f]{16}$/.test(BUILD_ID) && swId === BUILD_ID && swId.slice(0, 7) === BUILD_ID.slice(0, 7)
     && same && leftovers.length === 0 && swLeft.length === 0 && pkgInSite.length === 0 && fileText === `版本 ${PKG.version}（建置 ${BUILD_ID.slice(0, 7)}）`;
   return { ok, note: `package.json version ${PKG.version}；emt-app-version ${APP_VER}（${metaCount} 個）；emt-build-id ${BUILD_ID}；sw.js BUILD_ID ${swId}、CACHE_NAME ${cacheName && cacheName.trim()}；畫面「${fileText}」；dist 與 site/index.html 逐位元組相同=${same}；@@ 殘留 HTML ${leftovers.length}／sw ${swLeft.length}；site 內 package 檔 ${pkgInSite.length}（共 ${fs.readdirSync(SITE, { recursive: true }).filter((f) => fs.statSync(path.join(SITE, f)).isFile()).length} 檔）` };
 });
@@ -194,7 +194,9 @@ if (!EDGE) {
   const build = (dir, extra = []) => { const r = spawnSync(process.execPath, ["tools/build.mjs", "--out", path.join(dir, "t.html"), ...extra], { cwd: ROOT, encoding: "utf8" }); if (r.status !== 0) throw new Error(dir + " 建置失敗：" + (r.stdout + r.stderr).slice(-500)); return dir; };
   const files = ["t.html", "site/index.html", "site/sw.js", "site/manifest.webmanifest"];
   const A1 = build(path.join(TMP, "a1")), A2 = build(path.join(TMP, "a2"));
-  const pkg101 = path.join(TMP, "package-1.0.1.json"); fs.writeFileSync(pkg101, JSON.stringify({ ...PKG, version: "1.0.1" }, null, 2) + "\n");
+  // 第 7 輪：AC-42-04 (b) 以「目前版本的修訂號 +1」執行（v0.15 為 1.1.0 → 1.1.1；條文例子 1.0.0 → 1.0.1，性質相同）
+  const BUMP = PKG.version.replace(/\d+$/, (n) => String(Number(n) + 1));
+  const pkg101 = path.join(TMP, "package-bump.json"); fs.writeFileSync(pkg101, JSON.stringify({ ...PKG, version: BUMP }, null, 2) + "\n");
   const B = build(path.join(TMP, "b"), ["--package", pkg101]);
   const app2 = path.join(TMP, "app-c"); fs.cpSync(path.join(ROOT, "src/app"), app2, { recursive: true, filter: (s) => !s.includes("__tests__") });
   { const f = path.join(app2, "main.js"); const s = fs.readFileSync(f, "utf8"); const i = s.indexOf("。"); fs.writeFileSync(f, s.slice(0, i) + "，" + s.slice(i + 1)); }
@@ -204,17 +206,17 @@ if (!EDGE) {
   await R.check("TC-42-04a", "AC-42-04 (a)、AC-36-01 (a)", async () => {
     const eq = files.map((f) => [f, sha(path.join(A1, f)) === sha(path.join(A2, f))]);
     const eqDist = sha(path.join(A1, "t.html")) === sha(DIST) && sha(path.join(A1, "site/sw.js")) === sha(path.join(SITE, "sw.js"));
-    return { ok: eq.every(([, v]) => v) && eqDist && ia.ver === "1.0.0", note: `連續建置 2 次（--out 到暫存目錄）：${eq.map(([f, v]) => `${f} 相同=${v}`).join("、")}；與 dist 相同=${eqDist}；版本 ${ia.ver}、BUILD_ID ${ia.id}` };
+    return { ok: eq.every(([, v]) => v) && eqDist && ia.ver === PKG.version, note: `連續建置 2 次（--out 到暫存目錄）：${eq.map(([f, v]) => `${f} 相同=${v}`).join("、")}；與 dist 相同=${eqDist}；版本 ${ia.ver}、BUILD_ID ${ia.id}` };
   });
   await R.check("TC-42-04b", "AC-42-04 (b)、E-97（建置面）", async () => {
-    const ok = ib.ver === "1.0.1" && ib.id !== ia.id && ib.swId === ib.id && ib.sw !== ia.sw && /^[0-9a-f]{16}$/.test(ib.id);
-    return { ok, note: `只改 --package 的 version 1.0.0→1.0.1（複本 ${path.basename(pkg101)}，不改專案 package.json）：emt-app-version ${ib.ver}；BUILD_ID ${ia.id}→${ib.id}；sw.js BUILD_ID ${ib.swId}、內容不同=${ib.sw !== ia.sw}；未手動修改 HTML、sw、快取設定` };
+    const ok = ib.ver === BUMP && ib.id !== ia.id && ib.swId === ib.id && ib.sw !== ia.sw && /^[0-9a-f]{16}$/.test(ib.id);
+    return { ok, note: `只改 --package 的 version ${PKG.version}→${BUMP}（複本 ${path.basename(pkg101)}，不改專案 package.json）：emt-app-version ${ib.ver}；BUILD_ID ${ia.id}→${ib.id}；sw.js BUILD_ID ${ib.swId}、內容不同=${ib.sw !== ia.sw}；未手動修改 HTML、sw、快取設定` };
   });
   await R.check("TC-42-04c", "AC-42-04 (c)、AC-36-01 (b)", async () => {
-    const ok = ic.ver === "1.0.0" && ic.id !== ia.id && ic.swId === ic.id;
+    const ok = ic.ver === PKG.version && ic.id !== ia.id && ic.swId === ic.id;
     return { ok, note: `src/app 複本 main.js 改 1 個字（「。」→「，」）：emt-app-version ${ic.ver}（不變）；BUILD_ID ${ia.id}→${ic.id}；sw.js BUILD_ID ${ic.swId}` };
   });
-  // (b) 的 PWA 更新：已造訪 1.0.0 的 https 版（本機 serve），重新部署 1.0.1 後出現「有新版本，重新整理」並更新
+  // (b) 的 PWA 更新：已造訪目前版本（第 7 輪 1.1.0）的 https 版（本機 serve），重新部署修訂號 +1 版後出現「有新版本，重新整理」並更新
   await R.check("TC-42-04d", "AC-42-04 (b)（更新流程）、AC-36-03、E-97", async () => {
     await serve(SITE);
     const x = await env({});
@@ -228,8 +230,8 @@ if (!EDGE) {
       const ms = Date.now() - t0;
       if (n) { await page.click(".pwa-update__btn"); await sleep(5000); }
       const v2 = await page.evaluate(() => (document.getElementById("app-version") || {}).textContent);
-      const ok = sw.ok && v1 === `版本 1.0.0（建置 ${ia.id.slice(0, 7)}）` && n === "有新版本，重新整理" && v2 === `版本 1.0.1（建置 ${ib.id.slice(0, 7)}）`;
-      return { ok, note: `V1 service worker 啟用=${sw.ok}、版本行「${v1}」；部署 1.0.1 後重新載入 ${n ? ms + " ms 出現「" + n + "」" : "60 秒內未出現提示"}；按「重新整理」後版本行「${v2}」` };
+      const ok = sw.ok && v1 === `版本 ${PKG.version}（建置 ${ia.id.slice(0, 7)}）` && n === "有新版本，重新整理" && v2 === `版本 ${BUMP}（建置 ${ib.id.slice(0, 7)}）`;
+      return { ok, note: `V1 service worker 啟用=${sw.ok}、版本行「${v1}」；部署 ${BUMP} 後重新載入 ${n ? ms + " ms 出現「" + n + "」" : "60 秒內未出現提示"}；按「重新整理」後版本行「${v2}」` };
     } finally { await x.ctx.close(); await stopServer(); }
   });
 } else for (const t of ["TC-42-04a", "TC-42-04b", "TC-42-04c", "TC-42-04d"]) R.na(t, "AC-42-04", "Edge 冒煙不跑建置類 TC（Chrome 已驗）");
@@ -401,7 +403,7 @@ async function check4303(mode) {
   // (5) 匯出備份
   const bk = JSON.parse(await page.evaluate(() => EMT.store.actions.exportBackup().json));
   const same5 = JSON.stringify(bk.data.customVocab) === JSON.stringify(expect4) && bk.data.customVocab.filter((c) => c.origin === "template" && c.templateId === "cs").length === 9;
-  const keysOk = Object.keys(await lsAll(page)).join() === KEY && ls4.schemaVersion === 2 && JSON.stringify(Object.keys(ls4.data)) === JSON.stringify(Object.keys(pre.data)) && Object.keys(bk).length === 5;
+  const keysOk = Object.keys(await lsAll(page)).join() === KEY && ls4.schemaVersion === 3 && JSON.stringify(Object.keys(ls4.data).slice(0, 9)) === JSON.stringify(Object.keys(pre.data).slice(0, 9)) && Object.keys(ls4.data).length === 12 && Object.keys(bk).length === 5;
   const errs = errorsOf(x); await x.ctx.close();
   const ok = s1.entry === "main" && s1.tab === "dashboard" && errs1.length === 0 && cvSame && listOk && fcInfo.has && total === `共 ${fcInfo.n} 張` && attrib.includes("自訂擴充")
     && spoken.length === 1 && spoken[0] === word && score.includes("100") && dupMsg === "單字已存在" && same3 && same4 && same5 && keysOk && errs.length === 0;
@@ -433,7 +435,7 @@ await R.check("TC-01-08", "AC-01-08、AC-01-07、AC-25-06、E-92", async () => {
     const ls = JSON.parse((await lsAll(page))[KEY]);
     await page.reload(); await sleep(400); await goTab(page, "customizer"); const s3 = await st();
     const ok2 = s2.line === "目前色級：綠" && s2.pressed === "brown" && s2.banned.length === 0;
-    const ok3 = s3.line === "目前色級：綠" && s3.pressed === "blue" && s3.lines === 1 && s3.banned.length === 0 && ls.schemaVersion === 2 && ls.data.goal.appliedColor === "blue" && ls.data.goal.effectiveColor === "green" && ls.data.goal.appliedScore === 855 && Object.keys(ls.data.goal).length === 4;
+    const ok3 = s3.line === "目前色級：綠" && s3.pressed === "blue" && s3.lines === 1 && s3.banned.length === 0 && ls.schemaVersion === 3 && ls.data.goal.appliedColor === "blue" && ls.data.goal.effectiveColor === "green" && ls.data.goal.appliedScore === 855 && Object.keys(ls.data.goal).length === 4;
     const errs = errorsOf(x); await x.ctx.close();
     ok = ok && ok1 && ok2 && ok3 && errs.length === 0;
     notes.push(`【${w}px】(1) ${seq.map((s) => `「${s.line}」(${s.lines} 行${s.clip ? "、裁切" : ""})`).join("→")}；卡片全文＝該行=${seq.every((s, i) => s.cardText === exp[i])}、舊節點 ${seq[0].old}、aria-label「${seq[0].aria}」；(2) 套用綠後點棕未套用：「${s2.line}」、選中 ${s2.pressed}；(3) 套用藍後重新載入：「${s3.line}」、選中 ${s3.pressed}；禁用字樣 ${[...new Set([...seq, s2, s3].flatMap((s) => s.banned))].join("/") || "0"}；localStorage goal ${JSON.stringify(ls.data.goal)}、schemaVersion ${ls.schemaVersion}；Console 錯誤 ${errs.length}`);

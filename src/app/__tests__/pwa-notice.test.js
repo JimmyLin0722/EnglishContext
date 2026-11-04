@@ -3,6 +3,7 @@
  * 受測：ui/pwa-notice.js（極簡假 DOM ＋ node:vm 載入 core/dom.js、core/pwa.js、ui/pwa-notice.js）、styles/80-pwa.css、main.js 原始碼順序
  * 依據：architecture.md v0.7 §4.2「v0.7 main.js 啟動順序」、§4.7「EMT.ui.pwaNotice」、§7.18.7、§10.4「pwa-notice.test.js」列
  * 涵蓋：AC-36-03、AC-27-03、AC-31-03、AC-37-01
+ * （v0.11，FE-77）提示與按鈕文字改為 v0.16 新文字，並確認不含舊文字（architecture.md v0.11 §10.8、V-PWA-10）。
  */
 "use strict";
 
@@ -108,11 +109,11 @@ describe("pwa-notice.test.js：ui/pwa-notice.js", () => {
     assert.equal(s.host.hidden, true);
     const span = s.host.childNodes[0];
     assert.equal(span.className, "pwa-update__text");
-    assert.equal(span.textContent, "有新版本，重新整理");
+    assert.equal(span.textContent, "有新版本，請更新版本");
     const btn = button(s.host);
     assert.equal(btn.className, "btn btn--primary pwa-update__btn");
     assert.equal(btn.attrs.type, "button");
-    assert.equal(btn.textContent, "重新整理");
+    assert.equal(btn.textContent, "更新版本");
   });
 
   test("updateVisible 真 → 顯示；\"pwa\" tag 後依新狀態切換", () => {
@@ -138,7 +139,9 @@ describe("pwa-notice.test.js：ui/pwa-notice.js", () => {
     const s = setup({ pwa: { eligible: true, updateAvailable: true }, rt: { entryMode: "firstRun", currentTab: "customizer" } });
     s.api.init({ onReload() {} });
     assert.equal(s.host.hidden, false);
-    assert.equal(s.host.textContent, "有新版本，重新整理重新整理");
+    assert.equal(s.host.textContent, "有新版本，請更新版本更新版本");
+    // （v0.16，FE-77）舊文字不得再出現
+    assert.ok(!s.host.textContent.includes("重新整理"));
   });
 
   test("點擊 2 次 → onReload 1 次且按鈕 disabled；onReload 拋例外被攔下", () => {

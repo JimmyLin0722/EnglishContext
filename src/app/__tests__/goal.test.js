@@ -80,16 +80,17 @@ test("契約常數：其餘 13 個常數字面值相同", () => {
     findings: "研究結果 Findings",
     limitations: "研究限制 Limitations",
   });
-  // v0.8（FE-22）：持久化升版
-  assert.equal(C.CURRENT_SCHEMA_VERSION, 2);
-  assert.deepEqual([...C.SUPPORTED_SCHEMA_VERSIONS], [1, 2]);
+  // v0.8（FE-22）：持久化升版；v0.15（FE-73）：再升為 3、支援 1、2、3
+  assert.equal(C.CURRENT_SCHEMA_VERSION, 3);
+  assert.deepEqual([...C.SUPPORTED_SCHEMA_VERSIONS], [1, 2, 3]);
   assert.deepEqual({ ...C.STORAGE_KEYS }, {
     state: "englishMasterTrack:state",
     unreadable: "englishMasterTrack:unreadable",
   });
   assert.equal(C.BACKUP_FORMAT_ID, "english-master-track-backup");
-  // v0.8（FE-20）新增 4 個常數，共 18 個；v0.9（FE-34）再新增 HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS，共 20 個
-  assert.equal(Object.keys(C).length, 20);
+  // v0.8（FE-20）新增 4 個常數，共 18 個；v0.9（FE-34）再新增 HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS，共 20 個；
+  // v0.15（FE-73）再新增 PART5_RECORD_TEXTS，共 21 個
+  assert.equal(Object.keys(C).length, 21);
 });
 
 test("契約常數 v0.8（FE-20）／v0.9（FE-34）：TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS 逐字相同", () => {
@@ -111,8 +112,8 @@ test("契約常數 v0.8（FE-20）／v0.9（FE-34）：TAB_LABELS、NAV_TAB_ORDE
   C.NAV_TAB_ORDER.forEach((id) => assert.ok(Object.prototype.hasOwnProperty.call(C.TAB_LABELS, id)));
   assert.equal(C.LEARNED_HISTORY_DAYS, 30);
   assert.equal(C.DASHBOARD_CHART_DAYS, 7);
-  // （FE-22）持久化升版：寫入 2、支援 1、2
-  assert.equal(C.CURRENT_SCHEMA_VERSION, 2);
+  // （FE-73）持久化升版：寫入 3（與 data-schema.ts 相同，不寫死於他處）
+  assert.equal(C.CURRENT_SCHEMA_VERSION, 3);
 });
 
 // ── v0.9 契約常數（FE-34）────────────────────────────────────────
@@ -135,15 +136,60 @@ test("契約常數 v0.9（FE-34）：NAV_TAB_ORDER 與 data-schema.ts 逐項同�
   assert.deepEqual([...C.NAV_TAB_ORDER], contractStringArray("NAV_TAB_ORDER"));
 });
 
-test("契約常數 v0.9（FE-34）：LEARNING_PROGRESS_FIELDS 6 項，與 data-schema.ts 逐項同序（US-32、CI-4）", () => {
-  const expected = ["masteredWordKeys", "vocabQuiz", "part5", "streak", "todayLearned", "learnedHistory"];
+test("契約常數 v0.9（FE-34）／v0.15（FE-73）：LEARNING_PROGRESS_FIELDS 7 項，與 data-schema.ts 逐項同序（US-32、CI-4、AC-45-08）", () => {
+  const expected = ["masteredWordKeys", "vocabQuiz", "part5", "streak", "todayLearned", "learnedHistory", "part5CorrectIds"];
   assert.deepEqual([...C.LEARNING_PROGRESS_FIELDS], expected);
   assert.deepEqual([...C.LEARNING_PROGRESS_FIELDS], contractStringArray("LEARNING_PROGRESS_FIELDS"));
-  assert.equal(C.LEARNING_PROGRESS_FIELDS.length, 6);
-  // 不含保留欄位（AC-32-03）
+  assert.equal(C.LEARNING_PROGRESS_FIELDS.length, 7);
+  // 不含保留欄位（AC-32-03；v0.15 開關為偏好設定、位置依 FP-4 另行處理）
   assert.ok(!C.LEARNING_PROGRESS_FIELDS.includes("goal"));
   assert.ok(!C.LEARNING_PROGRESS_FIELDS.includes("customVocab"));
   assert.ok(!C.LEARNING_PROGRESS_FIELDS.includes("sttNoticeAcknowledged"));
+  assert.ok(!C.LEARNING_PROGRESS_FIELDS.includes("part5UnansweredOnly"));
+  assert.ok(!C.LEARNING_PROGRESS_FIELDS.includes("flashcardPosition"));
+});
+
+// ── v0.15 契約常數（FE-73）────────────────────────────────────────
+
+// data-schema.ts §15 PART5_RECORD_TEXTS 原文（逐字複製，含鍵順序）
+const CONTRACT_PART5_RECORD_TEXTS = {
+  correctBadge: "✓ 曾答對",
+  correctCount: "已答對 {k} / {q} 題",
+  unansweredOnlyLabel: "只練沒答對的題目",
+  allCorrectTitle: "{q} 題全部答對！",
+  replayKeepRecords: "全部題目再練一次（保留紀錄）",
+  clearAndRestart: "清除答對紀錄，重新來過",
+  clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+  confirmOk: "確定",
+  confirmCancel: "取消",
+};
+
+/** 從 data-schema.ts 擷取 PART5_RECORD_TEXTS 物件字面值（去除註解後以 JSON 解析；只含字串與字串陣列） */
+function contractPart5RecordTexts() {
+  const file = path.join(__dirname, "..", "..", "..", "docs", "02-contract", "data-schema.ts");
+  const src = fs.readFileSync(file, "utf8");
+  const m = /export const PART5_RECORD_TEXTS = (\{[\s\S]*?\n\}) as const;/.exec(src);
+  assert.ok(m, "data-schema.ts 找不到 PART5_RECORD_TEXTS");
+  const body = m[1]
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/^\s*\/\/.*$/gm, "")
+    .replace(/([A-Za-z0-9_]+):/g, '"$1":')
+    .replace(/,(\s*[\]}])/g, "$1");
+  return JSON.parse(body);
+}
+
+test("契約常數 v0.15（FE-73）：PART5_RECORD_TEXTS 與 data-schema.ts §15 逐字、逐鍵順序相同且深凍結", () => {
+  assert.deepEqual(JSON.parse(JSON.stringify(C.PART5_RECORD_TEXTS)), CONTRACT_PART5_RECORD_TEXTS);
+  assert.deepEqual(Object.keys(C.PART5_RECORD_TEXTS), Object.keys(CONTRACT_PART5_RECORD_TEXTS));
+  const fromContract = contractPart5RecordTexts();
+  assert.deepEqual(JSON.parse(JSON.stringify(C.PART5_RECORD_TEXTS)), fromContract);
+  assert.deepEqual(Object.keys(C.PART5_RECORD_TEXTS), Object.keys(fromContract));
+  assert.equal(C.PART5_RECORD_TEXTS.allCorrectTitle.slice(-1), "！");
+  assert.equal(C.PART5_RECORD_TEXTS.clearConfirmMustInclude.length, 2);
+  assert.ok(Object.isFrozen(C.PART5_RECORD_TEXTS));
+  assert.ok(Object.isFrozen(C.PART5_RECORD_TEXTS.clearConfirmMustInclude));
+  assert.throws(() => { C.PART5_RECORD_TEXTS.confirmOk = "OK"; }, TypeError);
+  assert.throws(() => { C.PART5_RECORD_TEXTS.clearConfirmMustInclude.push("x"); }, TypeError);
 });
 
 test("契約常數 v0.9（FE-34）：NAV_TAB_ORDER ∩ HIDDEN_TAB_IDS = ∅，三者聯集 = TAB_LABELS 的鍵，TAB_LABELS 仍 7 項", () => {
@@ -176,7 +222,7 @@ test("契約常數：物件深層凍結", () => {
   assert.throws(() => { C.HIDDEN_TAB_IDS.push("part5"); }, TypeError);
   assert.throws(() => { C.LEARNING_PROGRESS_FIELDS[0] = "goal"; }, TypeError);
   assert.throws(() => { C.NAV_TAB_ORDER[3] = "decoder"; }, TypeError);
-  assert.throws(() => { C.SUPPORTED_SCHEMA_VERSIONS.push(3); }, TypeError);
+  assert.throws(() => { C.SUPPORTED_SCHEMA_VERSIONS.push(4); }, TypeError);
   assert.throws(() => { C.LEARNED_HISTORY_DAYS = 31; }, TypeError);
   assert.throws(() => { C.COLOR_LEVELS[2].dailyNewWords = 99; }, TypeError);
 });

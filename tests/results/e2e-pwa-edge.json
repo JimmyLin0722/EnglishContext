@@ -39,7 +39,7 @@
     "tc": "TC-35-01",
     "ac": "AC-35-01、AC-21-03",
     "result": "通過",
-    "note": "啟用 194 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-436e27b40282d4af\"]（BUILD_ID 436e27b40282d4af）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
+    "note": "啟用 172 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-33dcbafd5b611fc6\"]（BUILD_ID 33dcbafd5b611fc6）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",

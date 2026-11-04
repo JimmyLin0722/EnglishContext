@@ -4,6 +4,8 @@
  * 依據：architecture.md v0.5 §7.15（函式表）、§10.2 reinit.test.js 列；契約 README §5.2、§5.7 CI-1～CI-4 與
  *       「有學習紀錄」(a)～(f) 對照表、FB-33；data-schema.ts LEARNING_PROGRESS_FIELDS
  * 涵蓋：AC-01-07、AC-32-02、AC-32-03、AC-32-05、AC-32-06、AC-32-07、AC-32-10
+ * （FE-73）v0.15：LEARNING_PROGRESS_FIELDS 7 欄（含 part5CorrectIds）；buildReinitData 另設 flashcardPosition = null、
+ *       part5UnansweredOnly 保留（CI-4、FP-4、V-ST-14、AC-45-08、AC-44-08）；3 個新欄位不列入 CI-2。
  */
 "use strict";
 
@@ -77,6 +79,10 @@ function richData() {
   d.sttNoticeAcknowledged = true;
   d.todayLearned = { date: TODAY, wordKeys: ["abandon", "monetization"] };
   d.learnedHistory = { [day(-2)]: 7, [day(-1)]: 3, [TODAY]: 2 };
+  // v0.15：上次位置、答對紀錄、只練沒答對開關（非預設值）
+  d.flashcardPosition = { wordKey: "abandon", ordinal: 5 };
+  d.part5CorrectIds = ["p5-001", "p5-007", "p5-999"];
+  d.part5UnansweredOnly = true;
   return d;
 }
 
@@ -253,7 +259,7 @@ function newGoal300() {
   return { draftScore: 300, appliedScore: 300, appliedColor: "brown", effectiveColor: "brown" };
 }
 
-test("buildReinitData：6 欄 deepEqual persist.defaultData() 對應欄；goal = 新值（AC-32-02）", () => {
+test("buildReinitData：7 欄 deepEqual persist.defaultData() 對應欄；goal = 新值（AC-32-02、AC-45-08）", () => {
   const out = R.buildReinitData(richData(), newGoal300(), P.defaultData());
   const def = P.defaultData();
   for (const k of C.LEARNING_PROGRESS_FIELDS) {
@@ -265,6 +271,8 @@ test("buildReinitData：6 欄 deepEqual persist.defaultData() 對應欄；goal =
   assert.deepEqual(out.streak, { days: 0, lastActiveDate: null });
   assert.deepEqual(out.todayLearned, { date: null, wordKeys: [] });
   assert.deepEqual(out.learnedHistory, {});
+  assert.deepEqual(out.part5CorrectIds, []);
+  assert.equal(C.LEARNING_PROGRESS_FIELDS.length, 7);
   assert.deepEqual(out.goal, newGoal300());
   // 初始化後無學習紀錄
   assert.equal(R.hasLearningRecord(out, TODAY), false);
@@ -287,7 +295,33 @@ test("buildReinitData：鍵集合與輸入相同（AC-32-10），且為新物件
   const out = R.buildReinitData(src, newGoal300(), P.defaultData());
   assert.notEqual(out, src);
   assert.deepEqual(Object.keys(out).sort(), Object.keys(src).sort());
-  assert.equal(Object.keys(out).length, 9);
+  assert.equal(Object.keys(out).length, 12);
+  assert.deepEqual(Object.keys(out).sort(), [...P.DATA_KEYS].sort());
+});
+
+test("buildReinitData（v0.15）：flashcardPosition = null（FP-4）、part5UnansweredOnly 保留、part5CorrectIds 清空（CI-4、V-ST-14）", () => {
+  const src = richData();
+  const out = R.buildReinitData(src, newGoal300(), P.defaultData());
+  assert.equal(out.flashcardPosition, null);
+  assert.equal(out.part5UnansweredOnly, true);
+  assert.deepEqual(out.part5CorrectIds, []);
+  // 開關關閉時同樣保留原值
+  const off = { ...richData(), part5UnansweredOnly: false };
+  assert.equal(R.buildReinitData(off, newGoal300(), P.defaultData()).part5UnansweredOnly, false);
+  // 輸入原本就是 null 時仍為 null
+  const none = { ...richData(), flashcardPosition: null };
+  assert.equal(R.buildReinitData(none, newGoal300(), P.defaultData()).flashcardPosition, null);
+});
+
+test("CI-2（v0.15）：只有答對紀錄、上次位置、開關而 (a)～(f) 皆不成立 → 無學習紀錄（AC-46-10、FB-58）", () => {
+  const d = emptyData(600);
+  d.goal.draftScore = 300;
+  d.flashcardPosition = { wordKey: "abandon", ordinal: 3 };
+  d.part5CorrectIds = ["p5-001"];
+  d.part5UnansweredOnly = true;
+  assert.deepEqual(R.recordFlags(d, TODAY), ALL_FALSE);
+  assert.equal(R.hasLearningRecord(d, TODAY), false);
+  assert.equal(R.needsConfirm(d, TODAY), false);
 });
 
 test("buildReinitData：未列入白名單的欄位（日後新增）原值保留（CI-4）", () => {
@@ -303,7 +337,7 @@ test("buildReinitData：輸入深度凍結後呼叫不拋例外，data、newGoal
   const snap = [clone(src), clone(goal), clone(defs)];
   const out = R.buildReinitData(src, goal, defs);
   assert.deepEqual([clone(src), clone(goal), clone(defs)], snap);
-  // 6 欄與 goal 為深複本，不與 defaults、newGoal 共用參照
+  // 7 欄與 goal 為深複本，不與 defaults、newGoal 共用參照
   assert.notEqual(out.goal, goal);
   for (const k of C.LEARNING_PROGRESS_FIELDS) {
     if (defs[k] && typeof defs[k] === "object") assert.notEqual(out[k], defs[k], k);

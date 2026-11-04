@@ -1,0 +1,193 @@
+{
+  "format": "english-master-track-backup",
+  "schemaVersion": 2,
+  "exportedAt": "2026-11-04T02:00:04.388Z",
+  "contentDataVersion": "2026.10.30",
+  "data": {
+    "goal": {
+      "draftScore": 725,
+      "appliedScore": 465,
+      "appliedColor": "brown",
+      "effectiveColor": "brown"
+    },
+    "customVocab": [
+      {
+        "id": "c_mw01isc5_x4gk",
+        "word": "Monetization",
+        "meaning": "營利化；變現",
+        "phonetic": "",
+        "pos": "",
+        "collocation": "",
+        "example": "",
+        "academicContext": "",
+        "origin": "manual",
+        "templateId": null,
+        "createdAt": "2026-11-03T02:00:01.013Z"
+      },
+      {
+        "id": "c_mw01isk2_x5db",
+        "word": "Latency",
+        "meaning": "延遲",
+        "phonetic": "",
+        "pos": "",
+        "collocation": "",
+        "example": "",
+        "academicContext": "",
+        "origin": "manual",
+        "templateId": null,
+        "createdAt": "2026-11-03T02:00:01.298Z"
+      },
+      {
+        "id": "c_mw01isq3_czpg",
+        "word": "Scalability",
+        "meaning": "可擴展性；延展性",
+        "phonetic": "/ˌskeɪləˈbɪləti/",
+        "pos": "n. 名詞",
+        "collocation": "horizontal scalability；improve scalability；scalability issues",
+        "example": "The team redesigned the database layer because scalability had become the main bottleneck.",
+        "academicContext": "We evaluate the scalability of the framework on clusters ranging from 8 to 512 nodes.",
+        "origin": "template",
+        "templateId": "cs",
+        "createdAt": "2026-11-03T02:00:01.515Z"
+      },
+      {
+        "id": "c_mw01isq4_26ss",
+        "word": "Throughput",
+        "meaning": "吞吐量；處理量",
+        "phonetic": "/ˈθrupʊt/",
+        "pos": "n. 名詞",
+        "collocation": "high throughput；maximize throughput；throughput gains",
+        "example": "After the upgrade, the payment system handled twice the throughput during peak hours.",
+        "academicContext": "Experimental results show that batching requests increases throughput without degrading accuracy.",
+        "origin": "template",
+        "templateId": "cs",
+        "createdAt": "2026-11-03T02:00:01.516Z"
+      },
+      {
+        "id": "c_mw01isq5_3bcl",
+        "word": "Concurrency",
+        "meaning": "並行；同時執行",
+        "phonetic": "/kənˈkɝənsi/",
+        "pos": "n. 名詞",
+        "collocation": "concurrency control；handle concurrency；concurrency bugs",
+        "example": "The new booking engine uses locks to manage concurrency when many customers reserve seats.",
+        "academicContext": "Prior work on concurrency control has largely assumed a single shared-memory machine.",
+        "origin": "template",
+        "templateId": "cs",
+        "createdAt": "2026-11-03T02:00:01.517Z"
+      },
+      {
+        "id": "c_mw01isq6_9i0p",
+        "word": "Middleware",
+        "meaning": "中介軟體",
+        "phonetic": "/ˈmɪdəlˌwɛr/",
+        "pos": "n. 名詞",
+        "collocation": "middleware layer；messaging middleware；deploy middleware",
+        "example": "Our integration team built middleware that connects the old billing system to the new app.",
+        "academicContext": "The middleware layer abstracts heterogeneous devices behind a uniform communication interface.",
+        "origin": "template",
+        "templateId": "cs",
+        "createdAt": "2026-11-03T02:00:01.518Z"
+      },
+      {
+        "id": "c_mw01isq7_7vl3",
+        "word": "Serialization",
+        "meaning": "序列化（將資料轉為可儲存或傳輸的格式）",
+        "phonetic": "/ˌsɪriələˈzeɪʃən/",
+        "pos": "n. 名詞",
+        "collocation": "data serialization；serialization format；serialization overhead",
+        "example": "Switching to a binary serialization format made the mobile app load customer records faster.",
+        "academicContext": "Serialization overhead accounted for nearly one third of the total communication cost in our measurements.",
+        "origin": "template",
+        "templateId": "cs",
+        "createdAt": "2026-11-03T02:00:01.519Z"
+      },
+      {
+        "id": "c_mw01isq8_p1cj",
+        "word": "Idempotent",
+        "meaning": "冪等的（重複執行結果相同）",
+        "phonetic": "/ˌaɪdəmˈpoʊtənt/",
+        "pos": "adj. 形容詞",
+        "collocation": "idempotent operation；idempotent request；make an API idempotent",
+        "example": "Please keep the refund endpoint idempotent so that a retried request never charges twice.",
+        "academicContext": "We require all update handlers to be idempotent, which simplifies recovery after partial failures.",
+        "origin": "template",
+        "templateId": "cs",
+        "createdAt": "2026-11-03T02:00:01.520Z"
+      },
+      {
+        "id": "c_mw01isq9_mhcr",
+        "word": "Containerization",
+        "meaning": "容器化（以容器封裝與部署程式）",
+        "phonetic": "/kənˌteɪnərəˈzeɪʃən/",
+        "pos": "n. 名詞",
+        "collocation": "application containerization；adopt containerization；containerization platform",
+        "example": "Containerization allowed the IT department to roll out updates to every branch in one afternoon.",
+        "academicContext": "This study examines how containerization affects reproducibility in computational research pipelines.",
+        "origin": "template",
+        "templateId": "cs",
+        "createdAt": "2026-11-03T02:00:01.521Z"
+      },
+      {
+        "id": "c_mw01isqa_ocr2",
+        "word": "Tokenization",
+        "meaning": "斷詞；標記化；代碼化",
+        "phonetic": "/ˌtoʊkənəˈzeɪʃən/",
+        "pos": "n. 名詞",
+        "collocation": "subword tokenization；tokenization step；apply tokenization",
+        "example": "The chatbot misread product names until the vendor fixed a problem in its tokenization step.",
+        "academicContext": "We compare three tokenization strategies and report their effect on downstream classification accuracy.",
+        "origin": "template",
+        "templateId": "cs",
+        "createdAt": "2026-11-03T02:00:01.522Z"
+      },
+      {
+        "id": "c_mw01isqb_uqcr",
+        "word": "Overfitting",
+        "meaning": "過度擬合；過擬合",
+        "phonetic": "/ˌoʊvɚˈfɪtɪŋ/",
+        "pos": "n. 名詞",
+        "collocation": "prevent overfitting；risk of overfitting；signs of overfitting",
+        "example": "The analyst warned that the sales forecast model showed clear signs of overfitting.",
+        "academicContext": "To mitigate overfitting, dropout and early stopping were applied during training.",
+        "origin": "template",
+        "templateId": "cs",
+        "createdAt": "2026-11-03T02:00:01.523Z"
+      }
+    ],
+    "masteredWordKeys": [
+      "of",
+      "a",
+      "in"
+    ],
+    "vocabQuiz": {
+      "answered": 4,
+      "correct": 3
+    },
+    "part5": {
+      "currentIndex": 5,
+      "lockedSelection": 0,
+      "phase": "question",
+      "roundAnswered": 6,
+      "roundCorrect": 4,
+      "totalAnswered": 6,
+      "totalCorrect": 4
+    },
+    "streak": {
+      "days": 2,
+      "lastActiveDate": "2026-11-04"
+    },
+    "sttNoticeAcknowledged": true,
+    "todayLearned": {
+      "date": "2026-11-04",
+      "wordKeys": [
+        "have",
+        "it"
+      ]
+    },
+    "learnedHistory": {
+      "2026-11-03": 7,
+      "2026-11-04": 2
+    }
+  }
+}

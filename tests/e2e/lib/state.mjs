@@ -1,3 +1,5 @@
+// 第 7 輪（PRD v0.15，契約 v0.15 C-8、SD-FB-57）：stateRecord() 預設產生 schemaVersion 3（data 12 欄；新 3 欄為預設 null／[]／false），
+// 避免開啟時觸發 v2 → v3 遷移寫回（MG-7）而影響「localStorage 不變」類斷言；需要舊版主鍵時用 stateRecordV2()。新增 V3_KEYS、SV。
 // 第 6 輪（PRD v0.14）：est() 改讀 #cz-st-line、dashGoal／GOAL_LINE 依 AC-39-04 v0.14、新增 injectTpl。
 // QA E2E 共用（第 3 輪，PRD v0.10；第 5 輪 PRD v0.13 改用精簡色級列 .cz-level、目標行 .db-goal、3 格數據、收合的資料備份）：構造 localStorage 狀態、點色級卡片、套用與初始化確認視窗。
 // 依據：契約 v0.10 storage-schema.json（schemaVersion 2）、FB-36（構造既有分數時 draftScore = appliedScore）、
@@ -24,7 +26,7 @@ export function colorOf(s) {
 const effOf = (c) => (c === "blue" || c === "gold" ? "green" : c);
 
 /**
- * 產生 schemaVersion 2 的完整狀態紀錄。score 同時寫入 draftScore 與 appliedScore（FB-36）。
+ * 產生目前版本（第 7 輪起 schemaVersion 3，data 12 欄）的完整狀態紀錄。score 同時寫入 draftScore 與 appliedScore（FB-36）。
  * data 內其餘欄位可由 over 覆寫（淺層合併）。
  */
 export function stateRecord(score = 725, over = {}) {
@@ -39,9 +41,23 @@ export function stateRecord(score = 725, over = {}) {
     sttNoticeAcknowledged: false,
     todayLearned: { date: null, wordKeys: [] },
     learnedHistory: {},
+    flashcardPosition: null,
+    part5CorrectIds: [],
+    part5UnansweredOnly: false,
     ...over,
   };
-  return { schemaVersion: 2, savedAt: new Date().toISOString(), data };
+  return { schemaVersion: SV, savedAt: new Date().toISOString(), data };
+}
+/** 第 7 輪：目前持久化結構版本（契約 v0.15 CURRENT_SCHEMA_VERSION）與 data 的 12 欄（順序同 storage-schema.json PersistedDataWritten） */
+export const SV = 3;
+export const V2_KEYS = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged", "todayLearned", "learnedHistory"];
+export const V3_KEYS = [...V2_KEYS, "flashcardPosition", "part5CorrectIds", "part5UnansweredOnly"];
+/** 第 7 輪：v0.14 以前（schemaVersion 2、data 9 欄）的狀態紀錄，用於遷移測試 */
+export function stateRecordV2(score = 725, over = {}) {
+  const r = stateRecord(score, over);
+  for (const k of ["flashcardPosition", "part5CorrectIds", "part5UnansweredOnly"]) if (!(k in over)) delete r.data[k];
+  r.schemaVersion = 2;
+  return r;
 }
 
 /** 寫入狀態後重新載入（頁面須已在 file:// 來源上） */

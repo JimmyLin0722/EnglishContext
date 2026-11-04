@@ -249,7 +249,7 @@ await R.check("TC-26-06", "AC-26-06", async () => {
     await p.go("customizer"); const e2 = await est(p);
     const c = expC[i]; const effTxt = c === "blue" || c === "gold" ? "綠" : NAME[c]; // 第 6 輪：AC-01-08 只顯示生效色級
     const good = e.pressed === c && e.daily === `${expD[i]} 字/天` && !r.dialog && d === GOAL_LINE[c]
-      && g1.appliedScore === s && g1.draftScore === s && g2.appliedScore === s && g2.draftScore === s && st.schemaVersion === 2 && e2.pressed === c && e2.stLine === "目前色級：" + effTxt;
+      && g1.appliedScore === s && g1.draftScore === s && g2.appliedScore === s && g2.draftScore === s && st.schemaVersion === 3 && e2.pressed === c && e2.stLine === "目前色級：" + effTxt;
     ok = ok && good;
     rows.push(`${s}→${e.pressed}/${e.daily}/主控台「${d}」/存 ${g1.appliedScore}→重載 ${g2.appliedScore}/狀態列「${e2.stLine}」${good ? "" : "（不符）"}`);
   }

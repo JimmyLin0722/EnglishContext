@@ -173,7 +173,9 @@
    * 建立初始化後的新資料（CI-4，白名單）。回傳新物件，不修改 data、newGoal、defaults。
    * - 先淺複製 data 的全部鍵（customVocab、sttNoticeAcknowledged 與日後新增欄位原值保留）
    * - goal = newGoal 的複本
-   * - LEARNING_PROGRESS_FIELDS 6 欄 = defaults[欄] 的深複本（defaults 由呼叫端傳入 persist.defaultData()，AC-32-02）
+   * - LEARNING_PROGRESS_FIELDS 欄位（v0.15 起 7 欄，含 part5CorrectIds）= defaults[欄] 的深複本
+   *   （defaults 由呼叫端傳入 persist.defaultData()，AC-32-02、AC-45-08）
+   * - （v0.15）flashcardPosition = null（CI-4 例外、FP-4、AC-44-08）；part5UnansweredOnly 隨淺複製保留原值
    * defaults 缺少任一欄 → 拋含欄位名的 Error（LD-3：程式組裝錯誤）。
    * @param {object} data 目前的 PersistedData
    * @param {object} newGoal 新套用的 GoalState
@@ -199,6 +201,8 @@
     fields.forEach(function (name) {
       out[name] = clone(defaults[name]);
     });
+    // CI-4 例外：生效色級改變 → 單字卡位置回到第 1 張（FP-4），與初始化同一次寫入
+    out.flashcardPosition = null;
     return out;
   }
 

@@ -1,15 +1,15 @@
 ---
 doc: CONTRACT
-version: 0.14
+version: 0.16
 status: approved
 author: sa-agent
 approved_by: JimmyLin（授權主控代核）
-approved_at: 2026-11-03
+approved_at: 2026-11-04
 ---
 
 # English Master Track — 資料契約總覽
 
-> 上游：`docs/01-PRD.md` v0.14（approved，JimmyLin，2026-11-03），以第 6 章「人類決議」與 R-15～R-22 為準（v0.12 修訂內容見 §13 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
+> 上游：`docs/01-PRD.md` v0.16（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-24 為準（v0.12 修訂內容見 §13 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列；v0.15 見 §5.3、§5.10～§5.12、§6、§8 v0.15 表與 0.15 列；v0.16 見 §4.3 L-7、§10.7 UP-6、§8 末表與 0.16 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
 > 本契約共 3 個檔案，視為一組審核：本檔、`data-schema.ts`（型別）、`storage-schema.json`（localStorage 與備份檔的 JSON Schema）。核准方式：把本檔 frontmatter 改為 `status: approved`，並同步填寫 `data-schema.ts` 開頭註解與 `storage-schema.json` `meta` 的 `status`、`approved_by`、`approved_at`（v0.5 起三檔狀態一律一致，SD-FB-04）。
 > 欄位的必填、值域、範例以 `data-schema.ts` 註解為準；本檔放總覽、規則、驗證與待辦。
 > v0.2：依主控 2026-10-29 連網查證結果，四份字表與 ECDICT 授權改為已確認、可收錄；原始字表已置於 `sources/wordlists/`；`N_B`、`N_G` 改為實際值（§4.2）。
@@ -22,6 +22,8 @@ approved_at: 2026-11-03
 > **v0.10：依 PRD v0.10（R-19、Q-39）增量修訂，不改持久化結構（`schemaVersion` 維持 2，`GoalState` 4 欄與 `PersistedData` 9 欄不變，不需遷移）。** 重點：(1) 首次／重設預設分數 `SCORE_DEFAULT` 600 → 725（Q-39 決議 B）；(2) 新增 §5.9 目標分數規則 GS-1～GS-8：選中卡片 = Color(`draftScore`)、點卡片 = 該色 `scoreMax`（取代 Q-32）、既有分數不轉換、分數驗證只用於資料層、畫面不顯示分數；(3) 修改 §5.2、FS-2、FS-3、CI-3、CI-9、FB-08、FB-35，新增 V-ST-16、FB-36、§9.4 DS-07～DS-10。三檔同步升為 v0.10（`storage-schema.json` 只改 description、examples 與 meta）。
 > **v0.11：依 PRD v0.11（R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48）增量修訂，不改持久化結構（`schemaVersion` 維持 2，localStorage 鍵數 2，`PersistedData` 9 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。PWA 不寫入 localStorage 任何資料。** 重點：新增 **§10 PWA 契約**——(1) 兩種交付形態對照（§10.1）；(2) 部署目錄 8 個檔案與圖示 PNG 規格 DP-1～DP-7（§10.2）；(3) manifest 欄位值 MF-1～MF-4（§10.3）；(4) HTML head 靜態／動態元素 HD-1～HD-5（§10.4）；(5) PWA 啟用條件（`file://` 判定）PE-1～PE-4（§10.5）；(6) service worker、快取名稱、建置識別碼、預先快取清單、清除舊快取 SW-1～SW-11（§10.6）；(7) 更新流程與 postMessage UP-1～UP-9（§10.7）；(8) 安裝按鈕 IN-1～IN-8（§10.8）；(9) 不互通說明 NT-1（§10.9）；(10) 儲存與隱私 PV-1～PV-7（§10.10）；(11) 驗證規則 V-PWA-01～V-PWA-12（§10.11）。`data-schema.ts` 新增 §12（7 個型別、11 個常數，`RuntimeState.pwa`）；`storage-schema.json` 只改 meta（新增 `browserStoragePolicy`，AC-21-03）。原「§10 變更紀錄」改為 §11。
 > **v0.14：依 PRD v0.14（R-22、US-42、US-43、AC-01-08，修改 13 條 AC、暫停 AC-05-01～AC-05-05，Q-58～Q-62）增量修訂，不改持久化結構（`schemaVersion` 維持 2，localStorage 鍵數 2，`PersistedData` 9 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) 新增 **§12.1 網站版本號**（VR-1～VR-9）：版本號由建置寫入 `<meta name="emt-app-version">`，**在計算 BUILD_ID 之前寫入**，只改版本號也會改變 BUILD_ID（AC-42-04）；頁尾版本行格式 `VERSION_LINE_TEXT`；HD-1、HD-5、SW-2、V-PWA-04、V-PWA-06 同步；(2) §5.8 新增 HT-6～HT-9：領域範本區塊 `hidden` + `inert`、程式與資料保留、畫面文字不得出現「範本」、已注入單字照原值保留（US-43）；(3) §12.2 色級狀態列只顯示生效色級（`LAYOUT_TEXTS.levelStatus`，AC-01-08）；DB-4 改寫：目標行一律 `goalLineSame` + 「變更」按鈕，`goalLineCapped`、`goalLineSeparator` 停用（AC-39-04）；(4) `data-schema.ts` 新增 §14（4 個常數）。原「§12 變更紀錄」改為 §13。
+> **v0.15：依 PRD v0.15（R-23、US-44～US-47、AC-44-01～AC-47-08，修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71）修訂，含持久化結構變更 `schemaVersion` 2 → 3（Q-63 已由人類核准）。依 CLAUDE.md，本版須由人類核准，不適用主控代核。** 重點：(1) `PersistedData` 新增 3 個**選填**欄位 `flashcardPosition`（新型別 `FlashcardPosition`）、`part5CorrectIds`、`part5UnansweredOnly`；v2 → v3 遷移 MG-5～MG-8、欄位層級讀取 RD-3、RD-4；鍵名 `englishMasterTrack:state` 不變、鍵數維持 2；(2) 新增 §5.10 單字卡上次位置 FP-1～FP-9、§5.11 答對紀錄 CR-1～CR-9 與「只練沒答對」UO-1～UO-9、§5.12 寫入時機與失敗 WR-1～WR-5；(3) `LEARNING_PROGRESS_FIELDS` 6 → 7 欄（Q-67 A），CI-4、CI-5、CI-8 修改；(4) 備份匯出 3、匯入 `[1, 2, 3]`，新增 IM-9、IM-10；(5) 新增 V-ST-18～V-ST-22、V-P5-08；(6) 網站版本 1.1.0（Q-70 A）只在 §12.1 註記，契約無版本值常數。**C-8 解讀規則**：本檔 v0.8～v0.14 段落中描述「目前」的「`schemaVersion` 2」「`PersistedData` 9 欄」，v0.15 起讀作 3 與 12 欄。
+> **v0.16：依 PRD v0.16（R-24，新增 AC-23-07，修改 AC-36-03、AC-42-04 文字）做文字層級修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) `PWA_TEXTS.updateNotice` 改為「有新版本，請更新版本」、`updateButton` 改為「更新版本」，UP-4～UP-7 等引用同步，更新流程行為不變（Q-43 決議 A）；(2) 新增契約常數 `SOURCES_CONTACT_TEXT`（`data-schema.ts` §16）與規則 **L-7**（§4.3）：「資料來源與授權」頁 1 行聯絡資訊，逐字、純文字、非連結、不得出現 `mailto:` 或不帶空格的完整位址、不發網路請求、不持久化。`storage-schema.json` 只改 meta。
 > 專案代號、文件標題與識別字仍為 English Master Track；App 顯示名稱自 v0.12 起為「EnglishContext」（§11.1）。
 
 ---
@@ -39,14 +41,16 @@ approved_at: 2026-11-03
 | `DecoderSentence`、`DecoderSegment`、`SyntaxRole` | 長難句與語法標籤 | pg-content | pg-frontend | FR-4.1、FR-4.2、AC-12-01～AC-12-03、AC-13-01、AC-13-03 |
 | `ReadingStrategy` | 閱讀策略 3 主題 | pg-content | pg-frontend | FR-4.3、AC-14-01、AC-14-02 |
 | `PhraseTemplate`、`PhraseCategory`、`PHRASE_CATEGORY_LABELS` | 學術句型庫 | pg-content | pg-frontend | FR-5.1、FR-5.2、AC-15-01～AC-16-03 |
-| `PersistedData`、`StorageRecord`、`GoalState`、`CustomVocabItem`、`VocabQuizStats`、`Part5Progress`、`StreakState`、`CURRENT_SCHEMA_VERSION`、`SUPPORTED_SCHEMA_VERSIONS`、`STORAGE_KEYS` | localStorage 持久化資料（schemaVersion 2） | pg-frontend | pg-frontend、QA | FR-6.1、FR-6.2、AC-01-04、AC-02-08、AC-04-05、AC-09-04、AC-11-05、AC-17-01～AC-17-06、AC-18-01～AC-18-05、AC-30-12 |
+| `PersistedData`、`StorageRecord`、`GoalState`、`CustomVocabItem`、`VocabQuizStats`、`Part5Progress`、`StreakState`、`CURRENT_SCHEMA_VERSION`、`SUPPORTED_SCHEMA_VERSIONS`、`STORAGE_KEYS` | localStorage 持久化資料（v0.15 起 schemaVersion 3，`PersistedData` 12 欄；可讀 1、2、3） | pg-frontend | pg-frontend、QA | FR-6.1、FR-6.2、AC-01-04、AC-02-08、AC-04-05、AC-09-04、AC-11-05、AC-17-01～AC-17-06、AC-18-01～AC-18-05、AC-30-12、AC-47-01～AC-47-05 |
+| `FlashcardPosition`、`PersistedData.flashcardPosition`（v0.15） | 單字卡上次位置（wordKey + 1 起算序號；null = 無紀錄） | pg-frontend | pg-frontend、QA | FR-2.1、FR-6.2、US-44、AC-44-01～AC-44-10、AC-47-01～AC-47-06、§5.10 |
+| `PersistedData.part5CorrectIds`、`part5UnansweredOnly`、`Part5ViewKind`、`PART5_RECORD_TEXTS`（v0.15） | 模擬測驗曾答對的題目 id、「只練沒答對」開關（持久化）；畫面種類（推導）與畫面文字（常數） | pg-frontend（題目 id 由 pg-content 維持不改號，V-P5-08） | pg-frontend、QA | FR-3.1、FR-3.2、FR-6.2、US-45、US-46、AC-45-01～AC-46-10、AC-47-01～AC-47-07、§5.11 |
 | `TodayLearnedState`、`LearnedHistory`、`LEARNED_HISTORY_DAYS`、`DASHBOARD_CHART_DAYS`（v0.8） | 今日已學紀錄、近 30 天每日已學字數（持久化） | pg-frontend | pg-frontend、QA | FR-6.1、FR-6.2、US-30、AC-30-01～AC-30-14、AC-18-01、AC-24-02、AC-24-10、AC-24-11、R-17 |
 | `BackupFile`、`ImportResult`、`ImportErrorCode` | JSON 備份匯出／匯入 | pg-frontend | pg-frontend、QA | AC-24-01～AC-24-11、AC-25-10、AC-25-11 |
 | `AppState`、`RuntimeState`、`StudyCard`、`VocabQuizQuestion`、`SttResult`、`SttLight`、`SttStatus`、`TabId`、`StorageStatus` | 執行期狀態（不持久化） | pg-frontend | pg-frontend | AC-03-04、AC-03-05、AC-06-04、AC-06-05、AC-08-01～AC-08-12、AC-09-01～AC-09-07、AC-13-03、AC-16-01、AC-18-03、AC-28-08、AC-30-14 |
 | `EntryMode`、`LearningEventKind`（v0.8） | 首次畫面／一般模式、「學過一個字」的學習行為（執行期，不持久化） | pg-frontend | pg-frontend、QA | US-25、AC-25-01～AC-25-11、US-30、AC-30-03、AC-30-04 |
 | `TAB_LABELS`、`NAV_TAB_ORDER`（v0.8；v0.9 `NAV_TAB_ORDER` 改為 4 項；v0.12 主控台不再有模組入口） | 頁面畫面名稱與導覽順序（R-15、R-18 三） | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-10-02、AC-17-06、AC-20-03、AC-27-01、AC-27-04、AC-39-06 |
 | `HIDDEN_TAB_IDS`（v0.9） | 隱藏頁面（解碼器、句型庫）；不可到達，嘗試進入時改顯示主控台 | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-20-04、E-68、R-18 三 |
-| `LEARNING_PROGRESS_FIELDS`（v0.9） | 切換難易度初始化時清除的 6 個 `PersistedData` 欄位（白名單） | 契約常數（pg-frontend 實作） | pg-frontend、QA | US-32、AC-32-02、AC-32-03、AC-32-10、R-18 一 |
+| `LEARNING_PROGRESS_FIELDS`（v0.9；v0.15 加 `part5CorrectIds`） | 切換難易度初始化時清除的 `PersistedData` 欄位（白名單；v0.15 起 7 個） | 契約常數（pg-frontend 實作） | pg-frontend、QA | US-32、AC-32-02、AC-32-03、AC-32-10、R-18 一 |
 | `PwaManifest`、`PwaManifestIcon`、`PwaIconPurpose`、`PWA_MANIFEST`、`PWA_APP_NAME`、`PWA_THEME_COLOR`、`PWA_BACKGROUND_COLOR`（v0.11） | Web App Manifest 全部欄位值（安裝名稱「EnglishContext」、相對路徑、顏色、3 個圖示） | 契約常數 → pg-frontend（建置輸出 `manifest.webmanifest`） | 瀏覽器、QA | AC-34-01～AC-34-05、Q-42、§10.3 |
 | `PwaDeployFile`、`PwaDeployFileRole`、`PWA_DEPLOY_FILES`（v0.11） | 部署目錄 8 個檔案的路徑、角色、MIME、圖示尺寸與用途 | 契約常數 → pg-frontend（建置）；圖示 PNG 由**主控**預先產生（Q-45） | 建置程式、`static.yml`、QA | AC-36-07、AC-34-01、AC-34-03、AC-34-05、Q-45、Q-46、§10.2 |
 | `PWA_PRECACHE_URLS`、`PWA_CACHE_PREFIX`、`PWA_BUILD_ID_PATTERN`、`PWA_BUILD_ID_META_NAME`、`PwaPageToSwMessage`（v0.11） | 預先快取清單、快取名稱、建置識別碼、頁面 → service worker 訊息 | 契約常數 → pg-frontend（建置輸出 `sw.js`、頁面端註冊） | 瀏覽器、QA | AC-35-01、AC-36-01～AC-36-05、AC-37-05、§10.6、§10.7 |
@@ -57,6 +61,11 @@ approved_at: 2026-11-03
 | `DashboardRuntimeState`（`RuntimeState.dashboard`，v0.12） | 「資料備份」收合區塊展開狀態（記憶體，不持久化） | pg-frontend | pg-frontend、QA | AC-39-08、AC-24-12、AC-34-07、E-90、E-91、§11.4 DB-6 |
 | `APP_VERSION_META_NAME`、`APP_VERSION_PATTERN`、`BUILD_CODE_LENGTH`、`VERSION_LINE_TEXT`（v0.14） | 網站版本號的 HTML meta、SemVer 格式、建置碼長度、頁尾版本行格式（不持久化） | 契約常數 → 建置寫入 meta（SD 安排）、pg-frontend 渲染 | pg-frontend、QA | US-42、AC-42-01～AC-42-04、AC-36-02、AC-41-04、§12.1 |
 | `LAYOUT_TEXTS.levelStatus`（v0.14 新增鍵）；`goalLineCapped`、`goalLineSeparator`（v0.14 停用）；`changeLink`（v0.14 改按鈕） | 難易度設定頁狀態列「目前色級：{生效色級}」；主控台目標行只顯示生效色級 | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-01-08、AC-39-04、AC-17-06、E-92、§12.2、§11.4 DB-4 |
+| `SOURCES_CONTACT_TEXT`（v0.16） | 「資料來源與授權」頁 1 行聯絡資訊（逐字、字母間含空格、純文字、非連結；不持久化） | 契約常數（pg-frontend 實作） | pg-frontend、QA | AC-23-07、E-118、E-119、R-24 二、§4.3 L-7 |
+
+型別數（v0.16）：與 v0.15 相同 **69** 個（34 個 `interface`、35 個 `type`），無增減、無欄位變更。契約常數 41 → **42**（新增 `SOURCES_CONTACT_TEXT`，§16）；值變更：`PWA_TEXTS.updateNotice`「有新版本，重新整理」→「有新版本，請更新版本」、`PWA_TEXTS.updateButton`「重新整理」→「更新版本」（R-24 一）。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變；localStorage 鍵數維持 2。
+
+型別數（v0.15）：67 → **69** 個（34 個 `interface`、35 個 `type`）；新增 `FlashcardPosition`（interface，持久化）、`Part5ViewKind`（type，執行期推導）。契約常數 40 → **41**（新增 `PART5_RECORD_TEXTS`）；值變更：`CURRENT_SCHEMA_VERSION` 2 → 3、`SUPPORTED_SCHEMA_VERSIONS` `[1, 2]` → `[1, 2, 3]`、`LEARNING_PROGRESS_FIELDS` 6 → 7 項。修改：`PersistedData`（+3 選填欄位）；`StorageRecord`、`BackupFile`、`Part5Progress`、`Part5Question.id`、`RuntimeState.flashcard.index`、`learningQuotaNoticeShown`、`FROZEN_IDENTIFIERS`、`APP_VERSION_META_NAME` 的註解。localStorage 鍵數維持 2；內容資料檔格式不變。
 
 型別數（v0.14）：與 v0.13 相同 **67** 個（33 個 `interface`、34 個 `type`），無增減、無欄位變更。契約常數 36 → **40**（新增 `APP_VERSION_META_NAME`、`APP_VERSION_PATTERN`、`BUILD_CODE_LENGTH`、`VERSION_LINE_TEXT`）；`LAYOUT_TEXTS` 內容變更（新增鍵 `levelStatus`；`goalLineCapped`、`goalLineSeparator` 標記停用但鍵保留）。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變。
 
@@ -81,6 +90,7 @@ approved_at: 2026-11-03
 | C-5 | 原創內容的來源標記固定 `"ORIGINAL"`，畫面顯示「原創」（AC-23-04） |
 | C-6 | 所有資料檔在 app 程式之前載入；前端讀全域變數時一律容忍「不存在／型別不符」，以空陣列處理，不得白屏 |
 | C-7 | 前端呈現**所有**資料（內建內容、自訂單字、匯入內容）一律以 `textContent` 等純文字方式寫入 DOM（AC-04-09、AC-24-07）；長難句的上色以「每個 segment 一個元素 + class」實作，不得拼接 HTML 字串 |
+| C-8 | （v0.15，比照 PRD「學習位置與作答紀錄」節共通規則 2）本契約 v0.8～v0.14 增修的段落（含 `data-schema.ts` 註解、`storage-schema.json` 說明）中，描述**目前**持久化結構的「`schemaVersion` 2」「`schemaVersion` 維持 2」「`PersistedData` 9 欄齊全」「欄位集合不變」，v0.15 起一律讀作「等於 `CURRENT_SCHEMA_VERSION`（3）、`PersistedData` 12 欄，且該條所述操作不改變版本與欄位集合」；變更紀錄、版本表、遷移規則 MG-1～MG-4 等**歷史**敘述照原意。PRD AC-01-08、AC-26-06、AC-32-10、AC-36-04、AC-37-06、AC-38-10、AC-42-03、AC-43-03 的「`schemaVersion` 2」同此讀作 3 |
 
 ---
 
@@ -105,6 +115,8 @@ approved_at: 2026-11-03
 （v0.11）PWA 不新增資料檔或 `window` 全域變數，本表不變；manifest、`sw.js`、圖示屬建置輸出與主控預產資產（§10.2），不屬 `src/data/`。
 
 （v0.12）不新增資料檔、全域變數或欄位，最少筆數不變。**唯一的資料值修改**：`sources.js` 中 `code = "ORIGINAL"` 那筆的 `fullName` 由 `"English Master Track 原創內容"` 改為 `"EnglishContext 原創內容"`（Q-49、AC-38-10 (1)；§4.3、DS-19）；其他欄位（含 `name` = `"原創"`）不變。`src/data/` 任何字串（畫面會顯示者）不得含「English Master Track」（不分大小寫）。
+
+（v0.15）不新增資料檔、全域變數或欄位，**不改任何資料值**。`part5.js` 的題目 `id` 成為使用者答對紀錄的鍵：既有 id（`p5-001`～`p5-200`）**不得改號、不得改指另一題**，刪除的 id 不得重用（Q-71 建議、V-P5-08）；修正錯字等不改變題意的內容修訂可沿用原 id。pg-content 本版無工作（除非 SD 安排 V-P5-08 自驗）。
 
 （v0.14）不新增資料檔、全域變數或欄位，**不改任何資料值**：`templates.js` 的檔案、`window.DOMAIN_TEMPLATES`、格式、最少筆數與 V-TPL 驗證全部不變，照常交付並打包（AC-43-01「交付檔原始碼仍含 3 個範本資料」；HT-8）。範本的 `label`（「資工」等）與單字內容不含「範本」二字，AC-43-02 不涉及 `src/data/`。版本號不放在 `src/data/`（§12.1）。pg-content 無工作。
 
@@ -254,6 +266,7 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | L-3 | `DATA_SOURCE_REGISTRY` 的每筆資料必須與本表一致（名稱、版本、授權、網址、確認日期、確認人） |
 | L-4 | 衍生的單字資料以 CC BY-SA 4.0 釋出，署名列原字表作者與修改者 JimmyLin。`modifications` 與 AC-23-02 一致：四份字表至少列出「合併、去重、重新編排頻率排名、補充欄位」（v0.4 未變）；ECDICT **恰為** `["簡體轉繁體台灣用語", "精簡釋義"]`；ORIGINAL 為 `[]`。**音標改寫不列入 ECDICT 的 `modifications`**（音標屬原創，不屬 ECDICT）；AC-23-02 要求的說明「音標改寫為美式 IPA，標為原創，不屬 ECDICT」由 pg-frontend 在「資料來源與授權」頁 ECDICT 區塊以固定文字顯示（R-06、R-13） |
 | L-6 | （v0.4）卡片出處顯示（AC-23-01，pg-frontend）：字表出處依 `sources` 逐一顯示「`name` `version`（`licenseName`）」，例「單字來源：NGSL 1.2（CC BY-SA 4.0）」；音標、釋義**分開**依 `phoneticSource`、`meaningSource` 顯示：`"ECDICT"` →「ECDICT（MIT，已修改）」（= `name` +「（」+ `licenseName` +「，已修改）」），`"ORIGINAL"` →「原創」，例「音標：原創；釋義：ECDICT（MIT，已修改）」。顯示文字必須由該筆資料的來源標記推導，不得寫死同一段文字（NFR-3「卡片出處與欄位來源標記不一致數 = 0」） |
+| L-7 | （v0.16，R-24 二，pg-frontend）**「資料來源與授權」頁聯絡資訊**：(1) **逐字**：該頁內容區（頁尾連結與版本行之上）恰 1 行，`textContent`（trim 後）與契約常數 `SOURCES_CONTACT_TEXT` 逐字元相同——`email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m`（小寫 `email:` + 1 個半形空格，其後每個字元之間各 1 個半形空格 U+0020，含 `.`、`@` 前後；無全形字元）；(2) **純文字**：以 `textContent` 寫入（C-7）；該行及祖先元素皆不是 `<a>`，無 `href`、`tabindex`、點擊處理器，Tab 不可取得焦點，點擊不開郵件程式、不換頁；(3) **防爬蟲**：交付 HTML（含內嵌 JS 與 CSS）不得含 `mailto:`，也不得含「去掉空格後的完整位址」字串；程式不得以字串處理（去空格、拼接、`replace`、`join` 等）在執行期組出無空格位址，常數值本身即帶空格；(4) **不發網路請求**、不寫入 localStorage、不寫入備份檔（`storage-schema.json` 不變）；(5) 只在「資料來源與授權」頁顯示；首次畫面、4 個功能區、各畫面頁尾、對話框、Toast 皆不顯示；`file://` 與 https 兩種形態皆顯示且相同，斷網照常；(6) 樣式為該頁說明性次要文字（對比 ≥ 4.5:1、不使用 `COLOR_TOKENS.accent`，VC-3、VC-7）；375px 預設字級維持 1 行、不產生水平捲軸（放大字級時換行可接受，E-119）；樣式與確切位置屬設計層；(7) AC-23-02 既有聲明內容不變；`sources.js`（pg-content）格式與值不變。對應：AC-23-07、E-118、E-119、AC-21-01、AC-37-05、AC-38-01、AC-38-04 |
 
 ---
 
@@ -263,7 +276,7 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 
 | 鍵名 | 值 | 寫入者 | 說明 |
 | :--- | :--- | :--- | :--- |
-| `englishMasterTrack:state` | `JSON.stringify(StorageRecord)` | pg-frontend | 唯一主狀態；Schema = `storage-schema.json` 根結構（schemaVersion 2）。（v0.8）**本鍵是否存在 = 首次判定依據**（§5.5 FS-1，AC-25-01）；首次畫面期間不寫入 |
+| `englishMasterTrack:state` | `JSON.stringify(StorageRecord)` | pg-frontend | 唯一主狀態；Schema = `storage-schema.json` 根結構（v0.15 起 schemaVersion 3；鍵名不變，`FROZEN_IDENTIFIERS.storageStateKey`）。（v0.8）**本鍵是否存在 = 首次判定依據**（§5.5 FS-1，AC-25-01）；首次畫面期間不寫入 |
 | `englishMasterTrack:unreadable` | 讀取失敗時的原始字串 | pg-frontend | AC-18-05 重設前保存，供人工救回；寫入失敗不報錯，但主鍵不得被覆蓋（§5.3 RS-1～RS-4）；下次讀取失敗時覆蓋 |
 
 鍵數：2（v0.8 不變；今日已學紀錄與歷史放在主鍵的 `data` 內，不另開鍵，確保整筆一次寫入）。內建內容（字庫、題庫、例句、句型）**不寫入** localStorage（R-04）；不存音訊（AC-21-03）；不存語音實例、DOM、計時器等不可序列化物件。
@@ -271,8 +284,9 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 （v0.11）PWA **不新增任何鍵、不寫入任何資料**：安裝按鈕、新版提示、更新檢查時間只在記憶體（`RuntimeState.pwa`）；https 版與 `file://` 版的鍵名、欄位集合、`schemaVersion` 2 完全相同（AC-36-04、AC-37-06、§10.10 PV-1）。同一 `<帳號>.github.io` 網域下的其他專案也用同一個來源，本系統鍵名已有 `englishMasterTrack:` 前綴，不讀寫他人資料（E-80）。
 （v0.12）版面與視覺**不新增任何鍵、不寫入任何資料**：「資料備份」展開狀態只在記憶體（`RuntimeState.dashboard`，§11.4 DB-6）。App 改名為「EnglishContext」**不改鍵名**（`FROZEN_IDENTIFIERS`，§11.1 NM-5；AC-38-10 (2)、E-94）。
 （v0.14）**不新增任何鍵、不寫入任何資料**：版本號與建置碼只存在交付 HTML 的 meta，不寫入 localStorage 與備份檔（AC-42-03，§12.1 VR-6）；隱藏領域範本不刪除、不轉換既有 `origin = "template"` 的自訂單字（AC-43-03，HT-9）；狀態列只顯示生效色級，`GoalState` 4 欄照常保存（AC-01-08）。`schemaVersion` 維持 2，無遷移。
+（v0.15，R-23、Q-63）**不新增鍵**：單字卡上次位置、模擬測驗答對紀錄、「只練沒答對」開關放在主鍵的 `data` 內（`flashcardPosition`、`part5CorrectIds`、`part5UnansweredOnly`），與其他進度**同一次 `setItem`** 寫入，確保初始化（CI-5）、匯入（§6.2 步驟 8）、首次「開始學習」的原子性與首次判定（FS-1）不受影響（AC-47-01「不改變既有鍵名」）。`schemaVersion` 2 → 3（§5.3）。單字卡／測驗模式、正反面、「全部答對」畫面、K 值皆**不**持久化。
 
-### 5.2 預設值（首次使用、重設時，AC-18-02；v0.9 起亦為切換難易度初始化時 `LEARNING_PROGRESS_FIELDS` 6 欄的值，§5.7）
+### 5.2 預設值（首次使用、重設時，AC-18-02；v0.9 起亦為切換難易度初始化時 `LEARNING_PROGRESS_FIELDS` 各欄的值，§5.7）
 
 | 欄位 | 預設 |
 | :--- | :--- |
@@ -284,6 +298,11 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | `sttNoticeAcknowledged` | false |
 | `todayLearned`（v0.8） | `{ "date": null, "wordKeys": [] }` |
 | `learnedHistory`（v0.8） | `{}` |
+| `flashcardPosition`（v0.15） | `null`（從第 1 張開始） |
+| `part5CorrectIds`（v0.15） | `[]`（K = 0） |
+| `part5UnansweredOnly`（v0.15） | `false`（開關關閉） |
+
+（v0.15）上表 3 個新欄位的預設值同時用於：首次使用、讀取失敗整體重設（AC-18-05）、v1／v2 遷移（MG-6）、欄位層級無效時只重設該欄（RD-3）、v3 資料缺少該鍵（選填）、localStorage 停用時的記憶體預設（AC-47-07 (a)）。
 
 （v0.8）首次使用時，預設值只存在記憶體；按「開始學習」或備份還原成功前不寫入 localStorage（§5.5 FS-2）。
 
@@ -294,12 +313,13 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | 啟動：存取拋例外 | `storageStatus = "unavailable"`，以預設值啟動，顯示「進度將無法保存」，本次工作階段不再嘗試寫入。（v0.8）`entryMode = "firstRun"`，每次開啟都顯示首次畫面（FS-6） | AC-18-03、AC-25-08 |
 | 啟動：鍵不存在 | 以預設值啟動，不顯示錯誤。（v0.8）`entryMode = "firstRun"`，顯示首次畫面；不寫入主鍵（FS-1、FS-2） | AC-18-02、AC-25-01 |
 | 啟動：JSON 解析失敗、不符 Schema、違反 V-ST-03（**完整**檢查，不適用 §6.2 的匯入例外） | 依 RS-1～RS-4 先保存原字串再重設主鍵，以預設值啟動，提示「資料讀取失敗，已重設」，不白屏。（v0.8）`entryMode = "main"`，不顯示首次畫面（FS-1）；`todayLearned`、`learnedHistory` 的問題**不屬於**本列，依 RD-1 只重設該欄 | AC-18-05、AC-25-09 |
-| 啟動：`schemaVersion` 缺失、非整數、不在 `SUPPORTED_SCHEMA_VERSIONS`（`[1, 2]`，含大於 2） | 同上（視為無法讀取；原字串保留在 `unreadable` 鍵） | AC-18-05 |
-| 啟動：`schemaVersion` = 1 | 依 MG-1～MG-4 遷移到 2，完整驗證後寫回；不顯示任何錯誤、不顯示首次畫面 | AC-30-12、E-51 |
-| 啟動：`schemaVersion` = 2 | 先依 RD-1 處理兩個新欄位，再以根結構與完整 V-ST-03 驗證 | AC-30-13、E-52 |
-| 啟動：成功讀取後 | 以 `appliedScore` 重算 `appliedColor`、`effectiveColor` 覆蓋；`part5.currentIndex` 超出題庫時依 V-ST-05 重設；（v0.8）以啟動當下的本地日期為今天，依 V-ST-09～V-ST-11 正規化 `todayLearned`、`learnedHistory` | AC-01-04、AC-11-05、AC-30-09、AC-30-13 |
+| 啟動：`schemaVersion` 缺失、非整數、不在 `SUPPORTED_SCHEMA_VERSIONS`（v0.15 起 `[1, 2, 3]`，含大於 3） | 同上（視為無法讀取；原字串保留在 `unreadable` 鍵） | AC-18-05 |
+| 啟動：`schemaVersion` = 1 | 依 MG-1～MG-4 遷移到 2，（v0.15）再依 MG-5～MG-8 遷移到 3，完整驗證後寫回一次；不顯示任何錯誤、不顯示首次畫面 | AC-30-12、E-51、AC-47-04 |
+| 啟動：`schemaVersion` = 2 | （v0.15）依 MG-5～MG-8 遷移到 3，之後同下列 = 3 的處理，完整驗證後寫回一次；不顯示任何錯誤、不顯示首次畫面 | AC-47-04、E-114 |
+| 啟動：`schemaVersion` = 3（含遷移後） | 先依 RD-1 處理 `todayLearned`、`learnedHistory`，（v0.15）再依 RD-3 處理 `flashcardPosition`、`part5CorrectIds`、`part5UnansweredOnly`，最後以根結構與完整 V-ST-03 驗證 | AC-30-13、E-52、AC-44-06、AC-47-05、E-116 |
+| 啟動：成功讀取後 | 以 `appliedScore` 重算 `appliedColor`、`effectiveColor` 覆蓋；`part5.currentIndex` 超出題庫時依 V-ST-05 重設；（v0.8）以啟動當下的本地日期為今天，依 V-ST-09～V-ST-11 正規化 `todayLearned`、`learnedHistory`；（v0.15）依 UO-4 正規化模擬測驗目前題目（V-ST-05 之後）；建立單字集後依 FP-2 解析 `flashcard.index`。皆只改記憶體，不因此呼叫 `setItem`（RD-4；遷移寫回 MG-7 除外） | AC-01-04、AC-11-05、AC-30-09、AC-30-13、AC-44-01、AC-46-04 |
 | 寫入 | 任何 `PersistedData` 變更後，整筆 `StorageRecord` 以**一次** `setItem` 寫入（不分鍵、不部分寫入） | AC-18-01、AC-18-06 |
-| 寫入：容量不足 | 新增自訂單字：記憶體回滾、不新增、提示「儲存空間不足」；其他寫入：保留記憶體狀態並提示，下次寫入再試。（v0.8）學習紀錄寫入（LR-7）：畫面照常計數，提示「儲存空間不足」**同一工作階段只一次**（`RuntimeState.learningQuotaNoticeShown`）。（v0.9）**例外**：切換難易度初始化（§5.7）寫入拋出任何例外 → 整個不套用、記憶體不變，提示「儲存空間不足，未套用」（CI-7）。原有 localStorage 值因 `setItem` 失敗而不變。「容量不足」的判定見 IM-7 | AC-18-04、AC-30-14、AC-32-11 |
+| 寫入：容量不足 | 新增自訂單字：記憶體回滾、不新增、提示「儲存空間不足」；其他寫入：保留記憶體狀態並提示，下次寫入再試。（v0.8）學習紀錄寫入（LR-7）：畫面照常計數，提示「儲存空間不足」**同一工作階段只一次**（`RuntimeState.learningQuotaNoticeShown`）。（v0.9）**例外**：切換難易度初始化（§5.7）寫入拋出任何例外 → 整個不套用、記憶體不變，提示「儲存空間不足，未套用」（CI-7）。原有 localStorage 值因 `setItem` 失敗而不變。「容量不足」的判定見 IM-7。（v0.15）單字卡位置、模擬測驗作答（含答對紀錄）、開關、「全部題目再練一次」、「清除答對紀錄」的寫入依 §5.12 WR-2：與學習紀錄共用「同一工作階段只提示一次」 | AC-18-04、AC-30-14、AC-32-11、AC-44-10、AC-47-07 |
 
 **讀取失敗時的重設時機**（v0.6，FE-07 #1；適用上表「JSON 解析失敗…」「`schemaVersion` 缺失…」兩列，以及遷移後驗證失敗）：
 
@@ -315,7 +335,10 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | `schemaVersion` | 契約版本 | 說明 | 遷移 |
 | :--- | :--- | :--- | :--- |
 | 1 | 0.1～0.7 | 初版（v0.2～v0.7 只改內容資料檔、規則、註解與執行期型別，持久化結構不變）。v0.7 程式寫入的 localStorage 與匯出的備份皆為 1 | — |
-| 2 | 0.8～ | `PersistedData` 新增必填 `todayLearned`、`learnedHistory`（PRD R-17，人類已同意） | 1 → 2：MG-1～MG-4 |
+| 2 | 0.8～0.14 | `PersistedData` 新增必填 `todayLearned`、`learnedHistory`（PRD R-17，人類已同意） | 1 → 2：MG-1～MG-4 |
+| 3 | 0.15～ | `PersistedData` 新增**選填** `flashcardPosition`、`part5CorrectIds`、`part5UnansweredOnly`（PRD R-23，Q-63 人類已核准）；其餘 9 欄定義不變 | 2 → 3：MG-5～MG-8（1 → 2 → 3 串接） |
+
+**v0.15 升版判斷（SA）**：PRD Q-63 把是否升版交 SA 判斷，契約決定**升為 3**，理由：(1) 下一條既有規則「任何結構變更（含新增選填欄位）都要 + 1」；(2) v0.14 程式對 v2 採 `additionalProperties: false` 嚴格驗證，若新欄位仍標 2，v0.14 程式匯入 v0.15 備份會誤報「備份檔格式錯誤」，升為 3 則顯示「備份檔版本不相容」並列出版本，正是 PRD E-117 預期的行為；(3) 讀取時以版本號決定是否補預設值，遷移只發生一次且可冪等（AC-47-04「不再重複升級、資料不變」）；(4) 不升版也無法讓 v0.14 程式讀懂含新欄位的 v2 資料（同樣會因多餘欄位整體重設），不升版沒有相容上的好處。既有學習紀錄不遺失由 MG-6「其餘 9 欄原值不動」保證（AC-47-03、AC-47-04）。
 
 - `PersistedData` 任何結構變更（含新增選填欄位）都要：`CURRENT_SCHEMA_VERSION` + 1、提供 v→v+1 遷移規則、更新 `SUPPORTED_SCHEMA_VERSIONS`、更新 `storage-schema.json`（`schemaVersion` 的 `const`／`enum`）、在本表與變更紀錄登記。
 - 版本只增不減；不提供降版。舊版程式讀到新版資料視為無法讀取（原字串保留於 `unreadable` 鍵）。**（v0.8 知會）** 使用者若改回 v0.7 程式開啟已升級為 2 的資料，v0.7 程式會依其 AC-18-05 重設；v0.7 程式也無法匯入本版匯出的備份（版本不相容）。見 FB-29。
@@ -336,6 +359,22 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | :--- | :--- | :--- |
 | RD-1 | `schemaVersion` = 2 且 `data` 為物件時，**在根結構驗證之前**先分別檢查 `data.todayLearned`、`data.learnedHistory`：鍵不存在，或不符 `storage-schema.json` 的 `$defs/TodayLearnedState`／`$defs/LearnedHistory`（shape）→ **只把該欄設為預設值**（§5.2），其他資料保留；不保存 `unreadable`、不提示「資料讀取失敗」、不觸發 AC-18-05。之後再以根結構與完整 V-ST-03 驗證整筆（此時兩欄必定通過 shape），其他欄位的錯誤仍依 AC-18-05 整體重設 | AC-30-13、E-52 |
 | RD-2 | RD-1 的重設與 V-ST-09～V-ST-11 的正規化只改記憶體；結果在下一次 `PersistedData` 寫入時一併寫回（實作也可在啟動時立即寫回一次，失敗不提示）。不另外為此提示使用者 | AC-30-13 |
+
+**v2 → v3 遷移規則**（v0.15；localStorage 讀取與備份匯入共用；1 → 3 時先 MG-1～MG-2 再 MG-5～MG-6）：
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| MG-5 | 輸入：`schemaVersion` = 2（或剛由 1 遷移到 2）且 `data` 為純物件。`data` 不是物件 → localStorage 視為無法讀取（AC-18-05）、匯入視為 `format`。遷移前**不**另以 v2 schema 驗證，遷移後統一以 v3 驗證 | AC-18-05、AC-24-05 |
+| MG-6 | 動作：`data.flashcardPosition = null`、`data.part5CorrectIds = []`、`data.part5UnansweredOnly = false`（**一律覆寫**：v2 資料本來就不應有這 3 個鍵，若有也不採用，與 MG-2 相同原則）；`schemaVersion` 改為 3。其餘 9 欄（`goal`、`customVocab`、`masteredWordKeys`、`vocabQuiz`、`part5`、`streak`、`sttNoticeAcknowledged`、`todayLearned`、`learnedHistory`）**原值不動**，不重算、不清理（RD-1、色級重算、V-ST-05 等照一般讀取流程在遷移後執行）。v0.14 以前的作答沒有逐題紀錄，不回溯推算答對紀錄（PRD US-45 名詞、Q-63 (d)） | AC-47-03、AC-47-04、E-113、E-114 |
+| MG-7 | localStorage：遷移結果依 RD-1、RD-3 處理後，以完整 v3 根結構與 V-ST-03 驗證；通過後以**一次** `setItem` 寫回整筆 `StorageRecord`（`schemaVersion` 3、`data` 符合 `$defs/PersistedDataWritten`、`savedAt` 更新）。寫回失敗（任何例外）不提示、不影響本次使用，下次 `PersistedData` 寫入時再寫；下次啟動若仍讀到 2，再遷移一次，結果相同（冪等）。驗證不通過 → 依 RS-1～RS-4 視為無法讀取。遷移成功不顯示「資料讀取失敗」、不顯示首次畫面、直接進主控台 | AC-47-04、AC-25-05 |
+| MG-8 | 備份匯入：§6.2 步驟 4 依版本串接遷移 `data`（1 → 2 → 3、2 → 3），頂層 `schemaVersion` 原值保留供步驟 5 驗證（`BackupFile.schemaVersion` enum `[1, 2, 3]`）；步驟 5 以 v3 的 `$defs/PersistedData` 驗證遷移後的 `data`。寫入 localStorage 的 `StorageRecord.schemaVersion` 一律為 3 | AC-47-03、AC-24-10 |
+
+**v3 新欄位的讀取規則**（v0.15；只適用讀 localStorage，匯入見 IM-9、IM-10）：
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| RD-3 | `schemaVersion` = 3（含遷移後）且 `data` 為物件時，**在根結構驗證之前**分別處理 3 個欄位，彼此獨立：(a) 鍵不存在 → 設為預設值（§5.2；選填）；(b) 不符 shape（`storage-schema.json` `$defs/FlashcardPosition`、`$defs/Part5CorrectIds`、`boolean`）→ **只把該欄設為預設值**；(c) `part5CorrectIds` shape 正確時做項目正規化：捨棄非字串、trim 後為空的項目，重複項只保留第一次出現，其餘有效 id（含題庫中不存在者）原值保留、順序不變；(d) `flashcardPosition` shape 正確但 `wordKey` 經 C-2 後為空 → 設為 `null`；否則 `wordKey` 改存 C-2 正規化結果。以上皆不保存 `unreadable`、不提示「資料讀取失敗」、不觸發 AC-18-05；其他欄位的錯誤仍依 AC-18-05 整體重設 | AC-44-06、AC-47-05、E-107、E-116 |
+| RD-4 | RD-3、UO-4、FP-2 的結果只改記憶體，隨下一次 `PersistedData` 寫入一併寫回（同 RD-2；遷移時的 MG-7 寫回會一併寫出）。不另外提示使用者；不得因「只是讀取或進入頁面」而呼叫 `setItem`（DB-3、AC-39-03） | AC-47-05、AC-39-03 |
 
 ### 5.4 今日已學紀錄的記錄規則（v0.8，pg-frontend；PRD US-30、R-17）
 
@@ -382,11 +421,11 @@ PRD Q-33 的介面數值（底部導覽 ≤ 640px、換頁動畫 ≤ 300ms、翻
 | CI-1 | **觸發條件**：只在 `entryMode = "main"`、一般難易度設定頁按「套用」時判斷。`effective(新分數) ≠ goal.effectiveColor`（**生效色級改變**）**且** CI-2「有學習紀錄」成立 → 跳出確認視窗；任一不成立 → 依一般「套用」規則直接套用，**不清除任何資料**。只點選色級卡片不判斷（AC-26-02；v0.10 已無調分數操作）。首次畫面「開始學習」（FS-4）、「從備份還原」（FS-5）、主控台匯入（§6.2）一律不觸發 | AC-01-02、AC-01-07、AC-26-02、AC-32-01、AC-32-05、AC-32-06、AC-32-08 |
 | CI-2 | **有學習紀錄**：以按「套用」當下記憶體中的 `PersistedData` 判斷（localStorage 停用時同樣以記憶體為準），下表 (a)～(f) **任一**成立即為有 | AC-32-01、AC-32-06、AC-32-07 |
 | CI-3 | **生效色級改變的判定例**：綠 → 綠（既有 600 → 點綠卡片 725，v0.10）、綠 ↔ 藍 ↔ 金（生效色級皆為綠）不算改變；橘 → 棕、棕 → 綠、綠 → 橘等算改變。比較對象是**記憶體中** `goal.effectiveColor`（啟動時已依 V-ST-02 重算） | AC-32-05、AC-01-07 |
-| CI-4 | **按「確定」後的新資料**：以目前 `PersistedData` 為底建立一份**新物件**（不可就地修改現行資料），依下方「清除欄位」「保留欄位」兩表設定。清除採**白名單**：只有 `LEARNING_PROGRESS_FIELDS` 的 6 欄被覆寫，其餘欄位一律原值保留 | AC-32-02、AC-32-03、AC-32-10 |
-| CI-5 | **單次原子寫入**：`storageStatus = "ok"` 時，把 CI-4 的新資料包成 `StorageRecord`（`schemaVersion` = 2、`savedAt` = 當下 ISO 8601、`data` = 新資料），對 `englishMasterTrack:state` **一次** `setItem`。不得拆成「先套用目標、再清除紀錄」等多次寫入；不得 `removeItem` 任何鍵；不碰 `englishMasterTrack:unreadable`；不新增鍵。`setItem` 成功後才以新資料取代記憶體並重繪（CI-8） | AC-32-02、AC-32-10、AC-32-11 |
+| CI-4 | **按「確定」後的新資料**：以目前 `PersistedData` 為底建立一份**新物件**（不可就地修改現行資料），依下方「清除欄位」「保留欄位」兩表設定。清除採**白名單**：只有 `LEARNING_PROGRESS_FIELDS` 的欄位（v0.15 起 7 欄）被覆寫，其餘欄位一律原值保留；（v0.15）例外：`flashcardPosition` 因生效色級改變依 FP-4 設為 `null`（不是學習進度，是 AC-03-05「回到第 1 張」的結果） | AC-32-02、AC-32-03、AC-32-10、AC-45-08、AC-44-08 |
+| CI-5 | **單次原子寫入**：`storageStatus = "ok"` 時，把 CI-4 的新資料包成 `StorageRecord`（`schemaVersion` = `CURRENT_SCHEMA_VERSION`（v0.15 起 3）、`savedAt` = 當下 ISO 8601、`data` = 新資料），對 `englishMasterTrack:state` **一次** `setItem`。不得拆成「先套用目標、再清除紀錄」等多次寫入；不得 `removeItem` 任何鍵；不碰 `englishMasterTrack:unreadable`；不新增鍵。`setItem` 成功後才以新資料取代記憶體並重繪（CI-8） | AC-32-02、AC-32-10、AC-32-11 |
 | CI-6 | **localStorage 停用**（`storageStatus = "unavailable"`）：不寫入，直接以新資料取代記憶體並重繪；「進度將無法保存」持續顯示 | AC-32-11 (a)、AC-18-03 |
 | CI-7 | **寫入失敗**：CI-5 的 `setItem` 拋出**任何**例外（IM-7 容量不足或其他）→ 丟棄新資料，記憶體 `PersistedData` 不變（localStorage 因 `setItem` 失敗而保持原值），畫面依 CI-9 回到按「套用」前的狀態，提示「儲存空間不足，未套用」。**不適用** §5.3「保留記憶體狀態、下次寫入再試」；不改 `learningQuotaNoticeShown`。不得出現只清除一部分、或畫面與儲存不一致 | AC-32-11 (b)、E-63 |
-| CI-8 | **成功後的執行期狀態**（不持久化，同一般套用不同色級）：依新 `goal.effectiveColor` 重建 `studySet`；`flashcard.index = 0`、`isFlipped = false`（AC-03-05）；`speech.lastResult = null`；測驗模式下重新出題。主控台、難易度設定試算（CurrentVocab = 0）、模擬測驗頁（第 1 題未作答）都由新資料推導，不另存狀態 | AC-32-02、AC-03-05 |
+| CI-8 | **成功後的執行期狀態**（不持久化，同一般套用不同色級）：依新 `goal.effectiveColor` 重建 `studySet`；`flashcard.index = 0`、`isFlipped = false`（AC-03-05；v0.15 持久化的 `flashcardPosition` 已於 CI-4 設為 `null`，同一次寫入）；`speech.lastResult = null`；測驗模式下重新出題。主控台、難易度設定試算（CurrentVocab = 0）、模擬測驗頁（第 1 題未作答；v0.15「已答對 0 / Q 題」、無「✓ 曾答對」標示、開關維持原狀態）都由新資料推導，不另存狀態。（v0.15）開關為開啟時，因答對紀錄已清空，第 1 題必為未答對題目，UO-4 不移動題號 | AC-32-02、AC-03-05、AC-45-08、AC-44-08 |
 | CI-9 | **取消**（「取消」、Esc、點視窗外，三者相同）：不建立新資料、**不呼叫 `setItem`**；記憶體中只把 `goal.draftScore` 改回 `goal.appliedScore`（選中卡片、試算回到原生效設定；v0.10 畫面已無分數輸入框與滑桿），其餘欄位不變。**例外於 §5.3「任何變更後寫入」**：此 `draftScore` 還原不立即寫入，隨下一次 `PersistedData` 寫入一併寫出，以符合 AC-32-04「localStorage 與按「套用」前完全相同」（重新載入的顯示見 FB-35）。單字卡位置不變 | AC-32-04、E-60 |
 | CI-10 | **視窗開啟期間**：背景不可操作，因此不會發生任何學習行為（LR-1）或其他 `PersistedData` 寫入；按下任一按鈕前，記憶體與 localStorage 皆與按「套用」前相同 | AC-32-01 |
 
@@ -400,6 +439,7 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | (d) | 今日已學數 X > 0 | `data.todayLearned.date === today && data.todayLearned.wordKeys.length > 0` | 同 LR-6 的 X |
 | (e) | 近 30 天歷史中至少 1 天字數 > 0 | 存在鍵 k ∈ `data.learnedHistory`：k 為合法 `LocalDate`、today − 29 天 ≤ k ≤ **today − 1 天**、值 > 0 | **SA 定案：不看 today 那一天**。依 V-ST-11，`learnedHistory[today]` 恆等於 X，today 已由 (d) 涵蓋，(a)～(f) 的 OR 結果與含 today 時完全相同；排除後 AC-32-07「只讓 (d) 成立」的測試狀態才可能構造（FB-33）。視窗下限同 V-ST-10，跨午夜未正規化的舊鍵不計 |
 | (f) | 有打卡紀錄 | `data.streak.lastActiveDate !== null \|\| data.streak.days > 0` | — |
+| （v0.15） | 不列入 | `flashcardPosition`、`part5CorrectIds`、`part5UnansweredOnly` | PRD 共通規則 3：「有學習紀錄」判定不因 R-23 改變；AC-46-10 明定開關不列入。正常操作下答對紀錄非空必伴隨 (c) 成立；只有以 DevTools／匯入構造「答對紀錄非空但 (a)～(f) 皆不成立」時，切換色級不跳確認視窗、直接套用，答對紀錄**保留**（CI-1「不清除任何資料」），位置依 FP-4 回到第 1 張（FB-58） |
 
 清除欄位（= `LEARNING_PROGRESS_FIELDS`，按「確定」後的值；與 §5.2 預設值相同，即「清除網站資料後在首次畫面按開始學習」所得的值，AC-32-02）：
 
@@ -411,6 +451,7 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | (4) 打卡紀錄 | `streak` | `{ "days": 0, "lastActiveDate": null }` |
 | (5) 今日已學紀錄 | `todayLearned` | `{ "date": null, "wordKeys": [] }` |
 | (6) 近 30 天每日已學字數 | `learnedHistory` | `{}` |
+| （v0.15，Q-67 A）(7) 模擬測驗答對紀錄 | `part5CorrectIds` | `[]`（K = 0，所有「✓ 曾答對」消失） |
 
 保留欄位：
 
@@ -419,8 +460,10 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | `goal` | **改為新值**：`draftScore` = 新分數、`appliedScore` = 新分數、`appliedColor` = Color(新分數)、`effectiveColor` = `effective(新分數)`（同一般「套用」，V-ST-02） | AC-32-02 |
 | `customVocab` | **原值**：陣列長度、順序、每筆 11 個欄位（含 `id`、`createdAt`）與確定前完全相同。自訂單字「只清除掌握狀態」= 其 wordKey 隨 `masteredWordKeys` 清空而移除；`CustomVocabItem` 本身沒有掌握欄位，不需修改 | AC-32-03、AC-32-10 |
 | `sttNoticeAcknowledged` | **原值**（STT 說明已讀，屬使用設定） | AC-32-03、AC-08-13 |
-| 其他使用設定 | `PersistedData` 目前沒有其他使用設定欄位。日後新增的任何欄位，除非契約明文加入 `LEARNING_PROGRESS_FIELDS`，一律保留 | CI-4 |
-| `schemaVersion`、鍵名 | 不變：`schemaVersion` 2；鍵仍只有 §5.1 的 2 個；`PersistedData` 9 欄齊全（只有值改變） | AC-32-10 |
+| `part5UnansweredOnly`（v0.15） | **原值**（「只練沒答對」開關屬偏好設定，Q-67 A） | AC-45-08、AC-46-10 |
+| `flashcardPosition`（v0.15） | **`null`**（不是保留也不是學習進度：生效色級改變 → 回到第 1 張，FP-4、AC-03-05） | AC-44-08 |
+| 其他使用設定 | v0.14 以前 `PersistedData` 沒有其他使用設定欄位；v0.15 新增的偏好設定為 `part5UnansweredOnly`（上列）。日後新增的任何欄位，除非契約明文加入 `LEARNING_PROGRESS_FIELDS` 或另有規則，一律保留 | CI-4 |
+| `schemaVersion`、鍵名 | 不變：`schemaVersion` = `CURRENT_SCHEMA_VERSION`（v0.15 起 3）；鍵仍只有 §5.1 的 2 個；`PersistedData` 欄位齊全（v0.15 起 12 欄，程式寫出必含 3 個選填欄位；只有值改變） | AC-32-10 |
 
 初始化後的學習行為照一般規則重新計：LR-3 以 `todayLearned.date = null` 視同換日，同一天再學初始化前學過的字會重新計入；打卡依 `StreakState` 規則由 `lastActiveDate = null` → `days = 1`（AC-32-09、AC-17-02）。
 
@@ -458,6 +501,64 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | GS-7 | **預設值** = `SCORE_DEFAULT` 725（綠）：適用首次使用（記憶體預設，FS-2）、首次畫面重新整理（AC-25-04）、讀取失敗重設（AC-18-05）、localStorage 停用時的記憶體預設（AC-18-03） | AC-18-02、AC-25-01、AC-25-04、Q-39 |
 | GS-8 | **取消初始化確認**（CI-9）：`draftScore` 還原為 `appliedScore`，因此選中卡片回到 Color(`appliedScore`)（如既有 600 → 綠卡片），分數本身仍為 600 不轉換 | AC-32-04 |
 
+### 5.10 單字卡上次位置（v0.15，pg-frontend；PRD US-44、R-23 一、Q-63、Q-68）
+
+名詞：**單字集**、**N** = `RuntimeState.studySet` 與其長度（V-ST-04 的順序：內建依排名，其後自訂依 `createdAt`）；**紀錄** = `PersistedData.flashcardPosition`；**目前卡片** = `studySet[flashcard.index]`（畫面「第 index + 1 / N 張」）。
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| FP-1 | **資料**：紀錄為 `null`（無紀錄）或 `{ wordKey, ordinal }`：`wordKey` = 目前卡片的 `StudyCard.wordKey`（C-2）、`ordinal` = `flashcard.index + 1`。以 wordKey 為主鍵（新增／刪除其他自訂單字後仍找到同一張），ordinal 只作退回依據。**不記** `mode`、`isFlipped`、`quiz`（Q-68 A）：重新載入一律單字卡模式、正面；同一工作階段內切換功能區再回來的模式行為維持 v0.14 | AC-44-01、AC-44-04、AC-44-09 |
+| FP-2 | **解析（紀錄 → `flashcard.index`）**：(1) N = 0 → `index = 0`、顯示 AC-06-06 空狀態，**紀錄不動**；(2) 紀錄為 `null` → `index = 0`；(3) 在單字集中找 `wordKey` 相同（皆為 C-2 形式）的卡 → 找到則 `index` = 該卡位置；(4) 找不到 → `index = min(ordinal, N) − 1`（AC-44-05：被刪的自訂單字顯示原本的下一張，原為最後一張則前一張，與 AC-04-08 一致）。(1) 以外，解析後把**記憶體中的紀錄**更新為目前卡片的 `{ wordKey, ordinal }`（不因此呼叫 `setItem`，RD-4）。**執行時機**：啟動讀取後建立單字集時；單字集每次重建時（新增／刪除自訂單字、匯入成功）。生效色級改變不用解析，依 FP-4 | AC-44-01、AC-44-04、AC-44-05、AC-44-07、E-104～E-106 |
+| FP-3 | **換卡即寫入**：使用者操作使 `flashcard.index` 改變時（上一張、下一張、滑動、測驗模式下換題等任何改變目前卡片的操作），紀錄 = 新目前卡片的 `{ wordKey, ordinal }`，並在同一個事件處理中以**一次** `setItem` 寫入整筆 `StorageRecord`（不需離開頁面）。`index` 未改變（翻面、切換模式、重複點擊）不寫入。可先更新畫面再寫入，換卡顯示時間仍須 ≤ 100ms（AC-28-03、AC-44-02） | AC-44-01、AC-44-02、AC-18-01 |
+| FP-4 | **生效色級改變**（`goal.effectiveColor` 改變的「套用」，含無學習紀錄直接套用與初始化「確定」）：紀錄設為 `null`、`index = 0`，與 `goal` 變更**同一次** `setItem`（初始化時即 CI-5 的那一次）。確認視窗按「取消」→ 紀錄與 `index` 不變、不寫入（CI-9）。**生效色級未改變**的套用（綠 ↔ 藍 ↔ 金、同色重套用）單字集不變，紀錄與 `index` **不變**（FB-54）。首次畫面「開始學習」寫入 `null` | AC-44-08、AC-03-05、AC-32-04、E-108 |
+| FP-5 | **新增／刪除自訂單字**：單字集重建 → 依 FP-2 解析，解析後的紀錄與該次 `customVocab` 變更**同一次** `setItem` 寫出。刪除時目前卡片正是被刪的字，FP-2 (4) 即得 AC-04-08 的結果；刪除後單字集為空 → 空狀態、紀錄不動（FP-2 (1)）。新增自訂單字容量不足的回滾（AC-18-04）一併回滾紀錄 | AC-44-04、AC-44-05 (a)、AC-04-08、AC-44-07 |
+| FP-6 | **匯入**：備份中的紀錄經 IM-10 正規化後寫入（步驟 8）；步驟 9 重建單字集後依 FP-2 解析（記錄的單字不在匯入後的單字集 → AC-44-05）。v0.14 以前的備份 → `null` → 第 1 張 | AC-47-02、AC-47-03、AC-47-06 (b) |
+| FP-7 | **不是學習行為**：解析、還原、換卡寫入都不改 `todayLearned`、`learnedHistory`、`streak`、`masteredWordKeys`（LR-1 只有翻面、四選一作答、STT 評分）；還原後卡片為正面 | AC-44-03、AC-30-04 |
+| FP-8 | **不提示**：還原位置不顯示「從上次位置繼續」等提示、對話框、Toast；由導覽「單字卡」與主控台「開始今日學習」進入結果相同（DB-3 進入時不寫入） | AC-44-01、AC-39-03 |
+| FP-9 | **儲存不可用或失敗**：`storageStatus = "unavailable"` → 只更新記憶體，同一工作階段回到單字卡頁仍為該張，重新載入為第 1 張（AC-44-10 (a)）；寫入失敗依 WR-2 | AC-44-10、E-102、E-103 |
+
+### 5.11 模擬測驗答對紀錄與「只練沒答對」（v0.15，pg-frontend；PRD US-45、US-46、R-23 二、Q-64～Q-67、Q-69、Q-71）
+
+名詞：**題庫** = `PART5_QUESTION_BANK`（陣列順序 = 題庫順序）；**Q** = 題庫長度；**答對集合** = `new Set(part5CorrectIds)`；**曾答對(j)** = `題庫[j].id` 在答對集合中；**K** = 題庫中曾答對的題數（= 答對集合 ∩ 題庫 id 的大小，0 ≤ K ≤ Q）；**未答對(j)** = 非曾答對(j)（含從未作答與答錯過）；**next(f)** = 最小的 j ≥ f 且 未答對(j)，沒有則「無」；**開關** = `part5UnansweredOnly`。題庫為空（Q = 0）時沿用既有空題庫處理，本節不適用、不顯示 K 與開關。
+
+**答對紀錄（CR）**
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| CR-1 | **資料**：`part5CorrectIds` 只記「曾答對」的題目 id（Q-64 A），依首次答對先後附加、不重複；不記答錯、次數或最近一次結果 | AC-45-01、AC-45-03 |
+| CR-2 | **記錄**：作答（`lockedSelection` 由 null 變非 null）時，若所選 = `correctIndex` 且該題 id 不在答對集合 → 附加到陣列末尾。與該次作答的 `part5` 計數（AC-11-03）、打卡變更**同一次** `setItem`。答錯不移除、不改變；已鎖定後重複點擊不變（AC-11-06）；曾答對的題目再答對不重複附加 | AC-45-01～AC-45-03 |
+| CR-3 | **推導，不另存**：K、Q、曾答對(j) 每次繪製時計算；不得把 K 寫入任何儲存。答對紀錄中題庫不存在的 id **不顯示、不計入 K、不報錯、不刪除**（Q-71 A）；題庫新增的題目一律為未答對 | AC-45-05、AC-45-07、E-109 |
+| CR-4 | **顯示**：(a) 「✓ 曾答對」（`PART5_RECORD_TEXTS.correctBadge`）：目前題目曾答對時，在題目畫面顯示（未作答與已作答皆顯示），位置與樣式限制見該常數註解；(b) 「已答對 K / Q 題」（`correctCount`）：question、summary、allCorrect 三種畫面（UO-3）各恰 1 次，進度條附近、題目之上；作答後 ≤ 100ms 更新；(c) 主控台**不**新增 K 的顯示 | AC-45-01、AC-45-04、AC-45-05、AC-45-06 |
+| CR-5 | **既有計算不變**：累計答題數／答對數（AC-11-03、AC-11-06、AC-11-07）、本輪結算（AC-11-04）、主控台「模擬測驗正確率」= `totalCorrect ÷ totalAnswered`（AC-17-04、§5.4 末段）、打卡（模擬測驗作答照常打卡）、今日已學（不計入）完全與 v0.14 相同；曾答對的題目再作答照常計入；不以 K / Q 取代任何既有數字 | AC-45-06、PRD 共通規則 3 |
+| CR-6 | **「清除答對紀錄，重新來過」**（只出現在 allCorrect 畫面，UO-7）：先顯示確認對話框（文字須包含 `clearConfirmMustInclude` 兩段，只有「確定」「取消」）。「確定」→ `part5CorrectIds = []`；開關**維持原值**（開啟）；`part5` = `{ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 原值, totalCorrect: 原值 }`（本輪歸 0，同「重新開始」；累計不變）；一次 `setItem`。「取消」（含 Esc、點視窗外）→ 留在 allCorrect 畫面，資料完全不變、不呼叫 `setItem` | AC-46-08、Q-65 C |
+| CR-7 | **不清除的情況**：「重新開始」（AC-11-07）、「全部題目再練一次（保留紀錄）」（UO-7）、開關切換、匯出、生效色級未改變的套用、無學習紀錄時直接套用（FB-58）都不清除答對紀錄 | AC-45-06、AC-46-07 |
+| CR-8 | **清除的情況**：初始化「確定」（CI-4，`LEARNING_PROGRESS_FIELDS` (7)）、CR-6「確定」、讀取失敗整體重設（AC-18-05）；匯入時整欄由備份值取代（舊版備份 → `[]`） | AC-45-08、AC-32-02、AC-47-03 |
+| CR-9 | **安全**：題目 id 不顯示在畫面；匯入的 id 只做字串比對，不以 HTML 插入（C-7） | AC-47-08 |
+
+**只練沒答對（UO）**
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| UO-1 | **開關**：`part5UnansweredOnly`，預設 `false`；切換即寫入（一次 `setItem`，開啟時與 UO-4 的正規化結果同一次寫入）。切換本身不改變 `roundAnswered`、`roundCorrect`、`totalAnswered`、`totalCorrect`。屬偏好設定：初始化保留（Q-67 A）、隨備份保存與還原（Q-69 A）、不屬 CI-2 判定。控制項規格（原生核取方塊或 `role="switch"`、≥ 44×44 CSS px、鍵盤可操作、不只靠顏色）見 PRD AC-46-01，屬設計層 | AC-46-01、AC-46-04、AC-46-10 |
+| UO-2 | **開關關閉**：題目順序、「下一題」、結算、「重新開始」與 v0.14 完全相同（AC-11-01～AC-11-07、AC-40-01）；曾答對的題目照常出現並顯示「✓ 曾答對」 | AC-46-02、AC-46-09 |
+| UO-3 | **畫面種類推導**（`Part5ViewKind`，每次繪製時計算，不持久化）：設 `allDone` = 開關開啟 且 K = Q（Q > 0）。(1) `allDone` 且**不是**「`phase = "question"` 且 `lockedSelection ≠ null`」→ `"allCorrect"`（`phase = "summary"` 時同時顯示本輪結算「答對 x / y」）；(2) 否則 `phase = "summary"` → `"summary"`；(3) 否則 → `"question"`。(1) 的排除條件讓「剛答對最後一題、尚未按下一題」時仍顯示該題結果與解析（AC-46-04 (b)） | AC-46-06、E-111 |
+| UO-4 | **不變式正規化**（開關開啟期間，以未作答狀態顯示的題目一律不是曾答對的題目，AC-46-04）：當 開關開啟 且 `phase = "question"` 且 `lockedSelection = null` 且 曾答對(`currentIndex`) 且 K < Q → j = next(`currentIndex`)：有 → `currentIndex = j`；無（其後已無未答對，但之前仍有）→ `phase = "summary"`（本輪計數不變；結算畫面「重新開始」依 UO-6 從第一題未答對開始，FB-55）。K = Q 時不移動（UO-3 顯示 allCorrect）。**執行時機**：開關由關變開時（與開關同一次寫入）、啟動讀取後（V-ST-05 之後，只改記憶體，RD-4）、匯入步驟 7（IM-10）。`lockedSelection ≠ null` 的題目（已作答鎖定）不移動，等按「下一題」 | AC-46-04、E-110 |
+| UO-5 | **「下一題」（開關開啟）**：j = next(`currentIndex + 1`)：有 → `currentIndex = j`、`lockedSelection = null`、`phase = "question"`；無 → 以 v0.14 進入本輪結算的方式設 `phase = "summary"`（進度條 100%）。被跳過的題目不作答、不計入本輪與累計。顯示 ≤ 100ms。「第 i / N 題」與進度條仍以題庫題號計算（例：p5-001 之後跳到 p5-004 顯示「第 4 / 200 題」，Q-66 A） | AC-46-03、AC-46-05、E-112 |
+| UO-6 | **「重新開始」**（summary 畫面）：本輪歸 0、累計不變（AC-11-07）；`lockedSelection = null`、`phase = "question"`；`currentIndex` = 開關開啟 ? next(0) : 0。開關開啟且 next(0) 為「無」（K = Q）時不會出現此按鈕（UO-3 為 allCorrect）；若仍被觸發，`currentIndex = 0` 並依 UO-3 顯示 allCorrect，不得出現空白題目或無限跳題 | AC-46-05、AC-11-07 |
+| UO-7 | **allCorrect 畫面**：顯示 `allCorrectTitle`（{q} = Q，例「200 題全部答對！」）、「已答對 Q / Q 題」、開關；以 `replayKeepRecords`、`clearAndRestart` 兩個按鈕**取代**「重新開始」；不顯示任何未作答題目、不顯示「第 i / N 題」；進度條 100%（`aria-valuenow` = N，同 MT-1 結算）。(a) `replayKeepRecords` → 開關 = `false`；`part5` = `{ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, 累計原值 }`；答對紀錄不變（K 仍為 Q，p5-001 顯示「✓ 曾答對」）；一次 `setItem`（FB-56）。(b) `clearAndRestart` → CR-6 | AC-46-06、AC-46-07、AC-46-08 |
+| UO-8 | **開關由開變關**：`part5` 不變（目前顯示的題目或結算維持）；之後依 UO-2。在 allCorrect 畫面關閉開關 → 依 UO-3 變為 question（顯示目前題目，帶「✓ 曾答對」）或 summary | AC-46-09 |
+| UO-9 | **效能與邊界**：next() 為線性掃描（Q ≈ 200），須在 ≤ 100ms 內完成換題；任何情況不得產生無限迴圈、空白題目、`currentIndex` ≥ Q（V-ST-05 仍適用） | AC-46-03、AC-46-04、AC-46-06 |
+
+### 5.12 v0.15 新資料的寫入時機與失敗處理（WR；PRD US-47、AC-44-10、AC-47-07、E-102、E-103、E-115）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| WR-1 | **寫入時機總表**（皆為整筆 `StorageRecord` 一次 `setItem`，同一事件的其他變更合併寫入）：換卡（FP-3）；生效色級改變（FP-4，與 `goal` 同次）；新增／刪除自訂單字（FP-5，同次）；模擬測驗作答（CR-2，與計數同次）；開關切換（UO-1）；「全部題目再練一次」（UO-7 (a)）；「清除答對紀錄」確定（CR-6）；初始化確定（CI-5）；匯入（步驟 8）；遷移寫回（MG-7）。**不寫入**：啟動讀取、解析（FP-2）、正規化（RD-3、UO-4 啟動時）、進入任何頁面、切換單字卡／測驗模式（翻面仍依 LR-3 寫入學習紀錄，該次寫入一併寫出目前紀錄） | AC-44-01、AC-44-02、AC-45-01、AC-46-10、AC-47-01 |
+| WR-2 | **容量不足**（IM-7）：記憶體保留新值，畫面照常（換卡、標示、K、開關照常運作）；若 `RuntimeState.learningQuotaNoticeShown` 為 false → 提示「儲存空間不足」並設為 true（**同一工作階段只提示一次，與 AC-30-14 學習紀錄共用同一旗標**）；localStorage 原值不變（既有已儲存資料不被破壞），下一次寫入再試。其他寫入例外：同樣保留記憶體、不提示。**不適用**的例外（維持原規則）：新增自訂單字回滾（AC-18-04）、初始化（CI-7）、匯入（步驟 8 `quota`／`write_failed`） | AC-44-10 (b)、AC-47-07 (b)、E-103 |
+| WR-3 | **localStorage 停用**（`storageStatus = "unavailable"`）：只更新記憶體；本工作階段內位置、「✓ 曾答對」、K、開關照常運作，持續顯示「進度將無法保存」；重新載入後回到預設值（第 1 張、K = 0、開關關閉） | AC-44-10 (a)、AC-47-07 (a)、E-102 |
+| WR-4 | **不產生網路請求**：上述寫入、匯出、匯入皆為本機操作（AC-18-06）；不引入外部函式庫 | AC-47-08 |
+| WR-5 | **多分頁**：同一來源同時開兩個分頁各自換卡或作答時，以最後一次寫入為準，不即時同步、不監聽 `storage` 事件；不得白屏或報錯（範圍外，不視為缺陷）。另見 FB-57 舊版分頁覆寫的知會 | E-115 |
+
 ---
 
 ## 6. 備份匯出與匯入（US-24）
@@ -466,7 +567,7 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 
 | 項目 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| 內容 | `BackupFile`：`format` = `"english-master-track-backup"`、`schemaVersion` = 目前版本（v0.8 起為 2）、`exportedAt`、`contentDataVersion`、`data` = 記憶體中的 `PersistedData`（localStorage 停用時仍可匯出）。（v0.8）匯出前以匯出當下的 today 依 V-ST-09～V-ST-11 正規化 `todayLearned`、`learnedHistory`，`data` 須符合 `storage-schema.json` `$defs/PersistedDataWritten` | AC-24-01、AC-24-02、AC-30-09 |
+| 內容 | `BackupFile`：`format` = `"english-master-track-backup"`、`schemaVersion` = 目前版本（v0.8 起為 2；**v0.15 起為 3**）、`exportedAt`、`contentDataVersion`、`data` = 記憶體中的 `PersistedData`（localStorage 停用時仍可匯出）。（v0.8）匯出前以匯出當下的 today 依 V-ST-09～V-ST-11 正規化 `todayLearned`、`learnedHistory`，`data` 須符合 `storage-schema.json` `$defs/PersistedDataWritten`。（v0.15）`data` 必含 `flashcardPosition`（目前紀錄，可為 `null`）、`part5CorrectIds`（含題庫中不存在的 id，Q-71 A）、`part5UnansweredOnly`（Q-69 A）；頂層仍恰 5 欄 | AC-24-01、AC-24-02、AC-30-09、AC-47-02 |
 | 不含 | 內建字庫、題庫、例句、句型、執行期狀態 | AC-24-02 |
 | 檔名 | `english-master-track-backup-YYYYMMDD.json`（本地日期）。（v0.12）前綴不隨 App 改名變動（`FROZEN_IDENTIFIERS.backupFileNamePrefix`，§11.1 NM-5） | AC-24-01、AC-38-10 |
 | 方式 | 本機產生檔案下載，不產生網路請求 | AC-24-01、AC-18-06 |
@@ -477,13 +578,13 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | :--- | :--- | :--- | :--- |
 | 1 | 讀檔；空檔或 `JSON.parse` 失敗 | `format`：「備份檔格式錯誤，未匯入」 | AC-24-05 |
 | 2 | 頂層不是物件，或 `format` 不等於 `"english-master-track-backup"` | `format` | AC-24-05 |
-| 3 | `schemaVersion` 缺失、非整數或不在 `SUPPORTED_SCHEMA_VERSIONS` | `version`：「備份檔版本不相容」，列出檔案版本與支援版本（v0.8 起「1、2」）。檔案版本依 IM-3 顯示 | AC-24-06 |
-| 4 | `schemaVersion` = 1 → 依 MG-1、MG-2、MG-4 只遷移 `data`（補 `todayLearned`、`learnedHistory` 預設值）；`data` 不是物件 → `format` | `format` | AC-24-06、AC-24-10 |
-| 5 | (a) 頂層欄位以 `$defs/BackupFile` 驗證：`exportedAt` 為 date-time（IM-2）、`contentDataVersion` 為字串、`data` 存在、不得有 5 個欄位以外的多餘欄位；(b) `data` 以 `$defs/PersistedData` 驗證並檢查 V-ST-03，**但不檢查** `customVocab` 的 `id` 不重複、wordKey 不重複（IM-1）。（v0.8）`schemaVersion` = 2 的檔案 `data` 缺少 `todayLearned`／`learnedHistory`，或其 shape 不符（`$defs/TodayLearnedState`、`$defs/LearnedHistory`）→ `format`；項目層級無效不在此擋（IM-8） | `format` | AC-24-05、AC-24-11 |
+| 3 | `schemaVersion` 缺失、非整數或不在 `SUPPORTED_SCHEMA_VERSIONS` | `version`：「備份檔版本不相容」，列出檔案版本與支援版本（v0.8 起「1、2」；**v0.15 起「1、2、3」**）。檔案版本依 IM-3 顯示 | AC-24-06 |
+| 4 | `schemaVersion` = 1 → 依 MG-1、MG-2、MG-4 只遷移 `data`（補 `todayLearned`、`learnedHistory` 預設值），（v0.15）再依 MG-5、MG-6、MG-8 補 3 個新欄位預設值；`schemaVersion` = 2 → 依 MG-5、MG-6、MG-8 補 3 個新欄位預設值；`data` 不是物件 → `format` | `format` | AC-24-06、AC-24-10、AC-47-03 |
+| 5 | (a) 頂層欄位以 `$defs/BackupFile` 驗證：`exportedAt` 為 date-time（IM-2）、`contentDataVersion` 為字串、`data` 存在、不得有 5 個欄位以外的多餘欄位；(b) `data` 以 `$defs/PersistedData` 驗證並檢查 V-ST-03，**但不檢查** `customVocab` 的 `id` 不重複、wordKey 不重複（IM-1）。（v0.8）`schemaVersion` = 2（v0.15 起含 3）的檔案 `data` 缺少 `todayLearned`／`learnedHistory`，或其 shape 不符（`$defs/TodayLearnedState`、`$defs/LearnedHistory`）→ `format`；項目層級無效不在此擋（IM-8）。（v0.15）`schemaVersion` = 3 的檔案 3 個新欄位依 IM-9：缺少 → 不算錯誤（步驟 7 補預設值）；存在但 shape 不符 → `format` | `format` | AC-24-05、AC-24-11、AC-47-06 (c) |
 | 6 | 顯示確認對話框「匯入將覆蓋目前所有進度」 | 取消 → `cancelled`，不提示錯誤 | AC-24-04 |
-| 7 | 清理：自訂單字 wordKey 與內建字庫（**全部**排名，不限目前色級）重複 → 略過；檔內自訂單字 wordKey 重複 → 保留第一筆、略過其餘；`id` 重複 → 重新產生（不計略過；新 id 須符合 `^c_[A-Za-z0-9_-]{1,64}$` 且不與保留項重複）；已掌握 wordKey 不在「內建字庫 ∪ 清理後自訂單字」→ 略過；重算色級；`part5.currentIndex` 依 V-ST-05；（v0.8）以**匯入當天**（執行本步驟時的本地日期）為 today，依 V-ST-09～V-ST-11 正規化 `todayLearned`、`learnedHistory`（IM-8；`todayLearned.wordKeys` **不**與字庫比對、不因字不存在而略過）；**清理後以 `$defs/PersistedData` 與完整 V-ST-03 再驗一次**，不通過 → `format`（防禦性檢查，正常不會發生） | 清理後驗證失敗 → `format` | AC-24-08、AC-24-05 |
-| 8 | 整筆 `StorageRecord` 以一次 `setItem` 寫入 | 容量不足（IM-7）→ `quota`：「儲存空間不足，未匯入」；其他寫入例外 → `write_failed`：「儲存失敗，未匯入」（v0.7 定案，IM-6、FB-24）。兩者皆記憶體與 localStorage 不變 | AC-24-09 |
-| 9 | 套用到記憶體並重建單字集；提示「已匯入，略過 N 筆」（N = 步驟 7 略過的自訂單字數 + 已掌握單字數；不含捨棄的歷史項目與今日紀錄，IM-8）。（v0.8）從首次畫面匯入時另依 FS-5 切換為 `entryMode = "main"` 並進入主控台 | localStorage 停用時：只套用記憶體並維持「進度將無法保存」警示 | AC-24-03、AC-24-08、AC-25-10 |
+| 7 | 清理：自訂單字 wordKey 與內建字庫（**全部**排名，不限目前色級）重複 → 略過；檔內自訂單字 wordKey 重複 → 保留第一筆、略過其餘；`id` 重複 → 重新產生（不計略過；新 id 須符合 `^c_[A-Za-z0-9_-]{1,64}$` 且不與保留項重複）；已掌握 wordKey 不在「內建字庫 ∪ 清理後自訂單字」→ 略過；重算色級；`part5.currentIndex` 依 V-ST-05；（v0.8）以**匯入當天**（執行本步驟時的本地日期）為 today，依 V-ST-09～V-ST-11 正規化 `todayLearned`、`learnedHistory`（IM-8；`todayLearned.wordKeys` **不**與字庫比對、不因字不存在而略過）；（v0.15）依 IM-10 處理 3 個新欄位（補預設值、項目層級正規化、UO-4）；**清理後以 `$defs/PersistedData` 與完整 V-ST-03 再驗一次**，不通過 → `format`（防禦性檢查，正常不會發生） | 清理後驗證失敗 → `format` | AC-24-08、AC-24-05、AC-47-06 |
+| 8 | 整筆 `StorageRecord`（v0.15 起 `schemaVersion` 3，`data` 符合 `$defs/PersistedDataWritten`）以一次 `setItem` 寫入 | 容量不足（IM-7）→ `quota`：「儲存空間不足，未匯入」；其他寫入例外 → `write_failed`：「儲存失敗，未匯入」（v0.7 定案，IM-6、FB-24）。兩者皆記憶體與 localStorage 不變 | AC-24-09 |
+| 9 | 套用到記憶體並重建單字集（v0.15：重建後依 FP-2 解析單字卡位置，FP-6）；提示「已匯入，略過 N 筆」（N = 步驟 7 略過的自訂單字數 + 已掌握單字數；不含捨棄的歷史項目與今日紀錄，IM-8；v0.15 亦不含 IM-10 捨棄或保留的答對紀錄項目與位置）。匯入不觸發 US-32 確認視窗（CI-1、AC-32-08）。（v0.8）從首次畫面匯入時另依 FS-5 切換為 `entryMode = "main"` 並進入主控台 | localStorage 停用時：只套用記憶體並維持「進度將無法保存」警示 | AC-24-03、AC-24-08、AC-25-10 |
 
 匯入內容的所有字串一律以純文字呈現（C-7、AC-24-07）。
 
@@ -499,6 +600,8 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | IM-6 | （v0.6，FE-07 #3）步驟 8 `setItem` 拋出的例外分兩類：符合 IM-7 → `quota`；其他（如 `SecurityError`、瀏覽器在工作階段中途停用儲存、未知例外）→ 執行期錯誤碼 `write_failed`。處理與 `quota` 相同：不套用、記憶體與 localStorage 皆不變、不白屏。畫面文字為「儲存失敗，未匯入」（v0.7 依人類決議定案，FB-24 已解除）；`write_failed` 不提供 `fileVersion`。步驟 8 只在 localStorage 可用時執行；停用時依步驟 9 只套用記憶體，不產生 `write_failed` | AC-24-09 |
 | IM-7 | **容量不足的判定**（§5.3「寫入：容量不足」與步驟 8 共用）：例外物件 `e` 符合任一條件即為容量不足：`e.name === "QuotaExceededError"`、`e.name === "NS_ERROR_DOM_QUOTA_REACHED"`、`e.code === 22`、`e.code === 1014`。其餘皆不是容量不足 | AC-18-04、AC-24-09 |
 | IM-8 | （v0.8）**新欄位的匯入處理分兩層**：(1) 欄位層級——`schemaVersion` 2 的檔案缺少 `todayLearned`／`learnedHistory`，或 shape 不符（`todayLearned` 不是物件、缺 `date`／`wordKeys`、有多餘鍵、`date` 非字串且非 null、`wordKeys` 不是陣列；`learnedHistory` 不是物件，如陣列、null、字串）→ 步驟 5 判 `format`，**整份不匯入**（與讀 localStorage 的 RD-1「只重設該欄」不同，依 PRD R-17 (b)）；(2) 項目層級——shape 正確但內容無效（歷史鍵不是合法日期如 `2026-13-40`、`yesterday`；值為負數、非整數、非數字；日期晚於匯入當天或早於匯入當天往前第 29 天；`todayLearned.date` 不是匯入當天；`wordKeys` 含非字串、空白、未正規化或重複項）→ 步驟 7 依 V-ST-09～V-ST-11 捨棄或重設，不報錯、**不計入**「略過 N 筆」。`schemaVersion` 1 的檔案經步驟 4 遷移後兩欄必為預設值 | AC-24-05、AC-24-10、AC-24-11、E-55、E-56 |
+| IM-9 | （v0.15）**v0.15 新欄位的欄位層級**（步驟 5，只適用 `schemaVersion` 3 的檔案；1、2 的檔案經步驟 4 必為預設值）：(1) 鍵不存在 → 不是錯誤（選填，Q-63 A），步驟 7 補預設值；(2) 存在但 shape 不符 → `format`，**整份不匯入**、目前資料完全不變：`part5CorrectIds` 不是陣列；`part5UnansweredOnly` 不是布林值（含 `"true"`、`0`、`1`、`null`）；`flashcardPosition` 不是 `null` 也不是物件（含陣列）、缺 `wordKey`／`ordinal`、有多餘鍵、`wordKey` 不是字串、`ordinal` 不是整數或 < 1。與讀 localStorage 的 RD-3「只重設該欄」不同（PRD AC-47-06 (c) 對 AC-47-05） | AC-47-06 (c)、AC-24-05、E-116 |
+| IM-10 | （v0.15）**v0.15 新欄位的項目層級**（步驟 7，純計算）：(1) 缺少的欄位補 §5.2 預設值；(2) `part5CorrectIds`：捨棄非字串、trim 後為空的項目，重複只保留第一次出現；題庫中不存在的 id **保留**（Q-71 A）；(3) `flashcardPosition`：`wordKey` 改為 C-2 正規化結果，C-2 後為空 → `null`；**不**與單字集比對（不存在的單字照存，步驟 9 依 FP-2 → AC-44-05）；(4) 在 V-ST-05 之後依匯入的開關值執行 UO-4；(5) 以上皆不報錯、**不計入**「略過 N 筆」（Q-71 A、AC-47-06 (a)） | AC-47-06 (a)(b)、AC-45-07、E-116 |
 
 ### 6.3 備份格式版本號（v0.8）
 
@@ -509,6 +612,10 @@ CI-2「有學習紀錄」與實際欄位的對應（PRD US-32 名詞表 (a)～(f
 | 本版匯入 | 支援 `[1, 2]`。1 = v0.7 程式匯出（`data` 無新欄位）→ 遷移後照常匯入，今日已學數 0、歷史為空，不顯示格式錯誤或版本不相容；2 = 本版匯出 → 依 IM-8 | AC-24-06、AC-24-10、AC-24-11 |
 | 不支援 | 缺失、非整數、0、負數、≥ 3 → `version`，訊息列出檔案版本（IM-3）與支援版本「1、2」 | AC-24-06 |
 | 反向相容（知會） | v0.7 程式只支援 `[1]`，匯入本版（2）的備份會顯示版本不相容；不提供降版匯出（FB-29） | — |
+| （v0.15）本版匯出 | `schemaVersion` = 3；`data` 12 欄，含 `flashcardPosition`（單字與序號）、`part5CorrectIds`（曾答對的題目 id）、`part5UnansweredOnly`（開關）；頂層仍恰 5 欄、`format` 不變、檔名前綴不變 | AC-24-02、AC-47-02 |
+| （v0.15）本版匯入 | 支援 `[1, 2, 3]`。1 = v0.7、2 = v0.8～v0.14 程式匯出 → 遷移後照常匯入，既有資料全部還原，第 1 張、K = 0、開關關閉，不顯示格式錯誤或版本不相容；3 = 本版匯出 → 依 IM-8～IM-10 | AC-47-03、AC-24-06、AC-24-10 |
+| （v0.15）不支援 | 缺失、非整數、0、負數、≥ 4 → `version`，訊息列出檔案版本與支援版本「1、2、3」 | AC-24-06 |
+| （v0.15）降版（知會） | v0.8～v0.14 程式只支援 `[1, 2]`，匯入本版備份顯示「備份檔版本不相容」，屬預期行為（PRD E-117，範圍外）；不提供降版匯出（FB-57） | E-117 |
 
 ---
 
@@ -583,6 +690,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | V-P5-05 | `correctIndex` ∈ 0～3；`options[correctIndex]` 填入空格後為唯一正確答案；全題庫正解位置 A～D 各佔 20%～30% | AC-11-01 |
 | V-P5-06 | `explanation.coreStrategy`、`explanation.structure` 皆非空 | AC-11-02 |
 | V-P5-07 | `source` = `"ORIGINAL"`；陣列順序即出題順序 | AC-11-04、AC-23-04 |
+| V-P5-08 | （v0.15，Q-71）**id 穩定**：與上一個交付版本相比，既有 `id` 仍指同一題（題意與正解相同；錯字、解析文字修正可沿用）；不得把既有 id 改號或改指另一題；刪除的 id 不得重用於新題；新增題目使用未用過的 id。題庫順序（陣列順序）調整不影響 id | AC-45-07、E-109 |
 
 ### 7.5 長難句、閱讀策略（`decoder.js`）
 
@@ -610,7 +718,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| V-ST-01 | 讀入的 `StorageRecord` 必須通過 `storage-schema.json` 驗證。（v0.8）`schemaVersion` 1 先依 MG-1～MG-4 遷移再驗證；`todayLearned`、`learnedHistory` 先依 RD-1 處理（缺少或 shape 不符只重設該欄），不因這兩欄觸發整體重設 | AC-18-05、AC-30-12、AC-30-13 |
+| V-ST-01 | 讀入的 `StorageRecord` 必須通過 `storage-schema.json` 驗證。（v0.8）`schemaVersion` 1 先依 MG-1～MG-4 遷移再驗證；`todayLearned`、`learnedHistory` 先依 RD-1 處理（缺少或 shape 不符只重設該欄），不因這兩欄觸發整體重設。（v0.15）`schemaVersion` 1、2 再依 MG-5～MG-8 遷移到 3；`flashcardPosition`、`part5CorrectIds`、`part5UnansweredOnly` 先依 RD-3 處理，不因這三欄觸發整體重設 | AC-18-05、AC-30-12、AC-30-13、AC-47-04、AC-47-05 |
 | V-ST-02 | `appliedColor` = Color(`appliedScore`)；`effectiveColor` = `appliedColor` 為 blue／gold 時 `"green"`，否則同 `appliedColor`；讀取時一律重算覆蓋 | AC-01-07、AC-17-06 |
 | V-ST-03 | `vocabQuiz.correct ≤ answered`；`part5.roundCorrect ≤ roundAnswered ≤ totalAnswered`；`part5.totalCorrect ≤ totalAnswered`；`customVocab` 的 `id` 不重複、wordKey 不重複；`masteredWordKeys` 已是 wordKey 正規化形式。**例外**（v0.5）：匯入 §6.2 步驟 5 不檢查 `customVocab` 的 `id`／wordKey 不重複，步驟 7 清理後再完整檢查（IM-1）；啟動讀取 localStorage 一律完整檢查 | AC-18-05、AC-24-05 |
 | V-ST-04 | 單字集 = 內建排名 1～N（orange `N_O`、brown `N_B`、green `N_G`）+ 全部自訂單字（依 `createdAt` 遞增）；若內建資料更新後與既有自訂單字 wordKey 相同，單字集只放內建那張，自訂資料保留不刪。**（v0.5 釐清，SD-FB-03）去重只比對「本次截取」的內建卡**（排名 1～N）：該內建字在範圍內 → 只放內建卡、略過自訂卡；不在範圍內（例：生效色級為橘、該內建字排名 3,000）→ 放自訂卡。效果：每個 wordKey 在單字集中恰好出現一次，且不會因色級較低而讓使用者的自訂字消失。「共 N 張」= 截取的內建張數 + 未被略過的自訂張數（AC-03-04）。註：新增自訂單字、範本注入、匯入仍與**全部**內建字庫比對（AC-04-06、AC-05-02、AC-24-08、§6.2 步驟 7），此情況只會因內建資料更新而出現 | AC-03-01～AC-03-04 |
@@ -623,11 +731,16 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | V-ST-11 | （v0.8）一致性（在 V-ST-09、V-ST-10 之後執行）：`todayLearned.date` = today → `learnedHistory[today] = wordKeys.length`（覆寫原值）；`todayLearned.date` 為 null → 刪除 `learnedHistory[today]`（今天顯示 0，與 X 一致）。程式寫出的 `data` 須符合 `$defs/PersistedDataWritten` | AC-30-09、AC-30-11、AC-24-11 |
 | V-ST-12 | （v0.8）學習紀錄只依 §5.4 LR-1～LR-8 變更：同一 wordKey 同一天只計 1 次；刪除自訂單字、未觸發初始化的套用不移除 `wordKeys` 也不回扣 `learnedHistory`；模擬測驗作答、未翻面瀏覽、STT 失敗不記錄。（v0.9）切換難易度確認初始化時兩欄整欄回到預設值（§5.7） | AC-30-03～AC-30-07、AC-30-11、AC-32-02 |
 | V-ST-13 | （v0.8）首次判定與首次畫面期間的寫入限制依 §5.5 FS-1～FS-7：主鍵不存在才是首次；首次畫面期間對主鍵、`unreadable` 鍵的寫入次數 = 0；只有「開始學習」或備份還原成功才寫入第一筆 | AC-25-01、AC-25-04、AC-25-07、AC-25-09～AC-25-11 |
-| V-ST-14 | （v0.9）切換難易度初始化依 §5.7 CI-1～CI-10：只在生效色級改變且有學習紀錄時跳出確認視窗；「確定」後 `LEARNING_PROGRESS_FIELDS` 6 欄 = §5.2 預設值、`goal` = 新值、`customVocab` 與 `sttNoticeAcknowledged` 與確定前深度相等；一次 `setItem`，失敗時記憶體與 localStorage 皆不變；取消時 `setItem` 呼叫次數 = 0 | AC-32-01～AC-32-11 |
+| V-ST-14 | （v0.9）切換難易度初始化依 §5.7 CI-1～CI-10：只在生效色級改變且有學習紀錄時跳出確認視窗；「確定」後 `LEARNING_PROGRESS_FIELDS` 各欄（v0.15 起 7 欄，含 `part5CorrectIds = []`）= §5.2 預設值、`goal` = 新值、`customVocab`、`sttNoticeAcknowledged`、（v0.15）`part5UnansweredOnly` 與確定前深度相等、`flashcardPosition = null`；一次 `setItem`，失敗時記憶體與 localStorage 皆不變；取消時 `setItem` 呼叫次數 = 0 | AC-32-01～AC-32-11、AC-45-08、AC-44-08 |
 | V-ST-15 | （v0.9）隱藏頁面依 §5.8 HT-1～HT-5：導覽恰為 `NAV_TAB_ORDER` 4 項；`currentTab` 永不屬於 `HIDDEN_TAB_IDS`；`decoder.js`、`phrasebank.js` 仍在交付檔中 | AC-20-03、AC-20-04、AC-27-01 |
 | V-ST-16 | （v0.10）目標分數依 §5.9 GS-1～GS-8：點卡片後 `draftScore` ∈ {215, 465, 725, 855, 990} 且等於該色 `scoreMax`；預設值為 725；合法的既有分數在讀取、遷移、匯入、未點卡片直接套用後皆維持原值；不合法分數只在讀取（AC-18-05）與匯入（`format`）時處理，不四捨五入；畫面不出現分數數值、分數範圍與分數輸入錯誤提示 | AC-01-05、AC-18-02、AC-25-04、AC-26-05、AC-26-06 |
 | V-ST-17 | （v0.14）領域範本依 §5.8 HT-6～HT-9：範本區塊外層容器同時有 `hidden`、`inert`，計算後 `display: none`；Tab 順序不含範本按鈕；畫面可見文字（含 `aria-label`、`title`）以「範本」搜尋結果 = 0（使用者輸入內容除外）；`window.DOMAIN_TEMPLATES` 仍為 3 筆；含 `origin = "template"` 項目的 v0.13 localStorage 與備份在載入、匯入、匯出、初始化前後各欄位值逐一相同 | AC-43-01～AC-43-03、E-100 |
-| V-IMP-01 | 匯入依 §6.2 順序與 IM-1～IM-8；任何失敗或取消不改動記憶體與 localStorage | AC-24-04～AC-24-06、AC-24-09、AC-24-10、AC-24-11、AC-25-11 |
+| V-ST-18 | （v0.15）單字卡位置依 §5.10 FP-1～FP-9：(a) 每次 `flashcard.index` 由使用者操作改變後，localStorage 中 `flashcardPosition` = `{ wordKey: studySet[index].wordKey, ordinal: index + 1 }`（`setItem` 在同一事件內呼叫 1 次）；(b) 解析結果符合 FP-2 四種情況（含 AC-44-04 以單字找回、AC-44-05 (a)(b)(c) 的 min(i, N)、AC-44-07 空集合紀錄不動）；(c) 生效色級改變後為 `null`，取消或未改變生效色級時不變；(d) 進入單字卡頁、啟動讀取時 `setItem` 呼叫次數 = 0；(e) 重新載入一律 `mode = "card"`、正面；(f) 換卡不改 `todayLearned`、`learnedHistory`、`streak` | AC-44-01～AC-44-10 |
+| V-ST-19 | （v0.15）答對紀錄依 §5.11 CR-1～CR-9：答對未曾答對的題 → 陣列多 1 個 id；答錯、重複點擊、再次答對 → 陣列不變；K = 題庫 id ∩ 答對集合的大小（不存在的 id、重複 id 不計，且仍保留於 localStorage）；`totalAnswered`、`totalCorrect`、`roundAnswered`、`roundCorrect`、主控台正確率、`streak`、`todayLearned` 的變化與 v0.14 同一操作序列完全相同；「重新開始」與「全部題目再練一次」後陣列不變；CR-6「確定」後為 `[]` 且累計不變，「取消」時 `setItem` 呼叫次數 = 0 | AC-45-01～AC-45-08、AC-46-07、AC-46-08 |
+| V-ST-20 | （v0.15）只練沒答對依 §5.11 UO-1～UO-9：開關開啟期間，任何時刻（含開啟當下、重新載入、匯入後、「重新開始」後）以未作答狀態顯示的題目皆不是曾答對的題目；「下一題」跳到 next(`currentIndex + 1`)，跳過的題目不計入本輪；`currentIndex` 永遠 < Q；K = Q 時畫面為 allCorrect（剛作答鎖定的題目除外），不出現空白題目或無限跳題；「第 i / N 題」i = `currentIndex + 1`；開關切換不改任何計數；開關值在重新載入、匯出→清除→匯入後不變，初始化後不變 | AC-46-01～AC-46-10、E-110～E-112 |
+| V-ST-21 | （v0.15）遷移與相容：(a) v0.14 程式寫入的 localStorage（`schemaVersion` 2）以 v0.15 開啟 → 直接進主控台、不提示錯誤；遷移後 localStorage 為 `schemaVersion` 3、`data` 前 9 欄與遷移前深度相等、3 個新欄位為 `null`、`[]`、`false`；再重新載入，localStorage 內容不變（不重複升級）；(b) v0.7（1）同樣直接升到 3；(c) v0.14、v0.7 匯出的備份匯入成功且既有欄位逐一相等；(d) RD-3：3 個新欄位任一 shape 錯誤只重設該欄，其他欄位深度相等、`unreadable` 鍵不被寫入、不提示「資料讀取失敗」；`part5CorrectIds` 的非字串項目被捨棄、其餘保留 | AC-47-03、AC-47-04、AC-47-05、E-113、E-114 |
+| V-ST-22 | （v0.15）寫入失敗依 §5.12 WR-2、WR-3：容量不足時畫面照常、「儲存空間不足」整個工作階段只出現 1 次（與學習紀錄共用），localStorage 原值不變；停用時本工作階段照常運作，重新載入為預設值；全程不拋出未處理錯誤、無網路請求 | AC-44-10、AC-47-07、AC-47-08 |
+| V-IMP-01 | 匯入依 §6.2 順序與 IM-1～IM-10；任何失敗或取消不改動記憶體與 localStorage。（v0.15）匯出檔符合 `$defs/PersistedDataWritten`、`schemaVersion` 3；IM-9 的每種 shape 錯誤皆為 `format`；IM-10 的項目層級無效皆不計入略過筆數 | AC-24-04～AC-24-06、AC-24-09、AC-24-10、AC-24-11、AC-25-11、AC-47-02、AC-47-03、AC-47-06 |
 
 ---
 
@@ -737,6 +850,54 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-43-02、E-100（新增） | §5.8 HT-7（空狀態文字由 SD 定，DS-27；來源標示不含「範本」，FB-51）、V-ST-17 |
 | AC-43-03、E-19（v0.14） | §5.8 HT-9、`CustomVocabOrigin`、`CustomVocabItem.templateId`、`storage-schema.json` `$defs` enum 不變、§6.2 匯入規則不變、V-ST-17 |
 
+**v0.15 新增與修改（PRD R-23）**
+
+| AC／E | 契約欄位／規則 |
+| :--- | :--- |
+| AC-44-01、AC-44-02 | `PersistedData.flashcardPosition`、`FlashcardPosition`、§5.10 FP-1～FP-3、FP-8、WR-1、V-ST-18 (a)(d) |
+| AC-44-03 | FP-7、LR-1、V-ST-18 (f) |
+| AC-44-04、E-105 | FP-1（wordKey 為主鍵）、FP-2 (3)、FP-5 |
+| AC-44-05、E-104 | FP-2 (4) min(ordinal, N)、FP-5、FP-6、IM-10 (3) |
+| AC-44-06、E-107 | §5.2 預設 `null`、MG-6、RD-3、`$defs/FlashcardPosition` |
+| AC-44-07、E-106 | FP-2 (1) 空集合紀錄不動 |
+| AC-44-08、E-108 | FP-4、CI-4、CI-8、CI-9、V-ST-14 |
+| AC-44-09 | FP-1（不記 `mode`、`isFlipped`）、`RuntimeState.flashcard` 註解 |
+| AC-44-10、AC-47-07、E-102、E-103 | FP-9、§5.12 WR-2、WR-3、`learningQuotaNoticeShown`（共用）、IM-7、V-ST-22 |
+| AC-45-01～AC-45-03 | `PersistedData.part5CorrectIds`、CR-1、CR-2、V-ST-19 |
+| AC-45-04、AC-45-05 | CR-3、CR-4、`PART5_RECORD_TEXTS.correctBadge`／`correctCount`、`Part5ViewKind`；版面屬設計層 |
+| AC-45-06 | CR-5、CR-7、`Part5Progress` 註解（計數不變） |
+| AC-45-07、E-109 | CR-3、RD-3 (c)、IM-10 (2)、V-P5-08、`$defs/Part5CorrectIds` |
+| AC-45-08 | `LEARNING_PROGRESS_FIELDS`（7）、CI-4、CI-8、§5.7 清除／保留表、UO-1 |
+| AC-46-01 | `PersistedData.part5UnansweredOnly`、UO-1、`PART5_RECORD_TEXTS.unansweredOnlyLabel`；控制項樣式屬設計層 |
+| AC-46-02、AC-46-09 | UO-2、UO-8 |
+| AC-46-03、AC-46-05、E-112 | UO-5、UO-6、MT-1（題庫題號，Q-66 A） |
+| AC-46-04、E-110 | UO-4、UO-3 排除條件、IM-10 (4)、§5.3 啟動列 |
+| AC-46-06、E-111 | UO-3、UO-7、`Part5ViewKind` `"allCorrect"`、`PART5_RECORD_TEXTS.allCorrectTitle` |
+| AC-46-07 | UO-7 (a)、`replayKeepRecords` |
+| AC-46-08 | CR-6、`clearAndRestart`、`clearConfirmMustInclude`、`confirmOk`、`confirmCancel` |
+| AC-46-10 | UO-1、§6.1、§6.3、CI-2（不列入） |
+| AC-47-01、AC-18-01（v0.15 修改） | §5.1（不新增鍵）、§5.2、WR-1、`$defs/PersistedDataWritten` |
+| AC-47-02、AC-24-02（v0.15 修改） | §6.1、§6.3、FP-6、FS-5（首次畫面還原同一程序） |
+| AC-47-03、E-113 | MG-5～MG-8、§6.2 步驟 4、§6.3、V-ST-21 (c) |
+| AC-47-04、E-114 | §5.3 版本表與升版判斷、MG-5～MG-7（冪等）、V-ST-21 (a)(b) |
+| AC-47-05、E-116（localStorage） | RD-3、RD-4、V-ST-21 (d) |
+| AC-47-06、E-116（備份） | IM-9、IM-10、§6.2 步驟 5、7、9 |
+| AC-47-08 | WR-4、CR-9、C-7 |
+| AC-32-02（v0.15 修改） | §5.7 清除表 (7)、CI-8（「已答對 0 / Q 題」）、FP-4 |
+| AC-42-02（v0.15 修改，1.1.0） | §12.1 VR-1～VR-3（版本值只來自 `package.json`，契約無版本常數；Q-70 A） |
+| AC-01-08、AC-26-06、AC-32-10、AC-36-04、AC-37-06、AC-38-10、AC-42-03、AC-43-03（「`schemaVersion` 2」改讀） | C-8：讀作 `CURRENT_SCHEMA_VERSION`（3）；AC-38-10、AC-37-06 比對同一版程式操作前狀態 |
+| E-115 | WR-5、FB-57 |
+| E-117 | §6.3（v0.15）降版、FB-57 |
+
+**v0.16 新增與修改（PRD R-24）**
+
+| AC／E | 契約欄位／規則 |
+| :--- | :--- |
+| AC-23-07、E-118、E-119（新增） | `SOURCES_CONTACT_TEXT`（§16）、§4.3 L-7、C-7、VC-3、VC-7；版面與樣式屬設計層 |
+| AC-36-03（v0.16 文字修改）、E-79 | `PWA_TEXTS.updateNotice`「有新版本，請更新版本」、`updateButton`「更新版本」；§10.7 UP-4～UP-7（行為不變）、V-PWA-10 |
+| AC-42-04（v0.16 文字修改） | §12.1 VR-4 (b)（提示文字同步）；建置規則不變 |
+| E-120 | 不需契約欄位：舊版頁面顯示舊版程式內的文字屬預期；UP 流程不變 |
+
 ---
 
 ## 9. 回饋上游
@@ -783,7 +944,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | FB-36 | （v0.10 新增）AC-26-06 的前置條件「目標分數分別設為 10、215、…、735（以 DevTools 修改）」只寫一個值，但資料有 `draftScore`（決定選中卡片，GS-1）與 `appliedScore`（目標分數）兩欄。若只改 `appliedScore`、`draftScore` 仍是別的值，選中卡片與「直接套用」後的分數會依 `draftScore`，AC 不成立 | QA、PM | 待辦（知會，SA 定案） | 不需改 PRD；QA 構造 AC-26-06 狀態時**兩欄設為同一值**（與正常套用後的資料一致），`appliedColor`／`effectiveColor` 可任填合法值（讀取時依 V-ST-02 重算）；匯入備份的方式同理 |
 | FB-37 | （v0.11 新增）AC-37-05 要求頁面請求「全部在部署目錄內」，但 HTML 沒有 `<link rel="icon">` 時，Chrome 會自動請求網域根目錄的 `/favicon.ico`（不在部署目錄、也不在預先快取清單），違反該 AC。契約以 HD-4 規定 HTML 靜態放 `<link rel="icon" href="data:,">`（`data:` 網址不產生網路請求），https 版可改指向預先快取清單內的 `icons/icon-192.png` | PM、QA | 待辦（知會，SA 定案） | 不需改 PRD；QA 驗 AC-37-05 時若看到 `/favicon.ico` 請求即為缺陷 |
 | FB-38 | **已解除（v0.12）**：PRD v0.12 AC-34-05 已改為「檢查載入後的頁面元素」並註明連結由程式動態加入。原文：（v0.11 新增）AC-34-01、AC-34-05 寫「檢查原始碼」頁面有 manifest 與 `<link rel="apple-touch-icon">`，但 R-20 PM 判斷 (d) 與 AC-37-01 要求 `file://` 下不得讀取 manifest，契約因此禁止 HTML 靜態寫入這兩個 `<link>`，只在 PE-1 成立時以程式加入（HD-2、HD-3）。交付 HTML 原始檔中**不會**有這兩個標籤 | QA、PM | 待辦（知會，SA 定案） | 不需改 PRD；QA 以載入後的 DOM（DevTools Elements）檢查，原始檔只檢查加入連結的程式與 PE-1 條件。若 PM 希望文字一致，可把 AC-34-05「檢查原始碼」改為「檢查載入後的頁面元素」 |
-| FB-39 | （v0.11 新增）AC-35-01 要求「本專案快取恰為 1 個」。依 Q-43 決議 A，新版已安裝但使用者尚未按「重新整理」期間，舊版快取（使用中）與新版快取（等待中）會同時存在，共 2 個；新版啟用時才刪除舊版（SW-9） | QA | 待辦（知會） | 不需改 PRD；AC-35-01 為首次造訪情境不受影響；AC-36-05 依 PRD 在 V2 **啟用後**檢查。QA 不要在等待期間以 AC-35-01 判定 |
+| FB-39 | （v0.11 新增）AC-35-01 要求「本專案快取恰為 1 個」。依 Q-43 決議 A，新版已安裝但使用者尚未按「重新整理」（v0.16 起按鈕文字為「更新版本」）期間，舊版快取（使用中）與新版快取（等待中）會同時存在，共 2 個；新版啟用時才刪除舊版（SW-9） | QA | 待辦（知會） | 不需改 PRD；AC-35-01 為首次造訪情境不受影響；AC-36-05 依 PRD 在 V2 **啟用後**檢查。QA 不要在等待期間以 AC-35-01 判定 |
 | FB-40 | **已解除（v0.12）**：PRD v0.12 AC-34-08 已補註 (e) 按鈕是否出現由瀏覽器決定、不視為缺陷。原文：（v0.11 新增）AC-34-08 (e)「已安裝後以瀏覽器分頁開啟」不顯示按鈕：網頁無法可靠判斷「本應用已安裝但目前在分頁中」（`getInstalledRelatedApps` 需要 manifest `related_applications`，契約 MF-1 為隱私禁止此欄）。契約依賴 Chromium「已安裝時不觸發 `beforeinstallprompt`」的行為（IN-3），沒有另外的偵測 | PM、QA | 待辦（知會） | 不需改 PRD；若某瀏覽器版本在已安裝時仍觸發事件，按鈕會出現，屬瀏覽器行為，建議比照 AC-34-09 (b) 的「是否再次觸發由瀏覽器決定，不視為缺陷」處理；如 PM 同意，可於 AC-34-08 補註 |
 | FB-41 | **已解除（v0.12）**：PRD v0.12 Q-54 決議 A，`theme_color` 改為 `#1e9bf0`；`background_color` 依 AC-34-04、AC-38-02 改為新背景 `#eef4fa`（§10.3、VC-5）。原文：（v0.11 新增）PRD 未指定 `theme_color` 的色值（AC-34-01 只要求格式 `#RRGGBB`、AC-34-04 只要求與 meta 相同）。SA 定為 App 主色 `#2f6fd6`（`--primary`）；`background_color` 依 AC-34-04 定為首次畫面 body 背景 `#f6f7f9`（`--bg`） | 人類 | 待辦（知會，SA 定案） | 契約核准即視為同意；若人類想改用圖示的藍色，只需改 `PWA_THEME_COLOR` 與 `PWA_MANIFEST.theme_color`（不涉持久化，可由主控代核） |
 | FB-42 | （v0.11 新增）AC-34-07 允許 QA「以替身事件觸發」`beforeinstallprompt`。契約 IN-3 規定只接受具有 `prompt` 函式的事件（避免按下按鈕時拋出錯誤，AC-34-09 (c)），以 `new Event("beforeinstallprompt")` 建立的空事件會被忽略、按鈕不顯示 | QA | 待辦（知會） | 不需改 PRD；替身事件須附 `prompt()`（回傳 Promise）與 `userChoice`（Promise，值 `{ outcome: "accepted" \| "dismissed" }`），並可呼叫 `preventDefault()` |
@@ -798,6 +959,15 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | FB-51 | （v0.14 新增）AC-43-02 的 Given 只涵蓋「自訂單字為空」「單字集為空」兩種狀態，未明說**有範本單字時**自訂清單的來源標示（現行實作為「範本：資工」等）是否也不得出現「範本」；AC-43-03 只要求標示「自訂擴充」 | PM、QA | 待辦（知會，SA 定案） | 契約依 Q-59「提示文字中『範本』字樣移除」與 US-43「不出現暫不提供的領域範本與相關提示」的意旨，定為**任何狀態**的畫面文字都不得出現「範本」（HT-7 (b)）；範本單字仍標「自訂擴充」，是否另顯示領域名稱由 SD 定。PM 若同意，可在 AC-43-03 (2) 補「不顯示含『範本』的來源標示」 |
 | FB-52 | （v0.14 新增）PRD 未給自訂清單空狀態、單字卡空狀態刪除「範本」字樣後的完整文字（AC-43-02 只規定不得含「範本」、文句完整、仍有引導） | SD、PM | 待辦（知會） | 契約不定義這兩段文字（`LAYOUT_TEXTS` 只收 PRD 原文），由 SD 在 architecture.md 定案（DS-27），限制見 HT-7 (a)。PM 若要固定文字，補進 AC 後契約再加常數（不涉持久化，可主控代核） |
 | FB-53 | （v0.14 新增）AC-42-04 (b) 要求只改 `package.json` 版本號也要改變 BUILD_ID，但 v0.13 契約 SW-2 只以 HTML、manifest、圖示、sw 範本計算，若版本號在 BUILD_ID 之後才寫入或只在執行期讀取，(b) 無法成立（PRD Q-58 亦已提醒） | SD、QA | 待辦（知會，SA 定案） | 契約以 VR-2、VR-4 規定版本號寫入 HTML meta 且**在計算 BUILD_ID 之前**寫入，SW-2 輸入 (1) 改為「已含版本號、`emt-build-id` 仍為佔位的 HTML」；不另把 `package.json` 整檔納入雜湊（避免 `scripts`、`devDependencies` 等與交付無關的修改也觸發 PWA 更新）。QA 以 V-VER-02 驗證 |
+| FB-54 | （v0.15 新增）AC-03-05、AC-44-08 寫「套用不同色級」回到第 1 張，未說明**生效色級未改變**的套用（綠 → 藍、綠 → 金、綠 → 綠重套用；單字集相同）是否也回到第 1 張 | PM、QA | 待辦（知會，SA 定案） | 契約定為只有 `goal.effectiveColor` 改變才回到第 1 張並把位置設為 `null`；生效色級未改變時單字集不變，位置保留（FP-4）。與 AC-32-05「綠↔藍↔金不跳確認、學習進度不變」同一判準。PM 若希望任何套用都回到第 1 張，改 FP-4 即可（不涉持久化結構） |
+| FB-55 | （v0.15 新增）AC-46-04 (a)、E-110 規定開關開啟時目前題目為曾答對且未作答 → 改顯示「其後」第一題未答對題目，但未規定**其後已無未答對、之前仍有**（K < Q）時顯示什麼 | PM、QA | 待辦（知會，SA 定案） | 契約定為進入本輪結算（`phase = "summary"`），「重新開始」從題庫順序第一題未答對開始（UO-4），與 AC-46-05「按下一題後其後已無未答對」一致，不出現空白題目、不回頭跳題 |
+| FB-56 | （v0.15 新增）AC-46-07、AC-46-08 只寫「顯示第 1 題未作答」「累計不變」，未說明本輪計數（`roundAnswered`、`roundCorrect`）是否歸 0 | QA | 待辦（知會，SA 定案） | 契約定為兩個選擇都等同「重新開始」：本輪歸 0、累計不變（UO-7 (a)、CR-6），之後的本輪結算只計新一輪 |
+| FB-57 | （v0.15 新增）**降版與舊版分頁**：(a) `schemaVersion` 升為 3 後，若使用者改用 v0.14 以前的交付檔（`file://` 舊檔，或 https 版尚未更新的 PWA 頁面）開啟同一來源，舊程式會把 3 視為無法讀取並依其 AC-18-05 重設（原字串保留在 `englishMasterTrack:unreadable`，可人工救回）；舊程式匯入新版備份顯示「版本不相容」（PRD E-117 預期）。(b) 同一來源若有 v0.14 分頁仍開著，它的下一次寫入會以 v2 格式覆蓋（新欄位遺失、其記憶體中較舊的進度覆蓋新進度），新版下次開啟時再遷移（E-115 範圍外） | 人類 | 待辦（知會） | 不需改 PRD。不升版也無法避免 (a)（v0.14 對多餘欄位同樣整體重設），升版反而讓備份錯誤訊息正確。建議發布說明提醒「更新後請關閉舊分頁、勿再用舊檔案開啟」；PWA 依既有 UP 流程按「重新整理」（v0.16 起按鈕文字為「更新版本」）即全部分頁換新版 |
+| FB-58 | （v0.15 新增）PRD 共通規則 3 規定「有學習紀錄」判定不變，因此以 DevTools／匯入構造「答對紀錄非空、但 (a)～(f) 皆不成立」時，切換色級不跳確認視窗、不初始化，答對紀錄保留；與 AC-45-08「切換色級清空答對紀錄」的前提（有學習紀錄）不衝突 | QA | 待辦（知會，SA 定案） | 正常操作下不會出現（答對必伴隨累計答題數 > 0）。QA 不以此情境判定 AC-45-08 |
+| FB-59 | （v0.15 新增）AC-47-06 (c) 寫「上次位置不是物件」視為格式錯誤；契約以 `null` 表示「無紀錄」（首次使用、切換色級後、v0.14 以前資料遷移後皆為 `null`，本版匯出檔也可能是 `null`），`null` 屬合法值、不是格式錯誤 | PM、QA | 待辦（知會，SA 定案） | 不需改 PRD；QA 構造 AC-47-06 (c) 時使用陣列、字串、數字或缺鍵的物件，不使用 `null`。PM 可在 AC-47-06 (c) 補「（`null` 表示無紀錄，合法）」 |
+| FB-60 | （v0.15 新增）PRD 未規定「清除答對紀錄，重新來過」確定時寫入 localStorage 失敗的行為（AC-47-07 只列作答與開關） | PM | 待辦（知會，SA 定案） | 契約依一般寫入規則 WR-2：畫面與記憶體照常清除、提示「儲存空間不足」（同一工作階段一次），localStorage 保留舊紀錄，下次寫入再試；未採用初始化（CI-7）的「整個不套用」。PM 若希望改為不套用並提示「儲存空間不足，未清除」，補 AC 後契約再改 |
+| FB-61 | （v0.16 新增）R-24 的 2 處變更是人類直接手改建置產物 `dist/english-master-track.html`；下次執行建置會由 `src/app/` 重新產生並**覆蓋**手改內容，且手改後的 HTML 與 `sw.js` 快取名稱的 BUILD_ID 可能不一致（SW-2、AC-36-02） | 主控、SD | 待辦（知會） | 不需改 PRD。契約已把兩段文字收為常數（`PWA_TEXTS`、`SOURCES_CONTACT_TEXT`），須由 pg-frontend 改 `src/app/` 後重新建置，交付以建置產物為準，不以手改檔為準（§9.9 DS-40） |
+| FB-62 | （v0.16 新增）AC-23-07 (2) 的「原始碼中不出現不帶空格的完整位址」只約束交付 HTML；契約文件、PRD、`src/app/` 原始碼只出現帶空格的形式，L-7 (3) 另禁止執行期以字串處理組出無空格位址（否則 DOM 或記憶體中會出現完整位址，違背防爬蟲目的） | QA | 待辦（知會，SA 定案） | QA 除檢查交付 HTML 外，可在 DevTools 以 `document.documentElement.outerHTML` 搜尋無空格位址確認為 0 |
 
 ### 9.1 下游回饋處理紀錄（v0.5，/pg-run 階段）
 
@@ -876,6 +1046,25 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | DS-29 | 狀態列、目標行、「變更」按鈕（AC-01-08、AC-39-04） | §12.2 LS-1～LS-5、DB-4（v0.14）、`levelStatus`、`changeLink` 註解 | 難易度設定頁兩行色級標籤改為一行 `levelStatus`；主控台目標行一律 `goalLineSame`，移除 `goalLineCapped`、`goalLineSeparator` 的使用；「變更」改 `<button>` 次要／外框樣式（不得用 `#f7893b`、`#d5d9e0`，≥ 44×44 CSS px，有焦點框）；既有測試（V-LAY-08 五種目標行）同步改寫，FE 測試列 V-LAY-09、V-LAY-10 |
 | DS-30 | 頁尾版本行（AC-42-01、AC-41-04） | §12.1 VR-5～VR-8、`VERSION_LINE_TEXT`、`BUILD_CODE_LENGTH` | 決定頁尾元件（所有畫面共用、每畫面恰 1 行、位於「資料來源與授權」連結正下方）、讀取 meta 的時機（建議啟動時讀一次存模組常數）、字級與顏色（`textMuted` 等，對比 ≥ 4.5:1）、≤ 640px 底部留白（不被底部導覽列與首次畫面固定底部列遮住）；FE 測試列 V-VER-03、V-VER-04 |
 | DS-31 | 工作範圍 | 持久化結構不變（`schemaVersion` 2、鍵 2、無遷移）；`src/data/` 不改 | 不需 CT 任務、不需遷移任務；FE 任務與建置任務依 DS-26～DS-30；QA 依 V-VER-01～V-VER-06、V-ST-17、V-LAY-09、V-LAY-10 與 PRD AC-42、AC-43、AC-01-08 及 13 條修改 AC 驗收；AC-05-01～AC-05-05 列「不適用（v0.14 暫停）」 |
+
+### 9.8 回饋下游（v0.15，給 SD；PRD R-23、Q-63～Q-71）
+
+| 編號 | 事項 | 契約的立場 | 請 SD 處理 |
+| :--- | :--- | :--- | :--- |
+| DS-32 | 遷移 v2 → v3（AC-47-03、AC-47-04） | §5.3 MG-5～MG-8、RD-3、RD-4；`CURRENT_SCHEMA_VERSION` 3、`SUPPORTED_SCHEMA_VERSIONS` `[1, 2, 3]` | 安排遷移任務：讀取鏈 1 → 2 → 3、匯入步驟 4 串接、寫回一次；以 v0.14 實際寫入的 localStorage 與匯出檔（含 v0.7 樣本）建立測試夾具；更新既有斷言 `schemaVersion === 2` 的測試（C-8）；V-ST-21 |
+| DS-33 | 單字卡位置的模組歸屬（US-44） | §5.10 FP-1～FP-9（資料與時機已定） | 決定「解析（FP-2）」放在單字集建立處或單字卡模組、換卡寫入的掛點（按鈕、滑動、測驗模式換題共用一個入口）、寫入時機相對於畫面更新（須維持 AC-44-02 ≤ 100ms）；確認現行「刪除自訂單字後回到單字卡頁」的程式改由 FP-2 (4) 取代，避免兩套邏輯；V-ST-18 |
+| DS-34 | 模擬測驗狀態機（US-45、US-46） | §5.11 CR-1～CR-9、UO-1～UO-9；`Part5ViewKind` 為推導值 | 把「下一題」「重新開始」「開關切換」「全部再練一次」「清除答對紀錄」整理為單一狀態轉移模組（純函式易測）；UO-4 正規化的呼叫點（啟動、開關開啟、匯入）；進度條在 allCorrect 畫面 100%（MT-1 擴充）；V-ST-19、V-ST-20 |
+| DS-35 | 畫面文字與版面（AC-45-04、AC-45-05、AC-46-01、AC-46-06、AC-46-08） | `PART5_RECORD_TEXTS` 只收 PRD 原文 | 定案：「全部答對」畫面除標題外的說明句（若有）、確認對話框完整句子與標題（須含兩段必要文字、只有確定／取消）；標示、計數行、開關的位置、樣式（不用強調橘、對比 ≥ 4.5:1、tabular-nums、375px 不裁切、44×44）與減少動態；確認對話框可沿用 US-32 的對話框元件（Esc／點外部 = 取消） |
+| DS-36 | 寫入失敗提示（AC-44-10、AC-47-07） | §5.12 WR-2：與 `learningQuotaNoticeShown` 共用 | 把現行各處寫入（學習紀錄、作答、位置、開關）的容量不足處理收斂為同一個函式；新增自訂單字、初始化、匯入維持各自的既有處理 |
+| DS-37 | 題目 id 穩定（Q-71） | V-P5-08；本版 `src/data/` 不需修改 | 不需 CT 任務；若 SD 認為需要，可加一個建置期或測試期檢查：比對前一版 `part5.js` 的 id → 題目指紋（如 `sentence` + `options[correctIndex]`），變更即警告 |
+| DS-38 | 網站版本 1.1.0（Q-70 A、AC-42-02） | §12.1：版本值只來自 `package.json`，契約與 `src/app/` 不寫死 | 依 Q-70 A 由主控在本次實作時一次性把 `package.json` `version` 改為 `1.1.0`（`package.json` 不屬 PG 目錄）；建置測試 V-VER-02 的範例值可沿用 |
+| DS-39 | 工作範圍 | **持久化結構變更（`schemaVersion` 3）**；鍵數 2 不變；`src/data/` 格式與值不變 | 不需 CT 任務（DS-37 選擇性）；FE 任務依 DS-32～DS-36；遷移屬持久化結構變更，契約須人類核准後才能開工（CLAUDE.md）；QA 依 V-ST-18～V-ST-22、V-IMP-01、V-P5-08 與 PRD AC-44～AC-47、修改的 AC-18-01、AC-24-02、AC-32-02、AC-42-02 及 C-8 改讀的 8 條 AC 驗收 |
+
+### 9.9 回饋下游（v0.16，給 SD；PRD R-24）
+
+| 編號 | 事項 | 契約的立場 | 請 SD 處理 |
+| :--- | :--- | :--- | :--- |
+| DS-40 | 工作範圍（AC-23-07、AC-36-03、AC-42-04） | **文字層級修訂**：`PWA_TEXTS.updateNotice`／`updateButton` 改值；新增 `SOURCES_CONTACT_TEXT` 與 L-7；持久化結構不變（`schemaVersion` 3、鍵數 2）；`src/data/` 不變 | 不需 CT 任務。FE 任務：(1) 更新提示與按鈕改用新常數值；(2) 「資料來源與授權」頁內容區末段（頁尾連結與版本行之上）新增 1 行，以 `textContent` 寫入常數，樣式沿用該頁次要文字；(3) 建置或測試期靜態檢查：交付 HTML 不含 `mailto:`、不含無空格位址（FB-62）、含 `SOURCES_CONTACT_TEXT` 原值（帶空格形式）、不含舊文字「有新版本，重新整理」；(4) 重新建置取代人類手改的 `dist/`（FB-61）；網站版本維持 1.1.0（PRD R-24），BUILD_ID 隨內容改變屬預期 |
 
 ---
 
@@ -989,10 +1178,10 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | UP-1 | 版本 V2 部署後，瀏覽器在頁面導覽（開啟 App、重新載入）時依 SW-1 取得新的 `sw.js`；位元組不同即安裝 V2（SW-4）。契約不另加定時輪詢 | AC-36-03 |
 | UP-2 | **偵測新版**：`register()` 成功後設 `lastUpdateCheckAt` = 現在；若 `registration.waiting` 存在且 `navigator.serviceWorker.controller` 不為 null → `updateAvailable = true`。另監聽 `registration` 的 `updatefound`：新 worker 的 `statechange` 變為 `"installed"` 且 `controller` 不為 null → `updateAvailable = true`。`controller` 為 null（首次安裝）時不設定 | AC-36-03 |
 | UP-3 | **回到前景**：`document.visibilityState` 變為 `"visible"` 且 `performance.now() − lastUpdateCheckAt ≥ PWA_UPDATE_RECHECK_MS`（1 小時）→ 呼叫 `registration.update()`（失敗靜默，PE-3），並更新 `lastUpdateCheckAt` | AC-36-03 情境 (2) |
-| UP-4 | **按「重新整理」**：設 `reloadRequested = true`；若 `registration.waiting` 存在 → 對它 `postMessage({ type: "SKIP_WAITING" })`；不存在（已被其他分頁啟用）→ 直接 `location.reload()`。重複點擊不再送訊息 | AC-36-03 |
+| UP-4 | **按「更新版本」**（`PWA_TEXTS.updateButton`；v0.15 以前文字為「重新整理」，R-24 一只改文字）：設 `reloadRequested = true`；若 `registration.waiting` 存在 → 對它 `postMessage({ type: "SKIP_WAITING" })`；不存在（已被其他分頁啟用）→ 直接 `location.reload()`。重複點擊不再送訊息 | AC-36-03 |
 | UP-5 | **`controllerchange`**：只有 `reloadRequested = true` 時呼叫 `location.reload()`，且頁面期間至多 1 次；其他情況（首次安裝 `clients.claim()`、其他分頁觸發換版）不重新載入 | AC-36-03 |
-| UP-6 | **新版提示**：`eligible && updateAvailable` 時顯示 `PWA_TEXTS.updateNotice`「有新版本，重新整理」與按鈕 `PWA_TEXTS.updateButton`「重新整理」；任何 `entryMode`、任何頁面皆可顯示；純文字、非彈出視窗、不阻擋操作、不被底部導覽列遮住、減少動態下無動畫（位置與樣式屬設計層） | AC-36-03、AC-27-03、AC-31-03 |
-| UP-7 | **不按「重新整理」**：頁面維持 V1 正常運作；不自動 `skipWaiting()`、不自動重新載入；關閉本應用全部視窗與分頁後重新開啟，由瀏覽器依預設生命週期啟用 V2 | AC-36-03、E-79 |
+| UP-6 | **新版提示**：`eligible && updateAvailable` 時顯示 `PWA_TEXTS.updateNotice`「有新版本，請更新版本」與按鈕 `PWA_TEXTS.updateButton`「更新版本」（v0.16 文字變更，R-24 一；顯示條件與行為不變）；兩段文字逐字取自常數，不得沿用舊文字「有新版本，重新整理」「重新整理」；任何 `entryMode`、任何頁面皆可顯示；純文字、非彈出視窗、不阻擋操作、不被底部導覽列遮住、減少動態下無動畫（位置與樣式屬設計層） | AC-36-03、AC-27-03、AC-31-03 |
+| UP-7 | **不按「更新版本」**：頁面維持 V1 正常運作；不自動 `skipWaiting()`、不自動重新載入；關閉本應用全部視窗與分頁後重新開啟，由瀏覽器依預設生命週期啟用 V2 | AC-36-03、E-79 |
 | UP-8 | 更新過程不讀寫 localStorage；V2 啟動後依 §5.3 照常讀取（`schemaVersion` 2、鍵名不變；首次畫面者仍無狀態鍵） | AC-36-04 |
 | UP-9 | **離線**：更新檢查失敗靜默（PE-3），`updateAvailable` 維持 false，不顯示提示、不報錯，以 V1 快取開啟；恢復連網後再開啟即依 UP-1 更新 | AC-36-06、E-78 |
 
@@ -1047,7 +1236,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | V-PWA-07 | `file://` 執行期：`getRegistrations()` 為空、DOM 無 manifest／apple-touch-icon 連結、Network 請求 0、Console 無錯誤與 manifest／service worker／圖示警告、無安裝按鈕與新版提示、NT-1 說明顯示 | AC-37-01、AC-37-02 |
 | V-PWA-08 | PE-1 判定表（單元測試）：`file:///…` → false；`https://x.github.io/p/` 且有 `serviceWorker` → true；`http://localhost:8080/` → true；`http://127.0.0.1/` → true；`http://192.168.0.2/` → false；https 但 `navigator.serviceWorker` 不存在 → false；存取 `navigator.serviceWorker` 拋例外 → false | AC-37-04、AC-37-03 |
 | V-PWA-09 | 安裝按鈕狀態機（單元測試，替身事件依 FB-42）：事件前不顯示；事件後只在主控台顯示；按下後立即消失且 `prompt()` 只被呼叫 1 次（含快速連點 2 次）；接受、拒絕後本頁不再顯示（再次觸發事件也不顯示）；`appinstalled` 後不顯示；`standalone` 或 `eligible = false` 時永不顯示 | AC-34-07～AC-34-10 |
-| V-PWA-10 | 更新流程：首次安裝不顯示提示且不重新載入；有 waiting worker 且有 controller 時顯示提示；按「重新整理」送出恰 1 則 `{ type: "SKIP_WAITING" }`，`controllerchange` 後重新載入恰 1 次；未按時不換版；離線時不提示 | AC-36-03、AC-36-06 |
+| V-PWA-10 | 更新流程：首次安裝不顯示提示且不重新載入；有 waiting worker 且有 controller 時顯示提示；提示與按鈕文字逐字等於 `PWA_TEXTS.updateNotice`／`updateButton`（v0.16）；按「更新版本」送出恰 1 則 `{ type: "SKIP_WAITING" }`，`controllerchange` 後重新載入恰 1 次；未按時不換版；離線時不提示 | AC-36-03、AC-36-06 |
 | V-PWA-11 | 儲存：PWA 啟用前後 localStorage 鍵名與 `StorageRecord` 欄位集合相同、`schemaVersion` 2；Cache Storage 依 PV-5；V2 啟用後舊本專案快取已刪、非前綴快取保留；IndexedDB 無本系統資料庫 | AC-36-04、AC-36-05、AC-37-06、AC-21-03、AC-35-01 |
 | V-PWA-12 | 請求：V-PWA (a) 完整操作後，所有請求為同源、部署目錄內、GET、網址屬 `PWA_PRECACHE_URLS` 或 `sw.js`；無 `/favicon.ico` 等部署目錄外請求 | AC-37-05、AC-21-01 |
 
@@ -1102,6 +1291,14 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | 近 7 天空狀態 | 由 LR-6 顯示值推導 | 不另存 | §5.4 末段 |
 
 v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `schemaVersion` 維持 2、`PersistedData` 9 欄不變。日後若要求記住展開狀態等，屬持久化結構變更，須回 PM 並由人類核准（CLAUDE.md）。
+（v0.15）PRD R-23 依 Q-63（人類核准）新增 3 項跨工作階段資料（§5.10、§5.11），`schemaVersion` 升為 3；以下仍**只在記憶體**：單字卡／測驗模式與正反面（Q-68 A）、模擬測驗畫面種類 `Part5ViewKind`（UO-3 推導）、K 與 Q（CR-3 推導）、「清除答對紀錄」確認對話框開啟狀態。
+
+| 狀態 | 存放 | 持久化 | 說明 |
+| :--- | :--- | :--- | :--- |
+| 單字卡上次位置 | `PersistedData.flashcardPosition` | 是（v0.15） | FP-1～FP-9 |
+| 模擬測驗答對紀錄 | `PersistedData.part5CorrectIds` | 是（v0.15） | CR-1～CR-9 |
+| 「只練沒答對」開關 | `PersistedData.part5UnansweredOnly` | 是（v0.15） | UO-1 |
+| 模擬測驗畫面種類、K、Q | 推導 | 否 | UO-3、CR-3 |
 
 ### 11.4 主控台（DB；US-39、Q-50、Q-52、Q-56）
 
@@ -1129,7 +1326,7 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| MT-1 | **進度推導**（不新增狀態）：N = 畫面「第 i / N 題」所用的題數（題庫長度 `PART5_QUESTION_BANK.length`）；`part5.phase = "question"` 時 i = `part5.currentIndex + 1`、填滿 i ÷ N、`aria-valuenow` = i；`phase = "summary"` 時填滿 100%、`aria-valuenow` = N（FB-47）；`aria-valuemax` = N、`role="progressbar"`。「重新開始」後依既有規則 `currentIndex` = 0 → 1 ÷ N；重新載入後由持久化的 `part5` 推導（AC-11-05）。N = 0（題庫為空）時不顯示進度條，沿用既有空題庫處理 | AC-40-01、AC-11-05 |
+| MT-1 | **進度推導**（不新增狀態）：N = 畫面「第 i / N 題」所用的題數（題庫長度 `PART5_QUESTION_BANK.length`）；`part5.phase = "question"` 時 i = `part5.currentIndex + 1`、填滿 i ÷ N、`aria-valuenow` = i；`phase = "summary"` 時填滿 100%、`aria-valuenow` = N（FB-47）；`aria-valuemax` = N、`role="progressbar"`。「重新開始」後依既有規則 `currentIndex` = 0 → 1 ÷ N；重新載入後由持久化的 `part5` 推導（AC-11-05）。N = 0（題庫為空）時不顯示進度條，沿用既有空題庫處理。（v0.15）開關開啟時仍以題庫題號計算（跳號顯示，如「第 4 / 200 題」，Q-66 A、UO-5）；`Part5ViewKind` = `"allCorrect"` 時同結算：填滿 100%、`aria-valuenow` = N、不顯示「第 i / N 題」（UO-7） | AC-40-01、AC-11-05、AC-46-03、AC-46-06 |
 | MT-2 | 進度條填色 `COLOR_TOKENS.brand`；作答選項對錯色 `SEMANTIC_COLORS.correct`／`wrong` 不變；`Part5Progress` 欄位與寫入時機不變 | AC-40-01、AC-40-03、AC-38-03 |
 
 ### 11.7 驗證規則（V-LAY；pg-frontend 單元測試、QA 驗收）
@@ -1153,16 +1350,18 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 
 ### 12.1 網站版本號（VR；US-42、Q-58、Q-62）
 
-名詞：**版本號** X.Y.Z = 建置時專案根目錄 `package.json` 的 `version`（人類發布時手動維護，本次 1.0.0）；**建置碼** = BUILD_ID（`<meta name="emt-build-id">` 的 `content`，SW-2）前 `BUILD_CODE_LENGTH`（7）個字元；**版本行** = 頁尾的「版本 X.Y.Z（建置 xxxxxxx）」。
+（v0.15 註記，Q-70 A、AC-42-02 修改）**v0.15 發布的版本號為 `1.1.0`**（新增功能、相容舊資料，屬次版號），由主控在本次實作時一次性修改 `package.json`，之後仍由人類維護。契約**沒有**版本值常數（VR-5 禁止在 `src/app/` 寫死版本號），本節規則全部不變；頁尾顯示「版本 1.1.0（建置 xxxxxxx）」。網站版本號與 `schemaVersion`（3）、契約文件版本（0.15）是三個互不相關的編號。
+
+名詞：**版本號** X.Y.Z = 建置時專案根目錄 `package.json` 的 `version`（人類發布時手動維護，v0.14 發布 1.0.0，v0.15 發布 1.1.0）；**建置碼** = BUILD_ID（`<meta name="emt-build-id">` 的 `content`，SW-2）前 `BUILD_CODE_LENGTH`（7）個字元；**版本行** = 頁尾的「版本 X.Y.Z（建置 xxxxxxx）」。
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
 | VR-1 | **來源**：只有建置程式在建置時讀取專案根目錄 `package.json` 的 `version`。`package.json` 不打包進 HTML、不放入部署目錄（DP-1 仍恰 8 檔）、頁面執行期不讀取 | AC-42-02、AC-42-03 |
 | VR-2 | **存在形式**：交付 HTML 的 `<head>` 含**恰 1 個** `<meta name="emt-app-version" content="X.Y.Z">`（`APP_VERSION_META_NAME`；HD-1 靜態元素，不產生請求；`file://` 與 https 為同一份 HTML，DP-2）。**佔位規則比照 `emt-build-id`**：原始模板中 `content` 為以 `@@` 前後包夾的固定佔位字串（實際字串由 SD 定，建議 `@@APP_VERSION@@`），組合後的 HTML 中恰出現 1 次且位於此 meta 內（程式與資料不得含此字串）；建置以版本號取代，產物不得殘留佔位字串。meta name 為 v0.14 新增識別字，日後不得改名（理由同 NM-5） | AC-42-01、AC-42-02 |
 | VR-3 | **格式驗證**：`version` 必須符合 `APP_VERSION_PATTERN`（SemVer 主.次.修訂，無 `v` 前綴、無預發布與建置中繼資料）；不符、欄位不存在、`package.json` 無法解析 → 建置中止，不產出交付檔。寫入值與 `version` 逐字相同 | AC-42-02 |
-| VR-4 | **寫入順序（BUILD_ID 必須涵蓋版本號）**：先依 VR-2 寫入版本號，再以「已含版本號、`emt-build-id` 仍為佔位」的 HTML 依 SW-2 計算 BUILD_ID，最後寫入 `emt-build-id` 與 `sw.js`。結果：(a) 不改任何檔案 → 產物逐位元組相同；(b) 只改 `version` → HTML 不同 → BUILD_ID、`sw.js` 快取名稱不同 → 已造訪的 https 版依 UP-1、UP-6 出現「有新版本，重新整理」；(c) 只改 1 個會進入交付 HTML 的字元 → X.Y.Z 不變、建置碼改變 | AC-42-04、AC-36-01、AC-36-03 |
+| VR-4 | **寫入順序（BUILD_ID 必須涵蓋版本號）**：先依 VR-2 寫入版本號，再以「已含版本號、`emt-build-id` 仍為佔位」的 HTML 依 SW-2 計算 BUILD_ID，最後寫入 `emt-build-id` 與 `sw.js`。結果：(a) 不改任何檔案 → 產物逐位元組相同；(b) 只改 `version` → HTML 不同 → BUILD_ID、`sw.js` 快取名稱不同 → 已造訪的 https 版依 UP-1、UP-6 出現「有新版本，請更新版本」與「更新版本」按鈕（v0.16 文字）；(c) 只改 1 個會進入交付 HTML 的字元 → X.Y.Z 不變、建置碼改變 | AC-42-04、AC-36-01、AC-36-03 |
 | VR-5 | **頁面讀取**：pg-frontend 只從 DOM 讀取兩個 meta 的 `content`（`APP_VERSION_META_NAME`、`PWA_BUILD_ID_META_NAME`），建置碼 = BUILD_ID `slice(0, BUILD_CODE_LENGTH)`；建議啟動時讀一次存於模組常數。**不得**以 `fetch`／`XMLHttpRequest`／`import` 讀取 `package.json` 或任何檔案、不得呼叫任何 API；不得把版本號寫死在 `src/app/` 程式中（必須與 meta 一致） | AC-42-02、AC-42-03 |
-| VR-6 | **不持久化**：版本號與建置碼不寫入 localStorage、不寫入備份檔（`BackupFile` 頂層 5 欄不變）、不放入 `PersistedData`；`StorageRecord` 欄位集合與 `schemaVersion` 2 不變。版本號只隨 HTML 本身存在（https 版的 HTML 在預先快取中屬既有行為，PV-5 不變） | AC-42-03、AC-24-02 |
+| VR-6 | **不持久化**：版本號與建置碼不寫入 localStorage、不寫入備份檔（`BackupFile` 頂層 5 欄不變）、不放入 `PersistedData`；`StorageRecord` 欄位集合與 `schemaVersion` 不因版本號而改變（v0.15 的 `schemaVersion` 3 來自 R-23，與版本號無關，C-8）。版本號只隨 HTML 本身存在（https 版的 HTML 在預先快取中屬既有行為，PV-5 不變） | AC-42-03、AC-24-02 |
 | VR-7 | **顯示**：以 `VERSION_LINE_TEXT` 組字（`{version}` = X.Y.Z、`{build}` = 建置碼；全形括號），例「版本 1.0.0（建置 3f9a2c1）」。位置：首次畫面、4 個功能區、「資料來源與授權」頁的頁尾，「資料來源與授權」連結**正下方**，每個畫面恰 1 行。純文字：不是連結或按鈕、無 `tabindex`、不可取得焦點、不可點擊；以 `textContent` 寫入（C-7）。文字對比 ≥ 4.5:1（VC-7），不使用 `accent`（VC-3）。375px 下不裁切、不換成兩行以上；寬度 ≤ 640px 捲動到底時完整顯示於底部導覽列（AC-27-03）或首次畫面固定底部列（AC-41-04）上方。原有頁尾連結位置與行為不變（AC-23-02）。字級、顏色、間距屬設計層 | AC-42-01、AC-41-04、AC-23-02 |
 | VR-8 | **異常值**：執行期任一 meta 不存在、`emt-app-version` 不符 `APP_VERSION_PATTERN`、或 `emt-build-id` 不符 `PWA_BUILD_ID_PATTERN`（例：未經建置的開發模板仍為佔位、非 PWA 測試模式）→ **整行不渲染**，不得顯示部分文字、`@@`、`undefined`、`null`、空括號「（建置 ）」；不拋出錯誤、Console 無錯誤。交付產物由 VR-3 與 V-VER-01 保證兩值皆合法，因此正式產物一律顯示 | AC-42-01 |
 | VR-9 | **一致性**：`dist/english-master-track.html` 與部署目錄 `index.html` 逐位元組相同（DP-2），版本行相同；建置碼 = `sw.js` 內嵌 `BUILD_ID` 前 7 字元 = `CACHE_NAME` 去掉 `PWA_CACHE_PREFIX` 後的前 7 字元（SW-3） | AC-42-02、AC-36-07 |
@@ -1216,6 +1415,10 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 | 0.12 | 2026-11-03 | sa-agent | 修訂已核准的 v0.11（主控代核），原因：PRD v0.12（approved，JimmyLin，2026-11-03）新增 R-21 版面與視覺（US-38～US-41，修改 30 條既有 AC，Q-49～Q-57 全部已決議）。三檔 `status` 改為 `in-review`、`version` 0.12、核准欄位清空並同步，上游改為 PRD v0.12。(1) 新增 **§11 版面與視覺契約**：§11.1 名稱 NM-1～NM-6（App 顯示名稱「EnglishContext」用於 `<title>`、標題列、ORIGINAL 來源名稱、授權註解第一行；鍵名、備份格式、匯出檔名前綴、交付檔名、快取前綴 `english-master-track-pwa-` 明定不改）；§11.2 色彩 VC-1～VC-8（`COLOR_TOKENS`、`SEMANTIC_COLORS`、背景與 theme 綁定）；§11.3 只在記憶體的介面狀態總表；§11.4 主控台 DB-1～DB-6（區塊順序、移除功能入口與小環形圖、「開始今日學習」、目標行、3 格數據、「資料備份」收合狀態不持久化）；§11.5 首次畫面與色級列 FT-1～FT-6；§11.6 模擬測驗進度 MT-1～MT-2；§11.7 驗證 V-LAY-01～V-LAY-08。(2) §10 PWA 同步：MF 表 `theme_color` `#2f6fd6` → `#1e9bf0`（Q-54）、`background_color` `#f6f7f9` → `#eef4fa`（AC-34-04、AC-38-02）、HD-1 `theme-color` 與 `<title>EnglishContext</title>`、MF-4 改寫、DP-4 (d) maskable 改以 80% 安全圓判定（實際約 78%）、IN-1 顯示條件加 `dashboard.backupExpanded`、NT-1 收合規則、SW-2 與 V-PWA-04、V-PWA-06 文字同步、DS-13 背景值。(3) 修改 §1（新增 4 列與 v0.12 型別數）、§3.1、§4.3 ORIGINAL 全名、§5.1、§5.4 末段（3 格數據與近 7 天空狀態）、FS-3、§5.6、HT-2（移除主控台模組入口）、§6.1、§8（新增 AC-38～AC-41 與 v0.12 改寫 AC 的對照，移除小環形圖與功能入口的對照）。(4) FB-38、FB-40、FB-41 已解除；新增回饋上游 FB-44～FB-49、回饋下游 §9.6 DS-19～DS-25。(5) 原「§11 變更紀錄」改為 §12。(6) `data-schema.ts` 新增 §13（型別 `DashboardRuntimeState`；常數 `APP_DISPLAY_NAME`、`FROZEN_IDENTIFIERS`、`COLOR_TOKENS`、`SEMANTIC_COLORS`、`LAYOUT_TEXTS`）、`RuntimeState.dashboard`，修改 PWA 顏色常數；`storage-schema.json` 只改 meta。型別數 66 → 67、契約常數 31 → 36、localStorage 鍵數維持 2；**持久化結構不變，`schemaVersion` 維持 2，不需遷移**；`src/data/` 格式不變，只有 ORIGINAL `fullName` 一個值要改（1 個 CT 任務，DS-19）。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 | 0.13 | 2026-11-03 | sa-agent | 修訂已核准的 v0.12（主控代核），原因：PRD v0.13（approved，JimmyLin，2026-11-03）依 SD-FB-39 修改 AC-38-01：標題列品牌圖示（AC-38-05）的橘色「EC」對話框不受強調橘用途限制，與 App 圖示一致。三檔 `status` 改為 `in-review`、`version` 0.13、核准欄位清空並同步，上游改為 PRD v0.13。只改：(1) VC-3 加入「標題列品牌圖示除外」；(2) V-LAY-01 註明標題列品牌圖示不列入計算；(3) §11.2 token 表 `accent` 用途同步（與 PRD 色彩 token 表一致）；(4) `data-schema.ts` `COLOR_TOKENS.accent` 註解同步（值不變）；`storage-schema.json` 只改 meta。型別數 67、契約常數 36、localStorage 鍵數 2 皆不變；**持久化結構不變，`schemaVersion` 維持 2，不需遷移**；`src/data/` 不受影響。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 | 0.14 | 2026-11-03 | sa-agent | 修訂已核准的 v0.13（主控代核），原因：PRD v0.14（approved，JimmyLin，2026-11-03）R-22：新增 US-42（頁尾版本號）、US-43（隱藏領域範本）、AC-01-08（狀態列只顯示生效色級）；修改 AC-01-02、AC-01-06（暫停中）、AC-01-07、AC-17-06、AC-22-02、AC-25-02、AC-25-03、AC-25-06、AC-26-06、AC-32-05、AC-36-02、AC-39-04、AC-41-04 共 13 條；暫停 AC-05-01～AC-05-05；Q-58～Q-62 已決議（Q-62 由主控把 `package.json` `version` 改為 1.0.0）。三檔 `status` 改為 `in-review`、`version` 0.14、核准欄位清空並同步，上游改為 PRD v0.14。(1) 新增 **§12**：§12.1 網站版本號 VR-1～VR-9（來源 `package.json`、`<meta name="emt-app-version">` 與比照 `emt-build-id` 的佔位規則、SemVer 驗證、**版本號先寫入再計算 BUILD_ID**、頁面只讀 meta、不持久化、頁尾版本行格式與位置、異常值整行不渲染、產物一致性）；§12.2 狀態列 LS-1～LS-5；§12.3 暫停 AC；§12.4 驗證 V-VER-01～V-VER-06、V-LAY-09、V-LAY-10。(2) §5.8 改名「隱藏頁面與隱藏區塊」，新增 HT-6～HT-9（範本區塊 `hidden` + `inert`、畫面文字不得出現「範本」、程式與資料保留、已注入單字照原值保留）；新增 V-ST-17；§7.3 註明 V-TPL 照常適用。(3) §10 同步：HD-1 加 `emt-app-version`、HD-5、SW-2 輸入 (1) 含版本號、V-PWA-04、V-PWA-06。(4) §11.4 DB-4 改寫（目標行一律只顯示生效色級、「變更」改按鈕）、FT-6、V-LAY-08。(5) §1 新增 2 列與 v0.14 型別數；§3.1、§5.1 補 v0.14 說明；§8 新增 v0.14 對照表（新增 8 條 AC、修改 13 條 AC、E-19、E-92、E-100），AC-05 列標示暫停。(6) 新增回饋上游 FB-50～FB-53、回饋下游 §9.7 DS-26～DS-31。(7) 原「§12 變更紀錄」改為 §13。(8) `data-schema.ts` 新增 §14（`APP_VERSION_META_NAME`、`APP_VERSION_PATTERN`、`BUILD_CODE_LENGTH`、`VERSION_LINE_TEXT`）；`LAYOUT_TEXTS` 新增 `levelStatus`，`goalLineCapped`、`goalLineSeparator` 標記停用，`changeLink` 註明改按鈕；範本、`GoalState`、`CustomVocabOrigin`、`PWA_BUILD_ID_META_NAME` 註解同步。`storage-schema.json` 只改 meta（新增 `browserStoragePolicy.localStorage.versionAndTemplates`）。型別數 67 不變、契約常數 36 → 40、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 2，不需遷移**；`src/data/` 不改（pg-content 無工作）。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
+| 0.15 | 2026-11-04 | sa-agent | 修訂已核准的 v0.14（主控代核），原因：PRD v0.15（approved，JimmyLin，2026-11-04）R-23：新增 US-44（單字卡記住上次位置）、US-45（模擬測驗答對紀錄）、US-46（只練沒答對的題目）、US-47（保存、備份與舊資料相容），AC-44-01～AC-47-08；修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02；E-102～E-117；Q-63～Q-71 全部依 PM 建議決議，**Q-63 為人類核准的 localStorage 持久化結構變更**。三檔 `status` 改為 `in-review`、`version` 0.15、核准欄位清空並同步，上游改為 PRD v0.15。**本版含持久化結構變更，依 CLAUDE.md 須由人類核准，不適用主控代核。** (1) **`schemaVersion` 2 → 3**（§5.3 升版判斷）：`PersistedData` 新增選填 `flashcardPosition`（新型別 `FlashcardPosition`：wordKey + 1 起算序號，或 `null`）、`part5CorrectIds`（曾答對的題目 id）、`part5UnansweredOnly`（開關）；`CURRENT_SCHEMA_VERSION` 3、`SUPPORTED_SCHEMA_VERSIONS` `[1, 2, 3]`；版本表新增 3；新增遷移 MG-5～MG-8（補預設值、既有 9 欄原值不動、寫回一次、冪等）與讀取規則 RD-3、RD-4（新欄位無效只重設該欄、讀取不寫入）；鍵名 `englishMasterTrack:state` 不變、鍵數 2。(2) 新增 §5.10 FP-1～FP-9（以 wordKey 找回、找不到夾在 min(i, N)、空集合紀錄不動、換卡即寫、生效色級改變設 `null`、不記模式與正反面）、§5.11 CR-1～CR-9 與 UO-1～UO-9（只記曾答對、K 推導、不存在的 id 保留、清除答對紀錄、開關開啟的出題與跳題、全部答對畫面與兩種重來、題號沿用題庫）、§5.12 WR-1～WR-5（寫入時機、容量不足與學習紀錄共用一次提示、停用、多分頁）。(3) §5.7：`LEARNING_PROGRESS_FIELDS` 加 (7) `part5CorrectIds`（Q-67 A），保留 `part5UnansweredOnly`，`flashcardPosition` 設 `null`；CI-4、CI-5、CI-8、CI-2 註記、清除／保留表修改。(4) §6：匯出 3、匯入 `[1, 2, 3]`；步驟 3、4、5、7、8、9 修改；新增 IM-9（新欄位 shape 錯誤 → `format`、缺少不算錯）、IM-10（項目層級正規化不計入略過筆數）；§6.3 新增 v0.15 四列。(5) 新增 C-8（「`schemaVersion` 2」改讀規則）、V-P5-08（題目 id 穩定）、V-ST-18～V-ST-22；修改 V-ST-01、V-ST-14、V-IMP-01。(6) §1 新增 2 列與 v0.15 型別數；§3.1、§5.1、§5.2、§11.3、§11.6 MT-1、§12.1（網站版本 1.1.0 註記，Q-70 A；VR-6 文字）補 v0.15 說明；§8 新增 v0.15 對照表。(7) 新增回饋上游 FB-54～FB-60、回饋下游 §9.8 DS-32～DS-39。(8) `data-schema.ts`：新增 `FlashcardPosition`、`Part5ViewKind`、`PART5_RECORD_TEXTS`（§15）；`PersistedData` +3 選填欄位；常數值與多處註解更新。`storage-schema.json`：根 `schemaVersion` const 3、新增 4 個 `$defs`、`PersistedData` 12 個 properties（required 仍 9）、`PersistedDataWritten` 12 欄必填、`BackupFile.schemaVersion` enum `[1, 2, 3]`、examples 改為 3、meta 更新。型別數 67 → 69、契約常數 40 → 41、localStorage 鍵數 2 不變；`src/data/` 格式與值不變 |
+| 0.15（核准） | 2026-11-04 | 主控 | 核准欄位由主控代填：持久化結構變更已由人類於 PRD v0.15 Q-63 核准（JimmyLin，2026-11-04，對話中回覆「核准」，Q-63～Q-71 依建議，Q-63 建議 A 明載由 SA 判斷是否升 schemaVersion），且使用者授權「修正好測試沒問題就直接推」。三檔同步改為 approved。 |
+| 0.16 | 2026-11-04 | sa-agent | 修訂已核准的 v0.15，原因：PRD v0.16（approved，JimmyLin，2026-11-04）R-24：人類手改產物後決定 (一) PWA 新版提示文字改為「有新版本，請更新版本」、按鈕改為「更新版本」（修改 AC-36-03、AC-42-04 文字，Q-43 行為不變）；(二) 「資料來源與授權」頁新增 1 行聯絡 email（新增 AC-23-07、E-118～E-120）。三檔 `status` 改為 `in-review`、`version` 0.16、核准欄位清空並同步，上游改為 PRD v0.16。**只做文字層級修訂**：(1) `data-schema.ts` `PWA_TEXTS.updateNotice`／`updateButton` 改值，UP-4、UP-6、UP-7、V-PWA-10、VR-4 (b)、FB-39、FB-57 引用同步（歷史紀錄保留舊文字）；(2) 契約原本未定義「資料來源與授權」頁的固定文字常數（聲明由 pg-frontend 依 PRD 組字），本版新增 `data-schema.ts` §16 常數 `SOURCES_CONTACT_TEXT` 與 §4.3 規則 **L-7**（逐字、純文字、非 `<a>`、無 `mailto:`、交付 HTML 不得含無空格位址、不得於執行期組出、不發網路請求、不持久化、只在該頁顯示）；(3) §1 新增 1 列與 v0.16 型別數；§8 新增 v0.16 對照表；新增回饋上游 FB-61、FB-62、回饋下游 §9.9 DS-40。`storage-schema.json` 只改 meta（版本、上游）。型別數 69 不變、契約常數 41 → 42、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，不需遷移**；`src/data/` 不受影響。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
+| 0.16（核准） | 2026-11-04 | 主控 | 主控代核：只改文字常數與規則（PWA_TEXTS、SOURCES_CONTACT_TEXT、L-7），不改 PRD、不改持久化結構（schemaVersion 3 不變）。 |
 
 > **主控代核（2026-11-02）**：v0.9 依 PRD v0.9（JimmyLin 核准）增量修訂，未改 PRD、未改持久化結構（schemaVersion 維持 2、備份格式不變），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 內容無變動，維持 v0.8 approved，三檔版本不同步屬本版例外。FB-33～FB-35 接受 SA 處理方式，於下次 PRD 修訂時交 PM 確認。
 

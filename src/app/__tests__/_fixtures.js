@@ -420,7 +420,7 @@ function seqRand() {
 /**
  * 以 fixture 建立已 init 的 store。
  * （v0.8，FE-30）主鍵不存在會進入首次模式（契約 FS-1、FS-2，期間不寫入）；為讓既有案例維持一般模式，
- * 預設在假 storage 預寫一筆合法的 schemaVersion 2 主鍵（直接放進 map，不計入 setCalls）。
+ * 預設在假 storage 預寫一筆合法的目前版本（CURRENT_SCHEMA_VERSION，v0.15 起為 3）主鍵（以 buildRecord(defaultData()) 產生）（直接放進 map，不計入 setCalls）。
  * 傳入的 storage 已有主鍵則不動；opts.firstRun = true 時不預寫（測首次模式）。
  * @param {{content?: object, storage?: object, now?: Function, speechSupport?: object, firstRun?: boolean}} [opts]
  * @returns {{store: object, a: object, storage: object}}

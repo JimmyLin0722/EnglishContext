@@ -15,6 +15,10 @@
  *
  * - （v0.11，FE-52）授權聲明清單在既有 3 條之後加「PWA 圖示與名稱」品牌標識聲明（AC-23-02、Q-48）；
  *   名稱於 render 時取 EMT.core.pwa.PWA_APP_NAME（LD-2；不存在依 LD-3 丟出錯誤），著作權人取 PROJECT_LICENSE.copyrightHolder。
+ * - （v0.11，FE-77；architecture.md v0.11 §7.22.2、契約 data-schema.ts §16、README §4.3 L-7、AC-23-07）
+ *   .src-page 最後（授權聲明區之後）加 1 行聯絡資訊 p.src-muted.src-contact，以 textContent 寫入常數 SOURCES_CONTACT_TEXT。
+ *   防爬蟲：常數為帶空格的原值，不做任何字串處理；不是連結、不可聚焦（無 href／tabindex／role／title／data-go）、
+ *   不掛事件。全 src/app 非測試原始碼只有下方常數 1 處字面值，註解不重複寫出。
  *
  * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution、brandStatement）可在 Node 測試；
  * 瀏覽器下登錄 EMT.views.register("sources", { mount })。
@@ -52,6 +56,12 @@
     // （v0.12，FE-60；NM-3、SD-FB-49）原創內容來源一行的前綴；名稱取 registry 中 ORIGINAL 的 fullName，不寫死
     originalSource: "原創內容來源："
   };
+
+  /**
+   * （v0.11，FE-77）聯絡行文字：逐字照契約 data-schema.ts §16 複製（半形空格 U+0020 分隔，防爬蟲，L-7）。
+   * 不得去空格、replace、split／join 或拼接。
+   */
+  var SOURCES_CONTACT_TEXT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";
 
   /** 欄位標籤 */
   var LABEL = {
@@ -352,7 +362,9 @@
       dom.el("p", { className: "src-muted", text: TEXT.intro }),
       dom.el("h3", { className: "src-section-title", text: TEXT.externalHeading }),
       dom.el("div", { className: "src-list" }, list),
-      licenseSection(dom, picked.wordlists, content.license, content.sources)
+      licenseSection(dom, picked.wordlists, content.license, content.sources),
+      // （v0.11，FE-77）聯絡行：純文字段落、非連結、不可聚焦、無事件（§7.22.2）
+      dom.el("p", { className: "src-muted src-contact", text: SOURCES_CONTACT_TEXT })
     ]));
   }
 
@@ -363,6 +375,7 @@
 
   return {
     TEXT: TEXT,
+    SOURCES_CONTACT_TEXT: SOURCES_CONTACT_TEXT,
     selectEntries: selectEntries,
     originalSourceName: originalSourceName,
     formatCount: formatCount,

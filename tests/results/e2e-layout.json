@@ -18,7 +18,7 @@
     "tc": "TC-38-04",
     "ac": "AC-38-04",
     "result": "通過",
-    "note": "WCAG 公式量測可見文字（不含停用按鈕、Q-55 語意色、標題列圖示；鎖定列以 opacity 合成）：375px 首次畫面：量測 28 處、最小 5.32；375px 主控台：量測 38 處、最小 5.39；375px 難易度設定：量測 60 處、最小 5.32；375px 單字卡：量測 24 處、最小 5.18；375px 模擬測驗：量測 20 處、最小 5.39；375px 資料來源與授權：量測 109 處、最小 5.39；1366px 首次畫面：量測 28 處、最小 5.32；1366px 主控台：量測 38 處、最小 5.39；1366px 難易度設定：量測 60 處、最小 5.32；1366px 單字卡：量測 24 處、最小 5.18；1366px 模擬測驗：量測 20 處、最小 5.39；1366px 資料來源與授權：量測 109 處、最小 5.39；未達標 無"
+    "note": "WCAG 公式量測可見文字（不含停用按鈕、Q-55 語意色、標題列圖示；鎖定列以 opacity 合成）：375px 首次畫面：量測 28 處、最小 5.32；375px 主控台：量測 38 處、最小 5.39；375px 難易度設定：量測 60 處、最小 5.32；375px 單字卡：量測 24 處、最小 5.18；375px 模擬測驗：量測 22 處、最小 5.39；375px 資料來源與授權：量測 110 處、最小 5.39；1366px 首次畫面：量測 28 處、最小 5.32；1366px 主控台：量測 38 處、最小 5.39；1366px 難易度設定：量測 60 處、最小 5.32；1366px 單字卡：量測 24 處、最小 5.18；1366px 模擬測驗：量測 22 處、最小 5.39；1366px 資料來源與授權：量測 110 處、最小 5.39；未達標 無"
   },
   {
     "suite": "e2e-layout",
@@ -46,7 +46,7 @@
     "tc": "TC-38-05",
     "ac": "AC-38-05、AC-21-01 (a)",
     "result": "通過",
-    "note": "連網 375px 首次畫面：{\"name\":\"EnglishContext\",\"tag\":\"svg\",\"w\":32,\"h\":32,\"hidden\":true,\"order\":true,\"clipped\":false,\"ext\":false,\"colors\":\"#1e9bf0,#f7893b,#ffffff\",\"shown\":true}；連網：主文件以外的請求 0；斷網 375px 首次畫面：{\"name\":\"EnglishContext\",\"tag\":\"svg\",\"w\":32,\"h\":32,\"hidden\":true,\"order\":true,\"clipped\":false,\"ext\":false,\"colors\":\"#1e9bf0,#f7893b,#ffffff\",\"shown\":true}；斷網：主文件以外的請求 0；首次畫面、4 個功能區、資料來源頁 × 兩種寬度 × 連網／斷網皆檢查；交付檔 3,322,315 bytes ≤ 5 MB"
+    "note": "連網 375px 首次畫面：{\"name\":\"EnglishContext\",\"tag\":\"svg\",\"w\":32,\"h\":32,\"hidden\":true,\"order\":true,\"clipped\":false,\"ext\":false,\"colors\":\"#1e9bf0,#f7893b,#ffffff\",\"shown\":true}；連網：主文件以外的請求 0；斷網 375px 首次畫面：{\"name\":\"EnglishContext\",\"tag\":\"svg\",\"w\":32,\"h\":32,\"hidden\":true,\"order\":true,\"clipped\":false,\"ext\":false,\"colors\":\"#1e9bf0,#f7893b,#ffffff\",\"shown\":true}；斷網：主文件以外的請求 0；首次畫面、4 個功能區、資料來源頁 × 兩種寬度 × 連網／斷網皆檢查；交付檔 3,373,421 bytes ≤ 5 MB"
   },
   {
     "suite": "e2e-layout",
@@ -67,7 +67,7 @@
     "tc": "TC-38-10",
     "ac": "AC-38-10、AC-24-03",
     "result": "通過",
-    "note": "(1) <title>「EnglishContext」；畫面文字含 English Master Track 的畫面 0（無；檢查 首次畫面、首次畫面→資料來源、dashboard、customizer、flashcards、part5、sources、初始化確認視窗、Toast）；資料來源頁「原創內容來源：EnglishContext 原創內容」；HTML 開頭註解第一行「EnglishContext」；(2) 匯出檔名 english-master-track-backup-20261103.json；localStorage 鍵 [\"englishMasterTrack:state\"]、schemaVersion 2；備份 format english-master-track-backup、schemaVersion 2、欄位 goal,customVocab,masteredWordKeys,vocabQuiz,part5,streak,sttNoticeAcknowledged,todayLearned,learnedHistory；交付檔名 dist/english-master-track.html 存在；sw.js 快取前綴 english-master-track-pwa-；(3) 著作權人 JimmyLin 與品牌標識聲明不變=true；(2) v0.11 寫入的 localStorage 以 v0.12 開啟 → main/dashboard、資料逐欄相同=true、目標行「棕級・每日 10 字｜變更」；v0.11 備份匯入 → [\"已匯入，略過 0 筆\"]、goal 465/brown、模擬測驗答題 1"
+    "note": "(1) <title>「EnglishContext」；畫面文字含 English Master Track 的畫面 0（無；檢查 首次畫面、首次畫面→資料來源、dashboard、customizer、flashcards、part5、sources、初始化確認視窗、Toast）；資料來源頁「原創內容來源：EnglishContext 原創內容」；HTML 開頭註解第一行「EnglishContext」；(2) 匯出檔名 english-master-track-backup-20261104.json；localStorage 鍵 [\"englishMasterTrack:state\"]、schemaVersion 3；備份 format english-master-track-backup、schemaVersion 3、欄位 goal,customVocab,masteredWordKeys,vocabQuiz,part5,streak,sttNoticeAcknowledged,todayLearned,learnedHistory,flashcardPosition,part5CorrectIds,part5UnansweredOnly；交付檔名 dist/english-master-track.html 存在；sw.js 快取前綴 english-master-track-pwa-；(3) 著作權人 JimmyLin 與品牌標識聲明不變=true；(2) v0.11 寫入的 localStorage 以 v0.12 開啟 → main/dashboard、原 9 欄逐欄相同且新 3 欄為預設=true、目標行「棕級・每日 10 字｜變更」；v0.11 備份匯入 → [\"已匯入，略過 0 筆\"]、goal 465/brown、模擬測驗答題 1"
   },
   {
     "suite": "e2e-layout",
@@ -88,7 +88,7 @@
     "tc": "TC-39-03",
     "ac": "AC-39-03、AC-22-01（量測方式）",
     "result": "通過",
-    "note": "點「開始今日學習」→ 目前頁 flashcards、單字卡頁可見=true、導覽選中 flashcards（與點導覽「單字卡」結果 flashcards,flashcards 相同）；localStorage 前後逐字相同=true；點擊到下一畫格 ms 31.7、4.4、3.2、2.7、3（中位數 3.2，無頭 Chrome 參考值）；鍵盤操作見 TC-38-09；單字集為空見 TC-39-03b"
+    "note": "點「開始今日學習」→ 目前頁 flashcards、單字卡頁可見=true、導覽選中 flashcards（與點導覽「單字卡」結果 flashcards,flashcards 相同）；localStorage 前後逐字相同=true；點擊到下一畫格 ms 32.7、4.7、2.9、2.7、2.8（中位數 2.9，無頭 Chrome 參考值）；鍵盤操作見 TC-38-09；單字集為空見 TC-39-03b"
   },
   {
     "suite": "e2e-layout",
@@ -151,7 +151,7 @@
     "tc": "TC-40-01",
     "ac": "AC-40-01、AC-11-05",
     "result": "通過",
-    "note": "375px：第 1 題 0.5%（now 1/max 200、高 6px、#1e9bf0、位於標題下題目上=true）；下一題 17.5ms → 1%（2）；第 5 題 2.5%；重新載入 2.5%「第 5 / 200 題」；第 N 題 100%；結算 100%（now 200）；重新開始 0.5%（1）；轉場 0s；1366px：第 1 題 0.5%（now 1/max 200、高 6px、#1e9bf0、位於標題下題目上=true）；下一題 3.1ms → 1%（2）；第 5 題 2.5%；重新載入 2.5%「第 5 / 200 題」；第 N 題 100%；結算 100%（now 200）；重新開始 0.5%（1）；轉場 0s；減少動態：填色轉場 0s"
+    "note": "375px：第 1 題 0.5%（now 1/max 200、高 6px、#1e9bf0、位於標題下題目上=true）；下一題 9.5ms → 1%（2）；第 5 題 2.5%；重新載入 2.5%「第 5 / 200 題」；第 N 題 100%；結算 100%（now 200）；重新開始 0.5%（1）；轉場 0s；1366px：第 1 題 0.5%（now 1/max 200、高 6px、#1e9bf0、位於標題下題目上=true）；下一題 14.5ms → 1%（2）；第 5 題 2.5%；重新載入 2.5%「第 5 / 200 題」；第 N 題 100%；結算 100%（now 200）；重新開始 0.5%（1）；轉場 0s；減少動態：填色轉場 0s"
   },
   {
     "suite": "e2e-layout",
@@ -172,7 +172,7 @@
     "tc": "TC-41-02",
     "ac": "AC-41-02、AC-02-03、AC-02-05、AC-02-10、AC-22-04",
     "result": "通過",
-    "note": "orange「橘級・每日 10 字　預計 15 週」（cz-firstbar__summary,cz-start,cz-restore）；brown「棕級・每日 10 字　預計 41 週」（cz-firstbar__summary,cz-start,cz-restore）；green「綠級・每日 15 字　預計 54 週」（cz-firstbar__summary,cz-start,cz-restore）；blue「藍級・每日 20 字　預計 41 週（以綠試算）」＋「目前內建字庫到綠色為止」（cz-firstbar__locked,cz-firstbar__summary,cz-start,cz-restore）；gold「金級・每日 20 字　預計 41 週（以綠試算）」＋「目前內建字庫到綠色為止」（cz-firstbar__locked,cz-firstbar__summary,cz-start,cz-restore）；點列到摘要更新 ms 8.7、13.9、13.5、16.9、13.8（中位數 13.8）；首次畫面期間 localStorage 無狀態鍵=true；一般頁試算（每日/週數）10 字/天/15 週、10 字/天/41 週、15 字/天/54 週、20 字/天/41 週、20 字/天/41 週，與摘要行相同；按鈕強調橘底深色字、「開始學習」「從備份還原」≥ 44×44；行為見 TC-25-02、TC-25-03、TC-25-10、TC-25-11"
+    "note": "orange「橘級・每日 10 字　預計 15 週」（cz-firstbar__summary,cz-start,cz-restore）；brown「棕級・每日 10 字　預計 41 週」（cz-firstbar__summary,cz-start,cz-restore）；green「綠級・每日 15 字　預計 54 週」（cz-firstbar__summary,cz-start,cz-restore）；blue「藍級・每日 20 字　預計 41 週（以綠試算）」＋「目前內建字庫到綠色為止」（cz-firstbar__locked,cz-firstbar__summary,cz-start,cz-restore）；gold「金級・每日 20 字　預計 41 週（以綠試算）」＋「目前內建字庫到綠色為止」（cz-firstbar__locked,cz-firstbar__summary,cz-start,cz-restore）；點列到摘要更新 ms 8.2、13.1、13.8、16.4、10.4（中位數 13.1）；首次畫面期間 localStorage 無狀態鍵=true；一般頁試算（每日/週數）10 字/天/15 週、10 字/天/41 週、15 字/天/54 週、20 字/天/41 週、20 字/天/41 週，與摘要行相同；按鈕強調橘底深色字、「開始學習」「從備份還原」≥ 44×44；行為見 TC-25-02、TC-25-03、TC-25-10、TC-25-11"
   },
   {
     "suite": "e2e-layout",

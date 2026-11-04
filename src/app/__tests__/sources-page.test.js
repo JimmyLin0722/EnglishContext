@@ -6,6 +6,8 @@
  *       字庫缺漏（C-6）時辭典與字表都不列出
  * 涵蓋：AC-23-02、契約 README FB-20、L-4
  * 資料：一律使用 _fixtures.js 的 DataSourceEntry（不讀正式內容資料檔）
+ * （v0.11，FE-77）新增聯絡行案例（architecture.md v0.11 §7.22.2、§10.8；契約 data-schema.ts §16、README §4.3 L-7；AC-23-07）。
+ *   去空格位址一律於執行期由常數推導，本檔不寫出其字面值（FB-62）。
  */
 "use strict";
 
@@ -116,8 +118,11 @@ describe("sources-page.test.js", () => {
     assert.equal(P.brandStatement(pwa.PWA_APP_NAME, ""), BRAND);
   });
 
-  /** 最小假 DOM（只支援 core/dom.js 用到的介面） */
-  function fakeDocument() {
+  /**
+   * 最小假 DOM（只支援 core/dom.js 用到的介面）
+   * @param {{ listeners: Array<{ node: object, type: string }> }} [rec] 傳入時記錄每次 addEventListener（FE-77）
+   */
+  function fakeDocument(rec) {
     function node(tag) {
       const n = {
         nodeType: tag === "#text" ? 3 : 1,
@@ -128,7 +133,7 @@ describe("sources-page.test.js", () => {
         _text: "",
         setAttribute(k, v) { this.attrs[k] = String(v); },
         getAttribute(k) { return this.attrs[k]; },
-        addEventListener() {},
+        addEventListener(type) { if (rec) rec.listeners.push({ node: this, type }); },
         appendChild(c) { this.childNodes.push(c); c.parentNode = this; return c; },
         removeChild(c) { this.childNodes.splice(this.childNodes.indexOf(c), 1); return c; },
         get firstChild() { return this.childNodes[0] || null; },
@@ -251,5 +256,91 @@ describe("sources-page.test.js", () => {
     const cards = findAll(rootEl, (n) => n.className === "card src-card").map((n) => n.attrs["data-source"]);
     assert.ok(cards.length > 0);
     assert.ok(!cards.includes("ORIGINAL"));
+  });
+
+  // ── （v0.11，FE-77）聯絡行（AC-23-07 (1)(2)(7)、L-7、E-118；architecture.md §7.22.2、§10.8） ──
+
+  /** 契約 data-schema.ts §16 原文（逐字複製） */
+  const CONTACT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";
+
+  /** 去空格位址：執行期由常數推導（測試原始碼不寫字面值，FB-62） */
+  function compactAddress(text) {
+    return text.slice("email: ".length).split(" ").join("");
+  }
+
+  /** 依建置方式在 vm 載入並 render；同時記錄 addEventListener 呼叫 */
+  function renderContact() {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const vm = require("node:vm");
+    const sandbox = { console: { warn() {}, error() {}, log() {} } };
+    sandbox.self = sandbox;
+    vm.createContext(sandbox);
+    for (const rel of ["core/dom.js", "core/pwa.js", "views/sources-page.js"]) {
+      vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox, { filename: rel });
+    }
+    const rec = { listeners: [] };
+    const doc = fakeDocument(rec);
+    sandbox.EMT.core.dom.setDocument(doc);
+    const rootEl = doc.createElement("section");
+    sandbox.EMT.views.sourcesPage.render(rootEl, { sources: REG, builtin: F.builtin(), license: F.license() });
+    return { rootEl, rec, api: sandbox.EMT.views.sourcesPage };
+  }
+
+  test("（FE-77）SOURCES_CONTACT_TEXT 逐字等於契約 §16，且結構為「email: 」＋27 個以單一半形空格分隔的單字元 token", () => {
+    assert.equal(P.SOURCES_CONTACT_TEXT, CONTACT);
+    const t = P.SOURCES_CONTACT_TEXT;
+    assert.ok(t.startsWith("email: "));
+    const tokens = t.slice("email: ".length).split(" ");
+    assert.equal(tokens.length, 27);
+    for (const tok of tokens) assert.equal(tok.length, 1, `token「${tok}」應為單一字元`);
+    assert.doesNotMatch(t, /[^\x20-\x7e]/, "無全形或非 ASCII 字元");
+    assert.doesNotMatch(t, / {2}/, "無連續空格");
+    assert.equal(t.length, 60);
+    // 推導出的去空格位址形態正確（不寫字面值）
+    assert.match(compactAddress(t), /^[a-z0-9.]+@[a-z.]+$/);
+  });
+
+  test("（FE-77）render：恰 1 個 p.src-muted.src-contact，textContent 逐字為常數，且為 .src-page 最後一個子元素（在 .src-project 之後）", () => {
+    const { rootEl, api } = renderContact();
+    assert.equal(api.SOURCES_CONTACT_TEXT, CONTACT);
+    const nodes = findAll(rootEl, (n) => typeof n.className === "string" && n.className.split(" ").includes("src-contact"));
+    assert.equal(nodes.length, 1);
+    const p = nodes[0];
+    assert.equal(p.tagName, "P");
+    assert.equal(p.className, "src-muted src-contact");
+    assert.equal(p.textContent.trim(), CONTACT);
+    assert.equal(p.childNodes.length, 0, "以 textContent 寫入，無子節點");
+    const page = p.parentNode;
+    assert.equal(page.className, "src-page");
+    assert.equal(page.childNodes[page.childNodes.length - 1], p, "為最後一個子元素");
+    const projectIdx = page.childNodes.findIndex((c) => c.className === "card src-project");
+    assert.ok(projectIdx >= 0 && projectIdx < page.childNodes.indexOf(p), "位於授權聲明區之後");
+  });
+
+  test("（FE-77）聯絡行非連結、不可聚焦、無事件：自身與祖先非 A；無 href／tabindex／role／title／data-go；addEventListener 0 次", () => {
+    const { rootEl, rec } = renderContact();
+    const p = findAll(rootEl, (n) => n.className === "src-muted src-contact")[0];
+    for (let n = p; n; n = n.parentNode) assert.notEqual(n.tagName, "A");
+    for (const k of ["href", "tabindex", "tabIndex", "role", "title", "data-go"]) {
+      assert.equal(Object.prototype.hasOwnProperty.call(p.attrs, k), false, `不得有 ${k}`);
+    }
+    assert.deepEqual(Object.keys(p.attrs), []);
+    assert.equal(rec.listeners.filter((r) => r.node === p).length, 0);
+  });
+
+  test("（FE-77）整頁 textContent 無 mailto: 與去空格位址（不分大小寫），含常數原值恰 1 次", () => {
+    const { rootEl } = renderContact();
+    const text = rootEl.textContent;
+    assert.ok(!/mailto:/i.test(text));
+    assert.ok(!text.toLowerCase().includes(compactAddress(CONTACT).toLowerCase()));
+    assert.equal(text.split(CONTACT).length - 1, 1);
+  });
+
+  test("（FE-77）加入聯絡行後，既有聲明 4 條與「原創內容來源」照常", () => {
+    const { rootEl } = renderContact();
+    const ul = findAll(rootEl, (n) => n.className === "src-statements")[0];
+    assert.deepEqual(ul.childNodes.map((li) => li.textContent), [P.TEXT.codeLicense, P.TEXT.dataLicense, P.TEXT.originalLicense, BRAND]);
+    assert.equal(findAll(rootEl, (n) => n.className === "src-original")[0].textContent, "原創內容來源：EnglishContext 原創內容");
   });
 });

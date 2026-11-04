@@ -88,14 +88,14 @@
     "tc": "TC-22-03",
     "ac": "AC-22-03",
     "result": "通過",
-    "note": "onresult → 徽章繪製 ms：14.8、8.1、3.7、15.8、10.2、4.1、12.5、7.6、3.7、13.8；中位數 8.1、p90 14.8、最大 15.8（無頭 Chrome、未降速）"
+    "note": "onresult → 徽章繪製 ms：11.4、7.4、3.5、15、6.7、8.8、16.3、21.3、13.1、10.4；中位數 10.4、p90 16.3、最大 21.3（無頭 Chrome、未降速）"
   },
   {
     "suite": "e2e-speech",
     "tc": "TC-21-03",
     "ac": "AC-21-03（執行期）",
     "result": "通過",
-    "note": "localStorage 鍵與長度 {\"englishMasterTrack:state\":6731}；含音訊樣式字串=false"
+    "note": "localStorage 鍵與長度 {\"englishMasterTrack:state\":6837}；含音訊樣式字串=false"
   },
   {
     "suite": "e2e-speech",

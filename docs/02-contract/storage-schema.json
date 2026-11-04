@@ -3,30 +3,32 @@
   "$id": "https://english-master-track.local/contract/storage-schema.json",
   "meta": {
     "doc": "CONTRACT-STORAGE",
-    "version": "0.14",
+    "version": "0.16",
     "status": "approved",
     "author": "sa-agent",
     "approved_by": "JimmyLin（授權主控代核）",
-    "approved_at": "2026-11-03",
-    "upstream": "docs/01-PRD.md v0.14（approved，JimmyLin，2026-11-03）",
-    "covers": ["FR-6.1", "FR-6.2", "AC-08-13", "AC-09-04", "AC-11-05", "AC-11-07", "AC-17-02", "AC-17-03", "AC-17-05", "AC-18-01", "AC-18-02", "AC-18-05", "AC-24-02", "AC-24-05", "AC-24-06", "AC-24-08", "AC-24-10", "AC-24-11", "AC-25-01", "AC-25-04", "AC-25-09", "AC-30-03", "AC-30-06", "AC-30-07", "AC-30-09", "AC-30-11", "AC-30-12", "AC-30-13", "R-17", "AC-26-06", "R-19", "Q-39", "AC-21-03", "AC-35-01", "AC-36-04", "AC-36-05", "AC-37-05", "AC-37-06", "R-20", "AC-38-10", "AC-39-08", "E-94", "R-21", "AC-42-03", "AC-43-03", "AC-01-08", "R-22"],
+    "approved_at": "2026-11-04",
+    "upstream": "docs/01-PRD.md v0.16（approved，JimmyLin，2026-11-04）",
+    "covers": ["FR-6.1", "FR-6.2", "AC-08-13", "AC-09-04", "AC-11-05", "AC-11-07", "AC-17-02", "AC-17-03", "AC-17-05", "AC-18-01", "AC-18-02", "AC-18-05", "AC-24-02", "AC-24-05", "AC-24-06", "AC-24-08", "AC-24-10", "AC-24-11", "AC-25-01", "AC-25-04", "AC-25-09", "AC-30-03", "AC-30-06", "AC-30-07", "AC-30-09", "AC-30-11", "AC-30-12", "AC-30-13", "R-17", "AC-26-06", "R-19", "Q-39", "AC-21-03", "AC-35-01", "AC-36-04", "AC-36-05", "AC-37-05", "AC-37-06", "R-20", "AC-38-10", "AC-39-08", "E-94", "R-21", "AC-42-03", "AC-43-03", "AC-01-08", "R-22", "AC-32-02", "AC-32-10", "AC-44-01", "AC-44-02", "AC-44-05", "AC-44-06", "AC-44-08", "AC-44-10", "AC-45-01", "AC-45-03", "AC-45-07", "AC-45-08", "AC-46-10", "AC-47-01", "AC-47-02", "AC-47-03", "AC-47-04", "AC-47-05", "AC-47-06", "AC-47-07", "E-102", "E-103", "E-107", "E-109", "E-113", "E-114", "E-116", "E-117", "R-23", "Q-63", "Q-64", "Q-67", "Q-69", "Q-71", "AC-23-07", "R-24"],
     "browserStoragePolicy": {
-      "description": "（v0.11，PRD R-20、AC-21-03）本系統在瀏覽器各種儲存區允許存放的內容。只是說明（JSON Schema 不驗證 meta），不改變下方任何結構關鍵字。PWA 不新增任何 localStorage 鍵或欄位，schemaVersion 維持 2。詳細規則見 README §10.10 PV-1～PV-7。",
+      "description": "（v0.11，PRD R-20、AC-21-03）本系統在瀏覽器各種儲存區允許存放的內容。只是說明（JSON Schema 不驗證 meta），不改變下方任何結構關鍵字。PWA 不新增任何 localStorage 鍵或欄位。詳細規則見 README §10.10 PV-1～PV-7。（v0.15）文中「schemaVersion」一律指本版根結構的版本（3），依 README C-8 解讀。",
       "localStorage": {
-        "file": "鍵只有 englishMasterTrack:state（本檔根結構，schemaVersion 2）與 englishMasterTrack:unreadable（原始字串）；與 v0.10 相同。",
-        "https": "與 file:// 相同（鍵名、欄位集合、schemaVersion 2 皆不變，AC-36-04、AC-37-06）。PWA 狀態（安裝按鈕、新版提示、更新檢查時間）只在記憶體，不寫入 localStorage。不同來源（file://、GitHub Pages、iOS Safari、iOS 主畫面 App）各自一份，不同步（AC-24-12、E-81）。",
+        "file": "鍵只有 englishMasterTrack:state（本檔根結構；v0.15 起 schemaVersion 3）與 englishMasterTrack:unreadable（原始字串）；鍵數與 v0.10 相同。",
+        "https": "與 file:// 相同（鍵名、欄位集合、schemaVersion 皆相同，AC-36-04、AC-37-06）。PWA 狀態（安裝按鈕、新版提示、更新檢查時間）只在記憶體，不寫入 localStorage。不同來源（file://、GitHub Pages、iOS Safari、iOS 主畫面 App）各自一份，不同步（AC-24-12、E-81）。",
         "layout": "（v0.12，R-21）版面與視覺不新增任何鍵或欄位：主控台「資料備份」展開狀態（RuntimeState.dashboard.backupExpanded）只在記憶體，展開、收合、切頁、重新載入前後本系統 localStorage 內容完全相同（AC-39-08）。App 顯示名稱改為「EnglishContext」（Q-49）不影響鍵名 englishMasterTrack:state／englishMasterTrack:unreadable、備份 format 識別字串 english-master-track-backup、匯出檔名前綴 english-master-track-backup-（AC-38-10 (2)、E-94）。",
-        "versionAndTemplates": "（v0.14，R-22）不新增任何鍵或欄位：(1) 頁尾版本行的版本號 X.Y.Z 與建置碼只取自交付 HTML 的 <meta name=\"emt-app-version\">、<meta name=\"emt-build-id\">，不寫入 localStorage，也不寫入備份檔（AC-42-03，README §12.1 VR-6）；(2) 領域範本畫面入口隱藏（US-43），既有 customVocab 中 origin = \"template\" 的項目（含 templateId）照原值保留，讀取、匯入、匯出都不刪除、不轉換為 manual（AC-43-03，README §5.8 HT-9）；(3) 難易度設定頁狀態列只顯示生效色級（AC-01-08），GoalState 4 欄（含 appliedColor 目標色級）照常保存。"
+        "versionAndTemplates": "（v0.14，R-22）不新增任何鍵或欄位：(1) 頁尾版本行的版本號 X.Y.Z 與建置碼只取自交付 HTML 的 <meta name=\"emt-app-version\">、<meta name=\"emt-build-id\">，不寫入 localStorage，也不寫入備份檔（AC-42-03，README §12.1 VR-6）；(2) 領域範本畫面入口隱藏（US-43），既有 customVocab 中 origin = \"template\" 的項目（含 templateId）照原值保留，讀取、匯入、匯出都不刪除、不轉換為 manual（AC-43-03，README §5.8 HT-9）；(3) 難易度設定頁狀態列只顯示生效色級（AC-01-08），GoalState 4 欄（含 appliedColor 目標色級）照常保存。",
+        "learningPositionAndRecords": "（v0.15，R-23，Q-63 人類核准）不新增鍵，主鍵 englishMasterTrack:state 不改名（FROZEN）。PersistedData 新增 3 個選填欄位：flashcardPosition（單字卡上次位置：wordKey + 1 起算序號，或 null）、part5CorrectIds（模擬測驗曾答對的題目 id 陣列）、part5UnansweredOnly（「只練沒答對的題目」開關）；schemaVersion 2 → 3，v1／v2 資料讀入時自動遷移並寫回一次，既有 9 欄原值不動（README §5.3 MG-5～MG-8，AC-47-04）。單字卡／測驗模式、卡片正反面、模擬測驗『全部答對』畫面、已答對數 K 皆不持久化（Q-68 A；K 由 part5CorrectIds ∩ 題庫推導）。",
+        "contactText": "（v0.16，R-24）不新增任何鍵或欄位：「資料來源與授權」頁的聯絡資訊行（data-schema.ts SOURCES_CONTACT_TEXT，README L-7）與更新提示文字（PWA_TEXTS）皆為程式內常數，不寫入 localStorage，也不寫入備份檔（AC-23-07 (5)）。"
       },
       "cacheStorage": {
         "file": "本系統建立的快取數 = 0（不註冊 service worker、不呼叫 caches API，AC-37-01、AC-21-03）。",
-        "https": "只有名稱符合 ^english-master-track-pwa-[0-9a-f]{16}$ 的本專案快取（v0.12：前綴不隨 App 改名變動，否則 v0.11 舊快取無法清除，AC-36-05）；service worker 啟用後恰為 1 個（AC-35-01、AC-36-05）。新版已安裝但尚未啟用（等待使用者按「重新整理」，AC-36-03）期間可暫時有 2 個（舊版使用中 + 新版等待中），新版啟用時刪除舊版。每個快取的項目恰為預先快取清單 7 個同源 GET 網址（./、./index.html、./manifest.webmanifest、./icons/icon-192.png、./icons/icon-512.png、./icons/icon-maskable-512.png、./icons/apple-touch-icon-180.png，相對於 sw.js 解析）的伺服器回應；不含 sw.js、ads.txt、備份檔、音訊、音量值、localStorage 內容或任何使用者資料（AC-21-03、AC-37-05）。名稱不以本前綴開頭的快取（同網域其他專案）不得讀取、修改或刪除（AC-36-05、E-80）。"
+        "https": "只有名稱符合 ^english-master-track-pwa-[0-9a-f]{16}$ 的本專案快取（v0.12：前綴不隨 App 改名變動，否則 v0.11 舊快取無法清除，AC-36-05）；service worker 啟用後恰為 1 個（AC-35-01、AC-36-05）。新版已安裝但尚未啟用（等待使用者按「更新版本」，v0.15 以前文字為「重新整理」，AC-36-03）期間可暫時有 2 個（舊版使用中 + 新版等待中），新版啟用時刪除舊版。每個快取的項目恰為預先快取清單 7 個同源 GET 網址（./、./index.html、./manifest.webmanifest、./icons/icon-192.png、./icons/icon-512.png、./icons/icon-maskable-512.png、./icons/apple-touch-icon-180.png，相對於 sw.js 解析）的伺服器回應；不含 sw.js、ads.txt、備份檔、音訊、音量值、localStorage 內容或任何使用者資料（AC-21-03、AC-37-05）。名稱不以本前綴開頭的快取（同網域其他專案）不得讀取、修改或刪除（AC-36-05、E-80）。"
       },
       "indexedDB": "file:// 與 https 皆不建立任何資料庫（AC-21-03、AC-37-05）。",
       "sessionStorage": "不使用。",
       "serviceWorkerRegistration": "file:// = 0 個；https = 恰 1 個，腳本 ./sw.js、scope = 部署目錄（README SW-1）。註冊不是使用者資料，列出只為說明 AC-35-01、AC-37-01 的檢查對象。"
     },
-    "notes": "根結構描述 localStorage 鍵 englishMasterTrack:state 的值（StorageRecord，schemaVersion 2）。schemaVersion 1 的紀錄只作為遷移輸入（README §5.3 MG-1～MG-4），遷移後再以本根結構驗證。備份檔結構見 $defs/BackupFile。鍵 englishMasterTrack:unreadable 存原始字串，不受本 schema 約束（README §5.3 RS-1～RS-4）。todayLearned、learnedHistory 分兩層：$defs/TodayLearnedState、$defs/LearnedHistory 為『結構（shape）』，不符 = 整個欄位型別錯誤（讀 localStorage 只重設該欄、匯入則格式錯誤）；$defs/TodayLearnedStateNormalized、$defs/LearnedHistoryNormalized 為正規化後的值，程式寫出（localStorage、匯出備份）必須符合，QA 可用 $defs/PersistedDataWritten 驗證匯出檔。本檔無法表達的規則（今天的日期範圍、一致性、correct ≤ answered 等）列於 README §7 V-ST-xx。",
+    "notes": "根結構描述 localStorage 鍵 englishMasterTrack:state 的值（StorageRecord，v0.15 起 schemaVersion 3）。schemaVersion 1、2 的紀錄只作為遷移輸入（README §5.3：1 → 2 為 MG-1～MG-4，2 → 3 為 MG-5～MG-8），遷移後再以本根結構驗證。備份檔結構見 $defs/BackupFile。鍵 englishMasterTrack:unreadable 存原始字串，不受本 schema 約束（README §5.3 RS-1～RS-4）。todayLearned、learnedHistory 分兩層：$defs/TodayLearnedState、$defs/LearnedHistory 為『結構（shape）』，不符 = 整個欄位型別錯誤（讀 localStorage 只重設該欄、匯入則格式錯誤）；$defs/TodayLearnedStateNormalized、$defs/LearnedHistoryNormalized 為正規化後的值。（v0.15）flashcardPosition、part5CorrectIds、part5UnansweredOnly 同樣分兩層：$defs/FlashcardPosition、$defs/Part5CorrectIds、boolean 為 shape（讀 localStorage 不符只重設該欄，RD-3；匯入不符為格式錯誤，IM-9），$defs/FlashcardPositionNormalized、$defs/Part5CorrectIdsNormalized 為程式寫出時必須符合的值；三欄在 $defs/PersistedData 為選填（缺少 = 預設值），在 $defs/PersistedDataWritten 為必填。程式寫出（localStorage、匯出備份）必須符合 $defs/PersistedDataWritten，QA 可用它驗證匯出檔。本檔無法表達的規則（今天的日期範圍、一致性、correct ≤ answered、位置序號 ≤ 單字集張數、答對 id 與題庫的關係等）列於 README §7 V-ST-xx。",
     "changelog": [
       { "version": "0.1", "date": "2026-10-29", "author": "sa-agent", "note": "初版：StorageRecord（schemaVersion 1）與 BackupFile。" },
       { "version": "0.2", "date": "2026-10-29", "author": "sa-agent", "note": "契約隨 README／data-schema.ts 升版（授權查證、N_B／N_G 回填、DataSourceEntry 新增欄位，皆屬內容資料檔）。持久化結構無變更，schemaVersion 維持 1，不需遷移。" },
@@ -40,19 +42,21 @@
       { "version": "0.11", "date": "2026-11-02", "author": "sa-agent", "note": "修訂已核准的 v0.10（主控代核），依 PRD v0.11 R-20（PWA）、US-34～US-37、AC-21-03 修訂；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.11。只改 meta：(1) 版本、狀態、上游、covers 補 AC-21-03、AC-35-01、AC-36-04、AC-36-05、AC-37-05、AC-37-06、R-20；(2) 新增 meta.browserStoragePolicy，說明 localStorage、Cache Storage、IndexedDB 在 file:// 與 https 兩種版本下允許的內容（AC-21-03）。$defs、properties、required、additionalProperties、type、const／enum 與 examples 皆未改動；PWA 不寫入 localStorage，持久化結構不變，schemaVersion 維持 2，不需遷移。" },
       { "version": "0.12", "date": "2026-11-03", "author": "sa-agent", "note": "修訂已核准的 v0.11（主控代核），原因：PRD v0.12 R-21（版面與視覺，US-38～US-41，Q-49～Q-57，JimmyLin 2026-11-03 核准）；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.12。只改 meta：(1) 版本、狀態、上游，covers 補 AC-38-10、AC-39-08、E-94、R-21；(2) browserStoragePolicy.localStorage 新增 layout 說明（資料備份展開狀態只在記憶體；App 改名為 EnglishContext 不影響鍵名、備份 format 與匯出檔名前綴）；cacheStorage.https 註明快取前綴不改。$id、$defs、properties、required、additionalProperties、type、const／enum 與 examples 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" },
       { "version": "0.13", "date": "2026-11-03", "author": "sa-agent", "note": "修訂已核准的 v0.12（主控代核），原因：PRD v0.13 修改 AC-38-01（標題列品牌圖示的橘色「EC」對話框不受強調橘用途限制，SD-FB-39，JimmyLin 2026-11-03 核准）；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.13。只改 meta 的 version、status、approved_by、approved_at、upstream；$defs、properties、required、additionalProperties、type、const／enum 與 examples 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" },
-      { "version": "0.14", "date": "2026-11-03", "author": "sa-agent", "note": "修訂已核准的 v0.13（主控代核），原因：PRD v0.14 R-22（US-42 頁尾版本號、US-43 隱藏領域範本、AC-01-08 狀態列只顯示生效色級、AC-39-04「變更」改為按鈕，Q-58～Q-62，JimmyLin 2026-11-03 核准）；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.14。只改 meta：版本、狀態、上游，covers 補 AC-42-03、AC-43-03、AC-01-08、R-22；browserStoragePolicy.localStorage 新增 versionAndTemplates 說明（版本號與建置碼不寫入 localStorage 與備份檔；origin = template 的自訂單字照原值保留）。$id、$defs、properties、required、additionalProperties、type、const／enum（含 origin 的 \"template\"、templateId 的 cs／business／biostat）與 examples 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" }
+      { "version": "0.14", "date": "2026-11-03", "author": "sa-agent", "note": "修訂已核准的 v0.13（主控代核），原因：PRD v0.14 R-22（US-42 頁尾版本號、US-43 隱藏領域範本、AC-01-08 狀態列只顯示生效色級、AC-39-04「變更」改為按鈕，Q-58～Q-62，JimmyLin 2026-11-03 核准）；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.14。只改 meta：版本、狀態、上游，covers 補 AC-42-03、AC-43-03、AC-01-08、R-22；browserStoragePolicy.localStorage 新增 versionAndTemplates 說明（版本號與建置碼不寫入 localStorage 與備份檔；origin = template 的自訂單字照原值保留）。$id、$defs、properties、required、additionalProperties、type、const／enum（含 origin 的 \"template\"、templateId 的 cs／business／biostat）與 examples 皆未改動；持久化結構不變，schemaVersion 維持 2，不需遷移。" },
+      { "version": "0.15", "date": "2026-11-04", "author": "sa-agent", "note": "修訂已核准的 v0.14（主控代核），原因：PRD v0.15 R-23（US-44～US-47，Q-63～Q-71，JimmyLin 2026-11-04 核准；Q-63 為人類核准的 localStorage 持久化結構變更）。status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.15。**本版為持久化結構變更，須由人類核准，不適用主控代核。** (1) 根 schemaVersion const 2 → 3；(2) PersistedData 新增選填 flashcardPosition、part5CorrectIds、part5UnansweredOnly（required 仍 9 欄，properties 12 欄，additionalProperties 仍 false）；(3) 新增 $defs/FlashcardPosition、FlashcardPositionNormalized、Part5CorrectIds、Part5CorrectIdsNormalized；(4) PersistedDataWritten 改為 12 欄必填並套用正規化定義；(5) BackupFile.schemaVersion enum [1, 2] → [1, 2, 3]，頂層 5 欄、format 字串不變；(6) examples 改為 schemaVersion 3（第 3 筆示範新欄位有值）；(7) meta：covers 補 v0.15 AC／E／Q，browserStoragePolicy.localStorage 新增 learningPositionAndRecords，notes 補兩層驗證。v2 → v3 遷移：data 補 flashcardPosition = null、part5CorrectIds = []、part5UnansweredOnly = false（一律覆寫），其餘 9 欄不變（README MG-5～MG-8）；鍵名 englishMasterTrack:state 不變。" },
+      { "version": "0.16", "date": "2026-11-04", "author": "sa-agent", "note": "修訂已核准的 v0.15，原因：PRD v0.16 R-24（新增 AC-23-07 資料來源與授權頁聯絡 email；修改 AC-36-03、AC-42-04 更新提示文字為「有新版本，請更新版本」與「更新版本」按鈕，JimmyLin 2026-11-04 核准）；status 改為 in-review、核准欄位清空，三檔同步，上游改為 PRD v0.16。只改 meta：版本、狀態、上游；covers 補 AC-23-07、R-24；browserStoragePolicy.localStorage 新增 contactText 說明（聯絡資訊行不寫入 localStorage 與備份檔）；cacheStorage.https 的按鈕名稱改為「更新版本」。$id、$defs、properties、required、additionalProperties、type、const／enum 與 examples 皆未改動；持久化結構不變，schemaVersion 維持 3，不需遷移。" }
     ]
   },
-  "title": "StorageRecord（localStorage: englishMasterTrack:state，schemaVersion 2）",
-  "description": "應用程式持久化狀態。寫入時整筆 JSON.stringify 後以單一 setItem 寫入，確保不出現只寫一半的狀態（AC-18-04、AC-24-09）。讀取流程（README §5.3）：JSON.parse → schemaVersion 檢查 → 1 則遷移（MG-1～MG-4）→ todayLearned／learnedHistory 欄位層級檢查（缺少或 shape 不符只重設該欄，RD-1）→ 以本根結構與 V-ST-03 完整驗證 → V-ST-09～V-ST-11 正規化。",
+  "title": "StorageRecord（localStorage: englishMasterTrack:state，schemaVersion 3）",
+  "description": "應用程式持久化狀態。寫入時整筆 JSON.stringify 後以單一 setItem 寫入，確保不出現只寫一半的狀態（AC-18-04、AC-24-09）。讀取流程（README §5.3）：JSON.parse → schemaVersion 檢查（[1, 2, 3]）→ 1 則遷移到 2（MG-1～MG-4）→ 2 則遷移到 3（MG-5～MG-8）→ todayLearned／learnedHistory 欄位層級檢查（RD-1）→ flashcardPosition／part5CorrectIds／part5UnansweredOnly 欄位層級檢查（缺少或 shape 不符只重設該欄，RD-3）→ 以本根結構與 V-ST-03 完整驗證 → V-ST-09～V-ST-11 正規化、V-ST-05、UO-4 正規化 → 遷移過則寫回一次（MG-7）。",
   "type": "object",
   "required": ["schemaVersion", "savedAt", "data"],
   "additionalProperties": false,
   "properties": {
     "schemaVersion": {
-      "description": "結構版本。本版寫入 = 2。讀取時 1 先遷移再驗證；缺失、非整數、不在 SUPPORTED_SCHEMA_VERSIONS [1, 2] 視為無法讀取（README §5.3）。",
+      "description": "結構版本。v0.15 起寫入 = 3。讀取時 1、2 先遷移再驗證；缺失、非整數、不在 SUPPORTED_SCHEMA_VERSIONS [1, 2, 3] 視為無法讀取（README §5.3）。",
       "type": "integer",
-      "const": 2
+      "const": 3
     },
     "savedAt": {
       "description": "最後寫入時間，ISO 8601（RFC 3339，強制檢查，IM-2）。",
@@ -143,12 +147,12 @@
       }
     },
     "Part5Progress": {
-      "description": "模擬測驗進度（識別字沿用 part5，R-15；AC-11-03～AC-11-07）。跨欄位規則：roundCorrect ≤ roundAnswered、totalCorrect ≤ totalAnswered、roundAnswered ≤ totalAnswered（V-ST-03）；currentIndex ≥ 題庫長度時重設（V-ST-05）。",
+      "description": "模擬測驗進度（識別字沿用 part5，R-15；AC-11-03～AC-11-07）。跨欄位規則：roundCorrect ≤ roundAnswered、totalCorrect ≤ totalAnswered、roundAnswered ≤ totalAnswered（V-ST-03）；currentIndex ≥ 題庫長度時重設（V-ST-05）。（v0.15）本物件欄位不變；答對紀錄與開關在 PersistedData 頂層（part5CorrectIds、part5UnansweredOnly）；開關開啟時 currentIndex 的移動依 README UO-4～UO-7。",
       "type": "object",
       "required": ["currentIndex", "lockedSelection", "phase", "roundAnswered", "roundCorrect", "totalAnswered", "totalCorrect"],
       "additionalProperties": false,
       "properties": {
-        "currentIndex": { "$ref": "#/$defs/Count", "description": "目前題目索引，0 起算。" },
+        "currentIndex": { "$ref": "#/$defs/Count", "description": "目前題目索引，0 起算；畫面「第 i / N 題」與進度條依題庫題號（Q-66 A）。" },
         "lockedSelection": {
           "description": "目前題目已作答所選索引；未作答為 null。",
           "oneOf": [ { "$ref": "#/$defs/OptionIndex" }, { "type": "null" } ]
@@ -173,7 +177,7 @@
       }
     },
     "TodayLearnedState": {
-      "description": "（v0.8，schemaVersion 2）今日已學紀錄的『結構（shape）』檢查（US-30、R-17）。不符（非物件、缺鍵、多餘鍵、date 非字串且非 null、wordKeys 非陣列）= 整個欄位型別錯誤：讀 localStorage → 只把本欄重設為 {date:null, wordKeys:[]}（RD-1、AC-30-13）；匯入備份 → 格式錯誤（AC-24-11、AC-24-05）。shape 正確但內容無效（日期格式錯、不是今天、wordKeys 含非字串／空白／重複項）不在此擋，由 README V-ST-09 正規化。預設 {date:null, wordKeys:[]}。",
+      "description": "（v0.8，schemaVersion 2 起）今日已學紀錄的『結構（shape）』檢查（US-30、R-17）。不符（非物件、缺鍵、多餘鍵、date 非字串且非 null、wordKeys 非陣列）= 整個欄位型別錯誤：讀 localStorage → 只把本欄重設為 {date:null, wordKeys:[]}（RD-1、AC-30-13）；匯入備份 → 格式錯誤（AC-24-11、AC-24-05）。shape 正確但內容無效（日期格式錯、不是今天、wordKeys 含非字串／空白／重複項）不在此擋，由 README V-ST-09 正規化。預設 {date:null, wordKeys:[]}。",
       "type": "object",
       "required": ["date", "wordKeys"],
       "additionalProperties": false,
@@ -203,7 +207,7 @@
       ]
     },
     "LearnedHistory": {
-      "description": "（v0.8，schemaVersion 2）近 30 天每日已學字數的『結構（shape）』檢查：必須是 JSON 物件（日期 → 字數的對照）。不是物件（陣列、null、字串、數字等）= 整個欄位型別錯誤，處理同 TodayLearnedState。項目層級的無效內容（鍵不是合法日期、值為負數／非整數／非數字、日期晚於今天或早於今天往前第 29 天）不在此擋，由 README V-ST-10 捨棄。預設 {}。",
+      "description": "（v0.8，schemaVersion 2 起）近 30 天每日已學字數的『結構（shape）』檢查：必須是 JSON 物件（日期 → 字數的對照）。不是物件（陣列、null、字串、數字等）= 整個欄位型別錯誤，處理同 TodayLearnedState。項目層級的無效內容（鍵不是合法日期、值為負數／非整數／非數字、日期晚於今天或早於今天往前第 29 天）不在此擋，由 README V-ST-10 捨棄。預設 {}。",
       "type": "object"
     },
     "LearnedHistoryNormalized": {
@@ -213,8 +217,48 @@
       "additionalProperties": { "$ref": "#/$defs/Count" },
       "maxProperties": 30
     },
+    "FlashcardPosition": {
+      "description": "（v0.15，schemaVersion 3；US-44）單字卡上次位置的『結構（shape）』檢查：null（無紀錄，從第 1 張開始），或恰含 wordKey（字串）與 ordinal（整數 ≥ 1，即畫面「第 i / N 張」的 i）的物件。不符（非 null 也非物件、陣列、缺鍵、多餘鍵、wordKey 不是字串、ordinal 不是正整數如 0、-1、1.5、\"10\"）= 整個欄位型別錯誤：讀 localStorage → 只把本欄重設為 null（RD-3、AC-44-06 (c)、AC-47-05）；匯入備份 → 格式錯誤（IM-9、AC-47-06 (c)）。shape 正確但內容無法使用（wordKey 經 C-2 正規化後為空、單字不在目前單字集、ordinal 大於張數）不在此擋：前者視同 null，後兩者依 README FP-2 以 min(ordinal, N) 還原（AC-44-05）。預設 null。",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["wordKey", "ordinal"],
+          "additionalProperties": false,
+          "properties": {
+            "wordKey": { "type": "string", "description": "目前卡片的 wordKey（C-2）；比對前先以 C-2 正規化。" },
+            "ordinal": { "type": "integer", "minimum": 1, "description": "1 起算的序號（= RuntimeState.flashcard.index + 1）；只在 wordKey 找不到時使用。" }
+          }
+        }
+      ]
+    },
+    "FlashcardPositionNormalized": {
+      "description": "（v0.15）單字卡上次位置寫出時的值：null，或 wordKey 為已 C-2 正規化的非空字串、ordinal 為整數 ≥ 1。另需 V-ST-18：寫出時 ordinal ≤ 當時單字集張數，且 wordKey = 單字集第 ordinal 張的 wordKey（單字集為空時保留原紀錄，不在此限）。",
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "required": ["wordKey", "ordinal"],
+          "additionalProperties": false,
+          "properties": {
+            "wordKey": { "$ref": "#/$defs/NonBlankString" },
+            "ordinal": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "Part5CorrectIds": {
+      "description": "（v0.15，schemaVersion 3；US-45、Q-64 A）模擬測驗答對紀錄的『結構（shape）』檢查：必須是陣列。不是陣列（物件、null、字串、數字、布林）= 整個欄位型別錯誤：讀 localStorage → 只把本欄重設為 []（RD-3、AC-47-05）；匯入備份 → 格式錯誤（IM-9、AC-47-06 (c)）。項目層級無效（非字串、trim 後為空、重複）不在此擋：讀取與匯入時捨棄該項、保留其餘有效 id，不報錯、不計入略過筆數（RD-3、IM-10、AC-47-05、AC-47-06 (a)）。題庫中不存在的 id 屬有效項目，保留不刪除（Q-71 A）。預設 []。",
+      "type": "array"
+    },
+    "Part5CorrectIdsNormalized": {
+      "description": "（v0.15）答對紀錄寫出時的值：字串陣列、每項 trim 後非空、不重複；依首次答對的先後排列。不限定 p5- 格式、不限定存在於題庫（Q-71 A）。不設 maxItems（正常 ≤ 歷來題庫 id 數）。",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/NonBlankString" }
+    },
     "PersistedData": {
-      "description": "全部使用者資料（AC-18-01、AC-24-02）。不含內建內容、語音實例、音訊、畫面暫態（R-04、AC-21-03）。schemaVersion 2 起含 todayLearned、learnedHistory（必填；v1 資料由遷移補上）。",
+      "description": "全部使用者資料（AC-18-01、AC-24-02）。不含內建內容、語音實例、音訊、畫面暫態（R-04、AC-21-03）。schemaVersion 2 起含 todayLearned、learnedHistory（必填；v1 資料由遷移補上）。（v0.15，schemaVersion 3）新增選填 flashcardPosition、part5CorrectIds、part5UnansweredOnly（Q-63 A：新資料一律選填，缺少 = 預設值 null、[]、false；v1／v2 資料由遷移補上）；required 仍為 9 欄。本定義用於讀 localStorage（RD-3 處理後）與匯入步驟 5、步驟 7 後的驗證；程式寫出用 $defs/PersistedDataWritten。",
       "type": "object",
       "required": ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged", "todayLearned", "learnedHistory"],
       "additionalProperties": false,
@@ -235,32 +279,38 @@
         "streak": { "$ref": "#/$defs/StreakState" },
         "sttNoticeAcknowledged": { "type": "boolean", "description": "STT 說明已讀（AC-08-13）。預設 false。" },
         "todayLearned": { "$ref": "#/$defs/TodayLearnedState" },
-        "learnedHistory": { "$ref": "#/$defs/LearnedHistory" }
+        "learnedHistory": { "$ref": "#/$defs/LearnedHistory" },
+        "flashcardPosition": { "$ref": "#/$defs/FlashcardPosition" },
+        "part5CorrectIds": { "$ref": "#/$defs/Part5CorrectIds" },
+        "part5UnansweredOnly": { "type": "boolean", "description": "（v0.15，US-46、Q-69 A）「只練沒答對的題目」開關。預設 false。不是布林值（含字串 \"true\"、0、1、null）= 整個欄位型別錯誤：讀 localStorage 只重設為 false（RD-3），匯入為格式錯誤（IM-9）。" }
       }
     },
     "PersistedDataWritten": {
-      "description": "（v0.8）程式寫出的 PersistedData（localStorage 寫入、匯出備份的 data）必須符合：PersistedData + 兩個新欄位為正規化後的值。讀取與匯入驗證用 PersistedData，不用本定義。",
+      "description": "（v0.8；v0.15 擴充）程式寫出的 PersistedData（localStorage 寫入、匯出備份的 data）必須符合：PersistedData + 12 欄全部存在 + todayLearned、learnedHistory、flashcardPosition、part5CorrectIds 為正規化後的值。讀取與匯入驗證用 PersistedData，不用本定義。",
       "allOf": [
         { "$ref": "#/$defs/PersistedData" },
         {
+          "required": ["flashcardPosition", "part5CorrectIds", "part5UnansweredOnly"],
           "properties": {
             "todayLearned": { "$ref": "#/$defs/TodayLearnedStateNormalized" },
-            "learnedHistory": { "$ref": "#/$defs/LearnedHistoryNormalized" }
+            "learnedHistory": { "$ref": "#/$defs/LearnedHistoryNormalized" },
+            "flashcardPosition": { "$ref": "#/$defs/FlashcardPositionNormalized" },
+            "part5CorrectIds": { "$ref": "#/$defs/Part5CorrectIdsNormalized" }
           }
         }
       ]
     },
     "BackupFile": {
-      "description": "備份檔（AC-24-01～AC-24-11）。檔名 english-master-track-backup-YYYYMMDD.json。匯出：schemaVersion = 2，data 符合 $defs/PersistedDataWritten。匯入檢查順序與錯誤分類見 README §6.2：先檢查 JSON 與 format（格式錯誤），再檢查 schemaVersion（不在 [1, 2] → 版本不相容），schemaVersion 1 的 data 依 MG-1～MG-4 補新欄位預設值（AC-24-10），再以本 schema 驗證頂層欄位（exportedAt 為 date-time、contentDataVersion 為字串、無多餘欄位）與 data（格式錯誤；schemaVersion 2 的 data 缺 todayLearned／learnedHistory 或其 shape 不符亦為格式錯誤，AC-24-11）。匯入例外（IM-1）：data.customVocab 的 id／wordKey 重複屬 V-ST-03（本 schema 不表達），步驟 5 不擋，由步驟 7 清理後再完整檢查；新欄位的項目層級無效內容由步驟 7 以匯入當天為今天正規化（IM-8）。讀 localStorage 時不適用 IM-1。本檔所有 format: date-time 皆為強制檢查（RFC 3339 且 Date.parse 可解析，IM-2）。",
+      "description": "備份檔（AC-24-01～AC-24-11、AC-47-02、AC-47-03、AC-47-06）。檔名 english-master-track-backup-YYYYMMDD.json。匯出：schemaVersion = 3，data 符合 $defs/PersistedDataWritten。匯入檢查順序與錯誤分類見 README §6.2：先檢查 JSON 與 format（格式錯誤），再檢查 schemaVersion（不在 [1, 2, 3] → 版本不相容），schemaVersion 1 的 data 依 MG-1～MG-4 補 todayLearned／learnedHistory（AC-24-10），schemaVersion 1、2 的 data 再依 MG-5～MG-8 補 3 個 v0.15 欄位的預設值（AC-47-03），再以本 schema 驗證頂層欄位（exportedAt 為 date-time、contentDataVersion 為字串、無多餘欄位）與 data（格式錯誤；schemaVersion 2、3 的 data 缺 todayLearned／learnedHistory 或其 shape 不符亦為格式錯誤，AC-24-11；schemaVersion 3 的 data 中 v0.15 欄位存在但 shape 不符為格式錯誤，缺少則補預設值，IM-9）。匯入例外（IM-1）：data.customVocab 的 id／wordKey 重複屬 V-ST-03（本 schema 不表達），步驟 5 不擋，由步驟 7 清理後再完整檢查；新欄位的項目層級無效內容由步驟 7 正規化（IM-8、IM-10），不計入略過筆數。讀 localStorage 時不適用 IM-1。本檔所有 format: date-time 皆為強制檢查（RFC 3339 且 Date.parse 可解析，IM-2）。",
       "type": "object",
       "required": ["format", "schemaVersion", "exportedAt", "contentDataVersion", "data"],
       "additionalProperties": false,
       "properties": {
         "format": { "const": "english-master-track-backup" },
         "schemaVersion": {
-          "description": "備份格式版本號（AC-24-02）= 匯出時的 CURRENT_SCHEMA_VERSION（本版匯出 2）。本版匯入支援 [1, 2]；1 = v0.7 程式匯出的舊版備份（AC-24-10）。",
+          "description": "備份格式版本號（AC-24-02）= 匯出時的 CURRENT_SCHEMA_VERSION（v0.15 起匯出 3）。本版匯入支援 [1, 2, 3]；1 = v0.7 程式匯出（AC-24-10）、2 = v0.8～v0.14 程式匯出（AC-47-03）。舊版程式匯入 3 會顯示版本不相容（PRD E-117，預期行為）。",
           "type": "integer",
-          "enum": [1, 2]
+          "enum": [1, 2, 3]
         },
         "exportedAt": { "type": "string", "format": "date-time", "description": "匯出時間，RFC 3339 date-time（含時區）。匯入時強制檢查，不符 → 格式錯誤（README IM-2）。" },
         "contentDataVersion": { "type": "string", "description": "內建字庫資料版本（VOCAB_MANIFEST.dataVersion），僅供參考。" },
@@ -270,8 +320,8 @@
   },
   "examples": [
     {
-      "schemaVersion": 2,
-      "savedAt": "2026-10-30T08:30:00.000Z",
+      "schemaVersion": 3,
+      "savedAt": "2026-11-04T08:30:00.000Z",
       "data": {
         "goal": { "draftScore": 725, "appliedScore": 725, "appliedColor": "green", "effectiveColor": "green" },
         "customVocab": [],
@@ -281,11 +331,14 @@
         "streak": { "days": 0, "lastActiveDate": null },
         "sttNoticeAcknowledged": false,
         "todayLearned": { "date": null, "wordKeys": [] },
-        "learnedHistory": {}
+        "learnedHistory": {},
+        "flashcardPosition": null,
+        "part5CorrectIds": [],
+        "part5UnansweredOnly": false
       }
     },
     {
-      "schemaVersion": 2,
+      "schemaVersion": 3,
       "savedAt": "2026-10-30T09:15:00.000+08:00",
       "data": {
         "goal": { "draftScore": 600, "appliedScore": 600, "appliedColor": "green", "effectiveColor": "green" },
@@ -296,7 +349,28 @@
         "streak": { "days": 1, "lastActiveDate": "2026-10-30" },
         "sttNoticeAcknowledged": false,
         "todayLearned": { "date": "2026-10-30", "wordKeys": ["the", "of", "latency", "comply with"] },
-        "learnedHistory": { "2026-10-24": 3, "2026-10-27": 10, "2026-10-30": 4 }
+        "learnedHistory": { "2026-10-24": 3, "2026-10-27": 10, "2026-10-30": 4 },
+        "flashcardPosition": null,
+        "part5CorrectIds": [],
+        "part5UnansweredOnly": false
+      }
+    },
+    {
+      "schemaVersion": 3,
+      "savedAt": "2026-11-04T21:05:00.000+08:00",
+      "data": {
+        "goal": { "draftScore": 725, "appliedScore": 725, "appliedColor": "green", "effectiveColor": "green" },
+        "customVocab": [],
+        "masteredWordKeys": [],
+        "vocabQuiz": { "answered": 0, "correct": 0 },
+        "part5": { "currentIndex": 10, "lockedSelection": null, "phase": "question", "roundAnswered": 4, "roundCorrect": 3, "totalAnswered": 4, "totalCorrect": 3 },
+        "streak": { "days": 1, "lastActiveDate": "2026-11-04" },
+        "sttNoticeAcknowledged": false,
+        "todayLearned": { "date": null, "wordKeys": [] },
+        "learnedHistory": {},
+        "flashcardPosition": { "wordKey": "say", "ordinal": 10 },
+        "part5CorrectIds": ["p5-001", "p5-005", "p5-010"],
+        "part5UnansweredOnly": true
       }
     }
   ]

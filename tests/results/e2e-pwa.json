@@ -67,14 +67,14 @@
     "tc": "TC-35-01",
     "ac": "AC-35-01、AC-21-03",
     "result": "通過",
-    "note": "啟用 210 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-436e27b40282d4af\"]（BUILD_ID 436e27b40282d4af）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
+    "note": "啟用 217 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-33dcbafd5b611fc6\"]（BUILD_ID 33dcbafd5b611fc6）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-37-05a",
     "ac": "AC-37-05、AC-21-01、AC-21-03",
     "result": "通過",
-    "note": "整個工作階段請求 10 筆（含 service worker 發出 7 筆：[\"/english-master-track/sw.js\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/icons/apple-touch-icon-180.png\"]）：[\"GET /english-master-track/\",\"GET /english-master-track/sw.js\",\"GET /english-master-track/index.html\",\"GET /english-master-track/manifest.webmanifest\",\"GET /english-master-track/icons/icon-192.png\",\"GET /english-master-track/icons/icon-512.png\",\"GET /english-master-track/icons/icon-maskable-512.png\",\"GET /english-master-track/icons/apple-touch-icon-180.png\"]；不在允許清單／非 GET／帶本文／有查詢字串／跨來源 0；載入完成後操作（難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入）請求 0；Cache Storage {\"english-master-track-pwa-436e27b40282d4af\":7}；IndexedDB []；localStorage 鍵 [\"englishMasterTrack:state\"]；Console 錯誤／警告 0"
+    "note": "整個工作階段請求 10 筆（含 service worker 發出 7 筆：[\"/english-master-track/sw.js\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/icons/apple-touch-icon-180.png\"]）：[\"GET /english-master-track/\",\"GET /english-master-track/sw.js\",\"GET /english-master-track/index.html\",\"GET /english-master-track/manifest.webmanifest\",\"GET /english-master-track/icons/icon-192.png\",\"GET /english-master-track/icons/icon-512.png\",\"GET /english-master-track/icons/icon-maskable-512.png\",\"GET /english-master-track/icons/apple-touch-icon-180.png\"]；不在允許清單／非 GET／帶本文／有查詢字串／跨來源 0；載入完成後操作（難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入）請求 0；Cache Storage {\"english-master-track-pwa-33dcbafd5b611fc6\":7}；IndexedDB []；localStorage 鍵 [\"englishMasterTrack:state\"]；Console 錯誤／警告 0"
   },
   {
     "suite": "e2e-pwa",
@@ -88,7 +88,7 @@
     "tc": "TC-35-04",
     "ac": "AC-35-04",
     "result": "通過",
-    "note": "離線（伺服器停止＋context 離線）重新載入到主控台「開始今日學習」可點擊：一般 99、101、98、103、104 ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 450、526、473、498、543 ms（門檻每次 ≤ 6000）"
+    "note": "離線（伺服器停止＋context 離線）重新載入到主控台「開始今日學習」可點擊：一般 108、102、104、114、114 ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 588、845、745、690、655 ms（門檻每次 ≤ 6000）"
   },
   {
     "suite": "e2e-pwa",
@@ -151,7 +151,7 @@
     "tc": "TC-37-06",
     "ac": "AC-37-06",
     "result": "通過",
-    "note": "加入 PWA 前版本（git e9372f2 的 dist，無建置識別碼=true）學習後換成 PWA 版：service worker 啟用=true；再載入 main；localStorage 鍵 [\"englishMasterTrack:state\"] 相同=true；StorageRecord／data 欄位集合相同=true；data 內容完全相同=true；schemaVersion 2"
+    "note": "加入 PWA 前版本（git e9372f2 的 dist，無建置識別碼=true）學習後換成 PWA 版：service worker 啟用=true；再載入 main；localStorage 鍵 [\"englishMasterTrack:state\"] 相同=true；StorageRecord 欄位相同、data 為原 9 欄＋新 3 欄=true（原 9 欄集合相同=false，C-8 改讀）；原 9 欄內容逐欄相同且新 3 欄為預設=true；schemaVersion 3"
   },
   {
     "suite": "e2e-pwa",

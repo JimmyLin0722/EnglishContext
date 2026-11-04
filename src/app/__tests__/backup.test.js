@@ -2,6 +2,8 @@
  * backup.test.js — 備份匯出與匯入步驟單元測試（FE-06；FE-22 v0.8 升版）
  * 涵蓋：AC-24-01、AC-24-02、AC-24-03、AC-24-05、AC-24-06、AC-24-07、AC-24-08、AC-24-10、AC-24-11、AC-30-09、
  *       V-IMP-01、README §6.1、§6.2、§6.3、IM-8、MG-4
+ * （FE-73）v0.15：backupObj 預設為目前版本（3）且 data 12 欄；另保留 schemaVersion 2、1 的匯入案例（MG-8）；
+ *       匯出 schemaVersion 3、12 欄；支援版本「1、2、3」。樣本檔與 IM-9、IM-10 矩陣見 migrate-v3.test.js。
  */
 "use strict";
 const test = require("node:test");
@@ -33,13 +35,29 @@ function sampleData() {
     streak: { days: 3, lastActiveDate: "2026-10-29" },
     sttNoticeAcknowledged: true,
     todayLearned: { date: TODAY, wordKeys: ["bootstrap", "ability"] },
-    learnedHistory: { "2026-10-24": 3, "2026-10-30": 2 }
+    learnedHistory: { "2026-10-24": 3, "2026-10-30": 2 },
+    // v0.15（schemaVersion 3）：非預設值，驗證匯出／匯入原樣往返（含題庫外 id，Q-71 A）
+    flashcardPosition: { wordKey: "overfitting", ordinal: 2 },
+    part5CorrectIds: ["p5-002", "p5-999"],
+    part5UnansweredOnly: true
   };
+}
+
+/** v0.15 新增的 3 欄預設值 */
+const TRACK_DEFAULTS = { flashcardPosition: null, part5CorrectIds: [], part5UnansweredOnly: false };
+
+/** v0.8～v0.14（schemaVersion 2）備份的 data：9 欄 */
+function v2Data() {
+  const d = sampleData();
+  delete d.flashcardPosition;
+  delete d.part5CorrectIds;
+  delete d.part5UnansweredOnly;
+  return d;
 }
 
 /** v0.7（schemaVersion 1）備份的 data：只有 7 個既有欄位 */
 function v1Data() {
-  const d = sampleData();
+  const d = v2Data();
   delete d.todayLearned;
   delete d.learnedHistory;
   return d;
@@ -48,7 +66,7 @@ function v1Data() {
 function backupObj(data, extra) {
   return Object.assign({
     format: "english-master-track-backup",
-    schemaVersion: 2,
+    schemaVersion: C.CURRENT_SCHEMA_VERSION,
     exportedAt: "2026-10-30T01:00:00.000Z",
     contentDataVersion: "2026.10.30",
     data: data
@@ -80,8 +98,9 @@ test("buildBackup：內容為合法 BackupFile，含全部使用者資料（AC-2
   const obj = JSON.parse(r.json);
   assert.deepEqual(Object.keys(obj).sort(), ["contentDataVersion", "data", "exportedAt", "format", "schemaVersion"]);
   assert.equal(obj.format, "english-master-track-backup");
-  assert.equal(obj.schemaVersion, 2);
+  assert.equal(obj.schemaVersion, C.CURRENT_SCHEMA_VERSION);
   assert.equal(obj.exportedAt, now.toISOString());
+  assert.deepEqual(Object.keys(obj.data), [...P.DATA_KEYS]);
   assert.equal(obj.contentDataVersion, "2026.10.30");
   assert.deepEqual(obj.data, d);
   assert.ok(P.validatePersistedData(obj.data).ok);
@@ -129,7 +148,7 @@ test("匯入：頂層非物件或 format 錯 → format（步驟 2）", () => {
   delete noFormat.format;
   expectFormat(JSON.stringify(noFormat), "缺 format");
   // format 錯但版本也錯 → 仍先回報 format
-  expectFormat(JSON.stringify(backupObj(sampleData(), { format: "x", schemaVersion: 2 })), "format 優先於版本");
+  expectFormat(JSON.stringify(backupObj(sampleData(), { format: "x", schemaVersion: 99 })), "format 優先於版本");
 });
 
 test("匯入：UTF-8 BOM 開頭仍可解析", () => {
@@ -145,16 +164,16 @@ test("匯入：版本缺失 → version，fileVersion null（AC-24-06）", () =>
   assert.deepEqual(B.importSteps(JSON.stringify(o), ctx()), { ok: false, error: "version", fileVersion: null });
 });
 
-test("匯入：版本 3、0、1.5、字串、null → version", () => {
-  const cases = [[3, 3], [99, 99], [0, 0], [1.5, 1.5], [2.5, 2.5], ["1", null], ["2", null], [null, null], [-3, -3], [true, null], [{}, null]];
+test("匯入：版本 4、0、1.5、字串、null → version", () => {
+  const cases = [[4, 4], [99, 99], ["3", null], [0, 0], [1.5, 1.5], [2.5, 2.5], ["1", null], ["2", null], [null, null], [-3, -3], [true, null], [{}, null]];
   for (const [v, fv] of cases) {
     const r = B.importSteps(JSON.stringify(backupObj(sampleData(), { schemaVersion: v })), ctx());
     assert.deepEqual(r, { ok: false, error: "version", fileVersion: fv }, String(v));
   }
 });
 
-test("匯入：版本檢查先於 data 驗證（版本 3 且 data 壞 → version）", () => {
-  const r = B.importSteps(JSON.stringify(backupObj({ broken: true }, { schemaVersion: 3 })), ctx());
+test("匯入：版本檢查先於 data 驗證（版本 4 且 data 壞 → version）", () => {
+  const r = B.importSteps(JSON.stringify(backupObj({ broken: true }, { schemaVersion: 4 })), ctx());
   assert.equal(r.error, "version");
 });
 
@@ -166,7 +185,8 @@ test("匯入：缺必要欄位 → format（AC-24-05）", () => {
     delete o[k];
     expectFormat(JSON.stringify(o), "缺 " + k);
   }
-  for (const k of P.DATA_KEYS) {
+  // 必填 9 欄（v0.15 的 3 個新欄位為選填，缺少不算錯誤，見 IM-9 與 migrate-v3.test.js）
+  for (const k of P.REQUIRED_DATA_KEYS) {
     const d = sampleData();
     delete d[k];
     expectFormat(JSON.stringify(backupObj(d)), "缺 data." + k);
@@ -317,8 +337,9 @@ test("匯入失敗與成功時都不修改傳入的現有資料與 ctx（深度�
   dup.customVocab = [item("c_1", "Ability"), item("c_2", "Zeta"), item("c_2", "Eta")];
   const texts = [
     "", "x", "[]", JSON.stringify(backupObj(sampleData(), { format: "y" })),
-    JSON.stringify(backupObj(sampleData(), { schemaVersion: 3 })),
+    JSON.stringify(backupObj(sampleData(), { schemaVersion: 4 })),
     JSON.stringify(backupObj(v1Data(), { schemaVersion: 1 })),
+    JSON.stringify(backupObj(v2Data(), { schemaVersion: 2 })),
     JSON.stringify(backupObj("x", { schemaVersion: 1 })),
     JSON.stringify(backupObj(Object.assign(sampleData(), { todayLearned: [] }))),
     JSON.stringify(bad),
@@ -339,7 +360,8 @@ test("匯入失敗與成功時都不修改傳入的現有資料與 ctx（深度�
 });
 
 test("importSteps：任意輸入不拋例外", () => {
-  const bases = [JSON.stringify(backupObj(sampleData())), JSON.stringify(backupObj(v1Data(), { schemaVersion: 1 }))];
+  const bases = [JSON.stringify(backupObj(sampleData())), JSON.stringify(backupObj(v1Data(), { schemaVersion: 1 })),
+    JSON.stringify(backupObj(v2Data(), { schemaVersion: 2 }))];
   let seed = 7;
   const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
   for (let i = 0; i < 2000; i++) {
@@ -405,7 +427,7 @@ test("回歸 R6-1：依建置順序於瀏覽器環境載入，匯出與匯入正
   assert.equal(exp.filename, "english-master-track-backup-20261030.json");
   const obj = JSON.parse(exp.json);
   assert.equal(obj.format, "english-master-track-backup");
-  assert.equal(obj.schemaVersion, 2);
+  assert.equal(obj.schemaVersion, C.CURRENT_SCHEMA_VERSION);
   assert.deepEqual(obj.data, d);
 
   // 匯入：剛匯出的檔案可匯入成功（不可被判成格式錯誤）
@@ -424,9 +446,9 @@ test("回歸 R6-1：依建置順序於瀏覽器環境載入，匯出與匯入正
   );
 });
 
-// ── v0.8（FE-22）：匯出 schemaVersion 2 與學習紀錄正規化（§6.1、AC-24-02）──
+// ── v0.8（FE-22）：匯出學習紀錄正規化（§6.1、AC-24-02）；v0.15 起匯出 schemaVersion 3 ──
 
-test("buildBackup：schemaVersion 2；data 以匯出當天（本地）正規化 todayLearned、learnedHistory，符合 PersistedDataWritten", () => {
+test("buildBackup：schemaVersion 3；data 以匯出當天（本地）正規化 todayLearned、learnedHistory，符合 PersistedDataWritten", () => {
   const d = sampleData();
   d.todayLearned = { date: "2026-10-29", wordKeys: ["a", "b"] }; // 前一天 → 歸零
   d.learnedHistory = {
@@ -435,7 +457,6 @@ test("buildBackup：schemaVersion 2；data 以匯出當天（本地）正規化 
   };
   const snap = JSON.parse(JSON.stringify(d));
   const obj = JSON.parse(B.buildBackup(d, "v", NOW).json);
-  assert.equal(obj.schemaVersion, 2);
   assert.equal(obj.schemaVersion, C.CURRENT_SCHEMA_VERSION);
   assert.deepEqual(obj.data.todayLearned, { date: null, wordKeys: [] });
   assert.deepEqual(obj.data.learnedHistory, { "2026-10-29": 2, "2026-10-01": 1 });
@@ -455,12 +476,29 @@ test("buildBackup：schemaVersion 2；data 以匯出當天（本地）正規化 
   assert.ok(P.validatePersistedData(o2.data, { written: true, today: TODAY }).ok);
 });
 
-test("buildBackup：記憶體資料缺兩欄時補預設值（仍為 9 欄、通過寫出格式）", () => {
+test("buildBackup：記憶體資料缺學習紀錄 2 欄與 v0.15 的 3 欄時補預設值（12 欄、通過寫出格式）", () => {
   const obj = JSON.parse(B.buildBackup(v1Data(), "v", NOW).json);
   assert.deepEqual(Object.keys(obj.data), [...P.DATA_KEYS]);
+  assert.equal(Object.keys(obj.data).length, 12);
   assert.deepEqual(obj.data.todayLearned, { date: null, wordKeys: [] });
   assert.deepEqual(obj.data.learnedHistory, {});
+  for (const k of P.TRACK_KEYS) { assert.deepEqual(obj.data[k], TRACK_DEFAULTS[k], k); }
   assert.ok(P.validatePersistedData(obj.data, { written: true, today: TODAY }).ok);
+});
+
+test("buildBackup（v0.15）：3 欄以 ensureWritable 正規化後匯出（ids 去重、wordKey 依 C-2），12 欄、schemaVersion 3（AC-47-02）", () => {
+  const d = sampleData();
+  d.part5CorrectIds = ["p5-002", "p5-002", "", 3, "p5-999"];
+  d.flashcardPosition = { wordKey: "  OverFitting ", ordinal: 2 };
+  const snap = JSON.parse(JSON.stringify(d));
+  const obj = JSON.parse(B.buildBackup(d, "v", NOW).json);
+  assert.equal(obj.schemaVersion, 3);
+  assert.deepEqual(Object.keys(obj).sort(), ["contentDataVersion", "data", "exportedAt", "format", "schemaVersion"]);
+  assert.deepEqual(obj.data.part5CorrectIds, ["p5-002", "p5-999"]);
+  assert.deepEqual(obj.data.flashcardPosition, { wordKey: "overfitting", ordinal: 2 });
+  assert.equal(obj.data.part5UnansweredOnly, true);
+  assert.ok(P.validatePersistedData(obj.data, { written: true, today: TODAY }).ok);
+  assert.deepEqual(d, snap, "不修改傳入值");
 });
 
 test("buildBackup：未指定 now 時以本地今天正規化", () => {
@@ -483,11 +521,36 @@ test("匯入 v1 備份：data 遷移、兩欄為預設、其餘照常清理與�
   assert.deepEqual(r.data.todayLearned, { date: null, wordKeys: [] });
   assert.deepEqual(r.data.learnedHistory, {});
   for (const k of P.V1_DATA_KEYS) { assert.deepEqual(r.data[k], d[k], k); }
+  // v0.15：1 → 2 → 3 串接，3 個新欄位為預設（MG-8）
+  for (const k of P.TRACK_KEYS) { assert.deepEqual(r.data[k], TRACK_DEFAULTS[k], k); }
   assert.deepEqual(Object.keys(r.data).sort(), [...P.DATA_KEYS].sort());
   assert.ok(P.validatePersistedData(r.data).ok);
   assert.ok(P.validatePersistedData(r.data, { written: true, today: TODAY }).ok);
-  // store 寫入 localStorage 的 StorageRecord 一律為 2（MG-4）
-  assert.equal(P.buildRecord(r.data).schemaVersion, 2);
+  // store 寫入 localStorage 的 StorageRecord 一律為目前版本 3（MG-4、MG-8）
+  assert.equal(P.buildRecord(r.data).schemaVersion, C.CURRENT_SCHEMA_VERSION);
+});
+
+test("匯入 v2 備份（v0.8～v0.14 匯出）：MG-8 補 3 欄預設值，9 欄照常清理與匯入（AC-47-03）", () => {
+  const d = v2Data();
+  const r = B.importSteps(JSON.stringify(backupObj(d, { schemaVersion: 2 })), ctx());
+  assert.equal(r.ok, true);
+  assert.equal(r.skipped, 0);
+  for (const k of P.V2_DATA_KEYS) { assert.deepEqual(r.data[k], d[k], k); }
+  for (const k of P.TRACK_KEYS) { assert.deepEqual(r.data[k], TRACK_DEFAULTS[k], k); }
+  assert.deepEqual(Object.keys(r.data), [...P.DATA_KEYS]);
+  assert.ok(P.validatePersistedData(r.data, { written: true, today: TODAY }).ok);
+  // v2 內即使有 3 個新鍵（含壞值）也一律覆寫（MG-6）
+  const x = v2Data();
+  x.flashcardPosition = "bad";
+  x.part5CorrectIds = ["p5-001"];
+  x.part5UnansweredOnly = 1;
+  const rx = B.importSteps(JSON.stringify(backupObj(x, { schemaVersion: 2 })), ctx());
+  assert.equal(rx.ok, true);
+  for (const k of P.TRACK_KEYS) { assert.deepEqual(rx.data[k], TRACK_DEFAULTS[k], k); }
+  // data 不是物件 → format（MG-5）
+  for (const v of [null, [], "x"]) {
+    expectFormat(JSON.stringify(backupObj(v, { schemaVersion: 2 })), "v2 data " + JSON.stringify(v));
+  }
 });
 
 test("匯入 v1 備份：步驟 7 清理與略過計數照常（AC-24-08）", () => {
@@ -530,24 +593,26 @@ test("匯入 v1 備份：data 不是物件 → format（MG-1）；7 欄有誤 �
   expectFormat(JSON.stringify(backupObj(v1Data(), { schemaVersion: 1, exportedAt: "x" })), "exportedAt");
 });
 
-// ── v0.8（FE-22）：匯入 v2 的兩欄（IM-8，AC-24-05、AC-24-11）──
+// ── v0.8（FE-22）：匯入 v2（v0.15 起含 v3）的兩欄（IM-8，AC-24-05、AC-24-11）──
 
-test("匯入 v2：todayLearned／learnedHistory 缺少或 shape 不符 → format，整份不匯入（IM-8 (1)）", () => {
+test("匯入 v2／v3：todayLearned／learnedHistory 缺少或 shape 不符 → format，整份不匯入（IM-8 (1)）", () => {
   const todayBad = [undefined, null, [], "x", 1, {}, { date: null }, { wordKeys: [] }, { date: null, wordKeys: [], x: 1 },
     { date: 20261030, wordKeys: [] }, { date: TODAY, wordKeys: "a" }, { date: TODAY, wordKeys: {} }];
-  for (const v of todayBad) {
-    const d = sampleData();
-    if (v === undefined) { delete d.todayLearned; } else { d.todayLearned = v; }
-    expectFormat(JSON.stringify(backupObj(d)), "todayLearned " + JSON.stringify(v));
-  }
-  for (const v of [undefined, null, [], [1, 2], "x", 0, true]) {
-    const d = sampleData();
-    if (v === undefined) { delete d.learnedHistory; } else { d.learnedHistory = v; }
-    expectFormat(JSON.stringify(backupObj(d)), "learnedHistory " + JSON.stringify(v));
+  for (const [ver, base] of [[2, v2Data], [3, sampleData]]) {
+    for (const v of todayBad) {
+      const d = base();
+      if (v === undefined) { delete d.todayLearned; } else { d.todayLearned = v; }
+      expectFormat(JSON.stringify(backupObj(d, { schemaVersion: ver })), "v" + ver + " todayLearned " + JSON.stringify(v));
+    }
+    for (const v of [undefined, null, [], [1, 2], "x", 0, true]) {
+      const d = base();
+      if (v === undefined) { delete d.learnedHistory; } else { d.learnedHistory = v; }
+      expectFormat(JSON.stringify(backupObj(d, { schemaVersion: ver })), "v" + ver + " learnedHistory " + JSON.stringify(v));
+    }
   }
 });
 
-test("匯入 v2：項目層級無效 → 步驟 7 捨棄或重設，不報錯、不計入略過數（IM-8 (2)、AC-24-11）", () => {
+test("匯入 v3：項目層級無效 → 步驟 7 捨棄或重設，不報錯、不計入略過數（IM-8 (2)、AC-24-11）", () => {
   const d = sampleData();
   d.todayLearned = { date: TODAY, wordKeys: [1, "  Bootstrap ", "bootstrap", "", "   ", null, "Ghost Word"] };
   d.learnedHistory = {
@@ -576,7 +641,7 @@ test("匯入 v2：項目層級無效 → 步驟 7 捨棄或重設，不報錯、
   }
 });
 
-test("匯入 v2：略過數只計自訂單字與已掌握，與學習紀錄捨棄數無關", () => {
+test("匯入 v3：略過數只計自訂單字與已掌握，與學習紀錄捨棄數無關", () => {
   const d = sampleData();
   d.customVocab = [item("c_1", "Ability"), item("c_2", "Bootstrap")];
   d.masteredWordKeys = ["ghost"];
@@ -601,21 +666,24 @@ test("匯入：ctx.today 缺省或不合法時以本地今天計", () => {
   }
 });
 
-test("匯入：支援版本字串為「1、2」（AC-24-06 訊息來源）；v2 匯出的備份可在同一天匯入", () => {
-  assert.equal(C.SUPPORTED_SCHEMA_VERSIONS.join("、"), "1、2");
+test("匯入：支援版本字串為「1、2、3」（AC-24-06 訊息來源）；v3 匯出的備份可在同一天匯入", () => {
+  assert.equal(C.SUPPORTED_SCHEMA_VERSIONS.join("、"), "1、2、3");
   const exp = B.buildBackup(sampleData(), "v", NOW);
   const r = B.importSteps(exp.json, ctx());
   assert.equal(r.ok, true);
   assert.deepEqual(r.data, sampleData());
 });
 
-test("匯入失敗時（v1／v2 各分支）不修改傳入的現有資料（V-IMP-01、AC-25-11）", () => {
+test("匯入失敗時（v1／v2／v3 各分支）不修改傳入的現有資料（V-IMP-01、AC-25-11）", () => {
   const current = sampleData();
   const snapshot = JSON.parse(JSON.stringify(current));
   const c = ctx({ current: current });
   const texts = [
     JSON.stringify(backupObj(null, { schemaVersion: 1 })),
+    JSON.stringify(backupObj(null, { schemaVersion: 2 })),
+    JSON.stringify(backupObj(Object.assign(v2Data(), { learnedHistory: [] }), { schemaVersion: 2 })),
     JSON.stringify(backupObj(Object.assign(sampleData(), { learnedHistory: [] }))),
+    JSON.stringify(backupObj(Object.assign(sampleData(), { part5CorrectIds: {} }))),
     JSON.stringify(backupObj(Object.assign(sampleData(), { todayLearned: { date: 1, wordKeys: [] } }))),
     JSON.stringify(backupObj(sampleData(), { schemaVersion: 0 })),
     JSON.stringify(backupObj(sampleData(), { schemaVersion: "2" }))

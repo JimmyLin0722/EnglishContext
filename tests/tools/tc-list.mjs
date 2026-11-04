@@ -16,20 +16,20 @@ const kind = (r) => {
   if (r.file === "data.json") return "自動化（資料檢查）";
   if (r.file === "static.json") return "自動化（靜態檢查）";
   if (r.file === "pwa-static.json") return r.result === "待人工" ? "人工" : "自動化（靜態與建置檢查）";
-  if (r.result === "待人工" && /^TC-(PWA|LAY|VER)-H/.test(r.tc)) return "人工";
+  if (r.result === "待人工" && /^TC-(PWA|LAY|VER|TRK)-H/.test(r.tc)) return "人工";
   if (r.file === "qa-review.json") return r.result === "待人工" ? "人工" : "QA 檢視";
   return "自動化 E2E";
 };
 const script = (r) => {
-  if (/^TC-(PWA|LAY|VER)-H/.test(r.tc)) return "§6";
+  if (/^TC-(PWA|LAY|VER|TRK)-H/.test(r.tc)) return "§6";
   if (SCRIPT[r.file]) return SCRIPT[r.file];
   if (r.file === "qa-review.json") {
-    if (/^TC-B0[13]/.test(r.tc)) return r.tc === "TC-B01" ? "tests/static/boundary-check.mjs" : "tests/static/boundary-r6.mjs";
+    if (/^TC-B0[13]/.test(r.tc)) return r.tc === "TC-B01" ? "tests/static/boundary-check.mjs" : "tests/static/boundary-r7.mjs";
     if (r.tc === "TC-B02") return "人工判讀（檔案時間、docs 變更紀錄）";
     if (r.tc === "TC-D18") return "tests/data/records-check.mjs＋人工判讀";
     if (/^TC-D/.test(r.tc)) return "src/data/_tools/sample.mjs＋人工判讀";
     if (/^TC-R5-J/.test(r.tc)) return "人工判讀（設計字面 vs AC）";
-    if (r.tc === "TC-X-edge") return "e2e-goal、e2e-hidden、e2e-pwa、e2e-version（QA_BROWSER=edge）";
+    if (r.tc === "TC-X-edge") return "e2e-goal、e2e-hidden、e2e-pwa、e2e-version、e2e-track-p5（QA_BROWSER=edge）";
     return "§6";
   }
   return "tests/e2e/" + r.file.replace(".json", ".mjs");

@@ -200,7 +200,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     const fields = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged"];
     const same = fields.every((k) => JSON.stringify(d[k]) === JSON.stringify(before[k]));
     const ok = entry === "main" && tab === "dashboard" && same && !t.some((x) => x.includes("資料讀取失敗")) && r.text.startsWith("今日已學 0 /") && r.bars.every((b) => b.count === 0) && r.empty === "開始學習後會顯示紀錄" && !r.barsShown
-      && st.schemaVersion === 2 && JSON.stringify(st.data.todayLearned) === JSON.stringify({ date: null, wordKeys: [] }) && JSON.stringify(st.data.learnedHistory) === "{}" && !(await p.ev(`localStorage.getItem("englishMasterTrack:unreadable")`));
+      && st.schemaVersion === 3 && JSON.stringify(st.data.todayLearned) === JSON.stringify({ date: null, wordKeys: [] }) && JSON.stringify(st.data.learnedHistory) === "{}" && !(await p.ev(`localStorage.getItem("englishMasterTrack:unreadable")`));
     return { ok, note: `v1 狀態開啟 → ${entry}/${tab}；7 欄不變=${same}；提示 ${JSON.stringify(t)}；${r.text}、長條 ${r.bars.map((b) => b.count).join(",")}、空狀態「${r.empty}」；localStorage 已寫回 schemaVersion ${st.schemaVersion}、todayLearned ${JSON.stringify(st.data.todayLearned)}、learnedHistory ${JSON.stringify(st.data.learnedHistory)}（t0=${t0}）` };
   });
 
@@ -275,7 +275,9 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
 
 // ═════════ AC-30-14：學習紀錄寫入容量不足 ═════════
 {
-  const p = await open([storageMode("quota")]);
+  // 第 7 輪（SD-FB-59、WR-2）：一般寫入的容量不足提示改為整個工作階段 1 次；若載入時就是容量已滿，首次畫面「開始學習」的寫入失敗會先用掉這 1 次，
+  // 因此改為每次載入先解除模擬，量測時才設為容量已滿（與 e2e-track TC-44-10b 相同）
+  const p = await open([storageMode("quota"), "window.__qaQuota = false;"]);
   await p.goto();
   await p.ev(`window.__qaQuota = false`);
   await R.check("TC-30-14", "AC-30-14、LR-7", async () => {

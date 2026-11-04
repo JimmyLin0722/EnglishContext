@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-04T03:38:03.256Z",
+  "oldVersion": "1.0.0",
+  "toasts": [
+    "備份檔版本不相容（檔案版本：3；支援版本：1、2）"
+  ],
+  "dialog": null,
+  "stateKeyWritten": false,
+  "exceptions": []
+}

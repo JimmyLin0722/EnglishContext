@@ -6,6 +6,7 @@
  * （v0.12，FE-61；architecture.md v0.8 §7.19.6；契約 MT-1、MT-2；AC-40-01～AC-40-03、AC-38-06、AC-38-07）
  *   內容寬 720px 置中；頁首作答進度條（軌道 6px --track、填色 --brand、transition: none）；
  *   題號、解析標題、結算標題 18px／700；題目卡沿用全域 .card；作答選項維持 --border 外框與對錯色。
+ * （v0.15，FE-75；architecture.md v0.10 §7.21.4）答對紀錄：計數行、「只練沒答對的題目」開關、「✓ 曾答對」、全部答對畫面。
  */
 
 /* 內容寬 720px 置中（AC-40-02；375px 填滿） */
@@ -262,6 +263,109 @@
 .p5-empty__text {
   margin: 0;
   color: var(--text-muted);
+}
+
+/* ─── （v0.15，FE-75；architecture.md v0.10 §7.21.4；CR-4、UO-1、UO-7）答對紀錄 ───
+ * 只用既有 token，不新增色彩、不使用強調橘；新元素不設轉場與動畫（AC-31-03）。
+ */
+
+/* 計數行與開關：進度條下方、題目之上；窄寬自動換行不重疊（AC-45-05） */
+.p5-record {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 0 0 8px;
+}
+
+.p5-record__count {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 整個 label 為觸控目標 ≥ 44×44（AC-46-01） */
+.p5-only {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--touch);
+  min-width: var(--touch);
+  padding: 0 4px;
+  color: var(--text);
+  font-size: 0.9375rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 原生核取方塊：勾選有 ✓ 形狀，不只靠顏色 */
+.p5-only input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--brand-deep);
+}
+
+.p5-only input:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* 「✓ 曾答對」：外框膠囊（同 .p5-type 尺寸），位於 .p5-meta 題型標籤之後（AC-45-04） */
+.p5-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--correct);
+  background: var(--surface);
+  color: var(--correct);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 全部答對畫面（AC-46-06） */
+.p5-allcorrect {
+  text-align: center;
+}
+
+.p5-allcorrect__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.p5-allcorrect__title:focus {
+  outline: none;
+}
+
+.p5-allcorrect__title:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.p5-allcorrect__note,
+.p5-allcorrect__caption {
+  color: var(--text-muted);
+}
+
+.p5-allcorrect__actions {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.p5-allcorrect__actions .btn {
+  min-height: var(--touch);
+}
+
+@media (max-width: 640px) {
+  .p5-allcorrect__actions .btn {
+    flex: 1 1 100%;
+  }
 }
 
 /* 平板以上：選項 2 欄 */

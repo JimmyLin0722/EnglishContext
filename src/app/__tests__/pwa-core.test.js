@@ -3,6 +3,7 @@
  * 受測：core/pwa.js
  * 依據：architecture.md v0.7 §4.7「EMT.core.pwa」、§10.4「pwa-core.test.js」列；契約 data-schema.ts §12、README §10.5、§10.7、§10.8、§10.11
  * 涵蓋：V-PWA-08、IN-1、IN-2、UP-3、UP-6；AC-34-01、AC-34-02、AC-34-07、AC-34-08、AC-36-03、AC-37-01、AC-37-02、AC-37-04、AC-24-12
+ * （v0.11，FE-77）PWA_TEXTS 文字依 data-schema.ts v0.16 更新（architecture.md v0.11 §7.22.1、§10.8）。
  * 常數期望值由 data-schema.ts §12 原文逐字複製（測試不讀 docs/）。
  */
 "use strict";
@@ -59,8 +60,9 @@ const EXPECTED = {
   PWA_UPDATE_RECHECK_MS: 3_600_000,
   PWA_TEXTS: {
     installButton: "安裝 App",
-    updateNotice: "有新版本，重新整理",
-    updateButton: "重新整理",
+    // （v0.16 契約 UP-6，FE-77）新文字；逗號為全形 U+FF0C
+    updateNotice: "有新版本，請更新版本",
+    updateButton: "更新版本",
     backupOriginNotice: "學習紀錄只存在目前的瀏覽器與網址；檔案版、網頁版、主畫面 App 彼此不互通，可用匯出備份／匯入轉移",
   },
 };

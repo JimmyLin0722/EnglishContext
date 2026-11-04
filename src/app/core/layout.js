@@ -13,6 +13,8 @@
  * - （v0.9，FE-65；契約 v0.14 §13、README §12.2 LS-1、§11.4 DB-4）LAYOUT_TEXTS 新增最後一鍵 levelStatus；
  *   新增 goalLineText（主控台目標行，只以生效色級組字）與 levelStatusText（難易度設定頁狀態列）。
  *   goalLineCapped、goalLineSeparator 兩鍵保留（契約仍含），但 view 不得再使用；goalLine 標記 @deprecated。
+ * - （v0.10，FE-72；契約 v0.15 §11.6 MT-1）part5Progress 新增 kind "allCorrect"（同 summary：100%、now = max）；
+ *   其他函式、LAYOUT_TEXTS 與載入規則（LD-1）不變。
  */
 (function (root, factory) {
   var api = factory();
@@ -245,17 +247,18 @@
 
   /**
    * MT-1 模擬測驗進度條推導。
-   * @param {"question"|"summary"|"empty"} kind
+   * （v0.10，FE-72；MT-1 v0.15）kind = "allCorrect"（全部答對畫面）與 "summary" 相同：進度條 100%、now = max。
+   * @param {"question"|"summary"|"allCorrect"|"empty"} kind
    * @param {number} number 畫面「第 i / N 題」的 i（kind = "question" 時使用）
    * @param {number} total 題數 N
    * @returns {{ visible: boolean, now: number, max: number, percent: number }}
    */
   function part5Progress(kind, number, total) {
     var max = typeof total === "number" && isFinite(total) ? Math.floor(total) : 0;
-    if (max <= 0 || kind === "empty" || (kind !== "question" && kind !== "summary")) {
+    if (max <= 0 || kind === "empty" || (kind !== "question" && kind !== "summary" && kind !== "allCorrect")) {
       return { visible: false, now: 0, max: max > 0 ? max : 0, percent: 0 };
     }
-    if (kind === "summary") {
+    if (kind === "summary" || kind === "allCorrect") {
       return { visible: true, now: max, max: max, percent: 100 };
     }
     var now = typeof number === "number" && isFinite(number) ? Math.round(number) : 0;

@@ -2,6 +2,8 @@
 /* 375px 寬度下長網址與授權全文須換行，不得產生水平捲軸 */
 /* （v0.12，FE-60；§7.19.8）各區塊沿用全域 .card（白底、圓角 16px、陰影、無邊框）；授權全文等非卡片元素框線改 --line；
  * 新增「原創內容來源」一行（.src-original，樣式同 .src-attrib） */
+/* （architecture v0.11，FE-77；§7.22.2）頁面最後一行聯絡資訊 .src-contact：沿用 .src-muted 顏色，字級 0.8125rem 使 375px 維持 1 行；
+ * 不禁止換行（放大字級時要能換行，E-119）、不禁止選取文字 */
 
 .src-page {
   min-width: 0;
@@ -136,4 +138,10 @@
 .src-attrib,
 .src-original {
   margin: 12px 0;
+}
+
+.src-contact {
+  margin: 24px 0 0;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
 }

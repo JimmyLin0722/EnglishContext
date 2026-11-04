@@ -44,8 +44,8 @@ PWA 圖示與名稱「EnglishContext」為品牌標識，著作權人 JimmyLin�
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="emt-build-id" content="436e27b40282d4af">
-<meta name="emt-app-version" content="1.0.0">
+<meta name="emt-build-id" content="a36e98461764d0be">
+<meta name="emt-app-version" content="1.1.0">
 <link rel="icon" href="data:,">
 <style>
 /* 00-base.css */
@@ -2432,6 +2432,7 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
  * （v0.12，FE-61；architecture.md v0.8 §7.19.6；契約 MT-1、MT-2；AC-40-01～AC-40-03、AC-38-06、AC-38-07）
  *   內容寬 720px 置中；頁首作答進度條（軌道 6px --track、填色 --brand、transition: none）；
  *   題號、解析標題、結算標題 18px／700；題目卡沿用全域 .card；作答選項維持 --border 外框與對錯色。
+ * （v0.15，FE-75；architecture.md v0.10 §7.21.4）答對紀錄：計數行、「只練沒答對的題目」開關、「✓ 曾答對」、全部答對畫面。
  */
 
 /* 內容寬 720px 置中（AC-40-02；375px 填滿） */
@@ -2688,6 +2689,109 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
 .p5-empty__text {
   margin: 0;
   color: var(--text-muted);
+}
+
+/* ─── （v0.15，FE-75；architecture.md v0.10 §7.21.4；CR-4、UO-1、UO-7）答對紀錄 ───
+ * 只用既有 token，不新增色彩、不使用強調橘；新元素不設轉場與動畫（AC-31-03）。
+ */
+
+/* 計數行與開關：進度條下方、題目之上；窄寬自動換行不重疊（AC-45-05） */
+.p5-record {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin: 0 0 8px;
+}
+
+.p5-record__count {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* 整個 label 為觸控目標 ≥ 44×44（AC-46-01） */
+.p5-only {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--touch);
+  min-width: var(--touch);
+  padding: 0 4px;
+  color: var(--text);
+  font-size: 0.9375rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 原生核取方塊：勾選有 ✓ 形狀，不只靠顏色 */
+.p5-only input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  flex: none;
+  accent-color: var(--brand-deep);
+}
+
+.p5-only input:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* 「✓ 曾答對」：外框膠囊（同 .p5-type 尺寸），位於 .p5-meta 題型標籤之後（AC-45-04） */
+.p5-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--correct);
+  background: var(--surface);
+  color: var(--correct);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 全部答對畫面（AC-46-06） */
+.p5-allcorrect {
+  text-align: center;
+}
+
+.p5-allcorrect__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.p5-allcorrect__title:focus {
+  outline: none;
+}
+
+.p5-allcorrect__title:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.p5-allcorrect__note,
+.p5-allcorrect__caption {
+  color: var(--text-muted);
+}
+
+.p5-allcorrect__actions {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.p5-allcorrect__actions .btn {
+  min-height: var(--touch);
+}
+
+@media (max-width: 640px) {
+  .p5-allcorrect__actions .btn {
+    flex: 1 1 100%;
+  }
 }
 
 /* 平板以上：選項 2 欄 */
@@ -3139,6 +3243,8 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
 /* 375px 寬度下長網址與授權全文須換行，不得產生水平捲軸 */
 /* （v0.12，FE-60；§7.19.8）各區塊沿用全域 .card（白底、圓角 16px、陰影、無邊框）；授權全文等非卡片元素框線改 --line；
  * 新增「原創內容來源」一行（.src-original，樣式同 .src-attrib） */
+/* （architecture v0.11，FE-77；§7.22.2）頁面最後一行聯絡資訊 .src-contact：沿用 .src-muted 顏色，字級 0.8125rem 使 375px 維持 1 行；
+ * 不禁止換行（放大字級時要能換行，E-119）、不禁止選取文字 */
 
 .src-page {
   min-width: 0;
@@ -3275,6 +3381,12 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   margin: 12px 0;
 }
 
+.src-contact {
+  margin: 24px 0 0;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
 /* 80-pwa.css */
 /* ─── PWA 新版提示列（FE-50；architecture.md v0.7 §7.18.7、§9 v0.7；契約 UP-6） ─── */
 /* 頁首之後、#app-banner 之後的頁面流元素；sticky 頂端，不可能被底部導覽列遮住（AC-27-03）。
@@ -3368,6 +3480,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * （FE-22）v0.8 持久化升版：CURRENT_SCHEMA_VERSION 1 → 2、SUPPORTED_SCHEMA_VERSIONS [1] → [1, 2]（契約 README §5.3）。
  * （FE-34）v0.9：NAV_TAB_ORDER 6 項 → 4 項（R-18 三）；新增 HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS（US-32）；TAB_LABELS 不變（HT-4）。
  * （FE-42）v0.10：SCORE_DEFAULT 600 → 725（= 綠色 scoreMax；PRD Q-39、契約 GS-7、DS-08）。
+ * （FE-73）契約 v0.15 持久化升版：CURRENT_SCHEMA_VERSION 2 → 3、SUPPORTED_SCHEMA_VERSIONS [1, 2] → [1, 2, 3]；
+ *   LEARNING_PROGRESS_FIELDS 6 → 7 項（加 part5CorrectIds，Q-67 A）；新增 PART5_RECORD_TEXTS（data-schema.ts §15）。
  * 契約變更時必須同步更新本檔與 src/app/__tests__/goal.test.js 的字面值斷言。
  * 本模組不碰 DOM；Node 以 require 載入，瀏覽器掛到 EMT.core.constants。
  */
@@ -3440,9 +3554,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     limitations: "研究限制 Limitations"
   };
 
-  // §8 持久化（v0.8：寫入 2；讀取與匯入支援 1、2，1 依 MG-1～MG-4 遷移）
-  var CURRENT_SCHEMA_VERSION = 2;
-  var SUPPORTED_SCHEMA_VERSIONS = [1, 2];
+  // §8 持久化（v0.15：寫入 3；讀取與匯入支援 1、2、3，1 依 MG-1～MG-4、2 依 MG-5～MG-8 逐版遷移）
+  var CURRENT_SCHEMA_VERSION = 3;
+  var SUPPORTED_SCHEMA_VERSIONS = [1, 2, 3];
   var STORAGE_KEYS = {
     state: "englishMasterTrack:state",
     unreadable: "englishMasterTrack:unreadable"
@@ -3468,14 +3582,29 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     sources: "資料來源與授權"
   };
 
-  // §8（v0.9）學習進度紀錄欄位（US-32、README §5.7 CI-4）：切換難易度初始化時只覆寫這 6 欄（白名單），順序同 data-schema.ts
-  var LEARNING_PROGRESS_FIELDS = ["masteredWordKeys", "vocabQuiz", "part5", "streak", "todayLearned", "learnedHistory"];
+  // §8（v0.9）學習進度紀錄欄位（US-32、README §5.7 CI-4）：切換難易度初始化時只覆寫這些欄（白名單），順序同 data-schema.ts
+  // （v0.15，Q-67 A）末尾加 part5CorrectIds，共 7 欄
+  var LEARNING_PROGRESS_FIELDS = ["masteredWordKeys", "vocabQuiz", "part5", "streak", "todayLearned", "learnedHistory", "part5CorrectIds"];
 
   // §10（v0.9）導覽列項目與順序（AC-20-03、AC-27-01）：恰好 4 項，不含 "sources"、不含隱藏頁（R-18 三）
   var NAV_TAB_ORDER = ["dashboard", "customizer", "flashcards", "part5"];
 
   // §10（v0.9）隱藏頁面（AC-20-04、HT-1～HT-5）：currentTab 不得為這些值；TAB_LABELS 保留其文字供未來開放
   var HIDDEN_TAB_IDS = ["decoder", "phrasebank"];
+
+  // §15（v0.15）模擬測驗答對紀錄與「只練沒答對」的畫面文字（AC-45-04、AC-45-05、AC-46-01、AC-46-06～AC-46-08）；
+  // 鍵、值、鍵順序與 data-schema.ts §15 逐字相同；{k}、{q} 為佔位符；以 textContent 寫入（C-7）
+  var PART5_RECORD_TEXTS = {
+    correctBadge: "✓ 曾答對",
+    correctCount: "已答對 {k} / {q} 題",
+    unansweredOnlyLabel: "只練沒答對的題目",
+    allCorrectTitle: "{q} 題全部答對！",
+    replayKeepRecords: "全部題目再練一次（保留紀錄）",
+    clearAndRestart: "清除答對紀錄，重新來過",
+    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+    confirmOk: "確定",
+    confirmCancel: "取消"
+  };
 
   return deepFreeze({
     COLOR_LEVELS: COLOR_LEVELS,
@@ -3497,7 +3626,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     TAB_LABELS: TAB_LABELS,
     NAV_TAB_ORDER: NAV_TAB_ORDER,
     HIDDEN_TAB_IDS: HIDDEN_TAB_IDS,
-    LEARNING_PROGRESS_FIELDS: LEARNING_PROGRESS_FIELDS
+    LEARNING_PROGRESS_FIELDS: LEARNING_PROGRESS_FIELDS,
+    PART5_RECORD_TEXTS: PART5_RECORD_TEXTS
   });
 });
 
@@ -3539,10 +3669,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 /* core/backup.js */
 /*
  * EMT.core.backup — 備份匯出物件與匯入步驟（FE-06；architecture.md §7.5；FE-22 v0.8 升版 §7.8；
- *   契約 README §6.1、§6.2、§6.3、IM-1～IM-8、MG-1～MG-4、V-IMP-01）
- * - buildBackup：組成 BackupFile 與檔名（AC-24-01、AC-24-02）；schemaVersion 2，data 先以匯出當天正規化學習紀錄
- * - importSteps：§6.2 步驟 1～5 與 7 的純函式（AC-24-05、AC-24-06、AC-24-08、AC-24-10、AC-24-11）；
- *   支援 schemaVersion 1（步驟 4 遷移 data）與 2；
+ *   FE-73 v0.15 升版 §4.10、§7.21.1；契約 README §6.1、§6.2、§6.3、IM-1～IM-10、MG-1～MG-8、V-IMP-01）
+ * - buildBackup：組成 BackupFile 與檔名（AC-24-01、AC-24-02、AC-47-02）；schemaVersion 3，data 12 欄
+ *   （persist.ensureWritable），並以匯出當天正規化學習紀錄
+ * - importSteps：§6.2 步驟 1～5 與 7 的純函式（AC-24-05、AC-24-06、AC-24-08、AC-24-10、AC-24-11、AC-47-03、AC-47-06）；
+ *   支援 schemaVersion 1、2（步驟 4 逐版遷移 data）與 3；
  *   步驟 6（確認對話框）、8（一次 setItem）、9（套用、重建單字集、提示）由 store 處理。
  * 本模組為純函式，不碰 DOM、不讀寫 localStorage，不修改任何傳入的參數。
  * Node 以 require 載入，瀏覽器掛到 EMT.core.backup（依賴 constants、wordkey、persist、learning，於呼叫時才取用，與載入順序無關）。
@@ -3599,7 +3730,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
-   * 只取 PersistedData 的 9 個欄位並深拷貝，確保匯出不夾帶執行期狀態或內建內容（AC-24-02）。
+   * 只取 PersistedData 的欄位（v0.15 起 12 欄）並深拷貝，確保匯出不夾帶執行期狀態或內建內容（AC-24-02）。
    */
   function pickPersisted(data) {
     var out = {};
@@ -3620,7 +3751,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    */
   function buildBackup(data, contentDataVersion, now) {
     var t = now instanceof Date && !isNaN(now.getTime()) ? now : new Date();
-    var out = pickPersisted(data);
+    // v0.15：補齊並正規化 3 個新欄位，data 一律 12 欄（$defs/PersistedDataWritten）
+    var out = P().ensureWritable(pickPersisted(data));
     // v0.8：以匯出當天正規化 todayLearned、learnedHistory，data 須符合 $defs/PersistedDataWritten（§6.1）
     var learned = L().normalizeLearning(out, P().localDate(t));
     out.todayLearned = learned.todayLearned;
@@ -3630,7 +3762,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       schemaVersion: C().CURRENT_SCHEMA_VERSION,
       exportedAt: t.toISOString(),
       contentDataVersion: typeof contentDataVersion === "string" ? contentDataVersion : "",
-      data: out
+      data: pickPersisted(out) // 依 DATA_KEYS 的契約順序輸出 12 欄
     };
     return {
       filename: FILENAME_PREFIX + localYmd(t) + ".json",
@@ -3672,10 +3804,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * 匯入步驟 1～5、7（README §6.2；V-IMP-01）。不拋例外、不修改任何傳入參數。
    * @param {string} text 備份檔文字內容
    * @param {{builtinKeys?: Set<string>|Map<string,*>|string[], part5Length?: number,
-   *          newId?: function(): string, random?: function(): number, today?: string}} [ctx]
+   *          newId?: function(): string, random?: function(): number, today?: string,
+   *          part5Ids?: Array<string|null>}} [ctx]
    *   builtinKeys：全部內建字庫的 wordKey 集合；part5Length：模擬測驗題庫長度（V-ST-05）；
    *   newId：id 重複時的產生器（測試用，可省略）；random：預設產生器的亂數來源；
-   *   today：匯入當天的本地日期 YYYY-MM-DD（步驟 7 的 V-ST-09～V-ST-11，IM-8 (2)），缺省或不合法時以本地今天計。
+   *   today：匯入當天的本地日期 YYYY-MM-DD（步驟 7 的 V-ST-09～V-ST-11，IM-8 (2)），缺省或不合法時以本地今天計；
+   *   part5Ids（v0.15，選填）：題庫 id 陣列（part5flow.bankIdsOf 結果），有傳時步驟 7 依 UO-4 正規化目前題目（IM-10 (4)）。
    * @returns {{ok: false, error: "format"} | {ok: false, error: "version", fileVersion: number|null}
    *          | {ok: true, data: object, skipped: number}}
    */
@@ -3716,8 +3850,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       return fail("version", fileVersion);
     }
 
-    // 步驟 4：schemaVersion 1 → 依 MG-1、MG-2 只遷移 data（與 localStorage 共用遷移鏈）；
-    //   data 不是物件 → format（MG-1）。頂層 schemaVersion 原值保留給步驟 5（MG-4），本函式不改寫 file。
+    // 步驟 4：schemaVersion < 3 → 以 persist.migrate 逐版只遷移 data（1 → 2 → 3、2 → 3；與 localStorage 共用遷移鏈）；
+    //   data 不是物件 → format（MG-1、MG-5）。頂層 schemaVersion 原值保留給步驟 5（MG-4、MG-8），本函式不改寫 file。
     var migratedData = file.data;
     if (v < C().CURRENT_SCHEMA_VERSION) {
       if (!P().isPlainObject(file.data)) {
@@ -3742,12 +3876,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     if (!P().isPlainObject(migratedData)) {
       return fail("format");
     }
-    // IM-8 (1)：schemaVersion 2 的 data 缺少 todayLearned／learnedHistory 或 shape 不符 → 整份不匯入
+    // IM-8 (1)：schemaVersion 2、3 的 data 缺少 todayLearned／learnedHistory 或 shape 不符 → 整份不匯入
     //   （與讀 localStorage 的 RD-1「只重設該欄」不同）
     if (!hasOwn(migratedData, "todayLearned") || !P().isTodayLearnedShape(migratedData.todayLearned) ||
         !hasOwn(migratedData, "learnedHistory") || !P().isLearnedHistoryShape(migratedData.learnedHistory)) {
       return fail("format");
     }
+    // IM-9：3 個新欄位缺少不算錯誤（步驟 7 補預設值）；存在但 shape 不符由 validatePersistedData 判為錯誤 → format
     if (!P().validatePersistedData(migratedData, { allowCustomDuplicates: true }).ok) {
       return fail("format");
     }
@@ -3795,11 +3930,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       return false;
     });
 
+    // v0.15（IM-10 (1)～(3)）：補預設值、答對紀錄與單字卡位置的項目層級正規化；不計入 skipped（IM-10 (5)）
+    data = P().normalizeTrackItems(data);
+
     // 重算色級（V-ST-02）、part5.currentIndex 依 V-ST-05；
     // v0.8：以匯入當天依 V-ST-09～V-ST-11 正規化學習紀錄（IM-8 (2)），捨棄的項目不計入 skipped
-    data = P().normalizeAfterLoad(data, ctx.part5Length, ctx.today);
+    // v0.15：有 part5Ids 時於 V-ST-05 之後依匯入的開關值執行 UO-4（IM-10 (4)）
+    data = P().normalizeAfterLoad(data, ctx.part5Length, ctx.today, ctx.part5Ids);
 
-    // 防禦：清理後必須完全符合 Schema（v2）與 V-ST-03
+    // 防禦：清理後必須完全符合 Schema（v3）與 V-ST-03
     if (!P().validatePersistedData(data).ok) {
       return fail("format");
     }
@@ -4844,6 +4983,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - （v0.9，FE-65；契約 v0.14 §13、README §12.2 LS-1、§11.4 DB-4）LAYOUT_TEXTS 新增最後一鍵 levelStatus；
  *   新增 goalLineText（主控台目標行，只以生效色級組字）與 levelStatusText（難易度設定頁狀態列）。
  *   goalLineCapped、goalLineSeparator 兩鍵保留（契約仍含），但 view 不得再使用；goalLine 標記 @deprecated。
+ * - （v0.10，FE-72；契約 v0.15 §11.6 MT-1）part5Progress 新增 kind "allCorrect"（同 summary：100%、now = max）；
+ *   其他函式、LAYOUT_TEXTS 與載入規則（LD-1）不變。
  */
 (function (root, factory) {
   var api = factory();
@@ -5076,17 +5217,18 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   /**
    * MT-1 模擬測驗進度條推導。
-   * @param {"question"|"summary"|"empty"} kind
+   * （v0.10，FE-72；MT-1 v0.15）kind = "allCorrect"（全部答對畫面）與 "summary" 相同：進度條 100%、now = max。
+   * @param {"question"|"summary"|"allCorrect"|"empty"} kind
    * @param {number} number 畫面「第 i / N 題」的 i（kind = "question" 時使用）
    * @param {number} total 題數 N
    * @returns {{ visible: boolean, now: number, max: number, percent: number }}
    */
   function part5Progress(kind, number, total) {
     var max = typeof total === "number" && isFinite(total) ? Math.floor(total) : 0;
-    if (max <= 0 || kind === "empty" || (kind !== "question" && kind !== "summary")) {
+    if (max <= 0 || kind === "empty" || (kind !== "question" && kind !== "summary" && kind !== "allCorrect")) {
       return { visible: false, now: 0, max: max > 0 ? max : 0, percent: 0 };
     }
-    if (kind === "summary") {
+    if (kind === "summary" || kind === "allCorrect") {
       return { visible: true, now: max, max: max, percent: 100 };
     }
     var now = typeof number === "number" && isFinite(number) ? Math.round(number) : 0;
@@ -5647,17 +5789,359 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   });
 });
 
+/* core/part5flow.js */
+/*
+ * EMT.core.part5flow — 模擬測驗答對紀錄與「只練沒答對」的狀態轉移（FE-72）
+ * 依據：architecture.md v0.10 §4.10「EMT.core.part5flow」、§7.21.3；
+ *       契約 README §5.11 CR-1～CR-8、UO-1～UO-9、§5.3 RD-3 (c)、§6.2 IM-10 (2)、(4)、§11.6 MT-1（v0.15）、
+ *       data-schema.ts §15 Part5ViewKind、§7.7 V-ST-19、V-ST-20、§9.8 DS-34。
+ * 涵蓋：AC-45-01～AC-45-03、AC-45-05、AC-45-07、AC-46-02～AC-46-09、AC-47-05
+ *
+ * - L1 模組：載入時不取用任何其他模組（LD-1）；不讀 DOM、不讀 window 資料、不碰儲存。
+ * - 全部為純函式：不修改傳入值、對任何輸入不拋例外、不遞迴；nextUnanswered 為單一有界迴圈（UO-9）。
+ * - 題庫 id 以 bankIds 陣列傳入（bankIdsOf 結果）；null 代表該題沒有合法 id：永遠「未答對」、不可被記錄。
+ * - 名詞：Q = bankIds.length；set = correctSet(part5CorrectIds)；only = part5UnansweredOnly；p5 = Part5Progress。
+ * - store 只負責取 bankIds、組 data 與寫入；寫入與否以回傳的 changed 判斷。
+ */
+(function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.core = root.EMT.core || {};
+    root.EMT.core.part5flow = api;
+  }
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  /** 淺複製並套用 patch，回傳新物件（不修改 base） */
+  function assign(base, patch) {
+    var out = {};
+    var k;
+    for (k in base) {
+      if (Object.prototype.hasOwnProperty.call(base, k)) { out[k] = base[k]; }
+    }
+    for (k in patch) {
+      if (Object.prototype.hasOwnProperty.call(patch, k)) { out[k] = patch[k]; }
+    }
+    return out;
+  }
+
+  /** 是否為可用的 Part5Progress（非 null 物件） */
+  function isProgress(p5) {
+    return !!p5 && typeof p5 === "object" && !Array.isArray(p5);
+  }
+
+  /** 題庫 id 陣列；非陣列視為空題庫 */
+  function idsOf(bankIds) {
+    return Array.isArray(bankIds) ? bankIds : [];
+  }
+
+  /** 答對集合查詢；非 Set 一律視為空集合 */
+  function has(set, id) {
+    return !!set && typeof set.has === "function" && set.has(id) === true;
+  }
+
+  /** 非空字串（trim 後長度 ≥ 1） */
+  function isIdString(v) {
+    return typeof v === "string" && v.trim() !== "";
+  }
+
+  /**
+   * 題庫 → 題目 id 陣列（與題庫同順序、同長度）。
+   * 非陣列 → []；題目沒有合法 id（非字串或 trim 後為空）→ 該位置為 null。
+   * @param {*} bank PART5_QUESTION_BANK
+   * @returns {Array<string|null>}
+   */
+  function bankIdsOf(bank) {
+    if (!Array.isArray(bank)) {
+      return [];
+    }
+    var out = new Array(bank.length);
+    for (var i = 0; i < bank.length; i++) {
+      var q = bank[i];
+      out[i] = q && typeof q === "object" && isIdString(q.id) ? q.id : null;
+    }
+    return out;
+  }
+
+  /**
+   * RD-3 (c)、IM-10 (2)：答對紀錄正規化。
+   * 非陣列 → []；捨棄非字串與 trim 後為空者；完全相同的字串只留第一次；
+   * 其餘原值、原順序保留（含題庫不存在的 id，Q-71 A）。一律回傳新陣列。
+   * @param {*} raw
+   * @returns {string[]}
+   */
+  function normalizeIds(raw) {
+    if (!Array.isArray(raw)) {
+      return [];
+    }
+    var seen = new Set();
+    var out = [];
+    for (var i = 0; i < raw.length; i++) {
+      var v = raw[i];
+      if (!isIdString(v) || seen.has(v)) { continue; }
+      seen.add(v);
+      out.push(v);
+    }
+    return out;
+  }
+
+  /**
+   * 答對集合。
+   * @param {*} ids part5CorrectIds
+   * @returns {Set<string>}
+   */
+  function correctSet(ids) {
+    return new Set(normalizeIds(ids));
+  }
+
+  /**
+   * K：題庫中曾答對的題數（非 null 且在集合中、同一 id 只計一次；0 ≤ K ≤ Q）。
+   * @param {Array<string|null>} bankIds
+   * @param {Set<string>} set
+   * @returns {number}
+   */
+  function countCorrect(bankIds, set) {
+    var list = idsOf(bankIds);
+    var counted = new Set();
+    for (var i = 0; i < list.length; i++) {
+      var id = list[i];
+      if (id !== null && has(set, id) && !counted.has(id)) {
+        counted.add(id);
+      }
+    }
+    return counted.size;
+  }
+
+  /**
+   * 曾答對(j)：bankIds[j] 非 null 且在答對集合中。
+   * @param {Array<string|null>} bankIds
+   * @param {Set<string>} set
+   * @param {number} j
+   * @returns {boolean}
+   */
+  function isCorrectAt(bankIds, set, j) {
+    var list = idsOf(bankIds);
+    if (!Number.isInteger(j) || j < 0 || j >= list.length) {
+      return false;
+    }
+    var id = list[j];
+    return id !== null && id !== undefined && has(set, id);
+  }
+
+  /**
+   * next(f)：從 max(from, 0) 到 Q − 1 的第一個「未答對」題號；沒有 → -1。
+   * 單一有界迴圈（UO-9）；from 非有限數值視為 0。
+   * @param {Array<string|null>} bankIds
+   * @param {Set<string>} set
+   * @param {number} from
+   * @returns {number}
+   */
+  function nextUnanswered(bankIds, set, from) {
+    var list = idsOf(bankIds);
+    var start = typeof from === "number" && isFinite(from) && from > 0 ? Math.ceil(from) : 0;
+    for (var j = start; j < list.length; j++) {
+      var id = list[j];
+      if (id === null || id === undefined || !has(set, id)) {
+        return j;
+      }
+    }
+    return -1;
+  }
+
+  /** 開關開啟且全部答對（Q > 0、K = Q） */
+  function isAllDone(bankIds, set, only) {
+    var q = idsOf(bankIds).length;
+    return only === true && q > 0 && countCorrect(bankIds, set) === q;
+  }
+
+  /**
+   * UO-3：畫面種類（每次繪製時推導，不持久化）。
+   * Q = 0 → "empty"；allDone 且不是「題目畫面且已鎖定作答」→ "allCorrect"；
+   * 否則 phase = "summary" → "summary"；否則 "question"。
+   * @param {object} p5 Part5Progress
+   * @param {Array<string|null>} bankIds
+   * @param {Set<string>} set
+   * @param {boolean} only
+   * @returns {"empty"|"question"|"summary"|"allCorrect"}
+   */
+  function viewKind(p5, bankIds, set, only) {
+    if (idsOf(bankIds).length === 0) {
+      return "empty";
+    }
+    var p = isProgress(p5) ? p5 : {};
+    var lockedQuestion = p.phase === "question" && p.lockedSelection !== null && p.lockedSelection !== undefined;
+    if (isAllDone(bankIds, set, only) && !lockedQuestion) {
+      return "allCorrect";
+    }
+    if (p.phase === "summary") {
+      return "summary";
+    }
+    return "question";
+  }
+
+  /**
+   * UO-4：不變式正規化。開關開啟、題目畫面、未鎖定、目前題目曾答對、K < Q →
+   * 移到其後第一題未答對；其後沒有 → phase = "summary"（本輪計數不變）。其他情況不變。
+   * @returns {{part5: object, changed: boolean}}
+   */
+  function normalizeOnly(p5, bankIds, set, only) {
+    if (only !== true || !isProgress(p5) || p5.phase !== "question" || p5.lockedSelection !== null) {
+      return { part5: p5, changed: false };
+    }
+    var q = idsOf(bankIds).length;
+    if (!isCorrectAt(bankIds, set, p5.currentIndex) || countCorrect(bankIds, set) >= q) {
+      return { part5: p5, changed: false };
+    }
+    var j = nextUnanswered(bankIds, set, p5.currentIndex);
+    if (j >= 0) {
+      return { part5: assign(p5, { currentIndex: j }), changed: true };
+    }
+    return { part5: assign(p5, { phase: "summary" }), changed: true };
+  }
+
+  /**
+   * CR-2：作答答對且 id 未曾記錄 → 附加到陣列末尾（回傳新陣列）；否則原陣列、changed false。
+   * @param {string[]} ids part5CorrectIds
+   * @param {string|null} id 該題 id（bankIds[currentIndex]）
+   * @param {boolean} correct 是否答對
+   * @returns {{ids: string[], changed: boolean}}
+   */
+  function recordAnswer(ids, id, correct) {
+    if (correct !== true || !isIdString(id) || !Array.isArray(ids) || ids.indexOf(id) >= 0) {
+      return { ids: ids, changed: false };
+    }
+    return { ids: ids.concat([id]), changed: true };
+  }
+
+  /**
+   * 「下一題」。前提：phase = "question" 且已鎖定作答，否則不變。
+   * 開關關閉 → v0.14 規則（最後一題 → summary，否則 +1）；
+   * 開關開啟 → UO-5：j = next(currentIndex + 1)，有 → 該題，無 → summary。
+   * @returns {{part5: object, changed: boolean}}
+   */
+  function next(p5, bankIds, set, only) {
+    if (!isProgress(p5) || p5.phase !== "question" || p5.lockedSelection === null || p5.lockedSelection === undefined) {
+      return { part5: p5, changed: false };
+    }
+    var q = idsOf(bankIds).length;
+    var toSummary = { lockedSelection: null, phase: "summary" };
+    if (only !== true) {
+      if (p5.currentIndex >= q - 1) {
+        return { part5: assign(p5, toSummary), changed: true };
+      }
+      return { part5: assign(p5, { currentIndex: p5.currentIndex + 1, lockedSelection: null }), changed: true };
+    }
+    var j = nextUnanswered(bankIds, set, p5.currentIndex + 1);
+    if (j >= 0) {
+      return { part5: assign(p5, { currentIndex: j, lockedSelection: null }), changed: true };
+    }
+    return { part5: assign(p5, toSummary), changed: true };
+  }
+
+  /**
+   * UO-6「重新開始」：本輪歸 0、未鎖定、題目畫面；currentIndex = 開關開啟 ? max(next(0), 0) : 0；累計不變。
+   * 與原值逐欄相同時 changed false（沿用 v0.14 不寫入的行為）。
+   * @returns {{part5: object, changed: boolean}}
+   */
+  function restart(p5, bankIds, set, only) {
+    if (!isProgress(p5)) {
+      return { part5: p5, changed: false };
+    }
+    var idx = only === true ? Math.max(nextUnanswered(bankIds, set, 0), 0) : 0;
+    var patch = { currentIndex: idx, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0 };
+    var changed = p5.currentIndex !== idx || p5.lockedSelection !== null || p5.phase !== "question" ||
+      p5.roundAnswered !== 0 || p5.roundCorrect !== 0;
+    return changed ? { part5: assign(p5, patch), changed: true } : { part5: p5, changed: false };
+  }
+
+  /**
+   * UO-1、UO-8：切換「只練沒答對」。
+   * on 非布林或與原值相同 → changed false；關 → 開 時再套 UO-4 正規化；開 → 關 時 part5 不變。
+   * 不改任何計數。
+   * @param {{part5: object, ids: string[], only: boolean}} state
+   * @param {Array<string|null>} bankIds
+   * @param {boolean} on
+   * @returns {{part5: object, only: boolean, changed: boolean}}
+   */
+  function setOnly(state, bankIds, on) {
+    var st = state && typeof state === "object" ? state : {};
+    if (typeof on !== "boolean" || on === st.only) {
+      return { part5: st.part5, only: st.only, changed: false };
+    }
+    if (on) {
+      var r = normalizeOnly(st.part5, bankIds, correctSet(st.ids), true);
+      return { part5: r.part5, only: true, changed: true };
+    }
+    return { part5: st.part5, only: false, changed: true };
+  }
+
+  /** 本輪歸 0、回第 1 題、累計保留的新 Part5Progress（UO-7 (a)、CR-6 共用） */
+  function freshRound(p5) {
+    var p = isProgress(p5) ? p5 : {};
+    return {
+      currentIndex: 0,
+      lockedSelection: null,
+      phase: "question",
+      roundAnswered: 0,
+      roundCorrect: 0,
+      totalAnswered: p.totalAnswered,
+      totalCorrect: p.totalCorrect
+    };
+  }
+
+  /**
+   * UO-7 (a)「全部題目再練一次（保留紀錄）」：回第 1 題、本輪歸 0、累計不變。
+   * 呼叫端另設 only = false、答對紀錄不變。
+   * @param {object} p5
+   * @returns {object} Part5Progress
+   */
+  function replayKeepRecords(p5) {
+    return freshRound(p5);
+  }
+
+  /**
+   * CR-6「清除答對紀錄，重新來過」（確認後）：part5 同 replayKeepRecords、ids = []。呼叫端保留 only。
+   * @param {object} p5
+   * @returns {{part5: object, ids: string[]}}
+   */
+  function clearAndRestart(p5) {
+    return { part5: freshRound(p5), ids: [] };
+  }
+
+  return Object.freeze({
+    bankIdsOf: bankIdsOf,
+    normalizeIds: normalizeIds,
+    correctSet: correctSet,
+    countCorrect: countCorrect,
+    isCorrectAt: isCorrectAt,
+    nextUnanswered: nextUnanswered,
+    viewKind: viewKind,
+    normalizeOnly: normalizeOnly,
+    recordAnswer: recordAnswer,
+    next: next,
+    restart: restart,
+    setOnly: setOnly,
+    replayKeepRecords: replayKeepRecords,
+    clearAndRestart: clearAndRestart
+  });
+});
+
 /* core/persist.js */
 /*
- * EMT.core.persist — 持久化預設值、StorageRecord 驗證與遷移（FE-06；architecture.md §7.5；FE-22 v0.8 升版 §7.8）
- * 依據：契約 README §5.2、§5.3（MG-1～MG-4、RD-1、RD-2）、§7.7 V-ST-01～05、V-ST-09～V-ST-11；
- *       storage-schema.json（schemaVersion 2；1 只作為遷移輸入）。
+ * EMT.core.persist — 持久化預設值、StorageRecord 驗證與遷移（FE-06；architecture.md §7.5；FE-22 v0.8 升版 §7.8；
+ *   FE-73 v0.15 升版 §4.10、§7.21.1）
+ * 依據：契約 README §5.2、§5.3（MG-1～MG-8、RD-1～RD-4）、§7.7 V-ST-01～05、V-ST-09～V-ST-11、V-ST-21；
+ *       storage-schema.json（schemaVersion 3；1、2 只作為遷移輸入）。
  * 不引入 JSON Schema 套件，手寫驗證逐欄對照 storage-schema.json：
  *   型別、必填、additionalProperties: false、enum／const、pattern、整數範圍、uniqueItems、if/then/else，
  *   另加跨欄位規則 V-ST-03。
  * 本模組為純函式，不碰 DOM、不讀寫 localStorage（實際存取由 store 負責）。
  * Node 以 require 載入，瀏覽器掛到 EMT.core.persist。
- * 載入時只取用 constants、wordkey（LD-1）；goal、learning 於函式被呼叫時才取用，取不到時丟出含模組名稱的錯誤（LD-3）。
+ * 載入時只取用 constants、wordkey（LD-1）；goal、learning、position、part5flow 於函式被呼叫時才取用，
+ * 取不到時丟出含模組名稱的錯誤（LD-3）。
  */
 (function (root, factory) {
   var api = factory();
@@ -5683,7 +6167,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     C = g.EMT.core.constants;
     WK = g.EMT.core.wordkey;
   }
-  var NODE_PATH = { goal: "./goal.js", learning: "./learning.js" };
+  var NODE_PATH = { goal: "./goal.js", learning: "./learning.js", position: "./position.js", part5flow: "./part5flow.js" };
 
   /** 其他 core 依賴於呼叫時才取（LD-1）；取不到屬程式組裝錯誤，丟出含模組名稱的 Error（LD-3） */
   function dep(name) {
@@ -5698,6 +6182,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
   function GOAL() { return dep("goal"); }
   function LEARN() { return dep("learning"); }
+  function POS() { return dep("position"); }
+  function PF() { return dep("part5flow"); }
 
   // ── storage-schema.json 的列舉與樣式（逐字對照）──
   var COLOR_LEVEL_ENUM = ["orange", "brown", "green", "blue", "gold"];
@@ -5714,8 +6200,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   // 各物件的欄位清單（同時作為 required 與 additionalProperties 的依據）
   var RECORD_KEYS = ["schemaVersion", "savedAt", "data"];
-  // v0.8（schemaVersion 2）：必填 7 欄 → 9 欄
-  var DATA_KEYS = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged", "todayLearned", "learnedHistory"];
+  // v0.8（schemaVersion 2）：必填 7 欄 → 9 欄；v0.15（schemaVersion 3）：必填仍 9 欄，另允許選填 3 欄（共 12 欄）
+  var REQUIRED_DATA_KEYS = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged", "todayLearned", "learnedHistory"];
+  // v0.15 新增的 3 個選填欄位（學習位置與作答紀錄；順序同契約）
+  var TRACK_KEYS = ["flashcardPosition", "part5CorrectIds", "part5UnansweredOnly"];
+  // 允許的全部欄位（12 欄；程式寫出時 12 欄一律寫出，$defs/PersistedDataWritten）
+  var DATA_KEYS = REQUIRED_DATA_KEYS.concat(TRACK_KEYS);
+  // v2 的 9 個欄位（遷移時原值不動，MG-6）
+  var V2_DATA_KEYS = REQUIRED_DATA_KEYS.slice();
   // v1 的 7 個欄位（遷移時原值不動，MG-2）
   var V1_DATA_KEYS = DATA_KEYS.slice(0, 7);
   var GOAL_KEYS = ["draftScore", "appliedScore", "appliedColor", "effectiveColor"];
@@ -5797,10 +6289,20 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
+   * v0.15 新欄位的預設值（README §5.2）。每次回傳新物件。
+   * @returns {{flashcardPosition: null, part5CorrectIds: string[], part5UnansweredOnly: boolean}}
+   */
+  function trackDefaults() {
+    return { flashcardPosition: null, part5CorrectIds: [], part5UnansweredOnly: false };
+  }
+
+  /**
    * 遷移表：MIGRATIONS[v] = function (data_v) → data_(v+1)（README §5.3；localStorage 與備份匯入共用）。
    * 1 → 2（MG-1、MG-2）：data 必須是純物件，否則丟出例外（呼叫端分別判為 unreadable／format）；
    *   todayLearned、learnedHistory 一律覆寫為預設值（v1 內即使有這兩鍵也不採用），
    *   其餘 7 欄原值不動、不重算、不清理。回傳新物件，不修改傳入值。
+   * 2 → 3（MG-5、MG-6）：同樣要求 data 為純物件；flashcardPosition、part5CorrectIds、part5UnansweredOnly
+   *   一律覆寫為預設值（v2 內即使有這 3 鍵也不採用），其餘 9 欄原值不動、不重算、不清理。
    */
   var MIGRATIONS = Object.freeze({
     1: function (data) {
@@ -5811,14 +6313,27 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       out.todayLearned = emptyToday();
       out.learnedHistory = {};
       return out;
+    },
+    2: function (data) {
+      if (!isPlainObject(data)) {
+        throw new TypeError("MG-5：schemaVersion 2 的 data 不是物件");
+      }
+      var out = clone(data);
+      var d = trackDefaults();
+      TRACK_KEYS.forEach(function (k) {
+        out[k] = d[k];
+      });
+      return out;
     }
   });
 
   /**
    * 檢查物件的必填欄位與多餘欄位（required + additionalProperties: false）。
+   * allowed 省略時 = keys（全部必填）；否則必填 keys、允許 allowed（含選填欄位）。
    * 錯誤以「路徑: 說明」字串推入 errors。回傳 false 表示不是物件。
    */
-  function checkShape(obj, keys, path, errors) {
+  function checkShape(obj, keys, path, errors, allowed) {
+    var allow = allowed || keys;
     if (!isPlainObject(obj)) {
       errors.push(path + ": 必須是物件");
       return false;
@@ -5829,7 +6344,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
     });
     Object.keys(obj).forEach(function (k) {
-      if (keys.indexOf(k) === -1) {
+      if (allow.indexOf(k) === -1) {
         errors.push(path + "." + k + ": 不允許的欄位");
       }
     });
@@ -5936,6 +6451,113 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
+   * v0.15 新欄位的 shape（storage-schema.json $defs/FlashcardPosition、$defs/Part5CorrectIds、boolean）。
+   * 不符 = 整個欄位型別錯誤：讀 localStorage 只重設該欄（RD-3）、匯入為 format（IM-9）。
+   * @param {string} name TRACK_KEYS 之一
+   * @param {*} v
+   * @returns {boolean} name 不是 TRACK_KEYS 時為 false
+   */
+  function isTrackShape(name, v) {
+    if (name === "flashcardPosition") { return POS().isShape(v); }
+    if (name === "part5CorrectIds") { return Array.isArray(v); }
+    if (name === "part5UnansweredOnly") { return typeof v === "boolean"; }
+    return false;
+  }
+
+  /**
+   * 3 個新欄位的項目層級正規化（RD-3 (a)(c)(d)、IM-10 (1)～(3) 共用）。回傳新物件，不修改傳入值。
+   * - 缺鍵 → 預設值
+   * - part5CorrectIds → part5flow.normalizeIds（捨棄非字串、空白、重複；題庫外 id 保留，Q-71 A）
+   * - flashcardPosition → position.normalize（wordKey 依 C-2，空 → null；shape 不符 → null）
+   * - part5UnansweredOnly → 布林原值（非布林 → 預設 false；正常流程已先經 shape 檢查）
+   * data 不是純物件時原樣回傳（交由後續驗證判定）。
+   * @param {*} data
+   * @returns {*}
+   */
+  function normalizeTrackItems(data) {
+    if (!isPlainObject(data)) { return data; }
+    var out = clone(data);
+    var d = trackDefaults();
+    out.flashcardPosition = hasOwn(out, "flashcardPosition") ? POS().normalize(out.flashcardPosition) : d.flashcardPosition;
+    out.part5CorrectIds = hasOwn(out, "part5CorrectIds") ? PF().normalizeIds(out.part5CorrectIds) : d.part5CorrectIds;
+    out.part5UnansweredOnly = typeof out.part5UnansweredOnly === "boolean" ? out.part5UnansweredOnly : d.part5UnansweredOnly;
+    return out;
+  }
+
+  /**
+   * RD-3：讀 localStorage 時（schemaVersion 3，含遷移後）在根結構驗證之前處理 3 個新欄位，彼此獨立：
+   * (a) 缺鍵 → 預設值（選填，不列入 fieldsReset）；(b) shape 不符 → 只把該欄設為預設值並列入 fieldsReset；
+   * (c)(d) 再以 normalizeTrackItems 做項目層級正規化。不修改傳入值；data 不是純物件時原樣回傳。
+   * @param {*} data
+   * @returns {{data: *, fieldsReset: string[]}}
+   */
+  function resetTrackFields(data) {
+    if (!isPlainObject(data)) { return { data: data, fieldsReset: [] }; }
+    var out = clone(data);
+    var d = trackDefaults();
+    var reset = [];
+    TRACK_KEYS.forEach(function (k) {
+      if (!hasOwn(out, k)) {
+        out[k] = d[k];
+      } else if (!isTrackShape(k, out[k])) {
+        out[k] = d[k];
+        reset.push(k);
+      }
+    });
+    return { data: normalizeTrackItems(out), fieldsReset: reset };
+  }
+
+  /**
+   * 程式寫出前補齊 3 個新欄位並正規化，使結果符合 $defs/PersistedDataWritten 的這 3 欄
+   * （store.writeData、backup.buildBackup 寫出前呼叫）。回傳新物件，不修改傳入值；data 不是純物件時原樣回傳。
+   * @param {*} data PersistedData
+   * @returns {*}
+   */
+  function ensureWritable(data) {
+    return normalizeTrackItems(data);
+  }
+
+  /**
+   * 驗證 3 個新欄位：存在時檢查 shape（$defs/PersistedData）；
+   * written 時另要求 3 欄存在，flashcardPosition、part5CorrectIds 為 Normalized 格式（$defs/PersistedDataWritten）。
+   */
+  function validateTrackFields(data, path, written, errors) {
+    TRACK_KEYS.forEach(function (k) {
+      if (!hasOwn(data, k)) {
+        if (written) { errors.push(path + "." + k + ": 缺少必填欄位（PersistedDataWritten）"); }
+        return;
+      }
+      check(isTrackShape(k, data[k]), path + "." + k, TRACK_SHAPE_MESSAGE[k], errors);
+    });
+    if (!written) { return; }
+    var fp = data.flashcardPosition;
+    if (fp !== null && fp !== undefined && POS().isShape(fp)) {
+      // $defs/FlashcardPositionNormalized：wordKey 為非空字串且已是 C-2 正規化形式
+      check(isNonBlank(fp.wordKey) && WK.wordKey(fp.wordKey) === fp.wordKey, path + ".flashcardPosition.wordKey",
+        "須為已正規化的非空 wordKey", errors);
+    }
+    if (Array.isArray(data.part5CorrectIds)) {
+      // $defs/Part5CorrectIdsNormalized：每項為非空白字串、不重複
+      var seen = Object.create(null);
+      data.part5CorrectIds.forEach(function (id, i) {
+        var p = path + ".part5CorrectIds[" + i + "]";
+        if (!isNonBlank(id)) {
+          errors.push(p + ": 須為非空字串");
+          return;
+        }
+        check(!seen[id], p, "重複（uniqueItems）", errors);
+        seen[id] = true;
+      });
+    }
+  }
+
+  var TRACK_SHAPE_MESSAGE = {
+    flashcardPosition: "不符 FlashcardPosition（須為 null 或恰含 wordKey〔字串〕、ordinal〔整數 ≥ 1〕的物件）",
+    part5CorrectIds: "不符 Part5CorrectIds（須為陣列）",
+    part5UnansweredOnly: "須為布林值"
+  };
+
+  /**
    * 驗證 todayLearned。
    * - 一律檢查 shape（$defs/TodayLearnedState）
    * - written = true 時另檢查 $defs/TodayLearnedStateNormalized：date 為實際存在的日期或 null；
@@ -6012,6 +6634,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    *   written = true 時 todayLearned、learnedHistory 以 $defs/PersistedDataWritten 的正規化格式驗證
    *   （程式寫出的 data：localStorage 寫入、匯出備份）；否則只檢查 shape（讀取、匯入步驟 5）。
    *   today（合法的 YYYY-MM-DD，只在 written 時使用）：另檢查 V-ST-09～V-ST-11 中與今天相關的規則。
+   *   （v0.15）必填 9 欄、允許 12 欄；3 個新欄位存在時檢查 shape（不符 → 錯誤；匯入即 IM-9 format）；
+   *   written = true 時另要求 3 欄存在，且 flashcardPosition、part5CorrectIds 為 Normalized 格式。
    * @returns {{ok: boolean, errors: string[]}}
    */
   function validatePersistedData(data, opts) {
@@ -6020,7 +6644,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     var written = !!(opts && opts.written);
     var today = opts && isRealLocalDate(opts.today) ? opts.today : undefined;
     var path = "data";
-    if (!checkShape(data, DATA_KEYS, path, errors)) {
+    if (!checkShape(data, REQUIRED_DATA_KEYS, path, errors, DATA_KEYS)) {
       return { ok: false, errors: errors };
     }
     if (hasOwn(data, "goal")) { validateGoal(data.goal, path + ".goal", errors); }
@@ -6082,12 +6706,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     if (hasOwn(data, "learnedHistory")) {
       validateLearnedHistory(data.learnedHistory, data.todayLearned, path + ".learnedHistory", written, today, errors);
     }
+    // v0.15：單字卡位置、答對紀錄、只練沒答對開關
+    validateTrackFields(data, path, written, errors);
     return { ok: errors.length === 0, errors: errors };
   }
 
   /**
    * 驗證 StorageRecord（storage-schema.json 根結構，V-ST-01 + V-ST-03）。
-   * schemaVersion 依 schema 為 const = CURRENT_SCHEMA_VERSION（2；v1 須先遷移再驗證）。
+   * schemaVersion 依 schema 為 const = CURRENT_SCHEMA_VERSION（3；v1、v2 須先遷移再驗證）。
    * @param {*} record
    * @returns {{ok: boolean, errors: string[]}}
    */
@@ -6124,7 +6750,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       streak: { days: 0, lastActiveDate: null },
       sttNoticeAcknowledged: false,
       todayLearned: emptyToday(),
-      learnedHistory: {}
+      learnedHistory: {},
+      flashcardPosition: null,
+      part5CorrectIds: [],
+      part5UnansweredOnly: false
     };
   }
 
@@ -6135,14 +6764,18 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    *   part5Length 不是 ≥ 0 的整數（呼叫端無法取得題庫長度）時不做 V-ST-05。
    * - （v0.8）V-ST-09～V-ST-11：以 learning.normalizeLearning(data, today) 正規化 todayLearned、learnedHistory
    *   （結果符合 $defs/PersistedDataWritten 的兩欄；只改記憶體，RD-2）
+   * - （v0.15）最先以 normalizeTrackItems 補齊並正規化 3 個新欄位；最後在 part5Ids 為陣列時
+   *   依 UO-4（part5flow.normalizeOnly）正規化目前題目（V-ST-05 之後；只改回傳的新物件，RD-4）。
+   *   未傳 part5Ids 時不做 UO-4（舊呼叫端相容）。
    * 傳入資料應已通過 validatePersistedData。
    * @param {object} data PersistedData
    * @param {number} part5Length 模擬測驗題庫長度
    * @param {string} [today] 本地日期 YYYY-MM-DD；缺省或不合法時以本地今天計
+   * @param {Array<string|null>} [part5Ids] 題庫 id 陣列（part5flow.bankIdsOf 結果）
    * @returns {object} PersistedData
    */
-  function normalizeAfterLoad(data, part5Length, today) {
-    var out = clone(data);
+  function normalizeAfterLoad(data, part5Length, today, part5Ids) {
+    var out = normalizeTrackItems(clone(data));
     var color = GOAL().colorOf(out.goal.appliedScore);
     out.goal.appliedColor = color;
     out.goal.effectiveColor = GOAL().effectiveColorOf(color);
@@ -6154,11 +6787,17 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     var learned = LEARN().normalizeLearning(out, resolveToday(today));
     out.todayLearned = learned.todayLearned;
     out.learnedHistory = learned.learnedHistory;
+    if (Array.isArray(part5Ids)) {
+      var uo = PF().normalizeOnly(out.part5, part5Ids, PF().correctSet(out.part5CorrectIds), out.part5UnansweredOnly);
+      if (uo.changed) {
+        out.part5 = uo.part5;
+      }
+    }
     return out;
   }
 
   /**
-   * RD-1：schemaVersion 2 的 data 中 todayLearned、learnedHistory 缺少或 shape 不符 → 只把該欄設為預設值。
+   * RD-1：schemaVersion 2 以上（v0.15 起為遷移後的 3）的 data 中 todayLearned、learnedHistory 缺少或 shape 不符 → 只把該欄設為預設值。
    * 不修改傳入值；data 不是純物件時原樣回傳（交由後續驗證判為無法讀取）。
    * @param {*} data
    * @returns {{data: *, fieldsReset: string[]}}
@@ -6209,13 +6848,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * 解析 localStorage 主鍵的原始字串（README §5.3、AC-18-02、AC-18-05；architecture.md §7.8 流程圖）。
    * 對任何使用者輸入都不拋例外（依賴模組缺漏屬組裝錯誤，依 LD-3 照常丟出）。
    * - null／undefined（鍵不存在）→ kind "missing"，data = 預設值
-   * - JSON 失敗、頂層不是物件、schemaVersion 缺失／非整數／不在 [1, 2]、data 不是物件、
-   *   遷移或 RD-1 後仍不符 Schema、違反 V-ST-03
+   * - JSON 失敗、頂層不是物件、schemaVersion 缺失／非整數／不在 [1, 2, 3]、data 不是物件、
+   *   遷移、RD-1、RD-3 後仍不符 Schema、違反 V-ST-03
    *   → kind "unreadable"，data = 預設值（呼叫端把原字串寫入 STORAGE_KEYS.unreadable 並提示）
-   * - schemaVersion 1 → 依 MG-1、MG-2 遷移後以 v2 完整驗證；通過 → kind "ok"、migrated = true
-   *   （呼叫端依 MG-3 寫回一次，失敗不提示）
-   * - schemaVersion 2 → RD-1 只重設缺少或 shape 不符的 todayLearned／learnedHistory，再完整驗證；
-   *   通過 → kind "ok"、migrated = false、fieldsReset 列出被重設的欄位（不提示、不保存 unreadable）
+   * - 逐版遷移 1 → 2（MG-1、MG-2）→ 3（MG-5、MG-6）；原為 3 不遷移
+   * - 之後**不論是否遷移**一律依序 RD-1（todayLearned／learnedHistory）→ RD-3（3 個新欄位）→ v3 完整驗證（T-76、DS-32）
+   * - 通過 → kind "ok"、migrated = 原版本 < 3（呼叫端依 MG-3／MG-7 寫回一次，失敗不提示）、
+   *   fieldsReset 列出 RD-1、RD-3 (b) 重設的欄位（不提示、不保存 unreadable）
    * 回傳的 data 尚未做 normalizeAfterLoad。
    * @param {string|null|undefined} rawString
    * @returns {{kind: "missing"|"ok"|"unreadable", data: object, migrated?: boolean,
@@ -6223,7 +6862,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    */
   function parseStored(rawString) {
     // 依賴缺漏屬程式組裝錯誤，先在 try 之外取用，避免被誤判為資料無法讀取（LD-3）
-    GOAL(); LEARN();
+    GOAL(); LEARN(); POS(); PF();
     if (rawString === null || rawString === undefined) {
       return { kind: "missing", data: defaultData() };
     }
@@ -6247,7 +6886,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         return unreadable(["schemaVersion " + parsed.schemaVersion + " 不支援"]);
       }
       if (!isPlainObject(parsed.data)) {
-        // MG-1（v1）與 v2 皆同：data 不是物件 → 無法讀取
+        // MG-1（v1）、MG-5（v2）與 v3 皆同：data 不是物件 → 無法讀取
         return unreadable(["data 不是物件"]);
       }
       var m = migrate(parsed);
@@ -6255,13 +6894,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         return unreadable(["schemaVersion " + parsed.schemaVersion + " 遷移失敗"]);
       }
       var rec = m.record;
-      var fieldsReset = [];
-      if (!m.migrated) {
-        // RD-1：只適用 schemaVersion 2（v1 遷移後兩欄必為預設值）
-        var rd = resetLearningFields(rec.data);
-        rec.data = rd.data;
-        fieldsReset = rd.fieldsReset;
-      }
+      // v0.15：不論是否遷移一律先 RD-1 再 RD-3（遷移後該欄已是預設值，結果不變；修正 T-76 遷移後跳過 RD-1）
+      var rd1 = resetLearningFields(rec.data);
+      var rd3 = resetTrackFields(rd1.data);
+      rec.data = rd3.data;
+      var fieldsReset = rd1.fieldsReset.concat(rd3.fieldsReset);
       var result = validateStorageRecord(rec);
       if (!result.ok) {
         return unreadable(result.errors);
@@ -6278,7 +6915,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   /**
    * 組成要寫入 localStorage 的 StorageRecord（呼叫端以一次 setItem 寫入 JSON.stringify 結果）。
-   * schemaVersion 一律為目前版本 2（MG-4）。
+   * schemaVersion 一律為目前版本（v0.15 起為 3，MG-4、MG-7）。
    * @param {object} data PersistedData
    * @param {Date} [now]
    * @returns {{schemaVersion: number, savedAt: string, data: object}}
@@ -6291,8 +6928,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   return Object.freeze({
     MIGRATIONS: MIGRATIONS,
     DATA_KEYS: Object.freeze(DATA_KEYS.slice()),
+    REQUIRED_DATA_KEYS: Object.freeze(REQUIRED_DATA_KEYS.slice()),
+    V2_DATA_KEYS: Object.freeze(V2_DATA_KEYS.slice()),
     V1_DATA_KEYS: Object.freeze(V1_DATA_KEYS.slice()),
+    TRACK_KEYS: Object.freeze(TRACK_KEYS.slice()),
     defaultData: defaultData,
+    trackDefaults: trackDefaults,
+    isTrackShape: isTrackShape,
+    resetTrackFields: resetTrackFields,
+    normalizeTrackItems: normalizeTrackItems,
+    ensureWritable: ensureWritable,
     emptyToday: emptyToday,
     isTodayLearnedShape: isTodayLearnedShape,
     isLearnedHistoryShape: isLearnedHistoryShape,
@@ -6310,6 +6955,165 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   });
 });
 
+/* core/position.js */
+/*
+ * EMT.core.position — 單字卡上次位置的解析與正規化（FE-71）
+ * 依據：architecture.md v0.10 §4.10「EMT.core.position」、§7.21.2；
+ *       契約 README §5.10 FP-1、FP-2、§5.3 RD-3 (d)、§6.2 IM-10 (3)、§7.7 V-ST-18 (b)；
+ *       data-schema.ts FlashcardPosition；storage-schema.json $defs/FlashcardPosition、FlashcardPositionNormalized。
+ * 涵蓋：AC-44-01、AC-44-04、AC-44-05、AC-44-06、AC-44-07、AC-47-05
+ *
+ * - L1 模組：載入時只取用 EMT.core.wordkey（LD-1）；不讀 DOM、不讀 window 資料、不碰儲存。
+ * - 全部為純函式：不修改傳入值、對任何輸入不拋例外（型別不符回傳 null 或預設結果）。
+ * - 何時解析、何時寫入由 store 決定（FE-74 的 placeCard、gotoCard）；本模組不呼叫任何寫入。
+ */
+(function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.core = root.EMT.core || {};
+    root.EMT.core.position = api;
+  }
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // 取得相依模組：Node 下 require，瀏覽器下讀 EMT.core.wordkey（建置順序保證先載入）
+  var wordKey;
+  if (typeof require === "function" && typeof module === "object") {
+    wordKey = require("./wordkey.js").wordKey;
+  } else {
+    var g = typeof self !== "undefined" ? self : this;
+    wordKey = g.EMT.core.wordkey.wordKey;
+  }
+
+  /** 純物件判斷：非 null、非陣列，原型為 Object.prototype 或 null */
+  function isPlainObject(v) {
+    if (v === null || typeof v !== "object" || Array.isArray(v)) {
+      return false;
+    }
+    var proto = Object.getPrototypeOf(v);
+    return proto === Object.prototype || proto === null;
+  }
+
+  /**
+   * $defs/FlashcardPosition：null，或恰 2 鍵 wordKey（字串）、ordinal（整數 ≥ 1）的純物件。
+   * 陣列、多餘鍵、缺鍵、ordinal 為 "10"／1.5／0／負數、wordKey 非字串皆為 false。
+   * @param {*} v
+   * @returns {boolean}
+   */
+  function isShape(v) {
+    if (v === null) {
+      return true;
+    }
+    if (!isPlainObject(v)) {
+      return false;
+    }
+    var keys = Object.keys(v);
+    if (keys.length !== 2) {
+      return false;
+    }
+    if (!Object.prototype.hasOwnProperty.call(v, "wordKey") || !Object.prototype.hasOwnProperty.call(v, "ordinal")) {
+      return false;
+    }
+    return typeof v.wordKey === "string" && Number.isInteger(v.ordinal) && v.ordinal >= 1;
+  }
+
+  /**
+   * RD-3 (d)、IM-10 (3)：正規化為 FlashcardPositionNormalized 或 null。
+   * isShape 為 false 或 v 為 null → null；wordKey 依 C-2 正規化，結果為空字串 → null。
+   * 一律回傳新物件，不回傳傳入值本身。
+   * @param {*} v
+   * @returns {{wordKey: string, ordinal: number}|null}
+   */
+  function normalize(v) {
+    if (v === null || !isShape(v)) {
+      return null;
+    }
+    var key = wordKey(v.wordKey);
+    if (key === "") {
+      return null;
+    }
+    return { wordKey: key, ordinal: v.ordinal };
+  }
+
+  /** 單字集長度；非陣列視為空集合 */
+  function sizeOf(studySet) {
+    return Array.isArray(studySet) ? studySet.length : 0;
+  }
+
+  /**
+   * 依目前索引建立位置紀錄（FP-1）。
+   * 0 ≤ index < N 且該卡 wordKey 為非空字串 → { wordKey, ordinal: index + 1 }；否則 null。
+   * @param {Array<{wordKey: string}>} studySet
+   * @param {number} index
+   * @returns {{wordKey: string, ordinal: number}|null}
+   */
+  function fromIndex(studySet, index) {
+    var n = sizeOf(studySet);
+    if (!Number.isInteger(index) || index < 0 || index >= n) {
+      return null;
+    }
+    var card = studySet[index];
+    if (!card || typeof card !== "object" || typeof card.wordKey !== "string" || card.wordKey === "") {
+      return null;
+    }
+    return { wordKey: card.wordKey, ordinal: index + 1 };
+  }
+
+  /**
+   * FP-2：把位置紀錄解析為 flashcard.index。
+   * (1) N = 0 → { index: 0, position: 傳入值原物件, kind: "empty" }（紀錄不動）；
+   * (2) 正規化後為 null → { index: 0, position: fromIndex(set, 0), kind: "none" }；
+   * (3) 單字集中有相同 wordKey 的卡 → { index: i, position: fromIndex(set, i), kind: "found" }；
+   * (4) 找不到 → i = min(ordinal, N) − 1 → { index: i, position: fromIndex(set, i), kind: "fallback" }。
+   * 線性搜尋 O(N)。
+   * @param {*} position
+   * @param {Array<{wordKey: string}>} studySet
+   * @returns {{index: number, position: *, kind: "empty"|"none"|"found"|"fallback"}}
+   */
+  function resolve(position, studySet) {
+    var n = sizeOf(studySet);
+    if (n === 0) {
+      return { index: 0, position: position, kind: "empty" };
+    }
+    var p = normalize(position);
+    if (p === null) {
+      return { index: 0, position: fromIndex(studySet, 0), kind: "none" };
+    }
+    for (var i = 0; i < n; i++) {
+      var card = studySet[i];
+      if (card && card.wordKey === p.wordKey) {
+        return { index: i, position: fromIndex(studySet, i), kind: "found" };
+      }
+    }
+    var idx = Math.min(p.ordinal, n) - 1;
+    return { index: idx, position: fromIndex(studySet, idx), kind: "fallback" };
+  }
+
+  /**
+   * 兩個位置是否指向同一張卡：兩者皆非 null（且為物件），wordKey 與 ordinal 皆相同。
+   * @param {*} a
+   * @param {*} b
+   * @returns {boolean}
+   */
+  function sameCard(a, b) {
+    if (!a || !b || typeof a !== "object" || typeof b !== "object") {
+      return false;
+    }
+    return a.wordKey === b.wordKey && a.ordinal === b.ordinal;
+  }
+
+  return Object.freeze({
+    isShape: isShape,
+    normalize: normalize,
+    fromIndex: fromIndex,
+    resolve: resolve,
+    sameCard: sameCard
+  });
+});
+
 /* core/pwa.js */
 /*
  * EMT.core.pwa — PWA 契約常數與純函式（FE-45）
@@ -6322,6 +7126,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - 純函式：不碰 DOM、不呼叫任何瀏覽器 API；所需的環境物件一律由呼叫端以參數傳入。
  * - 本檔同時由 tools/build.mjs 以 createRequire 讀取（FE-47）：Node 下 module.exports 即同一個 api 物件，
  *   不得依賴 window、document。factory 無任何依賴（LD-1）。
+ * - （v0.11，FE-77；architecture.md v0.11 §7.22.1、契約 v0.16 UP-6）PWA_TEXTS 只改 updateNotice、updateButton 兩個值，
+ *   其餘鍵與深度凍結不變。
  */
 (function (root, factory) {
   var api = factory();
@@ -6410,11 +7216,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   /** 回到前景時重新檢查更新的間隔（毫秒，1 小時；UP-3） */
   var PWA_UPDATE_RECHECK_MS = 3600000;
 
-  /** PWA 相關畫面文字（逐字使用） */
+  /** PWA 相關畫面文字（逐字使用；v0.16 契約 UP-6：更新提示改為「請更新版本」，逗號為全形 U+FF0C，行為不變） */
   var PWA_TEXTS = {
     installButton: "安裝 App",
-    updateNotice: "有新版本，重新整理",
-    updateButton: "重新整理",
+    updateNotice: "有新版本，請更新版本",
+    updateButton: "更新版本",
     backupOriginNotice: "學習紀錄只存在目前的瀏覽器與網址；檔案版、網頁版、主畫面 App 彼此不互通，可用匯出備份／匯入轉移"
   };
 
@@ -6880,7 +7686,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * 建立初始化後的新資料（CI-4，白名單）。回傳新物件，不修改 data、newGoal、defaults。
    * - 先淺複製 data 的全部鍵（customVocab、sttNoticeAcknowledged 與日後新增欄位原值保留）
    * - goal = newGoal 的複本
-   * - LEARNING_PROGRESS_FIELDS 6 欄 = defaults[欄] 的深複本（defaults 由呼叫端傳入 persist.defaultData()，AC-32-02）
+   * - LEARNING_PROGRESS_FIELDS 欄位（v0.15 起 7 欄，含 part5CorrectIds）= defaults[欄] 的深複本
+   *   （defaults 由呼叫端傳入 persist.defaultData()，AC-32-02、AC-45-08）
+   * - （v0.15）flashcardPosition = null（CI-4 例外、FP-4、AC-44-08）；part5UnansweredOnly 隨淺複製保留原值
    * defaults 缺少任一欄 → 拋含欄位名的 Error（LD-3：程式組裝錯誤）。
    * @param {object} data 目前的 PersistedData
    * @param {object} newGoal 新套用的 GoalState
@@ -6906,6 +7714,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     fields.forEach(function (name) {
       out[name] = clone(defaults[name]);
     });
+    // CI-4 例外：生效色級改變 → 單字卡位置回到第 1 張（FP-4），與初始化同一次寫入
+    out.flashcardPosition = null;
     return out;
   }
 
@@ -7557,7 +8367,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   鍵不存在 → 預設值；無法讀取 → 原字串盡力寫入 STORAGE_KEYS.unreadable 後以預設值啟動。
  * - 容量不足：新增自訂單字、範本注入 → 記憶體回滾、回 reason "quota"；匯入 → 回 error "quota"、記憶體不變
  *   （匯入遇容量不足以外的寫入例外 → error "write_failed"，契約 IM-6）；
- *   其他寫入 → 保留記憶體狀態，writeStatus 設為 "quota" 並以 tags ["storage"] 通知（banner 顯示提示），下次寫入再試。
+ *   其他寫入 → 保留記憶體狀態，writeStatus 設為 "quota"，下次寫入再試（v0.15 起提示規則見下方 commitWrite）。
  * - （v0.8，FE-25）學習事件（flipCard／answerVocabQuiz／recordSttScored）以 core/learning.record 更新
  *   todayLearned、learnedHistory，與打卡、統計、已掌握合併為一次 setItem，tags 加 "learning"（§7.7、LR-1～LR-5）；
  *   學習紀錄寫入遇容量不足 → 記憶體保留、不發 "storage"，本工作階段第一次發 "learningQuota"（LR-7）。
@@ -7578,6 +8388,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *
  * - （v0.11，FE-49）runtime.pwa（PwaRuntimeState，契約 PV-1、PV-7）：初始值取 core/pwa.initialPwaState()；
  *   只能經 actions.setPwa 更新（tag "pwa"，不寫入 localStorage、不進備份）；其他 action 以 assign 局部更新時保留原值。
+ *
+ * - （v0.15，FE-74）學習位置與作答紀錄（契約 §5.10～§5.12、architecture §4.10、§7.21.2、§7.21.3、§7.21.5）：
+ *   一般寫入一律經 commitWrite（容量不足：記憶體保留、整個工作階段最多發 1 次 "learningQuota"，不發 "storage"；
+ *   其他例外不提示）；writeData 寫出前呼叫 persist.ensureWritable。單字集重建一律經 placeCard（position.resolve，
+ *   FP-2、FP-5、FP-6）；gotoCard 換卡即寫入 flashcardPosition（FP-3）；生效色級改變 → 位置 null、第 1 張，
+ *   未改變 → 單字卡狀態全部不變（FP-4、FB-54）。模擬測驗轉移集中在 core/part5flow（CR-2、UO-1～UO-9），
+ *   題庫為空時 part5 action 一律不動作。
  *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
@@ -7614,14 +8431,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         BACKUP: require("../core/backup.js"),
         LEARN: require("../core/learning.js"),
         REINIT: require("../core/reinit.js"),
-        PWA: require("../core/pwa.js")
+        PWA: require("../core/pwa.js"),
+        POS: require("../core/position.js"),
+        PF: require("../core/part5flow.js")
       };
     } else {
       var c = root.EMT.core;
       coreCache = {
         C: c.constants, WK: c.wordkey, GOAL: c.goal, VOCAB: c.vocab, CUSTOM: c.custom,
         STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning,
-        REINIT: c.reinit, PWA: c.pwa
+        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow
       };
     }
     return coreCache;
@@ -7745,14 +8564,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return null;
   }
 
-  /** 在單字集中找 wordKey 的位置；找不到回 -1 */
-  function indexOfKey(studySet, key) {
-    for (var i = 0; i < studySet.length; i++) {
-      if (studySet[i].wordKey === key) { return i; }
-    }
-    return -1;
-  }
-
   /** 把索引夾在單字集範圍內；空集合 → 0 */
   function clampIndex(i, len) {
     if (len <= 0) { return 0; }
@@ -7824,8 +8635,21 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
       var K = core();
       try {
-        var lr = K.LEARN.normalizeLearning(data, today());
-        var out = assign(data, { todayLearned: lr.todayLearned, learnedHistory: lr.learnedHistory });
+        // （v0.15）補齊並正規化 3 個新欄位，保證寫出 PersistedDataWritten（architecture §4.10 ensureWritable）。
+        // ensureWritable 只處理這 3 欄但會深度複製整個物件；只傳入 3 欄再併回，避免每次換卡都複製整個 customVocab
+        // （1,000 個自訂單字時約多 2 ms，§7.21.2 效能要求），結果與傳入整筆相同
+        var tr = K.P.ensureWritable({
+          flashcardPosition: data.flashcardPosition,
+          part5CorrectIds: data.part5CorrectIds,
+          part5UnansweredOnly: data.part5UnansweredOnly
+        });
+        var wd = assign(data, {
+          flashcardPosition: tr.flashcardPosition,
+          part5CorrectIds: tr.part5CorrectIds,
+          part5UnansweredOnly: tr.part5UnansweredOnly
+        });
+        var lr = K.LEARN.normalizeLearning(wd, today());
+        var out = assign(wd, { todayLearned: lr.todayLearned, learnedHistory: lr.learnedHistory });
         var text = JSON.stringify(K.P.buildRecord(out, now()));
         storage.setItem(K.C.STORAGE_KEYS.state, text);
         return { ok: true };
@@ -7894,18 +8718,43 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
 
     /**
-     * 單字集重建後，盡量停在原本那張卡（以 wordKey 定位；找不到則夾回範圍）。
-     * 卡片沒變 → 保留翻面與題目；卡片變了 → 依 cardChanged 重設。
+     * （v0.15，FE-74）單字集重建時決定目前卡片（FP-2、FP-5、FP-6；architecture §4.10 placeCard）。
+     * 以 data.flashcardPosition 經 position.resolve 解析出新索引；新目前卡片與舊目前卡片（runtime.studySet[index]）
+     * 的 wordKey 相同 → 保留翻面、模式與題目，否則依 cardChanged 重設。
+     * 只計算、不寫入；呼叫端把回傳的 flashcardPosition 放進同一次寫入的 data（啟動與匯入步驟 9 只改記憶體，RD-4）。
+     * 單字集為空時 position 為原紀錄（FP-2 (1)，紀錄不動）。
+     * @param {object} runtime 目前（舊）執行期狀態
+     * @param {object} data 新的 PersistedData（讀取其 flashcardPosition）
+     * @param {object[]} newSet 新單字集
+     * @returns {{runtime: object, flashcardPosition: (object|null)}}
      */
-    function keepCurrentCard(runtime, newSet) {
-      var oldSet = runtime.studySet;
-      var oldCard = oldSet[runtime.flashcard.index];
-      var idx = oldCard ? indexOfKey(newSet, oldCard.wordKey) : -1;
-      if (idx !== -1) {
-        return assign(runtime, { studySet: newSet, flashcard: assign(runtime.flashcard, { index: idx }) });
+    function placeCard(runtime, data, newSet) {
+      var r = core().POS.resolve(data.flashcardPosition, newSet);
+      var oldCard = runtime.studySet ? runtime.studySet[runtime.flashcard.index] : null;
+      var newCard = newSet[r.index];
+      var rt;
+      if (oldCard && newCard && oldCard.wordKey === newCard.wordKey) {
+        rt = assign(runtime, { studySet: newSet, flashcard: assign(runtime.flashcard, { index: r.index }) });
+      } else {
+        var cc = cardChanged(runtime, newSet, r.index);
+        rt = assign(runtime, { studySet: newSet, flashcard: cc.flashcard, speech: cc.speech });
       }
-      var changed = cardChanged(runtime, newSet, clampIndex(runtime.flashcard.index, newSet.length));
-      return assign(runtime, { studySet: newSet, flashcard: changed.flashcard, speech: changed.speech });
+      // 無紀錄（null）→ 第 1 張，紀錄維持 null：null 與「第 1 張」等價（architecture §7.21.2 INV-FP），
+      // 避免只因啟動或重建就把 null 改成 { wordKey, ordinal: 1 }（啟動後記憶體與 localStorage 相同，V-ST-21）
+      var pos = r.kind === "none" && data.flashcardPosition === null ? null : r.position;
+      return { runtime: rt, flashcardPosition: pos };
+    }
+
+    /** 回到第 1 張（index 0）：已是第 1 張則原物件；否則依 cardChanged 重設（FP-4 位置為 null 時用） */
+    function firstCard(runtime) {
+      if (runtime.flashcard.index === 0) { return runtime; }
+      var cc = cardChanged(runtime, runtime.studySet, 0);
+      return assign(runtime, { flashcard: cc.flashcard, speech: cc.speech });
+    }
+
+    /** 題庫 id 陣列（part5flow.bankIdsOf，順序與題庫相同） */
+    function bankIds() {
+      return core().PF.bankIdsOf(content().part5);
     }
 
     // ── 訂閱與提交 ──
@@ -7937,39 +8786,40 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
 
     /**
-     * 提交新狀態。dataChanged = true 時先寫入（一次 setItem）；容量不足等失敗仍保留記憶體狀態（§5.3「其他寫入」）。
+     * 只更新記憶體並通知（不寫入 localStorage）。
      * @param {object} data
      * @param {object} runtime
      * @param {string[]} tags
-     * @param {boolean} dataChanged
      */
-    function commit(data, runtime, tags, dataChanged) {
-      if (dataChanged) {
-        noteWrite(writeData(data), tags);
-      }
+    function commit(data, runtime, tags) {
       state = { data: data, runtime: runtime };
       notify(tags);
     }
 
     /**
-     * （v0.8）提交含學習紀錄變更的新狀態（LR-3 (6)、LR-5、LR-7；architecture §7.7「LR-7 實作」）。
-     * 一次 setItem；學習紀錄實際改變且寫入失敗（quota／error）時：記憶體保留、writeStatus 更新但不發 "storage" tag；
-     * quota 且本工作階段尚未提示 → learningQuotaNoticeShown 設 true 並發 "learningQuota" tag（banner 提示一次）。
-     * 學習紀錄未改變、寫入成功或 storage 停用 → 沿用 commit（noteWrite）。
-     * @param {object} data
-     * @param {object} runtime
+     * （v0.15，FE-74）一般寫入的唯一提交函式（architecture §7.21.5、契約 WR-1～WR-3、V-ST-22；取代 v0.14 的
+     * 「commit 寫入」與學習紀錄專用提交）。一次 setItem 後記憶體一律採用新 data（不回滾），再 notify(tags) 一次：
+     * - 成功：writeStatus 由非 ok 回到 ok 時加 "storage" tag（banner 收起）
+     * - quota：writeStatus = "quota"；本工作階段尚未提示（learningQuotaNoticeShown 為 false）→ 設 true 並加
+     *   "learningQuota" tag（banner 提示「儲存空間不足」，整個工作階段最多 1 次，與 AC-30-14 共用旗標）；不加 "storage"
+     * - error：writeStatus = "error"；不提示
+     * - disabled／firstRun：沿用 noteWrite（不提示；首次守門不改 writeStatus）
+     * @param {object} data 新的 PersistedData
+     * @param {object} runtime 新的執行期狀態
      * @param {string[]} tags
-     * @param {boolean} dataChanged
-     * @param {boolean} learningChanged
+     * @param {{bypassFirstRun?: boolean}} [opts] bypassFirstRun 供 startLearning 寫第一筆
+     * @returns {{ok: true} | {ok: false, reason: string}} writeData 的結果
      */
-    function commitLearning(data, runtime, tags, dataChanged, learningChanged) {
-      if (!dataChanged || !learningChanged) {
-        commit(data, runtime, tags, dataChanged);
-        return;
-      }
-      var w = writeData(data);
+    function commitWrite(data, runtime, tags, opts) {
+      var o = opts || {};
+      var w = writeData(data, o.bypassFirstRun === true);
       var rt = runtime;
-      if (!w.ok && (w.reason === "quota" || w.reason === "error")) {
+      if (w.ok) {
+        if (writeStatus !== "ok") {
+          writeStatus = "ok";
+          tags.push("storage");
+        }
+      } else if (w.reason === "quota" || w.reason === "error") {
         writeStatus = w.reason;
         if (w.reason === "quota" && !rt.learningQuotaNoticeShown) {
           rt = assign(rt, { learningQuotaNoticeShown: true });
@@ -7980,6 +8830,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
       state = { data: data, runtime: rt };
       notify(tags);
+      return w;
     }
 
     /**
@@ -8039,7 +8890,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         if (parsed.kind === "ok") {
           // （v0.8）以今天正規化 todayLearned、learnedHistory（V-ST-09～V-ST-11）；
           // RD-1 的 fieldsReset 不提示、不另寫回，等下一次寫入一併寫回（RD-2、SD-FB-17）
-          data = K.P.normalizeAfterLoad(parsed.data, ct.part5.length, today());
+          // （v0.15）第 4 參數傳題庫 id → V-ST-05 之後再做 UO-4（只改記憶體，RD-4）
+          data = K.P.normalizeAfterLoad(parsed.data, ct.part5.length, today(), K.PF.bankIdsOf(ct.part5));
           startup = { status: "ok", migrated: false };
           if (parsed.migrated) {
             // 遷移後依 §5.3 驗證再以一次 setItem 寫回（MG-3：schemaVersion 2，失敗不提示）
@@ -8070,7 +8922,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
 
       writeStatus = available ? "ok" : "disabled";
-      state = { data: data, runtime: initialRuntime(data, available ? "ok" : "unavailable", entryMode) };
+      // （v0.15）FP-2：依紀錄解析目前卡片；記憶體中的紀錄更新為解析結果，不寫入（RD-4）
+      var rt0 = initialRuntime(data, available ? "ok" : "unavailable", entryMode);
+      var placed = placeCard(rt0, data, rt0.studySet);
+      if (placed.flashcardPosition !== data.flashcardPosition) {
+        data = assign(data, { flashcardPosition: placed.flashcardPosition });
+      }
+      state = { data: data, runtime: placed.runtime };
       initialized = true;
       notify(ALL_TAGS.slice());
       return { status: startup.status, migrated: startup.migrated };
@@ -8114,7 +8972,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         return;
       }
       var data = assign(d, { goal: assign(d.goal, { draftScore: score }) });
-      commit(data, state.runtime, ["goal"], true);
+      commitWrite(data, state.runtime, ["goal"]);
     }
 
     /**
@@ -8146,13 +9004,19 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
 
     /**
-     * 套用（AC-01-02、AC-01-07、AC-03-05）：appliedScore = draftScore、重算色級、重建單字集，
-     * 抽認卡回第 1 張正面；模式保持，測驗模式則重新出題。
+     * 套用（AC-01-02、AC-01-07、AC-03-05）：appliedScore = draftScore、重算色級；
+     * （v0.15）生效色級改變 → 重建單字集、抽認卡回第 1 張正面、位置 null（FP-4）；未改變 → 單字卡狀態不變（FB-54）。
+     * goal 未改變時不寫入（v0.14 行為）。
      */
     function applyGoal() {
       ensureInit();
       var g = appliedGoalState();
-      commit(g.data, g.runtime, ["goal", "studySet", "flashcard", "quiz", "speech"], g.changed);
+      var tags = ["goal", "studySet", "flashcard", "quiz", "speech"];
+      if (g.changed) {
+        commitWrite(g.data, g.runtime, tags);
+      } else {
+        commit(g.data, g.runtime, tags);
+      }
     }
 
     /**
@@ -8178,7 +9042,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var d = state.data;
       if (d.goal.draftScore === d.goal.appliedScore) { return false; }
       var data = assign(d, { goal: assign(d.goal, { draftScore: d.goal.appliedScore }) });
-      commit(data, state.runtime, ["goal"], false);
+      commit(data, state.runtime, ["goal"]);
       return true;
     }
 
@@ -8205,8 +9069,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var tags = ["goal", "studySet", "flashcard", "quiz", "speech", "stats", "streak", "part5", "learning"];
       noteWrite(w, tags);
       // CI-8：g.runtime 已依新 goal 重建 studySet、flashcard 回第 1 張正面（模式保持、測驗模式重新出題）、lastResult = null；
-      // 單字集只由 goal 與 customVocab 推導，兩者在 g.data 與 newData 相同
-      state = { data: newData, runtime: g.runtime };
+      // 單字集只由 goal 與 customVocab 推導，兩者在 g.data 與 newData 相同。
+      // （v0.15）buildReinitData 已設 flashcardPosition = null；生效色級未改變卻被直接呼叫時（UI 不會發生），
+      // 也回到第 1 張以維持「null ⇔ 第 1 張」（INV-FP）
+      state = { data: newData, runtime: firstCard(g.runtime) };
       notify(tags);
       return { ok: true, write: w.ok ? "ok" : "disabled" };
     }
@@ -8221,8 +9087,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
 
     /**
-     * 「套用」的狀態計算（applyGoal 與 startLearning 共用，不提交）：
-     * appliedScore = draftScore、依 V-ST-02 重算色級、重建單字集、抽認卡回第 1 張正面（模式保持，測驗模式重新出題）。
+     * 「套用」的狀態計算（applyGoal、confirmApplyGoal 與 startLearning 共用，不提交）：
+     * appliedScore = draftScore、依 V-ST-02 重算色級。
+     * （v0.15，FP-4、FB-54）生效色級改變 → 重建單字集、抽認卡回第 1 張正面（模式保持，測驗模式重新出題）、
+     * flashcardPosition = null；未改變 → studySet、flashcard、speech、flashcardPosition 全部不變。
      * @returns {{data: object, runtime: object, changed: boolean}}
      */
     function appliedGoalState() {
@@ -8233,18 +9101,22 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var goal = { draftScore: score, appliedScore: score, appliedColor: color, effectiveColor: K.GOAL.effectiveColorOf(color) };
       var changed = goal.appliedScore !== d.goal.appliedScore || goal.appliedColor !== d.goal.appliedColor ||
         goal.effectiveColor !== d.goal.effectiveColor;
-      var data = changed ? assign(d, { goal: goal }) : d;
-      var set = buildStudySet(data);
       var rt = state.runtime;
+      if (goal.effectiveColor === d.goal.effectiveColor) {
+        return { data: changed ? assign(d, { goal: goal }) : d, runtime: rt, changed: changed };
+      }
+      var data = assign(d, { goal: goal, flashcardPosition: null });
+      var set = buildStudySet(data);
       var cc = cardChanged(rt, set, 0);
-      return { data: data, runtime: assign(rt, { studySet: set, flashcard: cc.flashcard, speech: cc.speech }), changed: changed };
+      return { data: data, runtime: assign(rt, { studySet: set, flashcard: cc.flashcard, speech: cc.speech }), changed: true };
     }
 
     /**
      * （v0.8）首次畫面「開始學習」（FS-4、AC-25-02、AC-25-03、AC-18-02）。只在 firstRun 有效，一般模式回 { ok: false }、不做事。
      * 等同 applyGoal ＋ 一次 setItem（繞過首次守門，不論分數是否改變都寫入第一筆）；
      * 寫入結果不影響進入：entryMode = "main"、currentTab = "dashboard"。
-     * quota／error 走 noteWrite（banner 提示；主鍵仍不存在，下次開啟仍是首次畫面，契約 FB-31 (a)）；
+     * quota／error 走 commitWrite（v0.15：quota 依 WR-2 本工作階段最多提示 1 次；主鍵仍不存在，下次開啟仍是首次畫面，契約 FB-31 (a)）；
+     * （v0.15）寫入的 flashcardPosition 為 null、抽認卡為第 1 張（FP-4 末句）；
      * storage 停用 → 不寫入、直接進入（write "disabled"，AC-25-08）。
      * @returns {{ok: true, write: "ok"|"quota"|"error"|"disabled"} | {ok: false}}
      */
@@ -8253,10 +9125,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       if (state.runtime.entryMode !== "firstRun") { return { ok: false }; }
       var g = appliedGoalState();
       var tags = ["entry", "goal", "studySet", "flashcard", "quiz", "speech"];
-      var w = writeData(g.data, true);
-      noteWrite(w, tags);
-      state = { data: g.data, runtime: assign(g.runtime, { entryMode: "main", currentTab: "dashboard" }) };
-      notify(tags);
+      // （v0.15）FP-4 末句：第一筆寫入的位置為 null，抽認卡為第 1 張
+      var data = g.data.flashcardPosition === null ? g.data : assign(g.data, { flashcardPosition: null });
+      var runtime = assign(firstCard(g.runtime), { entryMode: "main", currentTab: "dashboard" });
+      var w = commitWrite(data, runtime, tags, { bypassFirstRun: true });
       return { ok: true, write: w.ok ? "ok" : w.reason };
     }
 
@@ -8280,15 +9152,18 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var taken = d.customVocab.map(function (it) { return it.id; });
       var item = K.CUSTOM.makeCustomItem(v.values, "manual", null, now(), rand, taken);
       var data = assign(d, { customVocab: d.customVocab.concat([item]) });
+      // （v0.15）FP-5：單字集重建 → placeCard，解析後的位置與 customVocab 同一次寫入
+      var placed = placeCard(state.runtime, data, buildStudySet(data));
+      data = assign(data, { flashcardPosition: placed.flashcardPosition });
 
-      // 先寫入；容量不足 → 丟棄新狀態（回滾），不通知 banner（由 view 顯示「儲存空間不足」）
+      // 先寫入；容量不足 → 丟棄新狀態（回滾，位置一併丟棄），不通知 banner（由 view 顯示「儲存空間不足」）
       var w = writeData(data);
       if (!w.ok && w.reason === "quota") {
         return { ok: false, reason: "quota" };
       }
       var tags = ["customVocab", "studySet", "flashcard"];
       noteWrite(w, tags);
-      state = { data: data, runtime: keepCurrentCard(state.runtime, buildStudySet(data)) };
+      state = { data: data, runtime: placed.runtime };
       notify(tags);
       return { ok: true, item: item };
     }
@@ -8319,21 +9194,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         masteredWordKeys: mastered
       });
 
-      var rt = state.runtime;
-      var oldSet = rt.studySet;
-      var oldCard = oldSet[rt.flashcard.index];
-      var newSet = buildStudySet(data);
-      var idx = K.CUSTOM.indexAfterDelete(oldSet, rt.flashcard.index, key);
-      idx = clampIndex(idx, newSet.length);
-      var runtime;
-      if (oldCard && newSet[idx] && newSet[idx].wordKey === oldCard.wordKey) {
-        // 仍是同一張卡：保留翻面與題目
-        runtime = assign(rt, { studySet: newSet, flashcard: assign(rt.flashcard, { index: idx }) });
-      } else {
-        var cc = cardChanged(rt, newSet, idx);
-        runtime = assign(rt, { studySet: newSet, flashcard: cc.flashcard, speech: cc.speech });
-      }
-      commit(data, runtime, ["customVocab", "studySet", "flashcard", "quiz", "stats"], true);
+      // （v0.15）FP-5：以 placeCard 定位（刪除目前卡片 → FP-2 (4) 的 min(ordinal, N) − 1，即原本下一張，
+      // 原為最後一張則前一張，與 AC-04-08 相同；仍是同一張卡則保留翻面與題目），位置與 customVocab 同一次寫入
+      var placed = placeCard(state.runtime, data, buildStudySet(data));
+      data = assign(data, { flashcardPosition: placed.flashcardPosition });
+      commitWrite(data, placed.runtime, ["customVocab", "studySet", "flashcard", "quiz", "stats"]);
       return { ok: true };
     }
 
@@ -8354,6 +9219,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var r = K.CUSTOM.buildTemplateItems(tpl, ct.builtinMap, d.customVocab, now(), rand);
       if (r.items.length === 0) { return { injected: 0, skipped: r.skippedCount }; }
       var data = assign(d, { customVocab: d.customVocab.concat(r.items) });
+      // （v0.15）FP-5：同 addCustomWord
+      var placed = placeCard(state.runtime, data, buildStudySet(data));
+      data = assign(data, { flashcardPosition: placed.flashcardPosition });
 
       // 先寫入；容量不足 → 丟棄新狀態（回滾），由 view 顯示「儲存空間不足」
       var w = writeData(data);
@@ -8362,7 +9230,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
       var tags = ["customVocab", "studySet", "flashcard"];
       noteWrite(w, tags);
-      state = { data: data, runtime: keepCurrentCard(state.runtime, buildStudySet(data)) };
+      state = { data: data, runtime: placed.runtime };
       notify(tags);
       return { injected: r.items.length, skipped: r.skippedCount };
     }
@@ -8370,7 +9238,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     // ── actions：抽認卡 ──
 
     /**
-     * 換卡（AC-06-04、AC-06-05）：超出範圍或同一張 → 不變。
+     * 換卡（AC-06-04、AC-06-05）：超出範圍或同一張 → 不變、不寫入。
+     * （v0.15，FP-3）index 實際改變時 flashcardPosition = position.fromIndex(studySet, index)，
+     * 同一事件以 commitWrite 一次 setItem（全專案唯一改變 index 的使用者入口）；不改學習紀錄與打卡（FP-7）。
      * @param {number} index
      */
     function gotoCard(index) {
@@ -8379,7 +9249,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       if (typeof index !== "number" || index !== Math.floor(index) || index < 0 || index >= rt.studySet.length) { return; }
       if (index === rt.flashcard.index) { return; }
       var cc = cardChanged(rt, rt.studySet, index);
-      commit(state.data, assign(rt, { flashcard: cc.flashcard, speech: cc.speech }), ["flashcard", "quiz", "speech"], false);
+      var data = assign(state.data, { flashcardPosition: core().POS.fromIndex(rt.studySet, index) });
+      commitWrite(data, assign(rt, { flashcard: cc.flashcard, speech: cc.speech }), ["flashcard", "quiz", "speech"]);
     }
 
     /**
@@ -8395,7 +9266,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var d = state.data;
       var patch = {};
       var dirty = false;
-      var learned = false;
       var tags = ["flashcard"];
       if (flipped) {
         var s = touchStreak(d.streak);
@@ -8410,11 +9280,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           patch.todayLearned = lp.patch.todayLearned;
           patch.learnedHistory = lp.patch.learnedHistory;
           dirty = true;
-          learned = true;
           tags.push("learning");
         }
       }
-      commitLearning(dirty ? assign(d, patch) : d, runtime, tags, dirty, learned);
+      if (dirty) {
+        commitWrite(assign(d, patch), runtime, tags);
+      } else {
+        commit(d, runtime, tags);
+      }
     }
 
     /**
@@ -8427,7 +9300,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var rt = state.runtime;
       if (mode === "card") {
         if (rt.flashcard.mode !== "card") {
-          commit(state.data, assign(rt, { flashcard: assign(rt.flashcard, { mode: "card", quiz: null }) }), ["flashcard", "quiz"], false);
+          commit(state.data, assign(rt, { flashcard: assign(rt.flashcard, { mode: "card", quiz: null }) }), ["flashcard", "quiz"]);
         }
         return { ok: true };
       }
@@ -8435,7 +9308,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       if (rt.flashcard.mode === "quiz" && rt.flashcard.quiz) { return { ok: true }; }
       var q = core().QUIZ.buildQuiz(rt.studySet, rt.flashcard.index, rand);
       if (!q) { return { ok: false, reason: "insufficient" }; }
-      commit(state.data, assign(rt, { flashcard: assign(rt.flashcard, { mode: "quiz", quiz: q, isFlipped: false }) }), ["flashcard", "quiz"], false);
+      commit(state.data, assign(rt, { flashcard: assign(rt.flashcard, { mode: "quiz", quiz: q, isFlipped: false }) }), ["flashcard", "quiz"]);
       return { ok: true };
     }
 
@@ -8471,14 +9344,28 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
       var data = assign(d, patch);
       var runtime = assign(rt, { flashcard: assign(rt.flashcard, { quiz: assign(q, { selectedIndex: optionIndex }) }) });
-      commitLearning(data, runtime, tags, true, lp.changed);
+      commitWrite(data, runtime, tags);
       return { ok: true, correct: correct };
     }
 
     // ── actions：Part 5 ──
 
     /**
-     * Part 5 作答（AC-11-03、AC-11-06）。已鎖定、結算中或題庫為空 → 忽略。
+     * （v0.15）模擬測驗目前的推導值：題庫 id、答對集合、開關（已正規化為布林）、畫面種類（UO-3）。
+     * @returns {{ids: Array<string|null>, set: Set<string>, only: boolean, kind: string}}
+     */
+    function part5Ctx() {
+      var PF = core().PF;
+      var d = state.data;
+      var ids = bankIds();
+      var set = PF.correctSet(d.part5CorrectIds);
+      var only = d.part5UnansweredOnly === true;
+      return { ids: ids, set: set, only: only, kind: PF.viewKind(d.part5, ids, set, only) };
+    }
+
+    /**
+     * Part 5 作答（AC-11-03、AC-11-06）。已鎖定、結算中、題庫為空或（v0.15）畫面為 allCorrect → 忽略。
+     * （v0.15，CR-2）答對且該題 id 未曾記錄 → 附加到 part5CorrectIds 末尾，與計數、打卡同一次 commitWrite。
      * @param {number} i 選項索引 0～3
      * @returns {{ok: true, correct: boolean} | {ok: false}}
      */
@@ -8491,6 +9378,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           p.currentIndex >= bank.length || !bank[p.currentIndex]) {
         return { ok: false };
       }
+      var ctx = part5Ctx();
+      if (ctx.kind === "allCorrect") { return { ok: false }; }
       var correct = i === bank[p.currentIndex].correctIndex;
       var part5 = assign(p, {
         lockedSelection: i,
@@ -8499,38 +9388,91 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         totalAnswered: p.totalAnswered + 1,
         totalCorrect: p.totalCorrect + (correct ? 1 : 0)
       });
-      var data = assign(d, { part5: part5, streak: touchStreak(d.streak) });
-      commit(data, state.runtime, ["part5", "stats", "streak"], true);
+      var patch = { part5: part5, streak: touchStreak(d.streak) };
+      var rec = core().PF.recordAnswer(d.part5CorrectIds, ctx.ids[p.currentIndex], correct);
+      if (rec.changed) { patch.part5CorrectIds = rec.ids; }
+      commitWrite(assign(d, patch), state.runtime, ["part5", "stats", "streak"]);
       return { ok: true, correct: correct };
     }
 
     /**
-     * 下一題（AC-11-04）：須已作答；最後一題後進入本輪結算（phase "summary"）。
+     * 下一題（AC-11-04）：須已作答；開關關閉 → 最後一題後進入本輪結算，
+     * 開關開啟 → 跳到其後第一題未答對，沒有則結算（UO-5）。題庫為空或 changed 為 false → 不寫入。
      */
     function nextPart5() {
       ensureInit();
-      var bank = content().part5;
-      var d = state.data;
-      var p = d.part5;
-      if (p.phase !== "question" || p.lockedSelection === null) { return; }
-      var part5;
-      if (p.currentIndex >= bank.length - 1) {
-        part5 = assign(p, { lockedSelection: null, phase: "summary" });
-      } else {
-        part5 = assign(p, { currentIndex: p.currentIndex + 1, lockedSelection: null });
-      }
-      commit(assign(d, { part5: part5 }), state.runtime, ["part5"], true);
+      var ctx = part5Ctx();
+      if (ctx.ids.length === 0) { return; }
+      var r = core().PF.next(state.data.part5, ctx.ids, ctx.set, ctx.only);
+      if (!r.changed) { return; }
+      commitWrite(assign(state.data, { part5: r.part5 }), state.runtime, ["part5"]);
     }
 
-    /** 重新開始（AC-11-07）：回第 1 題、本輪歸零，累計保留 */
+    /**
+     * 重新開始（AC-11-07、UO-6）：本輪歸零、累計與答對紀錄保留；開關開啟時從第一題未答對開始。
+     * 題庫為空 → 不動作；changed 為 false → 不寫入（沿用 v0.14：仍通知 "part5"）。
+     */
     function restartPart5() {
       ensureInit();
+      var ctx = part5Ctx();
+      if (ctx.ids.length === 0) { return; }
+      var r = core().PF.restart(state.data.part5, ctx.ids, ctx.set, ctx.only);
+      if (r.changed) {
+        commitWrite(assign(state.data, { part5: r.part5 }), state.runtime, ["part5"]);
+      } else {
+        commit(state.data, state.runtime, ["part5"]);
+      }
+    }
+
+    /**
+     * （v0.15，UO-1、UO-4、UO-8）切換「只練沒答對的題目」。
+     * 非布林、題庫為空、與原值相同 → { changed: false }、不寫入；
+     * 否則 part5flow.setOnly（關 → 開 時同時做 UO-4 正規化）→ 開關與正規化結果同一次 commitWrite，tags ["part5"]。
+     * 不改任何計數。
+     * @param {boolean} on
+     * @returns {{changed: boolean}}
+     */
+    function setPart5UnansweredOnly(on) {
+      ensureInit();
+      if (typeof on !== "boolean") { return { changed: false }; }
+      var ctx = part5Ctx();
+      if (ctx.ids.length === 0 || on === ctx.only) { return { changed: false }; }
       var d = state.data;
-      var p = d.part5;
-      var part5 = assign(p, { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0 });
-      var changed = p.currentIndex !== 0 || p.lockedSelection !== null || p.phase !== "question" ||
-        p.roundAnswered !== 0 || p.roundCorrect !== 0;
-      commit(changed ? assign(d, { part5: part5 }) : d, state.runtime, ["part5"], changed);
+      var r = core().PF.setOnly({ part5: d.part5, ids: d.part5CorrectIds, only: ctx.only }, ctx.ids, on);
+      if (!r.changed) { return { changed: false }; }
+      commitWrite(assign(d, { part5: r.part5, part5UnansweredOnly: r.only }), state.runtime, ["part5"]);
+      return { changed: true };
+    }
+
+    /**
+     * （v0.15，UO-7 (a)）allCorrect 畫面「全部題目再練一次（保留紀錄）」：
+     * 第 1 題、本輪歸 0、累計與答對紀錄不變、開關 = false；一次 commitWrite，tags ["part5"]。
+     * 畫面不是 allCorrect（含題庫為空）→ { ok: false }、不寫入。
+     * @returns {{ok: boolean}}
+     */
+    function replayPart5KeepRecords() {
+      ensureInit();
+      if (part5Ctx().kind !== "allCorrect") { return { ok: false }; }
+      var d = state.data;
+      var part5 = core().PF.replayKeepRecords(d.part5);
+      commitWrite(assign(d, { part5: part5, part5UnansweredOnly: false }), state.runtime, ["part5"]);
+      return { ok: true };
+    }
+
+    /**
+     * （v0.15，CR-6）allCorrect 畫面「清除答對紀錄，重新來過」確認「確定」後由 view 呼叫：
+     * part5CorrectIds = []、第 1 題、本輪歸 0、累計不變、開關維持；一次 commitWrite，tags ["part5", "stats"]
+     * （失敗依 WR-2，FB-60）。確認對話框由 view 顯示，「取消」時 view 不呼叫本 action（setItem 0 次）。
+     * 畫面不是 allCorrect（含題庫為空）→ { ok: false }、不寫入。
+     * @returns {{ok: boolean}}
+     */
+    function clearPart5CorrectIds() {
+      ensureInit();
+      if (part5Ctx().kind !== "allCorrect") { return { ok: false }; }
+      var d = state.data;
+      var r = core().PF.clearAndRestart(d.part5);
+      commitWrite(assign(d, { part5: r.part5, part5CorrectIds: r.ids }), state.runtime, ["part5", "stats"]);
+      return { ok: true };
     }
 
     // ── actions：語音 ──
@@ -8566,7 +9508,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         tags.push("learning");
       }
       if (tags.length === 0) { return; }
-      commitLearning(assign(d, patch), rt, tags, true, lp.changed);
+      commitWrite(assign(d, patch), rt, tags);
     }
 
     /** 按「我知道了」（AC-08-13、V-ST-08） */
@@ -8574,7 +9516,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       ensureInit();
       var d = state.data;
       if (d.sttNoticeAcknowledged === true) { return; }
-      commit(assign(d, { sttNoticeAcknowledged: true }), state.runtime, ["speech"], true);
+      commitWrite(assign(d, { sttNoticeAcknowledged: true }), state.runtime, ["speech"]);
     }
 
     /** @param {"idle"|"notice"|"listening"} s */
@@ -8582,7 +9524,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       ensureInit();
       var rt = state.runtime;
       if (STT_STATUSES.indexOf(s) === -1 || rt.speech.sttStatus === s) { return; }
-      commit(state.data, assign(rt, { speech: assign(rt.speech, { sttStatus: s }) }), ["speech"], false);
+      commit(state.data, assign(rt, { speech: assign(rt.speech, { sttStatus: s }) }), ["speech"]);
     }
 
     /** @param {object|null} r SttResult 或 null */
@@ -8590,7 +9532,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       ensureInit();
       var rt = state.runtime;
       var v = r && typeof r === "object" ? r : null;
-      commit(state.data, assign(rt, { speech: assign(rt.speech, { lastResult: v }) }), ["speech"], false);
+      commit(state.data, assign(rt, { speech: assign(rt.speech, { lastResult: v }) }), ["speech"]);
     }
 
     // ── actions：解碼器、句型庫、頁籤 ──
@@ -8604,13 +9546,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var rt = state.runtime;
       if (rt.decoder.sentenceIndex === idx) { return; }
       // 淡化狀態跨句保留（AC-13-03）
-      commit(state.data, assign(rt, { decoder: assign(rt.decoder, { sentenceIndex: idx }) }), ["decoder"], false);
+      commit(state.data, assign(rt, { decoder: assign(rt.decoder, { sentenceIndex: idx }) }), ["decoder"]);
     }
 
     function toggleModifierDim() {
       ensureInit();
       var rt = state.runtime;
-      commit(state.data, assign(rt, { decoder: assign(rt.decoder, { isModifierDimmed: !rt.decoder.isModifierDimmed }) }), ["decoder"], false);
+      commit(state.data, assign(rt, { decoder: assign(rt.decoder, { isModifierDimmed: !rt.decoder.isModifierDimmed }) }), ["decoder"]);
     }
 
     /** @param {"all"|"gap"|"aim"|"findings"|"limitations"} c */
@@ -8618,7 +9560,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       ensureInit();
       var rt = state.runtime;
       if (PHRASE_CATEGORIES.indexOf(c) === -1 || rt.phrasebank.category === c) { return; }
-      commit(state.data, assign(rt, { phrasebank: assign(rt.phrasebank, { category: c }) }), ["phrasebank"], false);
+      commit(state.data, assign(rt, { phrasebank: assign(rt.phrasebank, { category: c }) }), ["phrasebank"]);
     }
 
     /** @param {string} k 關鍵字原文 */
@@ -8627,7 +9569,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var rt = state.runtime;
       var kw = typeof k === "string" ? k : "";
       if (rt.phrasebank.keyword === kw) { return; }
-      commit(state.data, assign(rt, { phrasebank: assign(rt.phrasebank, { keyword: kw }) }), ["phrasebank"], false);
+      commit(state.data, assign(rt, { phrasebank: assign(rt.phrasebank, { keyword: kw }) }), ["phrasebank"]);
     }
 
     /**
@@ -8640,7 +9582,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       if (TAB_IDS.indexOf(tabId) === -1 || rt.currentTab === tabId) { return; }
       if (core().C.HIDDEN_TAB_IDS.indexOf(tabId) !== -1) { return; }
       if (rt.entryMode === "firstRun" && FIRST_RUN_TABS.indexOf(tabId) === -1) { return; }
-      commit(state.data, assign(rt, { currentTab: tabId }), ["tab"], false);
+      commit(state.data, assign(rt, { currentTab: tabId }), ["tab"]);
     }
 
     // ── actions：PWA（v0.11，FE-49）──
@@ -8671,7 +9613,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         next[k] = v;
       });
       if (!next) { return { changed: false }; }
-      commit(state.data, assign(rt, { pwa: next }), ["pwa"], false);
+      commit(state.data, assign(rt, { pwa: next }), ["pwa"]);
       return { changed: true };
     }
 
@@ -8691,7 +9633,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var rt = state.runtime;
       var cur = !!(rt.dashboard && rt.dashboard.backupExpanded === true);
       if (cur === value) { return { changed: false }; }
-      commit(state.data, assign(rt, { dashboard: { backupExpanded: value } }), ["dashboard"], false);
+      commit(state.data, assign(rt, { dashboard: { backupExpanded: value } }), ["dashboard"]);
       return { changed: true };
     }
 
@@ -8714,7 +9656,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
      * 步驟 1～5、7 由 core/backup.importSteps 先完成（IM-4，確認前不改動任何狀態）；
      * 步驟 6 呼叫 confirmFn（view 傳入，內部呼叫 ui.dialog.confirm）；
      * 步驟 8 一次 setItem，容量不足 → quota、其他例外 → write_failed（IM-6、IM-7），記憶體與 localStorage 皆不變；
-     * 步驟 9 套用到記憶體、重建單字集、抽認卡回第 1 張；localStorage 停用時只套用記憶體。
+     * 步驟 9 套用到記憶體、重建單字集、（v0.15）依匯入的位置紀錄以 placeCard 定位（FP-6，單字卡模式、正面）；
+     * localStorage 停用時只套用記憶體。（v0.15）importSteps 的 ctx 另帶 part5Ids（UO-4）。
      * （v0.8）首次模式（FS-5～FS-7）：步驟 8 繞過首次守門寫入第一筆；步驟 9 成功另設 entryMode = "main"、
      * currentTab = "dashboard"、tag "entry"；取消與任何失敗維持 firstRun，記憶體與 localStorage 不變。
      * @param {string} text 備份檔內容
@@ -8730,6 +9673,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         r = K.BACKUP.importSteps(text, {
           builtinKeys: ct.builtinMap,
           part5Length: ct.part5.length,
+          part5Ids: K.PF.bankIdsOf(ct.part5), // （v0.15）步驟 7 的 UO-4（IM-10 (4)）
           random: rand,
           today: today() // （v0.8）步驟 7 以匯入當天正規化學習紀錄（IM-8 (2)）
         });
@@ -8760,12 +9704,17 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
             }
           }
           var rt = state.runtime;
-          var set = buildStudySet(data);
-          var runtime = assign(rt, {
-            studySet: set,
+          // （v0.15，FP-6）步驟 9：重建單字集後依匯入的紀錄解析目前卡片（單字卡模式、正面）；
+          // 解析結果只改記憶體，步驟 8 已寫入備份值，下次寫入再寫出（RD-4）
+          var base = assign(rt, {
             flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null },
             speech: assign(rt.speech, { lastResult: null })
           });
+          var placed = placeCard(assign(base, { studySet: [] }), data, buildStudySet(data));
+          var runtime = placed.runtime;
+          if (placed.flashcardPosition !== data.flashcardPosition) {
+            data = assign(data, { flashcardPosition: placed.flashcardPosition });
+          }
           var tags = ["goal", "studySet", "flashcard", "quiz", "speech", "stats", "streak", "customVocab", "part5", "learning"];
           if (state.runtime.storageStatus !== "unavailable" && writeStatus !== "ok") {
             writeStatus = "ok";
@@ -8807,6 +9756,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         answerPart5: answerPart5,
         nextPart5: nextPart5,
         restartPart5: restartPart5,
+        setPart5UnansweredOnly: setPart5UnansweredOnly,
+        replayPart5KeepRecords: replayPart5KeepRecords,
+        clearPart5CorrectIds: clearPart5CorrectIds,
         recordSttScored: recordSttScored,
         acknowledgeSttNotice: acknowledgeSttNotice,
         setSttStatus: setSttStatus,
@@ -16052,6 +17004,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   div.p5-progress[role=progressbar]（值取 EMT.core.layout.part5Progress，呼叫時取用）；題庫為空時不建節點；
  *   buildViewModel、作答、下一題、重新開始與焦點邏輯不變。
  *
+ * （v0.15，FE-75；architecture.md v0.10 §4.10、§7.21.4；契約 data-schema §15 PART5_RECORD_TEXTS、Part5ViewKind、
+ *   README §5.11 CR-4、CR-6、CR-9、UO-1、UO-3、UO-7、§11.6 MT-1；AC-45-04、AC-45-05、AC-46-01、AC-46-06～AC-46-08）
+ * - buildViewModel 第 4 參數 record = { ids, only }（缺省 { ids: [], only: false }）；畫面種類以 part5flow.viewKind 推導
+ *   （empty／question／summary／allCorrect，不存在 store）；各 kind 附 k（已答對題數）、q（題庫題數）、only。
+ * - 題庫非空時於進度條之後建立 div.p5-record：「已答對 K / Q 題」與原生核取方塊「只練沒答對的題目」；
+ *   曾答對的題目在 .p5-meta 題型標籤後顯示「✓ 曾答對」；allCorrect 畫面以兩個按鈕取代「重新開始」。
+ * - 「清除答對紀錄，重新來過」先經 EMT.ui.dialog.confirm，回 true 才呼叫 clearPart5CorrectIds；取消不呼叫任何 action。
+ * - 契約文字取 constants.PART5_RECORD_TEXTS；SD 定稿文字（說明句、對話框標題與內文）放在 RECORD_TEXT 並匯出。
+ *   一律 textContent（C-7），不顯示題目 id（CR-9）。
+ *
  * 寫法：純邏輯（splitSentence、splitStructure、optionState、buildViewModel、feedbackOf、shouldIgnoreClick 等）
  * 在 Node 下以 module.exports 匯出供測試；
  * 瀏覽器下登錄為 EMT.views part5 模組。
@@ -16097,6 +17059,26 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     badData: "這一題的資料不完整。"
   };
 
+  // （v0.15，FE-75）契約 PART5_RECORD_TEXTS 的備援值（constants.js 取不到時使用，內容與 data-schema §15 一致）
+  var FALLBACK_RECORD_TEXTS = {
+    correctBadge: "✓ 曾答對",
+    correctCount: "已答對 {k} / {q} 題",
+    unansweredOnlyLabel: "只練沒答對的題目",
+    allCorrectTitle: "{q} 題全部答對！",
+    replayKeepRecords: "全部題目再練一次（保留紀錄）",
+    clearAndRestart: "清除答對紀錄，重新來過",
+    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+    confirmOk: "確定",
+    confirmCancel: "取消"
+  };
+
+  // （v0.15，FE-75）SD 定稿文字（architecture.md §7.21.4 文字定稿表，逐字）
+  var RECORD_TEXT = {
+    allCorrectNote: "每一題都至少答對過一次了。可以保留紀錄、全部題目再練一次，或清除答對紀錄後重新來過。",
+    confirmTitle: "清除答對紀錄",
+    confirmMessage: "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。"
+  };
+
   /** 取得契約常數（Node 下 require，瀏覽器下讀 EMT.core.constants） */
   function constants() {
     var c = null;
@@ -16111,8 +17093,46 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
     return {
       blank: c && typeof c.PART5_BLANK === "string" && c.PART5_BLANK ? c.PART5_BLANK : FALLBACK_BLANK,
-      labels: c && c.PART5_TYPE_LABELS ? c.PART5_TYPE_LABELS : FALLBACK_LABELS
+      labels: c && c.PART5_TYPE_LABELS ? c.PART5_TYPE_LABELS : FALLBACK_LABELS,
+      // （v0.15，FE-75）答對紀錄相關文字
+      record: c && c.PART5_RECORD_TEXTS ? c.PART5_RECORD_TEXTS : FALLBACK_RECORD_TEXTS
     };
+  }
+
+  /** （v0.15，FE-75）EMT.core.part5flow（Node 下 require，瀏覽器下於呼叫時讀取）；不存在視為組裝錯誤（LD-3） */
+  function part5flow() {
+    var pf = null;
+    if (typeof require === "function" && typeof module === "object") {
+      pf = require("../core/part5flow.js");
+    } else if (root.EMT && root.EMT.core) {
+      pf = root.EMT.core.part5flow;
+    }
+    if (!pf || typeof pf.viewKind !== "function") throw new Error("[EMT.views.part5] 缺少模組 EMT.core.part5flow");
+    return pf;
+  }
+
+  /**
+   * （v0.15，FE-75）以 {k}、{q} 代入契約文字（split／join，不用正規表示式）。
+   * @param {*} template 例「已答對 {k} / {q} 題」
+   * @param {{ k?: number, q?: number }} values
+   * @returns {string}
+   */
+  function fillText(template, values) {
+    var t = typeof template === "string" ? template : "";
+    var v = values || {};
+    if (v.k !== undefined) t = t.split("{k}").join(String(v.k));
+    if (v.q !== undefined) t = t.split("{q}").join(String(v.q));
+    return t;
+  }
+
+  /**
+   * （v0.15，FE-75）答對紀錄參數正規化：缺省或型別不符 → { ids: [], only: false }。
+   * @param {*} record { ids, only }
+   * @returns {{ ids: Array, only: boolean }}
+   */
+  function normalizeRecord(record) {
+    var r = record && typeof record === "object" ? record : {};
+    return { ids: Array.isArray(r.ids) ? r.ids : [], only: r.only === true };
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -16173,25 +17193,54 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * @param {object} progress Part5Progress（缺漏時以預設值處理）
    * @param {*} bank Part5Question[]
    * @param {{ blank?: string, labels?: object }} [consts] 契約常數
-   * @returns {object}
+   * @param {{ ids?: string[], only?: boolean }} [record] （v0.15）答對紀錄與開關；缺省 { ids: [], only: false }
+   * @returns {object} （v0.15）各 kind 皆附 k（已答對題數）、q（題庫題數）、only（開關）
    *   { kind: "empty" }
    *   { kind: "summary", roundCorrect, roundAnswered, totalCorrect, totalAnswered }
+   *   { kind: "allCorrect", inSummary, roundCorrect, roundAnswered }（v0.15，UO-3、UO-7）
    *   { kind: "question", index, number, total, typeLabel, segments, options[], locked, correctIndex,
-   *     isCorrect, valid, explanation: { coreStrategy, structureLines } }
+   *     isCorrect, valid, explanation: { coreStrategy, structureLines }, correctBadge }
    */
-  function buildViewModel(progress, bank, consts) {
+  function buildViewModel(progress, bank, consts, record) {
     var list = Array.isArray(bank) ? bank : [];
     var c = consts || constants();
     var p = progress && typeof progress === "object" ? progress : {};
-    if (list.length === 0) return { kind: "empty" };
+    var rec = normalizeRecord(record);
+    var PF = part5flow();
+    var bankIds = PF.bankIdsOf(list);
+    var set = PF.correctSet(rec.ids);
+    var kCount = PF.countCorrect(bankIds, set);
+    var qCount = list.length;
+    // UO-3：畫面種類每次繪製時推導（不存在 store）
+    var kind = PF.viewKind(p, bankIds, set, rec.only);
+    if (kind === "empty") return { kind: "empty", k: 0, q: 0, only: rec.only };
 
-    if (p.phase === "summary") {
+    var roundC = isIndex(p.roundCorrect) ? p.roundCorrect : 0;
+    var roundA = isIndex(p.roundAnswered) ? p.roundAnswered : 0;
+
+    // （v0.15，UO-7）全部答對：不顯示題目；作答結束進入（phase = summary）時另顯示本輪結算（AC-46-06）
+    if (kind === "allCorrect") {
+      return {
+        kind: "allCorrect",
+        inSummary: p.phase === "summary",
+        roundCorrect: roundC,
+        roundAnswered: roundA,
+        k: kCount,
+        q: qCount,
+        only: rec.only
+      };
+    }
+
+    if (kind === "summary") {
       return {
         kind: "summary",
-        roundCorrect: isIndex(p.roundCorrect) ? p.roundCorrect : 0,
-        roundAnswered: isIndex(p.roundAnswered) ? p.roundAnswered : 0,
+        roundCorrect: roundC,
+        roundAnswered: roundA,
         totalCorrect: isIndex(p.totalCorrect) ? p.totalCorrect : 0,
-        totalAnswered: isIndex(p.totalAnswered) ? p.totalAnswered : 0
+        totalAnswered: isIndex(p.totalAnswered) ? p.totalAnswered : 0,
+        k: kCount,
+        q: qCount,
+        only: rec.only
       };
     }
 
@@ -16234,7 +17283,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       explanation: {
         coreStrategy: typeof ex.coreStrategy === "string" ? ex.coreStrategy : "",
         structureLines: splitStructure(ex.structure)
-      }
+      },
+      // （v0.15，CR-4 (a)）目前題目曾答對（未作答、已作答皆顯示標示）
+      correctBadge: PF.isCorrectAt(bankIds, set, index),
+      k: kCount,
+      q: qCount,
+      only: rec.only
     };
   }
 
@@ -16336,7 +17390,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   var rootEl = null;      // #view-part5
   var unsubscribe = null;
-  var pendingFocus = null; // 重繪後要聚焦的目標："next" | "question" | "restart"
+  var pendingFocus = null; // 重繪後要聚焦的目標："next" | "question" | "restart" | "only"（v0.15）
+  var confirming = false;  // （v0.15）清除確認對話框開啟中（避免重複開啟）
   var touch = null;        // 選項清單的觸控狀態（跨重繪保留；只用於忽略滑動後補發的 click）
 
   /** 取用其他模組（呼叫時才取；不存在視為組裝錯誤，LD-3） */
@@ -16460,6 +17515,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return st && st.data ? st.data.part5 : null;
   }
 
+  /** （v0.15，FE-75）答對紀錄與開關（state.data.part5CorrectIds、part5UnansweredOnly）；取不到 → 預設值 */
+  function record() {
+    var s = store();
+    var st = s && typeof s.getState === "function" ? s.getState() : null;
+    var d = st && st.data ? st.data : {};
+    return normalizeRecord({ ids: d.part5CorrectIds, only: d.part5UnansweredOnly });
+  }
+
   /** 呼叫 store action（不存在時忽略） */
   function act(name, arg) {
     var s = store();
@@ -16467,6 +17530,125 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       return arguments.length > 1 ? s.actions[name](arg) : s.actions[name]();
     }
     return undefined;
+  }
+
+  /**
+   * （v0.15，FE-75；CR-4 (b)、UO-1；AC-45-05、AC-46-01）計數行與「只練沒答對的題目」開關。
+   * 開關為原生核取方塊，整個 label 為觸控目標；change → setPart5UnansweredOnly(input.checked)；
+   * 原生核取方塊不回應 Enter，keydown Enter 時補 input.click()（觸發原生切換與 change）。
+   * @param {object} vm buildViewModel 的結果（k、q、only）
+   * @param {object} T 契約文字 PART5_RECORD_TEXTS
+   * @returns {Element}
+   */
+  function renderRecord(vm, T) {
+    var D = dom();
+    var input = D.el("input", {
+      attrs: { type: "checkbox", "data-p5": "only", checked: vm.only === true },
+      on: {
+        change: function () {
+          pendingFocus = "only";
+          var r = act("setPart5UnansweredOnly", input.checked === true);
+          // store 未變更（或不存在）時不會通知重繪：主動重繪，讓核取方塊回到實際狀態
+          if (!r || !r.changed) render();
+        },
+        keydown: function (ev) {
+          if (ev && ev.key === "Enter") {
+            if (typeof ev.preventDefault === "function") ev.preventDefault();
+            input.click();
+          }
+        }
+      }
+    });
+    input.checked = vm.only === true;
+    return D.el("div", { className: "p5-record" }, [
+      D.el("p", { className: "p5-record__count", attrs: { "data-p5": "correct-count" },
+        text: fillText(T.correctCount, { k: vm.k, q: vm.q }) }),
+      D.el("label", { className: "p5-only", attrs: { "data-p5": "only-label" } }, [
+        input,
+        D.el("span", { className: "p5-only__text", text: T.unansweredOnlyLabel })
+      ])
+    ]);
+  }
+
+  /**
+   * （v0.15，FE-75；CR-6；AC-46-08）清除確認對話框：true → clearPart5CorrectIds；
+   * false（取消、Esc、點遮罩）→ 不呼叫任何 action，焦點回到清除按鈕。
+   * @returns {Promise|undefined} 對話框流程（已有對話框開啟中時回 undefined）
+   */
+  function onClearRequest() {
+    if (confirming) return undefined;
+    var T = constants().record;
+    var dlg = root.EMT && root.EMT.ui && root.EMT.ui.dialog;
+    if (!dlg || typeof dlg.confirm !== "function") throw new Error("[EMT.views.part5] 缺少模組 EMT.ui.dialog");
+    confirming = true;
+    var p;
+    try {
+      p = Promise.resolve(dlg.confirm({
+        title: RECORD_TEXT.confirmTitle,
+        message: RECORD_TEXT.confirmMessage,
+        okText: T.confirmOk,
+        cancelText: T.confirmCancel
+      }));
+    } catch (e) {
+      p = Promise.reject(e);
+    }
+    return p.then(function (ok) {
+      confirming = false;
+      if (ok === true) {
+        pendingFocus = "question";
+        var r = act("clearPart5CorrectIds");
+        if (!r || !r.ok) pendingFocus = null;
+        return;
+      }
+      focusSelector('[data-p5="clear"]');
+    }, function (e) {
+      // 對話框本身出錯：視同取消（資料不變）
+      confirming = false;
+      if (root.console) root.console.error("[EMT.views.part5] 確認視窗失敗", e);
+    });
+  }
+
+  /**
+   * （v0.15，FE-75；UO-7；AC-46-06～AC-46-08）全部答對畫面：標題、說明句、（作答結束進入時）本輪結算、兩個按鈕。
+   * 不顯示題目、選項與「第 i / N 題」。
+   */
+  function renderAllCorrect(vm, T) {
+    var D = dom();
+    var children = [
+      D.el("h3", { className: "p5-allcorrect__title", attrs: { tabindex: "-1", "data-p5": "allcorrect-title" },
+        text: fillText(T.allCorrectTitle, { q: vm.q }) }),
+      D.el("p", { className: "p5-allcorrect__note", text: RECORD_TEXT.allCorrectNote })
+    ];
+    if (vm.inSummary) {
+      children.push(D.el("p", { className: "p5-allcorrect__caption", text: TEXT.summaryTitle }));
+      children.push(D.el("p", { className: "p5-summary__score", attrs: { "data-p5": "summary-score" },
+        text: "答對 " + vm.roundCorrect + " / " + vm.roundAnswered }));
+    }
+    children.push(D.el("div", { className: "btn-row p5-allcorrect__actions" }, [
+      D.el("button", {
+        className: "btn btn--primary",
+        attrs: { type: "button", "data-p5": "replay" },
+        text: T.replayKeepRecords,
+        on: {
+          click: function () {
+            pendingFocus = "question";
+            var r = act("replayPart5KeepRecords");
+            if (!r || !r.ok) pendingFocus = null;
+          }
+        }
+      }),
+      D.el("button", {
+        className: "btn",
+        attrs: { type: "button", "data-p5": "clear" },
+        text: T.clearAndRestart,
+        on: {
+          click: function () {
+            onClearRequest();
+          }
+        }
+      })
+    ]));
+    return D.el("div", { className: "card p5-allcorrect" }, children);
   }
 
   /** 題庫為空 */
@@ -16571,14 +17753,17 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /** 作答畫面 */
-  function renderQuestion(vm) {
+  function renderQuestion(vm, T) {
     var D = dom();
+    var badgeText = T && typeof T.correctBadge === "string" ? T.correctBadge : FALLBACK_RECORD_TEXTS.correctBadge;
     var answered = vm.locked !== null;
     var children = [
       D.el("div", { className: "p5-meta" }, [
         D.el("h3", { className: "p5-number", attrs: { tabindex: "-1", "data-p5": "number" },
           text: "第 " + vm.number + " / " + vm.total + " 題" }),
-        vm.typeLabel ? D.el("span", { className: "p5-type", attrs: { "data-p5": "type" }, text: vm.typeLabel }) : null
+        vm.typeLabel ? D.el("span", { className: "p5-type", attrs: { "data-p5": "type" }, text: vm.typeLabel }) : null,
+        // （v0.15，CR-4 (a)；AC-45-04）曾答對才建立標示；未曾答對不顯示任何標示
+        vm.correctBadge ? D.el("span", { className: "p5-badge", attrs: { "data-p5": "correct-badge" }, text: badgeText }) : null
       ]),
       renderSentence(vm.segments),
       renderOptions(vm),
@@ -16612,11 +17797,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     if (!rootEl) return;
     var D = dom();
     var list = bank();
-    var vm = buildViewModel(progress(), list);
+    var c = constants();
+    var T = c.record;
+    var vm = buildViewModel(progress(), list, c, record());
     var body;
     if (vm.kind === "empty") body = renderEmpty();
     else if (vm.kind === "summary") body = renderSummary(vm);
-    else body = renderQuestion(vm);
+    else if (vm.kind === "allCorrect") body = renderAllCorrect(vm, T);
+    else body = renderQuestion(vm, T);
 
     D.clear(rootEl);
     D.append(rootEl, [
@@ -16624,6 +17812,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         D.el("h2", { className: "page-title p5-heading", text: TEXT.heading }),
         // （v0.12，FE-61）作答進度條：h2 之後、題型說明之前（MT-1）
         renderProgressBar(vm, list.length),
+        // （v0.15，FE-75）計數行與開關：進度條之後、題型說明之前；題庫為空時不建立（SD-FB-64）
+        vm.kind === "empty" ? null : renderRecord(vm, T),
         D.el("p", { className: "p5-heading-note", text: TEXT.headingNote }),
         body
       ])
@@ -16637,9 +17827,17 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     pendingFocus = null;
     if (!target || !rootEl) return;
     var sel = null;
-    if (vm.kind === "summary") sel = '[data-p5="summary-title"]';
+    // （v0.15，§7.21.4 互動表）開關操作後焦點留在開關；進入全部答對畫面時移到標題
+    if (target === "only") sel = '[data-p5="only"]';
+    else if (vm.kind === "summary") sel = '[data-p5="summary-title"]';
+    else if (vm.kind === "allCorrect") sel = '[data-p5="allcorrect-title"]';
     else if (vm.kind === "question") sel = target === "next" ? '[data-p5="next"]' : '[data-p5="number"]';
-    var node = sel ? rootEl.querySelector(sel) : null;
+    focusSelector(sel);
+  }
+
+  /** 聚焦 rootEl 內符合選擇器的元素（不存在時忽略） */
+  function focusSelector(sel) {
+    var node = sel && rootEl && typeof rootEl.querySelector === "function" ? rootEl.querySelector(sel) : null;
     if (node && typeof node.focus === "function") {
       try { node.focus(); } catch (e) { /* 忽略 */ }
     }
@@ -16667,6 +17865,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   return {
     LETTERS: LETTERS,
     TEXT: TEXT,
+    RECORD_TEXT: RECORD_TEXT,
+    fillText: fillText,
     splitSentence: splitSentence,
     splitStructure: splitStructure,
     optionState: optionState,
@@ -17333,6 +18533,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *
  * - （v0.11，FE-52）授權聲明清單在既有 3 條之後加「PWA 圖示與名稱」品牌標識聲明（AC-23-02、Q-48）；
  *   名稱於 render 時取 EMT.core.pwa.PWA_APP_NAME（LD-2；不存在依 LD-3 丟出錯誤），著作權人取 PROJECT_LICENSE.copyrightHolder。
+ * - （v0.11，FE-77；architecture.md v0.11 §7.22.2、契約 data-schema.ts §16、README §4.3 L-7、AC-23-07）
+ *   .src-page 最後（授權聲明區之後）加 1 行聯絡資訊 p.src-muted.src-contact，以 textContent 寫入常數 SOURCES_CONTACT_TEXT。
+ *   防爬蟲：常數為帶空格的原值，不做任何字串處理；不是連結、不可聚焦（無 href／tabindex／role／title／data-go）、
+ *   不掛事件。全 src/app 非測試原始碼只有下方常數 1 處字面值，註解不重複寫出。
  *
  * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution、brandStatement）可在 Node 測試；
  * 瀏覽器下登錄 EMT.views.register("sources", { mount })。
@@ -17370,6 +18574,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     // （v0.12，FE-60；NM-3、SD-FB-49）原創內容來源一行的前綴；名稱取 registry 中 ORIGINAL 的 fullName，不寫死
     originalSource: "原創內容來源："
   };
+
+  /**
+   * （v0.11，FE-77）聯絡行文字：逐字照契約 data-schema.ts §16 複製（半形空格 U+0020 分隔，防爬蟲，L-7）。
+   * 不得去空格、replace、split／join 或拼接。
+   */
+  var SOURCES_CONTACT_TEXT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";
 
   /** 欄位標籤 */
   var LABEL = {
@@ -17670,7 +18880,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       dom.el("p", { className: "src-muted", text: TEXT.intro }),
       dom.el("h3", { className: "src-section-title", text: TEXT.externalHeading }),
       dom.el("div", { className: "src-list" }, list),
-      licenseSection(dom, picked.wordlists, content.license, content.sources)
+      licenseSection(dom, picked.wordlists, content.license, content.sources),
+      // （v0.11，FE-77）聯絡行：純文字段落、非連結、不可聚焦、無事件（§7.22.2）
+      dom.el("p", { className: "src-muted src-contact", text: SOURCES_CONTACT_TEXT })
     ]));
   }
 
@@ -17681,6 +18893,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   return {
     TEXT: TEXT,
+    SOURCES_CONTACT_TEXT: SOURCES_CONTACT_TEXT,
     selectEntries: selectEntries,
     originalSourceName: originalSourceName,
     formatCount: formatCount,

@@ -2,8 +2,11 @@
 // 依據：契約 README §7.0～§7.6（V-IN、V-SRC、V-VOC、V-TPL、V-P5、V-DEC、V-RS、V-PH；V-VOC-15、17 依 v0.6 M-3；V-VOC-07 依 v0.7 M-8）、
 //       architecture.md v0.3 §8.4（S-2、H-1～H-5、H-7；H-1 繁簡同形白名單 → H-1W）。
 // 只使用 Node 內建模組。有錯誤時 exit code 1；資料檔不存在列為「缺檔」錯誤，不拋出未處理例外。
+// CT-25（契約 v0.15 README §7.4 V-P5-08、§9.8 DS-37；architecture.md v0.10 §7.21.6）：新增題目 id 穩定性檢查
+//       （V-P5-08／V-P5-08W／V-P5-08N）與 --update-snapshot、--accept <id>，快照檔 src/data/_records/part5-ids.json。
 
-import { existsSync, readdirSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import {
   DEFAULT_DATA_DIR, DEFAULT_SOURCES_DIR, VOCAB_FILES, VOCAB_KEYS, DATA_FILES, PART_OF_SPEECH, CONFIRMED_WORDLISTS,
@@ -27,11 +30,22 @@ const HELP = `用法：
                      final   ：全部檢查（預設）
   --sources <dir>    唯讀輸入目錄（預設 sources/），用於排名重算（S-2、V-VOC-04/05）、ECDICT 比對、H-1 字集等。
   --max <n>          每條規則最多列出幾筆明細（預設 20）。
+  --update-snapshot  （CT-25）把 part5.js 中快照沒有的題目 id 新增到 src/data/_records/part5-ids.json；
+                     不刪除、不覆寫既有項目。需同時載入 part5.js（--all 或 --file part5.js）。
+  --accept <id>      （CT-25）人工確認某題的 sentence／正解修改只是錯字修正（題意與正解不變）後，
+                     以目前內容覆寫該 id 的指紋；多個 id 以逗號分隔。只寫 _records/part5-ids.json。
   --help             顯示本說明。
+
+V-P5-08（題目 id 穩定，只在 --stage final 且快照檔存在時執行；快照一律讀專案的 src/data/_records/part5-ids.json，
+  不隨 --data 改變，因此可用 --data 指向修改過的副本與已交付快照比對）：
+  指紋 = SHA-256 前 16 個 hex，對象字串先 NFC → trim → 連續空白壓成 1 個 → 小寫；每題 s = sentence、a = options[correctIndex]。
+  快照 id 仍在題庫且 s、a 皆不同 → 錯誤 V-P5-08（id 改指另一題）；只有一個不同 → 警告 V-P5-08W（請確認為錯字修正，
+  確認後用 --accept <id>）；快照 id 不在題庫 → 資訊 V-P5-08（刪題，id 不得重用）；題庫 id 不在快照 → 警告 V-P5-08N
+  （新題，交付後用 --update-snapshot 更新快照）。
 
 輸出：每條規則的「通過／錯誤／警告／資訊」數與前 n 筆明細；有任何錯誤時 exit code 1。
 涵蓋規則：V-IN-01～07、V-SRC-01～05、V-VOC-01～11、13～17（14 只報告；17 列清單 + 疑似過度轉換警告）、
-          S-2、H-1（白名單字元降為 H-1W 警告）～H-5、H-7、V-TPL-01～04、V-P5-01～07（05 只檢查索引範圍與位置分布）、V-DEC-01～04、V-RS-01、V-PH-01～03。
+          S-2、H-1（白名單字元降為 H-1W 警告）～H-5、H-7、V-TPL-01～04、V-P5-01～07（05 只檢查索引範圍與位置分布）、V-P5-08（含 08W、08N）、V-DEC-01～04、V-RS-01、V-PH-01～03。
 不在此檢查：V-VOC-12（前端）、V-VOC-18（人工抽查，用 sample.mjs）、V-ST／V-IMP（前端）。`;
 
 // ─────────────────────────────────────────────────────────────
@@ -45,7 +59,7 @@ const RULE_ORDER = [
   ...Array.from({ length: 17 }, (_, i) => `V-VOC-${String(i + 1).padStart(2, "0")}`),
   "S-2", "H-1", "H-1W", "H-2", "H-3", "H-4", "H-5", "H-7",
   "V-TPL-01", "V-TPL-02", "V-TPL-03", "V-TPL-04",
-  "V-P5-01", "V-P5-02", "V-P5-03", "V-P5-04", "V-P5-05", "V-P5-06", "V-P5-07",
+  "V-P5-01", "V-P5-02", "V-P5-03", "V-P5-04", "V-P5-05", "V-P5-06", "V-P5-07", "V-P5-08", "V-P5-08W", "V-P5-08N",
   "V-DEC-01", "V-DEC-02", "V-DEC-03", "V-DEC-04", "V-RS-01",
   "V-PH-01", "V-PH-02", "V-PH-03", "INTERNAL",
 ];
@@ -62,6 +76,8 @@ const RULE_TITLE = {
   "H-5": "分檔內 example／meaning 重複", "H-7": "平均每筆 bytes",
   "V-TPL-01": "3 範本 × 10 字", "V-TPL-02": "必含代表字", "V-TPL-03": "不在內建字庫", "V-TPL-04": "30 字不重複",
   "V-P5-01": "題型與筆數", "V-P5-02": "id", "V-P5-03": "空格", "V-P5-04": "選項", "V-P5-05": "正解索引與位置分布", "V-P5-06": "解析", "V-P5-07": "source",
+  "V-P5-08": "id 穩定（快照比對：改指另一題為錯誤、刪題為資訊）", "V-P5-08W": "id 對應題目只改 sentence 或正解之一（請確認為錯字修正）",
+  "V-P5-08N": "新題 id 不在快照（交付後請更新快照）",
   "V-DEC-01": "筆數與 id", "V-DEC-02": "segments 串接", "V-DEC-03": "subject／verb／modifier", "V-DEC-04": "role、翻譯、section、source", "V-RS-01": "閱讀策略",
   "V-PH-01": "類別與筆數", "V-PH-02": "id、template、說明", "V-PH-03": "source、exampleEn", INTERNAL: "驗證器內部例外",
 };
@@ -217,6 +233,13 @@ function main() {
   if (loaded["sources.js"]) guard("sources.js", () => checkSources(loaded["sources.js"], vocabForSources, ref, rep, mode));
   if (loaded["templates.js"]) guard("templates.js", () => checkTemplates(loaded["templates.js"].DOMAIN_TEMPLATES, ref, vocabFiles, rep));
   if (loaded["part5.js"]) guard("part5.js", () => checkPart5(loaded["part5.js"].PART5_QUESTION_BANK, rep, stage));
+  // CT-25：V-P5-08 與快照更新選項
+  const wantUpdate = args["update-snapshot"] === true;
+  const acceptIds = args.accept === undefined ? null : args.accept === true ? [] : String(args.accept).split(",").map((x) => x.trim()).filter(Boolean);
+  if (args["update-snapshot"] !== undefined && !wantUpdate) rep.err("V-P5-08", `--update-snapshot 不接受參數（收到：${args["update-snapshot"]}）`);
+  if (acceptIds && !acceptIds.length) rep.err("V-P5-08", "--accept 需要題目 id（例：--accept p5-012，多個以逗號分隔）");
+  if ((wantUpdate || (acceptIds && acceptIds.length)) && !loaded["part5.js"]) rep.err("V-P5-08", "--update-snapshot／--accept 需要載入 part5.js（使用 --all 或 --file part5.js）；未寫入快照");
+  if (loaded["part5.js"]) guard("V-P5-08", () => checkPart5Ids(loaded["part5.js"].PART5_QUESTION_BANK, rep, stage, { wantUpdate, acceptIds: acceptIds || [] }));
   if (loaded["decoder.js"]) guard("decoder.js", () => checkDecoder(loaded["decoder.js"], rep, stage));
   if (loaded["phrasebank.js"]) guard("phrasebank.js", () => checkPhrasebank(loaded["phrasebank.js"].ACADEMIC_PHRASEBANK, rep, stage));
 
@@ -752,6 +775,112 @@ function checkPart5(bank, rep, stage) {
   }
   rep.info("V-P5-05", `正解唯一性需人工判斷；位置分布 A ${pos[0]}、B ${pos[1]}、C ${pos[2]}、D ${pos[3]}`);
 }
+
+// ─────────────────────────────────────────────────────────────
+// part5.js 題目 id 穩定性（CT-25；V-P5-08、V-P5-08W、V-P5-08N）
+// ─────────────────────────────────────────────────────────────
+
+const PART5_SNAPSHOT_PATH = join(DEFAULT_DATA_DIR, "_records", "part5-ids.json");
+const FP_RE = /^[0-9a-f]{16}$/;
+
+/** 指紋：NFC → trim → 連續空白壓成 1 個 → 小寫，SHA-256 取前 16 個 hex。 */
+function part5Fingerprint(text) {
+  const norm = String(text).normalize("NFC").trim().replace(/\s+/g, " ").toLowerCase();
+  return createHash("sha256").update(norm, "utf8").digest("hex").slice(0, 16);
+}
+
+/** 單題指紋 { s, a }；sentence 或正解不是字串時回傳 null（格式錯誤由 V-P5-03～05 報告）。 */
+function part5Prints(q) {
+  if (!isPlainObj(q) || !isStr(q.sentence) || !Array.isArray(q.options) || !isInt(q.correctIndex) || !isStr(q.options[q.correctIndex])) return null;
+  return { s: part5Fingerprint(q.sentence), a: part5Fingerprint(q.options[q.correctIndex]) };
+}
+
+function readPart5Snapshot() {
+  let snap;
+  try { snap = JSON.parse(readFileSync(PART5_SNAPSHOT_PATH, "utf8")); }
+  catch (e) { return { snap: null, bad: [`無法解析 ${PART5_SNAPSHOT_PATH}：${e.message}`] }; }
+  const bad = [];
+  if (!isPlainObj(snap) || !isPlainObj(snap.meta) || !isPlainObj(snap.ids)) bad.push("頂層應為 { meta: 物件, ids: 物件 }");
+  else for (const [id, v] of Object.entries(snap.ids)) {
+    if (!/^p5-\d{3}$/.test(id) || !isPlainObj(v) || Object.keys(v).length !== 2 || !FP_RE.test(v.s) || !FP_RE.test(v.a)) bad.push(`ids.${id} 應為 p5-NNN → { s, a }（各 16 位小寫 hex）`);
+  }
+  return { snap, bad };
+}
+
+/** 依 id 排序後寫出（每題一行），meta.count = 快照 id 數。 */
+function writePart5Snapshot(snap) {
+  const ids = Object.keys(snap.ids).sort();
+  snap.meta.count = ids.length;
+  const body = ids.map((id) => `    ${JSON.stringify(id)}: ${JSON.stringify({ s: snap.ids[id].s, a: snap.ids[id].a })}`).join(",\n");
+  writeFileSync(PART5_SNAPSHOT_PATH, `{\n  "meta": ${JSON.stringify(snap.meta)},\n  "ids": {\n${body}\n  }\n}\n`, "utf8");
+}
+
+function checkPart5Ids(bank, rep, stage, { wantUpdate, acceptIds }) {
+  if (!Array.isArray(bank)) return; // V-P5-01 已報告
+  // 題庫 id → 指紋（重複 id 由 V-P5-02 報告；這裡以第一次出現為準）
+  const cur = new Map();
+  for (const q of bank) {
+    if (!isPlainObj(q) || !isStr(q.id) || !/^p5-\d{3}$/.test(q.id) || cur.has(q.id)) continue;
+    cur.set(q.id, part5Prints(q));
+  }
+  const dupIds = new Set(dupes(bank.map((q) => (isPlainObj(q) ? q.id : undefined)).filter(isStr)));
+
+  // ── 更新快照（只寫 _records/part5-ids.json）──
+  if (wantUpdate || acceptIds.length) {
+    let snap;
+    if (existsSync(PART5_SNAPSHOT_PATH)) {
+      const r = readPart5Snapshot();
+      if (r.bad.length) { for (const b of r.bad) rep.err("V-P5-08", `快照格式錯誤，未更新：${b}`); return; }
+      snap = r.snap;
+    } else {
+      snap = { meta: { createdBy: "CT-25", source: "src/data/part5.js", createdAt: new Date().toISOString(), count: 0 }, ids: {} };
+    }
+    let blocked = false;
+    for (const id of acceptIds) {
+      if (!cur.has(id)) { rep.err("V-P5-08", `--accept ${id}：題庫中沒有這個 id，未寫入`); blocked = true; }
+      else if (dupIds.has(id) || !cur.get(id)) { rep.err("V-P5-08", `--accept ${id}：題目 id 重複或 sentence／正解格式錯誤，未寫入`); blocked = true; }
+    }
+    if (blocked) rep.info("V-P5-08", "因 --accept 參數錯誤，快照未寫入");
+    else {
+      const added = [];
+      for (const id of acceptIds) snap.ids[id] = { ...cur.get(id) };
+      if (wantUpdate) {
+        for (const [id, fp] of cur) {
+          if (id in snap.ids) continue;
+          if (dupIds.has(id) || !fp) { rep.err("V-P5-08", `--update-snapshot：${id} 的 id 重複或 sentence／正解格式錯誤，未加入快照`); continue; }
+          snap.ids[id] = { ...fp }; added.push(id);
+        }
+      }
+      writePart5Snapshot(snap);
+      rep.info("V-P5-08", `已寫入快照 ${PART5_SNAPSHOT_PATH}：新增 ${added.length} 筆${added.length ? `（${compactIds(added)}）` : ""}、覆寫 ${acceptIds.length} 筆${acceptIds.length ? `（${acceptIds.join("、")}）` : ""}；快照共 ${snap.meta.count} 筆`);
+    }
+  }
+
+  // ── 檢查 ──
+  if (stage !== "final") { rep.skip("V-P5-08", `階段 ${stage}，只在 final 執行`); return; }
+  if (!existsSync(PART5_SNAPSHOT_PATH)) {
+    console.log(`提示：找不到題目 id 快照 ${PART5_SNAPSHOT_PATH}，略過 V-P5-08；建立快照：node src/data/_tools/validate.mjs --all --stage final --update-snapshot`);
+    rep.skip("V-P5-08", "快照檔不存在");
+    return;
+  }
+  const { snap, bad } = readPart5Snapshot();
+  if (bad.length) { for (const b of bad) rep.err("V-P5-08", `快照格式錯誤：${b}`); return; }
+  const removed = [];
+  for (const [id, old] of Object.entries(snap.ids)) {
+    if (!cur.has(id)) { removed.push(id); continue; }
+    const now = cur.get(id);
+    if (!now) { rep.err("V-P5-08", `${id}：sentence 或正解格式錯誤，無法計算指紋`); continue; }
+    const ds = now.s !== old.s, da = now.a !== old.a;
+    if (ds && da) rep.err("V-P5-08", `${id}：sentence 與正解都和快照不同，疑似 id 改號或改指另一題（既有 id 不得改指另一題；若確為同一題的修訂，人工確認後執行 --accept ${id}）`);
+    else if (ds || da) rep.warn("V-P5-08W", `${id}：${ds ? "sentence" : "正解 options[correctIndex]"} 和快照不同，請確認為錯字修正（題意與正解不變）；確認後執行 --accept ${id}`);
+    else rep.ok("V-P5-08");
+  }
+  if (removed.length) rep.info("V-P5-08", `快照中有 ${removed.length} 個 id 不在題庫（已刪題，id 不得重用）：${compactIds(removed)}`);
+  for (const id of cur.keys()) if (!(id in snap.ids)) rep.warn("V-P5-08N", `${id}：新題 id 不在快照（請確認未重用已刪除的 id；交付後執行 --update-snapshot 更新快照）`);
+  rep.info("V-P5-08", `快照 ${Object.keys(snap.ids).length} 筆（meta.createdAt ${snap.meta.createdAt ?? "?"}）、題庫 ${cur.size} 個 id`);
+}
+
+function compactIds(ids) { return ids.length > 10 ? `${ids.slice(0, 10).join("、")}…等 ${ids.length} 個` : ids.join("、"); }
 
 // ─────────────────────────────────────────────────────────────
 // decoder.js

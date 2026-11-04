@@ -362,4 +362,12 @@ describe("part5Progress（MT-1）", () => {
     assert.equal(layout.part5Progress("question", 1, 0).visible, false);
     assert.equal(layout.part5Progress("summary", 0, 0).visible, false);
   });
+
+  // （v0.10，FE-72；MT-1 v0.15、AC-46-06）全部答對畫面同結算：100%、aria-valuenow = N
+  test("allCorrect → 100%（同 summary），total 0 → 不顯示；未知 kind 仍不顯示", () => {
+    assert.deepStrictEqual(layout.part5Progress("allCorrect", 0, 200), { visible: true, now: 200, max: 200, percent: 100 });
+    assert.deepStrictEqual(layout.part5Progress("allCorrect", 37, 200), layout.part5Progress("summary", 37, 200));
+    assert.equal(layout.part5Progress("allCorrect", 0, 0).visible, false);
+    assert.equal(layout.part5Progress("allcorrect", 0, 200).visible, false);
+  });
 });

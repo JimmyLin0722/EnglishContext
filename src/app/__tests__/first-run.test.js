@@ -66,9 +66,9 @@ describe("first-run.test.js：importFlow.messageOf", () => {
     assert.deepEqual(flowNode.messageOf({ ok: true, skipped: 3 }), { text: "已匯入，略過 3 筆", kind: "success" });
     assert.deepEqual(flowNode.messageOf({ ok: false, error: "format" }), { text: "備份檔格式錯誤，未匯入", kind: "error" });
     assert.equal(flowNode.messageOf({ ok: false, error: "version", fileVersion: 2.5 }).text,
-      "備份檔版本不相容（檔案版本：2.5；支援版本：1、2）");
+      "備份檔版本不相容（檔案版本：2.5；支援版本：1、2、3）");
     assert.equal(flowNode.messageOf({ ok: false, error: "version", fileVersion: null }).text,
-      "備份檔版本不相容（檔案版本：無；支援版本：1、2）");
+      "備份檔版本不相容（檔案版本：無；支援版本：1、2、3）");
     assert.equal(flowNode.messageOf({ ok: false, error: "quota" }).text, "儲存空間不足，未匯入");
     assert.equal(flowNode.messageOf({ ok: false, error: "write_failed" }).text, "儲存失敗，未匯入");
   });
@@ -310,17 +310,25 @@ describe("first-run.test.js：importFlow.start", () => {
 // ─────────────────────────────────────────────────────────────
 
 describe("first-run.test.js：首次畫面還原（真實 store）", () => {
-  /** 由一般模式 store 匯出目標 300（棕）的備份 */
+  /**
+   * 由一般模式 store 匯出目標 300（棕）的備份（目前版本 3）；
+   * version 2、1 時刻意改成 v0.14、v0.7 的備份形狀作為遷移輸入（v0.15，MG-8）
+   */
   function backupJson(version) {
     const src = F.makeStore();
     src.a.setDraftScore(300); // 既有分數 300（棕）的備份 fixture（GS-4：原值保留），非畫面操作
     src.a.applyGoal();
     const json = src.a.exportBackup().json;
-    if (version !== 1) return json;
+    if (version === undefined || version === C.CURRENT_SCHEMA_VERSION) return json;
     const o = JSON.parse(json);
-    o.schemaVersion = 1;
-    delete o.data.todayLearned;
-    delete o.data.learnedHistory;
+    o.schemaVersion = version;
+    delete o.data.flashcardPosition;
+    delete o.data.part5CorrectIds;
+    delete o.data.part5UnansweredOnly;
+    if (version === 1) {
+      delete o.data.todayLearned;
+      delete o.data.learnedHistory;
+    }
     return JSON.stringify(o);
   }
 
@@ -337,7 +345,7 @@ describe("first-run.test.js：首次畫面還原（真實 store）", () => {
     return { m, s, r, tags };
   }
 
-  for (const ver of [2, 1]) {
+  for (const ver of [3, 2, 1]) {
     test("v" + ver + " 備份還原成功 → main、主鍵寫入、資料依備份（300、棕）、通知含 entry（AC-25-10、AC-24-10）", async () => {
       const { m, s, r, tags } = await restore(backupJson(ver));
       assert.equal(r.ok, true);
@@ -348,7 +356,7 @@ describe("first-run.test.js：首次畫面還原（真實 store）", () => {
       assert.equal(st.data.goal.draftScore, 300);
       assert.equal(st.data.goal.appliedColor, "brown");
       assert.ok(m.storage.map.has(MAIN_KEY), "主鍵已寫入");
-      assert.equal(JSON.parse(m.storage.map.get(MAIN_KEY)).schemaVersion, 2);
+      assert.equal(JSON.parse(m.storage.map.get(MAIN_KEY)).schemaVersion, C.CURRENT_SCHEMA_VERSION);
       assert.ok(tags.some((t) => t.includes("entry")));
       assert.equal(s.toasts.length, 1);
       assert.match(s.toasts[0].text, /^已匯入，略過 \d+ 筆$/);
@@ -364,8 +372,8 @@ describe("first-run.test.js：首次畫面還原（真實 store）", () => {
     test("還原失敗（" + name + "）→ 維持 firstRun、主鍵不存在、顯示對應訊息（AC-25-11、FS-6）", async () => {
       let text = text0;
       if (code === "version") {
-        const o = JSON.parse(backupJson(2));
-        o.schemaVersion = 3;
+        const o = JSON.parse(backupJson());
+        o.schemaVersion = C.CURRENT_SCHEMA_VERSION + 1;
         text = JSON.stringify(o);
       }
       let storage;
@@ -373,7 +381,7 @@ describe("first-run.test.js：首次畫面還原（真實 store）", () => {
         storage = F.fakeStorage();
         storage.quota = true;
       }
-      const { m, s, r, tags } = await restore(text || backupJson(2), storage ? { storage } : null);
+      const { m, s, r, tags } = await restore(text || backupJson(), storage ? { storage } : null);
       assert.equal(r.error, code);
       const st = m.store.getState();
       assert.equal(st.runtime.entryMode, "firstRun");
@@ -389,7 +397,7 @@ describe("first-run.test.js：首次畫面還原（真實 store）", () => {
     const m = F.makeStore({ firstRun: true });
     const s = setup({ store: m.store, confirm: false });
     const p = s.EMT.ui.importFlow.start();
-    choose(s, backupJson(2));
+    choose(s, backupJson());
     assert.equal((await p).error, "cancelled");
     assert.equal(m.store.getState().runtime.entryMode, "firstRun");
     assert.ok(!m.storage.map.has(MAIN_KEY));
@@ -402,7 +410,7 @@ describe("first-run.test.js：首次畫面還原（真實 store）", () => {
       setItem() { throw new Error("SecurityError"); },
       removeItem() { throw new Error("SecurityError"); }
     };
-    const { m, r } = await restore(backupJson(2), { storage });
+    const { m, r } = await restore(backupJson(), { storage });
     assert.equal(r.ok, true);
     assert.equal(m.store.getState().runtime.entryMode, "main");
     assert.equal(m.store.getState().runtime.storageStatus, "unavailable");

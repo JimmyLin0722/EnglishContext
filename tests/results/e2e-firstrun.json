@@ -25,7 +25,7 @@
     "tc": "TC-25-11",
     "ac": "AC-25-11",
     "result": "通過",
-    "note": "(a) 檔案選擇器開啟=true 後未選檔：firstRun、狀態鍵 無；(a) 確認框「匯入備份  匯入將覆蓋目前所有進度  取消 匯入」按取消：firstRun、狀態鍵 無、提示 []；(b) 非 JSON：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(b) 空檔：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(c) 版本 99：[\"備份檔版本不相容（檔案版本：99；支援版本：1、2）\"]、firstRun、狀態鍵 無；版本訊息「備份檔版本不相容（檔案版本：99；支援版本：1、2）」；之後按「開始學習」→ main、狀態鍵 有"
+    "note": "(a) 檔案選擇器開啟=true 後未選檔：firstRun、狀態鍵 無；(a) 確認框「匯入備份  匯入將覆蓋目前所有進度  取消 匯入」按取消：firstRun、狀態鍵 無、提示 []；(b) 非 JSON：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(b) 空檔：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(c) 版本 99：[\"備份檔版本不相容（檔案版本：99；支援版本：1、2、3）\"]、firstRun、狀態鍵 無；版本訊息「備份檔版本不相容（檔案版本：99；支援版本：1、2、3）」；之後按「開始學習」→ main、狀態鍵 有"
   },
   {
     "suite": "e2e-firstrun",
@@ -39,7 +39,7 @@
     "tc": "TC-25-02",
     "ac": "AC-25-02",
     "result": "通過",
-    "note": "點棕 → 選中 brown；按「開始學習」→ 確認視窗=false、main/dashboard、導覽 4 鈕；主控台 棕級・每日 10 字｜變更；單字集 2809；寫入 schemaVersion 2、goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}"
+    "note": "點棕 → 選中 brown；按「開始學習」→ 確認視窗=false、main/dashboard、導覽 4 鈕；主控台 棕級・每日 10 字｜變更；單字集 2809；寫入 schemaVersion 3、goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}"
   },
   {
     "suite": "e2e-firstrun",
@@ -88,21 +88,21 @@
     "tc": "TC-24-10",
     "ac": "AC-24-10",
     "result": "通過",
-    "note": "v1 備份（無 todayLearned、learnedHistory）匯入：提示 [\"已匯入，略過 0 筆\"]；既有 7 欄還原相同=true；今日已學 0 / 10 字、近 7 天空狀態「開始學習後會顯示紀錄」、長條顯示=false；重新載入後 localStorage schemaVersion 2、todayLearned {\"date\":null,\"wordKeys\":[]}"
+    "note": "v1 備份（無 todayLearned、learnedHistory）匯入：提示 [\"已匯入，略過 0 筆\"]；既有 7 欄還原相同=true；今日已學 0 / 10 字、近 7 天空狀態「開始學習後會顯示紀錄」、長條顯示=false；重新載入後 localStorage schemaVersion 3、todayLearned {\"date\":null,\"wordKeys\":[]}"
   },
   {
     "suite": "e2e-firstrun",
     "tc": "TC-24-11",
     "ac": "AC-24-11、AC-24-05",
     "result": "通過",
-    "note": "無效項目：提示 [\"已匯入，略過 0 筆\"]、匯入後歷史 {\"2026-10-05\":7,\"2026-10-29\":5}、todayLearned {\"date\":null,\"wordKeys\":[]}、今日已學 0 / 10 字；型別錯誤：learnedHistory 為陣列：[\"備份檔格式錯誤，未匯入\"]；todayLearned 為字串：[\"備份檔格式錯誤，未匯入\"]；wordKeys 不是清單：[\"備份檔格式錯誤，未匯入\"]；learnedHistory 缺少：[\"備份檔格式錯誤，未匯入\"]"
+    "note": "無效項目：提示 [\"已匯入，略過 0 筆\"]、匯入後歷史 {\"2026-10-06\":7,\"2026-10-30\":5}、todayLearned {\"date\":null,\"wordKeys\":[]}、今日已學 0 / 10 字；型別錯誤：learnedHistory 為陣列：[\"備份檔格式錯誤，未匯入\"]；todayLearned 為字串：[\"備份檔格式錯誤，未匯入\"]；wordKeys 不是清單：[\"備份檔格式錯誤，未匯入\"]；learnedHistory 缺少：[\"備份檔格式錯誤，未匯入\"]"
   },
   {
     "suite": "e2e-firstrun",
     "tc": "TC-24-02b",
     "ac": "AC-24-02",
     "result": "通過",
-    "note": "v0.8 匯出：schemaVersion 2、todayLearned {\"date\":\"2026-11-03\",\"wordKeys\":[\"the\",\"be\"]}、learnedHistory {\"2026-11-03\":2}（翻 2 張卡；模擬測驗作答不計）"
+    "note": "v0.8 匯出：schemaVersion 3、todayLearned {\"date\":\"2026-11-04\",\"wordKeys\":[\"the\",\"be\"]}、learnedHistory {\"2026-11-04\":2}（翻 2 張卡；模擬測驗作答不計）"
   },
   {
     "suite": "e2e-firstrun",

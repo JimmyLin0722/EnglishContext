@@ -164,7 +164,7 @@ let BACKUP_V2, BACKUP_V1;
     const total = await p.ev(`EMT.store.getState().runtime.studySet.length`);
     const dlg = await p.ev(`!!document.querySelector(".dialog")`);
     const ok = pre.pressed === "brown" && !dlg && a.entry === "main" && a.tab === "dashboard" && a.dashboard && a.nav && a.navBtns === 4 && g === GOAL_LINE.brown && !g.includes("分數")
-      && k && k.schemaVersion === 2 && k.data.goal.appliedScore === 465 && k.data.goal.effectiveColor === "brown" && total === 2809;
+      && k && k.schemaVersion === 3 && k.data.goal.appliedScore === 465 && k.data.goal.effectiveColor === "brown" && total === 2809;
     return { ok, note: `點棕 → 選中 ${pre.pressed}；按「開始學習」→ 確認視窗=${dlg}、${a.entry}/${a.tab}、導覽 ${a.navBtns} 鈕；主控台 ${g}；單字集 ${total}；寫入 schemaVersion ${k && k.schemaVersion}、goal ${k && JSON.stringify(k.data.goal)}` };
   });
   await R.check("TC-25-06", "AC-25-06", async () => {
@@ -266,7 +266,7 @@ let BACKUP_V2, BACKUP_V1;
     const exp = JSON.parse(BACKUP_V1).data;
     const same = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged"].every((k) => JSON.stringify(d[k]) === JSON.stringify(exp[k]));
     await p.reload(); const k = JSON.parse(await stored(p));
-    const ok = r.t.some((x) => x.startsWith("已匯入，略過 0 筆")) && !r.t.some((x) => /格式錯誤|版本不相容/.test(x)) && same && pr.text.startsWith("今日已學 0 /") && pr.empty === "開始學習後會顯示紀錄" && !pr.barsShown && k.schemaVersion === 2 && !!k.data.todayLearned && !!k.data.learnedHistory;
+    const ok = r.t.some((x) => x.startsWith("已匯入，略過 0 筆")) && !r.t.some((x) => /格式錯誤|版本不相容/.test(x)) && same && pr.text.startsWith("今日已學 0 /") && pr.empty === "開始學習後會顯示紀錄" && !pr.barsShown && k.schemaVersion === 3 && !!k.data.todayLearned && !!k.data.learnedHistory;
     return { ok, note: `v1 備份（無 todayLearned、learnedHistory）匯入：提示 ${JSON.stringify(r.t)}；既有 7 欄還原相同=${same}；${pr.text}、近 7 天空狀態「${pr.empty}」、長條顯示=${pr.barsShown}；重新載入後 localStorage schemaVersion ${k.schemaVersion}、todayLearned ${JSON.stringify(k.data.todayLearned)}` };
   });
   await R.check("TC-24-11", "AC-24-11、AC-24-05", async () => {
@@ -291,7 +291,7 @@ let BACKUP_V2, BACKUP_V1;
   });
   await R.check("TC-24-02b", "AC-24-02", async () => {
     const j = JSON.parse(BACKUP_V2); const d = j.data;
-    const ok = j.schemaVersion === 2 && d.todayLearned && d.todayLearned.date === TODAY && Array.isArray(d.todayLearned.wordKeys) && d.todayLearned.wordKeys.length === 2 && d.learnedHistory[TODAY] === 2 && !/MASTER_VOCAB|PART5_QUESTION/.test(BACKUP_V2);
+    const ok = j.schemaVersion === 3 && d.todayLearned && d.todayLearned.date === TODAY && Array.isArray(d.todayLearned.wordKeys) && d.todayLearned.wordKeys.length === 2 && d.learnedHistory[TODAY] === 2 && !/MASTER_VOCAB|PART5_QUESTION/.test(BACKUP_V2);
     return { ok, note: `v0.8 匯出：schemaVersion ${j.schemaVersion}、todayLearned ${JSON.stringify(d.todayLearned)}、learnedHistory ${JSON.stringify(d.learnedHistory)}（翻 2 張卡；模擬測驗作答不計）` };
   });
   await p.close();

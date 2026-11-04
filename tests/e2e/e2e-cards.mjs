@@ -380,11 +380,11 @@ await R.check("TC-24-01", "AC-24-01、AC-24-02", async () => {
   const j = JSON.parse(text);
   const d = j.data || {};
   // v0.8（AC-24-02 修訂）：另含 todayLearned（日期與當天已學單字清單）、learnedHistory（近 30 天每日已學字數）；備份 schemaVersion 2
-  const keysOk = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged", "todayLearned", "learnedHistory"].every((k) => k in d);
+  const keysOk = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged", "todayLearned", "learnedHistory", "flashcardPosition", "part5CorrectIds", "part5UnansweredOnly"].every((k) => k in d) && Object.keys(d).length === 12; // 第 7 輪：v0.15 備份 12 欄（AC-24-02）
   const td = (() => { const x = new Date(); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, "0")}-${String(x.getDate()).padStart(2, "0")}`; })();
   const learnOk = d.todayLearned && d.todayLearned.date === td && Array.isArray(d.todayLearned.wordKeys) && d.todayLearned.wordKeys.length === 1 && d.learnedHistory && d.learnedHistory[td] === 1;
   const noBuiltin = !/MASTER_VOCAB|PART5_QUESTION|DECODER|PHRASEBANK/.test(text) && text.length < 50000;
-  const ok = files.length === 1 && name === `english-master-track-backup-${today}.json` && reqs.length === 0 && j.format === "english-master-track-backup" && j.schemaVersion === 2 && keysOk && learnOk && noBuiltin
+  const ok = files.length === 1 && name === `english-master-track-backup-${today}.json` && reqs.length === 0 && j.format === "english-master-track-backup" && j.schemaVersion === 3 && keysOk && learnOk && noBuiltin
     && d.goal.appliedScore === 300 && d.goal.appliedColor === "brown" && d.goal.effectiveColor === "brown" && d.customVocab.length === 10 && d.masteredWordKeys.length === 1 && d.vocabQuiz.answered === 1 && d.part5.totalAnswered === 1 && d.part5.currentIndex === 1 && d.streak.days === 1 && d.sttNoticeAcknowledged === true;
   return { ok, note: `檔名 ${name}（本地日期 ${today}）；網路請求 ${reqs.length}；${text.length} bytes；format=${j.format}、schemaVersion=${j.schemaVersion}；欄位齊全=${keysOk}；不含內建內容=${noBuiltin}；goal=${JSON.stringify(d.goal)}；自訂 ${d.customVocab.length}、已掌握 ${d.masteredWordKeys.length}、測驗 ${JSON.stringify(d.vocabQuiz)}、part5 ${JSON.stringify(d.part5)}、streak ${JSON.stringify(d.streak)}、STT 已讀 ${d.sttNoticeAcknowledged}、todayLearned ${JSON.stringify(d.todayLearned)}、learnedHistory ${JSON.stringify(d.learnedHistory)}` };
 });

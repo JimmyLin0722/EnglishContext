@@ -243,6 +243,29 @@ const stripCss = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
     `含「範本」字串常值 ${hits.length} 處（custom-vocab.js 隱藏容器內與 persist.js 內部驗證原因 ${hits.length - outside.length}、其他 ${outside.length}${outside.length ? "：" + outside.join("、") : ""}）；範本容器建立屬性含 hidden＋inert=${/hidden:\s*true,\s*inert/.test(cv)}；.db-change 規則「${dc.replace(/\s+/g, " ").trim().slice(0, 160)}」；.app-footer__version 規則「${fv.replace(/\s+/g, " ").trim()}」；用強調橘／灰框線或缺 nowrap／無底線=${cssBad}`);
 }
 
+// ── 第 7 輪（PRD v0.15 R-23，契約 v0.15 C-7、CR-9、WR-4、§15 PART5_RECORD_TEXTS；architecture §7.21.4） ──
+// TC-T-S01 AC-47-08、AC-45-04、AC-46-01：新模組不發請求、不碰 DOM／儲存（L1）；畫面文字逐字存在於產物；新 CSS 規則不用強調橘、無動畫
+{
+  const rel = (f) => path.relative(ROOT, f).split(path.sep).join("/");
+  const nc = (f) => fs.readFileSync(path.join(ROOT, f), "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
+  const NET = ["fetch(", "XMLHttpRequest", "import(", "sendBeacon", "WebSocket", "EventSource", "navigator.serviceWorker"];
+  const l1 = ["src/app/core/position.js", "src/app/core/part5flow.js"];
+  const l1Bad = l1.flatMap((f) => [...NET, "document.", "localStorage", "sessionStorage", "indexedDB", "innerHTML", "window."].filter((k) => nc(f).includes(k)).map((k) => f + ":" + k));
+  const viewBad = ["src/app/views/part5.js", "src/app/state/store.js", "src/app/core/persist.js", "src/app/core/backup.js", "src/app/core/reinit.js"].flatMap((f) => [...NET, "innerHTML", "insertAdjacentHTML"].filter((k) => nc(f).includes(k)).map((k) => f + ":" + k));
+  const texts = ["✓ 曾答對", "已答對 {k} / {q} 題", "只練沒答對的題目", "{q} 題全部答對！", "全部題目再練一次（保留紀錄）", "清除答對紀錄，重新來過", "將清除全部題目的答對紀錄", "累計答題數與正確率不受影響",
+    "每一題都至少答對過一次了。可以保留紀錄、全部題目再練一次，或清除答對紀錄後重新來過。", "清除答對紀錄", "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。"];
+  const miss = texts.filter((t) => !appJs.includes(t) && !appJs.includes(JSON.stringify(t).slice(1, -1)));
+  const p5css = stripCss(fs.readFileSync(path.join(ROOT, "src", "app", "styles", "40-part5.css"), "utf8"));
+  const newRules = [...p5css.matchAll(/([^{}]*\.(?:p5-record|p5-only|p5-badge|p5-allcorrect)[^{}]*)\{([^}]*)\}/g)].map((m) => ({ sel: m[1].trim(), body: m[2] }));
+  const cssBad = newRules.filter((r) => /--accent|#f7893b|transition|animation|#[0-9a-f]{3,8}\b/i.test(r.body)).map((r) => r.sel);
+  const only = newRules.find((r) => /^\.p5-only$/.test(r.sel)); const cnt = newRules.find((r) => /^\.p5-record__count$/.test(r.sel));
+  const okCss = cssBad.length === 0 && !!only && /min-height:\s*var\(--touch\)/.test(only.body) && !!cnt && /tabular-nums/.test(cnt.body);
+  const sizeOk = buf.length <= 5242880;
+  const extLib = /cdn\.|unpkg|jsdelivr|googleapis|<script[^>]+src=/i.test(html);
+  rec("TC-T-S01", "AC-47-08、AC-45-04、AC-45-05、AC-46-01（WR-4、CR-9、C-7）", l1Bad.length === 0 && viewBad.length === 0 && miss.length === 0 && okCss && sizeOk && !extLib,
+    `L1 新模組（position、part5flow）去註解後禁用 API／DOM／儲存：${l1Bad.join("、") || "無"}；part5 view／store／persist／backup／reinit 網路 API 與 HTML 插入：${viewBad.join("、") || "無"}；畫面文字 ${texts.length} 則缺 ${miss.length}${miss.length ? "：" + miss.join("、") : ""}；40-part5.css 新規則 ${newRules.length} 條（用強調橘／色碼／動畫：${cssBad.join("、") || "無"}；.p5-only min-height var(--touch)=${!!only && /min-height:\s*var\(--touch\)/.test(only.body)}；.p5-record__count tabular-nums=${!!cnt && /tabular-nums/.test(cnt.body)}）；交付檔 ${buf.length.toLocaleString()} bytes ≤ 5 MB=${sizeOk}；外部函式庫或外部 script=${extLib}`);
+}
+
 // TC-S09 產物與原始碼一致（以 QA 自行重建的產物比對）
 if (rebuilt && fs.existsSync(rebuilt)) {
   const b2 = fs.readFileSync(rebuilt);

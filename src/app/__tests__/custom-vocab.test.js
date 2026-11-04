@@ -13,6 +13,7 @@ const assert = require("node:assert/strict");
 
 const v = require("../views/custom-vocab.js");
 const F = require("./_fixtures.js");
+const C = require("../core/constants.js");
 
 describe("custom-vocab.test.js", () => {
   test("injectMessage", () => {
@@ -598,14 +599,29 @@ describe("custom-vocab.test.js：閒置預建與分批掛上（BUG-002）", () =
   });
 
   test("HT-9／AC-43-03：10 個範本字 + 1 個表單字啟動 → 11 項皆只標「自訂擴充」；新增 latency → 單字已存在；刪除 1 個範本字；匯出欄位不變", () => {
-    // 準備：v0.13 以前注入的 10 個資工字 + 表單新增 1 個字，寫入 localStorage（schemaVersion 2）
+    // 準備：v0.13 以前注入的 10 個資工字 + 表單新增 1 個字，寫入 localStorage；
+    // （v0.15，FE-73）刻意改回 v0.14 的形狀（schemaVersion 2、data 9 欄）作為遷移輸入，驗證 HT-9 經 MG-5～MG-7 遷移後不變
     const prep = setup();
     assert.equal(prep.a.injectTemplate("cs").injected, 10);
     assert.ok(prep.a.addCustomWord(F.customFields("Zymurgy", "釀造學")).ok);
     const saved = Object.fromEntries(prep.storage.map);
+    const KEY = "englishMasterTrack:state";
+    const v2 = JSON.parse(saved[KEY]);
+    v2.schemaVersion = 2;
+    delete v2.data.flashcardPosition;
+    delete v2.data.part5CorrectIds;
+    delete v2.data.part5UnansweredOnly;
+    saved[KEY] = JSON.stringify(v2);
 
-    // 以該 localStorage 啟動
+    // 以該 localStorage 啟動：遷移後 3 欄為預設、customVocab 逐欄相同，主鍵寫回目前版本
     const f = setup({ storage: F.fakeStorage(saved) });
+    const migrated = f.store.getState().data;
+    assert.equal(migrated.flashcardPosition, null);
+    assert.deepEqual(migrated.part5CorrectIds, []);
+    assert.equal(migrated.part5UnansweredOnly, false);
+    assert.deepStrictEqual(JSON.parse(JSON.stringify(migrated.customVocab)), v2.data.customVocab);
+    assert.equal(JSON.parse(f.storage.map.get(KEY)).schemaVersion, C.CURRENT_SCHEMA_VERSION);
+    assert.deepStrictEqual(JSON.parse(f.storage.map.get(KEY)).data.customVocab, v2.data.customVocab);
     const before = JSON.parse(JSON.stringify(f.store.getState().data.customVocab));
     assert.equal(before.length, 11);
     assert.equal(before.filter((x) => x.origin === "template").length, 10);

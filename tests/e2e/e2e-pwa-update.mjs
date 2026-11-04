@@ -114,7 +114,7 @@ await R.check("TC-36-03c", "AC-36-03（按「重新整理」）、AC-36-04、AC-
   const other = await A.page.evaluate(async () => { const c = await caches.open("other-project-cache"); const r = await c.match("/other-project/data.txt"); return r ? await r.text() : null; });
   const store1 = await readStore(A.page);
   const same = JSON.stringify(storeA0) === JSON.stringify(store1); const ver = JSON.parse(store1[KEY]).schemaVersion;
-  const ok = navs === 1 && id === V2 && !n.vis && entry === "main" && mine.length === 1 && mine[0] === CACHE_PREFIX + V2 && Object.keys(caches).includes("other-project-cache") && other === "keep-me" && same && ver === 2;
+  const ok = navs === 1 && id === V2 && !n.vis && entry === "main" && mine.length === 1 && mine[0] === CACHE_PREFIX + V2 && Object.keys(caches).includes("other-project-cache") && other === "keep-me" && same && ver === 3;
   return { ok, note: `按下（另補按 1 次）→ 重新載入 ${navs} 次、識別碼 ${id}（V2 ${V2}）、提示=${n.vis}、${entry}；本專案快取 ${JSON.stringify(mine)}、全部快取 ${JSON.stringify(Object.keys(caches))}、other-project-cache 內容「${other}」；localStorage 與更新前完全相同=${same}（鍵 ${JSON.stringify(Object.keys(store1))}、schemaVersion ${ver}）` };
 });
 await R.check("TC-37-05b", "AC-37-05、AC-21-01（經過 1 次更新）", async () => {
@@ -147,7 +147,7 @@ await R.check("TC-36-03d", "AC-36-03（不按時維持 V1、關閉後重開為 V
   const sameKeys = JSON.stringify(Object.keys(s0).sort()) === JSON.stringify(Object.keys(s1).sort());
   const d0 = JSON.parse(s0[KEY]).data, d1 = JSON.parse(s1[KEY]).data;
   const same = s0[KEY] === s1[KEY];
-  const ok = n.vis && id1 === V1 && navs === 0 && errs === 0 && id2 === V2 && e2 === "main" && sameKeys && same && JSON.parse(s1[KEY]).schemaVersion === 2;
+  const ok = n.vis && id1 === V1 && navs === 0 && errs === 0 && id2 === V2 && e2 === "main" && sameKeys && same && JSON.parse(s1[KEY]).schemaVersion === 3;
   return { ok, note: `提示顯示=${n.vis}；不按並操作 6 秒以上：識別碼 ${id1}、自動重新載入 ${navs} 次、例外 ${errs}；關閉全部分頁後重開 → ${id2}、${e2}；localStorage 鍵相同=${sameKeys}、schemaVersion ${JSON.parse(s1[KEY]).schemaVersion}、關閉前與重開後狀態逐字相同=${same}（連續天數 ${d0.streak.days}→${d1.streak.days}）` };
 });
 

@@ -1,17 +1,28 @@
 /**
  * ---
  * doc: CONTRACT-SCHEMA
- * version: 0.14
+ * version: 0.16
  * status: approved
  * author: sa-agent
  * approved_by: JimmyLin（授權主控代核）
- * approved_at: 2026-11-03
+ * approved_at: 2026-11-04
  * ---
  *
  * English Master Track — 資料契約（型別定義）
  *（專案代號仍為 English Master Track；v0.12 起 App 內顯示名稱為「EnglishContext」，見 §13 APP_DISPLAY_NAME 與 FROZEN_IDENTIFIERS。）
  *
- * 上游：docs/01-PRD.md v0.14（approved，JimmyLin，2026-11-03），以第 6 章「人類決議」與 R-15～R-22 為準。
+ * 上游：docs/01-PRD.md v0.16（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-24 為準。
+ * v0.16（PRD R-24：AC-36-03／AC-42-04 更新提示文字、新增 AC-23-07 資料來源頁聯絡 email）**只做文字層級修訂**，
+ *   不改持久化結構（schemaVersion 維持 3，PersistedData 12 欄不變）：PWA_TEXTS.updateNotice／updateButton 改值；
+ *   新增 §16 SOURCES_CONTACT_TEXT（README §4.3 L-7）。
+ * **v0.15（PRD R-23：US-44 單字卡記住上次位置、US-45 模擬測驗答對紀錄、US-46 只練沒答對的題目、US-47 保存與相容，Q-63～Q-71）
+ *   含 localStorage 持久化結構變更：schemaVersion 2 → 3（Q-63 已由人類核准，不適用主控代核）。**
+ *   PersistedData 新增 3 個選填欄位 flashcardPosition（新型別 FlashcardPosition）、part5CorrectIds、part5UnansweredOnly；
+ *   v2 → v3 遷移補預設值、既有 9 欄原值不動（README §5.3 MG-5～MG-8）；新欄位讀取只重設該欄（RD-3）；
+ *   LEARNING_PROGRESS_FIELDS 6 → 7 欄（加 part5CorrectIds，Q-67 A）；新增 §15（Part5ViewKind、PART5_RECORD_TEXTS）。
+ *   規則見 README §5.10 FP、§5.11 CR／UO、§5.12 WR、§6 IM-9～IM-10。鍵名 englishMasterTrack:state 不變（FROZEN）。
+ *   **解讀規則（README C-8）**：本檔 v0.8～v0.14 段落中描述「目前」狀態的「schemaVersion 2」「PersistedData 9 欄」，
+ *   v0.15 起一律讀作 CURRENT_SCHEMA_VERSION（3）與 PersistedData 12 欄；變更紀錄等歷史敘述照原意。
  * v0.14（PRD R-22：US-42 頁尾版本號、US-43 隱藏領域範本、AC-01-08 狀態列只顯示生效色級、AC-39-04「變更」改為按鈕，Q-58～Q-62）
  *   **不改**持久化結構（schemaVersion 維持 2），新增 §14 版本號常數；規則見 README §12、§5.8 HT-6～HT-9。
  * v0.12（PRD R-21 版面與視覺、US-38～US-41、Q-49～Q-57）**不改**持久化結構，內容見下方變更紀錄 0.12 列與 §13。
@@ -31,7 +42,8 @@
  *           docs/02-contract/README.md（總覽、驗證規則 V-xx、授權確認紀錄、回饋上游）。
  *
  * 本檔是「規格」不是實作：
- * - pg-content 依 §2～§7 產出 src/data/ 的資料檔；pg-frontend 依 §1、§8～§13 實作 src/app/（v0.11 §12 PWA 含建置輸出；v0.12 §13 版面與視覺）。
+ * - pg-content 依 §2～§7 產出 src/data/ 的資料檔；pg-frontend 依 §1、§8～§15 實作 src/app/（v0.11 §12 PWA 含建置輸出；v0.12 §13 版面與視覺；
+ *   v0.14 §14 版本號；v0.15 §15 模擬測驗答對紀錄）。
  * - 兩方都不得自創欄位；欄位變更必須先改本契約（版本遞增）。
  * - 下方的 export const 是契約常數（值本身就是規格），pg-frontend 實作時須使用相同數值。
  *
@@ -142,6 +154,24 @@
  * |      |            |          |     PWA_BUILD_ID_META_NAME 註明畫面只顯示前 7 碼（AC-36-02 v0.14）。
  * |      |            |          | 型別數 67 不變；契約常數 36 → 40；localStorage 鍵數 2 不變；PersistedData／StorageRecord／BackupFile 欄位不變，
  * |      |            |          | schemaVersion 維持 2，不需遷移；內容資料檔（src/data/）格式與值皆不變（pg-content 無工作）。 |
+ * | 0.15 | 2026-11-04 | sa-agent | 修訂已核准的 v0.14（主控代核），原因：PRD v0.15 R-23（US-44～US-47、AC-44-01～AC-47-08，修改 AC-18-01、
+ * |      |            |          | AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71；JimmyLin 2026-11-04 核准，Q-63 為人類核准的持久化結構變更）。
+ * |      |            |          | status 改為 in-review、核准欄位清空，三檔同步。**本版含持久化結構變更，須由人類核准，不適用主控代核。**
+ * |      |            |          | (1) CURRENT_SCHEMA_VERSION 2 → 3、SUPPORTED_SCHEMA_VERSIONS [1, 2] → [1, 2, 3]。
+ * |      |            |          | (2) 新增 interface FlashcardPosition；PersistedData 新增選填 flashcardPosition、part5CorrectIds、part5UnansweredOnly
+ * |      |            |          |     （程式寫出時三欄必定存在，storage-schema.json $defs/PersistedDataWritten）。
+ * |      |            |          | (3) LEARNING_PROGRESS_FIELDS 加入 "part5CorrectIds"（7 欄，Q-67 A）；part5UnansweredOnly 為偏好設定，初始化時保留。
+ * |      |            |          | (4) 新增 §15：type Part5ViewKind（模擬測驗畫面種類，執行期推導）、常數 PART5_RECORD_TEXTS（畫面文字）。
+ * |      |            |          | (5) 註解：Part5Progress、BackupFile、StorageRecord、RuntimeState.flashcard.index、learningQuotaNoticeShown、
+ * |      |            |          |     FROZEN_IDENTIFIERS.backupFormatId、APP_VERSION_META_NAME（本次 1.1.0，Q-70 A）、Part5Question.id（id 不改號，Q-71）。
+ * |      |            |          | 型別數 67 → 69（interface 34、type 35）；契約常數 40 → 41；localStorage 鍵數維持 2；src/data/ 格式不變。 |
+ * | 0.16 | 2026-11-04 | sa-agent | 修訂已核准的 v0.15，原因：PRD v0.16 R-24（JimmyLin 2026-11-04 核准；人類手改產物後決定併入 1.1.0）：
+ * |      |            |          | 新增 AC-23-07（資料來源與授權頁聯絡 email），修改 AC-36-03、AC-42-04（更新提示文字）。status 改為 in-review、
+ * |      |            |          | 核准欄位清空，三檔同步。**只做文字層級修訂**：
+ * |      |            |          | (1) PWA_TEXTS.updateNotice「有新版本，重新整理」→「有新版本，請更新版本」；updateButton「重新整理」→「更新版本」；
+ * |      |            |          |     PwaPageToSwMessage、PwaRuntimeState.reloadRequested 註解同步（行為不變，Q-43 決議 A）。
+ * |      |            |          | (2) 契約原本沒有「資料來源與授權」頁的固定文字常數，新增 §16 SOURCES_CONTACT_TEXT（README §4.3 L-7）。
+ * |      |            |          | 型別數 69 不變；契約常數 41 → 42；localStorage 鍵數 2 不變；schemaVersion 維持 3，不需遷移；src/data/ 不變。 |
  */
 
 // ════════════════════════════════════════════════════════════════════
@@ -605,7 +635,11 @@ export interface Part5Explanation {
  *       source: "ORIGINAL" }
  */
 export interface Part5Question {
-  /** 必填。格式 "p5-" + 3 位數字（"p5-001"～），唯一。 */
+  /**
+   * 必填。格式 "p5-" + 3 位數字（"p5-001"～），唯一。
+   * （v0.15，Q-71）本 id 是使用者「答對紀錄」（PersistedData.part5CorrectIds）的鍵：已交付的 id 不得改號、不得改指另一題；
+   * 刪除的題目 id 不得重用於新題（README V-P5-08）。
+   */
   id: string;
   /** 必填。題型。 */
   type: Part5QuestionType;
@@ -732,15 +766,21 @@ export interface PhraseTemplate {
 /**
  * 目前的 localStorage 結構版本（= 備份格式版本號，兩者共用）。
  * v0.8 由 1 升為 2（PRD R-17，人類已同意）：PersistedData 新增 todayLearned、learnedHistory。
+ * v0.15 由 2 升為 3（PRD R-23、Q-63，人類已核准）：PersistedData 新增 flashcardPosition、part5CorrectIds、part5UnansweredOnly。
+ *   升版理由（README §5.3 版本表）：(1) 契約既有規則「PersistedData 任何結構變更（含新增選填欄位）都要 + 1」；
+ *   (2) v0.14 程式以 additionalProperties: false 嚴格驗證 v2，新欄位若仍標 2，舊程式匯入時會誤報「格式錯誤」，
+ *   升為 3 後舊程式顯示「備份檔版本不相容」（PRD E-117 預期行為）；(3) 遷移只做一次、可冪等（AC-47-04）。
  * 寫入 localStorage 與匯出備份一律寫此值。
  */
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 /**
- * 本程式可讀取（含可升級）的版本清單。AC-24-06 的「支援版本」顯示此清單（畫面「1、2」）。
- * 1 = v0.7 程式寫入的 localStorage 資料與匯出的備份（AC-24-10、AC-30-12），讀入時依 README §5.3 MG-1～MG-4 遷移到 2。
+ * 本程式可讀取（含可升級）的版本清單。AC-24-06 的「支援版本」顯示此清單（v0.15 畫面「1、2、3」）。
+ * 1 = v0.7 程式寫入的 localStorage 資料與匯出的備份（AC-24-10、AC-30-12），讀入時依 README §5.3 MG-1～MG-4 遷移到 2，再依 MG-5～MG-8 遷移到 3。
+ * 2 = v0.8～v0.14 程式寫入／匯出（AC-47-03、AC-47-04），讀入時依 MG-5～MG-8 遷移到 3。
+ * 3 = v0.15 起。
  */
-export const SUPPORTED_SCHEMA_VERSIONS: readonly number[] = [1, 2];
+export const SUPPORTED_SCHEMA_VERSIONS: readonly number[] = [1, 2, 3];
 
 /**
  * 近 N 天每日已學字數的保存天數（契約常數，PRD R-17、AC-30-09）。
@@ -861,6 +901,11 @@ export type Part5Phase = "question" | "summary";
 /**
  * 模擬測驗進度（識別字沿用 Part5Progress／part5，R-15）。對應：FR-3.2、FR-6.1、AC-11-03～AC-11-07、AC-17-04、AC-18-01。
  * 預設：{ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 0, totalCorrect: 0 }。
+ * （v0.15，R-23）**本型別欄位不變**。答對紀錄與「只練沒答對」開關放在 PersistedData 頂層（part5CorrectIds、part5UnansweredOnly），
+ *   不放進本物件，理由：初始化（CI-4）整個 part5 回預設值，但開關須保留（Q-67 A）；「清除答對紀錄」不得動到累計（Q-65 C）。
+ *   - currentIndex 仍為題庫索引，畫面「第 i / N 題」與進度條仍以題庫題號計算（Q-66 A，README MT-1）。
+ *   - 開關開啟時，currentIndex 的移動改依 README §5.11 UO-4～UO-7（跳過曾答對的題目）；跳過的題目不計入 roundAnswered。
+ *   - roundAnswered／roundCorrect／totalAnswered／totalCorrect 的計算與 v0.14 完全相同：曾答對的題目再作答仍照常計入（AC-45-06）。
  */
 export interface Part5Progress {
   /** 必填。目前題目在 PART5_QUESTION_BANK 的索引（0 起算；畫面「第 5 題」= 4）。≥ 題庫長度時視為 0（V-ST-05）。 */
@@ -938,12 +983,41 @@ export interface TodayLearnedState {
 export type LearnedHistory = Record<string, number>;
 
 /**
+ * 單字卡上次位置（v0.15 新增，schemaVersion 3；PRD US-44、R-23 一、Q-63、Q-68）。
+ * 對應：FR-2.1、FR-6.2、AC-44-01～AC-44-10、AC-47-01～AC-47-06、AC-18-01、AC-24-02、E-102～E-108。
+ * 意義：單字卡頁「第 i / N 張」所指的目前卡片。以 wordKey 為主鍵找回同一張；找不到時以 ordinal 作為退回依據。
+ * 只記位置，不記單字卡／測驗模式與正反面（Q-68 A，AC-44-09）。
+ * 例：{ wordKey: "monetization", ordinal: 10 }
+ * 讀取還原（README §5.10 FP-2）：N = 目前單字集張數；N = 0 → 空狀態、紀錄不動；wordKey 在單字集 → 該張；
+ *   否則第 min(ordinal, N) 張（AC-44-05）。
+ * 「結構正確」（storage-schema.json $defs/FlashcardPosition）：null，或恰含下列 2 鍵的物件，wordKey 為字串、ordinal 為整數 ≥ 1。
+ *   不符 = 整個欄位型別錯誤：讀 localStorage → 只把本欄重設為 null（AC-44-06 (c)、AC-47-05）；匯入備份 → 格式錯誤（AC-47-06 (c)）。
+ */
+export interface FlashcardPosition {
+  /**
+   * 必填。目前卡片的 wordKey（C-2 正規化形式；內建與自訂一視同仁，同 StudyCard.wordKey）。
+   * 比對時一律先以 C-2 正規化再比對（不分大小寫，同 AC-04-06）。C-2 後為空字串 → 整筆視同無紀錄（null），不報錯。
+   */
+  wordKey: string;
+  /**
+   * 必填。目前卡片的序號 i（1 起算，= RuntimeState.flashcard.index + 1），整數 ≥ 1。
+   * 只在 wordKey 找不到時使用：顯示第 min(ordinal, N) 張（AC-44-05、E-104）。不得大於當時單字集張數（程式寫出時）。
+   */
+  ordinal: number;
+}
+
+/**
  * 全部使用者資料（localStorage 與備份檔共用的資料本體）。
- * 對應：FR-6.2、AC-18-01、AC-18-02、AC-24-02、R-04、R-17。
+ * 對應：FR-6.2、AC-18-01、AC-18-02、AC-24-02、R-04、R-17、（v0.15）R-23、AC-47-01～AC-47-06。
  * 只放可序列化的使用者狀態；**不放**內建內容、語音辨識／合成實例、音訊（AC-21-03）、畫面暫態。
  * v0.8（schemaVersion 2）新增 todayLearned、learnedHistory 兩個必填欄位；其餘 7 欄與 v1 完全相同。
- * （v0.9，US-32）切換難易度初始化學習紀錄時：LEARNING_PROGRESS_FIELDS 列出的 6 欄回到 README §5.2 預設值；
+ * （v0.9，US-32）切換難易度初始化學習紀錄時：LEARNING_PROGRESS_FIELDS 列出的欄位回到 README §5.2 預設值；
  *   goal 改為新套用的值；customVocab、sttNoticeAcknowledged 原值保留。欄位集合不變（AC-32-10），規則見 README §5.7。
+ * （v0.15，schemaVersion 3）新增 3 個**選填**欄位 flashcardPosition、part5CorrectIds、part5UnansweredOnly（Q-63 A：
+ *   新資料一律選填，舊資料給預設值）。「選填」= 讀 localStorage、匯入備份時缺少此鍵不算錯誤，以預設值補上；
+ *   程式寫出（localStorage 寫入、匯出備份）時 12 欄**一律寫出**（storage-schema.json $defs/PersistedDataWritten），
+ *   因此同一版程式操作前後欄位集合不變（AC-32-10、AC-38-10 依 PRD 共通規則 2 改讀）。
+ *   初始化時：part5CorrectIds 清空（LEARNING_PROGRESS_FIELDS）、part5UnansweredOnly 保留、flashcardPosition 設為 null（README CI-4、FP-4）。
  */
 export interface PersistedData {
   /** 必填。目標設定。 */
@@ -964,14 +1038,38 @@ export interface PersistedData {
   todayLearned: TodayLearnedState;
   /** 必填（v0.8 新增）。近 30 天每日已學字數。預設 {}。 */
   learnedHistory: LearnedHistory;
+  /**
+   * 選填（v0.15 新增，schemaVersion 3；US-44）。單字卡上次位置；null 或缺少 = 無紀錄（從第 1 張開始）。預設 null。
+   * 寫入時機：目前卡片每次改變時立即寫入（README FP-3）；生效色級改變（含初始化「確定」）時設為 null（FP-4、AC-44-08）。
+   * 不屬「有學習紀錄」判定（CI-2），也不在 LEARNING_PROGRESS_FIELDS 中。
+   */
+  flashcardPosition?: FlashcardPosition | null;
+  /**
+   * 選填（v0.15 新增，schemaVersion 3；US-45、Q-64 A）。模擬測驗**曾答對**的題目 id（Part5Question.id），依首次答對的先後附加。預設 []。
+   * 值域：每項為 trim 後非空的字串，不重複（程式寫出時）。**不**限定 "p5-" 格式、**不**與目前題庫比對：
+   *   題庫中已不存在的 id 保留不刪除，只在統計與標示時忽略（Q-71 A，AC-45-07、E-109）。
+   * 只記「曾答對」：答錯不移除、不記答錯或最近一次結果（Q-64 A，AC-45-03）。K（已答對數）不另存，由本欄 ∩ 題庫推導（README CR-3）。
+   * 清空時機只有：初始化「確定」（LEARNING_PROGRESS_FIELDS，Q-67 A）、「清除答對紀錄，重新來過」確定（README CR-6，Q-65 C）、
+   *   讀取失敗整體重設（AC-18-05）、匯入覆蓋（以備份值為準）。「重新開始」（AC-11-07）不清除。
+   * 例：["p5-001", "p5-005", "p5-010"]
+   */
+  part5CorrectIds?: string[];
+  /**
+   * 選填（v0.15 新增，schemaVersion 3；US-46、Q-69 A）。「只練沒答對的題目」開關。預設 false。
+   * 屬偏好設定（與 sttNoticeAcknowledged 同性質）：初始化時**保留**（Q-67 A）；不屬「有學習紀錄」判定（AC-46-10）；
+   *   隨 localStorage 與備份保存（Q-69 A）。開啟時出題規則見 README §5.11 UO-1～UO-9。
+   */
+  part5UnansweredOnly?: boolean;
 }
 
 /**
- * 學習進度紀錄欄位（契約常數，v0.9 新增，PRD US-32 名詞「學習進度紀錄」(1)～(6)、R-18 一）。
- * 切換難易度並在確認視窗按「確定」時，**只有**這 6 欄被覆寫為 README §5.2 預設值（白名單）；PersistedData 其他欄位
- * （goal 依套用規則更新；customVocab、sttNoticeAcknowledged 與日後新增的任何使用設定欄位）一律原值保留。
- * 順序對應 PRD (1) 已掌握單字、(2) 四選一統計、(3) 模擬測驗、(4) 打卡、(5) 今日已學、(6) 近 30 天歷史。
- * 對應：AC-32-02、AC-32-03、AC-32-10；規則見 README §5.7 CI-1～CI-10。不持久化（常數本身不寫入 localStorage）。
+ * 學習進度紀錄欄位（契約常數，v0.9 新增，PRD US-32 名詞「學習進度紀錄」(1)～(6)、R-18 一；v0.15 加 (7)）。
+ * 切換難易度並在確認視窗按「確定」時，**只有**這些欄被覆寫為 README §5.2 預設值（白名單）；PersistedData 其他欄位
+ * （goal 依套用規則更新；flashcardPosition 依 FP-4 設為 null；customVocab、sttNoticeAcknowledged、part5UnansweredOnly
+ *  與日後新增的任何使用設定欄位）一律原值保留。
+ * 順序對應 PRD (1) 已掌握單字、(2) 四選一統計、(3) 模擬測驗、(4) 打卡、(5) 今日已學、(6) 近 30 天歷史、
+ * （v0.15，Q-67 A）(7) 模擬測驗答對紀錄。
+ * 對應：AC-32-02、AC-32-03、AC-32-10、AC-45-08；規則見 README §5.7 CI-1～CI-10。不持久化（常數本身不寫入 localStorage）。
  */
 export const LEARNING_PROGRESS_FIELDS: readonly (keyof PersistedData)[] = [
   "masteredWordKeys",
@@ -980,11 +1078,15 @@ export const LEARNING_PROGRESS_FIELDS: readonly (keyof PersistedData)[] = [
   "streak",
   "todayLearned",
   "learnedHistory",
+  "part5CorrectIds",
 ];
 
 /** localStorage 主鍵（STORAGE_KEYS.state）的值。 */
 export interface StorageRecord {
-  /** 必填。結構版本，整數；本版寫入 = CURRENT_SCHEMA_VERSION（2）。讀到 1 時先遷移（README §5.3 MG-1～MG-4）。 */
+  /**
+   * 必填。結構版本，整數；本版寫入 = CURRENT_SCHEMA_VERSION（v0.15 起為 3）。
+   * 讀到 1 → MG-1～MG-4 遷移到 2 → MG-5～MG-8 遷移到 3；讀到 2 → MG-5～MG-8 遷移到 3（README §5.3），遷移後寫回一次。
+   */
   schemaVersion: number;
   /** 必填。最後寫入時間 ISO 8601。 */
   savedAt: string;
@@ -1014,13 +1116,20 @@ export const BACKUP_FORMAT_ID = "english-master-track-backup";
  *   - 匯入 schemaVersion = 2：data 必須含兩個新欄位且 shape 正確，缺少或整個欄位型別錯誤 → "format"（AC-24-05、AC-24-11）；
  *     shape 正確但項目無效 → 步驟 7 以「匯入當天」為今天正規化捨棄，不報錯、不計入略過筆數（IM-8）。
  *   - format 識別字串不變，不另設備份專用版本號。
+ * 版本相容（v0.15，README §6.3、IM-9、IM-10）：
+ *   - 匯出：schemaVersion = 3，data 12 欄齊全（含 flashcardPosition、part5CorrectIds、part5UnansweredOnly），符合 $defs/PersistedDataWritten。
+ *   - 匯入 1、2（v0.7、v0.8～v0.14 程式匯出）：步驟 4 依遷移鏈補新欄位預設值（第 1 張、無答對紀錄、開關關閉），照常匯入（AC-47-03）。
+ *   - 匯入 3：三個新欄位**選填**，缺少 → 預設值；整個欄位型別錯誤（答對紀錄不是陣列、開關不是布林值、位置不是 null／物件、
+ *     ordinal 不是正整數、wordKey 不是字串）→ "format"（AC-47-06 (c)）；項目層級無效（非字串或空白 id、重複 id、題庫中不存在的 id、
+ *     位置的單字不在單字集）→ 不報錯、不計入略過筆數（AC-47-06 (a)(b)、Q-71 A）。
+ *   - 舊版程式（v0.14 以前，支援 [1, 2] 或 [1]）匯入本版備份 → 其「備份檔版本不相容」，屬預期行為（PRD E-117，範圍外）。
  */
 export interface BackupFile {
   /** 必填。固定 BACKUP_FORMAT_ID；不符視為格式錯誤（AC-24-05）。 */
   format: "english-master-track-backup";
   /**
-   * 必填。備份格式版本號（AC-24-02）= 匯出當時的 CURRENT_SCHEMA_VERSION（本版匯出 2）。
-   * 匯入接受 SUPPORTED_SCHEMA_VERSIONS（1、2）；缺失或不在清單內視為版本不相容（AC-24-06）。
+   * 必填。備份格式版本號（AC-24-02）= 匯出當時的 CURRENT_SCHEMA_VERSION（v0.15 起匯出 3）。
+   * 匯入接受 SUPPORTED_SCHEMA_VERSIONS（1、2、3）；缺失或不在清單內視為版本不相容（AC-24-06）。
    */
   schemaVersion: number;
   /**
@@ -1030,7 +1139,10 @@ export interface BackupFile {
   exportedAt: string;
   /** 必填。內建字庫資料版本（VocabManifest.dataVersion；無法取得時填 ""）。匯入只檢查是字串，內容不影響匯入。 */
   contentDataVersion: string;
-  /** 必填。使用者資料，結構同 PersistedData（schemaVersion 1 的檔案於遷移前不含 todayLearned、learnedHistory）。 */
+  /**
+   * 必填。使用者資料，結構同 PersistedData（schemaVersion 1 的檔案於遷移前不含 todayLearned、learnedHistory；
+   * schemaVersion 1、2 的檔案於遷移前不含 v0.15 的 3 個欄位）。
+   */
   data: PersistedData;
 }
 
@@ -1192,7 +1304,12 @@ export interface RuntimeState {
   studySet: StudyCard[];
   /** 單字卡（識別字沿用 flashcard，R-15）。 */
   flashcard: {
-    /** 目前卡片索引（0 起算）；切換色級後歸 0（AC-03-05）。 */
+    /**
+     * 目前卡片索引（0 起算）；切換色級後歸 0（AC-03-05）。
+     * （v0.15，US-44）啟動時與單字集每次重建（新增／刪除自訂單字、匯入）後，由 PersistedData.flashcardPosition 依 README §5.10 FP-2
+     *   解析得出；使用者每次改變本值（上一張、下一張、滑動、測驗模式換題等）即依 FP-3 寫回 flashcardPosition（ordinal = index + 1）。
+     *   單字集為空時為 0 且不顯示卡片（AC-06-06）。mode、isFlipped、quiz 不持久化，重新載入一律 "card"、正面（Q-68 A）。
+     */
     index: number;
     /**
      * 是否顯示背面（邏輯狀態，動畫期間也以此為準）；切換卡片時設 false（AC-06-05）。
@@ -1234,6 +1351,9 @@ export interface RuntimeState {
   /**
    * （v0.8）本工作階段是否已因「學習紀錄寫入容量不足」提示過「儲存空間不足」（AC-30-14、E-54：同一工作階段只提示一次）。
    * 啟動時 false；不持久化。只控制學習紀錄（LR-7）的提示，不影響新增自訂單字等其他寫入的提示（AC-18-04）。
+   * （v0.15，AC-44-10 (b)、AC-47-07 (b)「同一工作階段只提示一次，與 AC-30-14 共用」）本旗標**同時**控制下列寫入容量不足的提示：
+   *   單字卡位置（FP-3）、模擬測驗作答（含答對紀錄，CR-2）、開關切換（UO-1）、「全部題目再練一次」與「清除答對紀錄」（UO-7、CR-6）。
+   *   識別字沿用不改名（README §5.12 WR-2）。
    */
   learningQuotaNoticeShown: boolean;
   /**
@@ -1483,10 +1603,16 @@ export const PWA_UPDATE_RECHECK_MS = 3_600_000;
 export const PWA_TEXTS = {
   /** 主控台「資料備份」區塊內、backupOriginNotice 之後的安裝按鈕文字（AC-34-07，Q-44）；（v0.12）區塊收合時隨區塊隱藏（AC-39-08）。 */
   installButton: "安裝 App",
-  /** 新版提示文字（AC-36-03，Q-43 決議 A）。 */
-  updateNotice: "有新版本，重新整理",
-  /** 新版提示中的按鈕文字（AC-36-03）。 */
-  updateButton: "重新整理",
+  /**
+   * 新版提示文字（AC-36-03，Q-43 決議 A）。
+   * （v0.16，R-24 一）由「有新版本，重新整理」改為本值；只改文字，顯示條件與更新行為不變（README UP-6）。逗號為全形「，」。
+   */
+  updateNotice: "有新版本，請更新版本",
+  /**
+   * 新版提示中的按鈕文字（AC-36-03）。
+   * （v0.16，R-24 一）由「重新整理」改為本值；按下後的行為不變（README UP-4、UP-5）。
+   */
+  updateButton: "更新版本",
   /**
    * 「匯出備份」按鈕旁的固定說明（AC-24-12，Q-47 決議 B）；file:// 與 https 兩種開啟方式文字相同。
    * （v0.12）「資料備份」收合時與「匯出備份」按鈕一併隱藏；只要「匯出備份」可見，本文字就可見（AC-24-12、AC-39-08）。
@@ -1496,7 +1622,7 @@ export const PWA_TEXTS = {
 
 /**
  * 頁面 → service worker 的 postMessage 訊息（唯一一種）。對應：AC-36-03、AC-37-05。
- * - 頁面只在使用者按下「重新整理」時，對 registration.waiting 送出 { type: "SKIP_WAITING" }（UP-4）。
+ * - 頁面只在使用者按下「更新版本」（PWA_TEXTS.updateButton；v0.15 以前為「重新整理」）時，對 registration.waiting 送出 { type: "SKIP_WAITING" }（UP-4）。
  * - service worker 只接受 event.data 為物件、且 type 恰為 "SKIP_WAITING"、且不含其他鍵的訊息，收到後呼叫 self.skipWaiting()；
  *   其他任何訊息一律忽略（不回覆、不報錯）。
  * - service worker → 頁面：**不送任何訊息**；頁面以 navigator.serviceWorker 的 "controllerchange" 事件得知已換版（UP-5）。
@@ -1539,7 +1665,7 @@ export interface PwaRuntimeState {
    */
   updateAvailable: boolean;
   /**
-   * 使用者是否已按「重新整理」（README UP-4、UP-5）。初始 false。只有為 true 時，"controllerchange" 才觸發 location.reload()，
+   * 使用者是否已按「更新版本」（PWA_TEXTS.updateButton，v0.16 前文字為「重新整理」；README UP-4、UP-5）。初始 false。只有為 true 時，"controllerchange" 才觸發 location.reload()，
    * 且整個頁面期間至多重新載入 1 次（首次安裝時 clients.claim() 造成的 controllerchange 不得重新載入）。
    */
   reloadRequested: boolean;
@@ -1586,7 +1712,11 @@ export const FROZEN_IDENTIFIERS = {
   storageStateKey: "englishMasterTrack:state",
   /** = STORAGE_KEYS.unreadable。 */
   storageUnreadableKey: "englishMasterTrack:unreadable",
-  /** = BACKUP_FORMAT_ID（備份檔 format 欄位）。備份 schemaVersion 與欄位亦不變（storage-schema.json $defs/BackupFile）。 */
+  /**
+   * = BACKUP_FORMAT_ID（備份檔 format 欄位）。v0.12 改名時備份 schemaVersion 與欄位亦不變（storage-schema.json $defs/BackupFile）。
+   * （v0.15）本值與 storageStateKey 仍不變；schemaVersion 依 Q-63 升為 3、data 新增 3 個選填欄位，屬人類核准的結構變更，
+   *   不是改名（頂層 5 欄、format 字串、匯出檔名前綴皆不變）。
+   */
   backupFormatId: "english-master-track-backup",
   /** 匯出檔名前綴；完整檔名 = 本值 + "YYYYMMDD" + ".json"（AC-24-01）。 */
   backupFileNamePrefix: "english-master-track-backup-",
@@ -1774,7 +1904,8 @@ export interface DashboardRuntimeState {
 /**
  * HTML 中記錄網站版本號的 <meta> name（比照 PWA_BUILD_ID_META_NAME）。
  * 寫法：<meta name="emt-app-version" content="X.Y.Z">，屬 HD-1 靜態元素（file:// 與 https 都有，不產生請求）。
- * - 來源：建置時專案根目錄 package.json 的 "version" 欄位（人類發布時手動維護；本次 1.0.0，Q-58、Q-62）。
+ * - 來源：建置時專案根目錄 package.json 的 "version" 欄位（人類發布時手動維護；v0.14 發布 1.0.0，Q-58、Q-62；
+ *   v0.15 發布 1.1.0，Q-70 A：授權主控本次實作時一次性修改 package.json，之後仍由人類維護）。契約不寫死版本值。
  * - 原始模板中 content 為**固定佔位字串**（比照 emt-build-id 的佔位規則：以 "@@" 前後包夾、模板中恰出現 1 次且位於本 meta 內；
  *   佔位字串的實際值由 SD 定，建議 "@@APP_VERSION@@"）。建置以 package.json 的 version 取代後，產物不得殘留佔位字串。
  * - **寫入順序**：先寫入版本號，再以「已含版本號、emt-build-id 仍為佔位」的 HTML 計算 BUILD_ID（README SW-2 v0.14），
@@ -1810,5 +1941,82 @@ export const BUILD_CODE_LENGTH = 7;
  * 對應：AC-42-01、AC-42-02、AC-42-03、AC-41-04。
  */
 export const VERSION_LINE_TEXT = "版本 {version}（建置 {build}）";
+
+// ════════════════════════════════════════════════════════════════════
+// §15 模擬測驗答對紀錄與「只練沒答對」（v0.15，PRD R-23 二、US-45、US-46、Q-64～Q-67、Q-69、Q-71）
+//     提供者：pg-frontend（src/app/）。pg-content 只需維持 Part5Question.id 不改號（README V-P5-08）。
+//     使用者：pg-frontend、QA（README §5.11 CR-1～CR-9、UO-1～UO-9、V-ST-19～V-ST-21）
+//     持久化欄位見 §8 PersistedData.part5CorrectIds、part5UnansweredOnly；本節型別與常數本身不持久化。
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * 模擬測驗頁目前顯示的畫面種類（執行期**推導值**，不持久化、不另存；README §5.11 UO-3）。
+ * 由 PersistedData.part5、part5CorrectIds、part5UnansweredOnly 與題庫每次繪製時推導；題庫為空時沿用既有空題庫處理，不使用本型別。
+ * - "question"：題目畫面（未作答或已作答鎖定）。顯示「第 i / N 題」、進度條、「已答對 K / Q 題」、開關；曾答對時顯示 correctBadge。
+ * - "summary"：本輪結算（part5.phase = "summary"，AC-11-04）。顯示「答對 x / y」、「重新開始」、「已答對 K / Q 題」、開關。
+ * - "allCorrect"：全部答對（開關開啟且 K = Q，且不是「剛作答、尚未按下一題」的鎖定題目；AC-46-06、E-111）。
+ *   顯示 allCorrectTitle、「已答對 K / Q 題」、開關、replayKeepRecords 與 clearAndRestart 兩個按鈕（取代「重新開始」）；
+ *   part5.phase = "summary" 時另同時顯示本輪結算「答對 x / y」。進度條 100%、不顯示「第 i / N 題」、不顯示任何未作答題目。
+ * 對應：AC-11-04、AC-40-01、AC-45-05、AC-46-04～AC-46-08。
+ */
+export type Part5ViewKind = "question" | "summary" | "allCorrect";
+
+/**
+ * 模擬測驗答對紀錄與開關的畫面文字（契約常數；只收 PRD 原文，逐字使用）。
+ * 佔位符：{k} = K（已答對數，答對紀錄 ∩ 題庫的不重複 id 數）；{q} = Q（題庫實際題數 PART5_QUESTION_BANK.length，不寫死 200）。
+ * 數字為阿拉伯數字，以 tabular-nums 呈現（AC-45-05）。所有文字以 textContent 寫入（C-7、AC-47-08）。
+ * 未列入本常數的文字（「全部答對」畫面的說明句、確認對話框的完整句子與標題）PRD 未給原文，由 SD 定案（README DS-35），
+ * 限制：確認對話框必須包含 clearConfirmMustInclude 的兩段文字，且只有 confirmOk、confirmCancel 兩個按鈕（AC-46-08）。
+ * 對應：AC-45-01、AC-45-04、AC-45-05、AC-46-01、AC-46-06～AC-46-08。
+ */
+export const PART5_RECORD_TEXTS = {
+  /**
+   * 「曾答對」標示（AC-45-04）：✓ 符號加文字，位於題目區內、題型標籤附近；未作答與已作答皆顯示（只要該題曾答對）。
+   * 不得只靠顏色；文字對比 ≥ 4.5:1；不得使用 COLOR_TOKENS.accent。未曾答對的題目不顯示任何標示（不得顯示「未答對」「答錯過」）。
+   * ✓ 若以獨立元素呈現，可設 aria-hidden，但「曾答對」文字必須可被輔助技術讀取。
+   */
+  correctBadge: "✓ 曾答對",
+  /** 進度條附近、題目之上的一行（AC-45-05）；question、summary、allCorrect 三種畫面各恰 1 次；K = 0 顯示 0，不顯示「—」。 */
+  correctCount: "已答對 {k} / {q} 題",
+  /** 開關標籤（AC-46-01）；原生核取方塊或 role="switch"；預設關閉。 */
+  unansweredOnlyLabel: "只練沒答對的題目",
+  /** 「全部答對」畫面的明確文字（AC-46-06），例「200 題全部答對！」。驚嘆號為全形「！」U+FF01。 */
+  allCorrectTitle: "{q} 題全部答對！",
+  /** 「全部答對」畫面按鈕一（AC-46-07，Q-65 C）：關閉開關、保留紀錄、從第 1 題開始（README UO-7）。 */
+  replayKeepRecords: "全部題目再練一次（保留紀錄）",
+  /** 「全部答對」畫面按鈕二（AC-46-08，Q-65 C）：先顯示確認對話框，確定後清除答對紀錄（README CR-6）。 */
+  clearAndRestart: "清除答對紀錄，重新來過",
+  /** 確認對話框文字必須**包含**的兩段（AC-46-08）；完整句子由 SD 組成（DS-35）。 */
+  clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+  /** 確認對話框按鈕（AC-46-08：只有這 2 個按鈕）。 */
+  confirmOk: "確定",
+  confirmCancel: "取消",
+} as const;
+
+// ════════════════════════════════════════════════════════════════════
+// §16 「資料來源與授權」頁聯絡資訊（v0.16，PRD R-24 二、AC-23-07、E-118、E-119）
+//     提供者：契約常數（pg-frontend 實作，src/app/）。pg-content 不涉及：src/data/sources.js 格式與值不變。
+//     使用者：pg-frontend、QA（README §4.3 L-7、§9.9 DS-40）
+//     本節常數不持久化：不寫入 localStorage、不寫入備份檔（storage-schema.json 不變）。
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * 「資料來源與授權」頁的聯絡資訊行（契約常數，**逐字**使用，不得改寫、不得增減空格）。
+ * 值的構成：小寫 "email:" + 1 個半形空格 U+0020，其後位址的每個字元之間各 1 個半形空格（含 "." 與 "@" 前後），
+ * 全部為半形 ASCII 字元，無全形字元；字母間空格是刻意的防爬蟲設計（R-24 二）。
+ *
+ * 使用規則（README L-7）：
+ * - 位置：只在「資料來源與授權」頁內容區顯示恰 1 行（頁尾連結與版本行之上，AC-42-01）；其他畫面、頁尾、對話框、Toast 皆不顯示。
+ * - 純文字：以 textContent 寫入（C-7）；該行及祖先元素不得是 <a>；不得有 href、tabindex、點擊處理器；Tab 不可取得焦點；
+ *   點擊、長按、鍵盤操作皆不開郵件程式、不換頁、不報錯（E-118），可依瀏覽器預設選取文字。
+ * - 防爬蟲：交付 HTML（含內嵌 JS、CSS）不得出現 "mailto:"，也不得出現去掉空格後的完整位址；
+ *   程式不得以 replace、split/join、拼接等字串處理在執行期組出無空格位址（DOM、記憶體亦不得出現）。
+ * - 不發網路請求：file:// 版請求數仍為 0（AC-21-01 (a)）；https 版仍只有 AC-37-05 允許的同源預先快取 GET。
+ * - 樣式：該頁說明性次要文字；對比 ≥ 4.5:1（AC-38-04）、不使用 COLOR_TOKENS.accent（AC-38-01）；
+ *   375px 預設字級維持 1 行、不產生水平捲軸，放大字級時換行可接受（E-119）。樣式與確切位置屬設計層。
+ * - file:// 與 https 兩種形態皆顯示且文字相同；斷網照常顯示（AC-23-07 (4)）。
+ * 對應：AC-23-07、E-118、E-119、R-24 二。
+ */
+export const SOURCES_CONTACT_TEXT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";
 
 export {};

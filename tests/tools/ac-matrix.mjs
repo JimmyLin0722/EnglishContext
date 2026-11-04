@@ -1,4 +1,4 @@
-// QA（第 3 輪；第 4 輪更新人工必要 AC）：由 PRD 的 AC 清單與 tests/results/summary.json（含 qa-review.json）產生 AC → TC 對照與 AC 判定。
+// QA（第 3 輪；第 4 輪更新人工必要 AC；第 7 輪加 BUG_ATTRIB）：由 PRD 的 AC 清單與 tests/results/summary.json（含 qa-review.json）產生 AC → TC 對照與 AC 判定。
 // 用法：node tests/tools/ac-matrix.mjs [輸出 JSON]   （輸出 Markdown 表格到 stdout 供 test-plan／test-report 使用）
 import fs from "node:fs";
 import path from "node:path";
@@ -21,6 +21,16 @@ function expand(s) {
     else out.add(`AC-${us}-${m[2]}`);
   }
   return [...out];
+}
+// 第 7 輪（BUG-004）：交付檔 dist/english-master-track.html 建置後被直接修改，下列 TC 只因「交付檔與重建產物／部署目錄 index.html 位元組不同」失敗，
+// 其餘檢查項目（版本行、BUILD_ID、sw.js、連續建置相同）皆通過。依 QA 判讀，失敗只歸屬 AC-36-07（index.html 與交付檔內容相同），
+// 該 TC 對應的其他 AC 以通過計（失敗原因不在那些 AC 的條文內）。BUG-004 verified 後移除本對照。
+const BUG_ATTRIB = { "TC-42-02": ["AC-36-07"], "TC-42-04a": ["AC-36-07"], "TC-S09": ["AC-36-07"], "TC-PS-01": ["AC-36-07"], "TC-X-edge": ["AC-36-07"] };
+for (let i = results.length - 1; i >= 0; i--) {
+  const r = results[i]; const bug = BUG_ATTRIB[r.tc];
+  if (!bug || r.result !== "失敗") continue;
+  const rest = expand(r.ac).filter((x) => !bug.includes(x));
+  results.splice(i, 1, { ...r, ac: rest.join("、"), result: "通過", note: "（BUG-004 部分另計於 AC-36-07）" + (r.note || "") }, { ...r, ac: bug.join("、"), note: "（BUG-004）" + (r.note || "") });
 }
 const map = new Map(acs.map((a) => [a.id, []]));
 for (const r of results) for (const id of expand(r.ac)) if (map.has(id)) map.get(id).push(r);

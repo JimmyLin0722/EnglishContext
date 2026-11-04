@@ -5,6 +5,8 @@
  * （FE-22）v0.8 持久化升版：CURRENT_SCHEMA_VERSION 1 → 2、SUPPORTED_SCHEMA_VERSIONS [1] → [1, 2]（契約 README §5.3）。
  * （FE-34）v0.9：NAV_TAB_ORDER 6 項 → 4 項（R-18 三）；新增 HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS（US-32）；TAB_LABELS 不變（HT-4）。
  * （FE-42）v0.10：SCORE_DEFAULT 600 → 725（= 綠色 scoreMax；PRD Q-39、契約 GS-7、DS-08）。
+ * （FE-73）契約 v0.15 持久化升版：CURRENT_SCHEMA_VERSION 2 → 3、SUPPORTED_SCHEMA_VERSIONS [1, 2] → [1, 2, 3]；
+ *   LEARNING_PROGRESS_FIELDS 6 → 7 項（加 part5CorrectIds，Q-67 A）；新增 PART5_RECORD_TEXTS（data-schema.ts §15）。
  * 契約變更時必須同步更新本檔與 src/app/__tests__/goal.test.js 的字面值斷言。
  * 本模組不碰 DOM；Node 以 require 載入，瀏覽器掛到 EMT.core.constants。
  */
@@ -77,9 +79,9 @@
     limitations: "研究限制 Limitations"
   };
 
-  // §8 持久化（v0.8：寫入 2；讀取與匯入支援 1、2，1 依 MG-1～MG-4 遷移）
-  var CURRENT_SCHEMA_VERSION = 2;
-  var SUPPORTED_SCHEMA_VERSIONS = [1, 2];
+  // §8 持久化（v0.15：寫入 3；讀取與匯入支援 1、2、3，1 依 MG-1～MG-4、2 依 MG-5～MG-8 逐版遷移）
+  var CURRENT_SCHEMA_VERSION = 3;
+  var SUPPORTED_SCHEMA_VERSIONS = [1, 2, 3];
   var STORAGE_KEYS = {
     state: "englishMasterTrack:state",
     unreadable: "englishMasterTrack:unreadable"
@@ -105,14 +107,29 @@
     sources: "資料來源與授權"
   };
 
-  // §8（v0.9）學習進度紀錄欄位（US-32、README §5.7 CI-4）：切換難易度初始化時只覆寫這 6 欄（白名單），順序同 data-schema.ts
-  var LEARNING_PROGRESS_FIELDS = ["masteredWordKeys", "vocabQuiz", "part5", "streak", "todayLearned", "learnedHistory"];
+  // §8（v0.9）學習進度紀錄欄位（US-32、README §5.7 CI-4）：切換難易度初始化時只覆寫這些欄（白名單），順序同 data-schema.ts
+  // （v0.15，Q-67 A）末尾加 part5CorrectIds，共 7 欄
+  var LEARNING_PROGRESS_FIELDS = ["masteredWordKeys", "vocabQuiz", "part5", "streak", "todayLearned", "learnedHistory", "part5CorrectIds"];
 
   // §10（v0.9）導覽列項目與順序（AC-20-03、AC-27-01）：恰好 4 項，不含 "sources"、不含隱藏頁（R-18 三）
   var NAV_TAB_ORDER = ["dashboard", "customizer", "flashcards", "part5"];
 
   // §10（v0.9）隱藏頁面（AC-20-04、HT-1～HT-5）：currentTab 不得為這些值；TAB_LABELS 保留其文字供未來開放
   var HIDDEN_TAB_IDS = ["decoder", "phrasebank"];
+
+  // §15（v0.15）模擬測驗答對紀錄與「只練沒答對」的畫面文字（AC-45-04、AC-45-05、AC-46-01、AC-46-06～AC-46-08）；
+  // 鍵、值、鍵順序與 data-schema.ts §15 逐字相同；{k}、{q} 為佔位符；以 textContent 寫入（C-7）
+  var PART5_RECORD_TEXTS = {
+    correctBadge: "✓ 曾答對",
+    correctCount: "已答對 {k} / {q} 題",
+    unansweredOnlyLabel: "只練沒答對的題目",
+    allCorrectTitle: "{q} 題全部答對！",
+    replayKeepRecords: "全部題目再練一次（保留紀錄）",
+    clearAndRestart: "清除答對紀錄，重新來過",
+    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+    confirmOk: "確定",
+    confirmCancel: "取消"
+  };
 
   return deepFreeze({
     COLOR_LEVELS: COLOR_LEVELS,
@@ -134,6 +151,7 @@
     TAB_LABELS: TAB_LABELS,
     NAV_TAB_ORDER: NAV_TAB_ORDER,
     HIDDEN_TAB_IDS: HIDDEN_TAB_IDS,
-    LEARNING_PROGRESS_FIELDS: LEARNING_PROGRESS_FIELDS
+    LEARNING_PROGRESS_FIELDS: LEARNING_PROGRESS_FIELDS,
+    PART5_RECORD_TEXTS: PART5_RECORD_TEXTS
   });
 });

@@ -518,10 +518,13 @@ if (!SMOKE) {
     const b = JSON.parse(before[KEY]), a = JSON.parse(after[KEY]);
     const keysSame = JSON.stringify(Object.keys(before).sort()) === JSON.stringify(Object.keys(after).sort());
     const fieldsSame = JSON.stringify(Object.keys(b.data).sort()) === JSON.stringify(Object.keys(a.data).sort()) && JSON.stringify(Object.keys(b).sort()) === JSON.stringify(Object.keys(a).sort());
-    const dataSame = JSON.stringify(b.data) === JSON.stringify(a.data);
+    // 第 7 輪（契約 v0.15 C-8、MG-5～MG-7）：舊版（schemaVersion 2）資料開啟後遷移為 3 並補 3 個新欄位預設值；既有 9 欄須逐欄相同（AC-47-04）
+    const OLD9 = Object.keys(b.data);
+    const fieldsSame2 = JSON.stringify(Object.keys(b).sort()) === JSON.stringify(Object.keys(a).sort()) && JSON.stringify(Object.keys(a.data).sort()) === JSON.stringify([...OLD9, "flashcardPosition", "part5CorrectIds", "part5UnansweredOnly"].sort());
+    const dataSame = OLD9.every((k) => JSON.stringify(b.data[k]) === JSON.stringify(a.data[k])) && a.data.flashcardPosition === null && JSON.stringify(a.data.part5CorrectIds) === "[]" && a.data.part5UnansweredOnly === false;
     await env.ctx.close();
-    const ok = !preBuild && sw.ok && keysSame && fieldsSame && dataSame && a.schemaVersion === 2 && entry === "main";
-    return { ok, note: `加入 PWA 前版本（git e9372f2 的 dist，無建置識別碼=${!preBuild}）學習後換成 PWA 版：service worker 啟用=${sw.ok}；再載入 ${entry}；localStorage 鍵 ${JSON.stringify(Object.keys(after))} 相同=${keysSame}；StorageRecord／data 欄位集合相同=${fieldsSame}；data 內容完全相同=${dataSame}；schemaVersion ${a.schemaVersion}${dataSame ? "" : "；差異 前 " + JSON.stringify(b.data).slice(0, 300) + " 後 " + JSON.stringify(a.data).slice(0, 300)}` };
+    const ok = !preBuild && sw.ok && keysSame && fieldsSame2 && dataSame && a.schemaVersion === 3 && entry === "main";
+    return { ok, note: `加入 PWA 前版本（git e9372f2 的 dist，無建置識別碼=${!preBuild}）學習後換成 PWA 版：service worker 啟用=${sw.ok}；再載入 ${entry}；localStorage 鍵 ${JSON.stringify(Object.keys(after))} 相同=${keysSame}；StorageRecord 欄位相同、data 為原 9 欄＋新 3 欄=${fieldsSame2}（原 9 欄集合相同=${fieldsSame}，C-8 改讀）；原 9 欄內容逐欄相同且新 3 欄為預設=${dataSame}；schemaVersion ${a.schemaVersion}${dataSame ? "" : "；差異 前 " + JSON.stringify(b.data).slice(0, 300) + " 後 " + JSON.stringify(a.data).slice(0, 300)}` };
   });
 
   await ntLayout("TC-24-12b", BASE, "localhost（V-PWA (b)）");

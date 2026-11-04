@@ -289,7 +289,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   const bj = files.length ? JSON.parse(fs.readFileSync(path.join(p.downloads, files[0]), "utf8")) : {};
   const keys = await p.ev(`Object.keys(localStorage)`); const st = await readState(p);
   const d = new Date(); const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
-  const ok2 = files[0] === `english-master-track-backup-${ymd}.json` && keys.includes("englishMasterTrack:state") && keys.every((k) => k.startsWith("englishMasterTrack:")) && st.schemaVersion === 2 && bj.format === "english-master-track-backup" && bj.schemaVersion === 2
+  const ok2 = files[0] === `english-master-track-backup-${ymd}.json` && keys.includes("englishMasterTrack:state") && keys.every((k) => k.startsWith("englishMasterTrack:")) && st.schemaVersion === 3 && bj.format === "english-master-track-backup" && bj.schemaVersion === 3
     && fs.existsSync(path.join(ROOT, "dist", "english-master-track.html")) && /var CACHE_PREFIX = "english-master-track-pwa-";/.test(fs.readFileSync(path.join(ROOT, "dist", "site", "sw.js"), "utf8"));
   ok = ok && ok2;
   out.push(`(2) 匯出檔名 ${files[0]}；localStorage 鍵 ${JSON.stringify(keys)}、schemaVersion ${st.schemaVersion}；備份 format ${bj.format}、schemaVersion ${bj.schemaVersion}、欄位 ${Object.keys(bj.data || {}).join(",")}；交付檔名 dist/english-master-track.html 存在；sw.js 快取前綴 english-master-track-pwa-`);
@@ -309,7 +309,9 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   await q.goto(); await sleep(300);
   const after = await lsAll(q); const entry = await q.ev(`document.body.dataset.entry`); const tab = await q.ev(`EMT.router.current()`); const g = await dashGoal(q);
   const v11d = JSON.parse(JSON.parse(v11ls)[KEY]).data, newD = JSON.parse(JSON.parse(after)[KEY]).data;
-  const sameData = JSON.stringify(v11d) === JSON.stringify(newD);
+  // 第 7 輪（PRD v0.15 共通規則 2、C-8）：v0.11 的 schemaVersion 2 資料以 1.1.0 開啟會遷移為 3 並補 3 個新欄位預設值；原 9 欄須逐欄相同（AC-47-04）
+  const sameData = Object.keys(v11d).every((k) => JSON.stringify(v11d[k]) === JSON.stringify(newD[k])) && Object.keys(newD).length === Object.keys(v11d).length + 3
+    && newD.flashcardPosition === null && JSON.stringify(newD.part5CorrectIds) === "[]" && newD.part5UnansweredOnly === false;
   // v0.11 備份匯入 v0.12
   const f = path.join(TMP, "v011-backup.json"); fs.writeFileSync(f, v11backup);
   await q.ev(`localStorage.setItem(${JSON.stringify(KEY)}, ${JSON.stringify(JSON.stringify(stateRecord(725)))})`); await q.goto(); await sleep(250);
@@ -320,7 +322,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   const t = await q.ev(`window.__qaToasts.slice(${n}).map((x) => x.text)`); const imp = (await readState(q)).data;
   const ok4 = entry === "main" && tab === "dashboard" && sameData && g === GOAL_LINE.brown && t.some((x) => x.startsWith("已匯入")) && imp.goal.appliedScore === 465 && imp.part5.totalAnswered === 1;
   ok = ok && ok4;
-  out.push(`(2) v0.11 寫入的 localStorage 以 v0.12 開啟 → ${entry}/${tab}、資料逐欄相同=${sameData}、目標行「${g}」；v0.11 備份匯入 → ${JSON.stringify(t)}、goal ${imp.goal.appliedScore}/${imp.goal.effectiveColor}、模擬測驗答題 ${imp.part5.totalAnswered}`);
+  out.push(`(2) v0.11 寫入的 localStorage 以 v0.12 開啟 → ${entry}/${tab}、原 9 欄逐欄相同且新 3 欄為預設=${sameData}、目標行「${g}」；v0.11 備份匯入 → ${JSON.stringify(t)}、goal ${imp.goal.appliedScore}/${imp.goal.effectiveColor}、模擬測驗答題 ${imp.part5.totalAnswered}`);
   await q.close();
   R[ok ? "pass" : "fail"]("TC-38-10", "AC-38-10、AC-24-03", out.join("；"));
 }

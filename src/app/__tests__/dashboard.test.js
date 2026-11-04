@@ -90,13 +90,13 @@ describe("dashboard.test.js", () => {
     assert.equal(D.importMessage({ ok: false, error: "cancelled" }), null);
     assert.equal(D.importMessage(undefined).text, "備份檔格式錯誤，未匯入");
     assert.equal(D.importMessage({ ok: false, error: "version", fileVersion: null }).text,
-      "備份檔版本不相容（檔案版本：無；支援版本：1、2）");
+      "備份檔版本不相容（檔案版本：無；支援版本：1、2、3）");
     assert.equal(D.importMessage({ ok: false, error: "version", fileVersion: 2 }).text,
-      "備份檔版本不相容（檔案版本：2；支援版本：1、2）");
+      "備份檔版本不相容（檔案版本：2；支援版本：1、2、3）");
     assert.equal(D.importMessage({ ok: false, error: "version", fileVersion: 1.5 }).text,
-      "備份檔版本不相容（檔案版本：1.5；支援版本：1、2）");
+      "備份檔版本不相容（檔案版本：1.5；支援版本：1、2、3）");
     assert.equal(D.importMessage({ ok: false, error: "version" }).text,
-      "備份檔版本不相容（檔案版本：無；支援版本：1、2）");
+      "備份檔版本不相容（檔案版本：無；支援版本：1、2、3）");
   });
 
   test("匯入訊息：write_failed（非容量的寫入例外，IM-6、R6-4）→「儲存失敗，未匯入」，不與格式錯誤混用", () => {
@@ -555,7 +555,7 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     }
     let preset;
     if (o.goal) {
-      // （v0.9，FE-66）以指定 goal 預寫 schemaVersion 2 主鍵（模擬已套用藍／金後重新載入）
+      // （v0.9，FE-66）以指定 goal 預寫目前版本（v0.15 起 3）主鍵（模擬已套用藍／金後重新載入；buildRecord 一律寫目前版本）
       const PERSIST = require("../core/persist.js");
       const data = PERSIST.defaultData();
       data.goal = o.goal;

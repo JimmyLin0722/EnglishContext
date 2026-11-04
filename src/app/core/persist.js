@@ -1,13 +1,15 @@
 /*
- * EMT.core.persist — 持久化預設值、StorageRecord 驗證與遷移（FE-06；architecture.md §7.5；FE-22 v0.8 升版 §7.8）
- * 依據：契約 README §5.2、§5.3（MG-1～MG-4、RD-1、RD-2）、§7.7 V-ST-01～05、V-ST-09～V-ST-11；
- *       storage-schema.json（schemaVersion 2；1 只作為遷移輸入）。
+ * EMT.core.persist — 持久化預設值、StorageRecord 驗證與遷移（FE-06；architecture.md §7.5；FE-22 v0.8 升版 §7.8；
+ *   FE-73 v0.15 升版 §4.10、§7.21.1）
+ * 依據：契約 README §5.2、§5.3（MG-1～MG-8、RD-1～RD-4）、§7.7 V-ST-01～05、V-ST-09～V-ST-11、V-ST-21；
+ *       storage-schema.json（schemaVersion 3；1、2 只作為遷移輸入）。
  * 不引入 JSON Schema 套件，手寫驗證逐欄對照 storage-schema.json：
  *   型別、必填、additionalProperties: false、enum／const、pattern、整數範圍、uniqueItems、if/then/else，
  *   另加跨欄位規則 V-ST-03。
  * 本模組為純函式，不碰 DOM、不讀寫 localStorage（實際存取由 store 負責）。
  * Node 以 require 載入，瀏覽器掛到 EMT.core.persist。
- * 載入時只取用 constants、wordkey（LD-1）；goal、learning 於函式被呼叫時才取用，取不到時丟出含模組名稱的錯誤（LD-3）。
+ * 載入時只取用 constants、wordkey（LD-1）；goal、learning、position、part5flow 於函式被呼叫時才取用，
+ * 取不到時丟出含模組名稱的錯誤（LD-3）。
  */
 (function (root, factory) {
   var api = factory();
@@ -33,7 +35,7 @@
     C = g.EMT.core.constants;
     WK = g.EMT.core.wordkey;
   }
-  var NODE_PATH = { goal: "./goal.js", learning: "./learning.js" };
+  var NODE_PATH = { goal: "./goal.js", learning: "./learning.js", position: "./position.js", part5flow: "./part5flow.js" };
 
   /** 其他 core 依賴於呼叫時才取（LD-1）；取不到屬程式組裝錯誤，丟出含模組名稱的 Error（LD-3） */
   function dep(name) {
@@ -48,6 +50,8 @@
   }
   function GOAL() { return dep("goal"); }
   function LEARN() { return dep("learning"); }
+  function POS() { return dep("position"); }
+  function PF() { return dep("part5flow"); }
 
   // ── storage-schema.json 的列舉與樣式（逐字對照）──
   var COLOR_LEVEL_ENUM = ["orange", "brown", "green", "blue", "gold"];
@@ -64,8 +68,14 @@
 
   // 各物件的欄位清單（同時作為 required 與 additionalProperties 的依據）
   var RECORD_KEYS = ["schemaVersion", "savedAt", "data"];
-  // v0.8（schemaVersion 2）：必填 7 欄 → 9 欄
-  var DATA_KEYS = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged", "todayLearned", "learnedHistory"];
+  // v0.8（schemaVersion 2）：必填 7 欄 → 9 欄；v0.15（schemaVersion 3）：必填仍 9 欄，另允許選填 3 欄（共 12 欄）
+  var REQUIRED_DATA_KEYS = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged", "todayLearned", "learnedHistory"];
+  // v0.15 新增的 3 個選填欄位（學習位置與作答紀錄；順序同契約）
+  var TRACK_KEYS = ["flashcardPosition", "part5CorrectIds", "part5UnansweredOnly"];
+  // 允許的全部欄位（12 欄；程式寫出時 12 欄一律寫出，$defs/PersistedDataWritten）
+  var DATA_KEYS = REQUIRED_DATA_KEYS.concat(TRACK_KEYS);
+  // v2 的 9 個欄位（遷移時原值不動，MG-6）
+  var V2_DATA_KEYS = REQUIRED_DATA_KEYS.slice();
   // v1 的 7 個欄位（遷移時原值不動，MG-2）
   var V1_DATA_KEYS = DATA_KEYS.slice(0, 7);
   var GOAL_KEYS = ["draftScore", "appliedScore", "appliedColor", "effectiveColor"];
@@ -147,10 +157,20 @@
   }
 
   /**
+   * v0.15 新欄位的預設值（README §5.2）。每次回傳新物件。
+   * @returns {{flashcardPosition: null, part5CorrectIds: string[], part5UnansweredOnly: boolean}}
+   */
+  function trackDefaults() {
+    return { flashcardPosition: null, part5CorrectIds: [], part5UnansweredOnly: false };
+  }
+
+  /**
    * 遷移表：MIGRATIONS[v] = function (data_v) → data_(v+1)（README §5.3；localStorage 與備份匯入共用）。
    * 1 → 2（MG-1、MG-2）：data 必須是純物件，否則丟出例外（呼叫端分別判為 unreadable／format）；
    *   todayLearned、learnedHistory 一律覆寫為預設值（v1 內即使有這兩鍵也不採用），
    *   其餘 7 欄原值不動、不重算、不清理。回傳新物件，不修改傳入值。
+   * 2 → 3（MG-5、MG-6）：同樣要求 data 為純物件；flashcardPosition、part5CorrectIds、part5UnansweredOnly
+   *   一律覆寫為預設值（v2 內即使有這 3 鍵也不採用），其餘 9 欄原值不動、不重算、不清理。
    */
   var MIGRATIONS = Object.freeze({
     1: function (data) {
@@ -161,14 +181,27 @@
       out.todayLearned = emptyToday();
       out.learnedHistory = {};
       return out;
+    },
+    2: function (data) {
+      if (!isPlainObject(data)) {
+        throw new TypeError("MG-5：schemaVersion 2 的 data 不是物件");
+      }
+      var out = clone(data);
+      var d = trackDefaults();
+      TRACK_KEYS.forEach(function (k) {
+        out[k] = d[k];
+      });
+      return out;
     }
   });
 
   /**
    * 檢查物件的必填欄位與多餘欄位（required + additionalProperties: false）。
+   * allowed 省略時 = keys（全部必填）；否則必填 keys、允許 allowed（含選填欄位）。
    * 錯誤以「路徑: 說明」字串推入 errors。回傳 false 表示不是物件。
    */
-  function checkShape(obj, keys, path, errors) {
+  function checkShape(obj, keys, path, errors, allowed) {
+    var allow = allowed || keys;
     if (!isPlainObject(obj)) {
       errors.push(path + ": 必須是物件");
       return false;
@@ -179,7 +212,7 @@
       }
     });
     Object.keys(obj).forEach(function (k) {
-      if (keys.indexOf(k) === -1) {
+      if (allow.indexOf(k) === -1) {
         errors.push(path + "." + k + ": 不允許的欄位");
       }
     });
@@ -286,6 +319,113 @@
   }
 
   /**
+   * v0.15 新欄位的 shape（storage-schema.json $defs/FlashcardPosition、$defs/Part5CorrectIds、boolean）。
+   * 不符 = 整個欄位型別錯誤：讀 localStorage 只重設該欄（RD-3）、匯入為 format（IM-9）。
+   * @param {string} name TRACK_KEYS 之一
+   * @param {*} v
+   * @returns {boolean} name 不是 TRACK_KEYS 時為 false
+   */
+  function isTrackShape(name, v) {
+    if (name === "flashcardPosition") { return POS().isShape(v); }
+    if (name === "part5CorrectIds") { return Array.isArray(v); }
+    if (name === "part5UnansweredOnly") { return typeof v === "boolean"; }
+    return false;
+  }
+
+  /**
+   * 3 個新欄位的項目層級正規化（RD-3 (a)(c)(d)、IM-10 (1)～(3) 共用）。回傳新物件，不修改傳入值。
+   * - 缺鍵 → 預設值
+   * - part5CorrectIds → part5flow.normalizeIds（捨棄非字串、空白、重複；題庫外 id 保留，Q-71 A）
+   * - flashcardPosition → position.normalize（wordKey 依 C-2，空 → null；shape 不符 → null）
+   * - part5UnansweredOnly → 布林原值（非布林 → 預設 false；正常流程已先經 shape 檢查）
+   * data 不是純物件時原樣回傳（交由後續驗證判定）。
+   * @param {*} data
+   * @returns {*}
+   */
+  function normalizeTrackItems(data) {
+    if (!isPlainObject(data)) { return data; }
+    var out = clone(data);
+    var d = trackDefaults();
+    out.flashcardPosition = hasOwn(out, "flashcardPosition") ? POS().normalize(out.flashcardPosition) : d.flashcardPosition;
+    out.part5CorrectIds = hasOwn(out, "part5CorrectIds") ? PF().normalizeIds(out.part5CorrectIds) : d.part5CorrectIds;
+    out.part5UnansweredOnly = typeof out.part5UnansweredOnly === "boolean" ? out.part5UnansweredOnly : d.part5UnansweredOnly;
+    return out;
+  }
+
+  /**
+   * RD-3：讀 localStorage 時（schemaVersion 3，含遷移後）在根結構驗證之前處理 3 個新欄位，彼此獨立：
+   * (a) 缺鍵 → 預設值（選填，不列入 fieldsReset）；(b) shape 不符 → 只把該欄設為預設值並列入 fieldsReset；
+   * (c)(d) 再以 normalizeTrackItems 做項目層級正規化。不修改傳入值；data 不是純物件時原樣回傳。
+   * @param {*} data
+   * @returns {{data: *, fieldsReset: string[]}}
+   */
+  function resetTrackFields(data) {
+    if (!isPlainObject(data)) { return { data: data, fieldsReset: [] }; }
+    var out = clone(data);
+    var d = trackDefaults();
+    var reset = [];
+    TRACK_KEYS.forEach(function (k) {
+      if (!hasOwn(out, k)) {
+        out[k] = d[k];
+      } else if (!isTrackShape(k, out[k])) {
+        out[k] = d[k];
+        reset.push(k);
+      }
+    });
+    return { data: normalizeTrackItems(out), fieldsReset: reset };
+  }
+
+  /**
+   * 程式寫出前補齊 3 個新欄位並正規化，使結果符合 $defs/PersistedDataWritten 的這 3 欄
+   * （store.writeData、backup.buildBackup 寫出前呼叫）。回傳新物件，不修改傳入值；data 不是純物件時原樣回傳。
+   * @param {*} data PersistedData
+   * @returns {*}
+   */
+  function ensureWritable(data) {
+    return normalizeTrackItems(data);
+  }
+
+  /**
+   * 驗證 3 個新欄位：存在時檢查 shape（$defs/PersistedData）；
+   * written 時另要求 3 欄存在，flashcardPosition、part5CorrectIds 為 Normalized 格式（$defs/PersistedDataWritten）。
+   */
+  function validateTrackFields(data, path, written, errors) {
+    TRACK_KEYS.forEach(function (k) {
+      if (!hasOwn(data, k)) {
+        if (written) { errors.push(path + "." + k + ": 缺少必填欄位（PersistedDataWritten）"); }
+        return;
+      }
+      check(isTrackShape(k, data[k]), path + "." + k, TRACK_SHAPE_MESSAGE[k], errors);
+    });
+    if (!written) { return; }
+    var fp = data.flashcardPosition;
+    if (fp !== null && fp !== undefined && POS().isShape(fp)) {
+      // $defs/FlashcardPositionNormalized：wordKey 為非空字串且已是 C-2 正規化形式
+      check(isNonBlank(fp.wordKey) && WK.wordKey(fp.wordKey) === fp.wordKey, path + ".flashcardPosition.wordKey",
+        "須為已正規化的非空 wordKey", errors);
+    }
+    if (Array.isArray(data.part5CorrectIds)) {
+      // $defs/Part5CorrectIdsNormalized：每項為非空白字串、不重複
+      var seen = Object.create(null);
+      data.part5CorrectIds.forEach(function (id, i) {
+        var p = path + ".part5CorrectIds[" + i + "]";
+        if (!isNonBlank(id)) {
+          errors.push(p + ": 須為非空字串");
+          return;
+        }
+        check(!seen[id], p, "重複（uniqueItems）", errors);
+        seen[id] = true;
+      });
+    }
+  }
+
+  var TRACK_SHAPE_MESSAGE = {
+    flashcardPosition: "不符 FlashcardPosition（須為 null 或恰含 wordKey〔字串〕、ordinal〔整數 ≥ 1〕的物件）",
+    part5CorrectIds: "不符 Part5CorrectIds（須為陣列）",
+    part5UnansweredOnly: "須為布林值"
+  };
+
+  /**
    * 驗證 todayLearned。
    * - 一律檢查 shape（$defs/TodayLearnedState）
    * - written = true 時另檢查 $defs/TodayLearnedStateNormalized：date 為實際存在的日期或 null；
@@ -362,6 +502,8 @@
    *   written = true 時 todayLearned、learnedHistory 以 $defs/PersistedDataWritten 的正規化格式驗證
    *   （程式寫出的 data：localStorage 寫入、匯出備份）；否則只檢查 shape（讀取、匯入步驟 5）。
    *   today（合法的 YYYY-MM-DD，只在 written 時使用）：另檢查 V-ST-09～V-ST-11 中與今天相關的規則。
+   *   （v0.15）必填 9 欄、允許 12 欄；3 個新欄位存在時檢查 shape（不符 → 錯誤；匯入即 IM-9 format）；
+   *   written = true 時另要求 3 欄存在，且 flashcardPosition、part5CorrectIds 為 Normalized 格式。
    * @returns {{ok: boolean, errors: string[]}}
    */
   function validatePersistedData(data, opts) {
@@ -370,7 +512,7 @@
     var written = !!(opts && opts.written);
     var today = opts && isRealLocalDate(opts.today) ? opts.today : undefined;
     var path = "data";
-    if (!checkShape(data, DATA_KEYS, path, errors)) {
+    if (!checkShape(data, REQUIRED_DATA_KEYS, path, errors, DATA_KEYS)) {
       return { ok: false, errors: errors };
     }
     if (hasOwn(data, "goal")) { validateGoal(data.goal, path + ".goal", errors); }
@@ -432,12 +574,14 @@
     if (hasOwn(data, "learnedHistory")) {
       validateLearnedHistory(data.learnedHistory, data.todayLearned, path + ".learnedHistory", written, today, errors);
     }
+    // v0.15：單字卡位置、答對紀錄、只練沒答對開關
+    validateTrackFields(data, path, written, errors);
     return { ok: errors.length === 0, errors: errors };
   }
 
   /**
    * 驗證 StorageRecord（storage-schema.json 根結構，V-ST-01 + V-ST-03）。
-   * schemaVersion 依 schema 為 const = CURRENT_SCHEMA_VERSION（2；v1 須先遷移再驗證）。
+   * schemaVersion 依 schema 為 const = CURRENT_SCHEMA_VERSION（3；v1、v2 須先遷移再驗證）。
    * @param {*} record
    * @returns {{ok: boolean, errors: string[]}}
    */
@@ -474,7 +618,10 @@
       streak: { days: 0, lastActiveDate: null },
       sttNoticeAcknowledged: false,
       todayLearned: emptyToday(),
-      learnedHistory: {}
+      learnedHistory: {},
+      flashcardPosition: null,
+      part5CorrectIds: [],
+      part5UnansweredOnly: false
     };
   }
 
@@ -485,14 +632,18 @@
    *   part5Length 不是 ≥ 0 的整數（呼叫端無法取得題庫長度）時不做 V-ST-05。
    * - （v0.8）V-ST-09～V-ST-11：以 learning.normalizeLearning(data, today) 正規化 todayLearned、learnedHistory
    *   （結果符合 $defs/PersistedDataWritten 的兩欄；只改記憶體，RD-2）
+   * - （v0.15）最先以 normalizeTrackItems 補齊並正規化 3 個新欄位；最後在 part5Ids 為陣列時
+   *   依 UO-4（part5flow.normalizeOnly）正規化目前題目（V-ST-05 之後；只改回傳的新物件，RD-4）。
+   *   未傳 part5Ids 時不做 UO-4（舊呼叫端相容）。
    * 傳入資料應已通過 validatePersistedData。
    * @param {object} data PersistedData
    * @param {number} part5Length 模擬測驗題庫長度
    * @param {string} [today] 本地日期 YYYY-MM-DD；缺省或不合法時以本地今天計
+   * @param {Array<string|null>} [part5Ids] 題庫 id 陣列（part5flow.bankIdsOf 結果）
    * @returns {object} PersistedData
    */
-  function normalizeAfterLoad(data, part5Length, today) {
-    var out = clone(data);
+  function normalizeAfterLoad(data, part5Length, today, part5Ids) {
+    var out = normalizeTrackItems(clone(data));
     var color = GOAL().colorOf(out.goal.appliedScore);
     out.goal.appliedColor = color;
     out.goal.effectiveColor = GOAL().effectiveColorOf(color);
@@ -504,11 +655,17 @@
     var learned = LEARN().normalizeLearning(out, resolveToday(today));
     out.todayLearned = learned.todayLearned;
     out.learnedHistory = learned.learnedHistory;
+    if (Array.isArray(part5Ids)) {
+      var uo = PF().normalizeOnly(out.part5, part5Ids, PF().correctSet(out.part5CorrectIds), out.part5UnansweredOnly);
+      if (uo.changed) {
+        out.part5 = uo.part5;
+      }
+    }
     return out;
   }
 
   /**
-   * RD-1：schemaVersion 2 的 data 中 todayLearned、learnedHistory 缺少或 shape 不符 → 只把該欄設為預設值。
+   * RD-1：schemaVersion 2 以上（v0.15 起為遷移後的 3）的 data 中 todayLearned、learnedHistory 缺少或 shape 不符 → 只把該欄設為預設值。
    * 不修改傳入值；data 不是純物件時原樣回傳（交由後續驗證判為無法讀取）。
    * @param {*} data
    * @returns {{data: *, fieldsReset: string[]}}
@@ -559,13 +716,13 @@
    * 解析 localStorage 主鍵的原始字串（README §5.3、AC-18-02、AC-18-05；architecture.md §7.8 流程圖）。
    * 對任何使用者輸入都不拋例外（依賴模組缺漏屬組裝錯誤，依 LD-3 照常丟出）。
    * - null／undefined（鍵不存在）→ kind "missing"，data = 預設值
-   * - JSON 失敗、頂層不是物件、schemaVersion 缺失／非整數／不在 [1, 2]、data 不是物件、
-   *   遷移或 RD-1 後仍不符 Schema、違反 V-ST-03
+   * - JSON 失敗、頂層不是物件、schemaVersion 缺失／非整數／不在 [1, 2, 3]、data 不是物件、
+   *   遷移、RD-1、RD-3 後仍不符 Schema、違反 V-ST-03
    *   → kind "unreadable"，data = 預設值（呼叫端把原字串寫入 STORAGE_KEYS.unreadable 並提示）
-   * - schemaVersion 1 → 依 MG-1、MG-2 遷移後以 v2 完整驗證；通過 → kind "ok"、migrated = true
-   *   （呼叫端依 MG-3 寫回一次，失敗不提示）
-   * - schemaVersion 2 → RD-1 只重設缺少或 shape 不符的 todayLearned／learnedHistory，再完整驗證；
-   *   通過 → kind "ok"、migrated = false、fieldsReset 列出被重設的欄位（不提示、不保存 unreadable）
+   * - 逐版遷移 1 → 2（MG-1、MG-2）→ 3（MG-5、MG-6）；原為 3 不遷移
+   * - 之後**不論是否遷移**一律依序 RD-1（todayLearned／learnedHistory）→ RD-3（3 個新欄位）→ v3 完整驗證（T-76、DS-32）
+   * - 通過 → kind "ok"、migrated = 原版本 < 3（呼叫端依 MG-3／MG-7 寫回一次，失敗不提示）、
+   *   fieldsReset 列出 RD-1、RD-3 (b) 重設的欄位（不提示、不保存 unreadable）
    * 回傳的 data 尚未做 normalizeAfterLoad。
    * @param {string|null|undefined} rawString
    * @returns {{kind: "missing"|"ok"|"unreadable", data: object, migrated?: boolean,
@@ -573,7 +730,7 @@
    */
   function parseStored(rawString) {
     // 依賴缺漏屬程式組裝錯誤，先在 try 之外取用，避免被誤判為資料無法讀取（LD-3）
-    GOAL(); LEARN();
+    GOAL(); LEARN(); POS(); PF();
     if (rawString === null || rawString === undefined) {
       return { kind: "missing", data: defaultData() };
     }
@@ -597,7 +754,7 @@
         return unreadable(["schemaVersion " + parsed.schemaVersion + " 不支援"]);
       }
       if (!isPlainObject(parsed.data)) {
-        // MG-1（v1）與 v2 皆同：data 不是物件 → 無法讀取
+        // MG-1（v1）、MG-5（v2）與 v3 皆同：data 不是物件 → 無法讀取
         return unreadable(["data 不是物件"]);
       }
       var m = migrate(parsed);
@@ -605,13 +762,11 @@
         return unreadable(["schemaVersion " + parsed.schemaVersion + " 遷移失敗"]);
       }
       var rec = m.record;
-      var fieldsReset = [];
-      if (!m.migrated) {
-        // RD-1：只適用 schemaVersion 2（v1 遷移後兩欄必為預設值）
-        var rd = resetLearningFields(rec.data);
-        rec.data = rd.data;
-        fieldsReset = rd.fieldsReset;
-      }
+      // v0.15：不論是否遷移一律先 RD-1 再 RD-3（遷移後該欄已是預設值，結果不變；修正 T-76 遷移後跳過 RD-1）
+      var rd1 = resetLearningFields(rec.data);
+      var rd3 = resetTrackFields(rd1.data);
+      rec.data = rd3.data;
+      var fieldsReset = rd1.fieldsReset.concat(rd3.fieldsReset);
       var result = validateStorageRecord(rec);
       if (!result.ok) {
         return unreadable(result.errors);
@@ -628,7 +783,7 @@
 
   /**
    * 組成要寫入 localStorage 的 StorageRecord（呼叫端以一次 setItem 寫入 JSON.stringify 結果）。
-   * schemaVersion 一律為目前版本 2（MG-4）。
+   * schemaVersion 一律為目前版本（v0.15 起為 3，MG-4、MG-7）。
    * @param {object} data PersistedData
    * @param {Date} [now]
    * @returns {{schemaVersion: number, savedAt: string, data: object}}
@@ -641,8 +796,16 @@
   return Object.freeze({
     MIGRATIONS: MIGRATIONS,
     DATA_KEYS: Object.freeze(DATA_KEYS.slice()),
+    REQUIRED_DATA_KEYS: Object.freeze(REQUIRED_DATA_KEYS.slice()),
+    V2_DATA_KEYS: Object.freeze(V2_DATA_KEYS.slice()),
     V1_DATA_KEYS: Object.freeze(V1_DATA_KEYS.slice()),
+    TRACK_KEYS: Object.freeze(TRACK_KEYS.slice()),
     defaultData: defaultData,
+    trackDefaults: trackDefaults,
+    isTrackShape: isTrackShape,
+    resetTrackFields: resetTrackFields,
+    normalizeTrackItems: normalizeTrackItems,
+    ensureWritable: ensureWritable,
     emptyToday: emptyToday,
     isTodayLearnedShape: isTodayLearnedShape,
     isLearnedHistoryShape: isLearnedHistoryShape,

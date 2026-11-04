@@ -1,13 +1,13 @@
 {
   "meta": {
     "doc": "TASKS",
-    "version": "0.8",
+    "version": "0.10",
     "status": "approved",
     "author": "sd-agent",
     "approved_by": "JimmyLin（對話中授權「修正好測試沒問題就直接推」，主控代填欄位）",
-    "approved_at": "2026-11-03",
-    "upstream": "docs/01-PRD.md v0.14（approved，JimmyLin，2026-11-03）、docs/02-contract/ v0.14（README、data-schema.ts、storage-schema.json 三檔 approved，主控代核）、package.json version 1.0.0（Q-62）、docs/03-design/architecture.md v0.9",
-    "changelog": "v0.8（2026-11-03，sd-agent）：修訂已核准的 v0.7（JimmyLin 核准），原因：PRD v0.14（R-22：US-42 網站版本號、US-43 隱藏領域範本、AC-01-08、AC-39-04 改寫等 13 條、暫停 AC-05-01～05、Q-58～Q-62）與契約 v0.14（§12 VR／LS／V-VER、§5.8 HT-6～HT-9、data-schema §14、§9.7 DS-26～DS-31）。status 改為 in-review、核准欄位清空。只新增 FE-63～FE-69 共 7 個 pg-frontend 任務（status todo、retries 0），新任務另加 batch 欄位（v0.9-1：FE-63、FE-65、FE-68；v0.9-2：FE-64、FE-66、FE-67；v0.9-3：FE-69）；既有 86 個任務的內容、status、retries 皆未修改。同批任務沒有共用 path，且本版每個檔案只屬於 1 個 v0.9 任務（architecture.md §3 D-14、§12.8）。不需 CT 任務（src/data/ 不改，DS-31）、不需主控手動項目。AC 對照見 architecture.md §13.6（應驗收 251 個 AC 全部涵蓋；AC-05-01～05 暫停）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 93 個任務：pg-content 24、pg-frontend 69。｜v0.7（2026-11-03，sd-agent）：修訂已核准的 v0.6（JimmyLin 核准），原因：PRD v0.12（R-21 版面與視覺、US-38～US-41、Q-49～Q-57；新增 27 條、修改 30 條 AC）與契約 v0.12（§11 NM／VC／DB／FT／MT／V-LAY、data-schema §13、§9.6 DS-19～DS-25）。status 改為 in-review、核准欄位清空。只新增 CT-24（pg-content，ORIGINAL fullName，DS-19）與 FE-54～FE-62 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 76 個任務的內容、status、retries 皆未修改。批次：第 1 批 CT-24、FE-54、FE-55、FE-56；第 2 批 FE-57～FE-61；第 3 批 FE-62（architecture.md §12.7）。同批任務沒有共用 path；core/pwa.js 與 __tests__/pwa-core.test.js 由 FE-56 → FE-58 依序修改（D-13）。AC 對照見 architecture.md §13.5（應驗收 248 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）；不需主控手動項目。共 86 個任務：pg-content 24、pg-frontend 62。｜v0.6（2026-11-02，sd-agent）：修訂已核准的 v0.5（JimmyLin 核准），原因：PRD v0.11（R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48；修改 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）與契約 v0.11（§10 PWA、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）。status 改為 in-review、核准欄位清空。只新增 FE-45～FE-53 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 67 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-18）。FE-45～FE-53 彼此沒有任何共用 path；FE-53 負責重新建置 dist/english-master-track.html 與部署目錄 dist/site/。新增頂層 manualSteps（MC-01 複製 ads.txt 到 sources/deploy/、MC-02 放置 4 張 PNG 到 src/app/assets/icons/、MC-03 修改 .github/workflows/static.yml），owner 為主控、不派給 PG；FE 任務以 manualPrereqs 引用（architecture.md §12.6、SD-FB-32）。批次見 architecture.md §12.6，AC 對照見 §13.4（應驗收 221 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 76 個任務：pg-content 23、pg-frontend 53。｜v0.5（2026-11-02，sd-agent）：修訂已核准的 v0.4（JimmyLin 核准），原因：PRD v0.10（R-19 只選色級不顯示分數、Q-39 預設 725、Q-40、AC-26-05、AC-26-06、AC-22-04 改寫、6 條分數輸入 AC 暫停）與契約 v0.10（§5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）。status 改為 in-review、核准欄位清空。只新增 FE-42～FE-44 共 3 個 pg-frontend 任務（status todo、retries 0），依序執行（FE-42 → FE-43 → FE-44）；既有 64 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-10）。FE-42～FE-44 彼此沒有任何共用 path；FE-44 負責重新建置 dist/。批次見 architecture.md §12.5，AC 對照見 §13.3（應驗收 192 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 67 個任務：pg-content 23、pg-frontend 44。｜v0.4（2026-11-02，sd-agent）：修訂已核准的 v0.3，原因：PRD v0.9（R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（§5.7、§5.8、§9.3 DS-01～DS-06）。status 改為 in-review、核准欄位清空。只新增 FE-34～FE-41 共 8 個 pg-frontend 任務（status todo、retries 0）；既有 56 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-06）。FE-34～FE-41 彼此沒有任何共用 path；FE-41 負責重新建置 dist/。批次見 architecture.md §12.4，AC 對照見 §13.2（應驗收 196 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 64 個任務：pg-content 23、pg-frontend 41。｜v0.3（2026-10-30，sd-agent）：依 PRD v0.8（R-15～R-17、US-25～US-31）與契約 v0.8 增量修訂；v0.2 已核准，依 CLAUDE.md 改回 draft、核准欄位清空。只新增 FE-20～FE-33 共 14 個 pg-frontend 任務（status todo、retries 0）；既有 42 個任務的內容、status、retries 皆未修改；src/data/ 不需改動，不新增 CT 任務。批次見 architecture.md §12.3，AC 對照見 §13.1。本版含持久化結構 schemaVersion 1 → 2 的實作任務（FE-22、FE-25），須由人類核准。共 56 個任務：pg-content 23、pg-frontend 33。 主控代核（2026-10-30）：持久化結構變更已由人類於契約 v0.8 核准，本版僅實作該契約，不改 PRD、不另改持久化結構；check_tasks 驗證新任務間無共用 paths（共用僅發生於與已 done 舊任務之間）。 主控代核（2026-11-02）：FE-41 paths 追加 src/app/__tests__/backup.test.js，修正因執行日期而失敗的既有測試（FE-34／FE-35 回報）；不改 PRD、不改持久化結構。 主控代核（2026-11-02）：FE-43 paths 追加 views/flashcards.js、__tests__/flashcards.test.js，改寫單字卡空狀態提示（人類決議，AC-06-06 未規定文字，不改 PRD）。",
+    "approved_at": "2026-11-04",
+    "upstream": "docs/01-PRD.md v0.16（approved，JimmyLin，2026-11-04；R-24）、docs/02-contract/ v0.16（README、data-schema.ts、storage-schema.json 三檔 approved，主控代核：PWA_TEXTS 新文字、SOURCES_CONTACT_TEXT、L-7、DS-40、FB-61、FB-62）、package.json version 維持 1.1.0、docs/03-design/architecture.md v0.11",
+    "changelog": "v0.10（2026-11-04，sd-agent）：修訂已核准的 v0.9（JimmyLin 授權、主控代填），原因：PRD v0.16（R-24：更新提示文字改為「有新版本，請更新版本」／按鈕「更新版本」、「資料來源與授權」頁新增 1 行聯絡 email；新增 AC-23-07，修改 AC-36-03、AC-42-04 文字，E-118～E-120）與契約 v0.16（PWA_TEXTS 新值、SOURCES_CONTACT_TEXT、L-7、§9.9 DS-40、FB-61、FB-62）。status 改為 in-review、核准欄位清空。依 DS-40 只新增 FE-77 共 1 個 pg-frontend 任務（status todo、retries 0、batch v0.11-1，dependsOn FE-76）；既有 101 個任務與 MC-01～MC-04 的內容、status、retries 皆未修改。不需 CT 任務（src/data/ 不變）、不需主控手動項目（package.json 維持 1.1.0）。使用者決定本次只改文字、不另跑 QA 輪次：FE-77 的驗收為 PG 自測＋主控檢查（architecture.md §10.8 H-1～H-4）。AC 對照見 architecture.md §13.8（應驗收 288 個 AC 全部涵蓋）。不改 PRD、不改契約、不改持久化結構（schemaVersion 3）。共 102 個任務：pg-content 25、pg-frontend 77。｜v0.9（2026-11-04，sd-agent）：修訂已核准的 v0.8（JimmyLin 核准），原因：PRD v0.15（R-23：US-44～US-47、AC-44-01～AC-47-08，修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71）與契約 v0.15（schemaVersion 2 → 3、C-8、MG-5～MG-8、RD-3、RD-4、FP-1～FP-9、CR-1～CR-9、UO-1～UO-9、WR-1～WR-5、IM-9、IM-10、V-P5-08、V-ST-18～V-ST-22、CI 修改、§9.8 DS-32～DS-39、FB-54～FB-60）。status 改為 in-review、核准欄位清空。只新增 FE-70～FE-76 共 7 個 pg-frontend 任務、CT-25 共 1 個 pg-content 任務（status todo、retries 0，batch v0.10-1～v0.10-5），以及主控手動項目 MC-04（package.json 1.1.0，FE-76 以 manualPrereqs 引用）；既有 93 個任務與 MC-01～MC-03 的內容、status、retries 皆未修改。批次：v0.10-1 FE-70、FE-71、FE-72、CT-25（＋MC-04）；v0.10-2 FE-73；v0.10-3 FE-74；v0.10-4 FE-75；v0.10-5 FE-76（architecture.md §12.9）。同批任務沒有共用 path；唯一被兩個 v0.10 任務修改的檔案 src/app/__tests__/store.test.js 由 FE-73 → FE-74 依序修改（D-15）。AC 對照見 architecture.md §13.7（應驗收 287 個 AC 全部涵蓋）。本版實作持久化結構變更（契約已由人類核准），不改 PRD、不改契約；src/data/ 資料檔不改（CT-25 只改 _tools/validate.mjs 與 _records/）。共 101 個任務：pg-content 25、pg-frontend 76。｜v0.8（2026-11-03，sd-agent）：修訂已核准的 v0.7（JimmyLin 核准），原因：PRD v0.14（R-22：US-42 網站版本號、US-43 隱藏領域範本、AC-01-08、AC-39-04 改寫等 13 條、暫停 AC-05-01～05、Q-58～Q-62）與契約 v0.14（§12 VR／LS／V-VER、§5.8 HT-6～HT-9、data-schema §14、§9.7 DS-26～DS-31）。status 改為 in-review、核准欄位清空。只新增 FE-63～FE-69 共 7 個 pg-frontend 任務（status todo、retries 0），新任務另加 batch 欄位（v0.9-1：FE-63、FE-65、FE-68；v0.9-2：FE-64、FE-66、FE-67；v0.9-3：FE-69）；既有 86 個任務的內容、status、retries 皆未修改。同批任務沒有共用 path，且本版每個檔案只屬於 1 個 v0.9 任務（architecture.md §3 D-14、§12.8）。不需 CT 任務（src/data/ 不改，DS-31）、不需主控手動項目。AC 對照見 architecture.md §13.6（應驗收 251 個 AC 全部涵蓋；AC-05-01～05 暫停）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 93 個任務：pg-content 24、pg-frontend 69。｜v0.7（2026-11-03，sd-agent）：修訂已核准的 v0.6（JimmyLin 核准），原因：PRD v0.12（R-21 版面與視覺、US-38～US-41、Q-49～Q-57；新增 27 條、修改 30 條 AC）與契約 v0.12（§11 NM／VC／DB／FT／MT／V-LAY、data-schema §13、§9.6 DS-19～DS-25）。status 改為 in-review、核准欄位清空。只新增 CT-24（pg-content，ORIGINAL fullName，DS-19）與 FE-54～FE-62 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 76 個任務的內容、status、retries 皆未修改。批次：第 1 批 CT-24、FE-54、FE-55、FE-56；第 2 批 FE-57～FE-61；第 3 批 FE-62（architecture.md §12.7）。同批任務沒有共用 path；core/pwa.js 與 __tests__/pwa-core.test.js 由 FE-56 → FE-58 依序修改（D-13）。AC 對照見 architecture.md §13.5（應驗收 248 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）；不需主控手動項目。共 86 個任務：pg-content 24、pg-frontend 62。｜v0.6（2026-11-02，sd-agent）：修訂已核准的 v0.5（JimmyLin 核准），原因：PRD v0.11（R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48；修改 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）與契約 v0.11（§10 PWA、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）。status 改為 in-review、核准欄位清空。只新增 FE-45～FE-53 共 9 個 pg-frontend 任務（status todo、retries 0）；既有 67 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-18）。FE-45～FE-53 彼此沒有任何共用 path；FE-53 負責重新建置 dist/english-master-track.html 與部署目錄 dist/site/。新增頂層 manualSteps（MC-01 複製 ads.txt 到 sources/deploy/、MC-02 放置 4 張 PNG 到 src/app/assets/icons/、MC-03 修改 .github/workflows/static.yml），owner 為主控、不派給 PG；FE 任務以 manualPrereqs 引用（architecture.md §12.6、SD-FB-32）。批次見 architecture.md §12.6，AC 對照見 §13.4（應驗收 221 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 76 個任務：pg-content 23、pg-frontend 53。｜v0.5（2026-11-02，sd-agent）：修訂已核准的 v0.4（JimmyLin 核准），原因：PRD v0.10（R-19 只選色級不顯示分數、Q-39 預設 725、Q-40、AC-26-05、AC-26-06、AC-22-04 改寫、6 條分數輸入 AC 暫停）與契約 v0.10（§5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）。status 改為 in-review、核准欄位清空。只新增 FE-42～FE-44 共 3 個 pg-frontend 任務（status todo、retries 0），依序執行（FE-42 → FE-43 → FE-44）；既有 64 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-10）。FE-42～FE-44 彼此沒有任何共用 path；FE-44 負責重新建置 dist/。批次見 architecture.md §12.5，AC 對照見 §13.3（應驗收 192 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 67 個任務：pg-content 23、pg-frontend 44。｜v0.4（2026-11-02，sd-agent）：修訂已核准的 v0.3，原因：PRD v0.9（R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（§5.7、§5.8、§9.3 DS-01～DS-06）。status 改為 in-review、核准欄位清空。只新增 FE-34～FE-41 共 8 個 pg-frontend 任務（status todo、retries 0）；既有 56 個任務的內容、status、retries 皆未修改；src/data/ 不改、不新增 CT 任務（契約 DS-06）。FE-34～FE-41 彼此沒有任何共用 path；FE-41 負責重新建置 dist/。批次見 architecture.md §12.4，AC 對照見 §13.2（應驗收 196 個 AC 全部涵蓋）。不改 PRD、不改持久化結構（schemaVersion 維持 2）。共 64 個任務：pg-content 23、pg-frontend 41。｜v0.3（2026-10-30，sd-agent）：依 PRD v0.8（R-15～R-17、US-25～US-31）與契約 v0.8 增量修訂；v0.2 已核准，依 CLAUDE.md 改回 draft、核准欄位清空。只新增 FE-20～FE-33 共 14 個 pg-frontend 任務（status todo、retries 0）；既有 42 個任務的內容、status、retries 皆未修改；src/data/ 不需改動，不新增 CT 任務。批次見 architecture.md §12.3，AC 對照見 §13.1。本版含持久化結構 schemaVersion 1 → 2 的實作任務（FE-22、FE-25），須由人類核准。共 56 個任務：pg-content 23、pg-frontend 33。 主控代核（2026-10-30）：持久化結構變更已由人類於契約 v0.8 核准，本版僅實作該契約，不改 PRD、不另改持久化結構；check_tasks 驗證新任務間無共用 paths（共用僅發生於與已 done 舊任務之間）。 主控代核（2026-11-02）：FE-41 paths 追加 src/app/__tests__/backup.test.js，修正因執行日期而失敗的既有測試（FE-34／FE-35 回報）；不改 PRD、不改持久化結構。 主控代核（2026-11-02）：FE-43 paths 追加 views/flashcards.js、__tests__/flashcards.test.js，改寫單字卡空狀態提示（人類決議，AC-06-06 未規定文字，不改 PRD）。",
     "note": "（以下為 v0.2 記載，任務數以 changelog 為準）v0.2 依 architecture v0.3 新增 FE-19（主控代核）；FE-18 dependsOn 加 FE-19；CT-02 doneWhen 的驗證方式改依 architecture.md §8.4（v0.1 由 JimmyLin 於 2026-10-30 核准；依 CLAUDE.md 修改已核准文件須改回 draft，待主控代核）。共 42 個任務：pg-content 23（CT-01～CT-23）、pg-frontend 19（FE-01～FE-19）。批次見 architecture.md §12；AC 對照見 §13。所有任務只能寫入自己的 paths；sources/ 唯讀且不得打包；建置驗證一律 --out 到 scratchpad（只有 FE-18 寫 dist/）。"
   },
   "tasks": [
@@ -4410,6 +4410,483 @@
       ],
       "status": "done",
       "retries": 0
+    },
+    {
+      "id": "FE-70",
+      "title": "凍結 v0.14／v0.7 實際寫出的 localStorage 與備份樣本（v2 → v3 遷移測試夾具）",
+      "owner": "pg-frontend",
+      "batch": "v0.10-1",
+      "paths": [
+        "src/app/__tests__/_samples/v014-state.json",
+        "src/app/__tests__/_samples/v014-backup.json",
+        "src/app/__tests__/_samples/v07-state.json",
+        "src/app/__tests__/_samples/v07-backup.json",
+        "src/app/__tests__/_samples/README.md",
+        "src/app/__tests__/samples.test.js"
+      ],
+      "dependsOn": [],
+      "covers": [
+        "US-47",
+        "AC-47-03",
+        "AC-47-04"
+      ],
+      "contractRefs": [
+        "README §9.8 DS-32",
+        "README §5.3 MG-5～MG-8",
+        "README §7.7 V-ST-21"
+      ],
+      "description": "依 architecture.md v0.10 §7.21.1「測試樣本來源」、D-15、T-86。目的：在任何程式改為 schemaVersion 3 之前，凍結 v0.14 已交付程式實際寫出的資料原文，供 FE-73、FE-74 的遷移與相容測試使用。**本任務不得修改任何程式檔或 dist/**。(1) 先記錄 `dist/english-master-track.html` 的 SHA-256，並確認其 `<meta name=\"emt-app-version\">` 為 1.0.0。(2) 首選：以無頭 Chromium（playwright-core）用 file:// 開啟該檔，清除網站資料後執行 §7.21.1 操作序列（點棕 → 開始學習；表單新增 Monetization、Latency；Console 呼叫 EMT.store.actions.injectTemplate(\"cs\")；單字卡翻面 3 張、測驗模式作答 4 題含對錯；EMT.store.actions.acknowledgeSttNotice()；模擬測驗作答 5 題對錯混合，第 6 題作答後不按下一題；難易度設定點綠卡片不套用）；`page.clock` 可用時 (1)～(3) 在 D − 1、其餘在 D，使 learnedHistory 有 2 天、streak.days = 2。之後以 `localStorage.getItem(\"englishMasterTrack:state\")` 取得原字串存為 v014-state.json（逐字、不重新排版），按主控台「匯出備份」取得下載檔的原始位元組存為 v014-backup.json。退回（無瀏覽器）：先 `node tools/build.mjs --out <scratchpad>/v014.html` 並確認與 dist 檔位元組相同，再以未修改的 state/store.js、假 storage 與 _fixtures.loadContent() 執行同一序列（injectTemplate、acknowledgeSttNotice 直接呼叫 action），取主鍵最後一次 setItem 字串與 exportBackup().json。(3) v07-state.json = persist.test.js 中 V07_RAW 的值（逐字）；v07-backup.json = v014-backup.json 刪除 data.todayLearned、data.learnedHistory，schemaVersion 改為 1，以 JSON.stringify(obj, null, 2) 輸出。(4) README.md：產生方式（首選或退回）、操作序列、產生時的本地日期 D（與 D − 1）與時區、dist 檔 SHA-256、4 個樣本的 SHA-256、「本目錄唯讀，後續任務不得重新產生或改寫」。(5) samples.test.js：只檢查樣本本身（與程式版本無關，v3 之後仍須通過）：4 檔可 JSON.parse；v014-state 頂層恰 schemaVersion、savedAt、data 三鍵且 schemaVersion === 2、data 恰 9 鍵；v014-backup 頂層恰 5 鍵、format 為 english-master-track-backup、schemaVersion === 2、data 9 鍵；v07-state、v07-backup 為 1 與 7 鍵；v014 樣本含 origin 為 template 的自訂單字、part5.lockedSelection 非 null、goal.draftScore ≠ goal.appliedScore；README 記錄的 SHA-256 與檔案相符。",
+      "doneWhen": [
+        "_samples/ 下 5 檔存在；v014-state.json 為 v0.14 程式寫出的原字串（未重新排版），v014-backup.json 為匯出檔原始位元組",
+        "README.md 記錄產生方式、操作序列、日期 D 與時區、dist 與 4 個樣本的 SHA-256",
+        "samples.test.js 通過，且 `npm test` 全部通過（本任務不改任何程式）",
+        "dist/ 與 src/app/ 的非測試檔 diff 為 0；只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-71",
+      "title": "core/position.js：單字卡上次位置的解析（FP-2）與正規化（RD-3 (d)、IM-10 (3)）",
+      "owner": "pg-frontend",
+      "batch": "v0.10-1",
+      "paths": [
+        "src/app/core/position.js",
+        "src/app/__tests__/position.test.js"
+      ],
+      "dependsOn": [],
+      "covers": [
+        "US-44",
+        "AC-44-01",
+        "AC-44-04",
+        "AC-44-05",
+        "AC-44-06",
+        "AC-44-07",
+        "AC-47-05"
+      ],
+      "contractRefs": [
+        "README §5.10 FP-1、FP-2",
+        "README §5.3 RD-3 (d)",
+        "README §6.2 IM-10 (3)",
+        "data-schema.ts FlashcardPosition",
+        "storage-schema.json $defs/FlashcardPosition、FlashcardPositionNormalized",
+        "README §7.7 V-ST-18 (b)"
+      ],
+      "description": "依 architecture.md v0.10 §4.10（EMT.core.position）、§7.21.2。新增 L1 模組 core/position.js：寫法同其他 core（IIFE、Node module.exports、瀏覽器掛 EMT.core.position）；**載入時只取 constants／wordkey（LD-1）**，不讀 DOM、不讀 window 資料、不碰 localStorage。成員：isShape(v)、normalize(v)、fromIndex(studySet, index)、resolve(position, studySet)、sameCard(a, b)，簽章與行為逐項依 §4.10 表；所有函式不修改傳入值、對任何輸入不拋例外。resolve 回傳 { index, position, kind }，kind ∈ empty／none／found／fallback；N = 0 時 position 回傳傳入值原物件（===）。position.test.js 依 §10.7：isShape 真／假矩陣（null、合法物件；陣列、{}、缺鍵、多餘鍵、ordinal 0、-1、1.5、字串 10、wordKey 為數字）；normalize（大小寫、前後與連續空白、空白 → null、非 shape → null、回傳新物件）；resolve 四種 kind、AC-44-04 以字找回（刪除前面的自訂單字後序號變小、再新增後 N 變大）、AC-44-05 (a) 刪除中間 → 原本下一張、刪除最後一張 → 前一張、(b) i ≤ N → 第 i 張、(c) i > N → 第 N 張、AC-44-07 N = 0；fromIndex 越界與卡片無 wordKey → null；4,000 張單字集 resolve 100 次平均 < 5 ms。不得修改其他檔案（persist、store 的呼叫由 FE-73、FE-74 負責）。",
+      "doneWhen": [
+        "`npm test` 全部通過（含既有 load-order.test.js：新模組依建置順序載入不報錯）",
+        "position.test.js 涵蓋 §10.7 列出的全部案例並通過",
+        "core/position.js 原始碼不含 document、window.localStorage、localStorage、innerHTML",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-72",
+      "title": "core/part5flow.js：模擬測驗答對紀錄與「只練沒答對」的狀態轉移；layout.part5Progress 支援 allCorrect",
+      "owner": "pg-frontend",
+      "batch": "v0.10-1",
+      "paths": [
+        "src/app/core/part5flow.js",
+        "src/app/__tests__/part5flow.test.js",
+        "src/app/core/layout.js",
+        "src/app/__tests__/layout.test.js"
+      ],
+      "dependsOn": [],
+      "covers": [
+        "US-45",
+        "US-46",
+        "AC-45-01",
+        "AC-45-02",
+        "AC-45-03",
+        "AC-45-05",
+        "AC-45-07",
+        "AC-46-02",
+        "AC-46-03",
+        "AC-46-04",
+        "AC-46-05",
+        "AC-46-06",
+        "AC-46-07",
+        "AC-46-08",
+        "AC-46-09",
+        "AC-47-05"
+      ],
+      "contractRefs": [
+        "README §5.11 CR-1～CR-8、UO-1～UO-9",
+        "README §5.3 RD-3 (c)",
+        "README §6.2 IM-10 (2)、(4)",
+        "README §11.6 MT-1（v0.15）",
+        "data-schema.ts §15 Part5ViewKind",
+        "README §7.7 V-ST-19、V-ST-20",
+        "README §9.8 DS-34"
+      ],
+      "description": "依 architecture.md v0.10 §4.10（EMT.core.part5flow、EMT.core.layout）、§7.21.3。(1) 新增 L1 模組 core/part5flow.js（IIFE、module.exports、瀏覽器 EMT.core.part5flow）：**載入時不取用任何模組**；成員 bankIdsOf、normalizeIds、correctSet、countCorrect、isCorrectAt、nextUnanswered、viewKind、normalizeOnly、recordAnswer、next、restart、setOnly、replayKeepRecords、clearAndRestart，簽章與規則逐項依 §4.10 表（UO-3 畫面種類、UO-4 正規化、UO-5 下一題、UO-6 重新開始、UO-7 (a)、CR-2、CR-6；開關關閉時 next／restart 與 v0.14 store 的 nextPart5／restartPart5 結果相同）。純函式、不修改傳入值、不拋例外、不遞迴；nextUnanswered 為單一有界迴圈；任何結果 currentIndex < Q。題庫 id 以 bankIds 陣列傳入（null 表示該題無合法 id，永遠未答對、不可被記錄）。(2) core/layout.js：part5Progress(kind, number, total) 新增 kind === \"allCorrect\" → { visible: true, now: max, max, percent: 100 }（同 summary）；其他行為、LAYOUT_TEXTS、其他函式不變；載入規則不變（LD-1）。(3) part5flow.test.js 依 §10.7（normalizeIds、countCorrect、viewKind 全部分支、normalizeOnly 含 AC-46-04 (a)(b) 與其後無 → summary、next 關／開含 AC-46-02、AC-46-03、AC-46-05、AC-46-09、restart、setOnly 不改計數、recordAnswer AC-45-01～03、replayKeepRecords 與 clearAndRestart 本輪歸 0 累計不變、1,000 組隨機狀態的不變式）；layout.test.js 加 allCorrect 案例，既有案例不變。不得修改 store、views、persist。",
+      "doneWhen": [
+        "`npm test` 全部通過（含既有 load-order.test.js、part5.test.js、dashboard.test.js）",
+        "part5flow.test.js 涵蓋 §10.7 列出的全部案例並通過，含 1,000 組隨機狀態不變式",
+        "layout.part5Progress(\"allCorrect\", 0, 200) 回傳 { visible: true, now: 200, max: 200, percent: 100 }",
+        "core/part5flow.js 原始碼不含 require、EMT.core 取用以外的全域讀取（載入時不取用任何模組）",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "CT-25",
+      "title": "V-P5-08 題目 id 穩定性：建立 part5 id 指紋快照並在 validate.mjs 檢查",
+      "owner": "pg-content",
+      "batch": "v0.10-1",
+      "paths": [
+        "src/data/_tools/validate.mjs",
+        "src/data/_records/part5-ids.json",
+        "src/data/_records/CT-25.md"
+      ],
+      "dependsOn": [],
+      "covers": [
+        "US-45",
+        "AC-45-07"
+      ],
+      "contractRefs": [
+        "README §7.4 V-P5-08",
+        "README §9.8 DS-37",
+        "data-schema.ts Part5Question.id（v0.15 註解）"
+      ],
+      "description": "依 architecture.md v0.10 §7.21.6。答對紀錄以題目 id 為鍵（Q-71），本任務建立防止 id 改號、改指另一題的檢查；**不修改 src/data/part5.js 或任何交付資料檔**。(1) src/data/_tools/validate.mjs：新增 V-P5-08 檢查（只在 --stage final 且快照檔存在時執行；不存在時印出提示並略過）。指紋 = Node 內建 crypto 的 SHA-256 取前 16 個 hex，對象字串先 NFC → trim → 連續空白壓成 1 個 → 小寫；每題兩個指紋：s = sentence、a = options[correctIndex]。規則：快照 id 仍在題庫且 s、a 皆不同 → 錯誤 V-P5-08；只有一個不同 → 警告 V-P5-08W（請確認為錯字修正）；快照 id 不在題庫 → 資訊（刪題，id 不得重用）；題庫 id 不在快照 → 警告 V-P5-08N（新題，交付後請更新快照）。新增選項 --update-snapshot（只新增快照沒有的 id，不刪除、不覆寫既有項目）與 --accept <id>（覆寫該 id 的指紋），兩者只寫 _records/part5-ids.json。V-P5-08 加入既有規則代號清單與說明表；其他檢查行為不變。(2) 以目前 part5.js 執行 --update-snapshot 建立 src/data/_records/part5-ids.json：{ meta: { createdBy: CT-25, source: src/data/part5.js, createdAt, count }, ids: { p5-001: { s, a }, … } }，count 等於題庫題數。(3) 自驗：`node src/data/_tools/validate.mjs --all --stage final` 錯誤 0、V-P5-08 相關警告 0；在 scratchpad 複製 part5.js 分別做「交換兩題的 id」「只改一題 sentence 的 1 個字」「新增 p5-201」三種修改，以 --data 指向副本執行，分別得到錯誤、警告 V-P5-08W、警告 V-P5-08N（附輸出）。(4) _records/CT-25.md 記錄規則、指令、三種情境輸出與日後維護方式（SD-FB-61）。",
+      "doneWhen": [
+        "`node src/data/_tools/validate.mjs --all --stage final` 錯誤 0，V-P5-08／V-P5-08W／V-P5-08N 皆 0",
+        "_records/part5-ids.json 的 count 等於 PART5_QUESTION_BANK 題數，每題有 s、a 兩個 16 位 hex",
+        "scratchpad 三種情境分別產生錯誤、V-P5-08W、V-P5-08N（輸出附於 CT-25.md）",
+        "src/data/ 的交付資料檔 diff 為 0；只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-73",
+      "title": "持久化 v3：常數、v2 → v3 遷移、RD-3、匯入 IM-9／IM-10、初始化 CI-4；既有測試的 schemaVersion 2 改寫",
+      "owner": "pg-frontend",
+      "batch": "v0.10-2",
+      "paths": [
+        "src/app/core/constants.js",
+        "src/app/core/persist.js",
+        "src/app/core/backup.js",
+        "src/app/core/reinit.js",
+        "src/app/__tests__/migrate-v3.test.js",
+        "src/app/__tests__/persist.test.js",
+        "src/app/__tests__/backup.test.js",
+        "src/app/__tests__/reinit.test.js",
+        "src/app/__tests__/goal.test.js",
+        "src/app/__tests__/_fixtures.js",
+        "src/app/__tests__/store.test.js",
+        "src/app/__tests__/first-run.test.js",
+        "src/app/__tests__/dashboard.test.js",
+        "src/app/__tests__/custom-vocab.test.js"
+      ],
+      "dependsOn": ["FE-70", "FE-71", "FE-72"],
+      "covers": [
+        "US-47",
+        "AC-47-01",
+        "AC-47-02",
+        "AC-47-03",
+        "AC-47-04",
+        "AC-47-05",
+        "AC-47-06",
+        "AC-44-06",
+        "AC-44-08",
+        "AC-45-07",
+        "AC-45-08",
+        "AC-46-04",
+        "AC-46-10",
+        "AC-18-01",
+        "AC-24-02",
+        "AC-32-02",
+        "AC-01-08",
+        "AC-26-06",
+        "AC-32-10",
+        "AC-36-04",
+        "AC-37-06",
+        "AC-38-10",
+        "AC-42-03",
+        "AC-43-03"
+      ],
+      "contractRefs": [
+        "README §2 C-8",
+        "README §5.2（v0.15 三欄預設）",
+        "README §5.3 MG-5～MG-8、RD-3、RD-4",
+        "README §5.7 CI-4、LEARNING_PROGRESS_FIELDS（7 欄）",
+        "README §6.1、§6.2 步驟 3～9、IM-9、IM-10、§6.3（v0.15）",
+        "README §7.7 V-ST-01、V-ST-14、V-ST-21、V-IMP-01",
+        "data-schema.ts CURRENT_SCHEMA_VERSION、SUPPORTED_SCHEMA_VERSIONS、PersistedData、FlashcardPosition、§15 PART5_RECORD_TEXTS",
+        "storage-schema.json $defs/PersistedData、PersistedDataWritten、FlashcardPosition、Part5CorrectIds",
+        "README §9.8 DS-32"
+      ],
+      "description": "依 architecture.md v0.10 §4.10（constants、persist、backup、reinit）、§7.21.1、§10.7。**本任務屬持久化結構變更的實作（契約 v0.15 已由人類核准）**。(1) core/constants.js：CURRENT_SCHEMA_VERSION = 3、SUPPORTED_SCHEMA_VERSIONS = [1, 2, 3]、LEARNING_PROGRESS_FIELDS 末尾加 part5CorrectIds（7 項）；新增 PART5_RECORD_TEXTS（深凍結，鍵、值、鍵順序與 data-schema.ts §15 逐字相同）；其他常數不變。(2) core/persist.js：DATA_KEYS 12 欄；新增 REQUIRED_DATA_KEYS、V2_DATA_KEYS、TRACK_KEYS、trackDefaults、MIGRATIONS[2]（MG-5、MG-6：3 欄一律覆寫）、isTrackShape、resetTrackFields（RD-3）、normalizeTrackItems（呼叫 part5flow.normalizeIds、position.normalize；兩者以 dep() 於函式內取用，LD-1、LD-3）、ensureWritable；validatePersistedData 改為必填 9 欄／允許 12 欄、3 欄存在時檢查 shape、written 時要求 12 欄與 Normalized 格式；validateStorageRecord 要求 3；defaultData 12 欄；parseStored 在 migrate 之後**一律**先 resetLearningFields（RD-1）再 resetTrackFields（RD-3）再驗證（修正 T-76），migrated = 原版本 < 3；normalizeAfterLoad 增加選填第 4 參數 part5Ids（先 normalizeTrackItems，最後在 Array.isArray(part5Ids) 時套 part5flow.normalizeOnly）。(3) core/backup.js：步驟 4 以 persist.migrate 串接（MG-8）；步驟 5 由 validatePersistedData 判 IM-9；步驟 7 在既有清理後 normalizeTrackItems → normalizeAfterLoad(data, ctx.part5Length, ctx.today, ctx.part5Ids)；ctx 新增選填 part5Ids；skipped 計算不變（IM-10 (5)）；buildBackup 以 ensureWritable 後的 12 欄、schemaVersion 3 匯出。(4) core/reinit.js：buildReinitData 在覆寫 7 欄後設 flashcardPosition = null；needsConfirm、recordFlags 不變。(5) 新增 migrate-v3.test.js：依 §10.7 以 FE-70 樣本（唯讀，不得改寫）驗 V-ST-21 (a)～(d)、RD-3 矩陣、RD-1 回歸、IM-9 矩陣（flashcardPosition: null 合法，FB-59）、IM-10、版本錯誤訊息「1、2、3」；以 now = 樣本日期 D 當天 12:00 執行，另以 D + 1 驗證只有換日正規化差異（SD-FB-62）。(6) 依 §7.21.1 表改寫 persist.test.js、backup.test.js、reinit.test.js、goal.test.js、_fixtures.js、store.test.js、first-run.test.js、dashboard.test.js、custom-vocab.test.js 中寫死 schemaVersion 2、9 欄、6 欄、「1、2」的斷言（改用常數；以 v2 預寫主鍵的案例改預寫 v3 或容許一次遷移寫回）；store.test.js **只**改因 v3 而必須改的斷言，行為改變留給 FE-74。不得修改 state/store.js 與 views。若出現不在 paths 的測試失敗 → 標 blocked 回報主控。",
+      "doneWhen": [
+        "`npm test` 全部通過",
+        "migrate-v3.test.js 涵蓋 §10.7 列出的 V-ST-21、RD-3、RD-1 回歸、IM-9、IM-10 案例並通過；樣本檔 diff 為 0",
+        "以 v014-state.json 預寫的假 storage：第一次 init 恰 1 次 setItem 且主鍵 schemaVersion 為 3、data 12 欄；第二次 init setItem 0 次且主鍵位元組不變",
+        "constants.PART5_RECORD_TEXTS 與 data-schema.ts §15 逐字相同（測試以複製的契約原文比對）；LEARNING_PROGRESS_FIELDS 7 項",
+        "__tests__ 內以 grep 搜尋 schemaVersion: 2、schemaVersion, 2、=== 2 的版本斷言，只剩刻意建立 v2 遷移輸入的案例（附 grep 輸出）",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-74",
+      "title": "store：單字卡位置掛點、答對紀錄、只練沒答對、3 個新 action、容量不足提示收斂（commitWrite）",
+      "owner": "pg-frontend",
+      "batch": "v0.10-3",
+      "paths": [
+        "src/app/state/store.js",
+        "src/app/__tests__/store.test.js",
+        "src/app/__tests__/store-track.test.js"
+      ],
+      "dependsOn": ["FE-73"],
+      "covers": [
+        "US-44",
+        "US-45",
+        "US-46",
+        "US-47",
+        "AC-44-01",
+        "AC-44-02",
+        "AC-44-03",
+        "AC-44-04",
+        "AC-44-05",
+        "AC-44-06",
+        "AC-44-07",
+        "AC-44-08",
+        "AC-44-09",
+        "AC-44-10",
+        "AC-45-01",
+        "AC-45-02",
+        "AC-45-03",
+        "AC-45-06",
+        "AC-45-08",
+        "AC-46-02",
+        "AC-46-03",
+        "AC-46-04",
+        "AC-46-05",
+        "AC-46-07",
+        "AC-46-08",
+        "AC-46-09",
+        "AC-46-10",
+        "AC-47-01",
+        "AC-47-02",
+        "AC-47-04",
+        "AC-47-06",
+        "AC-47-07",
+        "AC-18-01",
+        "AC-32-02",
+        "AC-03-05",
+        "AC-04-08",
+        "AC-30-14"
+      ],
+      "contractRefs": [
+        "README §5.10 FP-1～FP-9",
+        "README §5.11 CR-1～CR-9、UO-1～UO-9",
+        "README §5.12 WR-1～WR-5",
+        "README §5.3 RD-4、MG-7",
+        "README §5.7 CI-8、CI-9",
+        "README §6.2 步驟 9（FP-6）",
+        "README §7.7 V-ST-18～V-ST-20、V-ST-22",
+        "README §9.8 DS-33、DS-34、DS-36",
+        "README §9 FB-54、FB-56、FB-58、FB-60"
+      ],
+      "description": "依 architecture.md v0.10 §4.10（Store API 新增與修改）、§7.21.2、§7.21.3、§7.21.5、§10.7。(1) 新增內部函式 commitWrite(data, runtime, tags, opts)，取代既有 commit(…, true) 與 commitLearning：容量不足時記憶體保留、learningQuotaNoticeShown 為 false 才設 true 並加 learningQuota tag（整個工作階段最多 1 次）、不再加 storage tag；error 不提示；成功由非 ok 回 ok 時加 storage tag。套用範圍依 §7.21.5 表（含 setDraft、applyGoal、deleteCustomWord、acknowledgeSttNotice、startLearning）；addCustomWord、injectTemplate、confirmApplyGoal、importBackup、init 的寫入維持既有處理。writeData 寫出前呼叫 persist.ensureWritable。(2) 新增內部函式 placeCard(runtime, data, newSet)（position.resolve；新目前卡片與舊卡相同時保留翻面與測驗題目），用於 init（只改記憶體）、addCustomWord、injectTemplate、deleteCustomWord（與 customVocab 同一次寫入，FP-5）、importBackup 步驟 9（FP-6，mode card、正面）；刪除 keepCurrentCard，deleteCustomWord 不再呼叫 custom.indexAfterDelete。(3) gotoCard：index 實際改變時 flashcardPosition = position.fromIndex → commitWrite（FP-3）。(4) appliedGoalState：effectiveColor 改變 → 重建單字集、index 0、flashcardPosition null；未改變 → studySet、flashcard、speech、flashcardPosition 全部不變（FB-54）；startLearning 寫入 flashcardPosition null。(5) init：normalizeAfterLoad 傳入 bankIds（part5flow.bankIdsOf(content().part5)），UO-4 只改記憶體（RD-4）。(6) answerPart5：viewKind 為 allCorrect 時拒絕；答對依 part5flow.recordAnswer 附加 id，與計數、打卡同一次 commitWrite（CR-2）。nextPart5、restartPart5 改用 part5flow.next、restart（changed 為 false 不寫入）。(7) 新增 action：setPart5UnansweredOnly(on)、replayPart5KeepRecords()、clearPart5CorrectIds()，回傳值、守門與 tags 依 §4.10 表（題庫為空時不動作，SD-FB-64）。(8) importBackup 的 importSteps ctx 加 part5Ids。(9) store.test.js：改寫一般寫入 quota 的 storage tag 斷言、同色套用回第 1 張的斷言、deleteCustomWord 定位斷言（結果須與 AC-04-08 相同）；其餘 v0.14 案例保留。(10) 新增 store-track.test.js 依 §10.7（V-ST-18 含 INV-FP 每個 action 後斷言、V-ST-19、V-ST-20、V-ST-22、AC-47-02 匯出 → 清空 → 首次畫面匯入、unavailable、quota 混合 20 次 learningQuota 恰 1 次、1,000 個自訂單字下 200 次 gotoCard 平均 < 5 ms）。不得修改 views、ui、core（core 的需求回報主控）。若 flashcards.test.js、customizer.test.js、dashboard.test.js 因行為改變失敗 → 標 blocked 回報主控（預期不會）。",
+      "doneWhen": [
+        "`npm test` 全部通過",
+        "store-track.test.js 涵蓋 §10.7 列出的全部案例並通過；INV-FP 在每個 action 後皆成立",
+        "Node 量測：1,000 個自訂單字的狀態下 200 次 gotoCard 平均 < 5 ms（附輸出）",
+        "store.js 原始碼不再含 keepCurrentCard、commitLearning、indexAfterDelete 的呼叫；actions 物件含 setPart5UnansweredOnly、replayPart5KeepRecords、clearPart5CorrectIds",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-75",
+      "title": "模擬測驗畫面：「已答對 K / Q 題」、「✓ 曾答對」、只練沒答對開關、全部答對畫面與清除確認對話框",
+      "owner": "pg-frontend",
+      "batch": "v0.10-4",
+      "paths": [
+        "src/app/views/part5.js",
+        "src/app/styles/40-part5.css",
+        "src/app/__tests__/part5.test.js"
+      ],
+      "dependsOn": ["FE-72", "FE-74"],
+      "covers": [
+        "US-45",
+        "US-46",
+        "AC-45-01",
+        "AC-45-02",
+        "AC-45-04",
+        "AC-45-05",
+        "AC-45-06",
+        "AC-45-07",
+        "AC-45-08",
+        "AC-46-01",
+        "AC-46-02",
+        "AC-46-03",
+        "AC-46-04",
+        "AC-46-06",
+        "AC-46-07",
+        "AC-46-08",
+        "AC-46-10",
+        "AC-47-08",
+        "AC-32-02",
+        "AC-40-01"
+      ],
+      "contractRefs": [
+        "data-schema.ts §15 PART5_RECORD_TEXTS、Part5ViewKind",
+        "README §5.11 CR-4、CR-6、CR-9、UO-1、UO-3、UO-7",
+        "README §11.6 MT-1（v0.15）",
+        "README §9.8 DS-35",
+        "README §2 C-7"
+      ],
+      "description": "依 architecture.md v0.10 §4.10（views/part5.js）、§7.21.4、§10.7。(1) buildViewModel(progress, bank, consts, record?)：第 4 參數 { ids, only } 缺省為 { ids: [], only: false }；以 part5flow.viewKind 決定 kind（empty／question／summary／allCorrect），各 kind 附 k、q、only；question 附 correctBadge；allCorrect 附 inSummary、roundCorrect、roundAnswered。既有呼叫與測試相容。(2) render：題庫非空時在進度條之後、題型說明之前建立 div.p5-record（p.p5-record__count[data-p5=correct-count] 與 label.p5-only[data-p5=only-label] > input[type=checkbox][data-p5=only] + span）；question 卡片 .p5-meta 在題型標籤後、曾答對時加 span.p5-badge[data-p5=correct-badge]；新增 allCorrect 卡片（標題、說明句、inSummary 時的「本輪結算」與「答對 x / y」、兩個按鈕 data-p5=replay／clear）。進度條呼叫 layout.part5Progress(vm.kind, …)（allCorrect = 100%）。所有文字逐字依 §7.21.4 表：契約文字取 constants.PART5_RECORD_TEXTS（{k}、{q} 以 split／join 替換），SD 定稿文字放在本檔 RECORD_TEXT 並匯出；一律 textContent（C-7），不顯示題目 id。(3) 事件：開關 change → store.actions.setPart5UnansweredOnly(input.checked)；開關 keydown Enter → preventDefault 並 input.click()；replay → replayPart5KeepRecords()；clear → EMT.ui.dialog.confirm({ title: 清除答對紀錄, message: §7.21.4 內文, okText: 確定, cancelText: 取消 })，true 才呼叫 clearPart5CorrectIds()，false 不呼叫任何 action。焦點規則依 §7.21.4 互動表。訂閱 tag 仍為 part5。(4) 40-part5.css 依 §7.21.4 樣式表新增 .p5-record、.p5-record__count、.p5-only、.p5-only input、.p5-badge、.p5-allcorrect 系列；只用既有 CSS 變數，不新增色彩、不使用 --accent、不寫十六進位色值、新元素不設 transition／animation；遵守 §7.19.1 禁止寫法。(5) part5.test.js 依 §10.7 新增案例（含真 store 的 makeStore 整合：作答答對後 K +1 與標示出現、開關開啟跳題、allCorrect 兩個按鈕）；既有案例保留。不得修改 store、core、其他 view。",
+      "doneWhen": [
+        "`npm test` 全部通過（含 tokens.test.js、naming.test.js）",
+        "part5.test.js 涵蓋 §10.7 列出的全部案例並通過",
+        "三種畫面各恰 1 個 [data-p5=correct-count] 與 1 個 [data-p5=only]；allCorrect 畫面無 [data-p5=number]、無可作答選項",
+        "確認對話框參數 message 逐字等於 §7.21.4 內文且包含契約兩段；取消時 clearPart5CorrectIds 呼叫 0 次",
+        "40-part5.css 新規則無 --accent、無十六進位色值、無 transition／animation；.p5-only 有 min-height: var(--touch)",
+        "`node tools/build.mjs --out <scratchpad>/t.html` 成功；若有無頭瀏覽器，附 375px 與 1366px 的 question、summary、allCorrect 三種畫面截圖，否則列為待 FE-76 驗證",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-76",
+      "title": "v0.15 整合建置：產出 dist/ 與部署目錄（版本 1.1.0）、載入順序、跨模組自檢",
+      "owner": "pg-frontend",
+      "batch": "v0.10-5",
+      "paths": [
+        "dist/english-master-track.html",
+        "dist/site/index.html",
+        "dist/site/manifest.webmanifest",
+        "dist/site/sw.js",
+        "dist/site/ads.txt",
+        "dist/site/icons/icon-192.png",
+        "dist/site/icons/icon-512.png",
+        "dist/site/icons/icon-maskable-512.png",
+        "dist/site/icons/apple-touch-icon-180.png",
+        "src/app/__tests__/load-order.test.js",
+        "src/app/styles/90-overrides.css"
+      ],
+      "dependsOn": ["FE-70", "FE-71", "FE-72", "FE-73", "FE-74", "FE-75", "CT-25"],
+      "manualPrereqs": ["MC-04"],
+      "covers": [
+        "US-44",
+        "US-45",
+        "US-46",
+        "US-47",
+        "AC-44-01",
+        "AC-44-02",
+        "AC-47-08",
+        "AC-18-01",
+        "AC-42-02",
+        "AC-42-03",
+        "AC-01-08",
+        "AC-26-06",
+        "AC-32-10",
+        "AC-36-04",
+        "AC-37-06",
+        "AC-38-10",
+        "AC-43-03",
+        "AC-19-01",
+        "AC-19-04",
+        "AC-20-01",
+        "AC-36-01",
+        "AC-36-02"
+      ],
+      "contractRefs": [
+        "README §7.7 V-ST-18～V-ST-22、V-IMP-01",
+        "README §7.4 V-P5-08",
+        "README §12.4 V-VER-01～V-VER-06",
+        "README §10.11 V-PWA-01～06",
+        "README §9.8 DS-38、DS-39"
+      ],
+      "description": "所有 v0.10 任務與 MC-04 完成後的交付關卡，比照 FE-69。(1) load-order.test.js：依建置順序載入後斷言 EMT.core.position、EMT.core.part5flow 存在且載入時不讀 document、不取用 EMT.core.persist；constants.CURRENT_SCHEMA_VERSION === 3；PART5_RECORD_TEXTS 為凍結物件；既有斷言不變。(2) 執行 `npm run validate:data`（含 CT-25 的 V-P5-08，錯誤 0、警告 0）、`npm test`、`npm run build`：產出 dist/english-master-track.html（≤ 5,242,880 bytes，預估比 FE-69 產物多約 28 KB）與 dist/site/ 8 檔；再建置一次比對 index.html、manifest.webmanifest、sw.js 位元組相同；回報版本號、BUILD_ID、建置碼、各區段 bytes。(3) 靜態檢查（附指令與輸出）：FE-69 description (3) 全部照常，但 emt-app-version 必須為 1.1.0 且等於 package.json version；產物含 core/position、core/part5flow；產物字串常值含 PART5_RECORD_TEXTS 全部文字與 §7.21.4 的 SD 定稿文字；新增的 views 字串常值不含「範本」（HT-7）。(4) 若有無頭瀏覽器，以 file:// 與 `npm run serve` 依 architecture.md §10.7 E2E 表執行可自動化項目（AC-44-01、AC-44-02 重新載入回到同一張與 ≤ 100 ms；AC-45-01、AC-45-05、AC-46-03 ≤ 100 ms；AC-46-01 鍵盤與 44×44；AC-46-06～AC-46-08；AC-47-08 Network 0；375 與 1366 無水平捲軸、計數行與題號不重疊）；另以 FE-70 記錄 SHA-256 的 v0.14 交付檔產生的 localStorage（v014-state.json 內容寫入同一來源）開啟新產物，確認直接進主控台、既有資料不變、reload 後不再寫入。跨頁版面問題只在 90-overrides.css 修正，需改其他任務檔案時回報主控開 BUG，不得越界。無無頭瀏覽器時，回報列為待 QA 驗證項目。(5) 回報列出：已安裝 v1.0.0 PWA 的使用者將看到「有新版本，重新整理」（預期）；QA 既有 E2E 需更新的項目（SD-FB-57）；發布說明建議（SD-FB-63）。",
+      "doneWhen": [
+        "`npm run validate:data`、`npm test`、`npm run build` 皆成功",
+        "dist/english-master-track.html 已重新產生、≤ 5,242,880 bytes、emt-app-version 為 1.1.0、無 `@@`；dist/site/ 恰 8 檔且 index.html 與交付檔位元組相同",
+        "連續兩次 `npm run build` 的 index.html、manifest.webmanifest、sw.js 位元組相同（附 SHA-256）",
+        "load-order.test.js 含 position、part5flow、schemaVersion 3 的斷言並通過",
+        "description (3) 的靜態檢查全部符合（附指令與輸出）",
+        "description (4) 已執行並附結果與截圖路徑，或明確列為待 QA 驗證項目",
+        "只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
+    },
+    {
+      "id": "FE-77",
+      "title": "v0.16 文字修訂：更新提示新文字、資料來源頁聯絡行、防爬蟲靜態檢查、重新建置 dist/",
+      "owner": "pg-frontend",
+      "batch": "v0.11-1",
+      "paths": [
+        "src/app/core/pwa.js",
+        "src/app/views/sources-page.js",
+        "src/app/styles/70-sources.css",
+        "src/app/__tests__/pwa-core.test.js",
+        "src/app/__tests__/pwa-notice.test.js",
+        "src/app/__tests__/sources-page.test.js",
+        "src/app/__tests__/contact-static.test.js",
+        "dist/english-master-track.html",
+        "dist/site/index.html",
+        "dist/site/manifest.webmanifest",
+        "dist/site/sw.js",
+        "dist/site/ads.txt",
+        "dist/site/icons/icon-192.png",
+        "dist/site/icons/icon-512.png",
+        "dist/site/icons/icon-maskable-512.png",
+        "dist/site/icons/apple-touch-icon-180.png"
+      ],
+      "dependsOn": ["FE-76"],
+      "covers": [
+        "US-23",
+        "US-36",
+        "US-42",
+        "AC-23-07",
+        "AC-36-03",
+        "AC-42-04",
+        "AC-23-02",
+        "AC-36-01",
+        "AC-36-02",
+        "AC-36-07",
+        "AC-19-01",
+        "AC-21-01"
+      ],
+      "contractRefs": [
+        "data-schema.ts §16 SOURCES_CONTACT_TEXT",
+        "data-schema.ts PWA_TEXTS（updateNotice、updateButton，v0.16）",
+        "README §4.3 L-7",
+        "README §10.7 UP-4～UP-7（行為不變）",
+        "README §10.11 V-PWA-10",
+        "README §9.9 DS-40",
+        "README §9 FB-61、FB-62"
+      ],
+      "description": "依 architecture.md v0.11 §5.6、§7.22、§10.8。只改文字，不改行為、不改持久化結構、不改 src/data/、不改 tools/build.mjs、不改 package.json（維持 1.1.0）、不改 ui/pwa-notice.js、services/pwa.js、pwa/sw.template.js、index.html。(1) core/pwa.js：PWA_TEXTS.updateNotice 改為「有新版本，請更新版本」（全形逗號 U+FF0C）、updateButton 改為「更新版本」；其餘鍵與深度凍結不變；相關註解同步。(2) views/sources-page.js：新增模組層級常數 SOURCES_CONTACT_TEXT = \"email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m\"（逐字照契約 data-schema.ts §16 複製，半形空格 U+0020），並加入回傳的 api；render 在 .src-page 的最後（licenseSection 之後）加入 dom.el(\"p\", { className: \"src-muted src-contact\", text: SOURCES_CONTACT_TEXT })。不得對常數做任何字串處理（去空格、replace、split/join、拼接）；不設 href、tabindex、role、title、data-go，不加事件監聽；檔頭註解補 v0.11 說明，但註解中不得再寫出位址，也不得寫出去空格形式（全 src/app 非測試原始碼只此 1 處字面值）。(3) styles/70-sources.css：新增 .src-contact { margin: 24px 0 0; font-size: 0.8125rem; overflow-wrap: anywhere; }，不加 nowrap、user-select、--accent、#f7893b（§7.22.2；375px 實測仍折行時可改 0.75rem，回報中註明）。(4) 測試：pwa-core.test.js、pwa-notice.test.js 把逐字比對的舊文字改為新文字（含首次模式的 host.textContent「有新版本，請更新版本更新版本」），pwa-notice 另加「不含『重新整理』」；sources-page.test.js 依 §10.8 新增聯絡行案例（常數逐字與結構、恰 1 個 p.src-muted.src-contact、為 .src-page 最後一個子元素、本身與祖先非 A、無 href／tabindex／role／data-go、addEventListener 0 次、rootEl.textContent 無 mailto: 與去空格位址）；新增 contact-static.test.js：以 build({ write: false, log() {}, warn() {} }) 對專案預設輸入建置，檢查 html 無 mailto:（不分大小寫）、無去空格位址（不分大小寫）、常數原值恰 1 次、無「有新版本，重新整理」、含「有新版本，請更新版本」與「更新版本」、emt-app-version = package.json version；sw.js（r.site.files 中 path 為 sw.js 者）無 mailto: 與去空格位址；掃描 src/app 非 __tests__ 的 .js/.css/.html/.txt：無 mailto:、無去空格位址、常數原值只在 views/sources-page.js 出現 1 次；70-sources.css 的 .src-contact 規則無 nowrap、user-select、--accent、#f7893b。所有測試中的去空格位址一律於執行期由常數推導（例：SOURCES_CONTACT_TEXT.slice(\"email: \".length).split(\" \").join(\"\")），測試原始碼不得出現其字面值。(5) 執行 npm test；之後 npm run build 兩次（覆寫人類手改的 dist/，修正 QA BUG-004），以 SHA-256 比對兩次的 dist/english-master-track.html、dist/site/index.html、manifest.webmanifest、sw.js，並比對 dist/english-master-track.html 與 dist/site/index.html 相同；以指令檢查 dist/english-master-track.html、dist/site/index.html、dist/site/sw.js 中 mailto: 0 次、去空格位址 0 次、「有新版本，重新整理」0 次，兩份 HTML 的常數原值各 1 次、「有新版本，請更新版本」≥ 1 次；回報版本號（1.1.0）、新舊 BUILD_ID、建置碼、交付檔 bytes。(6) 若有無頭瀏覽器，依 §10.8 以 file:// 在 375×812、1366×768 量測聯絡行（getClientRects().length === 1、scrollWidth ≤ clientWidth、不被 #app-nav 遮住、對比 ≥ 4.5、點擊與 Tab 無動作、Network 0）；沒有則在回報中列為主控檢查 H-2、H-3。(7) 使用者決定本次不另跑 QA 輪次：驗收 = 本任務自測＋主控依 §10.8 H-1～H-4 檢查。不得修改 tests/、docs/ 或本任務 paths 以外的檔案；QA E2E 中的舊文字列於 SD-FB-65，不由本任務處理。",
+      "doneWhen": [
+        "core/pwa.js 的 PWA_TEXTS.updateNotice 為「有新版本，請更新版本」、updateButton 為「更新版本」，其餘鍵不變且仍深度凍結",
+        "資料來源與授權頁 .src-page 最後一個子元素為 p.src-muted.src-contact，以 textContent 寫入且 trim 後逐字等於 SOURCES_CONTACT_TEXT；非 <a>、無 href／tabindex／role／data-go、無事件監聽",
+        "70-sources.css 有 .src-contact 規則（0.8125rem 或回報理由後的 0.75rem、overflow-wrap: anywhere），無 nowrap／user-select／--accent／#f7893b",
+        "pwa-core.test.js、pwa-notice.test.js 已改為新文字；sources-page.test.js 新增聯絡行案例（逐字、非 A、不可聚焦、DOM 無去空格位址與 mailto:）；contact-static.test.js 已新增，且所有測試原始碼不含去空格位址字面值",
+        "`npm test` 全數通過",
+        "`npm run build` 連續兩次成功：dist/english-master-track.html、dist/site/index.html、manifest.webmanifest、sw.js 兩次 SHA-256 相同；dist/english-master-track.html 與 dist/site/index.html SHA-256 相同；emt-app-version 為 1.1.0（附指令與輸出）",
+        "dist/english-master-track.html、dist/site/index.html、dist/site/sw.js：mailto: 0 次、去空格位址 0 次、「有新版本，重新整理」0 次；兩份 HTML 的 SOURCES_CONTACT_TEXT 各 1 次、「有新版本，請更新版本」≥ 1 次（附指令與輸出）",
+        "375px 聯絡行 1 行、無水平捲軸、點擊與 Tab 無動作：已以無頭瀏覽器量測並附結果，或在回報中明確列為主控檢查 H-2、H-3",
+        "package.json、tools/、src/data/、tests/、docs/ 未被修改；只寫入本任務 paths"
+      ],
+      "status": "done",
+      "retries": 0
     }
   ],
   "manualSteps": [
@@ -4463,6 +4940,22 @@
         "static.yml 內容與 architecture.md §5.2 相同",
         "GitHub Actions 部署成功",
         "交人類／QA 執行 V-PWA-H4（AC-36-07）"
+      ],
+      "status": "done"
+    },
+    {
+      "id": "MC-04",
+      "title": "package.json version 改為 1.1.0（Q-70 A 一次授權）",
+      "owner": "主控",
+      "batch": "v0.10-1",
+      "paths": ["package.json"],
+      "before": ["FE-76"],
+      "covers": ["AC-42-02"],
+      "contractRefs": ["README §9.8 DS-38", "README §12.1 VR-1（v0.15 註記）", "PRD Q-70 決議 A"],
+      "description": "依 architecture.md v0.10 §5.5、§7.21.7。只把 package.json 的 \"version\": \"1.0.0\" 改為 \"1.1.0\"；name、scripts、engines、devDependencies 等其他欄位與格式（2 空白縮排、結尾換行）一律不動。須在 FE-76 執行 `npm run build` 之前完成。此為 Q-70 授權的唯一一次修改，之後版本號仍由人類維護（Q-58、D-14、D-15）；PG 不得修改此檔。",
+      "doneWhen": [
+        "package.json version 為 1.1.0，其他內容 diff 為 0",
+        "`npm test` 照常通過（build.test.js 以暫存 package.json 測試，不受影響）"
       ],
       "status": "done"
     }

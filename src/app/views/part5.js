@@ -23,6 +23,16 @@
  *   div.p5-progress[role=progressbar]（值取 EMT.core.layout.part5Progress，呼叫時取用）；題庫為空時不建節點；
  *   buildViewModel、作答、下一題、重新開始與焦點邏輯不變。
  *
+ * （v0.15，FE-75；architecture.md v0.10 §4.10、§7.21.4；契約 data-schema §15 PART5_RECORD_TEXTS、Part5ViewKind、
+ *   README §5.11 CR-4、CR-6、CR-9、UO-1、UO-3、UO-7、§11.6 MT-1；AC-45-04、AC-45-05、AC-46-01、AC-46-06～AC-46-08）
+ * - buildViewModel 第 4 參數 record = { ids, only }（缺省 { ids: [], only: false }）；畫面種類以 part5flow.viewKind 推導
+ *   （empty／question／summary／allCorrect，不存在 store）；各 kind 附 k（已答對題數）、q（題庫題數）、only。
+ * - 題庫非空時於進度條之後建立 div.p5-record：「已答對 K / Q 題」與原生核取方塊「只練沒答對的題目」；
+ *   曾答對的題目在 .p5-meta 題型標籤後顯示「✓ 曾答對」；allCorrect 畫面以兩個按鈕取代「重新開始」。
+ * - 「清除答對紀錄，重新來過」先經 EMT.ui.dialog.confirm，回 true 才呼叫 clearPart5CorrectIds；取消不呼叫任何 action。
+ * - 契約文字取 constants.PART5_RECORD_TEXTS；SD 定稿文字（說明句、對話框標題與內文）放在 RECORD_TEXT 並匯出。
+ *   一律 textContent（C-7），不顯示題目 id（CR-9）。
+ *
  * 寫法：純邏輯（splitSentence、splitStructure、optionState、buildViewModel、feedbackOf、shouldIgnoreClick 等）
  * 在 Node 下以 module.exports 匯出供測試；
  * 瀏覽器下登錄為 EMT.views part5 模組。
@@ -68,6 +78,26 @@
     badData: "這一題的資料不完整。"
   };
 
+  // （v0.15，FE-75）契約 PART5_RECORD_TEXTS 的備援值（constants.js 取不到時使用，內容與 data-schema §15 一致）
+  var FALLBACK_RECORD_TEXTS = {
+    correctBadge: "✓ 曾答對",
+    correctCount: "已答對 {k} / {q} 題",
+    unansweredOnlyLabel: "只練沒答對的題目",
+    allCorrectTitle: "{q} 題全部答對！",
+    replayKeepRecords: "全部題目再練一次（保留紀錄）",
+    clearAndRestart: "清除答對紀錄，重新來過",
+    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+    confirmOk: "確定",
+    confirmCancel: "取消"
+  };
+
+  // （v0.15，FE-75）SD 定稿文字（architecture.md §7.21.4 文字定稿表，逐字）
+  var RECORD_TEXT = {
+    allCorrectNote: "每一題都至少答對過一次了。可以保留紀錄、全部題目再練一次，或清除答對紀錄後重新來過。",
+    confirmTitle: "清除答對紀錄",
+    confirmMessage: "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。"
+  };
+
   /** 取得契約常數（Node 下 require，瀏覽器下讀 EMT.core.constants） */
   function constants() {
     var c = null;
@@ -82,8 +112,46 @@
     }
     return {
       blank: c && typeof c.PART5_BLANK === "string" && c.PART5_BLANK ? c.PART5_BLANK : FALLBACK_BLANK,
-      labels: c && c.PART5_TYPE_LABELS ? c.PART5_TYPE_LABELS : FALLBACK_LABELS
+      labels: c && c.PART5_TYPE_LABELS ? c.PART5_TYPE_LABELS : FALLBACK_LABELS,
+      // （v0.15，FE-75）答對紀錄相關文字
+      record: c && c.PART5_RECORD_TEXTS ? c.PART5_RECORD_TEXTS : FALLBACK_RECORD_TEXTS
     };
+  }
+
+  /** （v0.15，FE-75）EMT.core.part5flow（Node 下 require，瀏覽器下於呼叫時讀取）；不存在視為組裝錯誤（LD-3） */
+  function part5flow() {
+    var pf = null;
+    if (typeof require === "function" && typeof module === "object") {
+      pf = require("../core/part5flow.js");
+    } else if (root.EMT && root.EMT.core) {
+      pf = root.EMT.core.part5flow;
+    }
+    if (!pf || typeof pf.viewKind !== "function") throw new Error("[EMT.views.part5] 缺少模組 EMT.core.part5flow");
+    return pf;
+  }
+
+  /**
+   * （v0.15，FE-75）以 {k}、{q} 代入契約文字（split／join，不用正規表示式）。
+   * @param {*} template 例「已答對 {k} / {q} 題」
+   * @param {{ k?: number, q?: number }} values
+   * @returns {string}
+   */
+  function fillText(template, values) {
+    var t = typeof template === "string" ? template : "";
+    var v = values || {};
+    if (v.k !== undefined) t = t.split("{k}").join(String(v.k));
+    if (v.q !== undefined) t = t.split("{q}").join(String(v.q));
+    return t;
+  }
+
+  /**
+   * （v0.15，FE-75）答對紀錄參數正規化：缺省或型別不符 → { ids: [], only: false }。
+   * @param {*} record { ids, only }
+   * @returns {{ ids: Array, only: boolean }}
+   */
+  function normalizeRecord(record) {
+    var r = record && typeof record === "object" ? record : {};
+    return { ids: Array.isArray(r.ids) ? r.ids : [], only: r.only === true };
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -144,25 +212,54 @@
    * @param {object} progress Part5Progress（缺漏時以預設值處理）
    * @param {*} bank Part5Question[]
    * @param {{ blank?: string, labels?: object }} [consts] 契約常數
-   * @returns {object}
+   * @param {{ ids?: string[], only?: boolean }} [record] （v0.15）答對紀錄與開關；缺省 { ids: [], only: false }
+   * @returns {object} （v0.15）各 kind 皆附 k（已答對題數）、q（題庫題數）、only（開關）
    *   { kind: "empty" }
    *   { kind: "summary", roundCorrect, roundAnswered, totalCorrect, totalAnswered }
+   *   { kind: "allCorrect", inSummary, roundCorrect, roundAnswered }（v0.15，UO-3、UO-7）
    *   { kind: "question", index, number, total, typeLabel, segments, options[], locked, correctIndex,
-   *     isCorrect, valid, explanation: { coreStrategy, structureLines } }
+   *     isCorrect, valid, explanation: { coreStrategy, structureLines }, correctBadge }
    */
-  function buildViewModel(progress, bank, consts) {
+  function buildViewModel(progress, bank, consts, record) {
     var list = Array.isArray(bank) ? bank : [];
     var c = consts || constants();
     var p = progress && typeof progress === "object" ? progress : {};
-    if (list.length === 0) return { kind: "empty" };
+    var rec = normalizeRecord(record);
+    var PF = part5flow();
+    var bankIds = PF.bankIdsOf(list);
+    var set = PF.correctSet(rec.ids);
+    var kCount = PF.countCorrect(bankIds, set);
+    var qCount = list.length;
+    // UO-3：畫面種類每次繪製時推導（不存在 store）
+    var kind = PF.viewKind(p, bankIds, set, rec.only);
+    if (kind === "empty") return { kind: "empty", k: 0, q: 0, only: rec.only };
 
-    if (p.phase === "summary") {
+    var roundC = isIndex(p.roundCorrect) ? p.roundCorrect : 0;
+    var roundA = isIndex(p.roundAnswered) ? p.roundAnswered : 0;
+
+    // （v0.15，UO-7）全部答對：不顯示題目；作答結束進入（phase = summary）時另顯示本輪結算（AC-46-06）
+    if (kind === "allCorrect") {
+      return {
+        kind: "allCorrect",
+        inSummary: p.phase === "summary",
+        roundCorrect: roundC,
+        roundAnswered: roundA,
+        k: kCount,
+        q: qCount,
+        only: rec.only
+      };
+    }
+
+    if (kind === "summary") {
       return {
         kind: "summary",
-        roundCorrect: isIndex(p.roundCorrect) ? p.roundCorrect : 0,
-        roundAnswered: isIndex(p.roundAnswered) ? p.roundAnswered : 0,
+        roundCorrect: roundC,
+        roundAnswered: roundA,
         totalCorrect: isIndex(p.totalCorrect) ? p.totalCorrect : 0,
-        totalAnswered: isIndex(p.totalAnswered) ? p.totalAnswered : 0
+        totalAnswered: isIndex(p.totalAnswered) ? p.totalAnswered : 0,
+        k: kCount,
+        q: qCount,
+        only: rec.only
       };
     }
 
@@ -205,7 +302,12 @@
       explanation: {
         coreStrategy: typeof ex.coreStrategy === "string" ? ex.coreStrategy : "",
         structureLines: splitStructure(ex.structure)
-      }
+      },
+      // （v0.15，CR-4 (a)）目前題目曾答對（未作答、已作答皆顯示標示）
+      correctBadge: PF.isCorrectAt(bankIds, set, index),
+      k: kCount,
+      q: qCount,
+      only: rec.only
     };
   }
 
@@ -307,7 +409,8 @@
 
   var rootEl = null;      // #view-part5
   var unsubscribe = null;
-  var pendingFocus = null; // 重繪後要聚焦的目標："next" | "question" | "restart"
+  var pendingFocus = null; // 重繪後要聚焦的目標："next" | "question" | "restart" | "only"（v0.15）
+  var confirming = false;  // （v0.15）清除確認對話框開啟中（避免重複開啟）
   var touch = null;        // 選項清單的觸控狀態（跨重繪保留；只用於忽略滑動後補發的 click）
 
   /** 取用其他模組（呼叫時才取；不存在視為組裝錯誤，LD-3） */
@@ -431,6 +534,14 @@
     return st && st.data ? st.data.part5 : null;
   }
 
+  /** （v0.15，FE-75）答對紀錄與開關（state.data.part5CorrectIds、part5UnansweredOnly）；取不到 → 預設值 */
+  function record() {
+    var s = store();
+    var st = s && typeof s.getState === "function" ? s.getState() : null;
+    var d = st && st.data ? st.data : {};
+    return normalizeRecord({ ids: d.part5CorrectIds, only: d.part5UnansweredOnly });
+  }
+
   /** 呼叫 store action（不存在時忽略） */
   function act(name, arg) {
     var s = store();
@@ -438,6 +549,125 @@
       return arguments.length > 1 ? s.actions[name](arg) : s.actions[name]();
     }
     return undefined;
+  }
+
+  /**
+   * （v0.15，FE-75；CR-4 (b)、UO-1；AC-45-05、AC-46-01）計數行與「只練沒答對的題目」開關。
+   * 開關為原生核取方塊，整個 label 為觸控目標；change → setPart5UnansweredOnly(input.checked)；
+   * 原生核取方塊不回應 Enter，keydown Enter 時補 input.click()（觸發原生切換與 change）。
+   * @param {object} vm buildViewModel 的結果（k、q、only）
+   * @param {object} T 契約文字 PART5_RECORD_TEXTS
+   * @returns {Element}
+   */
+  function renderRecord(vm, T) {
+    var D = dom();
+    var input = D.el("input", {
+      attrs: { type: "checkbox", "data-p5": "only", checked: vm.only === true },
+      on: {
+        change: function () {
+          pendingFocus = "only";
+          var r = act("setPart5UnansweredOnly", input.checked === true);
+          // store 未變更（或不存在）時不會通知重繪：主動重繪，讓核取方塊回到實際狀態
+          if (!r || !r.changed) render();
+        },
+        keydown: function (ev) {
+          if (ev && ev.key === "Enter") {
+            if (typeof ev.preventDefault === "function") ev.preventDefault();
+            input.click();
+          }
+        }
+      }
+    });
+    input.checked = vm.only === true;
+    return D.el("div", { className: "p5-record" }, [
+      D.el("p", { className: "p5-record__count", attrs: { "data-p5": "correct-count" },
+        text: fillText(T.correctCount, { k: vm.k, q: vm.q }) }),
+      D.el("label", { className: "p5-only", attrs: { "data-p5": "only-label" } }, [
+        input,
+        D.el("span", { className: "p5-only__text", text: T.unansweredOnlyLabel })
+      ])
+    ]);
+  }
+
+  /**
+   * （v0.15，FE-75；CR-6；AC-46-08）清除確認對話框：true → clearPart5CorrectIds；
+   * false（取消、Esc、點遮罩）→ 不呼叫任何 action，焦點回到清除按鈕。
+   * @returns {Promise|undefined} 對話框流程（已有對話框開啟中時回 undefined）
+   */
+  function onClearRequest() {
+    if (confirming) return undefined;
+    var T = constants().record;
+    var dlg = root.EMT && root.EMT.ui && root.EMT.ui.dialog;
+    if (!dlg || typeof dlg.confirm !== "function") throw new Error("[EMT.views.part5] 缺少模組 EMT.ui.dialog");
+    confirming = true;
+    var p;
+    try {
+      p = Promise.resolve(dlg.confirm({
+        title: RECORD_TEXT.confirmTitle,
+        message: RECORD_TEXT.confirmMessage,
+        okText: T.confirmOk,
+        cancelText: T.confirmCancel
+      }));
+    } catch (e) {
+      p = Promise.reject(e);
+    }
+    return p.then(function (ok) {
+      confirming = false;
+      if (ok === true) {
+        pendingFocus = "question";
+        var r = act("clearPart5CorrectIds");
+        if (!r || !r.ok) pendingFocus = null;
+        return;
+      }
+      focusSelector('[data-p5="clear"]');
+    }, function (e) {
+      // 對話框本身出錯：視同取消（資料不變）
+      confirming = false;
+      if (root.console) root.console.error("[EMT.views.part5] 確認視窗失敗", e);
+    });
+  }
+
+  /**
+   * （v0.15，FE-75；UO-7；AC-46-06～AC-46-08）全部答對畫面：標題、說明句、（作答結束進入時）本輪結算、兩個按鈕。
+   * 不顯示題目、選項與「第 i / N 題」。
+   */
+  function renderAllCorrect(vm, T) {
+    var D = dom();
+    var children = [
+      D.el("h3", { className: "p5-allcorrect__title", attrs: { tabindex: "-1", "data-p5": "allcorrect-title" },
+        text: fillText(T.allCorrectTitle, { q: vm.q }) }),
+      D.el("p", { className: "p5-allcorrect__note", text: RECORD_TEXT.allCorrectNote })
+    ];
+    if (vm.inSummary) {
+      children.push(D.el("p", { className: "p5-allcorrect__caption", text: TEXT.summaryTitle }));
+      children.push(D.el("p", { className: "p5-summary__score", attrs: { "data-p5": "summary-score" },
+        text: "答對 " + vm.roundCorrect + " / " + vm.roundAnswered }));
+    }
+    children.push(D.el("div", { className: "btn-row p5-allcorrect__actions" }, [
+      D.el("button", {
+        className: "btn btn--primary",
+        attrs: { type: "button", "data-p5": "replay" },
+        text: T.replayKeepRecords,
+        on: {
+          click: function () {
+            pendingFocus = "question";
+            var r = act("replayPart5KeepRecords");
+            if (!r || !r.ok) pendingFocus = null;
+          }
+        }
+      }),
+      D.el("button", {
+        className: "btn",
+        attrs: { type: "button", "data-p5": "clear" },
+        text: T.clearAndRestart,
+        on: {
+          click: function () {
+            onClearRequest();
+          }
+        }
+      })
+    ]));
+    return D.el("div", { className: "card p5-allcorrect" }, children);
   }
 
   /** 題庫為空 */
@@ -542,14 +772,17 @@
   }
 
   /** 作答畫面 */
-  function renderQuestion(vm) {
+  function renderQuestion(vm, T) {
     var D = dom();
+    var badgeText = T && typeof T.correctBadge === "string" ? T.correctBadge : FALLBACK_RECORD_TEXTS.correctBadge;
     var answered = vm.locked !== null;
     var children = [
       D.el("div", { className: "p5-meta" }, [
         D.el("h3", { className: "p5-number", attrs: { tabindex: "-1", "data-p5": "number" },
           text: "第 " + vm.number + " / " + vm.total + " 題" }),
-        vm.typeLabel ? D.el("span", { className: "p5-type", attrs: { "data-p5": "type" }, text: vm.typeLabel }) : null
+        vm.typeLabel ? D.el("span", { className: "p5-type", attrs: { "data-p5": "type" }, text: vm.typeLabel }) : null,
+        // （v0.15，CR-4 (a)；AC-45-04）曾答對才建立標示；未曾答對不顯示任何標示
+        vm.correctBadge ? D.el("span", { className: "p5-badge", attrs: { "data-p5": "correct-badge" }, text: badgeText }) : null
       ]),
       renderSentence(vm.segments),
       renderOptions(vm),
@@ -583,11 +816,14 @@
     if (!rootEl) return;
     var D = dom();
     var list = bank();
-    var vm = buildViewModel(progress(), list);
+    var c = constants();
+    var T = c.record;
+    var vm = buildViewModel(progress(), list, c, record());
     var body;
     if (vm.kind === "empty") body = renderEmpty();
     else if (vm.kind === "summary") body = renderSummary(vm);
-    else body = renderQuestion(vm);
+    else if (vm.kind === "allCorrect") body = renderAllCorrect(vm, T);
+    else body = renderQuestion(vm, T);
 
     D.clear(rootEl);
     D.append(rootEl, [
@@ -595,6 +831,8 @@
         D.el("h2", { className: "page-title p5-heading", text: TEXT.heading }),
         // （v0.12，FE-61）作答進度條：h2 之後、題型說明之前（MT-1）
         renderProgressBar(vm, list.length),
+        // （v0.15，FE-75）計數行與開關：進度條之後、題型說明之前；題庫為空時不建立（SD-FB-64）
+        vm.kind === "empty" ? null : renderRecord(vm, T),
         D.el("p", { className: "p5-heading-note", text: TEXT.headingNote }),
         body
       ])
@@ -608,9 +846,17 @@
     pendingFocus = null;
     if (!target || !rootEl) return;
     var sel = null;
-    if (vm.kind === "summary") sel = '[data-p5="summary-title"]';
+    // （v0.15，§7.21.4 互動表）開關操作後焦點留在開關；進入全部答對畫面時移到標題
+    if (target === "only") sel = '[data-p5="only"]';
+    else if (vm.kind === "summary") sel = '[data-p5="summary-title"]';
+    else if (vm.kind === "allCorrect") sel = '[data-p5="allcorrect-title"]';
     else if (vm.kind === "question") sel = target === "next" ? '[data-p5="next"]' : '[data-p5="number"]';
-    var node = sel ? rootEl.querySelector(sel) : null;
+    focusSelector(sel);
+  }
+
+  /** 聚焦 rootEl 內符合選擇器的元素（不存在時忽略） */
+  function focusSelector(sel) {
+    var node = sel && rootEl && typeof rootEl.querySelector === "function" ? rootEl.querySelector(sel) : null;
     if (node && typeof node.focus === "function") {
       try { node.focus(); } catch (e) { /* 忽略 */ }
     }
@@ -638,6 +884,8 @@
   return {
     LETTERS: LETTERS,
     TEXT: TEXT,
+    RECORD_TEXT: RECORD_TEXT,
+    fillText: fillText,
     splitSentence: splitSentence,
     splitStructure: splitStructure,
     optionState: optionState,

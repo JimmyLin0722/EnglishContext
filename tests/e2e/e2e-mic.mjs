@@ -242,7 +242,7 @@ const PAGES = [];
     const cache = await p.ev(`(async () => { try { return await caches.keys(); } catch (e) { return "不可用：" + e.name; } })()`);
     const downloads = fs.readdirSync(p.downloads);
     const reqs = p.log.requests.filter((r) => !r.url.startsWith("file:") && !r.url.startsWith("data:"));
-    const ok = keys.length === 1 && keys[0] === "englishMasterTrack:state" && dataKeys === "customVocab,goal,learnedHistory,masteredWordKeys,part5,streak,sttNoticeAcknowledged,todayLearned,vocabQuiz" && !audioLike
+    const ok = keys.length === 1 && keys[0] === "englishMasterTrack:state" && dataKeys === "customVocab,flashcardPosition,goal,learnedHistory,masteredWordKeys,part5,part5CorrectIds,part5UnansweredOnly,streak,sttNoticeAcknowledged,todayLearned,vocabQuiz" /* 第 7 輪：v0.15 data 12 欄（C-8） */ && !audioLike
       && Array.isArray(idb) && idb.length === 0 && (!Array.isArray(cache) || cache.length === 0) && downloads.length === 0 && reqs.length === 0;
     return { ok, note: `localStorage 鍵 ${keys.join("、")}；data 欄位 ${dataKeys}；含音訊／音量樣式字串=${audioLike}；IndexedDB ${JSON.stringify(idb)}；Cache Storage ${JSON.stringify(cache)}；下載 ${downloads.length} 個；非 file: 網路請求 ${reqs.length}` };
   });

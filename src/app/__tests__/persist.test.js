@@ -4,6 +4,9 @@
  *       V-ST-01～03、V-ST-05、V-ST-09～V-ST-11、README §5.2、§5.3（MG-1～MG-4、RD-1、RD-2）
  * （FE-42）v0.10：預設分數 725（C.SCORE_DEFAULT，Q-39、GS-7）；既有分數 600、735 原值保留（GS-4）；
  *       723、"600"、600.5 仍為 unreadable（不四捨五入，GS-5）。以 600 代表「v0.9 以前既有分數」的資料刻意保留。
+ * （FE-73）v0.15 持久化升版：record() 產生目前版本（3）且 data 12 欄；v2Record() 明確走 MG-5～MG-6 遷移路徑；
+ *       v1 遷移結果改為 3；新增 3 欄的 shape／written 驗證、RD-3、ensureWritable、normalizeAfterLoad 第 4 參數（UO-4）。
+ *       樣本檔的 V-ST-21、RD-3 矩陣、IM-9、IM-10 另見 migrate-v3.test.js。
  */
 "use strict";
 const test = require("node:test");
@@ -26,12 +29,28 @@ function sampleData() {
     streak: { days: 3, lastActiveDate: "2026-10-29" },
     sttNoticeAcknowledged: true,
     todayLearned: { date: "2026-10-29", wordKeys: ["monetization", "bootstrap"] },
-    learnedHistory: { "2026-10-28": 3, "2026-10-29": 2 }
+    learnedHistory: { "2026-10-28": 3, "2026-10-29": 2 },
+    // v0.15（schemaVersion 3）：非預設值，驗證讀寫原樣保留（含題庫中不存在的 id，Q-71 A）
+    flashcardPosition: { wordKey: "bootstrap", ordinal: 2 },
+    part5CorrectIds: ["p5-001", "p5-999"],
+    part5UnansweredOnly: true
   };
 }
 
 /** v1 的 7 個既有欄位 */
 const V1_KEYS = ["goal", "customVocab", "masteredWordKeys", "vocabQuiz", "part5", "streak", "sttNoticeAcknowledged"];
+/** v2 的 9 個欄位 */
+const V2_KEYS = V1_KEYS.concat(["todayLearned", "learnedHistory"]);
+/** v0.15 新增的 3 個選填欄位 */
+const TRACK_KEYS = ["flashcardPosition", "part5CorrectIds", "part5UnansweredOnly"];
+const TRACK_DEFAULTS = { flashcardPosition: null, part5CorrectIds: [], part5UnansweredOnly: false };
+
+/** 只保留 v2 的 9 欄（v0.14 以前程式寫出的 data 形狀） */
+function v2Data() {
+  const d = sampleData();
+  TRACK_KEYS.forEach((k) => { delete d[k]; });
+  return d;
+}
 
 /**
  * v0.7 程式（schemaVersion 1）實際寫入 localStorage 的格式：
@@ -59,13 +78,19 @@ const V07_RAW = JSON.stringify({
   }
 });
 
+/** 目前版本（CURRENT_SCHEMA_VERSION）的紀錄 */
 function record(data, extra) {
-  return Object.assign({ schemaVersion: 2, savedAt: "2026-10-29T08:30:00.000Z", data: data }, extra || {});
+  return Object.assign({ schemaVersion: C.CURRENT_SCHEMA_VERSION, savedAt: "2026-10-29T08:30:00.000Z", data: data }, extra || {});
+}
+
+/** v2 紀錄（刻意建立 v2 遷移輸入）：資料只有 9 欄 */
+function v2Record(extra) {
+  return Object.assign({ schemaVersion: 2, savedAt: "2026-10-29T08:30:00.000Z", data: v2Data() }, extra || {});
 }
 
 /** v1 紀錄：資料只有 7 個既有欄位 */
 function v1Record(extra) {
-  const d = sampleData();
+  const d = v2Data();
   delete d.todayLearned;
   delete d.learnedHistory;
   return Object.assign({ schemaVersion: 1, savedAt: "2026-10-29T08:30:00.000Z", data: d }, extra || {});
@@ -97,18 +122,29 @@ test("defaultData：契約 §5.2 預設值（AC-18-02；v0.10 預設分數 725 =
     streak: { days: 0, lastActiveDate: null },
     sttNoticeAcknowledged: false,
     todayLearned: { date: null, wordKeys: [] },
-    learnedHistory: {}
+    learnedHistory: {},
+    flashcardPosition: null,
+    part5CorrectIds: [],
+    part5UnansweredOnly: false
   });
   // 每次回傳新物件
   const a = P.defaultData();
   a.customVocab.push(1);
   a.todayLearned.wordKeys.push("x");
   a.learnedHistory["2026-10-30"] = 1;
+  a.part5CorrectIds.push("p5-001");
   assert.equal(P.defaultData().customVocab.length, 0);
   assert.deepEqual(P.defaultData().todayLearned, { date: null, wordKeys: [] });
   assert.deepEqual(P.defaultData().learnedHistory, {});
-  assert.deepEqual([...P.DATA_KEYS], V1_KEYS.concat(["todayLearned", "learnedHistory"]));
+  assert.deepEqual(P.defaultData().part5CorrectIds, []);
+  // v0.15：12 欄（必填 9 欄 + 選填 3 欄，順序同契約）
+  assert.deepEqual([...P.DATA_KEYS], V2_KEYS.concat(TRACK_KEYS));
+  assert.equal(P.DATA_KEYS.length, 12);
+  assert.deepEqual([...P.REQUIRED_DATA_KEYS], V2_KEYS);
+  assert.deepEqual([...P.V2_DATA_KEYS], V2_KEYS);
+  assert.deepEqual([...P.TRACK_KEYS], TRACK_KEYS);
   assert.deepEqual([...P.V1_DATA_KEYS], V1_KEYS);
+  assert.deepEqual(Object.keys(P.defaultData()), [...P.DATA_KEYS]);
 });
 
 test("預設值與樣本皆通過驗證；與 storage-schema.json 範例一致", () => {
@@ -118,7 +154,9 @@ test("預設值與樣本皆通過驗證；與 storage-schema.json 範例一致",
   const schema = require("../../../docs/02-contract/storage-schema.json");
   assert.equal(schema.properties.schemaVersion.const, C.CURRENT_SCHEMA_VERSION);
   assert.deepEqual(schema.$defs.BackupFile.properties.schemaVersion.enum, [...C.SUPPORTED_SCHEMA_VERSIONS]);
-  assert.deepEqual(schema.$defs.PersistedData.required, [...P.DATA_KEYS]);
+  assert.deepEqual(schema.$defs.PersistedData.required, [...P.REQUIRED_DATA_KEYS]);
+  assert.deepEqual(Object.keys(schema.$defs.PersistedData.properties), [...P.DATA_KEYS]);
+  assert.deepEqual(schema.$defs.PersistedDataWritten.allOf[1].required, [...P.TRACK_KEYS]);
   assert.deepEqual(schema.$defs.TodayLearnedState.required, ["date", "wordKeys"]);
   const example = schema.examples[0];
   assert.ok(P.validateStorageRecord(example).ok);
@@ -131,6 +169,15 @@ test("預設值與樣本皆通過驗證；與 storage-schema.json 範例一致",
   assert.equal(r.kind, "ok");
   assert.deepEqual(r.fieldsReset, []);
   assert.deepEqual(r.data, ex2.data);
+  // 範例 3（v0.15）：3 個新欄位有值，符合寫出格式且讀回原樣
+  const ex3 = schema.examples[2];
+  assert.ok(P.validateStorageRecord(ex3).ok);
+  assert.ok(P.validatePersistedData(ex3.data, { written: true }).ok);
+  const r3 = P.parseStored(JSON.stringify(ex3));
+  assert.equal(r3.kind, "ok");
+  assert.equal(r3.migrated, false);
+  assert.deepEqual(r3.fieldsReset, []);
+  assert.deepEqual(r3.data, ex3.data);
 });
 
 test("parseStored：鍵不存在 → missing + 預設值", () => {
@@ -158,14 +205,15 @@ test("parseStored：非 JSON、空字串、非物件 → unreadable（AC-18-05�
   }
 });
 
-test("parseStored：schemaVersion 缺失、非整數、3、0、負數 → unreadable", () => {
+test("parseStored：schemaVersion 缺失、非整數、大於目前版本（4）、0、負數 → unreadable", () => {
   expectUnreadable((rec) => { delete rec.schemaVersion; }, "缺失");
   expectUnreadable((rec) => { rec.schemaVersion = "1"; }, "字串");
   expectUnreadable((rec) => { rec.schemaVersion = "2"; }, "字串 2");
+  expectUnreadable((rec) => { rec.schemaVersion = "3"; }, "字串 3");
   expectUnreadable((rec) => { rec.schemaVersion = 1.5; }, "小數");
   expectUnreadable((rec) => { rec.schemaVersion = 2.0000001; }, "小數 2.0000001");
   expectUnreadable((rec) => { rec.schemaVersion = null; }, "null");
-  expectUnreadable((rec) => { rec.schemaVersion = 3; }, "大於目前版本");
+  expectUnreadable((rec) => { rec.schemaVersion = C.CURRENT_SCHEMA_VERSION + 1; }, "大於目前版本");
   expectUnreadable((rec) => { rec.schemaVersion = 99; }, "大於目前版本 99");
   expectUnreadable((rec) => { rec.schemaVersion = 0; }, "不在支援清單");
   expectUnreadable((rec) => { rec.schemaVersion = -1; }, "負數");
@@ -197,11 +245,14 @@ test("parseStored：多餘欄位（各層 additionalProperties: false）→ unre
   expectUnreadable((rec, d) => { d.vocabQuiz.wrong = 2; }, "vocabQuiz 多餘欄");
   expectUnreadable((rec, d) => { d.part5.x = 0; }, "part5 多餘欄");
   expectUnreadable((rec, d) => { d.streak.x = 0; }, "streak 多餘欄");
-  // v1 也是：遷移後以 v2 完整驗證
+  // v1、v2 也是：遷移後以 v3 完整驗證
   assert.equal(P.parseStored(raw(v1Record({ extra: 1 }))).kind, "unreadable");
   const v1 = v1Record();
   v1.data.extra = true;
   assert.equal(P.parseStored(raw(v1)).kind, "unreadable");
+  const v2 = v2Record();
+  v2.data.extra = true;
+  assert.equal(P.parseStored(raw(v2)).kind, "unreadable");
 });
 
 test("parseStored：__proto__ 鍵視為多餘欄位，不污染原型", () => {
@@ -275,10 +326,12 @@ test("validatePersistedData：allowCustomDuplicates 只放寬 customVocab 的 id
   assert.equal(P.validatePersistedData(d, { allowCustomDuplicates: true }).ok, false);
 });
 
-test("validateStorageRecord：回傳錯誤清單；schemaVersion 必須等於目前版本（2；v1 須先遷移）", () => {
+test("validateStorageRecord：回傳錯誤清單；schemaVersion 必須等於目前版本（3；v1、v2 須先遷移）", () => {
   const ok = P.validateStorageRecord(record(sampleData()));
   assert.deepEqual(ok, { ok: true, errors: [] });
-  for (const v of [1, 3]) {
+  // 3 個新欄位為選填：只有 9 欄的 data 包在 v3 根結構仍通過
+  assert.ok(P.validateStorageRecord(record(v2Data())).ok);
+  for (const v of [1, 2, 4]) {
     const bad = P.validateStorageRecord(record(sampleData(), { schemaVersion: v }));
     assert.equal(bad.ok, false, String(v));
     assert.ok(bad.errors.length > 0);
@@ -290,7 +343,7 @@ test("validateStorageRecord：回傳錯誤清單；schemaVersion 必須等於目
 });
 
 test("parseStored：任意字串輸入都不拋例外", () => {
-  const seeds = [raw(record(sampleData())), raw(record(P.defaultData())), raw(v1Record()), V07_RAW, "{\"schemaVersion\":1}", "{}"];
+  const seeds = [raw(record(sampleData())), raw(record(P.defaultData())), raw(v1Record()), raw(v2Record()), V07_RAW, "{\"schemaVersion\":1}", "{}"];
   let seed = 12345;
   const rand = () => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
   const inputs = [
@@ -341,12 +394,15 @@ test("normalizeAfterLoad：以 appliedScore 重算色級（V-ST-02、AC-01-04）
 
 // ── v0.10（FE-42）：既有分數不轉換（GS-4）、資料層驗證不四捨五入（GS-5） ──
 
-test("GS-4：v2 紀錄的既有分數 600、735 讀取後原值保留，色級依 V-ST-02 重算（AC-26-06）", () => {
-  for (const [score, color, eff] of [[600, "green", "green"], [735, "blue", "green"]]) {
+test("GS-4：v3 與 v2（遷移）紀錄的既有分數 600、735 讀取後原值保留，色級依 V-ST-02 重算（AC-26-06）", () => {
+  for (const [score, color, eff, build] of [
+    [600, "green", "green", (d) => record(d)], [735, "blue", "green", (d) => record(d)],
+    [600, "green", "green", (d) => { TRACK_KEYS.forEach((k) => { delete d[k]; }); return record(d, { schemaVersion: 2 }); }]
+  ]) {
     const d = sampleData();
     // 冗餘色級刻意填錯，驗證只重算色級、不動分數
     d.goal = { draftScore: score, appliedScore: score, appliedColor: "orange", effectiveColor: "orange" };
-    const r = P.parseStored(raw(record(d)));
+    const r = P.parseStored(raw(build(d)));
     assert.equal(r.kind, "ok", String(score));
     assert.equal(r.data.goal.draftScore, score);
     assert.equal(r.data.goal.appliedScore, score);
@@ -354,7 +410,7 @@ test("GS-4：v2 紀錄的既有分數 600、735 讀取後原值保留，色級�
     assert.deepEqual(n.goal, { draftScore: score, appliedScore: score, appliedColor: color, effectiveColor: eff }, String(score));
     // 寫回後仍為原值（不改寫為色級上限或下限）
     const rec = P.buildRecord(n, new Date("2026-10-30T01:00:00.000Z"));
-    assert.equal(rec.schemaVersion, 2);
+    assert.equal(rec.schemaVersion, C.CURRENT_SCHEMA_VERSION);
     assert.equal(rec.data.goal.draftScore, score);
     assert.equal(rec.data.goal.appliedScore, score);
     assert.deepEqual(P.parseStored(JSON.stringify(rec)).data.goal, n.goal);
@@ -412,10 +468,10 @@ test("normalizeAfterLoad：V-ST-05 currentIndex 在範圍內保留（AC-11-05）
   assert.equal(P.normalizeAfterLoad(sampleData(), 0).part5.currentIndex, 0);
 });
 
-test("MIGRATIONS 只有 1 → 2；migrate 對目前版本不變、v1 遷移、其他版本失敗", () => {
-  assert.deepEqual(Object.keys(P.MIGRATIONS), ["1"]);
+test("MIGRATIONS 為 1 → 2、2 → 3；migrate 對目前版本不變、v1 逐版遷移到 3、其他版本失敗", () => {
+  assert.deepEqual(Object.keys(P.MIGRATIONS), ["1", "2"]);
   assert.ok(Object.isFrozen(P.MIGRATIONS));
-  assert.equal(C.CURRENT_SCHEMA_VERSION, 2);
+  assert.equal(C.CURRENT_SCHEMA_VERSION, 3);
   const rec = record(sampleData());
   const m = P.migrate(rec);
   assert.equal(m.ok, true);
@@ -428,27 +484,45 @@ test("MIGRATIONS 只有 1 → 2；migrate 對目前版本不變、v1 遷移、�
   const m1 = P.migrate(v1);
   assert.equal(m1.ok, true);
   assert.equal(m1.migrated, true);
-  assert.equal(m1.record.schemaVersion, 2);
+  assert.equal(m1.record.schemaVersion, C.CURRENT_SCHEMA_VERSION);
   assert.equal(m1.record.savedAt, v1.savedAt);
   assert.deepEqual(m1.record.data.todayLearned, { date: null, wordKeys: [] });
   assert.deepEqual(m1.record.data.learnedHistory, {});
+  TRACK_KEYS.forEach((k) => assert.deepEqual(m1.record.data[k], TRACK_DEFAULTS[k], "1 → 2 → 3：" + k));
   assert.deepEqual(v1, snapshot, "不修改傳入值");
 
-  for (const v of [0, 3, -1, 1.5, "1", "2", null, undefined]) {
+  // 2 → 3（MG-5、MG-6）：9 欄原值不動，3 欄一律覆寫為預設（即使 v2 內已有這 3 鍵也不採用）
+  const v2 = v2Record();
+  v2.data.flashcardPosition = { wordKey: "x", ordinal: 1 };
+  v2.data.part5CorrectIds = ["p5-001"];
+  v2.data.part5UnansweredOnly = true;
+  const snap2 = JSON.parse(JSON.stringify(v2));
+  const m2 = P.migrate(v2);
+  assert.equal(m2.ok, true);
+  assert.equal(m2.migrated, true);
+  assert.equal(m2.record.schemaVersion, 3);
+  V2_KEYS.forEach((k) => assert.deepEqual(m2.record.data[k], v2.data[k], "MG-6：" + k + " 原值不動"));
+  TRACK_KEYS.forEach((k) => assert.deepEqual(m2.record.data[k], TRACK_DEFAULTS[k], "MG-6：" + k + " 覆寫為預設"));
+  assert.deepEqual(v2, snap2, "不修改傳入值");
+
+  for (const v of [0, 4, -1, 1.5, "1", "2", "3", null, undefined]) {
     assert.equal(P.migrate(record(sampleData(), { schemaVersion: v })).ok, false, String(v));
   }
   assert.equal(P.migrate(null).ok, false);
-  // MG-1：v1 的 data 不是物件 → 遷移失敗
+  // MG-1、MG-5：v1、v2 的 data 不是物件 → 遷移失敗
   for (const d of [null, [], "x", 1, true, undefined]) {
     assert.equal(P.migrate({ schemaVersion: 1, data: d }).ok, false, JSON.stringify(d));
+    assert.equal(P.migrate({ schemaVersion: 2, data: d }).ok, false, JSON.stringify(d));
     assert.throws(() => P.MIGRATIONS[1](d), TypeError);
+    assert.throws(() => P.MIGRATIONS[2](d), TypeError);
   }
 });
 
-test("buildRecord：組成 StorageRecord（schemaVersion 2）並可被 parseStored 讀回", () => {
+test("buildRecord：組成 StorageRecord（schemaVersion = 目前版本 3）並可被 parseStored 讀回", () => {
   const d = sampleData();
   const rec = P.buildRecord(d, new Date("2026-10-30T01:02:03.000Z"));
-  assert.deepEqual(rec, { schemaVersion: 2, savedAt: "2026-10-30T01:02:03.000Z", data: d });
+  assert.deepEqual(rec, { schemaVersion: C.CURRENT_SCHEMA_VERSION, savedAt: "2026-10-30T01:02:03.000Z", data: d });
+  assert.equal(rec.schemaVersion, 3);
   const r = P.parseStored(JSON.stringify(rec));
   assert.equal(r.kind, "ok");
   assert.deepEqual(r.data, d);
@@ -467,7 +541,7 @@ test("XSS 字串原樣保留（不跳脫、不拒絕）", () => {
 
 // ── v0.8（FE-22）：v1 → v2 遷移（MG-1～MG-4，AC-30-12、AC-18-05）──
 
-test("v1 遷移：v0.7 實際格式 → ok、migrated、7 欄與原值深度相等、兩欄為預設、schemaVersion 2（AC-30-12）", () => {
+test("v1 遷移：v0.7 實際格式 → ok、migrated、7 欄與原值深度相等、兩欄與 3 個新欄為預設、schemaVersion 3（AC-30-12、AC-47-04）", () => {
   const original = JSON.parse(V07_RAW);
   const r = P.parseStored(V07_RAW);
   assert.equal(r.kind, "ok");
@@ -479,10 +553,11 @@ test("v1 遷移：v0.7 實際格式 → ok、migrated、7 欄與原值深度相�
   }
   assert.deepEqual(r.data.todayLearned, { date: null, wordKeys: [] });
   assert.deepEqual(r.data.learnedHistory, {});
+  TRACK_KEYS.forEach((k) => assert.deepEqual(r.data[k], TRACK_DEFAULTS[k], k));
   assert.deepEqual(Object.keys(r.data), [...P.DATA_KEYS]);
-  // 呼叫端依 MG-3 寫回：buildRecord 為 schemaVersion 2，且可再讀回（不再是 migrated）
+  // 呼叫端依 MG-3、MG-7 寫回：buildRecord 為 schemaVersion 3，且可再讀回（不再是 migrated）
   const rec = P.buildRecord(r.data, new Date("2026-10-30T01:00:00.000Z"));
-  assert.equal(rec.schemaVersion, 2);
+  assert.equal(rec.schemaVersion, C.CURRENT_SCHEMA_VERSION);
   assert.ok(P.validateStorageRecord(rec).ok);
   assert.ok(P.validatePersistedData(rec.data, { written: true, today: "2026-10-30" }).ok);
   const again = P.parseStored(JSON.stringify(rec));
@@ -536,9 +611,9 @@ test("v1 遷移：data 不是物件 → unreadable（MG-1）；7 欄有誤 → u
   assert.equal(P.parseStored(raw(badRoot)).kind, "unreadable");
 });
 
-// ── v0.8（FE-22）：v2 讀取 RD-1（AC-30-13）──
+// ── v0.8（FE-22）：讀取 RD-1（AC-30-13）；v0.15 起適用 schemaVersion 3（含遷移後）──
 
-test("RD-1：v2 的 todayLearned 缺少或 shape 不符 → 只重設該欄，其他資料保留、不視為無法讀取", () => {
+test("RD-1：v3 的 todayLearned 缺少或 shape 不符 → 只重設該欄，其他資料保留、不視為無法讀取", () => {
   const bad = [
     ["缺少", undefined],
     ["null", null],
@@ -567,7 +642,7 @@ test("RD-1：v2 的 todayLearned 缺少或 shape 不符 → 只重設該欄，�
   }
 });
 
-test("RD-1：v2 的 learnedHistory 缺少或不是物件 → 只重設該欄", () => {
+test("RD-1：v3 的 learnedHistory 缺少或不是物件 → 只重設該欄", () => {
   for (const [label, v] of [["缺少", undefined], ["陣列", [3, 4]], ["null", null], ["字串", "x"], ["數字", 0], ["布林", true]]) {
     const d = sampleData();
     if (v === undefined) { delete d.learnedHistory; } else { d.learnedHistory = v; }
@@ -746,7 +821,7 @@ test("isTodayLearnedShape／isLearnedHistoryShape 對照 $defs/TodayLearnedState
   }
 });
 
-test("LD-1：persist.js 載入時不取用 goal、learning（只有 constants、wordkey 時可載入，呼叫時缺模組丟出含名稱的錯誤）", () => {
+test("LD-1：persist.js 載入時不取用 goal、learning、position、part5flow（只有 constants、wordkey 時可載入，呼叫時缺模組丟出含名稱的錯誤）", () => {
   const fs = require("node:fs");
   const path = require("node:path");
   const vm = require("node:vm");
@@ -764,5 +839,173 @@ test("LD-1：persist.js 載入時不取用 goal、learning（只有 constants、
   for (const f of ["goal.js", "learning.js"]) {
     vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "core", f), "utf8"), sandbox, { filename: f });
   }
+  // v0.15：position、part5flow 也在呼叫時才取用（LD-3：缺漏時丟出含名稱的錯誤，不誤判為資料無法讀取）
+  assert.throws(() => VP.parseStored(V07_RAW), /EMT\.core\.position/);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "core", "position.js"), "utf8"), sandbox, { filename: "position.js" });
+  assert.throws(() => VP.parseStored(V07_RAW), /EMT\.core\.part5flow/);
+  vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "core", "part5flow.js"), "utf8"), sandbox, { filename: "part5flow.js" });
   assert.equal(VP.parseStored(V07_RAW).kind, "ok");
+});
+
+// ── v0.15（FE-73）：3 個新欄位（flashcardPosition、part5CorrectIds、part5UnansweredOnly）──
+
+test("trackDefaults：§5.2 預設值，每次回傳新物件", () => {
+  assert.deepEqual(P.trackDefaults(), TRACK_DEFAULTS);
+  const a = P.trackDefaults();
+  a.part5CorrectIds.push("x");
+  assert.deepEqual(P.trackDefaults().part5CorrectIds, []);
+});
+
+test("isTrackShape：對照 $defs/FlashcardPosition、$defs/Part5CorrectIds、boolean", () => {
+  assert.ok(P.isTrackShape("flashcardPosition", null));
+  assert.ok(P.isTrackShape("flashcardPosition", { wordKey: "a", ordinal: 1 }));
+  assert.ok(P.isTrackShape("flashcardPosition", { wordKey: "   ", ordinal: 3 }), "內容無效不屬 shape");
+  for (const v of [[], "a", 1, true, {}, { wordKey: "a" }, { ordinal: 1 }, { wordKey: 1, ordinal: 1 }, { wordKey: "a", ordinal: 0 },
+    { wordKey: "a", ordinal: 1.5 }, { wordKey: "a", ordinal: "10" }, { wordKey: "a", ordinal: 1, x: 0 }, undefined]) {
+    assert.equal(P.isTrackShape("flashcardPosition", v), false, JSON.stringify(v));
+  }
+  assert.ok(P.isTrackShape("part5CorrectIds", []));
+  assert.ok(P.isTrackShape("part5CorrectIds", [1, null, "  "]), "項目層級不屬 shape");
+  for (const v of [{}, null, "p5-001", 1, true, undefined]) {
+    assert.equal(P.isTrackShape("part5CorrectIds", v), false, String(v));
+  }
+  assert.ok(P.isTrackShape("part5UnansweredOnly", true));
+  assert.ok(P.isTrackShape("part5UnansweredOnly", false));
+  for (const v of ["true", 0, 1, null, undefined, {}]) {
+    assert.equal(P.isTrackShape("part5UnansweredOnly", v), false, String(v));
+  }
+  assert.equal(P.isTrackShape("goal", {}), false);
+});
+
+test("normalizeTrackItems／ensureWritable：缺鍵補預設、ids 去非字串／空白／重複且保留題庫外 id、wordKey 依 C-2；不修改傳入值", () => {
+  const d = v2Data();
+  const snap = JSON.parse(JSON.stringify(d));
+  const out = P.ensureWritable(d);
+  TRACK_KEYS.forEach((k) => assert.deepEqual(out[k], TRACK_DEFAULTS[k], k));
+  V2_KEYS.forEach((k) => assert.deepEqual(out[k], d[k], k));
+  assert.deepEqual(d, snap);
+  assert.notEqual(out, d);
+  assert.ok(P.validatePersistedData(out, { written: true }).ok);
+
+  const e = sampleData();
+  e.part5CorrectIds = ["p5-003", 7, "", "  ", null, "p5-003", "p5-999", "p5-001"];
+  e.flashcardPosition = { wordKey: "  Pay   Off ", ordinal: 7 };
+  const n = P.normalizeTrackItems(e);
+  assert.deepEqual(n.part5CorrectIds, ["p5-003", "p5-999", "p5-001"]);
+  assert.deepEqual(n.flashcardPosition, { wordKey: "pay off", ordinal: 7 });
+  assert.equal(n.part5UnansweredOnly, true);
+  const blank = sampleData();
+  blank.flashcardPosition = { wordKey: "   ", ordinal: 2 };
+  assert.equal(P.normalizeTrackItems(blank).flashcardPosition, null);
+  // 已正規化的值為恆等（冪等）
+  assert.deepEqual(P.ensureWritable(sampleData()), sampleData());
+  assert.deepEqual(P.ensureWritable(P.ensureWritable(e)), P.ensureWritable(e));
+  // 非物件原樣回傳
+  for (const v of [null, [], "x", 1]) {
+    assert.equal(P.ensureWritable(v), v);
+  }
+});
+
+test("validatePersistedData（v0.15）：必填 9 欄、允許 12 欄；3 欄存在時檢查 shape；written 要求 3 欄存在且為 Normalized", () => {
+  assert.ok(P.validatePersistedData(v2Data()).ok, "缺 3 欄 = 選填");
+  assert.equal(P.validatePersistedData(v2Data(), { written: true }).ok, false, "written 要求 12 欄");
+  for (const k of TRACK_KEYS) {
+    const d = sampleData();
+    delete d[k];
+    assert.ok(P.validatePersistedData(d).ok, "缺 " + k);
+    assert.equal(P.validatePersistedData(d, { written: true }).ok, false, "written 缺 " + k);
+  }
+  const shapeBad = [
+    ["flashcardPosition", []], ["flashcardPosition", "a"], ["flashcardPosition", { wordKey: 1, ordinal: 1 }],
+    ["flashcardPosition", { wordKey: "a", ordinal: 0 }], ["flashcardPosition", { wordKey: "a" }],
+    ["flashcardPosition", { wordKey: "a", ordinal: 1, x: 1 }],
+    ["part5CorrectIds", {}], ["part5CorrectIds", null], ["part5CorrectIds", "p5-001"],
+    ["part5UnansweredOnly", "true"], ["part5UnansweredOnly", 0], ["part5UnansweredOnly", 1], ["part5UnansweredOnly", null]
+  ];
+  for (const [k, v] of shapeBad) {
+    const d = sampleData();
+    d[k] = v;
+    const r = P.validatePersistedData(d);
+    assert.equal(r.ok, false, k + " " + JSON.stringify(v));
+    assert.ok(r.errors.some((e) => e.indexOf("data." + k) === 0), k);
+  }
+  // shape 正確但非 Normalized：只在 written 擋
+  const writtenBad = [
+    (d) => { d.flashcardPosition = { wordKey: "Bootstrap", ordinal: 2 }; },
+    (d) => { d.flashcardPosition = { wordKey: "  ", ordinal: 2 }; },
+    (d) => { d.flashcardPosition = { wordKey: "", ordinal: 2 }; },
+    (d) => { d.part5CorrectIds = ["p5-001", "p5-001"]; },
+    (d) => { d.part5CorrectIds = ["p5-001", " "]; },
+    (d) => { d.part5CorrectIds = [1]; }
+  ];
+  writtenBad.forEach((fn, i) => {
+    const d = sampleData();
+    fn(d);
+    assert.ok(P.validatePersistedData(d).ok, "shape ok " + i);
+    assert.equal(P.validatePersistedData(d, { written: true }).ok, false, "written bad " + i);
+  });
+  // 題庫外 id、null 位置皆為合法寫出值（Q-71 A、FB-59）
+  const ok = sampleData();
+  ok.flashcardPosition = null;
+  ok.part5CorrectIds = ["p5-999", "anything"];
+  assert.ok(P.validatePersistedData(ok, { written: true }).ok);
+});
+
+test("normalizeAfterLoad（v0.15）：先補齊 3 欄；有 part5Ids 才做 UO-4（V-ST-05 之後），未傳不做", () => {
+  const bank = ["p5-001", "p5-002", "p5-003", "p5-004"];
+  const d = sampleData();
+  d.part5 = { currentIndex: 1, lockedSelection: null, phase: "question", roundAnswered: 1, roundCorrect: 1, totalAnswered: 3, totalCorrect: 2 };
+  d.part5CorrectIds = ["p5-002", "p5-003"];
+  d.part5UnansweredOnly = true;
+  const snap = JSON.parse(JSON.stringify(d));
+  // 未傳 part5Ids：舊呼叫端行為不變
+  assert.equal(P.normalizeAfterLoad(d, 4, "2026-10-29").part5.currentIndex, 1);
+  // 有傳：目前題目曾答對 → 跳到其後第一題未答對（p5-004）
+  const n = P.normalizeAfterLoad(d, 4, "2026-10-29", bank);
+  assert.equal(n.part5.currentIndex, 3);
+  assert.deepEqual(n.part5CorrectIds, ["p5-002", "p5-003"]);
+  assert.deepEqual(d, snap, "不修改傳入值");
+  // 其後全部曾答對 → summary（本輪計數不變）
+  const tail = sampleData();
+  tail.part5 = Object.assign({}, d.part5, { currentIndex: 2 });
+  tail.part5CorrectIds = ["p5-003", "p5-004"];
+  tail.part5UnansweredOnly = true;
+  const s = P.normalizeAfterLoad(tail, 4, "2026-10-29", bank);
+  assert.equal(s.part5.phase, "summary");
+  assert.equal(s.part5.roundAnswered, 1);
+  // 開關關閉 → 不動
+  const off = Object.assign(sampleData(), { part5: d.part5, part5CorrectIds: d.part5CorrectIds, part5UnansweredOnly: false });
+  assert.equal(P.normalizeAfterLoad(off, 4, "2026-10-29", bank).part5.currentIndex, 1);
+  // V-ST-05 先執行：currentIndex 超出 → 0，再依 UO-4 跳過曾答對的 p5-001
+  const over = Object.assign(sampleData(), { part5: Object.assign({}, d.part5, { currentIndex: 9 }), part5CorrectIds: ["p5-001"], part5UnansweredOnly: true });
+  assert.equal(P.normalizeAfterLoad(over, 4, "2026-10-29", bank).part5.currentIndex, 1);
+  // 缺 3 欄的資料 → 補預設
+  const v2 = P.normalizeAfterLoad(v2Data(), 4, "2026-10-29", bank);
+  TRACK_KEYS.forEach((k) => assert.deepEqual(v2[k], TRACK_DEFAULTS[k], k));
+});
+
+test("RD-3（單元）：resetTrackFields 缺鍵補預設不列入 fieldsReset、shape 不符只重設該欄並列入；非物件原樣回傳", () => {
+  const d = v2Data();
+  const r0 = P.resetTrackFields(d);
+  assert.deepEqual(r0.fieldsReset, []);
+  TRACK_KEYS.forEach((k) => assert.deepEqual(r0.data[k], TRACK_DEFAULTS[k], k));
+  const bad = sampleData();
+  bad.flashcardPosition = [];
+  bad.part5UnansweredOnly = "true";
+  const snap = JSON.parse(JSON.stringify(bad));
+  const r = P.resetTrackFields(bad);
+  assert.deepEqual(r.fieldsReset, ["flashcardPosition", "part5UnansweredOnly"]);
+  assert.equal(r.data.flashcardPosition, null);
+  assert.equal(r.data.part5UnansweredOnly, false);
+  assert.deepEqual(r.data.part5CorrectIds, ["p5-001", "p5-999"]);
+  assert.deepEqual(bad, snap, "不修改傳入值");
+  assert.deepEqual(P.resetTrackFields(null), { data: null, fieldsReset: [] });
+  // parseStored 對 v3 一律 RD-1 → RD-3，fieldsReset 依序合併
+  const both = sampleData();
+  both.todayLearned = [];
+  both.part5CorrectIds = { 0: "p5-001" };
+  const p = P.parseStored(raw(record(both)));
+  assert.equal(p.kind, "ok");
+  assert.equal(p.migrated, false);
+  assert.deepEqual(p.fieldsReset, ["todayLearned", "part5CorrectIds"]);
 });

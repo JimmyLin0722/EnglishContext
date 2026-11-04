@@ -1,16 +1,24 @@
 {
   "summary": {
-    "date": "2026-11-03T11:46:06.310Z",
-    "total": 367,
-    "pass": 318,
-    "fail": 0,
-    "manual": 26,
+    "date": "2026-11-04T04:02:30.923Z",
+    "total": 423,
+    "pass": 367,
+    "fail": 5,
+    "manual": 28,
     "na": 23,
-    "failed": [],
+    "failed": [
+      "e2e-version.json TC-42-02 AC-42-02、AC-36-02、AC-36-07、E-96",
+      "e2e-version.json TC-42-04a AC-42-04 (a)、AC-36-01 (a)",
+      "pwa-static.json TC-PS-01 AC-36-07、AC-19-01（V-PWA-01）",
+      "qa-review.json TC-X-edge AC-19-02（Chrome／Edge）跨瀏覽器冒煙、AC-34-01、AC-35-01、AC-35-02、AC-37-01、AC-42-01、AC-43-01、AC-44-01、AC-45-01、AC-46-01",
+      "static.json TC-S09 AC-19-01（交付物可追溯）"
+    ],
     "edge": {
-      "total": 54,
-      "pass": 44,
-      "failed": []
+      "total": 81,
+      "pass": 70,
+      "failed": [
+        "e2e-version-edge.json TC-42-02"
+      ]
     },
     "exits": [],
     "rebuilt": true
@@ -302,7 +310,7 @@
       "tc": "TC-09-02",
       "ac": "AC-09-02",
       "result": "通過",
-      "note": "the：課程；學程 | 檢查；檢閱；檢驗 | 山；山脈；大堆 | （定冠詞）那；a：戲劇；戲劇藝術 | （不定冠詞）一個 | 贏得；獲勝；成功；勝利 | 主意；辦法；概念；意見；claim：不穩定的；可變的；揮發性的 | 多數；大半 | 任命；指定 | 要求；主張；斷言；認領；stadium：露天大型運動場 | 嫩的；溫柔的；投標；提出 | 詩人 | 繁榮；興旺；茁壯成長；undergraduate：大學部學生；大學生的 | 嚴肅地；認真地；嚴重地 | 明白地說；口才好的；發音清晰的 | 提醒的人；暗示；催單（單字集相異釋義 5606）"
+      "note": "the：意圖；目的；含義 | 最小的；最低的；最小值 | 缺口；縫隙；間距 | （定冠詞）那；a：重要；重要性；重要地位 | 混亂；混淆；無秩序 | （不定冠詞）一個 | 最佳化；充分利用；使完善；claim：可信的；可靠的 | 經濟學家；經濟學者 | 真實的；正確的；忠誠的 | 要求；主張；斷言；認領；stadium：意識形態的；思想上的 | 露天大型運動場 | 不正確的；錯誤的；不適當的 | 儀式；典禮；儀式的；undergraduate：妥協；折中方案；危害 | 參加社交活動；使社會化 | 強度；強烈；緊張 | 大學部學生；大學生的（單字集相異釋義 5606）"
     },
     {
       "file": "e2e-cards.json",
@@ -310,7 +318,7 @@
       "tc": "TC-09-03",
       "ac": "AC-09-03、AC-17-03",
       "result": "通過",
-      "note": "答對：狀態 correct,neutral,neutral,neutral、鎖定=true、再點不變=true；答錯：neutral(rgb(255, 255, 255)),correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226)),neutral(rgb(255, 255, 255))；同字答對兩次後掌握數 1（主控台「已掌握 1 字」）、答題 2/2"
+      "note": "答對：狀態 neutral,neutral,neutral,correct、鎖定=true、再點不變=true；答錯：neutral(rgb(255, 255, 255)),correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226)),neutral(rgb(255, 255, 255))；同字答對兩次後掌握數 1（主控台「已掌握 1 字」）、答題 2/2"
     },
     {
       "file": "e2e-cards.json",
@@ -326,7 +334,7 @@
       "tc": "TC-09-05",
       "ac": "AC-09-05",
       "result": "通過",
-      "note": "qaquizword：指責；控告；歸咎於 | 四選一自訂測試 | 方式；樣子；禮貌 | 種族的；人種的"
+      "note": "qaquizword：四選一自訂測試 | 創造；建造；引起；任命 | 永續的；可持續的；足以維持的 | 油酥點心；麵粉糕餅"
     },
     {
       "file": "e2e-cards.json",
@@ -334,7 +342,7 @@
       "tc": "TC-09-07",
       "ac": "AC-09-07",
       "result": "通過",
-      "note": "20 次正解位置：CDCCDACDDADBADBDDABB"
+      "note": "20 次正解位置：BBDDABCCACCBDABDDCCC"
     },
     {
       "file": "e2e-cards.json",
@@ -358,7 +366,7 @@
       "tc": "TC-24-01",
       "ac": "AC-24-01、AC-24-02",
       "result": "通過",
-      "note": "檔名 english-master-track-backup-20261103.json（本地日期 20261103）；網路請求 0；6947 bytes；format=english-master-track-backup、schemaVersion=2；欄位齊全=true；不含內建內容=true；goal={\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；自訂 10、已掌握 1、測驗 {\"answered\":1,\"correct\":1}、part5 {\"currentIndex\":1,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":1,\"roundCorrect\":1,\"totalAnswered\":1,\"totalCorrect\":1}、streak {\"days\":1,\"lastActiveDate\":\"2026-11-03\"}、STT 已讀 true、todayLearned {\"date\":\"2026-11-03\",\"wordKeys\":[\"the\"]}、learnedHistory {\"2026-11-03\":1}"
+      "note": "檔名 english-master-track-backup-20261104.json（本地日期 20261104）；網路請求 0；7059 bytes；format=english-master-track-backup、schemaVersion=3；欄位齊全=true；不含內建內容=true；goal={\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；自訂 10、已掌握 1、測驗 {\"answered\":1,\"correct\":1}、part5 {\"currentIndex\":1,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":1,\"roundCorrect\":1,\"totalAnswered\":1,\"totalCorrect\":1}、streak {\"days\":1,\"lastActiveDate\":\"2026-11-04\"}、STT 已讀 true、todayLearned {\"date\":\"2026-11-04\",\"wordKeys\":[\"the\"]}、learnedHistory {\"2026-11-04\":1}"
     },
     {
       "file": "e2e-cards.json",
@@ -390,7 +398,7 @@
       "tc": "TC-24-06",
       "ac": "AC-24-06",
       "result": "通過",
-      "note": "版本缺失：「備份檔版本不相容（檔案版本：無；支援版本：1、2）」；版本 99：「備份檔版本不相容（檔案版本：99；支援版本：1、2）」；版本字串：「備份檔版本不相容（檔案版本：無；支援版本：1、2）」"
+      "note": "版本缺失：「備份檔版本不相容（檔案版本：無；支援版本：1、2、3）」；版本 99：「備份檔版本不相容（檔案版本：99；支援版本：1、2、3）」；版本字串：「備份檔版本不相容（檔案版本：無；支援版本：1、2、3）」"
     },
     {
       "file": "e2e-cards.json",
@@ -486,7 +494,7 @@
       "tc": "TC-11-04",
       "ac": "AC-11-04、AC-11-07",
       "result": "通過",
-      "note": "下一題未作答=true；結算「模擬測驗 題型對應多益 Part 5 本輪結算 答對 197 / 200 累計答對 197 / 200 重新開始」、按鈕 重新開始；累計 200/197；重新開始後 第 1 / 200 題、未作答=true、累計 200/197"
+      "note": "下一題未作答=true；結算「模擬測驗 已答對 197 / 200 題 只練沒答對的題目 題型對應多益 Part 5 本輪結算 答對 197 / 200 累計答對 197 / 200 重新開」、按鈕 重新開始；累計 200/197；重新開始後 第 1 / 200 題、未作答=true、累計 200/197"
     },
     {
       "file": "e2e-content.json",
@@ -606,7 +614,7 @@
       "tc": "TC-18-03",
       "ac": "AC-18-03、AC-24-01",
       "result": "通過",
-      "note": "警示「進度將無法保存」；點棕套用 + 自訂 1 + 範本 10 → 共 2820 張；Part 5 作答 1；匯出 english-master-track-backup-20261103.json（分數 465、自訂 11）；主控台 連續打卡天數=1=天；單字掌握率=0%=已掌握 0 字；模擬測驗正確率=100%；例外 0"
+      "note": "警示「進度將無法保存」；點棕套用 + 自訂 1 + 範本 10 → 共 2820 張；Part 5 作答 1；匯出 english-master-track-backup-20261104.json（分數 465、自訂 11）；主控台 連續打卡天數=1=天；單字掌握率=0%=已掌握 0 字；模擬測驗正確率=100%；例外 0"
     },
     {
       "file": "e2e-env.json",
@@ -694,7 +702,7 @@
       "tc": "TC-22-01",
       "ac": "AC-22-01",
       "result": "通過",
-      "note": "本機無頭 Chrome 參考值（非基準環境），多輪判定（test-plan §2.3）；終點 = 換頁動畫第一個影格（點擊 → 下一個畫格繪製）：一般：有效 7/7 輪（排除第 無 輪）；各位置中位數最大 48.6；p90 33.1；最大 50.8；>100ms 0/70 筆；原始 第1輪[28.8、32、11.1、8.3、48.8、2.8、18.5、15.2、20.7、13.8]；第2輪[21.9、30.2、10.3、10.3、48.5、2.7、18.5、17、19.2、13.8]；第3輪[13.1、33.1、10.8、7.3、48.7、2.7、19.1、16、18.4、15.4]；第4輪[20.4、30.6、11.5、9.2、48.4、3.1、19.8、15.1、18.8、14.3]；第5輪[13.5、29.5、10.7、8.9、48.6、3.4、18.8、15.1、20.1、14]；第6輪[12.8、31.7、10.5、9.9、50.8、3.2、19.1、15、19、14.9]；第7輪[20.1、29.9、11、9.2、48.6、2.8、18.3、17.5、18.1、14]｜4 倍降速：有效 7/7 輪（排除第 無 輪）；各位置中位數最大 78.6；p90 56.6；最大 101.9；>100ms 1/70 筆；原始 第1輪[28.7、48.1、33.3、21.5、95.8、16.3、21.1、10.9、31.9、18.6]；第2輪[33.6、51.1、31.8、28.7、56.6、15.8、27.8、14.5、31.2、15.2]；第3輪[46.2、46.1、30.2、24.1、78.6、16.3、28.7、18.2、30.5、16.2]；第4輪[37.8、39、31.3、26、91.4、39.1、37.8、22.5、68、22.4]；第5輪[24.3、51.6、44.4、37.8、101.9、28.3、22.5、13.9、32.4、18]；第6輪[31.1、59.5、45.6、22.8、68、14.9、20、11.2、33.8、14.9]；第7輪[49.3、29.4、31.7、26.8、41.3、18.5、28、13.7、36.7、19.4]"
+      "note": "本機無頭 Chrome 參考值（非基準環境），多輪判定（test-plan §2.3）；終點 = 換頁動畫第一個影格（點擊 → 下一個畫格繪製）：一般：有效 7/7 輪（排除第 無 輪）；各位置中位數最大 49.8；p90 36.8；最大 54.3；>100ms 0/70 筆；原始 第1輪[13、32.8、14.5、3.4、52.3、5.4、16.9、16.7、18.9、14.1]；第2輪[23.9、31.3、13.3、6.3、48.9、3.1、18、16.7、19.2、13.6]；第3輪[25、32.4、12.4、6.3、48.7、3.4、18.5、16.4、18.3、14.6]；第4輪[13.2、33.8、14.1、3.6、48.8、3.6、17.6、16.4、19.3、13.7]；第5輪[24.4、33.6、14、3.1、52.7、3.5、18.2、15.7、21.2、14.2]；第6輪[28.4、36.8、13.4、2.8、54.3、4.1、18.2、16、19.7、14.4]；第7輪[13.7、31.6、12.6、5.7、49.8、3.3、19.9、14.6、19.3、15]｜4 倍降速：有效 7/7 輪（排除第 無 輪）；各位置中位數最大 71；p90 57.4；最大 109.7；>100ms 1/70 筆；原始 第1輪[55.6、26.5、25.2、20.9、76.5、37.3、20.2、12.5、33.1、29]；第2輪[27.5、57.4、23.2、18.5、41.1、42.5、20.4、14.9、34.2、17.9]；第3輪[22.1、31.7、18.8、15.1、36.4、17.1、14.6、12.2、35、14.5]；第4輪[22.4、30.2、19.2、13.4、38.1、21.9、17.1、14.4、31.5、15.1]；第5輪[46.4、65.6、50.9、35.4、109.7、43.6、31.7、17.6、72.5、32.9]；第6輪[67.1、43.6、32.5、28、71、21.5、19.7、13.3、32.5、16.3]；第7輪[56.9、52.2、37.7、36.8、91.8、45.4、36.8、24、50.8、24.6]"
     },
     {
       "file": "e2e-env.json",
@@ -702,7 +710,7 @@
       "tc": "TC-22-01m",
       "ac": "AC-22-01、AC-31-03",
       "result": "通過",
-      "note": "本機無頭 Chrome 參考值：prefers-reduced-motion: reduce + 4 倍降速，嚴格量法（含 #customizer-custom 顯示並繪製完成）7 輪：各位置中位數 71.4、31.5、20、18.2、47.7、53.5、22.3、13.9、67.7、25.5；最大中位數 71.4；p90 71.4；最大 148.5；>100ms 3/70 筆；原始 第1輪[71.4、60.4、34.4、20.2、51.3、53.3、14.6、23.6、67.7、28]；第2輪[51.1、31.5、16.1、16、41.6、84、26.6、13.9、84.8、21.8]；第3輪[94.9、25.6、17.8、17.9、47.7、45.6、28.6、12.3、67.8、36.1]；第4輪[57.3、53.1、19.2、18.2、44.1、57.3、16.6、19.7、33.4、28.5]；第5輪[60.9、28、25.1、16.8、42.6、40.9、15.3、13.5、88.7、25.5]；第6輪[148.5、22.4、22、36.2、116.8、68.7、22.3、17.6、34.1、23.5]；第7輪[104.4、36.5、20、29.2、49.3、53.5、24.1、13.2、33.1、17.2]"
+      "note": "本機無頭 Chrome 參考值：prefers-reduced-motion: reduce + 4 倍降速，嚴格量法（含 #customizer-custom 顯示並繪製完成）7 輪：各位置中位數 63.2、27.6、22.6、22.3、66.5、59.4、21.8、20.9、66.4、32.4；最大中位數 66.5；p90 84.7；最大 189.9；>100ms 5/70 筆；原始 第1輪[189.9、52.9、33.3、39.7、109、106、43、20.9、76.5、46.3]；第2輪[51.3、31.6、22.6、16.2、48.9、58.6、16.9、13.1、33.5、22.6]；第3輪[63.2、23.6、19.7、16.8、37.4、59.4、16.2、16.6、68.8、19]；第4輪[59.1、22、20、22.3、49.3、46.2、20.4、12.6、30.8、20.2]；第5輪[144.6、50.1、46.6、33.2、93.3、84.7、43.4、30.8、74.1、32.4]；第6輪[61.7、25.8、21.8、16.2、66.5、45.4、21.8、35.3、66.4、39.9]；第7輪[77.2、27.6、30、27.1、86.6、115、39.8、24.1、51、35.7]"
     },
     {
       "file": "e2e-env.json",
@@ -710,7 +718,7 @@
       "tc": "TC-22-01r",
       "ac": "AC-22-01",
       "result": "通過",
-      "note": "參考（只檢查嚴格量法終點有效，不另行判定效能）：#customizer-custom 在終點時皆已顯示且有內容 true（點擊後先為 hidden 的次數 28/28；額外等待畫格數 1；高度 639/2717px）。寬鬆量法（第 1 輪方法）：一般 有效 7/7 輪（排除第 無 輪）；各位置中位數最大 48.6；p90 33.1；最大 50.8；>100ms 0/70 筆；4 倍降速 有效 7/7 輪（排除第 無 輪）；各位置中位數最大 78.6；p90 56.6；最大 101.9；>100ms 1/70 筆，判定 符合；原始 第1輪[28.7、48.1、33.3、21.5、95.8、16.3、21.1、10.9、31.9、18.6]；第2輪[33.6、51.1、31.8、28.7、56.6、15.8、27.8、14.5、31.2、15.2]；第3輪[46.2、46.1、30.2、24.1、78.6、16.3、28.7、18.2、30.5、16.2]；第4輪[37.8、39、31.3、26、91.4、39.1、37.8、22.5、68、22.4]；第5輪[24.3、51.6、44.4、37.8、101.9、28.3、22.5、13.9、32.4、18]；第6輪[31.1、59.5、45.6、22.8、68、14.9、20、11.2、33.8、14.9]；第7輪[49.3、29.4、31.7、26.8、41.3、18.5、28、13.7、36.7、19.4]。嚴格 + 再一個畫格：一般 有效 7/7 輪（排除第 無 輪）；各位置中位數最大 48.6；p90 48.4；最大 50.8；>100ms 0/70 筆；4 倍降速 有效 7/7 輪（排除第 無 輪）；各位置中位數最大 90.2；p90 90.2；最大 109.9；>100ms 3/70 筆，判定 符合"
+      "note": "參考（只檢查嚴格量法終點有效，不另行判定效能）：#customizer-custom 在終點時皆已顯示且有內容 true（點擊後先為 hidden 的次數 28/28；額外等待畫格數 1；高度 639/2717px）。寬鬆量法（第 1 輪方法）：一般 有效 7/7 輪（排除第 無 輪）；各位置中位數最大 49.8；p90 36.8；最大 54.3；>100ms 0/70 筆；4 倍降速 有效 7/7 輪（排除第 無 輪）；各位置中位數最大 71；p90 57.4；最大 109.7；>100ms 1/70 筆，判定 符合；原始 第1輪[55.6、26.5、25.2、20.9、76.5、37.3、20.2、12.5、33.1、29]；第2輪[27.5、57.4、23.2、18.5、41.1、42.5、20.4、14.9、34.2、17.9]；第3輪[22.1、31.7、18.8、15.1、36.4、17.1、14.6、12.2、35、14.5]；第4輪[22.4、30.2、19.2、13.4、38.1、21.9、17.1、14.4、31.5、15.1]；第5輪[46.4、65.6、50.9、35.4、109.7、43.6、31.7、17.6、72.5、32.9]；第6輪[67.1、43.6、32.5、28、71、21.5、19.7、13.3、32.5、16.3]；第7輪[56.9、52.2、37.7、36.8、91.8、45.4、36.8、24、50.8、24.6]。嚴格 + 再一個畫格：一般 有效 7/7 輪（排除第 無 輪）；各位置中位數最大 49.8；p90 48.7；最大 54.3；>100ms 0/70 筆；4 倍降速 有效 7/7 輪（排除第 無 輪）；各位置中位數最大 101.7；p90 92.3；最大 146；>100ms 7/70 筆，判定 不符"
     },
     {
       "file": "e2e-env.json",
@@ -718,7 +726,7 @@
       "tc": "TC-22-04b",
       "ac": "AC-22-04",
       "result": "通過",
-      "note": "本機無頭 Chrome 參考值（非基準環境），多輪判定（test-plan §2.3）（點色級卡片到選中狀態與試算繪製）：一般：有效 7/7 輪（排除第 無 輪）；各位置中位數最大 18.3；p90 19.3；最大 21.4；>100ms 0/70 筆；原始 第1輪[13.9、2.8、2.8、5.8、15.5、3.4、2.7、17.4、3.4、2.6]；第2輪[15、2.6、2.3、5.8、16、19.7、19.4、20、19.7、19.2]；第3輪[16.4、18.7、18、5.8、16、3.2、18、19.4、3.3、18.3]；第4輪[15.9、19、2.4、6.1、18.1、17.8、17.7、2.6、3.3、2.5]；第5輪[14.8、2.4、2.5、21.4、16.4、18.5、18.8、2.9、19.3、17.9]；第6輪[14.4、2.4、2.4、6.3、17.7、3.7、18.2、2.4、3.1、18.6]；第7輪[14.5、19.2、17.1、5.9、16.9、19.1、19.4、17.7、3.4、19.2]｜4 倍降速：有效 7/7 輪（排除第 無 輪）；各位置中位數最大 24.8；p90 30.7；最大 44.7；>100ms 0/70 筆；原始 第1輪[30.8、28.4、33.5、44.7、23.1、42.9、33.9、22.2、41.4、18.4]；第2輪[12.2、18.2、14.3、18.8、17.9、19.7、20.2、24.4、24.8、16.5]；第3輪[24、19.3、13.8、20.9、25.4、22.1、14.9、18.3、20.9、18.8]；第4輪[28.7、28.9、24.5、23.2、15.9、23.5、19.6、17、41.4、17.1]；第5輪[13.5、17.7、18.5、20.6、17.1、20.4、13.8、17.5、26.1、16.9]；第6輪[18.3、14.7、16、30.7、17.3、21、12.6、17.4、21.9、29.6]；第7輪[13.5、14.8、15.7、19.7、15、20、17.7、16.9、23.9、14.3]；全部樣本最大：一般 21.4 ms、4 倍降速 44.7 ms"
+      "note": "本機無頭 Chrome 參考值（非基準環境），多輪判定（test-plan §2.3）（點色級卡片到選中狀態與試算繪製）：一般：有效 7/7 輪（排除第 無 輪）；各位置中位數最大 19.2；p90 19.8；最大 22.9；>100ms 0/70 筆；原始 第1輪[15.4、3.1、18.7、22.7、16.2、19、18.6、19.2、20.5、16.4]；第2輪[15.9、17.8、3.2、22.3、16.4、18.3、18.7、19.2、20.2、19]；第3輪[15.9、2.5、18.6、6、15.2、19.8、18.7、18.7、18.6、19.8]；第4輪[15.3、17.9、2.6、6、16.7、19.3、19.8、19.7、18.9、19.2]；第5輪[14.5、19.7、17.9、6.3、15.9、20.3、17.5、2.9、3.7、19.8]；第6輪[15.9、2.6、18.8、7.1、15.5、19、18.4、2.5、19.7、19.8]；第7輪[13.9、2.9、2.8、22.9、15.2、3.9、16.7、2.8、3.7、17.1]｜4 倍降速：有效 7/7 輪（排除第 無 輪）；各位置中位數最大 33.3；p90 39；最大 66.6；>100ms 0/70 筆；原始 第1輪[37.3、29.6、29.8、30.2、33.9、40.8、22.8、36.4、66.6、43.6]；第2輪[24.2、16.8、14.1、33.9、17.6、22.8、16.8、16.2、19.8、15.9]；第3輪[27、14.4、14.7、23.3、15.5、20.8、15.8、20.4、20.6、16.3]；第4輪[14.5、18、17.3、22.6、16.4、22.3、15.5、17.8、21.4、20.2]；第5輪[31.2、25.2、22.3、39、27、53.7、35.1、29.8、50.9、39.6]；第6輪[21.7、14.8、18.4、39.3、21、20.8、16.1、19、39、16.3]；第7輪[19.1、16.1、18.1、24.3、19.8、38.1、27.4、23.4、33.3、21]；全部樣本最大：一般 22.9 ms、4 倍降速 66.6 ms"
     },
     {
       "file": "e2e-env.json",
@@ -726,7 +734,7 @@
       "tc": "TC-22-02b",
       "ac": "AC-22-02",
       "result": "通過",
-      "note": "本機無頭 Chrome 參考值（非基準環境），7 輪全部樣本每筆 ≤ 100ms：一般最大 17.5 ms；4 倍降速最大 38.5 ms（第 1 輪 4 倍降速 27.7、24.1、15.7、30.4、22.5、23、17.3、18.2、20.6、38.5）"
+      "note": "本機無頭 Chrome 參考值（非基準環境），7 輪全部樣本每筆 ≤ 100ms：一般最大 17.7 ms；4 倍降速最大 55.8 ms（第 1 輪 4 倍降速 36.9、20.5、34.1、36.4、22.5、24.1、31.6、27.9、49.5、55.8）"
     },
     {
       "file": "e2e-env.json",
@@ -734,7 +742,7 @@
       "tc": "TC-22-03b",
       "ac": "AC-22-03",
       "result": "通過",
-      "note": "本機無頭 Chrome 參考值（非基準環境），7 輪全部樣本每筆 ≤ 100ms：一般最大 23.3 ms；4 倍降速最大 36 ms（第 1 輪 4 倍降速 22.7、30、17.4、24.7、22.8、20.4、27.7、31.3、29.7、15.6）"
+      "note": "本機無頭 Chrome 參考值（非基準環境），7 輪全部樣本每筆 ≤ 100ms：一般最大 23.2 ms；4 倍降速最大 40.8 ms（第 1 輪 4 倍降速 39.9、31.8、37.4、38.1、28.6、22.3、33、29.1、21.3、30.5）"
     },
     {
       "file": "e2e-env.json",
@@ -758,7 +766,7 @@
       "tc": "TC-22-05a",
       "ac": "AC-22-05",
       "result": "通過",
-      "note": "本機無頭 Chrome 參考值，7 輪 × 5 次：一般模式（timeOrigin → emt-ready，「開始今日學習」可點擊）一般 中位數 97、各次序中位數最大 109、p90 109、最大 113（上限 3000；> 上限 0/35）；4 倍降速 中位數 498、各次序中位數最大 597、p90 597、最大 673（上限 6000；> 上限 0/35）；emt-ready 時目標元素可點擊 true；第 1 輪原始 一般 91、87、92、92、97、降速 534、511、449、442、469；基準環境實測列人工 TC-M07"
+      "note": "本機無頭 Chrome 參考值，7 輪 × 5 次：一般模式（timeOrigin → emt-ready，「開始今日學習」可點擊）一般 中位數 92、各次序中位數最大 93、p90 138、最大 145（上限 3000；> 上限 0/35）；4 倍降速 中位數 469、各次序中位數最大 592、p90 687、最大 737（上限 6000；> 上限 0/35）；emt-ready 時目標元素可點擊 true；第 1 輪原始 一般 111、138、138、141、145、降速 730、680、589、594、551；基準環境實測列人工 TC-M07"
     },
     {
       "file": "e2e-env.json",
@@ -766,7 +774,7 @@
       "tc": "TC-22-05b",
       "ac": "AC-22-05、AC-25-01",
       "result": "通過",
-      "note": "本機無頭 Chrome 參考值，7 輪 × 5 次：首次模式（無狀態鍵；timeOrigin → emt-ready，「開始學習」可點擊）一般 中位數 95、各次序中位數最大 104、p90 108、最大 112（上限 3000；> 上限 0/35）；4 倍降速 中位數 413、各次序中位數最大 437、p90 505、最大 544（上限 6000；> 上限 0/35）；第 1 輪原始 一般 95、83、86、88、92、降速 383、479、394、439、397"
+      "note": "本機無頭 Chrome 參考值，7 輪 × 5 次：首次模式（無狀態鍵；timeOrigin → emt-ready，「開始學習」可點擊）一般 中位數 86、各次序中位數最大 93、p90 110、最大 119（上限 3000；> 上限 0/35）；4 倍降速 中位數 435、各次序中位數最大 547、p90 578、最大 709（上限 6000；> 上限 0/35）；第 1 輪原始 一般 93、101、86、114、94、降速 578、540、492、407、394"
     },
     {
       "file": "e2e-firstrun.json",
@@ -798,7 +806,7 @@
       "tc": "TC-25-11",
       "ac": "AC-25-11",
       "result": "通過",
-      "note": "(a) 檔案選擇器開啟=true 後未選檔：firstRun、狀態鍵 無；(a) 確認框「匯入備份  匯入將覆蓋目前所有進度  取消 匯入」按取消：firstRun、狀態鍵 無、提示 []；(b) 非 JSON：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(b) 空檔：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(c) 版本 99：[\"備份檔版本不相容（檔案版本：99；支援版本：1、2）\"]、firstRun、狀態鍵 無；版本訊息「備份檔版本不相容（檔案版本：99；支援版本：1、2）」；之後按「開始學習」→ main、狀態鍵 有"
+      "note": "(a) 檔案選擇器開啟=true 後未選檔：firstRun、狀態鍵 無；(a) 確認框「匯入備份  匯入將覆蓋目前所有進度  取消 匯入」按取消：firstRun、狀態鍵 無、提示 []；(b) 非 JSON：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(b) 空檔：[\"備份檔格式錯誤，未匯入\"]、firstRun、狀態鍵 無；(c) 版本 99：[\"備份檔版本不相容（檔案版本：99；支援版本：1、2、3）\"]、firstRun、狀態鍵 無；版本訊息「備份檔版本不相容（檔案版本：99；支援版本：1、2、3）」；之後按「開始學習」→ main、狀態鍵 有"
     },
     {
       "file": "e2e-firstrun.json",
@@ -814,7 +822,7 @@
       "tc": "TC-25-02",
       "ac": "AC-25-02",
       "result": "通過",
-      "note": "點棕 → 選中 brown；按「開始學習」→ 確認視窗=false、main/dashboard、導覽 4 鈕；主控台 棕級・每日 10 字｜變更；單字集 2809；寫入 schemaVersion 2、goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}"
+      "note": "點棕 → 選中 brown；按「開始學習」→ 確認視窗=false、main/dashboard、導覽 4 鈕；主控台 棕級・每日 10 字｜變更；單字集 2809；寫入 schemaVersion 3、goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}"
     },
     {
       "file": "e2e-firstrun.json",
@@ -870,7 +878,7 @@
       "tc": "TC-24-10",
       "ac": "AC-24-10",
       "result": "通過",
-      "note": "v1 備份（無 todayLearned、learnedHistory）匯入：提示 [\"已匯入，略過 0 筆\"]；既有 7 欄還原相同=true；今日已學 0 / 10 字、近 7 天空狀態「開始學習後會顯示紀錄」、長條顯示=false；重新載入後 localStorage schemaVersion 2、todayLearned {\"date\":null,\"wordKeys\":[]}"
+      "note": "v1 備份（無 todayLearned、learnedHistory）匯入：提示 [\"已匯入，略過 0 筆\"]；既有 7 欄還原相同=true；今日已學 0 / 10 字、近 7 天空狀態「開始學習後會顯示紀錄」、長條顯示=false；重新載入後 localStorage schemaVersion 3、todayLearned {\"date\":null,\"wordKeys\":[]}"
     },
     {
       "file": "e2e-firstrun.json",
@@ -878,7 +886,7 @@
       "tc": "TC-24-11",
       "ac": "AC-24-11、AC-24-05",
       "result": "通過",
-      "note": "無效項目：提示 [\"已匯入，略過 0 筆\"]、匯入後歷史 {\"2026-10-05\":7,\"2026-10-29\":5}、todayLearned {\"date\":null,\"wordKeys\":[]}、今日已學 0 / 10 字；型別錯誤：learnedHistory 為陣列：[\"備份檔格式錯誤，未匯入\"]；todayLearned 為字串：[\"備份檔格式錯誤，未匯入\"]；wordKeys 不是清單：[\"備份檔格式錯誤，未匯入\"]；learnedHistory 缺少：[\"備份檔格式錯誤，未匯入\"]"
+      "note": "無效項目：提示 [\"已匯入，略過 0 筆\"]、匯入後歷史 {\"2026-10-06\":7,\"2026-10-30\":5}、todayLearned {\"date\":null,\"wordKeys\":[]}、今日已學 0 / 10 字；型別錯誤：learnedHistory 為陣列：[\"備份檔格式錯誤，未匯入\"]；todayLearned 為字串：[\"備份檔格式錯誤，未匯入\"]；wordKeys 不是清單：[\"備份檔格式錯誤，未匯入\"]；learnedHistory 缺少：[\"備份檔格式錯誤，未匯入\"]"
     },
     {
       "file": "e2e-firstrun.json",
@@ -886,7 +894,7 @@
       "tc": "TC-24-02b",
       "ac": "AC-24-02",
       "result": "通過",
-      "note": "v0.8 匯出：schemaVersion 2、todayLearned {\"date\":\"2026-11-03\",\"wordKeys\":[\"the\",\"be\"]}、learnedHistory {\"2026-11-03\":2}（翻 2 張卡；模擬測驗作答不計）"
+      "note": "v0.8 匯出：schemaVersion 3、todayLearned {\"date\":\"2026-11-04\",\"wordKeys\":[\"the\",\"be\"]}、learnedHistory {\"2026-11-04\":2}（翻 2 張卡；模擬測驗作答不計）"
     },
     {
       "file": "e2e-firstrun.json",
@@ -1030,7 +1038,7 @@
       "tc": "TC-22-04",
       "ac": "AC-22-04",
       "result": "通過",
-      "note": "一般 ms：2.7、2.6、2.7、2.2、2.6、2.1、2.3、5、3.1、2.5（中位數 2.6、p90 3.1）；4 倍降速 ms：10.1、11.4、14.6、15.1、13.2、16.3、16.9、13.6、16.7、14.5（中位數 14.5、p90 16.7）；選中狀態錯誤 0（無頭 Chrome 參考值，基準環境列 TC-M07）"
+      "note": "一般 ms：6.1、4.5、5.6、5.2、6.2、5.6、3.8、5.8、5.5、4.7（中位數 5.5、p90 6.1）；4 倍降速 ms：14、14、27.3、36.3、29.6、18.4、20.1、22.5、10.1、6.7（中位數 18.4、p90 29.6）；選中狀態錯誤 0（無頭 Chrome 參考值，基準環境列 TC-M07）"
     },
     {
       "file": "e2e-goal.json",
@@ -1142,7 +1150,7 @@
       "tc": "TC-22-02",
       "ac": "AC-22-02",
       "result": "通過",
-      "note": "單字集 共 5650 張；10 次套用（含 toast 與繪製）ms：14.7、15.3、16.9、16.9、14.7、15.2、16、15.6、14.6、18；中位數 15.3、p90 16.9、最大 18（無頭 Chrome、未降速）；確認視窗 0"
+      "note": "單字集 共 5650 張；10 次套用（含 toast 與繪製）ms：8.8、17.2、14.9、19.6、26.2、14.3、14.4、15.4、15.5、15.5；中位數 15.4、p90 19.6、最大 26.2（無頭 Chrome、未降速）；確認視窗 0"
     },
     {
       "file": "e2e-goal.json",
@@ -1254,7 +1262,7 @@
       "tc": "TC-38-04",
       "ac": "AC-38-04",
       "result": "通過",
-      "note": "WCAG 公式量測可見文字（不含停用按鈕、Q-55 語意色、標題列圖示；鎖定列以 opacity 合成）：375px 首次畫面：量測 28 處、最小 5.32；375px 主控台：量測 38 處、最小 5.39；375px 難易度設定：量測 60 處、最小 5.32；375px 單字卡：量測 24 處、最小 5.18；375px 模擬測驗：量測 20 處、最小 5.39；375px 資料來源與授權：量測 109 處、最小 5.39；1366px 首次畫面：量測 28 處、最小 5.32；1366px 主控台：量測 38 處、最小 5.39；1366px 難易度設定：量測 60 處、最小 5.32；1366px 單字卡：量測 24 處、最小 5.18；1366px 模擬測驗：量測 20 處、最小 5.39；1366px 資料來源與授權：量測 109 處、最小 5.39；未達標 無"
+      "note": "WCAG 公式量測可見文字（不含停用按鈕、Q-55 語意色、標題列圖示；鎖定列以 opacity 合成）：375px 首次畫面：量測 28 處、最小 5.32；375px 主控台：量測 38 處、最小 5.39；375px 難易度設定：量測 60 處、最小 5.32；375px 單字卡：量測 24 處、最小 5.18；375px 模擬測驗：量測 22 處、最小 5.39；375px 資料來源與授權：量測 110 處、最小 5.39；1366px 首次畫面：量測 28 處、最小 5.32；1366px 主控台：量測 38 處、最小 5.39；1366px 難易度設定：量測 60 處、最小 5.32；1366px 單字卡：量測 24 處、最小 5.18；1366px 模擬測驗：量測 22 處、最小 5.39；1366px 資料來源與授權：量測 110 處、最小 5.39；未達標 無"
     },
     {
       "file": "e2e-layout.json",
@@ -1286,7 +1294,7 @@
       "tc": "TC-38-05",
       "ac": "AC-38-05、AC-21-01 (a)",
       "result": "通過",
-      "note": "連網 375px 首次畫面：{\"name\":\"EnglishContext\",\"tag\":\"svg\",\"w\":32,\"h\":32,\"hidden\":true,\"order\":true,\"clipped\":false,\"ext\":false,\"colors\":\"#1e9bf0,#f7893b,#ffffff\",\"shown\":true}；連網：主文件以外的請求 0；斷網 375px 首次畫面：{\"name\":\"EnglishContext\",\"tag\":\"svg\",\"w\":32,\"h\":32,\"hidden\":true,\"order\":true,\"clipped\":false,\"ext\":false,\"colors\":\"#1e9bf0,#f7893b,#ffffff\",\"shown\":true}；斷網：主文件以外的請求 0；首次畫面、4 個功能區、資料來源頁 × 兩種寬度 × 連網／斷網皆檢查；交付檔 3,322,315 bytes ≤ 5 MB"
+      "note": "連網 375px 首次畫面：{\"name\":\"EnglishContext\",\"tag\":\"svg\",\"w\":32,\"h\":32,\"hidden\":true,\"order\":true,\"clipped\":false,\"ext\":false,\"colors\":\"#1e9bf0,#f7893b,#ffffff\",\"shown\":true}；連網：主文件以外的請求 0；斷網 375px 首次畫面：{\"name\":\"EnglishContext\",\"tag\":\"svg\",\"w\":32,\"h\":32,\"hidden\":true,\"order\":true,\"clipped\":false,\"ext\":false,\"colors\":\"#1e9bf0,#f7893b,#ffffff\",\"shown\":true}；斷網：主文件以外的請求 0；首次畫面、4 個功能區、資料來源頁 × 兩種寬度 × 連網／斷網皆檢查；交付檔 3,373,421 bytes ≤ 5 MB"
     },
     {
       "file": "e2e-layout.json",
@@ -1310,7 +1318,7 @@
       "tc": "TC-38-10",
       "ac": "AC-38-10、AC-24-03",
       "result": "通過",
-      "note": "(1) <title>「EnglishContext」；畫面文字含 English Master Track 的畫面 0（無；檢查 首次畫面、首次畫面→資料來源、dashboard、customizer、flashcards、part5、sources、初始化確認視窗、Toast）；資料來源頁「原創內容來源：EnglishContext 原創內容」；HTML 開頭註解第一行「EnglishContext」；(2) 匯出檔名 english-master-track-backup-20261103.json；localStorage 鍵 [\"englishMasterTrack:state\"]、schemaVersion 2；備份 format english-master-track-backup、schemaVersion 2、欄位 goal,customVocab,masteredWordKeys,vocabQuiz,part5,streak,sttNoticeAcknowledged,todayLearned,learnedHistory；交付檔名 dist/english-master-track.html 存在；sw.js 快取前綴 english-master-track-pwa-；(3) 著作權人 JimmyLin 與品牌標識聲明不變=true；(2) v0.11 寫入的 localStorage 以 v0.12 開啟 → main/dashboard、資料逐欄相同=true、目標行「棕級・每日 10 字｜變更」；v0.11 備份匯入 → [\"已匯入，略過 0 筆\"]、goal 465/brown、模擬測驗答題 1"
+      "note": "(1) <title>「EnglishContext」；畫面文字含 English Master Track 的畫面 0（無；檢查 首次畫面、首次畫面→資料來源、dashboard、customizer、flashcards、part5、sources、初始化確認視窗、Toast）；資料來源頁「原創內容來源：EnglishContext 原創內容」；HTML 開頭註解第一行「EnglishContext」；(2) 匯出檔名 english-master-track-backup-20261104.json；localStorage 鍵 [\"englishMasterTrack:state\"]、schemaVersion 3；備份 format english-master-track-backup、schemaVersion 3、欄位 goal,customVocab,masteredWordKeys,vocabQuiz,part5,streak,sttNoticeAcknowledged,todayLearned,learnedHistory,flashcardPosition,part5CorrectIds,part5UnansweredOnly；交付檔名 dist/english-master-track.html 存在；sw.js 快取前綴 english-master-track-pwa-；(3) 著作權人 JimmyLin 與品牌標識聲明不變=true；(2) v0.11 寫入的 localStorage 以 v0.12 開啟 → main/dashboard、原 9 欄逐欄相同且新 3 欄為預設=true、目標行「棕級・每日 10 字｜變更」；v0.11 備份匯入 → [\"已匯入，略過 0 筆\"]、goal 465/brown、模擬測驗答題 1"
     },
     {
       "file": "e2e-layout.json",
@@ -1334,7 +1342,7 @@
       "tc": "TC-39-03",
       "ac": "AC-39-03、AC-22-01（量測方式）",
       "result": "通過",
-      "note": "點「開始今日學習」→ 目前頁 flashcards、單字卡頁可見=true、導覽選中 flashcards（與點導覽「單字卡」結果 flashcards,flashcards 相同）；localStorage 前後逐字相同=true；點擊到下一畫格 ms 31.7、4.4、3.2、2.7、3（中位數 3.2，無頭 Chrome 參考值）；鍵盤操作見 TC-38-09；單字集為空見 TC-39-03b"
+      "note": "點「開始今日學習」→ 目前頁 flashcards、單字卡頁可見=true、導覽選中 flashcards（與點導覽「單字卡」結果 flashcards,flashcards 相同）；localStorage 前後逐字相同=true；點擊到下一畫格 ms 32.7、4.7、2.9、2.7、2.8（中位數 2.9，無頭 Chrome 參考值）；鍵盤操作見 TC-38-09；單字集為空見 TC-39-03b"
     },
     {
       "file": "e2e-layout.json",
@@ -1406,7 +1414,7 @@
       "tc": "TC-40-01",
       "ac": "AC-40-01、AC-11-05",
       "result": "通過",
-      "note": "375px：第 1 題 0.5%（now 1/max 200、高 6px、#1e9bf0、位於標題下題目上=true）；下一題 17.5ms → 1%（2）；第 5 題 2.5%；重新載入 2.5%「第 5 / 200 題」；第 N 題 100%；結算 100%（now 200）；重新開始 0.5%（1）；轉場 0s；1366px：第 1 題 0.5%（now 1/max 200、高 6px、#1e9bf0、位於標題下題目上=true）；下一題 3.1ms → 1%（2）；第 5 題 2.5%；重新載入 2.5%「第 5 / 200 題」；第 N 題 100%；結算 100%（now 200）；重新開始 0.5%（1）；轉場 0s；減少動態：填色轉場 0s"
+      "note": "375px：第 1 題 0.5%（now 1/max 200、高 6px、#1e9bf0、位於標題下題目上=true）；下一題 9.5ms → 1%（2）；第 5 題 2.5%；重新載入 2.5%「第 5 / 200 題」；第 N 題 100%；結算 100%（now 200）；重新開始 0.5%（1）；轉場 0s；1366px：第 1 題 0.5%（now 1/max 200、高 6px、#1e9bf0、位於標題下題目上=true）；下一題 14.5ms → 1%（2）；第 5 題 2.5%；重新載入 2.5%「第 5 / 200 題」；第 N 題 100%；結算 100%（now 200）；重新開始 0.5%（1）；轉場 0s；減少動態：填色轉場 0s"
     },
     {
       "file": "e2e-layout.json",
@@ -1430,7 +1438,7 @@
       "tc": "TC-41-02",
       "ac": "AC-41-02、AC-02-03、AC-02-05、AC-02-10、AC-22-04",
       "result": "通過",
-      "note": "orange「橘級・每日 10 字　預計 15 週」（cz-firstbar__summary,cz-start,cz-restore）；brown「棕級・每日 10 字　預計 41 週」（cz-firstbar__summary,cz-start,cz-restore）；green「綠級・每日 15 字　預計 54 週」（cz-firstbar__summary,cz-start,cz-restore）；blue「藍級・每日 20 字　預計 41 週（以綠試算）」＋「目前內建字庫到綠色為止」（cz-firstbar__locked,cz-firstbar__summary,cz-start,cz-restore）；gold「金級・每日 20 字　預計 41 週（以綠試算）」＋「目前內建字庫到綠色為止」（cz-firstbar__locked,cz-firstbar__summary,cz-start,cz-restore）；點列到摘要更新 ms 8.7、13.9、13.5、16.9、13.8（中位數 13.8）；首次畫面期間 localStorage 無狀態鍵=true；一般頁試算（每日/週數）10 字/天/15 週、10 字/天/41 週、15 字/天/54 週、20 字/天/41 週、20 字/天/41 週，與摘要行相同；按鈕強調橘底深色字、「開始學習」「從備份還原」≥ 44×44；行為見 TC-25-02、TC-25-03、TC-25-10、TC-25-11"
+      "note": "orange「橘級・每日 10 字　預計 15 週」（cz-firstbar__summary,cz-start,cz-restore）；brown「棕級・每日 10 字　預計 41 週」（cz-firstbar__summary,cz-start,cz-restore）；green「綠級・每日 15 字　預計 54 週」（cz-firstbar__summary,cz-start,cz-restore）；blue「藍級・每日 20 字　預計 41 週（以綠試算）」＋「目前內建字庫到綠色為止」（cz-firstbar__locked,cz-firstbar__summary,cz-start,cz-restore）；gold「金級・每日 20 字　預計 41 週（以綠試算）」＋「目前內建字庫到綠色為止」（cz-firstbar__locked,cz-firstbar__summary,cz-start,cz-restore）；點列到摘要更新 ms 8.2、13.1、13.8、16.4、10.4（中位數 13.1）；首次畫面期間 localStorage 無狀態鍵=true；一般頁試算（每日/週數）10 字/天/15 週、10 字/天/41 週、15 字/天/54 週、20 字/天/41 週、20 字/天/41 週，與摘要行相同；按鈕強調橘底深色字、「開始學習」「從備份還原」≥ 44×44；行為見 TC-25-02、TC-25-03、TC-25-10、TC-25-11"
     },
     {
       "file": "e2e-layout.json",
@@ -1470,7 +1478,7 @@
       "tc": "TC-33-03",
       "ac": "AC-33-03",
       "result": "通過",
-      "note": "待機 5 格、可見=true、00000；聆聽中 11100（亮格連續=true）；麥克風按鈕位置不變=true；音量讀取 14 次、間隔 ms 最大 61.5（中位數 48.1）；結束後回到全暗 結果 0.5ms/00000/idle、逾時 0.4ms/00000/idle、無結果 0.2ms/00000/idle、錯誤 0.4ms/00000/idle、再按停止 77.8ms/00000/idle"
+      "note": "待機 5 格、可見=true、00000；聆聽中 11100（亮格連續=true）；麥克風按鈕位置不變=true；音量讀取 14 次、間隔 ms 最大 58.1（中位數 48.8）；結束後回到全暗 結果 0.5ms/00000/idle、逾時 0.2ms/00000/idle、無結果 0.2ms/00000/idle、錯誤 0.3ms/00000/idle、再按停止 71ms/00000/idle"
     },
     {
       "file": "e2e-mic.json",
@@ -1486,7 +1494,7 @@
       "tc": "TC-33-02a",
       "ac": "AC-33-02（自動化代理：音軌停止）",
       "result": "通過",
-      "note": "導覽→主控台：離開前 live 1 → 離開後 live 0、持有 0、140ms 內；導覽→難易度設定：離開前 live 1 → 離開後 live 0、持有 0、156ms 內；頁尾→資料來源與授權：離開前 live 1 → 離開後 live 0、持有 0、124ms 內；回單字卡頁再按：getUserMedia 3 → 4、listening；重新整理：pagehide 時音軌 ended,ended,ended,ended、持有 0（瀏覽器麥克風使用中圖示、關閉分頁列 V-MIC-2）"
+      "note": "導覽→主控台：離開前 live 1 → 離開後 live 0、持有 0、139ms 內；導覽→難易度設定：離開前 live 1 → 離開後 live 0、持有 0、155ms 內；頁尾→資料來源與授權：離開前 live 1 → 離開後 live 0、持有 0、123ms 內；回單字卡頁再按：getUserMedia 3 → 4、listening；重新整理：pagehide 時音軌 ended,ended,ended,ended、持有 0（瀏覽器麥克風使用中圖示、關閉分頁列 V-MIC-2）"
     },
     {
       "file": "e2e-mic.json",
@@ -1510,7 +1518,7 @@
       "tc": "TC-33-06",
       "ac": "AC-33-06",
       "result": "通過",
-      "note": "(a) 拔除後再按（仍有麥克風）：getUserMedia 1→2、listening；(a) 拔除後再按（無麥克風）：「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、idle、00000；(b) 聆聽中拔除（前 listening/11100）：0.8ms 回到 idle/00000、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、分數=false；例外 0（實機拔除列 V-MIC-5）"
+      "note": "(a) 拔除後再按（仍有麥克風）：getUserMedia 1→2、listening；(a) 拔除後再按（無麥克風）：「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、idle、00000；(b) 聆聽中拔除（前 listening/11100）：0.9ms 回到 idle/00000、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、分數=false；例外 0（實機拔除列 V-MIC-5）"
     },
     {
       "file": "e2e-mic.json",
@@ -1534,7 +1542,7 @@
       "tc": "TC-21-03b",
       "ac": "AC-21-03（執行期，v0.9 收音條）",
       "result": "通過",
-      "note": "localStorage 鍵 englishMasterTrack:state；data 欄位 customVocab,goal,learnedHistory,masteredWordKeys,part5,streak,sttNoticeAcknowledged,todayLearned,vocabQuiz；含音訊／音量樣式字串=false；IndexedDB []；Cache Storage []；下載 0 個；非 file: 網路請求 0"
+      "note": "localStorage 鍵 englishMasterTrack:state；data 欄位 customVocab,flashcardPosition,goal,learnedHistory,masteredWordKeys,part5,part5CorrectIds,part5UnansweredOnly,streak,sttNoticeAcknowledged,todayLearned,vocabQuiz；含音訊／音量樣式字串=false；IndexedDB []；Cache Storage []；下載 0 個；非 file: 網路請求 0"
     },
     {
       "file": "e2e-mic.json",
@@ -1582,7 +1590,7 @@
       "tc": "TC-28-03",
       "ac": "AC-28-03",
       "result": "通過",
-      "note": "第 5 張（背面）向左滑 120px → 第 6 / 5620 張、正面（手指離開到新卡 1.6ms）；向右滑 → 第 5 / 5620 張（1.2ms）（實機手感列人工 TC-M05）"
+      "note": "第 5 張（背面）向左滑 120px → 第 6 / 5620 張、正面（手指離開到新卡 1.7ms）；向右滑 → 第 5 / 5620 張（1.6ms）（實機手感列人工 TC-M05）"
     },
     {
       "file": "e2e-motion.json",
@@ -1614,7 +1622,7 @@
       "tc": "TC-29-01",
       "ac": "AC-29-01",
       "result": "通過",
-      "note": "四選一答對：點擊→顏色 5.3ms、動畫 \"qz-opt--pop\"/0.48s、700ms 後狀態 correct,neutral,neutral,neutral、鎖定=true、殘留動畫 class=false；四選一答錯：點擊→顏色 7.8ms、動畫 \"qz-opt--shake\"/0.48s、700ms 後狀態 wrong,neutral,neutral,correct、鎖定=true、殘留動畫 class=false；模擬測驗答對：點擊→顏色 10.4ms、動畫 \"p5-opt--pop\"/0.48s、700ms 後狀態 correct,locked,locked,locked、鎖定=true、殘留動畫 class=false；模擬測驗答錯：點擊→顏色 5.4ms、動畫 \"p5-opt--shake\"/0.48s、700ms 後狀態 locked,locked,correct,wrong、鎖定=true、殘留動畫 class=false（動畫上限 600ms，Q-33）"
+      "note": "四選一答對：點擊→顏色 5.5ms、動畫 \"qz-opt--pop\"/0.48s、700ms 後狀態 neutral,correct,neutral,neutral、鎖定=true、殘留動畫 class=false；四選一答錯：點擊→顏色 4.9ms、動畫 \"qz-opt--shake\"/0.48s、700ms 後狀態 neutral,correct,wrong,neutral、鎖定=true、殘留動畫 class=false；模擬測驗答對：點擊→顏色 48ms、動畫 \"p5-opt--pop\"/0.48s、700ms 後狀態 correct,locked,locked,locked、鎖定=true、殘留動畫 class=false；模擬測驗答錯：點擊→顏色 5.1ms、動畫 \"p5-opt--shake\"/0.48s、700ms 後狀態 locked,locked,correct,wrong、鎖定=true、殘留動畫 class=false（動畫上限 600ms，Q-33）"
     },
     {
       "file": "e2e-motion.json",
@@ -1638,7 +1646,7 @@
       "tc": "TC-31-01",
       "ac": "AC-31-01",
       "result": "通過",
-      "note": "customizer：emt-view-in/0.24s、點擊到第一個影格 12.8ms、結束後移除 class=true；flashcards：emt-view-in/0.24s、點擊到第一個影格 17.8ms、結束後移除 class=true；part5：emt-view-in/0.24s、點擊到第一個影格 10.4ms、結束後移除 class=true；dashboard：emt-view-in/0.24s、點擊到第一個影格 2.9ms、結束後移除 class=true（效能多輪判定見 TC-22-01）"
+      "note": "customizer：emt-view-in/0.24s、點擊到第一個影格 13.4ms、結束後移除 class=true；flashcards：emt-view-in/0.24s、點擊到第一個影格 18.7ms、結束後移除 class=true；part5：emt-view-in/0.24s、點擊到第一個影格 12.9ms、結束後移除 class=true；dashboard：emt-view-in/0.24s、點擊到第一個影格 3ms、結束後移除 class=true（效能多輪判定見 TC-22-01）"
     },
     {
       "file": "e2e-motion.json",
@@ -1654,7 +1662,7 @@
       "tc": "TC-31-03",
       "ac": "AC-31-03",
       "result": "通過",
-      "note": "prefers-reduced-motion=true；換頁：立即顯示=true、animation none、opacity 1；翻卡：20ms 內背面=true、animation none、transform none；滑動：第 6 / 5620 張、animation none、opacity 1；作答：四選一 wrong,neutral,neutral,correct（animation none）、模擬測驗 correct,locked,locked,locked（animation none）、震動仍呼叫 2 次；環形圖 transition/animation 0s/none（收音條與聆聽中見 TC-33-08、確認視窗見 TC-31-03d）"
+      "note": "prefers-reduced-motion=true；換頁：立即顯示=true、animation none、opacity 1；翻卡：20ms 內背面=true、animation none、transform none；滑動：第 6 / 5620 張、animation none、opacity 1；作答：四選一 correct,wrong,neutral,neutral（animation none）、模擬測驗 correct,locked,locked,locked（animation none）、震動仍呼叫 2 次；環形圖 transition/animation 0s/none（收音條與聆聽中見 TC-33-08、確認視窗見 TC-31-03d）"
     },
     {
       "file": "e2e-motion.json",
@@ -1670,7 +1678,7 @@
       "tc": "TC-18-01",
       "ac": "AC-18-01",
       "result": "通過",
-      "note": "重新開啟後資料完全相同=true；主控台畫面相同=true；目標 465/brown、自訂 1、Part 5 2/2（第 2 / 200 題、已作答鎖定=true）、打卡 1 天、STT 已讀 true、今日已學 {\"date\":\"2026-11-03\",\"wordKeys\":[\"the\"]}、歷史 {\"2026-11-03\":1}"
+      "note": "重新開啟後資料完全相同=true；主控台畫面相同=true；目標 465/brown、自訂 1、Part 5 2/2（第 2 / 200 題、已作答鎖定=true）、打卡 1 天、STT 已讀 true、今日已學 {\"date\":\"2026-11-04\",\"wordKeys\":[\"the\"]}、歷史 {\"2026-11-04\":1}"
     },
     {
       "file": "e2e-progress.json",
@@ -1694,7 +1702,7 @@
       "tc": "TC-30-03",
       "ac": "AC-30-03、AC-17-02（學習行為）",
       "result": "通過",
-      "note": "X 依序 1、1、1、2、3、4（A=he、B=for、C=they、E=not；測驗題目 he/not）；localStorage todayLearned {\"date\":\"2026-11-03\",\"wordKeys\":[\"he\",\"for\",\"they\",\"not\"]}、歷史今天 4"
+      "note": "X 依序 1、1、1、2、3、4（A=he、B=for、C=they、E=not；測驗題目 he/not）；localStorage todayLearned {\"date\":\"2026-11-04\",\"wordKeys\":[\"he\",\"for\",\"they\",\"not\"]}、歷史今天 4"
     },
     {
       "file": "e2e-progress.json",
@@ -1726,7 +1734,7 @@
       "tc": "TC-30-08",
       "ac": "AC-30-08",
       "result": "通過",
-      "note": "長條 10/28:3(30%) 10/29:0(0%) 10/30:0(0%) 10/31:10(100%) 11/1:0(0%) 11/2:0(0%) 11/3:4(40%)；高度/字數比 10"
+      "note": "長條 10/29:3(30%) 10/30:0(0%) 10/31:0(0%) 11/1:10(100%) 11/2:0(0%) 11/3:0(0%) 11/4:4(40%)；高度/字數比 10"
     },
     {
       "file": "e2e-progress.json",
@@ -1734,7 +1742,7 @@
       "tc": "TC-30-09",
       "ac": "AC-30-09",
       "result": "通過",
-      "note": "預寫 31 筆（含今天往前第 30、45 天）→ 學 1 字後匯出歷史 30 筆（2026-10-05～2026-11-03）、第 29 天=7、今天=1、X=1；localStorage 歷史 30 筆"
+      "note": "預寫 31 筆（含今天往前第 30、45 天）→ 學 1 字後匯出歷史 30 筆（2026-10-06～2026-11-04）、第 29 天=7、今天=1、X=1；localStorage 歷史 30 筆"
     },
     {
       "file": "e2e-progress.json",
@@ -1758,7 +1766,7 @@
       "tc": "TC-30-12",
       "ac": "AC-30-12、MG-3",
       "result": "通過",
-      "note": "v1 狀態開啟 → main/dashboard；7 欄不變=true；提示 []；今日已學 0 / 10 字、長條 0,0,0,0,0,0,0、空狀態「開始學習後會顯示紀錄」；localStorage 已寫回 schemaVersion 2、todayLearned {\"date\":null,\"wordKeys\":[]}、learnedHistory {}（t0=2）"
+      "note": "v1 狀態開啟 → main/dashboard；7 欄不變=true；提示 []；今日已學 0 / 10 字、長條 0,0,0,0,0,0,0、空狀態「開始學習後會顯示紀錄」；localStorage 已寫回 schemaVersion 3、todayLearned {\"date\":null,\"wordKeys\":[]}、learnedHistory {}（t0=2）"
     },
     {
       "file": "e2e-progress.json",
@@ -1766,7 +1774,7 @@
       "tc": "TC-30-13",
       "ac": "AC-30-13、RD-1、V-ST-09～V-ST-11",
       "result": "通過",
-      "note": "(1) 無效歷史 + 昨天的今日紀錄：今日已學 0 / 10 字、長條 0,0,0,5,0,0,0、提示 []、目標 465；學 1 字後寫出歷史 {\"2026-10-31\":5,\"2026-11-03\":1}；(2) 重複單字：今日已學 2 / 10 字、今天長條 2；(3) 未來日期：今日已學 0 / 10 字、長條 0,0,0,0,0,0,0；(4) 欄位型別錯誤：今日已學 0 / 10 字、目標 465、自訂字保留=true、提示 []、main"
+      "note": "(1) 無效歷史 + 昨天的今日紀錄：今日已學 0 / 10 字、長條 0,0,0,5,0,0,0、提示 []、目標 465；學 1 字後寫出歷史 {\"2026-11-01\":5,\"2026-11-04\":1}；(2) 重複單字：今日已學 2 / 10 字、今天長條 2；(3) 未來日期：今日已學 0 / 10 字、長條 0,0,0,0,0,0,0；(4) 欄位型別錯誤：今日已學 0 / 10 字、目標 465、自訂字保留=true、提示 []、main"
     },
     {
       "file": "e2e-progress.json",
@@ -1822,7 +1830,7 @@
       "tc": "TC-36-03a",
       "ac": "AC-36-03（首次安裝不提示、不重新載入）、AC-35-01",
       "result": "通過",
-      "note": "A：啟用=true（67 ms）、提示=false、主框架導覽 2 次、識別碼 436e27b40282d4af；B：啟用=true（205 ms）、提示=false、主框架導覽 1 次、識別碼 436e27b40282d4af；C：啟用=true（97 ms）、提示=false、主框架導覽 2 次、識別碼 436e27b40282d4af；D：啟用=true（82 ms）、提示=false、主框架導覽 2 次、識別碼 436e27b40282d4af（A 導覽 2 次 = 開啟＋寫入狀態後重新載入，clients.claim() 後未自動重新載入）"
+      "note": "A：啟用=true（70 ms）、提示=false、主框架導覽 2 次、識別碼 33dcbafd5b611fc6；B：啟用=true（232 ms）、提示=false、主框架導覽 1 次、識別碼 33dcbafd5b611fc6；C：啟用=true（83 ms）、提示=false、主框架導覽 2 次、識別碼 33dcbafd5b611fc6；D：啟用=true（75 ms）、提示=false、主框架導覽 2 次、識別碼 33dcbafd5b611fc6（A 導覽 2 次 = 開啟＋寫入狀態後重新載入，clients.claim() 後未自動重新載入）"
     },
     {
       "file": "e2e-pwa-update.json",
@@ -1830,7 +1838,7 @@
       "tc": "TC-36-06",
       "ac": "AC-36-06",
       "result": "通過",
-      "note": "離線（伺服器停止）開啟：識別碼 436e27b40282d4af、main、提示=false、錯誤 0；恢復連網（V2 已部署）重新開啟 → 1850 ms 後顯示提示=true"
+      "note": "離線（伺服器停止）開啟：識別碼 33dcbafd5b611fc6、main、提示=false、錯誤 0；恢復連網（V2 已部署）重新開啟 → 1849 ms 後顯示提示=true"
     },
     {
       "file": "e2e-pwa-update.json",
@@ -1838,7 +1846,7 @@
       "tc": "TC-36-03b",
       "ac": "AC-36-03、AC-31-03、AC-27-03",
       "result": "通過",
-      "note": "重新載入後 1853 ms 顯示「有新版本，重新整理」＋按鈕「重新整理」（role=status、圖像 0、非彈窗=true）；減少動態下 animation/transition [\"none/0s\",\"none/0s\",\"none/0s\"]；1366 遮住點 0/5、375 按鈕遮住點 0/5 裁切=false；按下前頁面識別碼 436e27b40282d4af（V1 照常運作）；本專案快取 [\"english-master-track-pwa-436e27b40282d4af\",\"english-master-track-pwa-df1b5161cedf0592\"]（更新等待期間 2 份，FB-39）；V2 快取中 ./ 與 ./index.html 的識別碼 df1b5161cedf0592、df1b5161cedf0592（取自伺服器而非 HTTP 快取；伺服器 Cache-Control: max-age=600，距 V1 安裝 2 秒內）"
+      "note": "重新載入後 1849 ms 顯示「有新版本，重新整理」＋按鈕「重新整理」（role=status、圖像 0、非彈窗=true）；減少動態下 animation/transition [\"none/0s\",\"none/0s\",\"none/0s\"]；1366 遮住點 0/5、375 按鈕遮住點 0/5 裁切=false；按下前頁面識別碼 33dcbafd5b611fc6（V1 照常運作）；本專案快取 [\"english-master-track-pwa-33dcbafd5b611fc6\",\"english-master-track-pwa-c0556075e7fe73cf\"]（更新等待期間 2 份，FB-39）；V2 快取中 ./ 與 ./index.html 的識別碼 c0556075e7fe73cf、c0556075e7fe73cf（取自伺服器而非 HTTP 快取；伺服器 Cache-Control: max-age=600，距 V1 安裝 2 秒內）"
     },
     {
       "file": "e2e-pwa-update.json",
@@ -1846,7 +1854,7 @@
       "tc": "TC-36-03c",
       "ac": "AC-36-03（按「重新整理」）、AC-36-04、AC-36-05",
       "result": "通過",
-      "note": "按下（另補按 1 次）→ 重新載入 1 次、識別碼 df1b5161cedf0592（V2 df1b5161cedf0592）、提示=false、main；本專案快取 [\"english-master-track-pwa-df1b5161cedf0592\"]、全部快取 [\"other-project-cache\",\"english-master-track-pwa-df1b5161cedf0592\"]、other-project-cache 內容「keep-me」；localStorage 與更新前完全相同=true（鍵 [\"englishMasterTrack:state\"]、schemaVersion 2）"
+      "note": "按下（另補按 1 次）→ 重新載入 1 次、識別碼 c0556075e7fe73cf（V2 c0556075e7fe73cf）、提示=false、main；本專案快取 [\"english-master-track-pwa-c0556075e7fe73cf\"]、全部快取 [\"other-project-cache\",\"english-master-track-pwa-c0556075e7fe73cf\"]、other-project-cache 內容「keep-me」；localStorage 與更新前完全相同=true（鍵 [\"englishMasterTrack:state\"]、schemaVersion 3）"
     },
     {
       "file": "e2e-pwa-update.json",
@@ -1862,7 +1870,7 @@
       "tc": "TC-36-04b",
       "ac": "AC-36-04（首次畫面）、AC-36-03（不按重新整理）",
       "result": "通過",
-      "note": "首次畫面重新載入 → 1860 ms 顯示提示=true（firstRun、識別碼 436e27b40282d4af）；不按、關閉全部分頁後重開 → 識別碼 df1b5161cedf0592、firstRun、狀態鍵 無、提示=false"
+      "note": "首次畫面重新載入 → 1862 ms 顯示提示=true（firstRun、識別碼 33dcbafd5b611fc6）；不按、關閉全部分頁後重開 → 識別碼 c0556075e7fe73cf、firstRun、狀態鍵 無、提示=false"
     },
     {
       "file": "e2e-pwa-update.json",
@@ -1870,7 +1878,7 @@
       "tc": "TC-36-03d",
       "ac": "AC-36-03（不按時維持 V1、關閉後重開為 V2）、AC-36-04",
       "result": "通過",
-      "note": "提示顯示=true；不按並操作 6 秒以上：識別碼 436e27b40282d4af、自動重新載入 0 次、例外 0；關閉全部分頁後重開 → df1b5161cedf0592、main；localStorage 鍵相同=true、schemaVersion 2、關閉前與重開後狀態逐字相同=true（連續天數 1→1）"
+      "note": "提示顯示=true；不按並操作 6 秒以上：識別碼 33dcbafd5b611fc6、自動重新載入 0 次、例外 0；關閉全部分頁後重開 → c0556075e7fe73cf、main；localStorage 鍵相同=true、schemaVersion 3、關閉前與重開後狀態逐字相同=true（連續天數 1→1）"
     },
     {
       "file": "e2e-pwa-update.json",
@@ -1958,7 +1966,7 @@
       "tc": "TC-35-01",
       "ac": "AC-35-01、AC-21-03",
       "result": "通過",
-      "note": "啟用 210 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-436e27b40282d4af\"]（BUILD_ID 436e27b40282d4af）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
+      "note": "啟用 217 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-33dcbafd5b611fc6\"]（BUILD_ID 33dcbafd5b611fc6）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
     },
     {
       "file": "e2e-pwa.json",
@@ -1966,7 +1974,7 @@
       "tc": "TC-37-05a",
       "ac": "AC-37-05、AC-21-01、AC-21-03",
       "result": "通過",
-      "note": "整個工作階段請求 10 筆（含 service worker 發出 7 筆：[\"/english-master-track/sw.js\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/icons/apple-touch-icon-180.png\"]）：[\"GET /english-master-track/\",\"GET /english-master-track/sw.js\",\"GET /english-master-track/index.html\",\"GET /english-master-track/manifest.webmanifest\",\"GET /english-master-track/icons/icon-192.png\",\"GET /english-master-track/icons/icon-512.png\",\"GET /english-master-track/icons/icon-maskable-512.png\",\"GET /english-master-track/icons/apple-touch-icon-180.png\"]；不在允許清單／非 GET／帶本文／有查詢字串／跨來源 0；載入完成後操作（難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入）請求 0；Cache Storage {\"english-master-track-pwa-436e27b40282d4af\":7}；IndexedDB []；localStorage 鍵 [\"englishMasterTrack:state\"]；Console 錯誤／警告 0"
+      "note": "整個工作階段請求 10 筆（含 service worker 發出 7 筆：[\"/english-master-track/sw.js\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/icons/apple-touch-icon-180.png\"]）：[\"GET /english-master-track/\",\"GET /english-master-track/sw.js\",\"GET /english-master-track/index.html\",\"GET /english-master-track/manifest.webmanifest\",\"GET /english-master-track/icons/icon-192.png\",\"GET /english-master-track/icons/icon-512.png\",\"GET /english-master-track/icons/icon-maskable-512.png\",\"GET /english-master-track/icons/apple-touch-icon-180.png\"]；不在允許清單／非 GET／帶本文／有查詢字串／跨來源 0；載入完成後操作（難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入）請求 0；Cache Storage {\"english-master-track-pwa-33dcbafd5b611fc6\":7}；IndexedDB []；localStorage 鍵 [\"englishMasterTrack:state\"]；Console 錯誤／警告 0"
     },
     {
       "file": "e2e-pwa.json",
@@ -1982,7 +1990,7 @@
       "tc": "TC-35-04",
       "ac": "AC-35-04",
       "result": "通過",
-      "note": "離線（伺服器停止＋context 離線）重新載入到主控台「開始今日學習」可點擊：一般 99、101、98、103、104 ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 450、526、473、498、543 ms（門檻每次 ≤ 6000）"
+      "note": "離線（伺服器停止＋context 離線）重新載入到主控台「開始今日學習」可點擊：一般 108、102、104、114、114 ms（門檻每次 ≤ 3000）；4 倍 CPU 降速 588、845、745、690、655 ms（門檻每次 ≤ 6000）"
     },
     {
       "file": "e2e-pwa.json",
@@ -2054,7 +2062,7 @@
       "tc": "TC-37-06",
       "ac": "AC-37-06",
       "result": "通過",
-      "note": "加入 PWA 前版本（git e9372f2 的 dist，無建置識別碼=true）學習後換成 PWA 版：service worker 啟用=true；再載入 main；localStorage 鍵 [\"englishMasterTrack:state\"] 相同=true；StorageRecord／data 欄位集合相同=true；data 內容完全相同=true；schemaVersion 2"
+      "note": "加入 PWA 前版本（git e9372f2 的 dist，無建置識別碼=true）學習後換成 PWA 版：service worker 啟用=true；再載入 main；localStorage 鍵 [\"englishMasterTrack:state\"] 相同=true；StorageRecord 欄位相同、data 為原 9 欄＋新 3 欄=true（原 9 欄集合相同=false，C-8 改讀）；原 9 欄內容逐欄相同且新 3 欄為預設=true；schemaVersion 3"
     },
     {
       "file": "e2e-pwa.json",
@@ -2078,7 +2086,7 @@
       "tc": "TC-32-02",
       "ac": "AC-32-02",
       "result": "通過",
-      "note": "確定後視窗關閉=true；localStorage goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；主控台 棕級・每日 10 字｜變更、今日已學 0 / 10 字、長條 0,0,0,0,0,0,0、近 7 天「開始學習後會顯示紀錄」、3 格 0 天｜0%｜已掌握 0 字｜—；試算 c=0 字、棕 41 週；單字卡 第 1 / 2812 張/false；模擬測驗 第 1 / 200 題（未作答=true）；重新載入後相同=true；匯出備份 6 欄 {\"masteredWordKeys\":[],\"vocabQuiz\":{\"answered\":0,\"correct\":0},\"part5\":{\"currentIndex\":0,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":0,\"roundCorrect\":0,\"totalAnswered\":0,\"totalCorrect\":0},\"streak\":{\"days\":0,\"lastActiveDate\":null},\"todayLearned\":{\"date\":null,\"wordKeys\":[]},\"learnedHistory\":{}} 與首次啟動預設相同=true"
+      "note": "確定後視窗關閉=true；localStorage goal {\"draftScore\":465,\"appliedScore\":465,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；主控台 棕級・每日 10 字｜變更、今日已學 0 / 10 字、長條 0,0,0,0,0,0,0、近 7 天「開始學習後會顯示紀錄」、3 格 0 天｜0%｜已掌握 0 字｜—；試算 c=0 字、棕 41 週；單字卡 第 1 / 2812 張/false；模擬測驗 第 1 / 200 題（未作答=true）；重新載入後相同=true；匯出備份 7 欄（第 7 輪含答對紀錄）{\"masteredWordKeys\":[],\"vocabQuiz\":{\"answered\":0,\"correct\":0},\"part5\":{\"currentIndex\":0,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":0,\"roundCorrect\":0,\"totalAnswered\":0,\"totalCorrect\":0},\"streak\":{\"days\":0,\"lastActiveDate\":null},\"todayLearned\":{\"date\":null,\"wordKeys\":[]},\"learnedHistory\":{},\"part5CorrectIds\":[]} 與首次啟動預設相同=true"
     },
     {
       "file": "e2e-reinit.json",
@@ -2094,7 +2102,7 @@
       "tc": "TC-32-10",
       "ac": "AC-32-10",
       "result": "通過",
-      "note": "schemaVersion 2→2；localStorage 鍵 [englishMasterTrack:state]→[englishMasterTrack:state]；data 欄位 9 個相同；goal 欄位相同；自訂單字相同；網路請求 0"
+      "note": "schemaVersion 3→3；localStorage 鍵 [englishMasterTrack:state]→[englishMasterTrack:state]；data 欄位 12 個相同；goal 欄位相同；自訂單字相同；網路請求 0"
     },
     {
       "file": "e2e-reinit.json",
@@ -2286,7 +2294,7 @@
       "tc": "TC-22-03",
       "ac": "AC-22-03",
       "result": "通過",
-      "note": "onresult → 徽章繪製 ms：14.8、8.1、3.7、15.8、10.2、4.1、12.5、7.6、3.7、13.8；中位數 8.1、p90 14.8、最大 15.8（無頭 Chrome、未降速）"
+      "note": "onresult → 徽章繪製 ms：11.4、7.4、3.5、15、6.7、8.8、16.3、21.3、13.1、10.4；中位數 10.4、p90 16.3、最大 21.3（無頭 Chrome、未降速）"
     },
     {
       "file": "e2e-speech.json",
@@ -2294,7 +2302,7 @@
       "tc": "TC-21-03",
       "ac": "AC-21-03（執行期）",
       "result": "通過",
-      "note": "localStorage 鍵與長度 {\"englishMasterTrack:state\":6731}；含音訊樣式字串=false"
+      "note": "localStorage 鍵與長度 {\"englishMasterTrack:state\":6837}；含音訊樣式字串=false"
     },
     {
       "file": "e2e-speech.json",
@@ -2345,12 +2353,436 @@
       "note": "toast [\"此裝置未安裝美式英語語音\"]；實際朗讀 0 次；未處理例外 0"
     },
     {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-01",
+      "ac": "AC-45-01、CR-2、AC-11-03",
+      "result": "通過",
+      "note": "p5-005 未曾答對、K = 2：答對後 34.9 ms 出現「✓ 曾答對」「已答對 3 / 200 題」；累計 7/3 → 8/4；紀錄 [\"p5-001\",\"p5-002\",\"p5-005\"]；重新載入「第 5 / 200 題」「✓ 曾答對」「已答對 3 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-01p",
+      "ac": "AC-45-01、AC-45-05（≤ 100ms，10 次）、NFR-4",
+      "result": "通過",
+      "note": "連續 10 題答對，點擊到「✓ 曾答對」與計數更新完成（下一影格）：7.3、5.9、6.8、6.4、4.5、4.9、9.2、6.9、4.7、4.5 ms；最大 9.2 ms"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-02",
+      "ac": "AC-45-02、CR-2",
+      "result": "通過",
+      "note": "p5-006 答錯：標示 null、「已答對 1 / 200 題」；累計 8/3；紀錄 [\"p5-001\"]"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-03",
+      "ac": "AC-45-03、AC-11-06、AC-11-07、CR-2",
+      "result": "通過",
+      "note": "(c) 鎖定後重複點擊 4 次：紀錄 [\"p5-005\"]、累計 3/2、localStorage 不變=true；(a) 結算「答對 1 / 4」→ 重新開始「第 1 / 200 題」→ 到「第 5 / 200 題」作答前標示「✓ 曾答對」、答錯後標示「✓ 曾答對」「已答對 1 / 200 題」；累計 16/5；(b) 再答對：紀錄 [\"p5-005\"]、「已答對 1 / 200 題」、累計 17/6"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-06",
+      "ac": "AC-45-06、CR-5、CR-7、AC-17-04、AC-11-07、AC-17-02、AC-30-04",
+      "result": "通過",
+      "note": "作答 4 題（含曾答對的 p5-003）：累計 4/2、本輪 4/2、主控台正確率 50%（主控台出現「已答對」=false）、K「已答對 2 / 200 題」、打卡 {\"days\":1,\"lastActiveDate\":\"2026-11-04\"}、今日已學 0；最後一題答對後結算「答對 3 / 5」；重新開始後累計 5/3、本輪 0、紀錄 [\"p5-003\",\"p5-001\",\"p5-200\"]（不清除）、正確率 60%、「已答對 3 / 200 題」「第 1 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-07",
+      "ac": "AC-45-07、CR-3、Q-71、E-109",
+      "result": "通過",
+      "note": "紀錄 [p5-001, p5-002, p5-003, p5-999, p5-001] → 已答對 3 / 200 題；逐題 第 1 / 200 題:✓ 曾答對、第 2 / 200 題:✓ 曾答對、第 3 / 200 題:✓ 曾答對、第 4 / 200 題:無；作答寫入後 localStorage 紀錄 [\"p5-001\",\"p5-002\",\"p5-003\",\"p5-999\"]（保留 p5-999）；unreadable 鍵 false；Toast []；畫面出現題目 id=false；Console 錯誤 0"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-08",
+      "ac": "AC-45-08、AC-32-02（v0.15：學習進度紀錄 (7)、「已答對 0 / Q 題」）、AC-32-04、CI-4、CI-8、E-108",
+      "result": "通過",
+      "note": "K = 37、開關開啟：(b) 取消 → localStorage 不變=true、「已答對 37 / 200 題」、開關 true；(a) 確定 → 紀錄 []、「已答對 0 / 200 題」、標示 0 個、開關 true、「第 1 / 200 題」未作答=true；累計 0；重新載入「已答對 0 / 200 題」「第 1 / 200 題」開關 true"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-X-p5-us45",
+      "ac": "Console 無未處理錯誤、無網路請求（AC-47-08 (a)）",
+      "result": "通過",
+      "note": "錯誤 []；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-04-375",
+      "ac": "AC-45-04、AC-38-01、AC-38-04、AC-11-01、CR-4 (a)",
+      "result": "通過",
+      "note": "375px p5-005（曾答對）作答前：標示「✓ 曾答對」在 .p5-meta 內=true、在題型標籤之後=true、顏色 rgb(21, 128, 61)（對比 5.02，背景 rgb(255, 255, 255)；非強調橘=true）、裁切=false、水平捲軸=false；選項可作答 4/4；作答後鎖定=true、選項樣式 p5-option p5-option--locked|p5-option p5-option--locked|p5-option p5-option--correct|p5-option p5-option--wrong；p5-006 標示 0 個、無「未答對／答錯過」=true"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-05-375",
+      "ac": "AC-45-05、AC-40-01、AC-38-07、CR-4 (b)、MT-1",
+      "result": "通過",
+      "note": "375px：K=0 題目「已答對 0 / 200 題」×1；K=0 結算「已答對 0 / 200 題」×1；K=37 題目「已答對 37 / 200 題」×1；K=37 結算「已答對 37 / 200 題」×1；K=200 題目「已答對 200 / 200 題」×1；K=200 結算「已答對 200 / 200 題」×1；字型數字 tabular-nums、位於進度條之後與題目之前"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-01-375",
+      "ac": "AC-46-01、AC-38-09、AC-31-03、UO-1",
+      "result": "通過",
+      "note": "375px：首次進入：開關 1 個、checked=false、localStorage false；元素 <input type=checkbox>（role null、appearance auto，原生核取方塊勾選有 ✓ 形狀）、標籤「只練沒答對的題目」、觸控區 156×44；Tab 取得焦點=true（外框 solid 3px rgb(8, 102, 173)）；空白鍵 → true（焦點 only、localStorage true）；Enter → false（焦點 only、localStorage false）；觸控點擊 → true；減少動態切換時動畫 0、transition 、animation ；結算畫面開關 1 個、可切換 false→true"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-X-p5-375",
+      "ac": "Console 無未處理錯誤、無網路請求",
+      "result": "通過",
+      "note": "錯誤 []；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-04-1366",
+      "ac": "AC-45-04、AC-38-01、AC-38-04、AC-11-01、CR-4 (a)",
+      "result": "通過",
+      "note": "1366px p5-005（曾答對）作答前：標示「✓ 曾答對」在 .p5-meta 內=true、在題型標籤之後=true、顏色 rgb(21, 128, 61)（對比 5.02，背景 rgb(255, 255, 255)；非強調橘=true）、裁切=false、水平捲軸=false；選項可作答 4/4；作答後鎖定=true、選項樣式 p5-option p5-option--locked|p5-option p5-option--locked|p5-option p5-option--correct|p5-option p5-option--wrong；p5-006 標示 0 個、無「未答對／答錯過」=true"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-05-1366",
+      "ac": "AC-45-05、AC-40-01、AC-38-07、CR-4 (b)、MT-1",
+      "result": "通過",
+      "note": "1366px：K=0 題目「已答對 0 / 200 題」×1；K=0 結算「已答對 0 / 200 題」×1；K=37 題目「已答對 37 / 200 題」×1；K=37 結算「已答對 37 / 200 題」×1；K=200 題目「已答對 200 / 200 題」×1；K=200 結算「已答對 200 / 200 題」×1；字型數字 tabular-nums、位於進度條之後與題目之前"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-01-1366",
+      "ac": "AC-46-01、AC-38-09、AC-31-03、UO-1",
+      "result": "通過",
+      "note": "1366px：首次進入：開關 1 個、checked=false、localStorage false；元素 <input type=checkbox>（role null、appearance auto，原生核取方塊勾選有 ✓ 形狀）、標籤「只練沒答對的題目」、觸控區 156×44；Tab 取得焦點=true（外框 solid 3px rgb(8, 102, 173)）；空白鍵 → true（焦點 only、localStorage true）；Enter → false（焦點 only、localStorage false）；滑鼠點擊 → true；減少動態切換時動畫 0、transition 、animation ；結算畫面開關 1 個、可切換 false→true"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-X-p5-1366",
+      "ac": "Console 無未處理錯誤、無網路請求",
+      "result": "通過",
+      "note": "錯誤 []；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-02",
+      "ac": "AC-46-02、UO-2、AC-11-01～AC-11-07",
+      "result": "通過",
+      "note": "開關關閉、p5-002 曾答對：p5-001 作答後「下一題」→「第 2 / 200 題」、標示「✓ 曾答對」、可作答 4/4、進度 2/200"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-03",
+      "ac": "AC-46-03、UO-5、Q-66、MT-1",
+      "result": "通過",
+      "note": "開關開啟、p5-002／003 曾答對：p5-001 作答後「下一題」4.6 ms →「第 4 / 200 題」未作答=true、進度 aria-valuenow 4/200（填滿 2%）；本輪 1→1、累計 1→1（跳過不計）"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-03p",
+      "ac": "AC-46-03（≤ 100ms，10 次）、NFR-4",
+      "result": "通過",
+      "note": "偶數題曾答對、開關開啟，連續 10 次「下一題」（每次跳過 1 題）：4.2、3.8、4、4.1、3、3.3、2.9、3、2.9、3.1 ms；題號 第 3 / 200 題、第 5 / 200 題、第 7 / 200 題、第 9 / 200 題、第 11 / 200 題、第 13 / 200 題、第 15 / 200 題、第 17 / 200 題、第 19 / 200 題、第 21 / 200 題"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-04",
+      "ac": "AC-46-04、UO-4、E-110",
+      "result": "通過",
+      "note": "(a)「第 10 / 200 題」✓ 曾答對 → 開啟 3.1 ms →「第 12 / 200 題」未作答=true、標示 0；(b) p5-010 答對鎖定 → 開啟後「第 10 / 200 題」鎖定=true、標示「✓ 曾答對」；下一題 →「第 12 / 200 題」；重新載入（開啟、指向 p5-010 曾答對未作答）→「第 12 / 200 題」未作答=true；計數 (a) [3,2,12,7]→[3,2,12,7]、(b) [4,3,13,8]→[4,3,13,8]"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-05",
+      "ac": "AC-46-05、UO-5、UO-6、AC-11-04、AC-40-01、E-112",
+      "result": "通過",
+      "note": "開關開啟、p5-010 之後全部曾答對、之前 p5-002～009 未答對：作答 p5-010 後「下一題」→ 結算「答對 1 / 3」、重新開始鈕=true、進度 200/200；「重新開始」→「第 2 / 200 題」未作答=true"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-06",
+      "ac": "AC-46-06、UO-3、UO-7、MT-1、AC-38-09、E-111",
+      "result": "通過",
+      "note": "答對最後 1 題（p5-200）後仍顯示結果「第 200 / 200 題」鎖定=true；「下一題」→「200 題全部答對！」、說明句逐字=true、本輪「答對 5 / 6」、按鈕「全部題目再練一次（保留紀錄）」「清除答對紀錄，重新來過」（258×44、210×44，Tab 可達 2/2）、焦點 allcorrect-title、選項 0、題號 null、「已答對 200 / 200 題」、進度 200/200；K = Q、開關關閉在「第 31 / 200 題」→ 開啟 → 全部答對畫面=true（無本輪結算=true）；開啟狀態重新載入 → 全部答對畫面=true、選項 0"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-07",
+      "ac": "AC-46-07、UO-7 (a)、CR-7",
+      "result": "通過",
+      "note": "全部答對畫面按「全部題目再練一次（保留紀錄）」→ 開關 false、「第 1 / 200 題」未作答=true、標示「✓ 曾答對」、「已答對 200 / 200 題」、累計 50/40、本輪 0、焦點 number；重新載入開關 false、「第 1 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-08",
+      "ac": "AC-46-08、CR-6、UO-7 (b)、AC-17-04",
+      "result": "通過",
+      "note": "cancel：對話框「清除答對紀錄」「將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。」按鈕 [\"取消\",\"確定\"] → 關閉=true、留在全部答對畫面=true、資料不變=true、焦點 clear；esc：對話框「清除答對紀錄」「將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。」按鈕 [\"取消\",\"確定\"] → 關閉=true、留在全部答對畫面=true、資料不變=true、焦點 clear；backdrop：對話框「清除答對紀錄」「將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。」按鈕 [\"取消\",\"確定\"] → 關閉=true、留在全部答對畫面=true、資料不變=true、焦點 clear；確定 → 紀錄 []、「已答對 0 / 200 題」、標示 0、開關 true、「第 1 / 200 題」未作答=true、累計 50/40、正確率 80%→80%；重新載入「已答對 0 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-09",
+      "ac": "AC-46-09、UO-8",
+      "result": "通過",
+      "note": "開啟、p5-010 已作答 → 關閉開關（仍顯示「第 10 / 200 題」鎖定=true）→「下一題」→「第 11 / 200 題」標示「✓ 曾答對」未作答=true"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-10",
+      "ac": "AC-46-10、Q-69、AC-46-04（不變式）、US-32「有學習紀錄」不含開關",
+      "result": "通過",
+      "note": "開啟 → true；重新載入 true；關閉重開 true；只開開關後套用棕 → 確認視窗=false；備份開關 true；清除後匯入 → 開關 true、「第 3 / 200 題」（p5-001、002 曾答對）未作答=true；重新載入 true「第 3 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-X-p5-us46",
+      "ac": "Console 無未處理錯誤、無網路請求（AC-47-08 (a)：作答、開關、清除答對紀錄、匯出、匯入）",
+      "result": "通過",
+      "note": "錯誤 []；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track-p5.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-47-08b",
+      "ac": "AC-47-08 (b)、AC-37-05、WR-4",
+      "result": "通過",
+      "note": "service worker 啟用=true；操作期間請求 1 筆（GET ./），非允許清單／非 GET／帶本文 0；全程跨來源 0；全部答對畫面=true、清除後「已答對 0 / 200 題」"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-01-375",
+      "ac": "AC-44-01、AC-39-03、AC-22-01、FP-3、FP-8",
+      "result": "通過",
+      "note": "375px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 1.6 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」7.9 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-03-375",
+      "ac": "AC-44-03、FP-7、AC-30-04、AC-17-02",
+      "result": "通過",
+      "note": "還原到第 10 張（未翻面、未作答）後：todayLearned {\"date\":null,\"wordKeys\":[]}、learnedHistory {}、streak {\"days\":0,\"lastActiveDate\":null}、已掌握 0；主控台「今日已學 0 / 15 字」、連續打卡「0 天」、「已掌握 0 字」；卡片正面=true"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-02",
+      "ac": "AC-44-02、AC-28-03、FP-3",
+      "result": "通過",
+      "note": "上一張 1.6 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it；向右滑動 16.6 ms →「第 8 / 5620 張」have（setItem 1 次、紀錄 {\"wordKey\":\"have\",\"ordinal\":8}）→ 重新載入「第 8 / 5620 張」have；下一張 1.6 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-09",
+      "ac": "AC-44-09、FP-1、Q-68",
+      "result": "通過",
+      "note": "第 第 9 / 5620 張 切測驗模式（aria-pressed true、選項可見=true）→ 重新載入：單字卡模式=true（aria-pressed false）、正面=true、「第 9 / 5620 張」it；同一工作階段切測驗模式後離開再回來：aria-pressed true（v0.14 現況，僅記錄）"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-X-track-375",
+      "ac": "Console 無未處理錯誤、無網路請求（AC-47-08 (a)）",
+      "result": "通過",
+      "note": "例外／錯誤 []；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-01-1366",
+      "ac": "AC-44-01、AC-39-03、AC-22-01、FP-3、FP-8",
+      "result": "通過",
+      "note": "1366px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 1.9 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」1.7 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-03-1366",
+      "ac": "AC-44-03、FP-7、AC-30-04、AC-17-02",
+      "result": "通過",
+      "note": "還原到第 10 張（未翻面、未作答）後：todayLearned {\"date\":null,\"wordKeys\":[]}、learnedHistory {}、streak {\"days\":0,\"lastActiveDate\":null}、已掌握 0；主控台「今日已學 0 / 15 字」、連續打卡「0 天」、「已掌握 0 字」；卡片正面=true"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-X-track-1366",
+      "ac": "Console 無未處理錯誤、無網路請求（AC-47-08 (a)）",
+      "result": "通過",
+      "note": "例外／錯誤 []；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-04",
+      "ac": "AC-44-04、FP-2 (3)、FP-5、E-105",
+      "result": "通過",
+      "note": "M = 5620；上次位置 C：「第 5623 / 5623 張」qacharlie；(1) 刪除 A 回單字卡「第 5622 / 5622 張」qacharlie；(2) 重新載入「第 5622 / 5622 張」qacharlie；(3) 新增 E 後「第 5622 / 5623 張」qacharlie、重新載入「第 5622 / 5623 張」qacharlie；紀錄 {\"wordKey\":\"qacharlie\",\"ordinal\":5622}"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-05a",
+      "ac": "AC-44-05 (a)、AC-04-08、FP-2 (4)、E-104",
+      "result": "通過",
+      "note": "中間：「第 5621 / 5623 張」qabravo 刪除 → 重新載入「第 5621 / 5622 張」qacharlie（原本的下一張）；最後一張：「第 5622 / 5622 張」qaecho 刪除 → 重新載入「第 5621 / 5621 張」qacharlie（前一張）；Console 錯誤 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-05bc",
+      "ac": "AC-44-05 (b)(c)、FP-2 (4)、E-104",
+      "result": "通過",
+      "note": "(b) 紀錄 {qanotexist, 5}、N = 5620 →「第 5 / 5620 張」to（期望第 5 張 to）；(c) {qanotexist, 999999} →「第 5620 / 5620 張」yeast（期望第 N 張 yeast）；空白卡 0、Toast []、Console 錯誤 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-06",
+      "ac": "AC-44-06 (b)(c)、AC-47-05（flashcardPosition）、RD-3 (d)、E-107",
+      "result": "通過",
+      "note": "(c) 序號 0→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；序號字串→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；序號 1.5→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；序號 -1→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；單字為數字→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；陣列→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；空物件→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；字串→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；多餘鍵→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；缺鍵→「第 1 / 5620 張」記憶體紀錄 null、其他欄位不變=true；(b) v2 狀態 →「第 1 / 5620 張」、Toast []、遷移寫回 setItem 1 次、schemaVersion 3、9 欄不變=true、flashcardPosition null；Console 錯誤 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-47-05",
+      "ac": "AC-47-05、RD-3 (a)～(c)、E-116",
+      "result": "通過",
+      "note": "答對紀錄為字串→ part5CorrectIds = []、其他欄位不變=true、已答對 0 / 200 題、開關 false；答對紀錄為物件→ part5CorrectIds = []、其他欄位不變=true、已答對 0 / 200 題、開關 false；答對紀錄為 null→ part5CorrectIds = []、其他欄位不變=true、已答對 0 / 200 題、開關 false；答對紀錄含非字串項目→ part5CorrectIds = [\"p5-002\",\"p5-003\"]、其他欄位不變=true、已答對 2 / 200 題、開關 false；開關為字串 true→ part5UnansweredOnly = false、其他欄位不變=true、已答對 2 / 200 題、開關 false；開關為 1→ part5UnansweredOnly = false、其他欄位不變=true、已答對 2 / 200 題、開關 false；開關為 null→ part5UnansweredOnly = false、其他欄位不變=true、已答對 2 / 200 題、開關 false；上次位置為陣列→ flashcardPosition = null、其他欄位不變=true、已答對 2 / 200 題、開關 false；Toast 含「資料讀取失敗」0、unreadable 鍵 0；Console 錯誤 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-07",
+      "ac": "AC-44-07、AC-06-06、FP-2 (1)、E-106",
+      "result": "通過",
+      "note": "記錄的單字在：紀錄 {\"wordKey\":\"qamono\",\"ordinal\":3}，空狀態=true、紀錄不動=true；新增 qamono 後「第 1 / 1 張」qamono；記錄的單字不在：紀錄 {\"wordKey\":\"qaghost\",\"ordinal\":3}，空狀態=true、紀錄不動=true；新增 qafirst 後「第 1 / 1 張」qafirst；Console 錯誤 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-08",
+      "ac": "AC-44-08、AC-03-05、AC-32-04、FP-4、CI-9、E-108",
+      "result": "通過",
+      "note": "(a) 無紀錄：「第 10 / 5620 張」套用棕 → 對話框=false、「第 1 / 2809 張」the、重新載入「第 1 / 2809 張」、紀錄 null；有紀錄：「第 10 / 2809 張」套用綠 → 對話框=true、確定 →「第 1 / 5620 張」、重新載入「第 1 / 5620 張」、紀錄 null；(b) 有紀錄：「第 10 / 5620 張」you 套用棕 → 對話框=true、取消 →「第 10 / 5620 張」you、localStorage 與按「套用」前相同=true、重新載入「第 10 / 5620 張」you"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-08b",
+      "ac": "AC-44-08（FB-54：同生效色級套用）、AC-32-05",
+      "result": "通過",
+      "note": "目前生效綠、「第 10 / 5620 張」you：blue→「第 10 / 5620 張」you；gold→「第 10 / 5620 張」you；green→「第 10 / 5620 張」you；重新載入「第 10 / 5620 張」you"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-10a",
+      "ac": "AC-44-10 (a)、AC-47-07 (a)、AC-18-03、FP-9、WR-3、E-102",
+      "result": "通過",
+      "note": "停用 storage：換到「第 10 / 5620 張」→ 離開再回來「第 10 / 5620 張」you；作答答對 → 標示「✓ 曾答對」「已答對 1 / 200 題」；開關 → true；「進度將無法保存」顯示=true；重新載入 →「第 1 / 5620 張」、「已答對 0 / 200 題」、開關 false、標示 null、警示仍顯示=true；未處理例外 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-44-10b",
+      "ac": "AC-44-10 (b)、AC-47-07 (b)、AC-30-14、WR-2、V-ST-22、E-103",
+      "result": "通過",
+      "note": "容量已滿下 下一張 ×6 →「第 9 / 5620 張」、翻面 1、作答答對 →「✓ 曾答對」「已答對 2 / 200 題」、開關切換 4 次 → false、點色級 6 次（共 19 次寫入）：「儲存空間不足」出現 1 次（全部 Toast [\"儲存空間不足\"]）；localStorage 原值不變=true；記憶體答對紀錄 [\"p5-001\",\"p5-002\"]；解除後重新載入 → 既有資料「第 3 / 5620 張」、「已答對 1 / 200 題」；未處理例外 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-47-01",
+      "ac": "AC-47-01、AC-18-01（v0.15）、FP-1、CR-1、UO-1",
+      "result": "通過",
+      "note": "關閉重開後：記憶體資料完全相同=true、主控台畫面相同=true；單字卡「第 10 / 2810 張」you（W=you）；localStorage 鍵 [\"englishMasterTrack:state\"]、schemaVersion 3、data 12 欄；flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}、part5CorrectIds [\"p5-001\",\"p5-005\",\"p5-010\"]、開關 true；模擬測驗「已答對 3 / 200 題」、開關 true；其他：目標 465、自訂 1、Part 5 10/3、打卡 1、STT 已讀 true、今日已學 1"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-47-02",
+      "ac": "AC-47-02、AC-24-02（v0.15）、AC-46-10（備份）、AC-25-10、AC-24-03、AC-32-08、FP-6",
+      "result": "通過",
+      "note": "匯出 english-master-track-backup-20261104.json：頂層 5 欄、schemaVersion 3、data 欄位 goal,customVocab,masteredWordKeys,vocabQuiz,part5,streak,sttNoticeAcknowledged,todayLearned,learnedHistory,flashcardPosition,part5CorrectIds,part5UnansweredOnly；flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}、part5CorrectIds [\"p5-001\",\"p5-005\",\"p5-010\"]、開關 true；(a) 首次畫面「從備份還原」：確認視窗「匯入將覆蓋目前所有進度」（非 US-32 初始化視窗=true）；12 欄與匯出前相同=true；重新載入後不變=true；「第 10 / 2810 張」you、「已答對 3 / 200 題」、開關 true；(b) 開始學習後主控台匯入：確認視窗「匯入將覆蓋目前所有進度」（非 US-32 初始化視窗=true）；12 欄與匯出前相同=true；重新載入後不變=true；「第 10 / 2810 張」you、「已答對 3 / 200 題」、開關 true"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-47-06",
+      "ac": "AC-47-06、IM-9、IM-10、AC-45-07、AC-44-05、AC-24-05、E-116",
+      "result": "通過",
+      "note": "(a) ids [\"p5-001\",\"p5-001\",\"p5-999\",\"p5-002\",\"p5-002\"] → Toast [\"已匯入，略過 0 筆\"]、「已答對 2 / 200 題」、localStorage [\"p5-001\",\"p5-999\",\"p5-002\"]；(b) 位置 {qanotexist, 7} → Toast [\"已匯入，略過 0 筆\"]、「第 7 / 2810 張」in（期望 in）；(c) 答對紀錄非陣列 → [\"備份檔格式錯誤，未匯入\"]、確認視窗=false、資料不變=true；(c) 答對紀錄為 null → [\"備份檔格式錯誤，未匯入\"]、確認視窗=false、資料不變=true；(c) 開關為字串 → [\"備份檔格式錯誤，未匯入\"]、確認視窗=false、資料不變=true；(c) 開關為 0 → [\"備份檔格式錯誤，未匯入\"]、確認視窗=false、資料不變=true；(c) 位置為陣列 → [\"備份檔格式錯誤，未匯入\"]、確認視窗=false、資料不變=true；(c) 位置序號 0 → [\"備份檔格式錯誤，未匯入\"]、確認視窗=false、資料不變=true；(c) 位置序號 1.5 → [\"備份檔格式錯誤，未匯入\"]、確認視窗=false、資料不變=true；(c) 位置單字為數字 → [\"備份檔格式錯誤，未匯入\"]、確認視窗=false、資料不變=true；位置 null（合法）→ [\"已匯入，略過 0 筆\"]、「第 1 / 2810 張」；未處理例外 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-X-track-backup",
+      "ac": "Console 無未處理錯誤、無網路請求（AC-47-08 (a)：匯出、匯入）",
+      "result": "通過",
+      "note": "未處理例外 0；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-47-03",
+      "ac": "AC-47-03、AC-24-10、IM-9、MG-8、FP-6、E-113",
+      "result": "通過",
+      "note": "v014-backup.json（schemaVersion 2）→ Toast [\"已匯入，略過 0 筆\"]；7 欄與備份相同=true；今日已學／歷史=true；「第 1 / 2820 張」、「已答對 0 / 200 題」、開關 false；3 欄 [null,[],false]；v07-backup.json（schemaVersion 1）→ Toast [\"已匯入，略過 0 筆\"]；7 欄與備份相同=true；今日已學／歷史=true；「第 1 / 2820 張」、「已答對 0 / 200 題」、開關 false；3 欄 [null,[],false]"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-47-04",
+      "ac": "AC-47-04、AC-30-12、MG-5～MG-7、RD-4、E-114、V-ST-21",
+      "result": "通過",
+      "note": "v014-state.json（schemaVersion 2）→ main、Toast []；開啟時 setItem 1 次、再載入 0 次、主鍵位元組不變=true；鍵 [\"englishMasterTrack:state\"]、schemaVersion 3；7 欄（localStorage 與匯出）與開啟前相同=true；模擬測驗「第 6 / 200 題」原題號與累計=true、正確率「67%」（期望 67%）；「第 1 / 2820 張」、「已答對 0 / 200 題」、開關 false；v07-state.json（schemaVersion 1）→ main、Toast []；開啟時 setItem 1 次、再載入 0 次、主鍵位元組不變=true；鍵 [\"englishMasterTrack:state\"]、schemaVersion 3；5 欄（localStorage 與匯出）與開啟前相同（另比 goal 分數、part5 累計）=true；模擬測驗「第 1 / 200 題」原題號與累計=true、正確率「70%」（期望 70%）；「第 1 / 2811 張」、「已答對 0 / 200 題」、開關 false"
+    },
+    {
+      "file": "e2e-track.json",
+      "suite": "e2e-track",
+      "tc": "TC-47-04b",
+      "ac": "AC-47-04（以 v1.0.0 交付檔實測，SD-FB-58）、AC-36-04",
+      "result": "通過",
+      "note": "v1.0.0（emt-app-version 1.0.0）學習後主鍵 schemaVersion 2、9 欄（part5 {\"currentIndex\":3,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":3,\"roundCorrect\":2,\"totalAnswered\":3,\"totalCorrect\":2}）→ 以 1.1.0 開啟：main、setItem 1 次、再載入 0 次且位元組不變=true；schemaVersion 3；9 欄逐欄相同=true；模擬測驗「第 4 / 200 題」「已答對 0 / 200 題」、開關 false；單字卡「第 1 / 2810 張」；未處理例外 0"
+    },
+    {
       "file": "e2e-version.json",
       "suite": "e2e-version",
       "tc": "TC-42-01a",
       "ac": "AC-42-01 (a)、AC-41-04、AC-27-03、AC-23-02、E-95、E-96",
       "result": "通過",
-      "note": "【file:// 375×667】firstRun：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 459 ≤ cz-firstbar 上緣 515=true；dashboard：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；customizer：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587 ≤ app-nav 上緣 611=true；flashcards：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.7 ≤ app-nav 上緣 611=true；part5：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；sources：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587.1 ≤ app-nav 上緣 611=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0 ／ 【file:// 1366×768】firstRun：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752 ≤ 無固定列 上緣 768=true；dashboard：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.5 ≤ 無固定列 上緣 768=true；customizer：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.8 ≤ 無固定列 上緣 768=true；flashcards：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.3 ≤ 無固定列 上緣 768=true；part5：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 601.3 ≤ 無固定列 上緣 768=true；sources：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.1 ≤ 無固定列 上緣 768=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0"
+      "note": "【file:// 375×667】firstRun：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 459 ≤ cz-firstbar 上緣 515=true；dashboard：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；customizer：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587 ≤ app-nav 上緣 611=true；flashcards：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.7 ≤ app-nav 上緣 611=true；part5：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；sources：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587.3 ≤ app-nav 上緣 611=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0 ／ 【file:// 1366×768】firstRun：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752 ≤ 無固定列 上緣 768=true；dashboard：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.5 ≤ 無固定列 上緣 768=true；customizer：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.8 ≤ 無固定列 上緣 768=true；flashcards：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.3 ≤ 無固定列 上緣 768=true；part5：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 653.3 ≤ 無固定列 上緣 768=true；sources：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.7 ≤ 無固定列 上緣 768=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0"
     },
     {
       "file": "e2e-version.json",
@@ -2358,7 +2790,7 @@
       "tc": "TC-42-03a",
       "ac": "AC-42-03 (a)、AC-21-01 (a)、E-98",
       "result": "通過",
-      "note": "連網：6 畫面版本行皆正常=true、文字 版本 1.0.0（建置 436e27b）；主文件以外請求 0；斷網：6 畫面版本行皆正常=true、文字 版本 1.0.0（建置 436e27b）；主文件以外請求 0；localStorage 鍵 englishMasterTrack:state、schemaVersion 2、切換 5 個畫面前後相同=true、含版本號或建置碼=false；備份頂層 format,schemaVersion,exportedAt,contentDataVersion,data（5 欄）、含版本號或建置碼=false"
+      "note": "連網：6 畫面版本行皆正常=true、文字 版本 1.1.0（建置 33dcbaf）；主文件以外請求 0；斷網：6 畫面版本行皆正常=true、文字 版本 1.1.0（建置 33dcbaf）；主文件以外請求 0；localStorage 鍵 englishMasterTrack:state、schemaVersion 3、切換 5 個畫面前後相同=true、含版本號或建置碼=false；備份頂層 format,schemaVersion,exportedAt,contentDataVersion,data（5 欄）、含版本號或建置碼=false"
     },
     {
       "file": "e2e-version.json",
@@ -2366,23 +2798,23 @@
       "tc": "TC-42-01b",
       "ac": "AC-42-01 (b)、AC-42-03 (b)、AC-37-05、AC-41-04、AC-27-03",
       "result": "通過",
-      "note": "【http 375×667】firstRun：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 459 ≤ cz-firstbar 上緣 515=true；dashboard：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；customizer：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587 ≤ app-nav 上緣 611=true；flashcards：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.7 ≤ app-nav 上緣 611=true；part5：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；sources：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587.1 ≤ app-nav 上緣 611=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；請求 8 筆（./ ./sw.js ./index.html ./manifest.webmanifest ./icons/icon-192.png ./icons/icon-512.png ./icons/icon-maskable-512.png ./icons/apple-touch-icon-180.png），非允許清單 0、package.json 0、非 GET 或帶本文 0；Console 錯誤 0 ／ 【http 1366×768】firstRun：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752 ≤ 無固定列 上緣 768=true；dashboard：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.5 ≤ 無固定列 上緣 768=true；customizer：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.8 ≤ 無固定列 上緣 768=true；flashcards：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.3 ≤ 無固定列 上緣 768=true；part5：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 601.3 ≤ 無固定列 上緣 768=true；sources：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.1 ≤ 無固定列 上緣 768=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；請求 8 筆（./ ./sw.js ./index.html ./manifest.webmanifest ./icons/icon-192.png ./icons/icon-512.png ./icons/icon-maskable-512.png ./icons/apple-touch-icon-180.png），非允許清單 0、package.json 0、非 GET 或帶本文 0；Console 錯誤 0；file:// 與 http 文字相同=true"
+      "note": "【http 375×667】firstRun：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 459 ≤ cz-firstbar 上緣 515=true；dashboard：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；customizer：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587 ≤ app-nav 上緣 611=true；flashcards：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.7 ≤ app-nav 上緣 611=true；part5：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；sources：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587.1 ≤ app-nav 上緣 611=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；請求 8 筆（./ ./sw.js ./index.html ./manifest.webmanifest ./icons/icon-192.png ./icons/icon-512.png ./icons/icon-maskable-512.png ./icons/apple-touch-icon-180.png），非允許清單 0、package.json 0、非 GET 或帶本文 0；Console 錯誤 0 ／ 【http 1366×768】firstRun：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752 ≤ 無固定列 上緣 768=true；dashboard：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.5 ≤ 無固定列 上緣 768=true；customizer：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.8 ≤ 無固定列 上緣 768=true；flashcards：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.3 ≤ 無固定列 上緣 768=true；part5：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 653.3 ≤ 無固定列 上緣 768=true；sources：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.1 ≤ 無固定列 上緣 768=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；請求 8 筆（./ ./sw.js ./index.html ./manifest.webmanifest ./icons/icon-192.png ./icons/icon-512.png ./icons/icon-maskable-512.png ./icons/apple-touch-icon-180.png），非允許清單 0、package.json 0、非 GET 或帶本文 0；Console 錯誤 0；file:// 與 http 文字相同=true"
     },
     {
       "file": "e2e-version.json",
       "suite": "e2e-version",
       "tc": "TC-42-02",
       "ac": "AC-42-02、AC-36-02、AC-36-07、E-96",
-      "result": "通過",
-      "note": "package.json version 1.0.0；emt-app-version 1.0.0（1 個）；emt-build-id 436e27b40282d4af；sw.js BUILD_ID 436e27b40282d4af、CACHE_NAME CACHE_PREFIX + BUILD_ID；畫面「版本 1.0.0（建置 436e27b）」；dist 與 site/index.html 逐位元組相同=true；@@ 殘留 HTML 0／sw 0；site 內 package 檔 0（共 8 檔）"
+      "result": "失敗",
+      "note": "package.json version 1.1.0；emt-app-version 1.1.0（1 個）；emt-build-id 33dcbafd5b611fc6；sw.js BUILD_ID 33dcbafd5b611fc6、CACHE_NAME CACHE_PREFIX + BUILD_ID；畫面「版本 1.1.0（建置 33dcbaf）」；dist 與 site/index.html 逐位元組相同=false；@@ 殘留 HTML 0／sw 0；site 內 package 檔 0（共 8 檔）"
     },
     {
       "file": "e2e-version.json",
       "suite": "e2e-version",
       "tc": "TC-42-04a",
       "ac": "AC-42-04 (a)、AC-36-01 (a)",
-      "result": "通過",
-      "note": "連續建置 2 次（--out 到暫存目錄）：t.html 相同=true、site/index.html 相同=true、site/sw.js 相同=true、site/manifest.webmanifest 相同=true；與 dist 相同=true；版本 1.0.0、BUILD_ID 436e27b40282d4af"
+      "result": "失敗",
+      "note": "連續建置 2 次（--out 到暫存目錄）：t.html 相同=true、site/index.html 相同=true、site/sw.js 相同=true、site/manifest.webmanifest 相同=true；與 dist 相同=false；版本 1.1.0、BUILD_ID 33dcbafd5b611fc6"
     },
     {
       "file": "e2e-version.json",
@@ -2390,7 +2822,7 @@
       "tc": "TC-42-04b",
       "ac": "AC-42-04 (b)、E-97（建置面）",
       "result": "通過",
-      "note": "只改 --package 的 version 1.0.0→1.0.1（複本 package-1.0.1.json，不改專案 package.json）：emt-app-version 1.0.1；BUILD_ID 436e27b40282d4af→6b739743f6e502c9；sw.js BUILD_ID 6b739743f6e502c9、內容不同=true；未手動修改 HTML、sw、快取設定"
+      "note": "只改 --package 的 version 1.1.0→1.1.1（複本 package-bump.json，不改專案 package.json）：emt-app-version 1.1.1；BUILD_ID 33dcbafd5b611fc6→ce6356f487f160b4；sw.js BUILD_ID ce6356f487f160b4、內容不同=true；未手動修改 HTML、sw、快取設定"
     },
     {
       "file": "e2e-version.json",
@@ -2398,7 +2830,7 @@
       "tc": "TC-42-04c",
       "ac": "AC-42-04 (c)、AC-36-01 (b)",
       "result": "通過",
-      "note": "src/app 複本 main.js 改 1 個字（「。」→「，」）：emt-app-version 1.0.0（不變）；BUILD_ID 436e27b40282d4af→df1b5161cedf0592；sw.js BUILD_ID df1b5161cedf0592"
+      "note": "src/app 複本 main.js 改 1 個字（「。」→「，」）：emt-app-version 1.1.0（不變）；BUILD_ID 33dcbafd5b611fc6→c0556075e7fe73cf；sw.js BUILD_ID c0556075e7fe73cf"
     },
     {
       "file": "e2e-version.json",
@@ -2406,7 +2838,7 @@
       "tc": "TC-42-04d",
       "ac": "AC-42-04 (b)（更新流程）、AC-36-03、E-97",
       "result": "通過",
-      "note": "V1 service worker 啟用=true、版本行「版本 1.0.0（建置 436e27b）」；部署 1.0.1 後重新載入 1838 ms 出現「有新版本，重新整理」；按「重新整理」後版本行「版本 1.0.1（建置 6b73974）」"
+      "note": "V1 service worker 啟用=true、版本行「版本 1.1.0（建置 33dcbaf）」；部署 1.1.1 後重新載入 1855 ms 出現「有新版本，重新整理」；按「重新整理」後版本行「版本 1.1.1（建置 ce6356f）」"
     },
     {
       "file": "e2e-version.json",
@@ -2430,7 +2862,7 @@
       "tc": "TC-43-03a",
       "ac": "AC-43-03（localStorage）、AC-04-06、AC-04-07、AC-23-01、E-99、E-19",
       "result": "通過",
-      "note": "(1) v0.13 localStorage 直接開啟 → main/dashboard、錯誤 0；customVocab 與開啟前逐欄相同=true（範本字 10：Latency,Scalability,Throughput,Concurrency,Middleware,Serialization,Idempotent,Containerization,Tokenization,Overfitting）；(2) 清單 11 項、標示 自訂擴充、含來源標示節點 0、含「範本」0；單字卡「共 5631 張」含 11 字=true；卡片 Latency 出處「自訂擴充」、TTS [\"Latency\"]、STT「辨識吻合度 100 綠燈 此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；(3) 新增 latency →「單字已存在」、localStorage 不變=true；(4) 刪除 Scalability 後其餘 10 字逐欄相同=true；(5) 備份 customVocab 10 字與 localStorage 相同、origin/templateId 保留=true；鍵名、欄位集合、schemaVersion 2、備份頂層 5 欄=true；Console 錯誤 0"
+      "note": "(1) v0.13 localStorage 直接開啟 → main/dashboard、錯誤 0；customVocab 與開啟前逐欄相同=true（範本字 10：Latency,Scalability,Throughput,Concurrency,Middleware,Serialization,Idempotent,Containerization,Tokenization,Overfitting）；(2) 清單 11 項、標示 自訂擴充、含來源標示節點 0、含「範本」0；單字卡「共 5631 張」含 11 字=true；卡片 Latency 出處「自訂擴充」、TTS [\"Latency\"]、STT「辨識吻合度 100 綠燈 此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；(3) 新增 latency →「單字已存在」、localStorage 不變=true；(4) 刪除 Scalability 後其餘 10 字逐欄相同=true；(5) 備份 customVocab 10 字與 localStorage 相同、origin/templateId 保留=true；鍵名、欄位集合、schemaVersion 3、備份頂層 5 欄=true；Console 錯誤 0"
     },
     {
       "file": "e2e-version.json",
@@ -2438,7 +2870,7 @@
       "tc": "TC-43-03b",
       "ac": "AC-43-03（匯入 v0.13 備份）、AC-24-08、E-99",
       "result": "通過",
-      "note": "(1) 匯入 v0.13 備份並確認 → main/dashboard、錯誤 0；customVocab 與開啟前逐欄相同=true（範本字 10：Latency,Scalability,Throughput,Concurrency,Middleware,Serialization,Idempotent,Containerization,Tokenization,Overfitting）；(2) 清單 11 項、標示 自訂擴充、含來源標示節點 0、含「範本」0；單字卡「共 5631 張」含 11 字=true；卡片 Latency 出處「自訂擴充」、TTS [\"Latency\"]、STT「辨識吻合度 100 綠燈 此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；(3) 新增 latency →「單字已存在」、localStorage 不變=true；(4) 刪除 Scalability 後其餘 10 字逐欄相同=true；(5) 備份 customVocab 10 字與 localStorage 相同、origin/templateId 保留=true；鍵名、欄位集合、schemaVersion 2、備份頂層 5 欄=true；Console 錯誤 0"
+      "note": "(1) 匯入 v0.13 備份並確認 → main/dashboard、錯誤 0；customVocab 與開啟前逐欄相同=true（範本字 10：Latency,Scalability,Throughput,Concurrency,Middleware,Serialization,Idempotent,Containerization,Tokenization,Overfitting）；(2) 清單 11 項、標示 自訂擴充、含來源標示節點 0、含「範本」0；單字卡「共 5631 張」含 11 字=true；卡片 Latency 出處「自訂擴充」、TTS [\"Latency\"]、STT「辨識吻合度 100 綠燈 此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；(3) 新增 latency →「單字已存在」、localStorage 不變=true；(4) 刪除 Scalability 後其餘 10 字逐欄相同=true；(5) 備份 customVocab 10 字與 localStorage 相同、origin/templateId 保留=true；鍵名、欄位集合、schemaVersion 3、備份頂層 5 欄=true；Console 錯誤 0"
     },
     {
       "file": "e2e-version.json",
@@ -2446,7 +2878,7 @@
       "tc": "TC-01-08",
       "ac": "AC-01-08、AC-01-07、AC-25-06、E-92",
       "result": "通過",
-      "note": "【375px】(1) 「目前色級：橘」(1 行)→「目前色級：棕」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)；卡片全文＝該行=true、舊節點 0、aria-label「目前色級」；(2) 套用綠後點棕未套用：「目前色級：綠」、選中 brown；(3) 套用藍後重新載入：「目前色級：綠」、選中 blue；禁用字樣 0；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}、schemaVersion 2；Console 錯誤 0 ／ 【1366px】(1) 「目前色級：橘」(1 行)→「目前色級：棕」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)；卡片全文＝該行=true、舊節點 0、aria-label「目前色級」；(2) 套用綠後點棕未套用：「目前色級：綠」、選中 brown；(3) 套用藍後重新載入：「目前色級：綠」、選中 blue；禁用字樣 0；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}、schemaVersion 2；Console 錯誤 0"
+      "note": "【375px】(1) 「目前色級：橘」(1 行)→「目前色級：棕」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)；卡片全文＝該行=true、舊節點 0、aria-label「目前色級」；(2) 套用綠後點棕未套用：「目前色級：綠」、選中 brown；(3) 套用藍後重新載入：「目前色級：綠」、選中 blue；禁用字樣 0；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}、schemaVersion 3；Console 錯誤 0 ／ 【1366px】(1) 「目前色級：橘」(1 行)→「目前色級：棕」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)；卡片全文＝該行=true、舊節點 0、aria-label「目前色級」；(2) 套用綠後點棕未套用：「目前色級：綠」、選中 brown；(3) 套用藍後重新載入：「目前色級：綠」、選中 blue；禁用字樣 0；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}、schemaVersion 3；Console 錯誤 0"
     },
     {
       "file": "e2e-version.json",
@@ -2461,8 +2893,8 @@
       "suite": "pwa-static",
       "tc": "TC-PS-01",
       "ac": "AC-36-07、AC-19-01（V-PWA-01）",
-      "result": "通過",
-      "note": "dist/site 檔案 8 個 [\"ads.txt\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"sw.js\"]，與契約 8 檔相同=true；全小寫=true；index.html 與 dist/english-master-track.html 位元組相同=true；ads.txt 與 sources/deploy/ads.txt 相同=true、與 dist/ads.txt 相同=（無）（\"google.com, pub-4051803210893105, DIRECT, f08c47fec0942fa0\"）；4 張 PNG 與 src/app/assets/icons 位元組相同=true；不得出現的檔案 0"
+      "result": "失敗",
+      "note": "dist/site 檔案 8 個 [\"ads.txt\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"sw.js\"]，與契約 8 檔相同=true；全小寫=true；index.html 與 dist/english-master-track.html 位元組相同=false；ads.txt 與 sources/deploy/ads.txt 相同=true、與 dist/ads.txt 相同=（無）（\"google.com, pub-4051803210893105, DIRECT, f08c47fec0942fa0\"）；4 張 PNG 與 src/app/assets/icons 位元組相同=true；不得出現的檔案 0"
     },
     {
       "file": "pwa-static.json",
@@ -2486,7 +2918,7 @@
       "tc": "TC-PS-04",
       "ac": "AC-34-04、AC-34-05、AC-36-02、AC-37-01、AC-19-01（V-PWA-04）",
       "result": "通過",
-      "note": "HD-1 各元素（全檔／head 內）次數 1/1、1/1、1/1、1/1、1/1、1/1；emt-build-id=436e27b40282d4af；禁止元素命中 0；<link> 標籤 [\"<link rel=\\\"icon\\\" href=\\\"data:,\\\">\"]；<title>EnglishContext</title>；殘留佔位 @@=false"
+      "note": "HD-1 各元素（全檔／head 內）次數 1/1、1/1、1/1、1/1、1/1、1/1；emt-build-id=33dcbafd5b611fc6；禁止元素命中 0；<link> 標籤 [\"<link rel=\\\"icon\\\" href=\\\"data:,\\\">\"]；<title>EnglishContext</title>；殘留佔位 @@=false"
     },
     {
       "file": "pwa-static.json",
@@ -2494,7 +2926,7 @@
       "tc": "TC-PS-05",
       "ac": "AC-36-02、AC-37-05、AC-35-01（V-PWA-05）",
       "result": "通過",
-      "note": "sw.js BUILD_ID=436e27b40282d4af（HTML 436e27b40282d4af）；CACHE_NAME = 前綴 + BUILD_ID；PRECACHE_URLS [\"./\",\"./index.html\",\"./manifest.webmanifest\",\"./icons/icon-192.png\",\"./icons/icon-512.png\",\"./icons/icon-maskable-512.png\",\"./icons/apple-touch-icon-180.png\"]；禁用字串命中 無；監聽 install、activate、fetch、message；無 self.onX 指派；UTF-8 無 BOM"
+      "note": "sw.js BUILD_ID=33dcbafd5b611fc6（HTML 33dcbafd5b611fc6）；CACHE_NAME = 前綴 + BUILD_ID；PRECACHE_URLS [\"./\",\"./index.html\",\"./manifest.webmanifest\",\"./icons/icon-192.png\",\"./icons/icon-512.png\",\"./icons/icon-maskable-512.png\",\"./icons/apple-touch-icon-180.png\"]；禁用字串命中 無；監聽 install、activate、fetch、message；無 self.onX 指派；UTF-8 無 BOM"
     },
     {
       "file": "pwa-static.json",
@@ -2502,7 +2934,7 @@
       "tc": "TC-PS-06",
       "ac": "AC-19-01（附屬檔參照）",
       "result": "通過",
-      "note": "HTML 中類檔名字串 40 種：PWA 附屬檔 [\"icons/icon-192.png\",\"manifest.webmanifest\",\"icons/apple-touch-icon-180.png\",\"./sw.js\"]；其他（內容資料中的字串，非資源參照，人工判讀）[\"./constants.js\",\"./wordkey.js\",\"./persist.js\",\"./learning.js\",\"./vocab.js\",\"dist/english-master-track.html\",\"./goal.js\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"sw.js\",\"ads.txt\",\"./index.html\",\"./manifest.webmanifest\",\"./icons/icon-192.png\"]；src/href 絕對網址 0"
+      "note": "HTML 中類檔名字串 44 種：PWA 附屬檔 [\"icons/icon-192.png\",\"manifest.webmanifest\",\"icons/apple-touch-icon-180.png\",\"./sw.js\"]；其他（內容資料中的字串，非資源參照，人工判讀）[\"./constants.js\",\"./wordkey.js\",\"./persist.js\",\"./learning.js\",\"./vocab.js\",\"dist/english-master-track.html\",\"./goal.js\",\"./position.js\",\"./part5flow.js\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"sw.js\",\"ads.txt\",\"./index.html\"]；src/href 絕對網址 0"
     },
     {
       "file": "pwa-static.json",
@@ -2510,7 +2942,7 @@
       "tc": "TC-36-01a",
       "ac": "AC-36-01 (a)（V-PWA-06）",
       "result": "通過",
-      "note": "連續建置 2 次：HTML／index.html／manifest／sw.js 逐位元組相同 [true,true,true,true]、部署目錄全部相同=true（sha fc074ac341a3）；與 dist/ 現有產物相同=true；BUILD_ID 436e27b40282d4af"
+      "note": "連續建置 2 次：HTML／index.html／manifest／sw.js 逐位元組相同 [true,true,true,true]、部署目錄全部相同=true（sha 8c2974965865）；與 dist/ 現有產物相同=false；BUILD_ID 33dcbafd5b611fc6"
     },
     {
       "file": "pwa-static.json",
@@ -2518,7 +2950,7 @@
       "tc": "TC-36-01b",
       "ac": "AC-36-01 (b)、AC-36-02",
       "result": "通過",
-      "note": "src/app/main.js 改 1 字（註解「。」→「，」）：BUILD_ID df1b5161cedf0592（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；src/data/templates.js 改 1 字（內容「延遲」→「延時」）：BUILD_ID 62f71447e4ef43d3（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；全程未手動修改版本號、快取名稱或 sw 範本"
+      "note": "src/app/main.js 改 1 字（註解「。」→「，」）：BUILD_ID c0556075e7fe73cf（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；src/data/templates.js 改 1 字（內容「延遲」→「延時」）：BUILD_ID 67c0f5d4d38a4b47（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；全程未手動修改版本號、快取名稱或 sw 範本"
     },
     {
       "file": "pwa-static.json",
@@ -2526,7 +2958,7 @@
       "tc": "TC-36-01c",
       "ac": "AC-36-01 (c)",
       "result": "通過",
-      "note": "換 icons/icon-192.png（單色 192×192 RGB）：BUILD_ID 96cbbd4642a25a37（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true"
+      "note": "換 icons/icon-192.png（單色 192×192 RGB）：BUILD_ID f3044978d0dcce87（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true"
     },
     {
       "file": "pwa-static.json",
@@ -2534,7 +2966,7 @@
       "tc": "TC-36-02",
       "ac": "AC-36-02",
       "result": "通過",
-      "note": "HTML <meta name=\"emt-build-id\"> = sw.js BUILD_ID = 436e27b40282d4af（畫面不顯示，meta 標籤）；(b) 兩版識別碼 436e27b40282d4af ≠ df1b5161cedf0592；只改 ads.txt：BUILD_ID 436e27b40282d4af（不同=false）、sw.js 不同=false、HTML 與 sw 識別碼一致=true（ads.txt 不納入，SW-2）"
+      "note": "HTML <meta name=\"emt-build-id\"> = sw.js BUILD_ID = 33dcbafd5b611fc6（畫面不顯示，meta 標籤）；(b) 兩版識別碼 33dcbafd5b611fc6 ≠ c0556075e7fe73cf；只改 ads.txt：BUILD_ID 33dcbafd5b611fc6（不同=false）、sw.js 不同=false、HTML 與 sw 識別碼一致=true（ads.txt 不納入，SW-2）"
     },
     {
       "file": "pwa-static.json",
@@ -2542,7 +2974,7 @@
       "tc": "TC-36-01obs",
       "ac": "AC-36-01（觀察）",
       "result": "通過",
-      "note": "src/data/templates.js 只改第 1 行註解 1 字（觀察） → BUILD_ID 不變、HTML 與原產物相同：資料檔以 JSON 重新序列化，註解不進入交付 HTML，因此交付物不變、無需更新；列觀察與回饋上游（AC-36-01 (b)「任一處」的解讀）"
+      "note": "src/data/templates.js 只改第 1 行註解 1 字（觀察） → BUILD_ID 不變、HTML 不同：資料檔以 JSON 重新序列化，註解不進入交付 HTML，因此交付物不變、無需更新；列觀察與回饋上游（AC-36-01 (b)「任一處」的解讀）"
     },
     {
       "file": "pwa-static.json",
@@ -2550,7 +2982,7 @@
       "tc": "TC-36-07a",
       "ac": "AC-36-07（本機模擬 MC-03 新 workflow）",
       "result": "通過",
-      "note": "取 architecture §5.2 workflow：Build「npm run build」、上傳 path「dist/site」、不執行 npm ci=true；以不含 .git／node_modules／dist 的複本（35 個文字檔轉 LF，模擬 .gitattributes eol=lf 的 CI checkout）執行 npm run build → 結束碼 0；Verify 步驟（逐字取自 §5.2，以 Git Bash 執行）結束碼 0；dist/site 恰 8 個檔案 [\"ads.txt\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"sw.js\"]；CI 模擬 BUILD_ID c2fa53f507c3bcb0（本機 CRLF 工作目錄 436e27b40282d4af；不同，屬 SD-FB-37 已知事項）；CI 建置所需但尚未被 git 追蹤的檔案 0 個"
+      "note": "取 architecture §5.2 workflow：Build「npm run build」、上傳 path「dist/site」、不執行 npm ci=true；以不含 .git／node_modules／dist 的複本（35 個文字檔轉 LF，模擬 .gitattributes eol=lf 的 CI checkout）執行 npm run build → 結束碼 0；Verify 步驟（逐字取自 §5.2，以 Git Bash 執行）結束碼 0；dist/site 恰 8 個檔案 [\"ads.txt\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"sw.js\"]；CI 模擬 BUILD_ID 4a70f6b751d9c9c8（本機 CRLF 工作目錄 33dcbafd5b611fc6；不同，屬 SD-FB-37 已知事項）；CI 建置所需但尚未被 git 追蹤的檔案 0 個"
     },
     {
       "file": "pwa-static.json",
@@ -2566,7 +2998,7 @@
       "tc": "TC-D18",
       "ac": "AC-23-02、AC-23-03（architecture §8.4 紀錄完整性）",
       "result": "通過",
-      "note": "沿用第 1 輪逐筆判讀；第 6 輪 src/data 無任何變動（git status 無 src/data，DS-31），records-check 本輪重跑"
+      "note": "沿用第 1 輪逐筆判讀；第 7 輪 src/data 的交付資料檔無變動（git status 只有 _tools/validate.mjs、_records/CT-25.md、_records/part5-ids.json，皆 CT-25 paths），records-check 本輪重跑"
     },
     {
       "file": "qa-review.json",
@@ -2582,7 +3014,7 @@
       "tc": "TC-D20",
       "ac": "AC-11-01（V-P5-05 正解唯一性）",
       "result": "通過",
-      "note": "沿用第 1 輪 40 題全數正確；part5.js 本輪未修改"
+      "note": "沿用第 1 輪 40 題全數正確；part5.js 本輪未修改（git status 無變動）；CT-25 新增 V-P5-08 id 指紋快照 200 筆，npm run validate:data 的 V-P5-08 通過 200／錯誤 0／警告 0（題目 id 不改號，Q-71）"
     },
     {
       "file": "qa-review.json",
@@ -2590,7 +3022,7 @@
       "tc": "TC-B01",
       "ac": "（越界檢查：檔案歸屬）",
       "result": "通過",
-      "note": "boundary-check：屬於任務 166、人類／上游文件 44、QA tests/ 105、人類自放或主控授權（非 PG）9［.gitattributes、.github/workflows/static.yml、.gitignore、LICENSE、package-lock.json、src/app/assets/icons/apple-touch-icon-180.png、src/app/assets/icons/icon-192.png、src/app/assets/icons/icon-512.png、src/app/assets/icons/icon-maskable-512.png］、不屬於任何任務 0；任務 paths 中不存在 src/app/styles/90-overrides.css（90-overrides.css 只在發現問題時才寫，非缺陷）"
+      "note": "boundary-check：屬於任務 180、人類／上游文件 45、QA tests/ 202、人類自放或主控授權（非 PG）9［.gitattributes、.github/workflows/static.yml、.gitignore、LICENSE、package-lock.json、src/app/assets/icons/apple-touch-icon-180.png、src/app/assets/icons/icon-192.png、src/app/assets/icons/icon-512.png、src/app/assets/icons/icon-maskable-512.png］、不屬於任何任務 0；任務 paths 中不存在 src/app/styles/90-overrides.css（90-overrides.css 只在發現問題時才寫，非缺陷）"
     },
     {
       "file": "qa-review.json",
@@ -2598,23 +3030,23 @@
       "tc": "TC-B02",
       "ac": "（越界檢查：原始需求、sources/、docs/、tests/）",
       "result": "通過",
-      "note": "english_master_track.md 最後修改 2026-10-29 14:02（未修改）；sources/ 無檔案晚於 HEAD 8a266c3 提交時間（2026-11-03 16:35:57）；docs/ 本輪變動只有 PRD v0.14、契約三檔 v0.14、architecture v0.9、tasks.json v0.8（上游代理與主控）；docs/04-qa 在本輪 QA 開始前最後修改為第 5 輪（2026-11-03 16:35，QA），bug-reports/ 最後修改 09:23；tests/ 在本輪 QA 開始前與 HEAD 8a266c3 相同（git status 無 tests/ 變動），PG 未修改；package.json 只有 version 0.1.0→1.0.0 一行（git diff，Q-62 授權）"
+      "note": "english_master_track.md 最後修改 2026-10-29 14:02（未修改）；sources/ 無檔案晚於 HEAD a5eee06 提交時間（2026-11-03 19:47:42）；docs/ 本輪變動只有 PRD v0.15、契約三檔 v0.15、architecture v0.10、tasks.json v0.9（上游代理與主控）；docs/04-qa 在本輪 QA 開始前最後修改為第 6 輪（2026-11-03 19:47，QA），bug-reports/ 最後修改 11-03 09:54；tests/ 在本輪 QA 開始前與 HEAD a5eee06 相同（QA 開始時 git status 無 tests/ 變動），PG 未修改；package.json 只有 version 1.0.0→1.1.0 一行（git diff，MC-04、Q-70 A 授權，boundary-r7 pkgOnlyVersion=true）；src/app/__tests__/_samples/ 為 FE-70 產出，README 記錄的 SHA-256 與檔案相符（samples.test.js 通過），QA 只讀取"
     },
     {
       "file": "qa-review.json",
       "suite": "qa-review",
       "tc": "TC-B03",
-      "ac": "（越界檢查：第 6 輪增量 FE-63～FE-69）",
+      "ac": "（越界檢查：第 7 輪增量 FE-70～FE-76、CT-25）",
       "result": "通過",
-      "note": "boundary-r6：與 git HEAD 8a266c3 比對（含 .gitignore 的 dist/site/ 依修改時間）變動 88 個檔案；PG 任務 paths 內 33 個；超出 0 個；授權例外 7 個（docs/01-PRD.md、docs/02-contract/README.md、docs/02-contract/data-schema.ts、docs/02-contract/storage-schema.json、docs/03-design/architecture.md、docs/03-design/tasks.json、package.json）；任務 paths 中未變動 src/app/styles/90-overrides.css"
+      "note": "boundary-r7：與 git HEAD a5eee06 比對（含 .gitignore 的 dist/site/ 依修改時間）變動 167 個檔案；PG 任務 paths 內 44 個；超出 0 個；授權例外 7 個（docs/01-PRD.md、docs/02-contract/README.md、docs/02-contract/data-schema.ts、docs/02-contract/storage-schema.json、docs/03-design/architecture.md、docs/03-design/tasks.json、package.json）；任務 paths 中未變動 src/app/styles/90-overrides.css"
     },
     {
       "file": "qa-review.json",
       "suite": "qa-review",
       "tc": "TC-X-edge",
-      "ac": "AC-19-02（Chrome／Edge）跨瀏覽器冒煙、AC-34-01、AC-35-01、AC-35-02、AC-37-01、AC-42-01、AC-43-01",
-      "result": "通過",
-      "note": "以 Microsoft Edge（headless）重跑：e2e-goal-edge.json：通過 22、不適用（暫停）5、失敗 0（共 27）；e2e-hidden-edge.json：通過 5、不適用（暫停）0、失敗 0（共 5）；e2e-pwa-edge.json：通過 8、不適用（暫停）0、失敗 0（共 8）；e2e-version-edge.json：通過 9、不適用（暫停）5、失敗 0（共 14）"
+      "ac": "AC-19-02（Chrome／Edge）跨瀏覽器冒煙、AC-34-01、AC-35-01、AC-35-02、AC-37-01、AC-42-01、AC-43-01、AC-44-01、AC-45-01、AC-46-01",
+      "result": "失敗",
+      "note": "以 Microsoft Edge（headless）重跑：e2e-goal-edge.json：通過 22、不適用（暫停）5、失敗 0（共 27）；e2e-hidden-edge.json：通過 5、不適用（暫停）0、失敗 0（共 5）；e2e-pwa-edge.json：通過 8、不適用（暫停）0、失敗 0（共 8）；e2e-track-p5-edge.json：通過 27、不適用（暫停）0、失敗 0（共 27）；e2e-version-edge.json：通過 8、不適用（暫停）5、失敗 1（共 14）；失敗：e2e-version-edge.json TC-42-02（BUG-004，與 Chrome TC-42-02 同因：交付檔被直接修改，與 dist/site/index.html 位元組不同）"
     },
     {
       "file": "qa-review.json",
@@ -2782,7 +3214,7 @@
       "tc": "TC-VER-H1",
       "ac": "AC-42-01、AC-27-03、AC-41-04、E-95",
       "result": "待人工",
-      "note": "實機版本行：Android Chrome、iPhone Safari 以正式網址開啟與從主畫面啟動已安裝 App，首次畫面與 4 個功能區、資料來源頁捲到底，「版本 1.0.0（建置 xxxxxxx）」完整顯示在底部導覽列或固定底部列上方、單行不裁切；含瀏海／Home Indicator 機型"
+      "note": "實機版本行：Android Chrome、iPhone Safari 以正式網址開啟與從主畫面啟動已安裝 App，首次畫面與 4 個功能區、資料來源頁捲到底，「版本 1.1.0（建置 xxxxxxx）」完整顯示在底部導覽列或固定底部列上方、單行不裁切；含瀏海／Home Indicator 機型"
     },
     {
       "file": "qa-review.json",
@@ -2790,7 +3222,7 @@
       "tc": "TC-VER-H2",
       "ac": "AC-42-02、AC-36-07",
       "result": "待人工",
-      "note": "部署後比對：push 後 Actions 成功，正式網址 https://jimmyfantasyworld.com/ 檢視原始碼 emt-app-version＝1.0.0、emt-build-id 前 7 碼＝頁尾建置碼＝sw.js BUILD_ID 前 7 碼（CI 為 LF 建置，建置碼與本機不同屬正常）"
+      "note": "部署後比對：push 後 Actions 成功，正式網址 https://jimmyfantasyworld.com/ 檢視原始碼 emt-app-version＝1.1.0、emt-build-id 前 7 碼＝頁尾建置碼＝sw.js BUILD_ID 前 7 碼（CI 為 LF 建置，建置碼與本機不同屬正常）"
     },
     {
       "file": "qa-review.json",
@@ -2798,7 +3230,7 @@
       "tc": "TC-VER-H3",
       "ac": "AC-42-04 (b)、AC-36-03、E-97",
       "result": "待人工",
-      "note": "下次發布：人類只把 package.json version 改為下一版（例 1.0.1）後 push；已安裝的 App 連網開啟出現「有新版本，重新整理」，按下後頁尾版本行為新版本號；並確認 version 與預期一致（建置只驗格式不驗遞增）"
+      "note": "下次發布：人類只把 package.json version 改為下一版（例 1.1.1）後 push；已安裝的 App 連網開啟出現「有新版本，重新整理」，按下後頁尾版本行為新版本號；並確認 version 與預期一致（建置只驗格式不驗遞增）"
     },
     {
       "file": "qa-review.json",
@@ -2807,6 +3239,22 @@
       "ac": "AC-38-02、AC-34-04",
       "result": "待人工",
       "note": "實機狀態列顏色：Android Chrome 以正式網址開啟與從主畫面啟動已安裝 App，網址列／狀態列為亮藍 #1e9bf0；已安裝 v0.11 者更新後顏色隨之改變（V-PWA-H1／H2 新 theme_color）"
+    },
+    {
+      "file": "qa-review.json",
+      "suite": "qa-review",
+      "tc": "TC-TRK-H1",
+      "ac": "AC-47-04、AC-36-03、AC-44-01、AC-45-05、E-114",
+      "result": "待人工",
+      "note": "實機升級（architecture §10.7 人工驗收）：Android Chrome、iPhone Safari 已安裝 v1.0.0 PWA 且有學習紀錄者，push 1.1.0 後出現「有新版本，重新整理」並更新；既有進度（主控台今日已學、連續打卡、掌握率、模擬測驗正確率、自訂單字）未遺失；單字卡從第 1 張開始；模擬測驗顯示「已答對 0 / 200 題」；之後換卡到第 10 張、關閉 App 重開仍在第 10 張"
+    },
+    {
+      "file": "qa-review.json",
+      "suite": "qa-review",
+      "tc": "TC-TRK-H2",
+      "ac": "AC-46-01、AC-45-04、AC-38-09",
+      "result": "待人工",
+      "note": "實機觸控與螢幕閱讀器：Android TalkBack、iPhone VoiceOver 下「只練沒答對的題目」開關可聚焦、讀出名稱與勾選狀態、可切換；「✓ 曾答對」與「已答對 K / Q 題」可被讀出；觸控點擊開關文字即可切換"
     },
     {
       "file": "static.json",
@@ -2822,7 +3270,7 @@
       "tc": "TC-S02",
       "ac": "AC-19-04",
       "result": "通過",
-      "note": "3,322,315 bytes（上限 5,242,880）"
+      "note": "3,373,421 bytes（上限 5,242,880）"
     },
     {
       "file": "static.json",
@@ -2878,7 +3326,7 @@
       "tc": "TC-S10",
       "ac": "AC-31-04",
       "result": "通過",
-      "note": "外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,322,315 bytes（AC-19-01 外部資源見 TC-S01）"
+      "note": "外部動畫／圖表／手勢函式庫特徵命中：無；內嵌 @keyframes 9 個（emt-view-in、fc-flip-in、fc-card-in-next、fc-card-in-prev、sp-blink、qz-opt-pop、qz-opt-shake、p5-opt-pop、p5-opt-shake）；SVG 以原生 DOM API 建立=true；檔案 3,373,421 bytes（AC-19-01 外部資源見 TC-S01）"
     },
     {
       "file": "static.json",
@@ -2926,7 +3374,7 @@
       "tc": "TC-V-S01",
       "ac": "AC-42-03、AC-42-02（VR-5、V-VER-05）",
       "result": "通過",
-      "note": "src/app 非測試 .js 含「package.json」：無；版本模組（去註解）禁用 API：無；寫死版本字串 \"1.0.0\"：無"
+      "note": "src/app 非測試 .js 含「package.json」：無；版本模組（去註解）禁用 API：無；寫死版本字串 \"1.1.0\"：無"
     },
     {
       "file": "static.json",
@@ -2934,7 +3382,7 @@
       "tc": "TC-V-S02",
       "ac": "AC-42-02（V-VER-01、VR-2、HD-1）",
       "result": "通過",
-      "note": "產物 emt-app-version 1 個、值 1.0.0（package.json 1.0.0）；位於 emt-build-id 之後、</head> 之前=true；產物 @@ 佔位殘留 0；模板 @@APP_VERSION@@ 1 次"
+      "note": "產物 emt-app-version 1 個、值 1.1.0（package.json 1.1.0）；位於 emt-build-id 之後、</head> 之前=true；產物 @@ 佔位殘留 0；模板 @@APP_VERSION@@ 1 次"
     },
     {
       "file": "static.json",
@@ -2947,10 +3395,18 @@
     {
       "file": "static.json",
       "suite": "static",
+      "tc": "TC-T-S01",
+      "ac": "AC-47-08、AC-45-04、AC-45-05、AC-46-01（WR-4、CR-9、C-7）",
+      "result": "通過",
+      "note": "L1 新模組（position、part5flow）去註解後禁用 API／DOM／儲存：無；part5 view／store／persist／backup／reinit 網路 API 與 HTML 插入：無；畫面文字 11 則缺 0；40-part5.css 新規則 14 條（用強調橘／色碼／動畫：無；.p5-only min-height var(--touch)=true；.p5-record__count tabular-nums=true）；交付檔 3,373,421 bytes ≤ 5 MB=true；外部函式庫或外部 script=false"
+    },
+    {
+      "file": "static.json",
+      "suite": "static",
       "tc": "TC-S09",
       "ac": "AC-19-01（交付物可追溯）",
-      "result": "通過",
-      "note": "重建產物 3,322,315 bytes；與 dist 位元組相同=true"
+      "result": "失敗",
+      "note": "重建產物 3,375,522 bytes；與 dist 位元組相同=false"
     }
   ],
   "edge": [
@@ -3008,7 +3464,7 @@
       "tc": "TC-22-04",
       "ac": "AC-22-04",
       "result": "通過",
-      "note": "一般 ms：3.3、3.7、2.6、2.5、3、2.5、2、3.5、2.6、3.3（中位數 2.6、p90 3.5）；4 倍降速 ms：11.6、12.8、13.5、12.7、19、14.8、15.5、14.3、13.1、14.6（中位數 13.5、p90 15.5）；選中狀態錯誤 0（無頭 Chrome 參考值，基準環境列 TC-M07）"
+      "note": "一般 ms：2.5、2.4、3.4、2.1、2.4、2.6、2.2、2.5、2.4、2.5（中位數 2.4、p90 2.6）；4 倍降速 ms：11.7、12.7、16.4、13.6、16.3、10.6、16.2、15.2、14.4、13.8（中位數 13.8、p90 16.3）；選中狀態錯誤 0（無頭 Chrome 參考值，基準環境列 TC-M07）"
     },
     {
       "file": "e2e-goal-edge.json",
@@ -3120,7 +3576,7 @@
       "tc": "TC-22-02",
       "ac": "AC-22-02",
       "result": "通過",
-      "note": "單字集 共 5650 張；10 次套用（含 toast 與繪製）ms：9.9、15.7、15.6、15.5、18.7、15、16、14.1、17.3、17.3；中位數 15.6、p90 17.3、最大 18.7（無頭 Chrome、未降速）；確認視窗 0"
+      "note": "單字集 共 5650 張；10 次套用（含 toast 與繪製）ms：14.6、16.5、14.8、15.9、16.5、16.1、17、13.2、15.5、16.8；中位數 15.9、p90 16.8、最大 17（無頭 Chrome、未降速）；確認視窗 0"
     },
     {
       "file": "e2e-goal-edge.json",
@@ -3256,7 +3712,7 @@
       "tc": "TC-35-01",
       "ac": "AC-35-01、AC-21-03",
       "result": "通過",
-      "note": "啟用 194 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-436e27b40282d4af\"]（BUILD_ID 436e27b40282d4af）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
+      "note": "啟用 172 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-33dcbafd5b611fc6\"]（BUILD_ID 33dcbafd5b611fc6）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
     },
     {
       "file": "e2e-pwa-edge.json",
@@ -3275,12 +3731,228 @@
       "note": "1366px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 0（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後收合中 0、展開後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台（仍展開=true）1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次；375px：首次畫面收到事件 → 顯示 0（preventDefault=true）；開始學習後主控台 0（首次畫面事件已存）；重新載入事件前 0（容器 hidden=true、高 0px）；事件後收合中 0、展開後 1「安裝 App」preventDefault=true；101×44、遮住點 0/5、裁切=false、位於 NT-1 之後=true；其他畫面 {\"customizer\":0,\"flashcards\":0,\"part5\":0,\"sources\":0}、導覽列內=false；回主控台（仍展開=true）1；自動 prompt 0 次；彈窗 0；瀏覽器真實事件 0 次"
     },
     {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-01",
+      "ac": "AC-45-01、CR-2、AC-11-03",
+      "result": "通過",
+      "note": "p5-005 未曾答對、K = 2：答對後 35.9 ms 出現「✓ 曾答對」「已答對 3 / 200 題」；累計 7/3 → 8/4；紀錄 [\"p5-001\",\"p5-002\",\"p5-005\"]；重新載入「第 5 / 200 題」「✓ 曾答對」「已答對 3 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-01p",
+      "ac": "AC-45-01、AC-45-05（≤ 100ms，10 次）、NFR-4",
+      "result": "通過",
+      "note": "連續 10 題答對，點擊到「✓ 曾答對」與計數更新完成（下一影格）：6.7、5.8、6.4、6.6、4.1、4.2、6.1、5、4.5、4.3 ms；最大 6.7 ms"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-02",
+      "ac": "AC-45-02、CR-2",
+      "result": "通過",
+      "note": "p5-006 答錯：標示 null、「已答對 1 / 200 題」；累計 8/3；紀錄 [\"p5-001\"]"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-03",
+      "ac": "AC-45-03、AC-11-06、AC-11-07、CR-2",
+      "result": "通過",
+      "note": "(c) 鎖定後重複點擊 4 次：紀錄 [\"p5-005\"]、累計 3/2、localStorage 不變=true；(a) 結算「答對 1 / 4」→ 重新開始「第 1 / 200 題」→ 到「第 5 / 200 題」作答前標示「✓ 曾答對」、答錯後標示「✓ 曾答對」「已答對 1 / 200 題」；累計 16/5；(b) 再答對：紀錄 [\"p5-005\"]、「已答對 1 / 200 題」、累計 17/6"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-06",
+      "ac": "AC-45-06、CR-5、CR-7、AC-17-04、AC-11-07、AC-17-02、AC-30-04",
+      "result": "通過",
+      "note": "作答 4 題（含曾答對的 p5-003）：累計 4/2、本輪 4/2、主控台正確率 50%（主控台出現「已答對」=false）、K「已答對 2 / 200 題」、打卡 {\"days\":1,\"lastActiveDate\":\"2026-11-04\"}、今日已學 0；最後一題答對後結算「答對 3 / 5」；重新開始後累計 5/3、本輪 0、紀錄 [\"p5-003\",\"p5-001\",\"p5-200\"]（不清除）、正確率 60%、「已答對 3 / 200 題」「第 1 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-07",
+      "ac": "AC-45-07、CR-3、Q-71、E-109",
+      "result": "通過",
+      "note": "紀錄 [p5-001, p5-002, p5-003, p5-999, p5-001] → 已答對 3 / 200 題；逐題 第 1 / 200 題:✓ 曾答對、第 2 / 200 題:✓ 曾答對、第 3 / 200 題:✓ 曾答對、第 4 / 200 題:無；作答寫入後 localStorage 紀錄 [\"p5-001\",\"p5-002\",\"p5-003\",\"p5-999\"]（保留 p5-999）；unreadable 鍵 false；Toast []；畫面出現題目 id=false；Console 錯誤 0"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-08",
+      "ac": "AC-45-08、AC-32-02（v0.15：學習進度紀錄 (7)、「已答對 0 / Q 題」）、AC-32-04、CI-4、CI-8、E-108",
+      "result": "通過",
+      "note": "K = 37、開關開啟：(b) 取消 → localStorage 不變=true、「已答對 37 / 200 題」、開關 true；(a) 確定 → 紀錄 []、「已答對 0 / 200 題」、標示 0 個、開關 true、「第 1 / 200 題」未作答=true；累計 0；重新載入「已答對 0 / 200 題」「第 1 / 200 題」開關 true"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-X-p5-us45",
+      "ac": "Console 無未處理錯誤、無網路請求（AC-47-08 (a)）",
+      "result": "通過",
+      "note": "錯誤 []；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-04-375",
+      "ac": "AC-45-04、AC-38-01、AC-38-04、AC-11-01、CR-4 (a)",
+      "result": "通過",
+      "note": "375px p5-005（曾答對）作答前：標示「✓ 曾答對」在 .p5-meta 內=true、在題型標籤之後=true、顏色 rgb(21, 128, 61)（對比 5.02，背景 rgb(255, 255, 255)；非強調橘=true）、裁切=false、水平捲軸=false；選項可作答 4/4；作答後鎖定=true、選項樣式 p5-option p5-option--locked|p5-option p5-option--locked|p5-option p5-option--correct|p5-option p5-option--wrong；p5-006 標示 0 個、無「未答對／答錯過」=true"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-05-375",
+      "ac": "AC-45-05、AC-40-01、AC-38-07、CR-4 (b)、MT-1",
+      "result": "通過",
+      "note": "375px：K=0 題目「已答對 0 / 200 題」×1；K=0 結算「已答對 0 / 200 題」×1；K=37 題目「已答對 37 / 200 題」×1；K=37 結算「已答對 37 / 200 題」×1；K=200 題目「已答對 200 / 200 題」×1；K=200 結算「已答對 200 / 200 題」×1；字型數字 tabular-nums、位於進度條之後與題目之前"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-01-375",
+      "ac": "AC-46-01、AC-38-09、AC-31-03、UO-1",
+      "result": "通過",
+      "note": "375px：首次進入：開關 1 個、checked=false、localStorage false；元素 <input type=checkbox>（role null、appearance auto，原生核取方塊勾選有 ✓ 形狀）、標籤「只練沒答對的題目」、觸控區 156×44；Tab 取得焦點=true（外框 solid 3px rgb(8, 102, 173)）；空白鍵 → true（焦點 only、localStorage true）；Enter → false（焦點 only、localStorage false）；觸控點擊 → true；減少動態切換時動畫 0、transition 、animation ；結算畫面開關 1 個、可切換 false→true"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-X-p5-375",
+      "ac": "Console 無未處理錯誤、無網路請求",
+      "result": "通過",
+      "note": "錯誤 []；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-04-1366",
+      "ac": "AC-45-04、AC-38-01、AC-38-04、AC-11-01、CR-4 (a)",
+      "result": "通過",
+      "note": "1366px p5-005（曾答對）作答前：標示「✓ 曾答對」在 .p5-meta 內=true、在題型標籤之後=true、顏色 rgb(21, 128, 61)（對比 5.02，背景 rgb(255, 255, 255)；非強調橘=true）、裁切=false、水平捲軸=false；選項可作答 4/4；作答後鎖定=true、選項樣式 p5-option p5-option--locked|p5-option p5-option--locked|p5-option p5-option--correct|p5-option p5-option--wrong；p5-006 標示 0 個、無「未答對／答錯過」=true"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-45-05-1366",
+      "ac": "AC-45-05、AC-40-01、AC-38-07、CR-4 (b)、MT-1",
+      "result": "通過",
+      "note": "1366px：K=0 題目「已答對 0 / 200 題」×1；K=0 結算「已答對 0 / 200 題」×1；K=37 題目「已答對 37 / 200 題」×1；K=37 結算「已答對 37 / 200 題」×1；K=200 題目「已答對 200 / 200 題」×1；K=200 結算「已答對 200 / 200 題」×1；字型數字 tabular-nums、位於進度條之後與題目之前"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-01-1366",
+      "ac": "AC-46-01、AC-38-09、AC-31-03、UO-1",
+      "result": "通過",
+      "note": "1366px：首次進入：開關 1 個、checked=false、localStorage false；元素 <input type=checkbox>（role null、appearance auto，原生核取方塊勾選有 ✓ 形狀）、標籤「只練沒答對的題目」、觸控區 156×44；Tab 取得焦點=true（外框 solid 3px rgb(8, 102, 173)）；空白鍵 → true（焦點 only、localStorage true）；Enter → false（焦點 only、localStorage false）；滑鼠點擊 → true；減少動態切換時動畫 0、transition 、animation ；結算畫面開關 1 個、可切換 false→true"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-X-p5-1366",
+      "ac": "Console 無未處理錯誤、無網路請求",
+      "result": "通過",
+      "note": "錯誤 []；非 file 請求 0"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-02",
+      "ac": "AC-46-02、UO-2、AC-11-01～AC-11-07",
+      "result": "通過",
+      "note": "開關關閉、p5-002 曾答對：p5-001 作答後「下一題」→「第 2 / 200 題」、標示「✓ 曾答對」、可作答 4/4、進度 2/200"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-03",
+      "ac": "AC-46-03、UO-5、Q-66、MT-1",
+      "result": "通過",
+      "note": "開關開啟、p5-002／003 曾答對：p5-001 作答後「下一題」4.4 ms →「第 4 / 200 題」未作答=true、進度 aria-valuenow 4/200（填滿 2%）；本輪 1→1、累計 1→1（跳過不計）"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-03p",
+      "ac": "AC-46-03（≤ 100ms，10 次）、NFR-4",
+      "result": "通過",
+      "note": "偶數題曾答對、開關開啟，連續 10 次「下一題」（每次跳過 1 題）：6.1、3.7、3.5、3.4、3、2.9、2.8、2.9、2.9、3 ms；題號 第 3 / 200 題、第 5 / 200 題、第 7 / 200 題、第 9 / 200 題、第 11 / 200 題、第 13 / 200 題、第 15 / 200 題、第 17 / 200 題、第 19 / 200 題、第 21 / 200 題"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-04",
+      "ac": "AC-46-04、UO-4、E-110",
+      "result": "通過",
+      "note": "(a)「第 10 / 200 題」✓ 曾答對 → 開啟 2.9 ms →「第 12 / 200 題」未作答=true、標示 0；(b) p5-010 答對鎖定 → 開啟後「第 10 / 200 題」鎖定=true、標示「✓ 曾答對」；下一題 →「第 12 / 200 題」；重新載入（開啟、指向 p5-010 曾答對未作答）→「第 12 / 200 題」未作答=true；計數 (a) [3,2,12,7]→[3,2,12,7]、(b) [4,3,13,8]→[4,3,13,8]"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-05",
+      "ac": "AC-46-05、UO-5、UO-6、AC-11-04、AC-40-01、E-112",
+      "result": "通過",
+      "note": "開關開啟、p5-010 之後全部曾答對、之前 p5-002～009 未答對：作答 p5-010 後「下一題」→ 結算「答對 1 / 3」、重新開始鈕=true、進度 200/200；「重新開始」→「第 2 / 200 題」未作答=true"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-06",
+      "ac": "AC-46-06、UO-3、UO-7、MT-1、AC-38-09、E-111",
+      "result": "通過",
+      "note": "答對最後 1 題（p5-200）後仍顯示結果「第 200 / 200 題」鎖定=true；「下一題」→「200 題全部答對！」、說明句逐字=true、本輪「答對 5 / 6」、按鈕「全部題目再練一次（保留紀錄）」「清除答對紀錄，重新來過」（258×44、210×44，Tab 可達 2/2）、焦點 allcorrect-title、選項 0、題號 null、「已答對 200 / 200 題」、進度 200/200；K = Q、開關關閉在「第 31 / 200 題」→ 開啟 → 全部答對畫面=true（無本輪結算=true）；開啟狀態重新載入 → 全部答對畫面=true、選項 0"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-07",
+      "ac": "AC-46-07、UO-7 (a)、CR-7",
+      "result": "通過",
+      "note": "全部答對畫面按「全部題目再練一次（保留紀錄）」→ 開關 false、「第 1 / 200 題」未作答=true、標示「✓ 曾答對」、「已答對 200 / 200 題」、累計 50/40、本輪 0、焦點 number；重新載入開關 false、「第 1 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-08",
+      "ac": "AC-46-08、CR-6、UO-7 (b)、AC-17-04",
+      "result": "通過",
+      "note": "cancel：對話框「清除答對紀錄」「將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。」按鈕 [\"取消\",\"確定\"] → 關閉=true、留在全部答對畫面=true、資料不變=true、焦點 clear；esc：對話框「清除答對紀錄」「將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。」按鈕 [\"取消\",\"確定\"] → 關閉=true、留在全部答對畫面=true、資料不變=true、焦點 clear；backdrop：對話框「清除答對紀錄」「將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。」按鈕 [\"取消\",\"確定\"] → 關閉=true、留在全部答對畫面=true、資料不變=true、焦點 clear；確定 → 紀錄 []、「已答對 0 / 200 題」、標示 0、開關 true、「第 1 / 200 題」未作答=true、累計 50/40、正確率 80%→80%；重新載入「已答對 0 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-09",
+      "ac": "AC-46-09、UO-8",
+      "result": "通過",
+      "note": "開啟、p5-010 已作答 → 關閉開關（仍顯示「第 10 / 200 題」鎖定=true）→「下一題」→「第 11 / 200 題」標示「✓ 曾答對」未作答=true"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-46-10",
+      "ac": "AC-46-10、Q-69、AC-46-04（不變式）、US-32「有學習紀錄」不含開關",
+      "result": "通過",
+      "note": "開啟 → true；重新載入 true；關閉重開 true；只開開關後套用棕 → 確認視窗=false；備份開關 true；清除後匯入 → 開關 true、「第 3 / 200 題」（p5-001、002 曾答對）未作答=true；重新載入 true「第 3 / 200 題」"
+    },
+    {
+      "file": "e2e-track-p5-edge.json",
+      "suite": "e2e-track-p5",
+      "tc": "TC-X-p5-us46",
+      "ac": "Console 無未處理錯誤、無網路請求（AC-47-08 (a)：作答、開關、清除答對紀錄、匯出、匯入）",
+      "result": "通過",
+      "note": "錯誤 []；非 file 請求 0"
+    },
+    {
       "file": "e2e-version-edge.json",
       "suite": "e2e-version",
       "tc": "TC-42-01a",
       "ac": "AC-42-01 (a)、AC-41-04、AC-27-03、AC-23-02、E-95、E-96",
       "result": "通過",
-      "note": "【file:// 375×667】firstRun：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 459 ≤ cz-firstbar 上緣 515=true；dashboard：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；customizer：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587 ≤ app-nav 上緣 611=true；flashcards：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.7 ≤ app-nav 上緣 611=true；part5：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；sources：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587.1 ≤ app-nav 上緣 611=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0 ／ 【file:// 1366×768】firstRun：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752 ≤ 無固定列 上緣 768=true；dashboard：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.5 ≤ 無固定列 上緣 768=true；customizer：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.8 ≤ 無固定列 上緣 768=true；flashcards：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.3 ≤ 無固定列 上緣 768=true；part5：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 601.3 ≤ 無固定列 上緣 768=true；sources：1 行「版本 1.0.0（建置 436e27b）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.1 ≤ 無固定列 上緣 768=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0"
+      "note": "【file:// 375×667】firstRun：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 459 ≤ cz-firstbar 上緣 515=true；dashboard：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；customizer：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587 ≤ app-nav 上緣 611=true；flashcards：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.7 ≤ app-nav 上緣 611=true；part5：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 586.9 ≤ app-nav 上緣 611=true；sources：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 587.3 ≤ app-nav 上緣 611=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0 ／ 【file:// 1366×768】firstRun：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752 ≤ 無固定列 上緣 768=true；dashboard：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.5 ≤ 無固定列 上緣 768=true；customizer：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.8 ≤ 無固定列 上緣 768=true；flashcards：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 752.3 ≤ 無固定列 上緣 768=true；part5：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 653.3 ≤ 無固定列 上緣 768=true；sources：1 行「版本 1.1.0（建置 33dcbaf）」<P> 前一兄弟 #footer-sources、行數 1、對比 5.4、色 rgb(91, 100, 114)、捲到底下緣 751.7 ≤ 無固定列 上緣 768=true；dashboard：Tab 10 次、到達 #app-version=false、到達 #footer-sources=true；sources：Tab 8 次、到達 #app-version=false、到達 #footer-sources=true；點版本行不導覽=true；Console 錯誤 0"
     },
     {
       "file": "e2e-version-edge.json",
@@ -3288,7 +3960,7 @@
       "tc": "TC-42-03a",
       "ac": "AC-42-03 (a)、AC-21-01 (a)、E-98",
       "result": "通過",
-      "note": "連網：6 畫面版本行皆正常=true、文字 版本 1.0.0（建置 436e27b）；主文件以外請求 0；斷網：6 畫面版本行皆正常=true、文字 版本 1.0.0（建置 436e27b）；主文件以外請求 0；localStorage 鍵 englishMasterTrack:state、schemaVersion 2、切換 5 個畫面前後相同=true、含版本號或建置碼=false；備份頂層 format,schemaVersion,exportedAt,contentDataVersion,data（5 欄）、含版本號或建置碼=false"
+      "note": "連網：6 畫面版本行皆正常=true、文字 版本 1.1.0（建置 33dcbaf）；主文件以外請求 0；斷網：6 畫面版本行皆正常=true、文字 版本 1.1.0（建置 33dcbaf）；主文件以外請求 0；localStorage 鍵 englishMasterTrack:state、schemaVersion 3、切換 5 個畫面前後相同=true、含版本號或建置碼=false；備份頂層 format,schemaVersion,exportedAt,contentDataVersion,data（5 欄）、含版本號或建置碼=false"
     },
     {
       "file": "e2e-version-edge.json",
@@ -3303,8 +3975,8 @@
       "suite": "e2e-version",
       "tc": "TC-42-02",
       "ac": "AC-42-02、AC-36-02、AC-36-07、E-96",
-      "result": "通過",
-      "note": "package.json version 1.0.0；emt-app-version 1.0.0（1 個）；emt-build-id 436e27b40282d4af；sw.js BUILD_ID 436e27b40282d4af、CACHE_NAME CACHE_PREFIX + BUILD_ID；畫面「版本 1.0.0（建置 436e27b）」；dist 與 site/index.html 逐位元組相同=true；@@ 殘留 HTML 0／sw 0；site 內 package 檔 0（共 8 檔）"
+      "result": "失敗",
+      "note": "package.json version 1.1.0；emt-app-version 1.1.0（1 個）；emt-build-id 33dcbafd5b611fc6；sw.js BUILD_ID 33dcbafd5b611fc6、CACHE_NAME CACHE_PREFIX + BUILD_ID；畫面「版本 1.1.0（建置 33dcbaf）」；dist 與 site/index.html 逐位元組相同=false；@@ 殘留 HTML 0／sw 0；site 內 package 檔 0（共 8 檔）"
     },
     {
       "file": "e2e-version-edge.json",
@@ -3360,7 +4032,7 @@
       "tc": "TC-43-03a",
       "ac": "AC-43-03（localStorage）、AC-04-06、AC-04-07、AC-23-01、E-99、E-19",
       "result": "通過",
-      "note": "(1) v0.13 localStorage 直接開啟 → main/dashboard、錯誤 0；customVocab 與開啟前逐欄相同=true（範本字 10：Latency,Scalability,Throughput,Concurrency,Middleware,Serialization,Idempotent,Containerization,Tokenization,Overfitting）；(2) 清單 11 項、標示 自訂擴充、含來源標示節點 0、含「範本」0；單字卡「共 5631 張」含 11 字=true；卡片 Latency 出處「自訂擴充」、TTS [\"Latency\"]、STT「辨識吻合度 100 綠燈 此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；(3) 新增 latency →「單字已存在」、localStorage 不變=true；(4) 刪除 Scalability 後其餘 10 字逐欄相同=true；(5) 備份 customVocab 10 字與 localStorage 相同、origin/templateId 保留=true；鍵名、欄位集合、schemaVersion 2、備份頂層 5 欄=true；Console 錯誤 0"
+      "note": "(1) v0.13 localStorage 直接開啟 → main/dashboard、錯誤 0；customVocab 與開啟前逐欄相同=true（範本字 10：Latency,Scalability,Throughput,Concurrency,Middleware,Serialization,Idempotent,Containerization,Tokenization,Overfitting）；(2) 清單 11 項、標示 自訂擴充、含來源標示節點 0、含「範本」0；單字卡「共 5631 張」含 11 字=true；卡片 Latency 出處「自訂擴充」、TTS [\"Latency\"]、STT「辨識吻合度 100 綠燈 此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；(3) 新增 latency →「單字已存在」、localStorage 不變=true；(4) 刪除 Scalability 後其餘 10 字逐欄相同=true；(5) 備份 customVocab 10 字與 localStorage 相同、origin/templateId 保留=true；鍵名、欄位集合、schemaVersion 3、備份頂層 5 欄=true；Console 錯誤 0"
     },
     {
       "file": "e2e-version-edge.json",
@@ -3368,7 +4040,7 @@
       "tc": "TC-43-03b",
       "ac": "AC-43-03（匯入 v0.13 備份）、AC-24-08、E-99",
       "result": "通過",
-      "note": "(1) 匯入 v0.13 備份並確認 → main/dashboard、錯誤 0；customVocab 與開啟前逐欄相同=true（範本字 10：Latency,Scalability,Throughput,Concurrency,Middleware,Serialization,Idempotent,Containerization,Tokenization,Overfitting）；(2) 清單 11 項、標示 自訂擴充、含來源標示節點 0、含「範本」0；單字卡「共 5631 張」含 11 字=true；卡片 Latency 出處「自訂擴充」、TTS [\"Latency\"]、STT「辨識吻合度 100 綠燈 此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；(3) 新增 latency →「單字已存在」、localStorage 不變=true；(4) 刪除 Scalability 後其餘 10 字逐欄相同=true；(5) 備份 customVocab 10 字與 localStorage 相同、origin/templateId 保留=true；鍵名、欄位集合、schemaVersion 2、備份頂層 5 欄=true；Console 錯誤 0"
+      "note": "(1) 匯入 v0.13 備份並確認 → main/dashboard、錯誤 0；customVocab 與開啟前逐欄相同=true（範本字 10：Latency,Scalability,Throughput,Concurrency,Middleware,Serialization,Idempotent,Containerization,Tokenization,Overfitting）；(2) 清單 11 項、標示 自訂擴充、含來源標示節點 0、含「範本」0；單字卡「共 5631 張」含 11 字=true；卡片 Latency 出處「自訂擴充」、TTS [\"Latency\"]、STT「辨識吻合度 100 綠燈 此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；(3) 新增 latency →「單字已存在」、localStorage 不變=true；(4) 刪除 Scalability 後其餘 10 字逐欄相同=true；(5) 備份 customVocab 10 字與 localStorage 相同、origin/templateId 保留=true；鍵名、欄位集合、schemaVersion 3、備份頂層 5 欄=true；Console 錯誤 0"
     },
     {
       "file": "e2e-version-edge.json",
@@ -3376,7 +4048,7 @@
       "tc": "TC-01-08",
       "ac": "AC-01-08、AC-01-07、AC-25-06、E-92",
       "result": "通過",
-      "note": "【375px】(1) 「目前色級：橘」(1 行)→「目前色級：棕」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)；卡片全文＝該行=true、舊節點 0、aria-label「目前色級」；(2) 套用綠後點棕未套用：「目前色級：綠」、選中 brown；(3) 套用藍後重新載入：「目前色級：綠」、選中 blue；禁用字樣 0；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}、schemaVersion 2；Console 錯誤 0 ／ 【1366px】(1) 「目前色級：橘」(1 行)→「目前色級：棕」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)；卡片全文＝該行=true、舊節點 0、aria-label「目前色級」；(2) 套用綠後點棕未套用：「目前色級：綠」、選中 brown；(3) 套用藍後重新載入：「目前色級：綠」、選中 blue；禁用字樣 0；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}、schemaVersion 2；Console 錯誤 0"
+      "note": "【375px】(1) 「目前色級：橘」(1 行)→「目前色級：棕」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)；卡片全文＝該行=true、舊節點 0、aria-label「目前色級」；(2) 套用綠後點棕未套用：「目前色級：綠」、選中 brown；(3) 套用藍後重新載入：「目前色級：綠」、選中 blue；禁用字樣 0；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}、schemaVersion 3；Console 錯誤 0 ／ 【1366px】(1) 「目前色級：橘」(1 行)→「目前色級：棕」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)→「目前色級：綠」(1 行)；卡片全文＝該行=true、舊節點 0、aria-label「目前色級」；(2) 套用綠後點棕未套用：「目前色級：綠」、選中 brown；(3) 套用藍後重新載入：「目前色級：綠」、選中 blue；禁用字樣 0；localStorage goal {\"draftScore\":855,\"appliedScore\":855,\"appliedColor\":\"blue\",\"effectiveColor\":\"green\"}、schemaVersion 3；Console 錯誤 0"
     },
     {
       "file": "e2e-version-edge.json",

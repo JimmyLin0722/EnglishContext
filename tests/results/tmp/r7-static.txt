@@ -1,0 +1,4 @@
+  PASS TC-V-S03 AC-43-02、AC-39-04、AC-42-01（HT-7、V-LAY-10、VR-7） 含「範本」字串常值 3 處（custom-vocab.js 隱藏容器內與 persist.js 內部驗證原因 3、其他 0）；範本容器建立屬性含 hidden＋inert=true；.db-change 規則「min-height: 44px; min-width: 44px; margin-left: auto; padding: 0 14px; background: var(--surface); border: 1px solid var(--brand-deep); color: var(--brand-deep)」；.app-footer__version 規則「margin: 4px 0 0; font-size: 0.75rem; line-height: 1.5; color: var(--text-muted); white-space: nowrap;」；用強調橘／灰框線或缺 nowrap／無底線=false
+  PASS TC-T-S01 AC-47-08、AC-45-04、AC-45-05、AC-46-01（WR-4、CR-9、C-7） L1 新模組（position、part5flow）去註解後禁用 API／DOM／儲存：無；part5 view／store／persist／backup／reinit 網路 API 與 HTML 插入：無；畫面文字 11 則缺 0；40-part5.css 新規則 14 條（用強調橘／色碼／動畫：無；.p5-only min-height var(--touch)=true；.p5-record__count tabular-nums=true）；交付檔 3,375,522 bytes ≤ 5 MB=true；外部函式庫或外部 script=false
+  PASS TC-S09 AC-19-01（交付物可追溯） 重建產物 3,375,522 bytes；與 dist 位元組相同=true
+靜態檢查：通過 19、失敗 0

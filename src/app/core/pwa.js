@@ -9,6 +9,8 @@
  * - 純函式：不碰 DOM、不呼叫任何瀏覽器 API；所需的環境物件一律由呼叫端以參數傳入。
  * - 本檔同時由 tools/build.mjs 以 createRequire 讀取（FE-47）：Node 下 module.exports 即同一個 api 物件，
  *   不得依賴 window、document。factory 無任何依賴（LD-1）。
+ * - （v0.11，FE-77；architecture.md v0.11 §7.22.1、契約 v0.16 UP-6）PWA_TEXTS 只改 updateNotice、updateButton 兩個值，
+ *   其餘鍵與深度凍結不變。
  */
 (function (root, factory) {
   var api = factory();
@@ -97,11 +99,11 @@
   /** 回到前景時重新檢查更新的間隔（毫秒，1 小時；UP-3） */
   var PWA_UPDATE_RECHECK_MS = 3600000;
 
-  /** PWA 相關畫面文字（逐字使用） */
+  /** PWA 相關畫面文字（逐字使用；v0.16 契約 UP-6：更新提示改為「請更新版本」，逗號為全形 U+FF0C，行為不變） */
   var PWA_TEXTS = {
     installButton: "安裝 App",
-    updateNotice: "有新版本，重新整理",
-    updateButton: "重新整理",
+    updateNotice: "有新版本，請更新版本",
+    updateButton: "更新版本",
     backupOriginNotice: "學習紀錄只存在目前的瀏覽器與網址；檔案版、網頁版、主畫面 App 彼此不互通，可用匯出備份／匯入轉移"
   };
 

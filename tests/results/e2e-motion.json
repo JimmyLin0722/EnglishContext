@@ -32,7 +32,7 @@
     "tc": "TC-28-03",
     "ac": "AC-28-03",
     "result": "通過",
-    "note": "第 5 張（背面）向左滑 120px → 第 6 / 5620 張、正面（手指離開到新卡 1.6ms）；向右滑 → 第 5 / 5620 張（1.2ms）（實機手感列人工 TC-M05）"
+    "note": "第 5 張（背面）向左滑 120px → 第 6 / 5620 張、正面（手指離開到新卡 1.7ms）；向右滑 → 第 5 / 5620 張（1.6ms）（實機手感列人工 TC-M05）"
   },
   {
     "suite": "e2e-motion",
@@ -60,7 +60,7 @@
     "tc": "TC-29-01",
     "ac": "AC-29-01",
     "result": "通過",
-    "note": "四選一答對：點擊→顏色 5.3ms、動畫 \"qz-opt--pop\"/0.48s、700ms 後狀態 correct,neutral,neutral,neutral、鎖定=true、殘留動畫 class=false；四選一答錯：點擊→顏色 7.8ms、動畫 \"qz-opt--shake\"/0.48s、700ms 後狀態 wrong,neutral,neutral,correct、鎖定=true、殘留動畫 class=false；模擬測驗答對：點擊→顏色 10.4ms、動畫 \"p5-opt--pop\"/0.48s、700ms 後狀態 correct,locked,locked,locked、鎖定=true、殘留動畫 class=false；模擬測驗答錯：點擊→顏色 5.4ms、動畫 \"p5-opt--shake\"/0.48s、700ms 後狀態 locked,locked,correct,wrong、鎖定=true、殘留動畫 class=false（動畫上限 600ms，Q-33）"
+    "note": "四選一答對：點擊→顏色 5.5ms、動畫 \"qz-opt--pop\"/0.48s、700ms 後狀態 neutral,correct,neutral,neutral、鎖定=true、殘留動畫 class=false；四選一答錯：點擊→顏色 4.9ms、動畫 \"qz-opt--shake\"/0.48s、700ms 後狀態 neutral,correct,wrong,neutral、鎖定=true、殘留動畫 class=false；模擬測驗答對：點擊→顏色 48ms、動畫 \"p5-opt--pop\"/0.48s、700ms 後狀態 correct,locked,locked,locked、鎖定=true、殘留動畫 class=false；模擬測驗答錯：點擊→顏色 5.1ms、動畫 \"p5-opt--shake\"/0.48s、700ms 後狀態 locked,locked,correct,wrong、鎖定=true、殘留動畫 class=false（動畫上限 600ms，Q-33）"
   },
   {
     "suite": "e2e-motion",
@@ -81,7 +81,7 @@
     "tc": "TC-31-01",
     "ac": "AC-31-01",
     "result": "通過",
-    "note": "customizer：emt-view-in/0.24s、點擊到第一個影格 12.8ms、結束後移除 class=true；flashcards：emt-view-in/0.24s、點擊到第一個影格 17.8ms、結束後移除 class=true；part5：emt-view-in/0.24s、點擊到第一個影格 10.4ms、結束後移除 class=true；dashboard：emt-view-in/0.24s、點擊到第一個影格 2.9ms、結束後移除 class=true（效能多輪判定見 TC-22-01）"
+    "note": "customizer：emt-view-in/0.24s、點擊到第一個影格 13.4ms、結束後移除 class=true；flashcards：emt-view-in/0.24s、點擊到第一個影格 18.7ms、結束後移除 class=true；part5：emt-view-in/0.24s、點擊到第一個影格 12.9ms、結束後移除 class=true；dashboard：emt-view-in/0.24s、點擊到第一個影格 3ms、結束後移除 class=true（效能多輪判定見 TC-22-01）"
   },
   {
     "suite": "e2e-motion",
@@ -95,7 +95,7 @@
     "tc": "TC-31-03",
     "ac": "AC-31-03",
     "result": "通過",
-    "note": "prefers-reduced-motion=true；換頁：立即顯示=true、animation none、opacity 1；翻卡：20ms 內背面=true、animation none、transform none；滑動：第 6 / 5620 張、animation none、opacity 1；作答：四選一 wrong,neutral,neutral,correct（animation none）、模擬測驗 correct,locked,locked,locked（animation none）、震動仍呼叫 2 次；環形圖 transition/animation 0s/none（收音條與聆聽中見 TC-33-08、確認視窗見 TC-31-03d）"
+    "note": "prefers-reduced-motion=true；換頁：立即顯示=true、animation none、opacity 1；翻卡：20ms 內背面=true、animation none、transform none；滑動：第 6 / 5620 張、animation none、opacity 1；作答：四選一 correct,wrong,neutral,neutral（animation none）、模擬測驗 correct,locked,locked,locked（animation none）、震動仍呼叫 2 次；環形圖 transition/animation 0s/none（收音條與聆聽中見 TC-33-08、確認視窗見 TC-31-03d）"
   },
   {
     "suite": "e2e-motion",

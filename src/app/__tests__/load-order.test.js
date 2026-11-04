@@ -5,6 +5,8 @@
  *       （沒有 module、require、document、localStorage、資料全域變數）依序載入 src/app 全部 .js（不含 main.js、__tests__）。
  * （FE-44）v0.10：新增 SCORE_DEFAULT 725 與 scoreForCard 斷言。
  * （FE-69）v0.14：新增 core/version.js、ui/version-line.js 與 layout.goalLineText、levelStatusText 斷言。
+ * （FE-76）v0.15：新增 core/position.js、core/part5flow.js（載入時不讀 document、不取用 persist）、
+ *           CURRENT_SCHEMA_VERSION 3 與 PART5_RECORD_TEXTS 凍結斷言。
  * 背景：R6-1（backup.js 早於 persist.js 載入，載入時取用 EMT.core.persist 得到 undefined）在 Node 單元測試中
  *       因 require 不受順序影響而測不到；本檔對全部模組做同樣的瀏覽器環境模擬。
  */
@@ -425,5 +427,115 @@ describe("load-order.test.js：版本號與介面精簡（v0.14，FE-69）", () 
     assert.equal(EMT.core.version.versionLineText("1.0.0", "3f9a2c1d77e2b6a4"), "版本 1.0.0（建置 3f9a2c1）");
     assert.equal(EMT.core.layout.levelStatusText(EMT.core.goal.levelOf("green")), "目前色級：綠");
     assert.equal(EMT.core.layout.goalLineText(EMT.core.goal.levelOf("orange")), "橘級・每日 10 字");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// （v0.10，FE-76）v0.15 新模組：core/position.js（FE-71）、core/part5flow.js（FE-72）；持久化 v3（FE-73）
+// 依據：architecture.md v0.10 §10.7 load-order.test.js 列；LD-1、LD-2；契約 C-8、data-schema.ts §15
+// ─────────────────────────────────────────────────────────────
+
+describe("load-order.test.js：單字卡位置與答對紀錄（v0.15，FE-76）", () => {
+  const APP_DIR = path.join(__dirname, "..");
+  const BUILD_MJS = path.join(APP_DIR, "..", "..", "tools", "build.mjs");
+  const NEW_CORE = ["core/position.js", "core/part5flow.js"];
+
+  /**
+   * 依建置順序在 vm 沙箱載入 src/app 全部檔案（不含 main.js）。
+   * - document：以 getter 記錄讀取次數（依檔名分開）。
+   * - EMT.core.persist：constants.js 建立 EMT.core 後，改為存取子屬性，記錄「誰在載入時讀取」；
+   *   persist.js 自己的指派經 setter 正常保存。
+   */
+  async function loadWithTraps() {
+    const build = await import(pathToFileURL(BUILD_MJS).href);
+    const files = build.listAppFiles(APP_DIR).filter((f) => f !== "main.js");
+    const errors = [];
+    const sandbox = { console: { log() {}, info() {}, debug() {}, warn: (...a) => errors.push(a), error: (...a) => errors.push(a) } };
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    let current = "";
+    const docReads = [];
+    const persistReads = [];
+    Object.defineProperty(sandbox, "document", { configurable: true, get() { docReads.push(current); return undefined; } });
+    vm.createContext(sandbox);
+    const failures = [];
+    let trapped = false;
+    for (const rel of files) {
+      current = rel;
+      try {
+        vm.runInContext(fs.readFileSync(path.join(APP_DIR, rel), "utf8"), sandbox, { filename: rel });
+      } catch (e) {
+        failures.push(rel + "：" + e.message);
+      }
+      if (!trapped && sandbox.EMT && sandbox.EMT.core) {
+        // 在 EMT.core 建立後立即安裝陷阱（persist.js 載入前）
+        let stored;
+        Object.defineProperty(sandbox.EMT.core, "persist", {
+          configurable: true,
+          enumerable: true,
+          get() { persistReads.push(current); return stored; },
+          set(v) { stored = v; }
+        });
+        trapped = true;
+      }
+    }
+    current = "";
+    return { files, sandbox, EMT: sandbox.EMT, failures, errors, docReads, persistReads, trapped };
+  }
+
+  test("core/position.js、core/part5flow.js 在建置清單中，且位於 state/、views/ 之前；position 在 wordkey 之後", async () => {
+    const build = await import(pathToFileURL(BUILD_MJS).href);
+    const files = build.listAppFiles(APP_DIR).filter((f) => f !== "main.js");
+    for (const f of NEW_CORE) {
+      assert.ok(files.includes(f), "建置清單缺少 " + f);
+      assert.ok(files.indexOf(f) < files.findIndex((x) => x.startsWith("state/")), f + " 應在 state/ 之前");
+      assert.ok(files.indexOf(f) < files.findIndex((x) => x.startsWith("views/")), f + " 應在 views/ 之前");
+    }
+    // position 載入時取用 EMT.core.wordkey（LD-1：相依模組須先載入）
+    assert.ok(files.indexOf("core/wordkey.js") < files.indexOf("core/position.js"));
+  });
+
+  test("依建置順序載入後 EMT.core.position、EMT.core.part5flow 存在；載入時不讀 document、不取用 EMT.core.persist（LD-1、LD-2）", async () => {
+    const { sandbox, EMT, failures, errors, docReads, persistReads, trapped } = await loadWithTraps();
+    assert.ok(trapped, "未能安裝 EMT.core.persist 陷阱");
+    assert.deepEqual(failures, [], "載入時拋出例外");
+    assert.deepEqual(errors, [], "載入時輸出 console.error／warn");
+    for (const f of NEW_CORE) {
+      assert.ok(!docReads.includes(f), f + " 載入時讀取 document");
+      assert.ok(!persistReads.includes(f), f + " 載入時取用 EMT.core.persist");
+    }
+    assert.deepEqual(docReads, [], "載入過程不讀 document（LD-2）");
+    assert.equal(typeof EMT.core.position, "object", "缺少 EMT.core.position");
+    assert.equal(typeof EMT.core.part5flow, "object", "缺少 EMT.core.part5flow");
+    for (const fn of ["isShape", "normalize", "resolve", "fromIndex", "sameCard"]) {
+      assert.equal(typeof EMT.core.position[fn], "function", "缺少 position." + fn);
+    }
+    for (const fn of ["normalizeIds", "countCorrect", "viewKind", "normalizeOnly", "next", "restart", "setOnly", "recordAnswer", "replayKeepRecords", "clearAndRestart"]) {
+      assert.equal(typeof EMT.core.part5flow[fn], "function", "缺少 part5flow." + fn);
+    }
+    // persist 本身仍正常登錄（陷阱的 setter 有保存）
+    assert.equal(typeof EMT.core.persist, "object");
+    // 瀏覽器環境下可用：position 取到 wordkey（以字找回）；
+    // 物件在沙箱內建立（isShape 檢查原型，主 realm 的物件會被判為非純物件）
+    const pos = vm.runInContext("EMT.core.position.normalize({ wordKey: '  Pay   Off ', ordinal: 2 })", sandbox);
+    assert.equal(JSON.stringify(pos), JSON.stringify({ wordKey: "pay off", ordinal: 2 }));
+  });
+
+  test("constants.CURRENT_SCHEMA_VERSION === 3；SUPPORTED_SCHEMA_VERSIONS 含 1、2、3；PART5_RECORD_TEXTS 為凍結物件（C-8、data-schema.ts §15）", async () => {
+    const { EMT, failures } = await loadWithTraps();
+    assert.deepEqual(failures, []);
+    const C = EMT.core.constants;
+    assert.equal(C.CURRENT_SCHEMA_VERSION, 3);
+    assert.deepEqual(Array.from(C.SUPPORTED_SCHEMA_VERSIONS), [1, 2, 3]);
+    const T = C.PART5_RECORD_TEXTS;
+    assert.equal(typeof T, "object");
+    assert.ok(Object.isFrozen(T), "PART5_RECORD_TEXTS 應凍結");
+    assert.ok(Object.isFrozen(T.clearConfirmMustInclude), "clearConfirmMustInclude 應凍結");
+    assert.deepEqual(Object.keys(T), [
+      "correctBadge", "correctCount", "unansweredOnlyLabel", "allCorrectTitle",
+      "replayKeepRecords", "clearAndRestart", "clearConfirmMustInclude", "confirmOk", "confirmCancel"
+    ]);
+    assert.equal(T.correctBadge, "✓ 曾答對");
+    assert.equal(T.correctCount, "已答對 {k} / {q} 題");
   });
 });

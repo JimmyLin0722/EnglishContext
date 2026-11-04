@@ -130,14 +130,14 @@
     "tc": "TC-09-02",
     "ac": "AC-09-02",
     "result": "通過",
-    "note": "the：課程；學程 | 檢查；檢閱；檢驗 | 山；山脈；大堆 | （定冠詞）那；a：戲劇；戲劇藝術 | （不定冠詞）一個 | 贏得；獲勝；成功；勝利 | 主意；辦法；概念；意見；claim：不穩定的；可變的；揮發性的 | 多數；大半 | 任命；指定 | 要求；主張；斷言；認領；stadium：露天大型運動場 | 嫩的；溫柔的；投標；提出 | 詩人 | 繁榮；興旺；茁壯成長；undergraduate：大學部學生；大學生的 | 嚴肅地；認真地；嚴重地 | 明白地說；口才好的；發音清晰的 | 提醒的人；暗示；催單（單字集相異釋義 5606）"
+    "note": "the：意圖；目的；含義 | 最小的；最低的；最小值 | 缺口；縫隙；間距 | （定冠詞）那；a：重要；重要性；重要地位 | 混亂；混淆；無秩序 | （不定冠詞）一個 | 最佳化；充分利用；使完善；claim：可信的；可靠的 | 經濟學家；經濟學者 | 真實的；正確的；忠誠的 | 要求；主張；斷言；認領；stadium：意識形態的；思想上的 | 露天大型運動場 | 不正確的；錯誤的；不適當的 | 儀式；典禮；儀式的；undergraduate：妥協；折中方案；危害 | 參加社交活動；使社會化 | 強度；強烈；緊張 | 大學部學生；大學生的（單字集相異釋義 5606）"
   },
   {
     "suite": "e2e-cards",
     "tc": "TC-09-03",
     "ac": "AC-09-03、AC-17-03",
     "result": "通過",
-    "note": "答對：狀態 correct,neutral,neutral,neutral、鎖定=true、再點不變=true；答錯：neutral(rgb(255, 255, 255)),correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226)),neutral(rgb(255, 255, 255))；同字答對兩次後掌握數 1（主控台「已掌握 1 字」）、答題 2/2"
+    "note": "答對：狀態 neutral,neutral,neutral,correct、鎖定=true、再點不變=true；答錯：neutral(rgb(255, 255, 255)),correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226)),neutral(rgb(255, 255, 255))；同字答對兩次後掌握數 1（主控台「已掌握 1 字」）、答題 2/2"
   },
   {
     "suite": "e2e-cards",
@@ -151,14 +151,14 @@
     "tc": "TC-09-05",
     "ac": "AC-09-05",
     "result": "通過",
-    "note": "qaquizword：指責；控告；歸咎於 | 四選一自訂測試 | 方式；樣子；禮貌 | 種族的；人種的"
+    "note": "qaquizword：四選一自訂測試 | 創造；建造；引起；任命 | 永續的；可持續的；足以維持的 | 油酥點心；麵粉糕餅"
   },
   {
     "suite": "e2e-cards",
     "tc": "TC-09-07",
     "ac": "AC-09-07",
     "result": "通過",
-    "note": "20 次正解位置：CDCCDACDDADBADBDDABB"
+    "note": "20 次正解位置：BBDDABCCACCBDABDDCCC"
   },
   {
     "suite": "e2e-cards",
@@ -179,7 +179,7 @@
     "tc": "TC-24-01",
     "ac": "AC-24-01、AC-24-02",
     "result": "通過",
-    "note": "檔名 english-master-track-backup-20261103.json（本地日期 20261103）；網路請求 0；6947 bytes；format=english-master-track-backup、schemaVersion=2；欄位齊全=true；不含內建內容=true；goal={\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；自訂 10、已掌握 1、測驗 {\"answered\":1,\"correct\":1}、part5 {\"currentIndex\":1,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":1,\"roundCorrect\":1,\"totalAnswered\":1,\"totalCorrect\":1}、streak {\"days\":1,\"lastActiveDate\":\"2026-11-03\"}、STT 已讀 true、todayLearned {\"date\":\"2026-11-03\",\"wordKeys\":[\"the\"]}、learnedHistory {\"2026-11-03\":1}"
+    "note": "檔名 english-master-track-backup-20261104.json（本地日期 20261104）；網路請求 0；7059 bytes；format=english-master-track-backup、schemaVersion=3；欄位齊全=true；不含內建內容=true；goal={\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；自訂 10、已掌握 1、測驗 {\"answered\":1,\"correct\":1}、part5 {\"currentIndex\":1,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":1,\"roundCorrect\":1,\"totalAnswered\":1,\"totalCorrect\":1}、streak {\"days\":1,\"lastActiveDate\":\"2026-11-04\"}、STT 已讀 true、todayLearned {\"date\":\"2026-11-04\",\"wordKeys\":[\"the\"]}、learnedHistory {\"2026-11-04\":1}"
   },
   {
     "suite": "e2e-cards",
@@ -207,7 +207,7 @@
     "tc": "TC-24-06",
     "ac": "AC-24-06",
     "result": "通過",
-    "note": "版本缺失：「備份檔版本不相容（檔案版本：無；支援版本：1、2）」；版本 99：「備份檔版本不相容（檔案版本：99；支援版本：1、2）」；版本字串：「備份檔版本不相容（檔案版本：無；支援版本：1、2）」"
+    "note": "版本缺失：「備份檔版本不相容（檔案版本：無；支援版本：1、2、3）」；版本 99：「備份檔版本不相容（檔案版本：99；支援版本：1、2、3）」；版本字串：「備份檔版本不相容（檔案版本：無；支援版本：1、2、3）」"
   },
   {
     "suite": "e2e-cards",

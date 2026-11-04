@@ -13,7 +13,8 @@ const TMP = process.env.QA_TMP || path.resolve("tests/results/tmp");
 fs.mkdirSync(TMP, { recursive: true });
 const TODAY = todayYmd();
 const PAGES = [];
-const LEARN = ["masteredWordKeys", "vocabQuiz", "part5", "streak", "todayLearned", "learnedHistory"];
+// 第 7 輪（PRD v0.15 AC-32-02、Q-67 A）：學習進度紀錄加 (7) 模擬測驗答對紀錄
+const LEARN = ["masteredWordKeys", "vocabQuiz", "part5", "streak", "todayLearned", "learnedHistory", "part5CorrectIds"];
 const pick = (d, ks) => Object.fromEntries(ks.map((k) => [k, d[k]]));
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -37,6 +38,7 @@ function withRecords(score = 600) {
     vocabQuiz: { answered: 6, correct: 5 },
     part5: { currentIndex: 10, lockedSelection: null, phase: "question", roundAnswered: 10, roundCorrect: 7, totalAnswered: 10, totalCorrect: 7 },
     streak: { days: 3, lastActiveDate: TODAY },
+    part5CorrectIds: ["p5-001", "p5-003", "p5-007"], // 第 7 輪：答對紀錄（初始化時清空）
     sttNoticeAcknowledged: true,
     todayLearned: { date: TODAY, wordKeys: ["the", "of", "monetization"] },
     learnedHistory: { [addDays(TODAY, -2)]: 4, [addDays(TODAY, -1)]: 6, [TODAY]: 3 },
@@ -101,7 +103,7 @@ const DEFAULTS = await freshDefaults();
       && pr.today === "今日已學 0 / 10 字" && pr.bars === "0,0,0,0,0,0,0" && pr.empty === "開始學習後會顯示紀錄" && !pr.barsShown && pr.stats === "0 天｜0%｜已掌握 0 字｜—"
       && p5[0].startsWith("第 1 /") && p5[1] && same(pr, pr2) && same(st.data, st2.data) && fc2[0] === "第 1 / 2812 張" && p52[0].startsWith("第 1 /")
       && same(pick(backup, LEARN), DEFAULTS);
-    return { ok, note: `確定後視窗關閉=${closed}；localStorage goal ${JSON.stringify(st.data.goal)}；主控台 ${g}、${pr.today}、長條 ${pr.bars}、近 7 天「${pr.empty}」、3 格 ${pr.stats}；試算 c=${e.mastered}、棕 ${e.weeks}；單字卡 ${fc.join("/")}；模擬測驗 ${p5[0]}（未作答=${p5[1]}）；重新載入後相同=${same(pr, pr2) && same(st.data, st2.data)}；匯出備份 6 欄 ${JSON.stringify(pick(backup, LEARN))} 與首次啟動預設相同=${same(pick(backup, LEARN), DEFAULTS)}` };
+    return { ok, note: `確定後視窗關閉=${closed}；localStorage goal ${JSON.stringify(st.data.goal)}；主控台 ${g}、${pr.today}、長條 ${pr.bars}、近 7 天「${pr.empty}」、3 格 ${pr.stats}；試算 c=${e.mastered}、棕 ${e.weeks}；單字卡 ${fc.join("/")}；模擬測驗 ${p5[0]}（未作答=${p5[1]}）；重新載入後相同=${same(pr, pr2) && same(st.data, st2.data)}；匯出備份 7 欄（第 7 輪含答對紀錄）${JSON.stringify(pick(backup, LEARN))} 與首次啟動預設相同=${same(pick(backup, LEARN), DEFAULTS)}` };
   });
   await R.check("TC-32-03", "AC-32-03", async () => {
     const st = await readState(p);
@@ -118,7 +120,7 @@ const DEFAULTS = await freshDefaults();
     const s1 = await readState(p);
     const keys1 = await p.ev(`Object.keys(localStorage).sort().join(",")`);
     const reqs = p.log.requests.filter((r) => !r.url.startsWith("file:") && !/^(blob|data):/.test(r.url));
-    const ok = s0.schemaVersion === 2 && s1.schemaVersion === 2 && keys0 === keys1 && same(Object.keys(s0.data).sort(), Object.keys(s1.data).sort()) && same(Object.keys(s0.data.goal).sort(), Object.keys(s1.data.goal).sort())
+    const ok = s0.schemaVersion === 3 && s1.schemaVersion === 3 && keys0 === keys1 && same(Object.keys(s0.data).sort(), Object.keys(s1.data).sort()) && same(Object.keys(s0.data.goal).sort(), Object.keys(s1.data.goal).sort())
       && same(s0.data.customVocab, s1.data.customVocab) && reqs.length === 0;
     return { ok, note: `schemaVersion ${s0.schemaVersion}→${s1.schemaVersion}；localStorage 鍵 [${keys0}]→[${keys1}]；data 欄位 ${Object.keys(s1.data).length} 個相同；goal 欄位相同；自訂單字相同；網路請求 ${reqs.length}` };
   });
@@ -216,7 +218,7 @@ const DEFAULTS = await freshDefaults();
     // (b) 主控台已有學習紀錄，匯入生效色級不同（棕）的備份
     await seed(p, withRecords(725));
     const b0 = stateRecord(300, { masteredWordKeys: ["the", "of"], vocabQuiz: { answered: 2, correct: 2 }, streak: { days: 1, lastActiveDate: TODAY }, todayLearned: { date: TODAY, wordKeys: ["the", "of"] }, learnedHistory: { [TODAY]: 2 } });
-    const backup = { format: "english-master-track-backup", schemaVersion: 2, exportedAt: new Date().toISOString(), data: b0.data };
+    const backup = { format: "english-master-track-backup", schemaVersion: 3, exportedAt: new Date().toISOString(), data: b0.data }; // 第 7 輪：stateRecord 改產生 v3（12 欄）
     const ref = JSON.parse(await p.ev(`EMT.store.actions.exportBackup().json`));
     for (const k of Object.keys(ref)) if (!(k in backup)) backup[k] = ref[k];
     const f = path.join(TMP, "reinit-import-" + Date.now() + ".json"); fs.writeFileSync(f, JSON.stringify(backup));

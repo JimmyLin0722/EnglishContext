@@ -12,7 +12,7 @@
  *   鍵不存在 → 預設值；無法讀取 → 原字串盡力寫入 STORAGE_KEYS.unreadable 後以預設值啟動。
  * - 容量不足：新增自訂單字、範本注入 → 記憶體回滾、回 reason "quota"；匯入 → 回 error "quota"、記憶體不變
  *   （匯入遇容量不足以外的寫入例外 → error "write_failed"，契約 IM-6）；
- *   其他寫入 → 保留記憶體狀態，writeStatus 設為 "quota" 並以 tags ["storage"] 通知（banner 顯示提示），下次寫入再試。
+ *   其他寫入 → 保留記憶體狀態，writeStatus 設為 "quota"，下次寫入再試（v0.15 起提示規則見下方 commitWrite）。
  * - （v0.8，FE-25）學習事件（flipCard／answerVocabQuiz／recordSttScored）以 core/learning.record 更新
  *   todayLearned、learnedHistory，與打卡、統計、已掌握合併為一次 setItem，tags 加 "learning"（§7.7、LR-1～LR-5）；
  *   學習紀錄寫入遇容量不足 → 記憶體保留、不發 "storage"，本工作階段第一次發 "learningQuota"（LR-7）。
@@ -33,6 +33,13 @@
  *
  * - （v0.11，FE-49）runtime.pwa（PwaRuntimeState，契約 PV-1、PV-7）：初始值取 core/pwa.initialPwaState()；
  *   只能經 actions.setPwa 更新（tag "pwa"，不寫入 localStorage、不進備份）；其他 action 以 assign 局部更新時保留原值。
+ *
+ * - （v0.15，FE-74）學習位置與作答紀錄（契約 §5.10～§5.12、architecture §4.10、§7.21.2、§7.21.3、§7.21.5）：
+ *   一般寫入一律經 commitWrite（容量不足：記憶體保留、整個工作階段最多發 1 次 "learningQuota"，不發 "storage"；
+ *   其他例外不提示）；writeData 寫出前呼叫 persist.ensureWritable。單字集重建一律經 placeCard（position.resolve，
+ *   FP-2、FP-5、FP-6）；gotoCard 換卡即寫入 flashcardPosition（FP-3）；生效色級改變 → 位置 null、第 1 張，
+ *   未改變 → 單字卡狀態全部不變（FP-4、FB-54）。模擬測驗轉移集中在 core/part5flow（CR-2、UO-1～UO-9），
+ *   題庫為空時 part5 action 一律不動作。
  *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
@@ -69,14 +76,16 @@
         BACKUP: require("../core/backup.js"),
         LEARN: require("../core/learning.js"),
         REINIT: require("../core/reinit.js"),
-        PWA: require("../core/pwa.js")
+        PWA: require("../core/pwa.js"),
+        POS: require("../core/position.js"),
+        PF: require("../core/part5flow.js")
       };
     } else {
       var c = root.EMT.core;
       coreCache = {
         C: c.constants, WK: c.wordkey, GOAL: c.goal, VOCAB: c.vocab, CUSTOM: c.custom,
         STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning,
-        REINIT: c.reinit, PWA: c.pwa
+        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow
       };
     }
     return coreCache;
@@ -200,14 +209,6 @@
     return null;
   }
 
-  /** 在單字集中找 wordKey 的位置；找不到回 -1 */
-  function indexOfKey(studySet, key) {
-    for (var i = 0; i < studySet.length; i++) {
-      if (studySet[i].wordKey === key) { return i; }
-    }
-    return -1;
-  }
-
   /** 把索引夾在單字集範圍內；空集合 → 0 */
   function clampIndex(i, len) {
     if (len <= 0) { return 0; }
@@ -279,8 +280,21 @@
       }
       var K = core();
       try {
-        var lr = K.LEARN.normalizeLearning(data, today());
-        var out = assign(data, { todayLearned: lr.todayLearned, learnedHistory: lr.learnedHistory });
+        // （v0.15）補齊並正規化 3 個新欄位，保證寫出 PersistedDataWritten（architecture §4.10 ensureWritable）。
+        // ensureWritable 只處理這 3 欄但會深度複製整個物件；只傳入 3 欄再併回，避免每次換卡都複製整個 customVocab
+        // （1,000 個自訂單字時約多 2 ms，§7.21.2 效能要求），結果與傳入整筆相同
+        var tr = K.P.ensureWritable({
+          flashcardPosition: data.flashcardPosition,
+          part5CorrectIds: data.part5CorrectIds,
+          part5UnansweredOnly: data.part5UnansweredOnly
+        });
+        var wd = assign(data, {
+          flashcardPosition: tr.flashcardPosition,
+          part5CorrectIds: tr.part5CorrectIds,
+          part5UnansweredOnly: tr.part5UnansweredOnly
+        });
+        var lr = K.LEARN.normalizeLearning(wd, today());
+        var out = assign(wd, { todayLearned: lr.todayLearned, learnedHistory: lr.learnedHistory });
         var text = JSON.stringify(K.P.buildRecord(out, now()));
         storage.setItem(K.C.STORAGE_KEYS.state, text);
         return { ok: true };
@@ -349,18 +363,43 @@
     }
 
     /**
-     * 單字集重建後，盡量停在原本那張卡（以 wordKey 定位；找不到則夾回範圍）。
-     * 卡片沒變 → 保留翻面與題目；卡片變了 → 依 cardChanged 重設。
+     * （v0.15，FE-74）單字集重建時決定目前卡片（FP-2、FP-5、FP-6；architecture §4.10 placeCard）。
+     * 以 data.flashcardPosition 經 position.resolve 解析出新索引；新目前卡片與舊目前卡片（runtime.studySet[index]）
+     * 的 wordKey 相同 → 保留翻面、模式與題目，否則依 cardChanged 重設。
+     * 只計算、不寫入；呼叫端把回傳的 flashcardPosition 放進同一次寫入的 data（啟動與匯入步驟 9 只改記憶體，RD-4）。
+     * 單字集為空時 position 為原紀錄（FP-2 (1)，紀錄不動）。
+     * @param {object} runtime 目前（舊）執行期狀態
+     * @param {object} data 新的 PersistedData（讀取其 flashcardPosition）
+     * @param {object[]} newSet 新單字集
+     * @returns {{runtime: object, flashcardPosition: (object|null)}}
      */
-    function keepCurrentCard(runtime, newSet) {
-      var oldSet = runtime.studySet;
-      var oldCard = oldSet[runtime.flashcard.index];
-      var idx = oldCard ? indexOfKey(newSet, oldCard.wordKey) : -1;
-      if (idx !== -1) {
-        return assign(runtime, { studySet: newSet, flashcard: assign(runtime.flashcard, { index: idx }) });
+    function placeCard(runtime, data, newSet) {
+      var r = core().POS.resolve(data.flashcardPosition, newSet);
+      var oldCard = runtime.studySet ? runtime.studySet[runtime.flashcard.index] : null;
+      var newCard = newSet[r.index];
+      var rt;
+      if (oldCard && newCard && oldCard.wordKey === newCard.wordKey) {
+        rt = assign(runtime, { studySet: newSet, flashcard: assign(runtime.flashcard, { index: r.index }) });
+      } else {
+        var cc = cardChanged(runtime, newSet, r.index);
+        rt = assign(runtime, { studySet: newSet, flashcard: cc.flashcard, speech: cc.speech });
       }
-      var changed = cardChanged(runtime, newSet, clampIndex(runtime.flashcard.index, newSet.length));
-      return assign(runtime, { studySet: newSet, flashcard: changed.flashcard, speech: changed.speech });
+      // 無紀錄（null）→ 第 1 張，紀錄維持 null：null 與「第 1 張」等價（architecture §7.21.2 INV-FP），
+      // 避免只因啟動或重建就把 null 改成 { wordKey, ordinal: 1 }（啟動後記憶體與 localStorage 相同，V-ST-21）
+      var pos = r.kind === "none" && data.flashcardPosition === null ? null : r.position;
+      return { runtime: rt, flashcardPosition: pos };
+    }
+
+    /** 回到第 1 張（index 0）：已是第 1 張則原物件；否則依 cardChanged 重設（FP-4 位置為 null 時用） */
+    function firstCard(runtime) {
+      if (runtime.flashcard.index === 0) { return runtime; }
+      var cc = cardChanged(runtime, runtime.studySet, 0);
+      return assign(runtime, { flashcard: cc.flashcard, speech: cc.speech });
+    }
+
+    /** 題庫 id 陣列（part5flow.bankIdsOf，順序與題庫相同） */
+    function bankIds() {
+      return core().PF.bankIdsOf(content().part5);
     }
 
     // ── 訂閱與提交 ──
@@ -392,39 +431,40 @@
     }
 
     /**
-     * 提交新狀態。dataChanged = true 時先寫入（一次 setItem）；容量不足等失敗仍保留記憶體狀態（§5.3「其他寫入」）。
+     * 只更新記憶體並通知（不寫入 localStorage）。
      * @param {object} data
      * @param {object} runtime
      * @param {string[]} tags
-     * @param {boolean} dataChanged
      */
-    function commit(data, runtime, tags, dataChanged) {
-      if (dataChanged) {
-        noteWrite(writeData(data), tags);
-      }
+    function commit(data, runtime, tags) {
       state = { data: data, runtime: runtime };
       notify(tags);
     }
 
     /**
-     * （v0.8）提交含學習紀錄變更的新狀態（LR-3 (6)、LR-5、LR-7；architecture §7.7「LR-7 實作」）。
-     * 一次 setItem；學習紀錄實際改變且寫入失敗（quota／error）時：記憶體保留、writeStatus 更新但不發 "storage" tag；
-     * quota 且本工作階段尚未提示 → learningQuotaNoticeShown 設 true 並發 "learningQuota" tag（banner 提示一次）。
-     * 學習紀錄未改變、寫入成功或 storage 停用 → 沿用 commit（noteWrite）。
-     * @param {object} data
-     * @param {object} runtime
+     * （v0.15，FE-74）一般寫入的唯一提交函式（architecture §7.21.5、契約 WR-1～WR-3、V-ST-22；取代 v0.14 的
+     * 「commit 寫入」與學習紀錄專用提交）。一次 setItem 後記憶體一律採用新 data（不回滾），再 notify(tags) 一次：
+     * - 成功：writeStatus 由非 ok 回到 ok 時加 "storage" tag（banner 收起）
+     * - quota：writeStatus = "quota"；本工作階段尚未提示（learningQuotaNoticeShown 為 false）→ 設 true 並加
+     *   "learningQuota" tag（banner 提示「儲存空間不足」，整個工作階段最多 1 次，與 AC-30-14 共用旗標）；不加 "storage"
+     * - error：writeStatus = "error"；不提示
+     * - disabled／firstRun：沿用 noteWrite（不提示；首次守門不改 writeStatus）
+     * @param {object} data 新的 PersistedData
+     * @param {object} runtime 新的執行期狀態
      * @param {string[]} tags
-     * @param {boolean} dataChanged
-     * @param {boolean} learningChanged
+     * @param {{bypassFirstRun?: boolean}} [opts] bypassFirstRun 供 startLearning 寫第一筆
+     * @returns {{ok: true} | {ok: false, reason: string}} writeData 的結果
      */
-    function commitLearning(data, runtime, tags, dataChanged, learningChanged) {
-      if (!dataChanged || !learningChanged) {
-        commit(data, runtime, tags, dataChanged);
-        return;
-      }
-      var w = writeData(data);
+    function commitWrite(data, runtime, tags, opts) {
+      var o = opts || {};
+      var w = writeData(data, o.bypassFirstRun === true);
       var rt = runtime;
-      if (!w.ok && (w.reason === "quota" || w.reason === "error")) {
+      if (w.ok) {
+        if (writeStatus !== "ok") {
+          writeStatus = "ok";
+          tags.push("storage");
+        }
+      } else if (w.reason === "quota" || w.reason === "error") {
         writeStatus = w.reason;
         if (w.reason === "quota" && !rt.learningQuotaNoticeShown) {
           rt = assign(rt, { learningQuotaNoticeShown: true });
@@ -435,6 +475,7 @@
       }
       state = { data: data, runtime: rt };
       notify(tags);
+      return w;
     }
 
     /**
@@ -494,7 +535,8 @@
         if (parsed.kind === "ok") {
           // （v0.8）以今天正規化 todayLearned、learnedHistory（V-ST-09～V-ST-11）；
           // RD-1 的 fieldsReset 不提示、不另寫回，等下一次寫入一併寫回（RD-2、SD-FB-17）
-          data = K.P.normalizeAfterLoad(parsed.data, ct.part5.length, today());
+          // （v0.15）第 4 參數傳題庫 id → V-ST-05 之後再做 UO-4（只改記憶體，RD-4）
+          data = K.P.normalizeAfterLoad(parsed.data, ct.part5.length, today(), K.PF.bankIdsOf(ct.part5));
           startup = { status: "ok", migrated: false };
           if (parsed.migrated) {
             // 遷移後依 §5.3 驗證再以一次 setItem 寫回（MG-3：schemaVersion 2，失敗不提示）
@@ -525,7 +567,13 @@
       }
 
       writeStatus = available ? "ok" : "disabled";
-      state = { data: data, runtime: initialRuntime(data, available ? "ok" : "unavailable", entryMode) };
+      // （v0.15）FP-2：依紀錄解析目前卡片；記憶體中的紀錄更新為解析結果，不寫入（RD-4）
+      var rt0 = initialRuntime(data, available ? "ok" : "unavailable", entryMode);
+      var placed = placeCard(rt0, data, rt0.studySet);
+      if (placed.flashcardPosition !== data.flashcardPosition) {
+        data = assign(data, { flashcardPosition: placed.flashcardPosition });
+      }
+      state = { data: data, runtime: placed.runtime };
       initialized = true;
       notify(ALL_TAGS.slice());
       return { status: startup.status, migrated: startup.migrated };
@@ -569,7 +617,7 @@
         return;
       }
       var data = assign(d, { goal: assign(d.goal, { draftScore: score }) });
-      commit(data, state.runtime, ["goal"], true);
+      commitWrite(data, state.runtime, ["goal"]);
     }
 
     /**
@@ -601,13 +649,19 @@
     }
 
     /**
-     * 套用（AC-01-02、AC-01-07、AC-03-05）：appliedScore = draftScore、重算色級、重建單字集，
-     * 抽認卡回第 1 張正面；模式保持，測驗模式則重新出題。
+     * 套用（AC-01-02、AC-01-07、AC-03-05）：appliedScore = draftScore、重算色級；
+     * （v0.15）生效色級改變 → 重建單字集、抽認卡回第 1 張正面、位置 null（FP-4）；未改變 → 單字卡狀態不變（FB-54）。
+     * goal 未改變時不寫入（v0.14 行為）。
      */
     function applyGoal() {
       ensureInit();
       var g = appliedGoalState();
-      commit(g.data, g.runtime, ["goal", "studySet", "flashcard", "quiz", "speech"], g.changed);
+      var tags = ["goal", "studySet", "flashcard", "quiz", "speech"];
+      if (g.changed) {
+        commitWrite(g.data, g.runtime, tags);
+      } else {
+        commit(g.data, g.runtime, tags);
+      }
     }
 
     /**
@@ -633,7 +687,7 @@
       var d = state.data;
       if (d.goal.draftScore === d.goal.appliedScore) { return false; }
       var data = assign(d, { goal: assign(d.goal, { draftScore: d.goal.appliedScore }) });
-      commit(data, state.runtime, ["goal"], false);
+      commit(data, state.runtime, ["goal"]);
       return true;
     }
 
@@ -660,8 +714,10 @@
       var tags = ["goal", "studySet", "flashcard", "quiz", "speech", "stats", "streak", "part5", "learning"];
       noteWrite(w, tags);
       // CI-8：g.runtime 已依新 goal 重建 studySet、flashcard 回第 1 張正面（模式保持、測驗模式重新出題）、lastResult = null；
-      // 單字集只由 goal 與 customVocab 推導，兩者在 g.data 與 newData 相同
-      state = { data: newData, runtime: g.runtime };
+      // 單字集只由 goal 與 customVocab 推導，兩者在 g.data 與 newData 相同。
+      // （v0.15）buildReinitData 已設 flashcardPosition = null；生效色級未改變卻被直接呼叫時（UI 不會發生），
+      // 也回到第 1 張以維持「null ⇔ 第 1 張」（INV-FP）
+      state = { data: newData, runtime: firstCard(g.runtime) };
       notify(tags);
       return { ok: true, write: w.ok ? "ok" : "disabled" };
     }
@@ -676,8 +732,10 @@
     }
 
     /**
-     * 「套用」的狀態計算（applyGoal 與 startLearning 共用，不提交）：
-     * appliedScore = draftScore、依 V-ST-02 重算色級、重建單字集、抽認卡回第 1 張正面（模式保持，測驗模式重新出題）。
+     * 「套用」的狀態計算（applyGoal、confirmApplyGoal 與 startLearning 共用，不提交）：
+     * appliedScore = draftScore、依 V-ST-02 重算色級。
+     * （v0.15，FP-4、FB-54）生效色級改變 → 重建單字集、抽認卡回第 1 張正面（模式保持，測驗模式重新出題）、
+     * flashcardPosition = null；未改變 → studySet、flashcard、speech、flashcardPosition 全部不變。
      * @returns {{data: object, runtime: object, changed: boolean}}
      */
     function appliedGoalState() {
@@ -688,18 +746,22 @@
       var goal = { draftScore: score, appliedScore: score, appliedColor: color, effectiveColor: K.GOAL.effectiveColorOf(color) };
       var changed = goal.appliedScore !== d.goal.appliedScore || goal.appliedColor !== d.goal.appliedColor ||
         goal.effectiveColor !== d.goal.effectiveColor;
-      var data = changed ? assign(d, { goal: goal }) : d;
-      var set = buildStudySet(data);
       var rt = state.runtime;
+      if (goal.effectiveColor === d.goal.effectiveColor) {
+        return { data: changed ? assign(d, { goal: goal }) : d, runtime: rt, changed: changed };
+      }
+      var data = assign(d, { goal: goal, flashcardPosition: null });
+      var set = buildStudySet(data);
       var cc = cardChanged(rt, set, 0);
-      return { data: data, runtime: assign(rt, { studySet: set, flashcard: cc.flashcard, speech: cc.speech }), changed: changed };
+      return { data: data, runtime: assign(rt, { studySet: set, flashcard: cc.flashcard, speech: cc.speech }), changed: true };
     }
 
     /**
      * （v0.8）首次畫面「開始學習」（FS-4、AC-25-02、AC-25-03、AC-18-02）。只在 firstRun 有效，一般模式回 { ok: false }、不做事。
      * 等同 applyGoal ＋ 一次 setItem（繞過首次守門，不論分數是否改變都寫入第一筆）；
      * 寫入結果不影響進入：entryMode = "main"、currentTab = "dashboard"。
-     * quota／error 走 noteWrite（banner 提示；主鍵仍不存在，下次開啟仍是首次畫面，契約 FB-31 (a)）；
+     * quota／error 走 commitWrite（v0.15：quota 依 WR-2 本工作階段最多提示 1 次；主鍵仍不存在，下次開啟仍是首次畫面，契約 FB-31 (a)）；
+     * （v0.15）寫入的 flashcardPosition 為 null、抽認卡為第 1 張（FP-4 末句）；
      * storage 停用 → 不寫入、直接進入（write "disabled"，AC-25-08）。
      * @returns {{ok: true, write: "ok"|"quota"|"error"|"disabled"} | {ok: false}}
      */
@@ -708,10 +770,10 @@
       if (state.runtime.entryMode !== "firstRun") { return { ok: false }; }
       var g = appliedGoalState();
       var tags = ["entry", "goal", "studySet", "flashcard", "quiz", "speech"];
-      var w = writeData(g.data, true);
-      noteWrite(w, tags);
-      state = { data: g.data, runtime: assign(g.runtime, { entryMode: "main", currentTab: "dashboard" }) };
-      notify(tags);
+      // （v0.15）FP-4 末句：第一筆寫入的位置為 null，抽認卡為第 1 張
+      var data = g.data.flashcardPosition === null ? g.data : assign(g.data, { flashcardPosition: null });
+      var runtime = assign(firstCard(g.runtime), { entryMode: "main", currentTab: "dashboard" });
+      var w = commitWrite(data, runtime, tags, { bypassFirstRun: true });
       return { ok: true, write: w.ok ? "ok" : w.reason };
     }
 
@@ -735,15 +797,18 @@
       var taken = d.customVocab.map(function (it) { return it.id; });
       var item = K.CUSTOM.makeCustomItem(v.values, "manual", null, now(), rand, taken);
       var data = assign(d, { customVocab: d.customVocab.concat([item]) });
+      // （v0.15）FP-5：單字集重建 → placeCard，解析後的位置與 customVocab 同一次寫入
+      var placed = placeCard(state.runtime, data, buildStudySet(data));
+      data = assign(data, { flashcardPosition: placed.flashcardPosition });
 
-      // 先寫入；容量不足 → 丟棄新狀態（回滾），不通知 banner（由 view 顯示「儲存空間不足」）
+      // 先寫入；容量不足 → 丟棄新狀態（回滾，位置一併丟棄），不通知 banner（由 view 顯示「儲存空間不足」）
       var w = writeData(data);
       if (!w.ok && w.reason === "quota") {
         return { ok: false, reason: "quota" };
       }
       var tags = ["customVocab", "studySet", "flashcard"];
       noteWrite(w, tags);
-      state = { data: data, runtime: keepCurrentCard(state.runtime, buildStudySet(data)) };
+      state = { data: data, runtime: placed.runtime };
       notify(tags);
       return { ok: true, item: item };
     }
@@ -774,21 +839,11 @@
         masteredWordKeys: mastered
       });
 
-      var rt = state.runtime;
-      var oldSet = rt.studySet;
-      var oldCard = oldSet[rt.flashcard.index];
-      var newSet = buildStudySet(data);
-      var idx = K.CUSTOM.indexAfterDelete(oldSet, rt.flashcard.index, key);
-      idx = clampIndex(idx, newSet.length);
-      var runtime;
-      if (oldCard && newSet[idx] && newSet[idx].wordKey === oldCard.wordKey) {
-        // 仍是同一張卡：保留翻面與題目
-        runtime = assign(rt, { studySet: newSet, flashcard: assign(rt.flashcard, { index: idx }) });
-      } else {
-        var cc = cardChanged(rt, newSet, idx);
-        runtime = assign(rt, { studySet: newSet, flashcard: cc.flashcard, speech: cc.speech });
-      }
-      commit(data, runtime, ["customVocab", "studySet", "flashcard", "quiz", "stats"], true);
+      // （v0.15）FP-5：以 placeCard 定位（刪除目前卡片 → FP-2 (4) 的 min(ordinal, N) − 1，即原本下一張，
+      // 原為最後一張則前一張，與 AC-04-08 相同；仍是同一張卡則保留翻面與題目），位置與 customVocab 同一次寫入
+      var placed = placeCard(state.runtime, data, buildStudySet(data));
+      data = assign(data, { flashcardPosition: placed.flashcardPosition });
+      commitWrite(data, placed.runtime, ["customVocab", "studySet", "flashcard", "quiz", "stats"]);
       return { ok: true };
     }
 
@@ -809,6 +864,9 @@
       var r = K.CUSTOM.buildTemplateItems(tpl, ct.builtinMap, d.customVocab, now(), rand);
       if (r.items.length === 0) { return { injected: 0, skipped: r.skippedCount }; }
       var data = assign(d, { customVocab: d.customVocab.concat(r.items) });
+      // （v0.15）FP-5：同 addCustomWord
+      var placed = placeCard(state.runtime, data, buildStudySet(data));
+      data = assign(data, { flashcardPosition: placed.flashcardPosition });
 
       // 先寫入；容量不足 → 丟棄新狀態（回滾），由 view 顯示「儲存空間不足」
       var w = writeData(data);
@@ -817,7 +875,7 @@
       }
       var tags = ["customVocab", "studySet", "flashcard"];
       noteWrite(w, tags);
-      state = { data: data, runtime: keepCurrentCard(state.runtime, buildStudySet(data)) };
+      state = { data: data, runtime: placed.runtime };
       notify(tags);
       return { injected: r.items.length, skipped: r.skippedCount };
     }
@@ -825,7 +883,9 @@
     // ── actions：抽認卡 ──
 
     /**
-     * 換卡（AC-06-04、AC-06-05）：超出範圍或同一張 → 不變。
+     * 換卡（AC-06-04、AC-06-05）：超出範圍或同一張 → 不變、不寫入。
+     * （v0.15，FP-3）index 實際改變時 flashcardPosition = position.fromIndex(studySet, index)，
+     * 同一事件以 commitWrite 一次 setItem（全專案唯一改變 index 的使用者入口）；不改學習紀錄與打卡（FP-7）。
      * @param {number} index
      */
     function gotoCard(index) {
@@ -834,7 +894,8 @@
       if (typeof index !== "number" || index !== Math.floor(index) || index < 0 || index >= rt.studySet.length) { return; }
       if (index === rt.flashcard.index) { return; }
       var cc = cardChanged(rt, rt.studySet, index);
-      commit(state.data, assign(rt, { flashcard: cc.flashcard, speech: cc.speech }), ["flashcard", "quiz", "speech"], false);
+      var data = assign(state.data, { flashcardPosition: core().POS.fromIndex(rt.studySet, index) });
+      commitWrite(data, assign(rt, { flashcard: cc.flashcard, speech: cc.speech }), ["flashcard", "quiz", "speech"]);
     }
 
     /**
@@ -850,7 +911,6 @@
       var d = state.data;
       var patch = {};
       var dirty = false;
-      var learned = false;
       var tags = ["flashcard"];
       if (flipped) {
         var s = touchStreak(d.streak);
@@ -865,11 +925,14 @@
           patch.todayLearned = lp.patch.todayLearned;
           patch.learnedHistory = lp.patch.learnedHistory;
           dirty = true;
-          learned = true;
           tags.push("learning");
         }
       }
-      commitLearning(dirty ? assign(d, patch) : d, runtime, tags, dirty, learned);
+      if (dirty) {
+        commitWrite(assign(d, patch), runtime, tags);
+      } else {
+        commit(d, runtime, tags);
+      }
     }
 
     /**
@@ -882,7 +945,7 @@
       var rt = state.runtime;
       if (mode === "card") {
         if (rt.flashcard.mode !== "card") {
-          commit(state.data, assign(rt, { flashcard: assign(rt.flashcard, { mode: "card", quiz: null }) }), ["flashcard", "quiz"], false);
+          commit(state.data, assign(rt, { flashcard: assign(rt.flashcard, { mode: "card", quiz: null }) }), ["flashcard", "quiz"]);
         }
         return { ok: true };
       }
@@ -890,7 +953,7 @@
       if (rt.flashcard.mode === "quiz" && rt.flashcard.quiz) { return { ok: true }; }
       var q = core().QUIZ.buildQuiz(rt.studySet, rt.flashcard.index, rand);
       if (!q) { return { ok: false, reason: "insufficient" }; }
-      commit(state.data, assign(rt, { flashcard: assign(rt.flashcard, { mode: "quiz", quiz: q, isFlipped: false }) }), ["flashcard", "quiz"], false);
+      commit(state.data, assign(rt, { flashcard: assign(rt.flashcard, { mode: "quiz", quiz: q, isFlipped: false }) }), ["flashcard", "quiz"]);
       return { ok: true };
     }
 
@@ -926,14 +989,28 @@
       }
       var data = assign(d, patch);
       var runtime = assign(rt, { flashcard: assign(rt.flashcard, { quiz: assign(q, { selectedIndex: optionIndex }) }) });
-      commitLearning(data, runtime, tags, true, lp.changed);
+      commitWrite(data, runtime, tags);
       return { ok: true, correct: correct };
     }
 
     // ── actions：Part 5 ──
 
     /**
-     * Part 5 作答（AC-11-03、AC-11-06）。已鎖定、結算中或題庫為空 → 忽略。
+     * （v0.15）模擬測驗目前的推導值：題庫 id、答對集合、開關（已正規化為布林）、畫面種類（UO-3）。
+     * @returns {{ids: Array<string|null>, set: Set<string>, only: boolean, kind: string}}
+     */
+    function part5Ctx() {
+      var PF = core().PF;
+      var d = state.data;
+      var ids = bankIds();
+      var set = PF.correctSet(d.part5CorrectIds);
+      var only = d.part5UnansweredOnly === true;
+      return { ids: ids, set: set, only: only, kind: PF.viewKind(d.part5, ids, set, only) };
+    }
+
+    /**
+     * Part 5 作答（AC-11-03、AC-11-06）。已鎖定、結算中、題庫為空或（v0.15）畫面為 allCorrect → 忽略。
+     * （v0.15，CR-2）答對且該題 id 未曾記錄 → 附加到 part5CorrectIds 末尾，與計數、打卡同一次 commitWrite。
      * @param {number} i 選項索引 0～3
      * @returns {{ok: true, correct: boolean} | {ok: false}}
      */
@@ -946,6 +1023,8 @@
           p.currentIndex >= bank.length || !bank[p.currentIndex]) {
         return { ok: false };
       }
+      var ctx = part5Ctx();
+      if (ctx.kind === "allCorrect") { return { ok: false }; }
       var correct = i === bank[p.currentIndex].correctIndex;
       var part5 = assign(p, {
         lockedSelection: i,
@@ -954,38 +1033,91 @@
         totalAnswered: p.totalAnswered + 1,
         totalCorrect: p.totalCorrect + (correct ? 1 : 0)
       });
-      var data = assign(d, { part5: part5, streak: touchStreak(d.streak) });
-      commit(data, state.runtime, ["part5", "stats", "streak"], true);
+      var patch = { part5: part5, streak: touchStreak(d.streak) };
+      var rec = core().PF.recordAnswer(d.part5CorrectIds, ctx.ids[p.currentIndex], correct);
+      if (rec.changed) { patch.part5CorrectIds = rec.ids; }
+      commitWrite(assign(d, patch), state.runtime, ["part5", "stats", "streak"]);
       return { ok: true, correct: correct };
     }
 
     /**
-     * 下一題（AC-11-04）：須已作答；最後一題後進入本輪結算（phase "summary"）。
+     * 下一題（AC-11-04）：須已作答；開關關閉 → 最後一題後進入本輪結算，
+     * 開關開啟 → 跳到其後第一題未答對，沒有則結算（UO-5）。題庫為空或 changed 為 false → 不寫入。
      */
     function nextPart5() {
       ensureInit();
-      var bank = content().part5;
-      var d = state.data;
-      var p = d.part5;
-      if (p.phase !== "question" || p.lockedSelection === null) { return; }
-      var part5;
-      if (p.currentIndex >= bank.length - 1) {
-        part5 = assign(p, { lockedSelection: null, phase: "summary" });
-      } else {
-        part5 = assign(p, { currentIndex: p.currentIndex + 1, lockedSelection: null });
-      }
-      commit(assign(d, { part5: part5 }), state.runtime, ["part5"], true);
+      var ctx = part5Ctx();
+      if (ctx.ids.length === 0) { return; }
+      var r = core().PF.next(state.data.part5, ctx.ids, ctx.set, ctx.only);
+      if (!r.changed) { return; }
+      commitWrite(assign(state.data, { part5: r.part5 }), state.runtime, ["part5"]);
     }
 
-    /** 重新開始（AC-11-07）：回第 1 題、本輪歸零，累計保留 */
+    /**
+     * 重新開始（AC-11-07、UO-6）：本輪歸零、累計與答對紀錄保留；開關開啟時從第一題未答對開始。
+     * 題庫為空 → 不動作；changed 為 false → 不寫入（沿用 v0.14：仍通知 "part5"）。
+     */
     function restartPart5() {
       ensureInit();
+      var ctx = part5Ctx();
+      if (ctx.ids.length === 0) { return; }
+      var r = core().PF.restart(state.data.part5, ctx.ids, ctx.set, ctx.only);
+      if (r.changed) {
+        commitWrite(assign(state.data, { part5: r.part5 }), state.runtime, ["part5"]);
+      } else {
+        commit(state.data, state.runtime, ["part5"]);
+      }
+    }
+
+    /**
+     * （v0.15，UO-1、UO-4、UO-8）切換「只練沒答對的題目」。
+     * 非布林、題庫為空、與原值相同 → { changed: false }、不寫入；
+     * 否則 part5flow.setOnly（關 → 開 時同時做 UO-4 正規化）→ 開關與正規化結果同一次 commitWrite，tags ["part5"]。
+     * 不改任何計數。
+     * @param {boolean} on
+     * @returns {{changed: boolean}}
+     */
+    function setPart5UnansweredOnly(on) {
+      ensureInit();
+      if (typeof on !== "boolean") { return { changed: false }; }
+      var ctx = part5Ctx();
+      if (ctx.ids.length === 0 || on === ctx.only) { return { changed: false }; }
       var d = state.data;
-      var p = d.part5;
-      var part5 = assign(p, { currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0 });
-      var changed = p.currentIndex !== 0 || p.lockedSelection !== null || p.phase !== "question" ||
-        p.roundAnswered !== 0 || p.roundCorrect !== 0;
-      commit(changed ? assign(d, { part5: part5 }) : d, state.runtime, ["part5"], changed);
+      var r = core().PF.setOnly({ part5: d.part5, ids: d.part5CorrectIds, only: ctx.only }, ctx.ids, on);
+      if (!r.changed) { return { changed: false }; }
+      commitWrite(assign(d, { part5: r.part5, part5UnansweredOnly: r.only }), state.runtime, ["part5"]);
+      return { changed: true };
+    }
+
+    /**
+     * （v0.15，UO-7 (a)）allCorrect 畫面「全部題目再練一次（保留紀錄）」：
+     * 第 1 題、本輪歸 0、累計與答對紀錄不變、開關 = false；一次 commitWrite，tags ["part5"]。
+     * 畫面不是 allCorrect（含題庫為空）→ { ok: false }、不寫入。
+     * @returns {{ok: boolean}}
+     */
+    function replayPart5KeepRecords() {
+      ensureInit();
+      if (part5Ctx().kind !== "allCorrect") { return { ok: false }; }
+      var d = state.data;
+      var part5 = core().PF.replayKeepRecords(d.part5);
+      commitWrite(assign(d, { part5: part5, part5UnansweredOnly: false }), state.runtime, ["part5"]);
+      return { ok: true };
+    }
+
+    /**
+     * （v0.15，CR-6）allCorrect 畫面「清除答對紀錄，重新來過」確認「確定」後由 view 呼叫：
+     * part5CorrectIds = []、第 1 題、本輪歸 0、累計不變、開關維持；一次 commitWrite，tags ["part5", "stats"]
+     * （失敗依 WR-2，FB-60）。確認對話框由 view 顯示，「取消」時 view 不呼叫本 action（setItem 0 次）。
+     * 畫面不是 allCorrect（含題庫為空）→ { ok: false }、不寫入。
+     * @returns {{ok: boolean}}
+     */
+    function clearPart5CorrectIds() {
+      ensureInit();
+      if (part5Ctx().kind !== "allCorrect") { return { ok: false }; }
+      var d = state.data;
+      var r = core().PF.clearAndRestart(d.part5);
+      commitWrite(assign(d, { part5: r.part5, part5CorrectIds: r.ids }), state.runtime, ["part5", "stats"]);
+      return { ok: true };
     }
 
     // ── actions：語音 ──
@@ -1021,7 +1153,7 @@
         tags.push("learning");
       }
       if (tags.length === 0) { return; }
-      commitLearning(assign(d, patch), rt, tags, true, lp.changed);
+      commitWrite(assign(d, patch), rt, tags);
     }
 
     /** 按「我知道了」（AC-08-13、V-ST-08） */
@@ -1029,7 +1161,7 @@
       ensureInit();
       var d = state.data;
       if (d.sttNoticeAcknowledged === true) { return; }
-      commit(assign(d, { sttNoticeAcknowledged: true }), state.runtime, ["speech"], true);
+      commitWrite(assign(d, { sttNoticeAcknowledged: true }), state.runtime, ["speech"]);
     }
 
     /** @param {"idle"|"notice"|"listening"} s */
@@ -1037,7 +1169,7 @@
       ensureInit();
       var rt = state.runtime;
       if (STT_STATUSES.indexOf(s) === -1 || rt.speech.sttStatus === s) { return; }
-      commit(state.data, assign(rt, { speech: assign(rt.speech, { sttStatus: s }) }), ["speech"], false);
+      commit(state.data, assign(rt, { speech: assign(rt.speech, { sttStatus: s }) }), ["speech"]);
     }
 
     /** @param {object|null} r SttResult 或 null */
@@ -1045,7 +1177,7 @@
       ensureInit();
       var rt = state.runtime;
       var v = r && typeof r === "object" ? r : null;
-      commit(state.data, assign(rt, { speech: assign(rt.speech, { lastResult: v }) }), ["speech"], false);
+      commit(state.data, assign(rt, { speech: assign(rt.speech, { lastResult: v }) }), ["speech"]);
     }
 
     // ── actions：解碼器、句型庫、頁籤 ──
@@ -1059,13 +1191,13 @@
       var rt = state.runtime;
       if (rt.decoder.sentenceIndex === idx) { return; }
       // 淡化狀態跨句保留（AC-13-03）
-      commit(state.data, assign(rt, { decoder: assign(rt.decoder, { sentenceIndex: idx }) }), ["decoder"], false);
+      commit(state.data, assign(rt, { decoder: assign(rt.decoder, { sentenceIndex: idx }) }), ["decoder"]);
     }
 
     function toggleModifierDim() {
       ensureInit();
       var rt = state.runtime;
-      commit(state.data, assign(rt, { decoder: assign(rt.decoder, { isModifierDimmed: !rt.decoder.isModifierDimmed }) }), ["decoder"], false);
+      commit(state.data, assign(rt, { decoder: assign(rt.decoder, { isModifierDimmed: !rt.decoder.isModifierDimmed }) }), ["decoder"]);
     }
 
     /** @param {"all"|"gap"|"aim"|"findings"|"limitations"} c */
@@ -1073,7 +1205,7 @@
       ensureInit();
       var rt = state.runtime;
       if (PHRASE_CATEGORIES.indexOf(c) === -1 || rt.phrasebank.category === c) { return; }
-      commit(state.data, assign(rt, { phrasebank: assign(rt.phrasebank, { category: c }) }), ["phrasebank"], false);
+      commit(state.data, assign(rt, { phrasebank: assign(rt.phrasebank, { category: c }) }), ["phrasebank"]);
     }
 
     /** @param {string} k 關鍵字原文 */
@@ -1082,7 +1214,7 @@
       var rt = state.runtime;
       var kw = typeof k === "string" ? k : "";
       if (rt.phrasebank.keyword === kw) { return; }
-      commit(state.data, assign(rt, { phrasebank: assign(rt.phrasebank, { keyword: kw }) }), ["phrasebank"], false);
+      commit(state.data, assign(rt, { phrasebank: assign(rt.phrasebank, { keyword: kw }) }), ["phrasebank"]);
     }
 
     /**
@@ -1095,7 +1227,7 @@
       if (TAB_IDS.indexOf(tabId) === -1 || rt.currentTab === tabId) { return; }
       if (core().C.HIDDEN_TAB_IDS.indexOf(tabId) !== -1) { return; }
       if (rt.entryMode === "firstRun" && FIRST_RUN_TABS.indexOf(tabId) === -1) { return; }
-      commit(state.data, assign(rt, { currentTab: tabId }), ["tab"], false);
+      commit(state.data, assign(rt, { currentTab: tabId }), ["tab"]);
     }
 
     // ── actions：PWA（v0.11，FE-49）──
@@ -1126,7 +1258,7 @@
         next[k] = v;
       });
       if (!next) { return { changed: false }; }
-      commit(state.data, assign(rt, { pwa: next }), ["pwa"], false);
+      commit(state.data, assign(rt, { pwa: next }), ["pwa"]);
       return { changed: true };
     }
 
@@ -1146,7 +1278,7 @@
       var rt = state.runtime;
       var cur = !!(rt.dashboard && rt.dashboard.backupExpanded === true);
       if (cur === value) { return { changed: false }; }
-      commit(state.data, assign(rt, { dashboard: { backupExpanded: value } }), ["dashboard"], false);
+      commit(state.data, assign(rt, { dashboard: { backupExpanded: value } }), ["dashboard"]);
       return { changed: true };
     }
 
@@ -1169,7 +1301,8 @@
      * 步驟 1～5、7 由 core/backup.importSteps 先完成（IM-4，確認前不改動任何狀態）；
      * 步驟 6 呼叫 confirmFn（view 傳入，內部呼叫 ui.dialog.confirm）；
      * 步驟 8 一次 setItem，容量不足 → quota、其他例外 → write_failed（IM-6、IM-7），記憶體與 localStorage 皆不變；
-     * 步驟 9 套用到記憶體、重建單字集、抽認卡回第 1 張；localStorage 停用時只套用記憶體。
+     * 步驟 9 套用到記憶體、重建單字集、（v0.15）依匯入的位置紀錄以 placeCard 定位（FP-6，單字卡模式、正面）；
+     * localStorage 停用時只套用記憶體。（v0.15）importSteps 的 ctx 另帶 part5Ids（UO-4）。
      * （v0.8）首次模式（FS-5～FS-7）：步驟 8 繞過首次守門寫入第一筆；步驟 9 成功另設 entryMode = "main"、
      * currentTab = "dashboard"、tag "entry"；取消與任何失敗維持 firstRun，記憶體與 localStorage 不變。
      * @param {string} text 備份檔內容
@@ -1185,6 +1318,7 @@
         r = K.BACKUP.importSteps(text, {
           builtinKeys: ct.builtinMap,
           part5Length: ct.part5.length,
+          part5Ids: K.PF.bankIdsOf(ct.part5), // （v0.15）步驟 7 的 UO-4（IM-10 (4)）
           random: rand,
           today: today() // （v0.8）步驟 7 以匯入當天正規化學習紀錄（IM-8 (2)）
         });
@@ -1215,12 +1349,17 @@
             }
           }
           var rt = state.runtime;
-          var set = buildStudySet(data);
-          var runtime = assign(rt, {
-            studySet: set,
+          // （v0.15，FP-6）步驟 9：重建單字集後依匯入的紀錄解析目前卡片（單字卡模式、正面）；
+          // 解析結果只改記憶體，步驟 8 已寫入備份值，下次寫入再寫出（RD-4）
+          var base = assign(rt, {
             flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null },
             speech: assign(rt.speech, { lastResult: null })
           });
+          var placed = placeCard(assign(base, { studySet: [] }), data, buildStudySet(data));
+          var runtime = placed.runtime;
+          if (placed.flashcardPosition !== data.flashcardPosition) {
+            data = assign(data, { flashcardPosition: placed.flashcardPosition });
+          }
           var tags = ["goal", "studySet", "flashcard", "quiz", "speech", "stats", "streak", "customVocab", "part5", "learning"];
           if (state.runtime.storageStatus !== "unavailable" && writeStatus !== "ok") {
             writeStatus = "ok";
@@ -1262,6 +1401,9 @@
         answerPart5: answerPart5,
         nextPart5: nextPart5,
         restartPart5: restartPart5,
+        setPart5UnansweredOnly: setPart5UnansweredOnly,
+        replayPart5KeepRecords: replayPart5KeepRecords,
+        clearPart5CorrectIds: clearPart5CorrectIds,
         recordSttScored: recordSttScored,
         acknowledgeSttNotice: acknowledgeSttNotice,
         setSttStatus: setSttStatus,
