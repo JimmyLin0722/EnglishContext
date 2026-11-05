@@ -15,7 +15,7 @@
  * - （v0.9，FE-66；契約 v0.14 DB-4、AC-39-04、Q-61）目標行一律以生效色級組字（藍、金套用時為「綠級・每日 15 字」），
  *   不再顯示目標與生效兩個色級的對照註記與「・」分隔；色點亦依生效色級；「變更」改為外框按鈕（10-dashboard.css）。
  * - (2) 3 格數據 section.card.db-stats（aria-label「學習數據」）：連續打卡天數（強調橘圖示 + 數字 + 天）→
- *   單字掌握率（大字 % + 小字「已掌握 N 字」）→ 模擬測驗正確率；無資料「—」（DB-5）
+ *   單字掌握率（大字 % + 小字「已掌握 N 字」）→ 模擬測驗已答對行（v0.19）；無資料「—」（DB-5）
  * - (3) 近 7 天圖表 section.card.db-chart：ol.db-bars（7 根）或空狀態「開始學習後會顯示紀錄」（layout.chartIsEmpty）
  * - (4) 「資料備份」收合區塊 section.card.db-backup：標題列 toggle（aria-expanded = runtime.dashboard.backupExpanded）→
  *   展開區：備份說明 → 「匯出備份」「匯入備份」→ NT-1 → 「安裝 App」（IN-1）→ 隱藏 file input（DB-6）
@@ -24,6 +24,10 @@
  *   toggle 只呼叫 store.actions.setBackupExpanded（不寫 localStorage）；訂閱 "dashboard" tag 時只更新 aria-expanded、
  *   展開區 hidden 與安裝區，節點不重建（焦點留在 toggle）
  * 所有文字以 textContent 呈現（經 core/dom.js）；版面文字於呼叫時取 EMT.core.layout（LD-2）。
+ *
+ * （v0.19，FE-84；architecture.md v0.14 §7.25.1、§7.25.2；契約 README §13.1 AS-1、AS-3、AS-4、AS-7、§11.4 DB-5、DS-51；
+ *   AC-49-01、AC-49-02、AC-49-04、AC-49-08）第 3 格改為標籤「模擬測驗」與已答對行（K、Q、P 由 part5flow.answeredSummary 計算，
+ *   與模擬測驗頁同一份題庫與同一個函式）；Q = 0 顯示 statNoData。totalAnswered、totalCorrect 照常保存但不再顯示。
  *
  * 寫法：純邏輯（dashboardModel、goalInfoOf、importMessage、progressModel、ringGeometry）以 module.exports 匯出供 Node 測試；
  * 瀏覽器下登錄 EMT.views "dashboard"，載入時不操作 DOM。
@@ -51,11 +55,12 @@
         GOAL: require("../core/goal.js"),
         STREAK: require("../core/streak.js"),
         LEARN: require("../core/learning.js"),
-        LAY: require("../core/layout.js")
+        LAY: require("../core/layout.js"),
+        PF: require("../core/part5flow.js")
       };
     } else {
       var c = root.EMT.core;
-      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, LEARN: c.learning, LAY: c.layout };
+      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, LEARN: c.learning, LAY: c.layout, PF: c.part5flow };
     }
     return coreCache;
   }
@@ -87,7 +92,6 @@
   // ── 畫面文字（AC 引號內文案逐字使用；v0.12 主控台版面文字取 EMT.core.layout.LAYOUT_TEXTS）──
   var TEXT = {
     title: "學習主控台",
-    accuracy: "模擬測驗正確率",
     // （v0.12，SD-FB-41）今日任務卡標題、3 格數據區的 aria-label、近 7 天圖表標題
     todayTitle: "今日任務",
     statsLabel: "學習數據",
@@ -224,24 +228,31 @@
     };
   }
 
+  /** （v0.19，FE-84）模擬測驗題庫：與 views/part5.js 相同的取得方式（AS-1）；取不到 → 空題庫 */
+  function part5Bank() {
+    var c = root && root.EMT && root.EMT.content;
+    return c && Array.isArray(c.part5) ? c.part5 : [];
+  }
+
   /**
-   * 今日進度、掌握率、正確率與近 7 天長條的計算值（FE-31；契約 README §5.4 LR-6）。dashboardModel 由此組出畫面文字。
+   * 今日進度、掌握率、已答對行與近 7 天長條的計算值（FE-31；契約 README §5.4 LR-6）。dashboardModel 由此組出畫面文字。
    * - 主環：X = learning.todayCount、D = learning.dailyGoal(生效色級)；X 可超過 D；X ≥ D → done、滿圈。
    * - 掌握率 = learning.masteryRate(runtime.studySet, data.masteredWordKeys)；
-   *   正確率 = learning.percentOf(part5.totalCorrect, part5.totalAnswered)；null → 「—」。
+   *   已答對行 = part5flow.answeredSummary(題庫 id, part5CorrectIds)（AS-1～AS-4）；Q = 0 → statNoData「—」。
    * - 長條：learning.chartSeries(learnedHistory, X, today)，由舊到新 7 筆；高度 = 字數 ÷ 最大字數（全 0 → 0）。
    * 不修改傳入值；state 缺漏時以預設值計算，不拋錯。
    * @param {{data: object, runtime: object}|null} state store.getState() 的結果
    * @param {string} today 本地日期 YYYY-MM-DD（store.today()）
+   * @param {*} [bank] 模擬測驗題庫；省略時取 EMT.content.part5
    * @returns {{
    *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
    *   mastery: { label: string, numer: number, denom: number, percent: (number|null), ratio: number, text: string },
-   *   accuracy: { label: string, percent: (number|null), ratio: number, text: string },
+   *   answered: { label: string, summary: ({k: number, q: number, p: number}|null), text: string },
    *   bars: { date: string, label: string, count: number, heightPct: number, isToday: boolean }[],
    *   maxCount: number
    * }}
    */
-  function progressModel(state, today) {
+  function progressModel(state, today, bank) {
     var K = core();
     var L = K.LEARN;
     var LT = K.LAY.LAYOUT_TEXTS;
@@ -267,11 +278,11 @@
       doneText: done ? TEXT.goalDone : ""
     };
 
-    // 掌握率、正確率（AC-30-10、AC-39-05）
+    // 掌握率、已答對行（AC-30-10、AC-39-05、AS-4）
     var mr = L.masteryRate(Array.isArray(rt.studySet) ? rt.studySet : [],
       Array.isArray(d.masteredWordKeys) ? d.masteredWordKeys : []);
-    var p5 = d.part5 && typeof d.part5 === "object" ? d.part5 : {};
-    var acc = L.percentOf(p5.totalCorrect, p5.totalAnswered);
+    var bankIds = K.PF.bankIdsOf(bank === undefined ? part5Bank() : bank);
+    var answered = K.PF.answeredSummary(bankIds, d.part5CorrectIds);
 
     // 近 7 天長條圖（AC-30-08）；最右（today）一律用 X
     var series = L.chartSeries(d.learnedHistory || null, x, today);
@@ -300,11 +311,10 @@
         ratio: mr.percent === null ? 0 : clampRatio(mr.percent / 100),
         text: percentText(mr.percent)
       },
-      accuracy: {
-        label: LT.statAccuracyLabel,
-        percent: acc,
-        ratio: acc === null ? 0 : clampRatio(acc / 100),
-        text: percentText(acc)
+      answered: {
+        label: LT.statPart5Label,
+        summary: answered,
+        text: K.PF.answeredSummaryText(answered) || LT.statNoData
       },
       bars: bars,
       maxCount: max
@@ -315,22 +325,23 @@
    * （v0.12，FE-58）主控台全部顯示值（architecture.md §4.8；契約 DB-2～DB-6）。文字全部經 EMT.core.layout。
    * @param {{data: object, runtime: object}|null} state store.getState() 的結果
    * @param {string} today 本地日期 YYYY-MM-DD
+   * @param {*} [bank] 模擬測驗題庫；省略時取 EMT.content.part5
    * @returns {{
    *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
    *   goal: { text: string, colorId: (string|null) },
-   *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, accuracyText: string },
+   *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, answeredText: string },
    *   chart: { empty: boolean, bars: object[] },
    *   backupExpanded: boolean
    * }}
    */
-  function dashboardModel(state, today) {
+  function dashboardModel(state, today, bank) {
     var K = core();
     var LAY = K.LAY;
     var LT = LAY.LAYOUT_TEXTS;
     var st = state && typeof state === "object" ? state : {};
     var d = st.data && typeof st.data === "object" ? st.data : {};
     var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
-    var p = progressModel(st, today);
+    var p = progressModel(st, today, bank);
 
     // 目標行（DB-4 v0.14）：只以生效色級組字與上色（goalInfoOf 以 appliedScore 推導生效色級）
     var info = goalInfoOf(d.goal || null);
@@ -347,7 +358,7 @@
         streakUnit: LT.statStreakUnit,
         masteryText: p.mastery.text,
         masteredText: LAY.fill(LT.statMasteredCount, { n: LAY.formatInt(masteredN) }),
-        accuracyText: p.accuracy.text
+        answeredText: p.answered.text
       },
       chart: {
         empty: LAY.chartIsEmpty(p.bars.map(function (b) { return b.count; })),
@@ -492,7 +503,7 @@
       D.setText(refs.streakValue, m.stats.streakValue);
       D.setText(refs.masteryValue, m.stats.masteryText);
       D.setText(refs.masteredSub, m.stats.masteredText);
-      D.setText(refs.accuracyValue, m.stats.accuracyText);
+      D.setText(refs.answeredValue, m.stats.answeredText);
 
       // 近 7 天（AC-39-07）：空狀態只顯示一行文字；否則 7 根長條，節點固定，只改高度與文字
       refs.bars.hidden = m.chart.empty;
@@ -703,7 +714,7 @@
       var streakValue = D.el("span", { className: "db-stat__num", text: TEXT.empty });
       var masteryValue = D.el("p", { className: "db-stat__value", text: TEXT.empty });
       var masteredSub = D.el("p", { className: "db-stat__sub", text: "" });
-      var accuracyValue = D.el("p", { className: "db-stat__value", text: TEXT.empty });
+      var answeredValue = D.el("p", { className: "db-stat__value db-stat__value--answered", text: TEXT.empty });
       var section = D.el("section", { className: "card db-stats", attrs: { "aria-label": TEXT.statsLabel } }, [
         D.el("div", { className: "db-stat db-stat--streak" }, [
           D.el("p", { className: "db-stat__label", text: LT.statStreakLabel }),
@@ -718,13 +729,13 @@
           masteryValue,
           masteredSub
         ]),
-        D.el("div", { className: "db-stat db-stat--accuracy" }, [
-          D.el("p", { className: "db-stat__label", text: LT.statAccuracyLabel }),
-          accuracyValue
+        D.el("div", { className: "db-stat db-stat--answered" }, [
+          D.el("p", { className: "db-stat__label", text: LT.statPart5Label }),
+          answeredValue
         ])
       ]);
       return { section: section, streakValue: streakValue, masteryValue: masteryValue,
-        masteredSub: masteredSub, accuracyValue: accuracyValue };
+        masteredSub: masteredSub, answeredValue: answeredValue };
     }
 
     /** (3) 近 7 天圖表：長條（節點固定 DASHBOARD_CHART_DAYS 組）與空狀態 */
@@ -826,7 +837,7 @@
         streakValue: stats.streakValue,
         masteryValue: stats.masteryValue,
         masteredSub: stats.masteredSub,
-        accuracyValue: stats.accuracyValue,
+        answeredValue: stats.answeredValue,
         bars: chart.bars,
         chartEmpty: chart.empty,
         barCells: chart.cells,

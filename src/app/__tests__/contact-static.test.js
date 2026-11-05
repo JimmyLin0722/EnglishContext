@@ -7,6 +7,7 @@
  *
  * - 去空格位址一律於執行期由 SOURCES_CONTACT_TEXT 推導，本檔不寫出其字面值（FB-62）。
  * - 建置程式不加防爬蟲規則（§5.6），靜態檢查集中在本檔。
+ * - （v0.19，FE-87）常數移到 core/site-content.js；新增 ML-4 判定與 .site-page__contact 規則（architecture.md v0.14 §7.25.9；契約 ML-1、ML-4）。
  */
 "use strict";
 
@@ -26,6 +27,10 @@ const BUILD = path.join(ROOT, "tools", "build.mjs");
 const CONTACT = P.SOURCES_CONTACT_TEXT;
 /** 去空格位址（執行期推導，小寫比對用） */
 const COMPACT = CONTACT.slice("email: ".length).split(" ").join("").toLowerCase();
+/** 契約 ML-1：全站唯一的信箱行（逐字，不從被測模組取值） */
+const ML_1 = "email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m";
+/** 契約 ML-4 判定式：字元間以單一空格分隔、含 @ 的字串 */
+const SPACED_ADDRESS = /(?:[A-Za-z0-9._%+-] ){3,}@(?: [A-Za-z0-9._%+-])+/g;
 
 const OLD_NOTICE = "有新版本，重新整理";
 const NEW_NOTICE = "有新版本，請更新版本";
@@ -59,6 +64,7 @@ function listAppSources(dir, out = []) {
 describe("contact-static.test.js", () => {
   test("前提：常數形態正確、推導出的去空格位址非空且與原值不同", () => {
     assert.ok(CONTACT.startsWith("email: "));
+    assert.equal(CONTACT, ML_1);
     assert.ok(COMPACT.length > 10);
     assert.ok(COMPACT.includes("@"));
     assert.notEqual(COMPACT, CONTACT.toLowerCase());
@@ -98,7 +104,7 @@ describe("contact-static.test.js", () => {
     });
   });
 
-  test("src/app 非測試原始碼：無 mailto:、無去空格位址；常數原值只在 views/sources-page.js 出現 1 次", () => {
+  test("src/app 非測試原始碼：無 mailto:、無去空格位址；常數原值只在 core/site-content.js 出現 1 次", () => {
     const files = listAppSources(APP_DIR);
     assert.ok(files.length > 10, "應掃描到原始碼檔案");
     const hits = [];
@@ -109,7 +115,27 @@ describe("contact-static.test.js", () => {
       const n = countOf(text, CONTACT);
       if (n > 0) hits.push([rel, n]);
     }
-    assert.deepEqual(hits, [["views/sources-page.js", 1]]);
+    assert.deepEqual(hits, [["core/site-content.js", 1]]);
+  });
+
+  test("src/app 非測試原始碼：符合 ML-4 判定式的字串只有目前信箱 1 種，且只在 core/site-content.js（AC-23-07 (8)）", () => {
+    const found = [];
+    for (const f of listAppSources(APP_DIR)) {
+      const rel = path.relative(APP_DIR, f).split(path.sep).join("/");
+      for (const m of fs.readFileSync(f, "utf8").match(SPACED_ADDRESS) || []) found.push([rel, m]);
+    }
+    assert.deepEqual(found, [["core/site-content.js", ML_1.slice("email: ".length)]]);
+  });
+
+  test("75-site-pages.css 的 .site-page__contact 規則：次要文字、與 .src-contact 同字級、可換行；無 nowrap／user-select／--accent／#f7893b", () => {
+    const css = fs.readFileSync(path.join(APP_DIR, "styles", "75-site-pages.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const m = css.match(/\.site-page__contact\s*\{([^{}]*)\}/);
+    assert.ok(m, "應有 .site-page__contact 規則");
+    assert.match(m[1], /color:\s*var\(--text-muted\)\s*;/);
+    assert.match(m[1], /font-size:\s*0\.8125rem\s*;/);
+    assert.match(m[1], /overflow-wrap:\s*anywhere\s*;/);
+    for (const bad of [/nowrap/i, /user-select/i]) assert.doesNotMatch(m[1], bad);
+    for (const bad of [/--accent/i, /#f7893b/i]) assert.doesNotMatch(css, bad, "整份樣式不用強調橘（AC-38-01）");
   });
 
   test("70-sources.css 的 .src-contact 規則：0.8125rem 或 0.75rem、overflow-wrap: anywhere；無 nowrap／user-select／--accent／#f7893b", () => {

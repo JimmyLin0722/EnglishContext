@@ -7,9 +7,10 @@
  * EMT.ui.versionLine.init(doc?)
  * - 只從 DOM 讀 name 為 emt-app-version 與 emt-build-id 兩個 meta 的 content（各須恰 1 個），
  *   交給 EMT.core.version.versionLineText 組字；同一份 document 只讀一次（結果存模組變數）。
- * - 文字合法且有 #footer-sources → 以 core/dom.js 建立 <p id="app-version" class="app-footer__version">（textContent），
- *   插在 #footer-sources 之後（「正下方」）；已存在則只更新文字（重入安全）。不設 tabindex、role、事件。
- * - 文字不合法（任一 meta 缺少／重複、版本或 BUILD_ID 不符格式）或找不到 #footer-sources → 不建節點，已存在則移除（VR-8）。
+ * - 文字合法且有 #footer-links（v0.19，FE-86：錨點由 #footer-sources 改為頁尾連結列，VR-7、architecture §7.25.6）
+ *   → 以 core/dom.js 建立 <p id="app-version" class="app-footer__version">（textContent），
+ *   插在 #footer-links 之後（「正下方」）；已存在則只更新文字（重入安全）。不設 tabindex、role、事件。
+ * - 文字不合法（任一 meta 缺少／重複、版本或 BUILD_ID 不符格式）或找不到 #footer-links → 不建節點，已存在則移除（VR-8）。
  * - 整個 init 包在 try 內：任何例外回 { rendered: false, text: null }，不拋出、不輸出錯誤訊息到主控台。
  * - 不發任何請求、不讀檔、不碰 store 與瀏覽器儲存；版本號一律來自 meta，本檔不寫死任何版本號（VR-5、VR-6）。
  * - 頁尾位於 #app-main 之外，所有畫面共用同一個節點 → 每個畫面恰 1 行（由 DOM 結構保證）。
@@ -30,8 +31,8 @@
   /** 版本行元素 id 與 class（architecture.md §7.20.1） */
   var LINE_ID = "app-version";
   var LINE_CLASS = "app-footer__version";
-  /** 版本行的錨點：頁尾「資料來源與授權」連結 */
-  var ANCHOR_ID = "footer-sources";
+  /** 版本行的錨點：頁尾連結列（v0.19，FE-86） */
+  var ANCHOR_ID = "footer-links";
 
   /** 已讀取的 document 與組好的文字（同一份 document 只讀一次） */
   var readDoc = null;

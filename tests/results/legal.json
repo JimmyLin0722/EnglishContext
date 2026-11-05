@@ -18,7 +18,7 @@
     "tc": "TC-LGL-S01",
     "ac": "AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-07、AC-23-08（V-LGL-01～04、交付檔字串）",
     "result": "通過",
-    "note": "舊文字 0 次；LT-1 1 次、LT-2 1 次、LT-3 2 次、LT-5 1 次、LT-6 1 次；聯絡行字串 1 次、mailto 0、無空格位址 0"
+    "note": "舊文字 0 次；LT-1 1 次、LT-2 9 次、LT-3 2 次、LT-5 1 次、LT-6 1 次；聯絡行字串 1 次（常數 1 處；v0.19 來源為 core/site-content.js）、mailto 0、無空格位址（ML-3 規則）0"
   },
   {
     "suite": "legal",

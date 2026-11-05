@@ -1,0 +1,33 @@
+/* 靜態頁內嵌樣式（FE-85；§7.25.8）。不進交付 HTML，不得有外部資源。 */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0 auto;
+  padding: 16px;
+  max-width: 720px;
+  background: #eef4fa;
+  color: #1f2937;
+  font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+h1 { margin: 16px 0 8px; font-size: 1.5rem; line-height: 1.4; }
+h2 { margin: 24px 0 8px; font-size: 1.15rem; line-height: 1.4; }
+p { margin: 8px 0; }
+ul { margin: 8px 0; padding-left: 1.5em; }
+a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #0866ad;
+}
+a:focus-visible { outline: 2px solid #0866ad; outline-offset: 2px; }
+.sp-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+  margin-top: 24px;
+  padding-top: 8px;
+  border-top: 1px solid #c9d6e3;
+}

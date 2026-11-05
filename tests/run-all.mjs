@@ -39,7 +39,9 @@ const rebuilt = path.join(TMP, "rebuilt.html");
 spawnSync(process.execPath, ["tools/build.mjs", "--out", rebuilt], { cwd: ROOT, stdio: "ignore" });
 run(["tests/static/static-check.mjs", path.join(RES, "static.json"), rebuilt]);
 run(["tests/static/boundary-check.mjs", path.join(RES, "boundary.json")]);
-run(["tests/static/boundary-r8.mjs", path.join(RES, "boundary-delta.json")]);
+run(["tests/static/boundary-r9.mjs", path.join(RES, "boundary-delta.json")]);
+run(["tests/static/mail-scan.mjs", path.join(RES, "mail-scan.json")]);
+run(["tests/static/site-check.mjs", path.join(RES, "site-check.json")]);
 run(["tests/static/legal-check.mjs", path.join(RES, "legal.json")]);
 
 // 2. 無內建資料的 fixture 建置（AC-06-06、AC-09-06、AC-30-10）
@@ -69,6 +71,13 @@ run(["tests/e2e/e2e-track-p5.mjs"], { QA_BROWSER: "edge" });
 // 第 8 輪：已答對鎖定檢視（US-48）、法律文字與聯絡行（e2e-legal 的 http 區塊使用埠 8080）
 run(["tests/e2e/e2e-lock.mjs"]);
 run(["tests/e2e/e2e-legal.mjs"]);
+// 第 9 輪（PRD v0.19 R-27、R-28）：已答對行、頁尾與三頁、廣告替身（V-AD (b)；全部記【替身驗證】）、375px 焦點；逐一執行請用 tests/tools/run-r9.mjs
+run(["tests/e2e/e2e-answered.mjs"], { QA_FIXTURE_NODATA: fixture });
+run(["tests/e2e/e2e-site.mjs"]);
+run(["tests/e2e/e2e-ad.mjs"]);
+run(["tests/e2e/e2e-ad-extra.mjs"]);
+run(["tests/e2e/e2e-ad-perf.mjs"]);
+run(["tests/e2e/diag-r9-focus.mjs"]);
 
 // 4. 彙整（-edge.json 為跨瀏覽器重跑，於報告以 TC-X-edge 一項計）
 const all = [];

@@ -260,8 +260,11 @@
   color: var(--text);
 }
 
-.p5-summary__total {
+/* （v0.19，FE-84）已答對行：取代累計行；可換行（AS-5、AC-49-08） */
+.p5-summary__answered {
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 .p5-summary .btn-row {

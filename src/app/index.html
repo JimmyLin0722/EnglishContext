@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <!-- @@LICENSE@@ -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>EnglishContext</title>
+<!-- @@SEO_HEAD@@ -->
 <meta name="theme-color" content="#1e9bf0">
 <meta name="apple-mobile-web-app-title" content="EnglishContext">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,6 +16,7 @@
 <style>/* @@STYLES@@ */</style>
 </head>
 <body data-entry="boot">
+<!-- @@NOSCRIPT@@ -->
 <!-- （v0.4，FE-32）data-entry：boot（啟動前）→ firstRun／main，由 main.js、router 設定；data-tab 由 router 設定（architecture.md §4.2、§7.9） -->
 <!-- 應用殼（FE-02；architecture.md §4.2 掛載點、§9 RWD）。各頁內容由 views 於 mount 時以 core/dom.js 建立。 -->
 <header class="app-header">
@@ -47,11 +48,19 @@
   <section id="view-decoder" class="view" hidden></section>
   <section id="view-phrasebank" class="view" hidden></section>
   <section id="view-sources" class="view" aria-label="資料來源與授權" hidden></section>
+  <!-- （v0.19，FE-86）應用內三頁（SP-1）：內容由 views 於 mount 時建立，內建於交付 HTML -->
+  <section id="view-about" class="view" aria-label="關於我" hidden></section>
+  <section id="view-contact" class="view" aria-label="聯絡我們" hidden></section>
+  <section id="view-privacy" class="view" aria-label="隱私權政策" hidden></section>
 </main>
 <footer id="app-footer" class="app-footer">
-  <button type="button" id="footer-sources" class="btn btn--link" data-go="sources">資料來源與授權</button>
-  <!-- （v0.4，FE-32）首次模式且位於資料來源頁時才以 CSS 顯示（AC-25-07） -->
-  <button type="button" id="footer-first-run-back" class="btn btn--link" data-go="customizer">返回難易度設定</button>
+  <!-- （v0.19，FE-86）頁尾連結列（SP-2、AC-57-01）：順序與文字同 FOOTER_LINKS；VR-7 的那一行由 ui/version-line.js 插在本列之後 -->
+  <div id="footer-links" class="footer-links" role="group" aria-label="網站資訊">
+    <button type="button" id="footer-about" class="btn btn--link" data-go="about">關於我</button>
+    <button type="button" id="footer-contact" class="btn btn--link" data-go="contact">聯絡我們</button>
+    <button type="button" id="footer-privacy" class="btn btn--link" data-go="privacy">隱私權政策</button>
+    <button type="button" id="footer-sources" class="btn btn--link" data-go="sources">資料來源與授權</button>
+  </div>
 </footer>
 <div id="toast-root" class="toast-root" role="status" aria-live="polite"></div>
 <div id="dialog-root" class="dialog-root"></div>

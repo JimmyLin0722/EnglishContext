@@ -18,7 +18,10 @@ const vm = require("node:vm");
 const APP_DIR = path.join(__dirname, "..");
 const interaction = require(path.join(APP_DIR, "core", "interaction.js"));
 
-const TABS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources"];
+const F = require("./_fixtures.js");
+const MAIN_KEY = require(path.join(APP_DIR, "core", "constants.js")).STORAGE_KEYS.state;
+
+const TABS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources", "about", "contact", "privacy"];
 // （v0.5）導覽按鈕 = NAV_TAB_ORDER（隱藏頁不在導覽中）
 const NAV_TABS = ["dashboard", "customizer", "flashcards", "part5"];
 const ENTER = "view--entering";
@@ -124,7 +127,7 @@ function setup(opt) {
   const state = { reduce: !!opt.reduce, mmCalls: 0 };
   const sandbox = {
     console: { log() {}, info() {}, warn() {}, error: (...a) => errors.push(a), debug() {} },
-    location: { hash: opt.hash || "" },
+    location: { hash: opt.hash || "", pathname: "/p/index.html", search: "?x=1" },
     addEventListener: (t, fn) => { (winListeners[t] = winListeners[t] || []).push(fn); },
     setTimeout: timers.setTimeout,
     clearTimeout: timers.clearTimeout,
@@ -136,6 +139,17 @@ function setup(opt) {
     sandbox.matchMedia = (q) => {
       state.mmCalls++;
       return { matches: q === "(prefers-reduced-motion: reduce)" && state.reduce, media: q };
+    };
+  }
+  // （v0.19）假 history：replaceState 比照瀏覽器移除片段、不觸發 hashchange；noHistory／replaceThrows 模擬失敗（SP-6）
+  const replaced = [];
+  if (!opt.noHistory) {
+    sandbox.history = {
+      replaceState(st, title, url) {
+        if (opt.replaceThrows) throw new Error("SecurityError");
+        replaced.push({ st, title, url });
+        sandbox.location.hash = "";
+      }
     };
   }
   sandbox.self = sandbox;
@@ -162,6 +176,7 @@ function setup(opt) {
     marks,
     errors,
     winListeners,
+    replaced,
     // 模擬網址列輸入片段：改 location.hash 並觸發 window 的 hashchange
     setHash: (h) => {
       sandbox.location.hash = h;
@@ -501,20 +516,21 @@ describe("ui/router.js 首次進入模式（FE-32）", () => {
     assert.deepEqual(s.store.tabs, ["customizer"], "被拒絕的頁面不呼叫 setTab");
   });
 
-  test("首次模式：go(\"sources\") 可；頁尾「返回難易度設定」（data-go=customizer）回到首次畫面（AC-25-07）", () => {
+  test("（v0.19）首次模式：4 個對外頁面都可開啟；back() 回到首次畫面（AC-25-07、SP-4）", () => {
     const s = firstRun();
     const doc = s.document;
     doc.body.dataset.entry = "firstRun";
     s.EMT.router.start("customizer");
-    assert.equal(s.EMT.router.go("sources"), true);
-    assert.deepEqual(s.shown(), ["sources"]);
-    assert.equal(doc.body.dataset.tab, "sources");
-    // 經 [data-go] 委派（document click）
-    const back = makeEl("footer-first-run-back", { "data-go": "customizer" });
-    vmClick(s, back);
-    assert.deepEqual(s.shown(), ["customizer"]);
-    assert.equal(doc.body.dataset.tab, "customizer");
-    assert.equal(doc.body.dataset.entry, "firstRun");
+    for (const t of ["sources", "about", "contact", "privacy"]) {
+      // 經 [data-go] 委派（document click，頁尾 4 個按鈕）
+      vmClick(s, makeEl(null, { "data-go": t }));
+      assert.deepEqual(s.shown(), [t]);
+      assert.equal(doc.body.dataset.tab, t);
+      assert.equal(s.EMT.router.back(), true, t);
+      assert.deepEqual(s.shown(), ["customizer"]);
+      assert.equal(doc.body.dataset.tab, "customizer");
+      assert.equal(doc.body.dataset.entry, "firstRun");
+    }
     // 首次模式下主控台入口類的 [data-go] 不生效
     vmClick(s, makeEl(null, { "data-go": "dashboard" }));
     assert.deepEqual(s.shown(), ["customizer"]);
@@ -590,14 +606,15 @@ describe("ui/router.js 隱藏頁守門（FE-38）", () => {
     return calls;
   }
 
-  test("TAB_IDS 與 register 仍接受 7 個 TabId（隱藏頁照常登錄，HT-5）；isHiddenTab 依 HIDDEN_TAB_IDS", () => {
+  test("TAB_IDS 與 register 接受 10 個 TabId（v0.19，SP-1；隱藏頁照常登錄，HT-5）；isHiddenTab 依 HIDDEN_TAB_IDS", () => {
     const s = setup();
     assert.deepEqual([...s.EMT.router.TAB_IDS], TABS);
+    assert.equal(TABS.length, 10);
     assert.doesNotThrow(() => spyHidden(s));
     assert.equal(s.EMT.router.isTabId("decoder"), true);
     assert.equal(s.EMT.router.isHiddenTab("decoder"), true);
     assert.equal(s.EMT.router.isHiddenTab("phrasebank"), true);
-    for (const t of ["dashboard", "customizer", "flashcards", "part5", "sources", "nope"]) {
+    for (const t of ["dashboard", "customizer", "flashcards", "part5", "sources", "about", "contact", "privacy", "nope"]) {
       assert.equal(s.EMT.router.isHiddenTab(t), false, t);
     }
   });
@@ -665,14 +682,16 @@ describe("ui/router.js 隱藏頁守門（FE-38）", () => {
     assert.deepEqual(s.errors, []);
   });
 
-  test("其他片段（#flashcards、#part5、#view-sources、#、空字串、#decoderx）→ 不切頁", () => {
+  test("其他片段（#flashcards、#part5、#about、#contact、#privacy、#sourcesx、#、空字串、#decoderx）→ 不切頁、不改網址（v0.19，SP-6 不新增其他 hash 路由）", () => {
     const s = setup();
     s.EMT.router.start("dashboard");
     s.EMT.router.go("part5");
-    for (const h of ["#flashcards", "#part5", "#view-sources", "#", "", "#decoderx", "#nope"]) {
+    for (const h of ["#flashcards", "#part5", "#about", "#contact", "#privacy", "#view-about", "#sourcesx", "#sources/x", "#", "", "#decoderx", "#nope"]) {
       s.setHash(h);
       assert.deepEqual(s.shown(), ["part5"], h);
+      assert.equal(s.sandbox.location.hash, h, h);
     }
+    assert.deepEqual(s.replaced, []);
     assert.deepEqual(s.errors, []);
   });
 
@@ -737,6 +756,179 @@ describe("ui/router.js 隱藏頁守門（FE-38）", () => {
     assert.equal(n(undefined), "");
     assert.equal(n(null), "");
     assert.equal(n("#flashcards"), "flashcards");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// （v0.19，FE-86）對外頁面的返回與 #sources：§4.12、§7.25.5；契約 SP-3、SP-4、SP-6、V-SITE-01、V-SITE-07
+// ─────────────────────────────────────────────────────────────
+
+describe("ui/router.js 對外頁面與 #sources（FE-86）", () => {
+  /** 以真實 store 建立沙箱；firstRun 時 body[data-entry="firstRun"] */
+  function withStore(opt) {
+    const o = opt || {};
+    const m = F.makeStore({ firstRun: !!o.firstRun });
+    const s = setup({ hash: o.hash, noHistory: o.noHistory, replaceThrows: o.replaceThrows });
+    s.document.body.dataset.entry = o.firstRun ? "firstRun" : "main";
+    s.EMT.store = m.store;
+    s.m = m;
+    s.ret = () => m.store.getState().runtime.sitePageReturnTab;
+    s.cur = () => m.store.getState().runtime.currentTab;
+    s.EMT.router.start(o.firstRun ? "customizer" : "dashboard");
+    return s;
+  }
+
+  test("單字卡 → 關於我 → 返回：回到單字卡，返回目標清為 null", () => {
+    const s = withStore();
+    s.EMT.router.go("flashcards");
+    s.EMT.router.go("about");
+    assert.equal(s.EMT.router.returnTarget(), "flashcards");
+    assert.equal(s.EMT.router.back(), true);
+    assert.deepEqual(s.shown(), ["flashcards"]);
+    assert.equal(s.ret(), null);
+  });
+
+  test("單字卡 → 關於我 → 隱私權政策 → 資料來源 → 返回：仍回到單字卡（4 頁之間不覆蓋）", () => {
+    const s = withStore();
+    s.EMT.router.go("flashcards");
+    for (const t of ["about", "privacy", "sources"]) s.EMT.router.go(t);
+    assert.equal(s.ret(), "flashcards");
+    s.EMT.router.back();
+    assert.deepEqual(s.shown(), ["flashcards"]);
+  });
+
+  test("首次畫面 → 聯絡我們 → 返回：回到首次畫面、無導覽、setItem 0 次、無狀態鍵（SP-4）", () => {
+    const s = withStore({ firstRun: true });
+    const calls = s.m.storage.setCalls.length;
+    s.EMT.router.go("contact");
+    assert.equal(s.ret(), "customizer");
+    assert.equal(s.EMT.router.returnTarget(), "customizer");
+    s.EMT.router.back();
+    assert.deepEqual(s.shown(), ["customizer"]);
+    assert.equal(s.document.body.dataset.entry, "firstRun");
+    assert.equal(s.m.store.getState().runtime.entryMode, "firstRun");
+    assert.equal(s.m.storage.setCalls.length, calls);
+    assert.equal(s.m.storage.getItem(MAIN_KEY), null);
+  });
+
+  test("returnTarget：sitePageReturnTab 為 null 時，一般模式 dashboard、首次模式 customizer；無 store 亦同（SP-3）", () => {
+    assert.equal(withStore().EMT.router.returnTarget(), "dashboard");
+    assert.equal(withStore({ firstRun: true }).EMT.router.returnTarget(), "customizer");
+    const n = setup();
+    assert.equal(n.EMT.router.returnTarget(), "dashboard");
+    n.document.body.dataset.entry = "firstRun";
+    assert.equal(n.EMT.router.returnTarget(), "customizer");
+  });
+
+  test("returnTarget：不合法的值（隱藏頁、4 頁之一、未知值）與 getState 拋例外 → 退回預設", () => {
+    const s = setup();
+    for (const v of ["decoder", "sources", "about", "nope", 1, undefined]) {
+      s.EMT.store = { getState: () => ({ runtime: { sitePageReturnTab: v } }), actions: { setTab() {} } };
+      assert.equal(s.EMT.router.returnTarget(), "dashboard", String(v));
+    }
+    s.EMT.store = { getState() { throw new Error("x"); }, actions: { setTab() {} } };
+    assert.equal(s.EMT.router.returnTarget(), "dashboard");
+  });
+
+  test("新頁 show 執行時 returnTarget() 已是本次切頁後的值（FE-87 的返回按鈕文字依此）", () => {
+    const s = withStore();
+    const seen = [];
+    s.EMT.views.register("about", { show: () => seen.push(s.EMT.router.returnTarget()) });
+    s.EMT.router.go("part5");
+    s.EMT.router.go("about");
+    assert.deepEqual(seen, ["part5"]);
+    assert.equal(s.document.body.dataset.tab, "about");
+  });
+
+  test("4 個頁面時導覽無 aria-current；導覽仍 4 鈕（AC-20-03）", () => {
+    const s = withStore();
+    assert.equal(s.navBtns.length, 4);
+    for (const t of ["about", "contact", "privacy", "sources"]) {
+      s.EMT.router.go(t);
+      assert.deepEqual(s.navBtns.filter((b) => b.getAttribute("aria-current") === "page"), [], t);
+    }
+  });
+
+  test("啟動帶 #sources：開啟資料來源頁、返回目標 null、片段被移除且保留路徑與查詢；返回 → 主控台（V-SITE-07）", () => {
+    const s = withStore({ hash: "#sources" });
+    assert.deepEqual(s.shown(), ["sources"]);
+    assert.equal(s.ret(), null);
+    assert.deepEqual(s.replaced.map((r) => [r.st, r.title, r.url]), [[null, "", "/p/index.html?x=1"]]);
+    assert.equal(s.sandbox.location.hash, "");
+    s.EMT.router.back();
+    assert.deepEqual(s.shown(), ["dashboard"]);
+  });
+
+  test("首次模式啟動帶 #sources：開啟資料來源頁、仍為首次模式、無狀態鍵；返回 → 首次畫面（V-SITE-07、SP-4）", () => {
+    const s = withStore({ firstRun: true, hash: "#sources" });
+    assert.deepEqual(s.shown(), ["sources"]);
+    assert.equal(s.ret(), null);
+    assert.equal(s.replaced.length, 1);
+    assert.equal(s.document.body.dataset.entry, "firstRun");
+    assert.equal(s.m.storage.getItem(MAIN_KEY), null);
+    assert.deepEqual(s.m.storage.setCalls, []);
+    s.EMT.router.back();
+    assert.deepEqual(s.shown(), ["customizer"]);
+  });
+
+  test("模擬測驗中 hashchange 為 #sources：返回目標 null，返回 → 主控台（SP-6）", () => {
+    const s = withStore();
+    s.EMT.router.go("part5");
+    s.setHash("#sources");
+    assert.deepEqual(s.shown(), ["sources"]);
+    assert.equal(s.ret(), null);
+    assert.equal(s.sandbox.location.hash, "");
+    s.EMT.router.back();
+    assert.deepEqual(s.shown(), ["dashboard"]);
+  });
+
+  test("已在資料來源頁（由單字卡進入）又 hashchange 為 #sources：返回目標清為 null，並重呼 show 讓返回文字同步（SP-6）", () => {
+    const s = withStore();
+    const shows = [];
+    s.EMT.views.register("sources", { show: () => shows.push(s.EMT.router.returnTarget()) });
+    s.EMT.router.go("flashcards");
+    s.EMT.router.go("sources");
+    s.setHash("#sources");
+    assert.deepEqual(shows, ["flashcards", "dashboard"]);
+    assert.equal(s.ret(), null);
+    assert.deepEqual(s.shown(), ["sources"]);
+  });
+
+  test("正規化後恰為 sources 才開啟：#view-sources、#/sources、#SOURCES 開啟（SD-FB-84）", () => {
+    for (const h of ["#view-sources", "#/sources", "#SOURCES", "#/view-Sources"]) {
+      const s = withStore();
+      s.EMT.router.go("part5");
+      s.setHash(h);
+      assert.deepEqual(s.shown(), ["sources"], h);
+      assert.equal(s.replaced.length, 1, h);
+    }
+  });
+
+  test("replaceState 拋例外或 history 不存在：照常開啟、不拋出、無 console.error（SP-6 失敗靜默）", () => {
+    for (const o of [{ replaceThrows: true }, { noHistory: true }]) {
+      const s = withStore(Object.assign({ hash: "#sources" }, o));
+      assert.deepEqual(s.shown(), ["sources"]);
+      assert.deepEqual(s.errors, []);
+    }
+  });
+
+  test("隱藏頁片段回歸：一般模式主控台、首次模式不動作；皆不呼叫 replaceState、返回目標不受影響（AC-20-04）", () => {
+    const a = withStore();
+    a.EMT.router.go("part5");
+    a.setHash("#decoder");
+    assert.deepEqual(a.shown(), ["dashboard"]);
+    assert.equal(a.sandbox.location.hash, "#decoder");
+    assert.deepEqual(a.replaced, []);
+    const b = withStore({ firstRun: true });
+    b.setHash("#phrasebank");
+    assert.deepEqual(b.shown(), ["customizer"]);
+    assert.equal(b.sandbox.location.hash, "#phrasebank");
+    assert.deepEqual(b.replaced, []);
+    assert.deepEqual(b.m.storage.setCalls, []);
+  });
+
+  test("原始碼不碰瀏覽器儲存（SP-4、SP-5：返回目標只在記憶體）", () => {
+    assert.doesNotMatch(source("ui/router.js"), /localStorage|sessionStorage|indexedDB/);
   });
 });
 

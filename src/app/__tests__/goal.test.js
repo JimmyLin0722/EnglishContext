@@ -89,12 +89,12 @@ test("契約常數：其餘 13 個常數字面值相同", () => {
   });
   assert.equal(C.BACKUP_FORMAT_ID, "english-master-track-backup");
   // v0.8（FE-20）新增 4 個常數，共 18 個；v0.9（FE-34）再新增 HIDDEN_TAB_IDS、LEARNING_PROGRESS_FIELDS，共 20 個；
-  // v0.15（FE-73）再新增 PART5_RECORD_TEXTS，共 21 個
-  assert.equal(Object.keys(C).length, 21);
+  // v0.15（FE-73）再新增 PART5_RECORD_TEXTS，共 21 個；v0.19（FE-83）再新增 ANSWERED_SUMMARY_TEXT，共 22 個
+  assert.equal(Object.keys(C).length, 22);
 });
 
-test("契約常數 v0.8（FE-20）／v0.9（FE-34）：TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS 逐字相同", () => {
-  // TAB_LABELS 7 項，鍵順序同 data-schema.ts
+test("契約常數 v0.8（FE-20）／v0.9（FE-34）／v0.19（FE-83）：TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS 逐字相同", () => {
+  // TAB_LABELS 10 項（v0.19 加 about、contact、privacy，SP-1），鍵順序同 data-schema.ts
   assert.deepEqual({ ...C.TAB_LABELS }, {
     dashboard: "主控台",
     customizer: "難易度設定",
@@ -103,12 +103,17 @@ test("契約常數 v0.8（FE-20）／v0.9（FE-34）：TAB_LABELS、NAV_TAB_ORDE
     decoder: "解碼器",
     phrasebank: "句型庫",
     sources: "資料來源與授權",
+    about: "關於我",
+    contact: "聯絡我們",
+    privacy: "隱私權政策",
   });
-  assert.deepEqual(Object.keys(C.TAB_LABELS), ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources"]);
+  assert.deepEqual(Object.keys(C.TAB_LABELS), ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources", "about", "contact", "privacy"]);
   // （v0.9）NAV_TAB_ORDER 恰好 4 項，不含 sources、不含隱藏頁（R-18 三、AC-20-03、AC-27-01）
   assert.deepEqual([...C.NAV_TAB_ORDER], ["dashboard", "customizer", "flashcards", "part5"]);
   assert.equal(C.NAV_TAB_ORDER.length, 4);
   assert.ok(!C.NAV_TAB_ORDER.includes("sources"));
+  // （v0.19）3 個對外頁面同樣不在導覽列（AC-57-01）
+  for (const id of ["about", "contact", "privacy"]) assert.ok(!C.NAV_TAB_ORDER.includes(id));
   C.NAV_TAB_ORDER.forEach((id) => assert.ok(Object.prototype.hasOwnProperty.call(C.TAB_LABELS, id)));
   assert.equal(C.LEARNED_HISTORY_DAYS, 30);
   assert.equal(C.DASHBOARD_CHART_DAYS, 7);
@@ -162,7 +167,7 @@ const CONTRACT_PART5_RECORD_TEXTS = {
   summaryNoNewAnswers: "本輪沒有新作答的題目",
   filterHint: "關閉時顯示全部題目，答對過的題目會以綠色鎖定。",
   filterHintAllCorrect: "要檢視全部題目，請關閉上方的「只練沒答對的題目」。",
-  clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+  clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "「已答對」會回到 0 題"],
   confirmOk: "確定",
   confirmCancel: "取消",
 };
@@ -195,12 +200,22 @@ test("契約常數 v0.15（FE-73）：PART5_RECORD_TEXTS 與 data-schema.ts §15
   assert.throws(() => { C.PART5_RECORD_TEXTS.clearConfirmMustInclude.push("x"); }, TypeError);
 });
 
-test("契約常數 v0.9（FE-34）：NAV_TAB_ORDER ∩ HIDDEN_TAB_IDS = ∅，三者聯集 = TAB_LABELS 的鍵，TAB_LABELS 仍 7 項", () => {
+test("契約常數 v0.19（FE-83）：ANSWERED_SUMMARY_TEXT 與 data-schema.ts §17 逐字相同；clearConfirmMustInclude 不含「正確率」（AS-3、AS-6、AC-46-08、AC-49-07）", () => {
+  assert.equal(C.ANSWERED_SUMMARY_TEXT, "已答對 {k} / {q} 題（{p}%）");
+  const file = path.join(__dirname, "..", "..", "..", "docs", "02-contract", "data-schema.ts");
+  const m = /export const ANSWERED_SUMMARY_TEXT = "([^"]*)";/.exec(fs.readFileSync(file, "utf8"));
+  assert.ok(m, "data-schema.ts 找不到 ANSWERED_SUMMARY_TEXT");
+  assert.equal(C.ANSWERED_SUMMARY_TEXT, m[1]);
+  assert.deepEqual([...C.PART5_RECORD_TEXTS.clearConfirmMustInclude], ["將清除全部題目的答對紀錄", "「已答對」會回到 0 題"]);
+  for (const part of C.PART5_RECORD_TEXTS.clearConfirmMustInclude) assert.ok(!part.includes("正確率"), part);
+});
+
+test("契約常數 v0.9（FE-34）／v0.19（FE-83）：NAV_TAB_ORDER ∩ HIDDEN_TAB_IDS = ∅，導覽、隱藏頁、sources、3 個對外頁面的聯集 = TAB_LABELS 的鍵，TAB_LABELS 10 項", () => {
   C.HIDDEN_TAB_IDS.forEach((id) => assert.ok(!C.NAV_TAB_ORDER.includes(id), id + " 不得在 NAV_TAB_ORDER"));
-  const union = new Set([...C.NAV_TAB_ORDER, ...C.HIDDEN_TAB_IDS, "sources"]);
-  assert.equal(union.size, C.NAV_TAB_ORDER.length + C.HIDDEN_TAB_IDS.length + 1);
+  const union = new Set([...C.NAV_TAB_ORDER, ...C.HIDDEN_TAB_IDS, "sources", "about", "contact", "privacy"]);
+  assert.equal(union.size, C.NAV_TAB_ORDER.length + C.HIDDEN_TAB_IDS.length + 4);
   assert.deepEqual([...union].sort(), Object.keys(C.TAB_LABELS).sort());
-  assert.equal(Object.keys(C.TAB_LABELS).length, 7);
+  assert.equal(Object.keys(C.TAB_LABELS).length, 10);
   // 隱藏頁的文字保留（HT-4）
   assert.equal(C.TAB_LABELS.decoder, "解碼器");
   assert.equal(C.TAB_LABELS.phrasebank, "句型庫");

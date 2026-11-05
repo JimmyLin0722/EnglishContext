@@ -4,21 +4,21 @@
     "tc": "TC-37-01a",
     "ac": "AC-37-01、AC-21-01、AC-34-08、AC-24-12、AC-21-03",
     "result": "通過",
-    "note": "file:// 連網（edge）：getRegistrations=拒絕：SecurityError；DOM link=[\"icon=data:,\"]；替身安裝事件 preventDefault=false（未監聽）、安裝按鈕 0／顯示 0、新版提示 false；NT-1 逐字=true、緊接匯出按鈕=true；操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入備份；請求（不含主文件、blob/data）0 筆；blob/data 0 筆；瀏覽器內部頁面（下載介面等，非頁面請求）48 筆；Console 錯誤／警告與例外 0；Cache Storage {}；IndexedDB []"
+    "note": "file:// 連網（edge）：getRegistrations=拒絕：SecurityError；DOM link=[\"canonical=https://jimmyfantasyworld.com/\",\"icon=data:,\"]；替身安裝事件 preventDefault=false（未監聽）、安裝按鈕 0／顯示 0、新版提示 false；NT-1 逐字=true、緊接匯出按鈕=true；操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入備份；請求（不含主文件、blob/data）0 筆；blob/data 0 筆；瀏覽器內部頁面（下載介面等，非頁面請求）48 筆；Console 錯誤／警告與例外 0；Cache Storage {}；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-37-01b",
     "ac": "AC-37-01、AC-21-01、AC-34-08",
     "result": "通過",
-    "note": "file:// 斷網（edge）：getRegistrations=拒絕：SecurityError；DOM link=[\"icon=data:,\"]；替身安裝事件 preventDefault=false（未監聽）、安裝按鈕 0／顯示 0、新版提示 false；NT-1 逐字=true、緊接匯出按鈕=true；操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入備份；請求（不含主文件、blob/data）0 筆；blob/data 0 筆；瀏覽器內部頁面（下載介面等，非頁面請求）48 筆；Console 錯誤／警告與例外 0；Cache Storage {}；IndexedDB []"
+    "note": "file:// 斷網（edge）：getRegistrations=拒絕：SecurityError；DOM link=[\"canonical=https://jimmyfantasyworld.com/\",\"icon=data:,\"]；替身安裝事件 preventDefault=false（未監聽）、安裝按鈕 0／顯示 0、新版提示 false；NT-1 逐字=true、緊接匯出按鈕=true；操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入備份；請求（不含主文件、blob/data）0 筆；blob/data 0 筆；瀏覽器內部頁面（下載介面等，非頁面請求）48 筆；Console 錯誤／警告與例外 0；Cache Storage {}；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-37-02",
     "ac": "AC-37-02、AC-24-12",
     "result": "通過",
-    "note": "只有 HTML 的空資料夾 english-master-track.html（edge）：getRegistrations=拒絕：SecurityError；DOM link=[\"icon=data:,\"]；替身安裝事件 preventDefault=false（未監聽）、安裝按鈕 0／顯示 0、新版提示 false；NT-1 逐字=true、緊接匯出按鈕=true；操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入備份；請求（不含主文件、blob/data）0 筆；blob/data 0 筆；瀏覽器內部頁面（下載介面等，非頁面請求）48 筆；Console 錯誤／警告與例外 0；Cache Storage {}；IndexedDB []"
+    "note": "只有 HTML 的空資料夾 english-master-track.html（edge）：getRegistrations=拒絕：SecurityError；DOM link=[\"canonical=https://jimmyfantasyworld.com/\",\"icon=data:,\"]；替身安裝事件 preventDefault=false（未監聽）、安裝按鈕 0／顯示 0、新版提示 false；NT-1 逐字=true、緊接匯出按鈕=true；操作 難易度設定、翻卡、STT（替身）、Part 5 作答、資料來源與授權、主控台、匯出＋匯入備份；請求（不含主文件、blob/data）0 筆；blob/data 0 筆；瀏覽器內部頁面（下載介面等，非頁面請求）48 筆；Console 錯誤／警告與例外 0；Cache Storage {}；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",
@@ -32,14 +32,14 @@
     "tc": "TC-34-01",
     "ac": "AC-34-01",
     "result": "通過",
-    "note": "manifest 200 application/manifest+json、BOM=false、與契約常數深度相等=true、鍵 10；id→http://localhost:8080/english-master-track/、start_url→http://localhost:8080/english-master-track/、scope→http://localhost:8080/english-master-track/；圖示 [{\"src\":\"icons/icon-192.png\",\"status\":200,\"mime\":\"image/png\",\"w\":192,\"h\":192,\"ct\":2,\"tRNS\":false,\"ok\":true},{\"src\":\"icons/icon-512.png\",\"status\":200,\"mime\":\"image/png\",\"w\":512,\"h\":512,\"ct\":2,\"tRNS\":false,\"ok\":true},{\"src\":\"icons/icon-maskable-512.png\",\"status\":200,\"mime\":\"image/png\",\"w\":512,\"h\":512,\"ct\":2,\"tRNS\":false,\"ok\":true}]；動態連結 [\"icon=data:,\",\"manifest=manifest.webmanifest\",\"apple-touch-icon=icons/apple-touch-icon-180.png(180x180)\"]；DevTools Manifest 錯誤 []（一般設定檔 []）；可安裝性錯誤：一般設定檔 []（Playwright 無痕 context：[\"in-incognito\"]，環境因素）"
+    "note": "manifest 200 application/manifest+json、BOM=false、與契約常數深度相等=true、鍵 10；id→http://localhost:8080/english-master-track/、start_url→http://localhost:8080/english-master-track/、scope→http://localhost:8080/english-master-track/；圖示 [{\"src\":\"icons/icon-192.png\",\"status\":200,\"mime\":\"image/png\",\"w\":192,\"h\":192,\"ct\":2,\"tRNS\":false,\"ok\":true},{\"src\":\"icons/icon-512.png\",\"status\":200,\"mime\":\"image/png\",\"w\":512,\"h\":512,\"ct\":2,\"tRNS\":false,\"ok\":true},{\"src\":\"icons/icon-maskable-512.png\",\"status\":200,\"mime\":\"image/png\",\"w\":512,\"h\":512,\"ct\":2,\"tRNS\":false,\"ok\":true}]；動態連結 [\"canonical=https://jimmyfantasyworld.com/\",\"icon=data:,\",\"manifest=manifest.webmanifest\",\"apple-touch-icon=icons/apple-touch-icon-180.png(180x180)\"]；DevTools Manifest 錯誤 []（一般設定檔 []）；可安裝性錯誤：一般設定檔 []（Playwright 無痕 context：[\"in-incognito\"]，環境因素）"
   },
   {
     "suite": "e2e-pwa",
     "tc": "TC-35-01",
     "ac": "AC-35-01、AC-21-03",
     "result": "通過",
-    "note": "啟用 264 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-be5c8e6ad7ed6061\"]（BUILD_ID be5c8e6ad7ed6061）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
+    "note": "啟用 199 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-2769ee9fc5c56941\"]（BUILD_ID 2769ee9fc5c56941）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",

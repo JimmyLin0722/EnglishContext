@@ -1,15 +1,17 @@
 ---
 doc: ARCH
-version: 0.13
+version: 0.14
 status: approved
 author: sd-agent
-approved_by: JimmyLin（對話中授權「調整好後完成測試直接推上去」，主控代核）
-approved_at: 2026-11-04
+approved_by: JimmyLin（對話中授權「核准 PRD v0.19，測完直接推」，主控代核）
+approved_at: 2026-11-05
 ---
 
 # English Master Track — 系統架構與設計
 
-> 上游：`docs/01-PRD.md` v0.18（approved，JimmyLin，2026-11-04；R-26）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.18（approved，主控代核，2026-11-04；LV、SM、HN-1、CR-10、UO-10、DS-43～DS-46，持久化結構不變）、`storage-schema.json` 維持 v0.16（無實質變動）。v0.12 時的上游：`docs/01-PRD.md` v0.17（approved，JimmyLin，2026-11-04；R-25）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.17（approved，主控代核，2026-11-04；只改文字規則與註解）。v0.11 時的上游：`docs/01-PRD.md` v0.16（approved，JimmyLin，2026-11-04；R-24）、`docs/02-contract/` v0.16（三檔 approved，主控代核，2026-11-04；只改文字常數與規則）。v0.10 時的上游：`docs/01-PRD.md` v0.15（approved，JimmyLin，2026-11-04）、`docs/02-contract/` v0.15（README.md、data-schema.ts、storage-schema.json 三檔 approved，JimmyLin 核准 Q-63 持久化結構變更，2026-11-04）、`package.json` `version` 本版由主控改為 `1.1.0`（Q-70 A，tasks.json MC-04）。v0.9 以前的內容仍有效，除非本版明文修改。**契約 C-8 同樣適用本文件**：v0.4～v0.9 段落中描述「目前」持久化結構的「`schemaVersion` 2」「`PersistedData` 9 欄」「欄位集合不變」，v0.10 起讀作「`CURRENT_SCHEMA_VERSION`（3）、12 欄，且該段所述操作不改變版本與欄位集合」；遷移 MG-1～MG-4 等歷史敘述照原意。
+> **v0.14 上游**：`docs/01-PRD.md` v0.19（approved，JimmyLin，2026-11-05；R-27、R-28）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.19（approved，主控代核，2026-11-05；§13、§9.12 DS-47～DS-56、data-schema §17，持久化結構不變）、`storage-schema.json` 維持 v0.16（無實質變動）。搭配 `docs/03-design/tasks.json` v0.13（共 115 個任務：既有 108 個全部 `done` 不變；v0.14 新增 FE-83～FE-89 共 7 個，主控手動項目 MC-07、MC-08，見 §12.13）。
+> **v0.14 增量導讀**：已答對顯示（§7.25.1～§7.25.2）、廣告框架（§7.25.3～§7.25.4，第一階段 `adSlotId = null`，零廣告請求）、頁尾與應用內三頁（§7.25.5～§7.25.6）、單一文案來源與靜態頁（§7.25.7～§7.25.8）、SEO 與爬蟲檔的建置（§5.9）、信箱（§7.25.9）。新增模組 `core/site-content.js`、`core/ad.js`、`services/ad.js`、`ui/ad-slot.js`、`ui/site-return.js`、`views/site-pages.js`、`tools/site-pages.mjs`（§3.1、§4.12）。**持久化結構不變**（`schemaVersion` 3、鍵數 2、備份格式不變、無遷移）；`src/data/` 不變、不建 CT 任務（DS-56）。**改讀規則**：(1) v0.13 以前段落提到「部署目錄 8 檔」「`<title>EnglishContext</title>`」「`ALLOWED_STATIC_TAGS` 只有 1 項」，現行一律以 §5.9 為準；(2) 提到「模擬測驗正確率」「累計答對」「`statAccuracyLabel`」「`#footer-first-run-back`」，現行以 §7.25 為準；(3) 提到「`SOURCES_CONTACT_TEXT` 位於 `views/sources-page.js`」，現行以 §7.25.7 為準；已完成任務的歷史敘述不逐字回改。**待人類決定**：部署 workflow 的檔案數檢查寫死 8，須另行授權修改（SD-FB-77、MC-08）。同步修訂 §1、§3.1、§4.12、§5.9、§7.21.4、§7.22.2、§7.24.3、§7.25、§10.8、§10.11、§11（T-104～T-114）、§12.13、§13.11、§14、§15（SD-FB-77～SD-FB-84）。
+> 上游（v0.13）：`docs/01-PRD.md` v0.18（approved，JimmyLin，2026-11-04；R-26）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.18（approved，主控代核，2026-11-04；LV、SM、HN-1、CR-10、UO-10、DS-43～DS-46，持久化結構不變）、`storage-schema.json` 維持 v0.16（無實質變動）。v0.12 時的上游：`docs/01-PRD.md` v0.17（approved，JimmyLin，2026-11-04；R-25）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.17（approved，主控代核，2026-11-04；只改文字規則與註解）。v0.11 時的上游：`docs/01-PRD.md` v0.16（approved，JimmyLin，2026-11-04；R-24）、`docs/02-contract/` v0.16（三檔 approved，主控代核，2026-11-04；只改文字常數與規則）。v0.10 時的上游：`docs/01-PRD.md` v0.15（approved，JimmyLin，2026-11-04）、`docs/02-contract/` v0.15（README.md、data-schema.ts、storage-schema.json 三檔 approved，JimmyLin 核准 Q-63 持久化結構變更，2026-11-04）、`package.json` `version` 本版由主控改為 `1.1.0`（Q-70 A，tasks.json MC-04）。v0.9 以前的內容仍有效，除非本版明文修改。**契約 C-8 同樣適用本文件**：v0.4～v0.9 段落中描述「目前」持久化結構的「`schemaVersion` 2」「`PersistedData` 9 欄」「欄位集合不變」，v0.10 起讀作「`CURRENT_SCHEMA_VERSION`（3）、12 欄，且該段所述操作不改變版本與欄位集合」；遷移 MG-1～MG-4 等歷史敘述照原意。
 > 搭配文件：`docs/03-design/tasks.json` v0.12（共 108 個任務：既有 105 個全部 `done` 不變；v0.13 新增 FE-80、FE-81、FE-82 共 3 個，另有主控手動項目 MC-06，見 §12.12）。v0.12 時為 v0.11（共 105 個任務：v0.12 新增 CT-26、FE-78、FE-79 共 3 個，另有主控手動項目 MC-05，見 §12.11）。v0.11 時為 v0.10（共 102 個任務：既有 101 個全部 `done` 不變；v0.11 新增 FE-77 共 1 個，見 §12.10）。v0.10 時為 v0.9（101 個任務：v0.10 新增 FE-70～FE-76 共 7 個、CT-25 共 1 個，另有主控手動項目 MC-04，見 §12.9）。
 > **v0.13 增量導讀**（上游改為 PRD v0.18（R-26、US-48、AC-48-01～12，修改 13 條 AC，移除 AC-46-07，E-124～E-134，Q-77～Q-80）、契約 v0.18（§5.11 LV-1～LV-7、SM-1～SM-3、HN-1、CR-10、UO-7、UO-8、UO-10、`Part5QuestionState`、V-ST-23～27、DS-43～DS-46、FB-65～FB-69））：模擬測驗「已答對鎖定檢視」、開關說明、常駐清除入口、結算 y = 0、移除 replay 動作。**持久化結構不變**（`schemaVersion` 3、鍵數 2、備份格式不變、無遷移）；`src/data/` 不變、不建 CT 任務；鎖定狀態是推導值，不寫入 `lockedSelection`（LV-4）。設計集中於 §4.11 與 §7.24；任務為 FE-80～FE-82（§12.12）；`package.json` 改為 1.2.0 由主控 MC-06 在 FE-82 之前執行（Q-79 A）；測試與 QA 範圍見 §10.10。**改讀規則**：§4.10、§7.21.3、§7.21.4、§10.7、§12.9、§13.7 中關於 `replayKeepRecords`、`replayPart5KeepRecords`、兩個按鈕、全部答對說明句、`[data-p5=replay]`、`clearPart5CorrectIds` 只在 `allCorrect` 有效，以及「曾答對的題目仍可作答」的敘述，一律以 §4.11、§7.24 為準；現行設計表格已就地標註，已完成任務的歷史敘述不逐字回改。同步修訂 §1、§3（D-18）、§5.8、§10.10、§11（T-96～T-103）、§12.12、§13.10、§14、§15（SD-FB-72～SD-FB-76）。
 > **v0.12 增量導讀**（上游改為 PRD v0.17（approved，JimmyLin，2026-11-04；R-25）、契約 v0.17（`README.md`、`data-schema.ts` approved，主控代核：L-8 LT-1～LT-6、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64）；新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）：**只改文字與驗證規則**，不改持久化結構（`schemaVersion` 3、鍵數 2）、不改建置程式、不新增外部資源；`package.json` 維持 1.1.0；AC-23-07、`p5-103`、頁尾不動。修改點集中於 §7.23，任務為 CT-26、FE-78、FE-79（§12.11），測試與給 QA 的項目見 §10.9。**375px 注意**：模擬測驗標題說明預期換成 2 行，須實測不裁切、無水平捲軸（AC-10-02、E-123，§7.23.4）。**改讀規則**：v0.11 以前段落（§3 的 FE-47、FE-52 註記、§4.7、§7.13、§7.19.6、§7.21.4、§10.1、§10.4、§12.6、§13.4 等）提到的舊標題說明、搭配詞標籤、原創內容聲明與品牌標識聲明，現行文字一律以 LT-1～LT-5 為準；這些段落記載已完成任務的歷史，除下方已就地標註者外，不逐字回改。同步修訂 §1、§3（D-17）、§5.7、§7.23、§10.9、§11（T-91～T-95）、§12.11、§13.9、§14、§15（SD-FB-68～SD-FB-71）。
@@ -74,6 +76,13 @@ approved_at: 2026-11-04
 | （v0.13）開關與清除 | 開關由開變關時，切換前畫面為 `allCorrect` 才回第 1 題、本輪歸 0（`setOnly`）；`clearPart5CorrectIds` 改為 K ≥ 1 有效；移除 replay 常數、動作與函式，不保留隱藏程式 | UO-7、UO-8、CR-6、CR-10、Q-77 A、Q-78 B |
 | （v0.13）畫面文字 | 4 段新文字取自 `PART5_RECORD_TEXTS`；說明文字與清除按鈕放在 `.p5-record`；y = 0 結算不顯示「0 / 0」；全部答對畫面的 SD 說明句刪除 | SM-1～SM-3、HN-1、DS-44、Q-80 C |
 | （v0.13）交付物 | MC-06 把 `package.json` 改為 1.2.0 後，FE-82 由原始碼重新建置 `dist/` | Q-79 A、DS-45、AC-42-02 |
+| （v0.14）已答對顯示 | `part5flow.answeredSummary` 是 K、Q、P 的唯一來源，P 用整數公式；主控台第 3 格與結算區共用同一段文字 | R-27 一、AS-1～AS-7、AC-49-01～AC-49-08 |
+| （v0.14）廣告版位 | 容器由 `ui/ad-slot.js` 建立 1 次，插在 `#app-main` 與 `#app-footer` 之間，不在主控台重建範圍內；切頁只靠 CSS 顯示或隱藏；`loading` 以 `height: 0` 保留可量寬度 | AD-1～AD-15、DS-47、DS-48 |
+| （v0.14）第一階段 | `AD_CONFIG.adSlotId = null`，正式環境也是 `ineligible`，不建容器、不請求腳本；測試建置只能經 `build({ adSlotIdOverride })`，命令列與環境變數都無法注入 | Q-82 A、DS-53、DS-54 |
+| （v0.14）對外頁面 | 文案只在 `core/site-content.js`；應用內由 `views/site-pages.js` 渲染，靜態頁、SEO、`<noscript>` 由 `tools/site-pages.mjs` 在建置時產生 | SC-1～SC-6、DS-49、AC-57-03 |
+| （v0.14）路由 | `TabId` 加 3 個值；`runtime.sitePageReturnTab` 由 `store.setTab` 維護；移除 `#footer-first-run-back`，4 個頁面共用返回按鈕；`#sources` 開啟後以 `replaceState` 移除片段 | SP-1～SP-6、DS-50 |
+| （v0.14）建置 | SEO 與 `<noscript>` 在計算 BUILD_ID 前寫入；`ALLOWED_STATIC_TAGS` 只加逐字的 canonical；部署目錄 13 檔；預先快取 7 項不變 | SE-1～SE-9、DP-1、DP-8～DP-10、DS-55 |
+| （v0.14）交付物 | MC-07 把 `package.json` 改為 1.3.0 後，FE-89 由原始碼重新建置 `dist/` | Q-85 A、DS-53、AC-42-02 |
 
 ---
 
@@ -402,6 +411,29 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | D-12 | （v0.7）`src/app/pwa/`、`src/app/assets/` 不打包進 HTML（建置只收 §4.1 的 5 層目錄與 `main.js`）；`src/app/pwa/sw.template.js` 不得被任何 `src/app` 模組 `require` 或讀取 |
 | D-13 | （v0.8）同 D-6、D-8、D-10、D-11：v0.8 對既有檔案的修改由 CT-24、FE-54～FE-62 承接；**同一批次的任務沒有任何共用 path**。唯一被兩個 v0.8 任務修改的檔案是 `core/pwa.js` 與 `__tests__/pwa-core.test.js`（FE-56 改色值 → FE-58 改 IN-1），以 `dependsOn` 串接、分屬第 1、2 批。`src/data/` 只改 ORIGINAL `fullName` 一個值（CT-24，契約 DS-19、DS-25）；`_fixtures.js` 的同名字串屬 FE-60 |
 | D-7 | （v0.4）`src/data/` 本版**不改**：R-15 更名不涉及內容資料（題型標籤 `PART5_TYPE_LABELS` 與授權文字中的「Part 5」屬題型與授權用語，保留），R-16、R-17 只涉及介面與持久化。因此不建 CT 任務 |
+
+### 3.1 v0.14 目錄增量（FE-83～FE-89）
+
+（`src/app/` 前綴省略，`tools/`、`dist/` 除外。「新」為新增檔案。）
+
+| 檔案 | 層 | 任務 | 內容 |
+| :--- | :--- | :--- | :--- |
+| `core/site-content.js`（新） | L1 | FE-83 | §17 文案常數的唯一來源；不依賴 DOM，瀏覽器與 Node 都可載入 |
+| `core/ad.js`（新） | L1 | FE-83 | 廣告設定與純函式 |
+| `core/constants.js`、`core/layout.js`、`core/part5flow.js` | L1 | FE-83 | `TAB_LABELS` +3、`ANSWERED_SUMMARY_TEXT`、`clearConfirmMustInclude`、`statPart5Label`、`answeredSummary` |
+| `views/dashboard.js`、`views/part5.js`、`styles/10-dashboard.css`、`styles/40-part5.css` | L5 | FE-84 | 已答對顯示 |
+| `tools/build.mjs`、`tools/site-pages.mjs`（新）、`tools/serve.mjs` | 建置 | FE-85 | SEO、`<noscript>`、靜態頁、爬蟲檔、測試注入、`.xml` MIME |
+| `site/static-page.css`（新） | 建置輸入 | FE-85 | 靜態頁內嵌 CSS；不在 `styles/`，不進交付 HTML |
+| `core/pwa.js` | L1 | FE-85 | `PWA_DEPLOY_FILES` 13 檔 |
+| `index.html` | 殼層 | FE-85 → FE-86 | FE-85 改 head 與標記；FE-86 改頁尾與 section |
+| `state/store.js`、`ui/router.js`、`ui/version-line.js`、`styles/00-base.css` | L2、L4 | FE-86 | 路由、返回、`runtime.ad`、頁尾連結列 |
+| `ui/site-return.js`（新）、`views/site-pages.js`（新）、`views/sources-page.js`、`styles/75-site-pages.css`（新） | L4、L5 | FE-87 | 應用內三頁與返回按鈕 |
+| `services/ad.js`（新）、`ui/ad-slot.js`（新）、`main.js`、`styles/85-ad.css`（新） | L3、L4 | FE-88 | 廣告執行期 |
+| `dist/` 下 14 檔 | 產物 | FE-89 | 只由 `npm run build` 產生 |
+| `package.json` | 主控 | MC-07 | 只改 `version` |
+| `.github/workflows/static.yml` | 主控 | MC-08 | **須人類授權**（SD-FB-77） |
+
+**D-19**：`index.html`、`__tests__/shell.test.js` 由 FE-85 → FE-86 依序修改；`styles/10-dashboard.css`、`styles/85-ad.css`、`styles/75-site-pages.css`、`site/static-page.css` 由原任務 → FE-89 依序修改，FE-89 只有實測不合格才可改版面規則；其他檔案各屬 1 個 v0.14 任務。`tests/`、`docs/04-qa/` 不派給 PG，`tests/static/legal-check.mjs` 歸 QA。
 
 ---
 
@@ -791,6 +823,24 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 
 `core/layout.js` 不改：`part5Progress(vm.kind, vm.number, total)` 不受題目狀態影響。
 
+### 4.12 v0.14 新增與修改的模組介面
+
+本節全部不持久化：不新增 localStorage 鍵與欄位，不新增 window 全域變數（命名空間 `EMT` 之外）。
+
+| 模組 | 介面 | 說明 |
+| :--- | :--- | :--- |
+| `EMT.core.siteContent` | `SITE_PAGES`、`LEGAL_STATEMENTS`、`SOURCES_CONTACT_TEXT`、`FOOTER_LINKS`、`SITE_PAGE_TEXTS`、`SITE_ORIGIN`、`SITE_HOME_SEO`、`SITE_HOME_JSON_LD`、`SITE_NOSCRIPT`、`ROBOTS_TXT`、`SITEMAP_XML` | 全部 `deepFreeze`；`module.exports` 同一物件（建置以 `createRequire` 載入）；`SITE_PAGES` 的關於我以變數引用 `LEGAL_STATEMENTS`，不另存字串 |
+| `EMT.core.ad` | `AD_CONFIG`、`AD_PRODUCTION_HOSTNAME`、`AD_PUBLISHER_ID_PATTERN`、`AD_SLOT_ID_PATTERN`、`AD_SCRIPT_URL`、`AD_LOAD_TIMEOUT_MS`、`AD_TEXTS`；`isSlotConfigured(config)`、`isProductionLocation(loc)`、`initialStatus({ location, config, isStandalone })`、`decide(ctx)`、`transition(status, event)`、`resultOfAdStatus(value)` | 純函式；原始碼有逐字 1 行 `var AD_SLOT_ID = null;`（§5.9 B-25 與 AC-50-05 只改此值） |
+| `EMT.core.part5flow` | 新增 `answeredSummary(bankIds, ids)` → `{ k, q, p }` 或 `null`（Q = 0）；`answeredSummaryText(summary)` → 字串或 `null` | K 內部沿用 `countCorrect`（AS-1） |
+| `store.actions` | `setTab(tabId, opts)`：`opts.resetReturn` 為 true 時 `sitePageReturnTab = null`；`initAd(status)`：只在啟動時由 `ineligible` 設定 1 次；`adEvent(event)`：經 `core.ad.transition`，有改變才通知 `["ad"]` | 三者 `setItem` 皆 0 次 |
+| `runtime` | 新增 `ad: { status: "ineligible" }`、`sitePageReturnTab: null` | 只在記憶體 |
+| `EMT.router` | `TAB_IDS` 10 個；`go(tabId, opts)`；`back()`；`returnTarget()` → `sitePageReturnTab`，為 `null` 時首次模式 `customizer`、一般模式 `dashboard` | 返回按鈕只呼叫 `back()` |
+| `EMT.ui.siteReturn` | `create(dom)` → button；`refresh(btn)` | 文字「返回{TAB_LABELS[returnTarget()]}」 |
+| `EMT.services.ad` | `start({ env, store })`；`load(insEl, callbacks)` | `load` 建立腳本、`push({})`、監看結果、10 秒逾時；不讀學習資料 |
+| `EMT.ui.adSlot` | `init()` | 訂閱 store；只在 `waiting`、`loading`、`filled` 時有事做；`ineligible` 立即結束，不建 DOM |
+| `tools/site-pages.mjs` | `escapeHtml`、`renderHomeHead(site, ad)`、`renderNoscript(site)`、`renderStaticPage(page, site, css)`、`checkStaticPage(html, page, ad)` | 純函式；輸出換行一律 LF；不讀時間、亂數、環境變數 |
+| `tools/build.mjs` | `build({ adSlotIdOverride })`；`loadSiteContent(appDir)`、`loadAdCore(appDir)`：`appDir/core/` 有檔案就用，否則用專案檔；`ALLOWED_STATIC_TAGS` 2 項 | `parseArgs` **不接受**單元 ID 參數 |
+
 ---
 
 ## 5. 建置與打包流程
@@ -1051,6 +1101,41 @@ jobs:
 | 交付 | FE-82 依序 `npm test`、`npm run validate:data`、`npm run build` 兩次，覆寫 `dist/english-master-track.html` 與 `dist/site/` 8 檔；不得手改；可重現與兩份 HTML 相同的檢查同 §5.6 |
 | 大小 | 新增程式與文字約 +5 KB，移除 replay 與說明句約 −1 KB，對 AC-19-04 的影響可忽略，不另列估算 |
 | 外部資源 | 不新增；B-7 檢查不受影響 |
+
+### 5.9 v0.14 建置（FE-85；契約 SE-1～SE-9、DP-1、DP-7～DP-10、SW-2、AD-15、DS-49、DS-53、DS-55）
+
+**執行順序**（粗體為新增或修改）：B-1～B-6 → B-10 → **B-25** → B-17 → B-18 → **B-20、B-21**（得 HTML₀′）→ B-11 → **B-24** → B-12 → B-13 → B-14（對 HTML₀′）→ B-15 → **B-22** → **B-23** → B-7（含 B-19）→ B-16 → B-8。SEO 與 `<noscript>` 必須在 B-14 之前寫入，屬 SW-2 輸入 (1)（SE-9）。
+
+| 步驟 | 內容 | 中止碼 |
+| :--- | :--- | :--- |
+| B-20 | 模板 `<title>` 改為 `<!-- @@SEO_HEAD@@ -->`，以 `renderHomeHead` 取代。輸出順序固定：`<title>`、description、canonical、`og:title`、`og:description`、`og:url`、`og:type`、`og:site_name`、`og:locale`、`og:image`、`google-adsense-account` meta、`application/ld+json`。值跳脫 `&`、`<`、`>`、`"`；JSON-LD 為 `JSON.stringify(SITE_HOME_JSON_LD)` 後經 `escapeForScript` | `SEO_TEMPLATE`：PWA 模式標記不是恰 1 次、不在 `</head>` 前 |
+| B-21 | `<body>` 標籤下一行放 `<!-- @@NOSCRIPT@@ -->`，以 `renderNoscript` 取代：`<noscript><div class="site-noscript"><h2>…</h2><p>…</p><ul>…</ul><p>3 個 a</p></div></noscript>` | `SEO_TEMPLATE` |
+| B-22 | 依 DS-55 調整檢查（見下表） | `EXTERNAL_RESOURCE`、`PWA_HEAD` |
+| B-23 | 產生 `about.html`、`contact.html`、`privacy.html`、`robots.txt`、`sitemap.xml`，加入 `byPath`；每個靜態頁過 `checkStaticPage`；`robots.txt`、`sitemap.xml` 逐字等於常數；`sitemap` 的 `loc` 與 `SITE_PAGES` 的 canonical 相符 | `SITE_PAGE_CHECK` |
+| B-24 | 有讀 `ads.txt` 時：`trim()` 後須逐字為 `google.com, pub-{數字段}, DIRECT, f08c47fec0942fa0`，數字段 = `AD_CONFIG.publisherId` 的數字段；`publisherId` 符合 `AD_PUBLISHER_ID_PATTERN`（AD-15） | `AD_PUBLISHER_MISMATCH` |
+| B-25 | 只有 `adSlotIdOverride` 有值才動作：值須符合 `AD_SLOT_ID_PATTERN`；`write !== false` 時 `out` 與 `site` 不得落在專案 `dist/` 之內；取代 `core/ad.js` 中的 `var AD_SLOT_ID = …;`（須恰 1 次） | `AD_OVERRIDE` |
+
+**DS-55：既有檢查只放行逐字項目，不放寬任何樣式**
+
+| 新內容 | 會碰到的檢查 | 處理 |
+| :--- | :--- | :--- |
+| `<link rel="canonical" href="https://jimmyfantasyworld.com/">` | `FORBIDDEN_PATTERNS` 的 `<link href>` | 加入 `ALLOWED_STATIC_TAGS`，逐字且恰 1 次；檢查前只從副本移除這個字串。其他任何 `<link href>` 仍中止 |
+| `<script type="application/ld+json">` | `<script src>` 樣式不會命中（無 `src`） | 不改規則；B-23 另檢查恰 1 段且可 `JSON.parse`、深度相等於 `SITE_HOME_JSON_LD` |
+| `og:url`、`og:image`、`<noscript>` 的 `<a>` | build 沒有針對這些的樣式 | 不改規則。QA 的 `static-check.mjs:270`、`pwa-static.mjs:82`、`:84` 依 §10.11 Q3 改為逐字放行 |
+| `<title>` | `checkPwaHead` 比對舊字串 | 改為 `<title>{SITE_HOME_SEO.documentTitle}</title>` 恰 1 次；`apple-mobile-web-app-title` 維持 `EnglishContext` |
+| 靜態廣告框 | 新增樣式 | `FORBIDDEN_PATTERNS` 加 `{ name: "靜態廣告框", re: /<ins\b[^>]*adsbygoogle/i }`。程式與註解都不得出現此樣式，`ui/ad-slot.js` 以 `createElement("ins")` 建立 |
+
+**靜態頁與 CSS 來源**：樣板在 `tools/site-pages.mjs`（§7.25.8）；CSS 讀 `src/app/site/static-page.css`，換行正規化為 LF 後內嵌；含 `@import`、`url(`、`</style` 即中止。不納入 BUILD_ID（SW-2），但文案改變會經 HTML 改變 BUILD_ID（AC-57-06）。
+
+**部署目錄**：`PWA_DEPLOY_FILES` 改為契約的 13 項（FE-85 改 `core/pwa.js`）；`PWA_PRECACHE_URLS` 維持 7 項；`checkSiteDir`、`verifySite` 依此常數運作，不需另改；`index.html` 與 `dist/english-master-track.html` 仍由 `verifySite` 比對相同（DP-2）。`dist/` 共 14 檔。
+
+**決定性**：5 個新檔只由常數與 CSS 決定（DP-10）；鍵順序固定；`Date`、`Math.random`、絕對路徑皆不使用。
+
+**大小**：文案約 +7 KB，SEO 約 +2 KB，廣告與頁面程式約 +15 KB，CSS 約 +2 KB，合計約 +26 KB，對 AC-19-04 的影響可忽略。
+
+**版本號**：MC-07 只把 `package.json` `version` 由 `1.2.0` 改為 `1.3.0`，必須在 FE-89 之前（原因同 §5.8）。本版不把版本值寫進單元測試。
+
+**部署 workflow（未解決）**：`.github/workflows/static.yml:42` 為 `test "$(find dist/site -type f | wc -l)" -eq 8`，:45 只列 8 檔。建置輸出 13 檔後這一步會失敗，**部署會中止**。Q-46 的修改授權已用完（SD-FB-38、tasks.json MC-03），因此列為 MC-08，須人類授權後才可執行（SD-FB-77）。
 
 ---
 
@@ -2295,7 +2380,7 @@ QA 的 `tests/e2e/` 也有 13 處（`e2e-cards.mjs`、`e2e-goal.mjs`、`e2e-firs
 | 按鈕一 | `全部題目再練一次（保留紀錄）` | 契約 `replayKeepRecords` |
 | 按鈕二 | `清除答對紀錄，重新來過` | 契約 `clearAndRestart` |
 | **確認對話框標題** | `清除答對紀錄` | **SD 定稿** |
-| **確認對話框內文** | `將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。` | **SD 定稿**（逐字包含契約 `clearConfirmMustInclude` 兩段） |
+| **確認對話框內文** | ~~`將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。`~~（v0.14 起現行文字見 §7.25.2，DS-51） | **SD 定稿**（逐字包含契約 `clearConfirmMustInclude` 兩段） |
 | 對話框按鈕 | `確定`、`取消`（只有這 2 個） | 契約 `confirmOk`、`confirmCancel` |
 
 以上文字皆不含「範本」「English Master Track」，不顯示題目 id（CR-9），全部經 `core/dom.js` 以 `textContent` 寫入。
@@ -2423,7 +2508,7 @@ SD 決定**建立**檢查（契約為選擇性），理由：答對紀錄以 id 
 
 #### 7.22.2 「資料來源與授權」頁聯絡行（R-24 二）
 
-**常數位置**：`views/sources-page.js` 模組層級 `var SOURCES_CONTACT_TEXT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";`，並在回傳的 api 匯出 `SOURCES_CONTACT_TEXT`（測試取用）。理由：只有此頁使用，放 `core/constants.js` 會擴大影響面；全專案 `src/app/` 只此一處字面值（含註解，註解不得重複寫出位址，也不得寫出去空格形式）。
+**常數位置**（v0.14 註：常數已移到 `core/site-content.js`，值依 ML-1，見 §7.25.7、§7.25.9；本段為 v0.11 的歷史做法，舊值不再列出）：`views/sources-page.js` 模組層級 `var SOURCES_CONTACT_TEXT = …;`，並在回傳的 api 匯出 `SOURCES_CONTACT_TEXT`（測試取用）。理由：只有此頁使用，放 `core/constants.js` 會擴大影響面；全專案 `src/app/` 只此一處字面值（含註解，註解不得重複寫出位址，也不得寫出去空格形式）。
 
 **DOM**（`render` 內，`.src-page` 的最後一個子元素，位於 `licenseSection` 之後）：
 
@@ -2647,7 +2732,7 @@ K ≥ 1 時題目區約下移 60～90px。AC 未限制此處高度，也未要�
 | 題目與結算畫面說明 | `filterHint` | 逐字，恰 1 次 |
 | 全部答對畫面說明 | `filterHintAllCorrect` | 逐字，恰 1 次，不同時顯示 `filterHint` |
 | 全部答對說明句 | SD 文字 `allCorrectNote` | **刪除**，不改寫。AC-46-06 不要求此句，`filterHintAllCorrect` 已說明下一步，保留會重複 |
-| 確認對話框 | `RECORD_TEXT.confirmTitle`、`confirmMessage` | 不變。清除入口擴大後內文仍正確（AC-48-11 依 AC-46-08） |
+| 確認對話框 | `RECORD_TEXT.confirmTitle`、`confirmMessage` | 不變。清除入口擴大後內文仍正確（AC-48-11 依 AC-46-08）。（v0.14 註：`confirmMessage` 已改寫，見 §7.25.2） |
 
 **移除清單**（V-ST-27，連註解一併清除，測試除外）：
 
@@ -2676,6 +2761,282 @@ K ≥ 1 時題目區約下移 60～90px。AC 未限制此處高度，也未要�
 各畫面共通：`[data-p5=clear]` 數量（K ≥ 1 恰 1、K = 0 為 0）；清除按鈕與 `.p5-only` 的 `getBoundingClientRect` 寬高 ≥ 44；`.p5-record` 子元素兩兩不重疊；`.p5-record__hint` 的 `scrollWidth ≤ clientWidth`、左右邊界在視窗內；`document.documentElement.scrollWidth ≤ clientWidth`；說明文字對比 ≥ 4.5:1；Console 無錯誤、`file://` 下非 file 請求 0。行數一律以 Range 量測（§7.23.4），回報實際值，不以行數判定失敗。
 
 **不合格時**：只能修改 `.p5-record__hint`、`.p5-record__clear`、`.p5-summary__none` 的版面規則，不得改文字、不得加 `nowrap`、不得使用 `--accent`。原因若在共用容器或 `views/part5.js`，FE-82 標 `blocked` 回報主控。
+
+### 7.25 已答對顯示、廣告、對外頁面與 SEO（v0.14；PRD R-27、R-28、US-49～US-57、Q-81～Q-93；契約 v0.19 §13、DS-47～DS-56）
+
+固定文字與常數以 data-schema §17、§15、§13 為唯一來源，實作時複製，本節不重抄。
+
+#### 7.25.1 已答對顯示（FE-83、FE-84；AS-1～AS-7）
+
+```
+answeredSummary(bankIds, ids):
+  q = bankIds 長度；q = 0 → 回傳 null
+  k = countCorrect(bankIds, correctSet(ids))
+  p = Math.floor((200 * k + q) / (2 * q))     // AS-2 整數運算；不得用 k / q * 100
+  若 k < q：p = Math.min(p, 99)
+  回傳 { k, q, p }
+```
+
+驗算（V-ANS-01 全部列入 `part5flow.test.js`）：(0, 200) → 0；(1, 200) → 1；(7, 200) → 4；(29, 200) → 15；(48, 200) → 24；(199, 200) → 99；(200, 200) → 100；(1, 3) → 33；(2, 3) → 67。
+
+| 位置 | 內容 | 決定 |
+| :--- | :--- | :--- |
+| 主控台第 3 格 | 標籤 `statPart5Label`；值為已答對行；Q = 0 為 `statNoData` | class 由 `db-stat--accuracy` 改為 `db-stat--answered`；值元素加 `db-stat__value--answered`：`font-size: 0.875rem; line-height: 1.35; font-variant-numeric: tabular-nums; overflow-wrap: anywhere`（≥ 14px、可換行，AS-4、AC-49-08） |
+| 結算區（`summary`） | y ≥ 1 分數行或 y = 0 說明之下加 `p.p5-summary__answered[data-p5=summary-answered]` | 取代 `.p5-summary__total`；a = 0 也顯示；Q = 0 不建節點 |
+| 全部答對畫面 | 不變 | 不加已答對行（AS-5） |
+| 模擬測驗頁進度條附近 | `correctCount` 不變 | 與已答對行並存（AS-3，Q-87 A） |
+| 累計資料 | `totalAnswered`、`totalCorrect` 依 AC-11-03 照常更新 | 只移除顯示；`reinit.hasLearningRecord` 不改（AS-7） |
+
+主控台要拿到題庫 id：`dashboardProgress` 內以與 part5 view 相同的方式取得題庫，兩者都呼叫 `answeredSummary`。`PROGRESS_TAGS` 須含 `part5`（現況若缺少，FE-84 補上，否則清除紀錄後主控台不更新）。
+
+**375px**：第 3 格欄寬約 105px，已答對行預期 2～3 行，3 格的列高會增加。FE-89 依 §7.25.10 量測 AC-39-09 首屏條件；不符時只可調 `.db-stat` 系列的間距，不得縮小字級到 14px 以下或截斷（T-111）。
+
+#### 7.25.2 文字定稿（DS-51）
+
+| 用途 | 來源 | 決定 |
+| :--- | :--- | :--- |
+| 第 3 格標籤 | `LAYOUT_TEXTS.statPart5Label` | 「模擬測驗」；刪除 `statAccuracyLabel` |
+| 第 3 格與結算區 | `ANSWERED_SUMMARY_TEXT` | 由 `answeredSummaryText` 組字，只有這一處 |
+| 確認對話框內文 | SD 定稿，取代 DS-35 | `將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。` 逐字包含 `clearConfirmMustInclude` 兩段；不含「正確率」「累計」 |
+| `clearConfirmMustInclude` | `PART5_RECORD_TEXTS` | 依 data-schema，改第 2 段 |
+
+**受影響位置**（依現況搜尋，行號供定位）：
+
+| 檔案 | 位置 | 處理 |
+| :--- | :--- | :--- |
+| `core/layout.js` | `:104` | 改鍵 |
+| `core/constants.js` | `:133` | 改值 |
+| `views/dashboard.js` | `:18`、`:90`、`:228`～`:239`、`:270`、`:303`～`:308`、`:321`、`:350`、`:495`、`:706`、`:721`～`:727`、`:829` | 改為已答對行，移除 `accuracy` |
+| `views/part5.js` | `:99`、`:107`、`:716`～`:719` | 改文字；結算區改行 |
+| `styles/40-part5.css` | `:263` | `.p5-summary__total` 改為 `.p5-summary__answered` |
+| `core/stats.js` | 全檔 | **不改**：單字測驗統計仍用，AC-49-07 明訂不受影響；畫面不再呼叫的部分由 FE-84 確認 |
+
+#### 7.25.3 廣告執行期（FE-83、FE-88；AD-1～AD-14、DS-47、DS-48）
+
+**分工**
+
+| 模組 | 負責 | 不負責 |
+| :--- | :--- | :--- |
+| `core/ad.js` | 環境判定（AD-2～AD-4）、`decide`、轉移表 | DOM、計時器 |
+| `store` | 保存 `runtime.ad.status`、AD-10 (a)(b) 的同步隱藏 | DOM、網路 |
+| `services/ad.js` | 加入腳本、`push({})`、結果監看、逾時 | 版位顯示 |
+| `ui/ad-slot.js` | 建立容器 1 次、同步 `data-ad-state`、呼叫評估 | 切頁時的顯示切換（由 CSS 處理） |
+
+**啟動**（`main.js`）：`store.init` → `services.ad.start`（算 `initialStatus`；非 `ineligible` 時 `store.actions.initAd("waiting")`，並設 `document.documentElement.dataset.adEnv = "1"`）→ … → `router.start` → `bottomNav.init` → `ui.adSlot.init`。`initialStatus` 整段 `try`，例外視為 `ineligible`（AD-4）；`isStandalone` 共用 `core/pwa.js`，不依賴 `pwa.eligible`（Q-89 B）。
+
+**轉移**（`transition`；未列出的組合回傳原狀態）：
+
+| 目前 | `load` | `filled` | `collapse` | `dismiss` |
+| :--- | :--- | :--- | :--- | :--- |
+| `waiting` | `loading` | — | `collapsed` | `dismissed` |
+| `loading` | — | `filled` | `collapsed` | `dismissed` |
+| `filled` | — | — | — | `dismissed` |
+| `ineligible`、`collapsed`、`dismissed` | — | — | — | — |
+
+**評估**（`decide`，AD-6）：`status = "waiting"` 且 `entryMode = "main"`、`currentTab = "dashboard"`、`reinit.hasLearningRecord(data, today)` 皆成立時：`navigator.onLine === false` → `collapse`；否則若 `#view-dashboard .db-start` 存在且未 `disabled` → `load`；其餘 → 不動作。`ui/ad-slot.js` 只在 `waiting` 時於每次 store 通知評估，通過後以 `requestAnimationFrame` 再 `setTimeout(0)` 執行，確保在繪製之後（AD-6 (5)、AC-51-02）；分頁在背景時 rAF 不觸發，回到前景才載入，不算失敗。
+
+**DS-47：不重建、不搬動**
+
+- 容器由 `ui/ad-slot.js` 以 `insertBefore(slot, #app-footer)` 建立 1 次，位於 `#app-main` 之後，**不在 `#view-dashboard` 內**，因此主控台 `mount` 的 `D.clear(rootEl)`、`renderProgress` 都碰不到它。
+- `ineligible`、`waiting` 時**不建容器**，第一階段 DOM 完全沒有版位。
+- `ins` 由程式建立 1 次、`appendChild` 1 次，之後不移除、不換父節點、不重新 `push`。不使用「存起節點再塞回去」。
+- 切頁**不執行 JavaScript**：只靠 router 既有的 `body[data-tab]` 與 CSS 切換（下表）。`display: none` 不會讓 iframe 重新載入；移除或換父節點才會。
+
+```
+body
+ ├ main#app-main       （資料備份是其中最後一個區塊）
+ ├ aside#ad-slot.ad-slot[data-ad-state][aria-label=廣告版位] ← 只建立 1 次
+ │   ├ p.ad-slot__label  「廣告」（filled 前 hidden）
+ │   └ div.ad-slot__frame
+ │       └ ins.adsbygoogle（屬性依 AD-7；style="display:block"）
+ └ footer#app-footer
+```
+
+**DS-48：高度 0 但寬度可量**（`styles/85-ad.css`）
+
+| 狀態與條件 | CSS | 原因 |
+| :--- | :--- | :--- |
+| 基本 | `.ad-slot { box-sizing: border-box; width: 100%; max-width: calc(var(--content-narrow) + 32px); margin: 0 auto; padding: 0 16px; }` | 與主控台內容同寬（AC-52-01） |
+| `loading`（**不論目前頁面**） | `height: 0; max-height: 0; overflow: hidden; padding-block: 0; border: 0;` **不得用 `display: none`**、不用 `visibility: hidden` | 腳本非同步載入，可能在使用者切頁後才量寬度；`display: none` 會得到寬度 0。`max-height` 是因為 AdSense 可能以 inline 樣式改 `height`（T-106） |
+| `collapsed`、`dismissed` | `display: none` | 高度 0、不佔位；iframe 若已存在也不移除 |
+| `filled` | `display: none` | 預設不可見 |
+| `body[data-tab="dashboard"]` 且 `filled` | `display: block; margin-block: 48px;` 高度隨內容 | AD-14；距資料備份控制項與頁尾連結皆 ≥ 48px（AC-52-03） |
+| `html[data-ad-env]` | `scrollbar-gutter: stable` | 非覆蓋式捲軸在廣告撐高頁面時出現，會讓置中內容左右移動，違反 AC-52-05。只在環境成立時套用，第一階段與 `file://` 無影響（SD-FB-80） |
+
+標籤：`.ad-slot__label { margin: 0 0 4px; font-size: 0.75rem; color: var(--text-muted); }`（對 `--bg` 約 5.4:1），不用 `--accent`。不設 `position`、`transition`、`animation`；不用 `.card`，避免與學習內容同標題或同卡片（AC-52-04）。
+
+**載入流程**（`services/ad.js`，AD-7、AD-8，全部靜默，不 `console.error`）：
+
+1. `adEvent("load")`；`ui/ad-slot.js` 建容器與 `ins`，`data-ad-state="loading"`。
+2. 開始監看：`MutationObserver`（`attributeFilter: ["data-ad-status"]`）與 `setTimeout(AD_LOAD_TIMEOUT_MS)`。
+3. 建立 `script`（`async`、`crossOrigin = "anonymous"`、`src = AD_SCRIPT_URL`），掛 `error` 事件，`appendChild(document.head)`，本頁至多 1 次。
+4. `try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch → collapse`。參數恆為 `{}`（AD-11）。
+5. 結果：`filled` → `adEvent("filled")`，顯示標籤；`unfilled`、`error`、例外、逾時 → `adEvent("collapse")`。任何結果都先確認 `status === "loading"`，否則忽略（逾時後的 `filled` 不會改變狀態，AD-8）。結束後 `disconnect`、`clearTimeout`。不重試。
+
+**隱藏**（AD-10，同步、≤ 100ms）：`store.confirmApplyGoal` 成功路徑與 `importBackup` 成功後 `hasLearningRecord` 為 false 時，把 `runtime.ad` 以 `transition(status, "dismiss")` 更新並加 tag `"ad"`；`clearPart5CorrectIds` 不動。寫入失敗路徑（資料未改變）不觸發。首次還原成功（FS-5）同樣經 `importBackup`。
+
+**隱私**（AD-11）：`services/ad.js` 不取得 `state.data`；`hasLearningRecord` 只在 `ui/ad-slot.js` 用於判斷，結果不傳給腳本；`ins` 只有 AD-7 列出的屬性。
+
+**第二階段**（AC-50-05）：人類提供單元 ID 後，只改 `core/ad.js` 的 `var AD_SLOT_ID = null;`。BUILD_ID 隨 HTML 改變。填入前由主控核對標準片段（FB-73）。
+
+#### 7.25.4 測試注入與替身（DS-53、DS-54；V-AD）
+
+**正式建置不可能含單元 ID 的 5 層保護**
+
+| # | 機制 | 驗證 |
+| :--- | :--- | :--- |
+| 1 | 來源只有 `core/ad.js` 的 `null` | `npm run build` 後交付 HTML 含逐字 `var AD_SLOT_ID = null;`（FE-89） |
+| 2 | `adSlotIdOverride` **只是 `build()` 的 JS 參數**：`parseArgs` 不接受，`npm run build`、CI 無從傳入；不讀環境變數 | `build.test.js`：`--ad-slot`、`--adSlotIdOverride` → `BAD_ARGS` |
+| 3 | `write !== false` 時 `out`、`site` 落在專案 `dist/` 內 → `AD_OVERRIDE` 中止 | `build.test.js` |
+| 4 | 值須符合 `AD_SLOT_ID_PATTERN` | `build.test.js` |
+| 5 | 建置報告列出「廣告單元 ID：未設定」或值；FE-89 與 CI 的 HTML 比對 | FE-89 回報 |
+
+單元測試**不可**寫死「`AD_SLOT_ID` 必須為 null」，否則第二階段只改此值會讓測試失敗，違反 AC-50-05。第一階段的 `null` 由 FE-89 與 QA 以建置結果檢查（同版本值的處理方式，D-14）。
+
+**替身**
+
+| 用途 | 位置 | 負責 | 說明 |
+| :--- | :--- | :--- | :--- |
+| 單元測試 | `__tests__/ad-service.test.js` 內的假 document、假 script | FE-88 | 不產生檔案 |
+| FE-89 實測 | scratchpad | FE-89 | 不寫入專案 |
+| 正式 E2E（V-AD (b)） | `tests/e2e/fixtures/ad-stub.js`、`tests/tools/build-ad-test.mjs` | QA | 見下 |
+
+**QA 的 V-AD (b) 做法**：`build-ad-test.mjs` 呼叫 `build({ adSlotIdOverride: "1234567890", out: <暫存>, site: <暫存> })`；Playwright `context.route("https://jimmyfantasyworld.com/**")` 回應暫存部署目錄；`context.route(AD_SCRIPT_URL 開頭)` 回應 `ad-stub.js` 或 abort、永不回應；`serviceWorkers: "block"` 視案例而定。替身覆寫 `window.adsbygoogle.push`，依測試指定的結果對 `ins.adsbygoogle` 設 `data-ad-status`，`filled` 時放入 1 個固定高度的 `iframe`（`srcdoc`），記錄 `push` 次數與參數。`tests/` 不進部署目錄（DP-1），`tools/build.mjs` 不讀 `tests/`。
+
+#### 7.25.5 路由（FE-86；SP-1～SP-6、DS-50）
+
+| 項目 | 決定 |
+| :--- | :--- |
+| `TAB_IDS` | `router.js`、`store.js` 同步加 `about`、`contact`、`privacy`（10 個） |
+| `FIRST_RUN_TABS` | `router.js`、`store.js` 同步改為 `customizer`、`sources`、`about`、`contact`、`privacy` |
+| `sitePageReturnTab` | 4 個頁面 = `sources`、`about`、`contact`、`privacy`。`store.setTab(next)`：`next` 屬 4 頁且 `current` 不屬 4 頁 → 記 `current`；`next` 與 `current` 都屬 4 頁 → 不覆蓋；`next` 不屬 4 頁 → `null` |
+| 返回 | `router.back()` → `go(returnTarget())`；不寫 localStorage（SP-4） |
+| `#sources` | `checkHash`：`normalizeHash` 後恰為 `sources` → `go("sources", { resetReturn: true })`，再 `history.replaceState(null, "", pathname + search)`（`try`，失敗靜默）。只由 `start()` 與 `hashchange` 呼叫，`replaceState` 不會再觸發 `hashchange`。隱藏頁片段與其他片段行為不變 |
+| `#footer-first-run-back` | **移除**（元素、CSS、測試）。4 頁共用內容區上方的返回按鈕，首次模式文字即「返回難易度設定」，AC-25-07 仍成立；SD-FB-12、SD-FB-55 由此取代（SD-FB-79） |
+| 導覽 | `NAV_TAB_ORDER`、`HIDDEN_TAB_IDS` 不變；4 頁時導覽無 `aria-current` |
+| 首次模式寫入 | `setTab` 只改記憶體；V-SITE-01 以 `setItem` 替身驗證 0 次 |
+
+| 操作 | `sitePageReturnTab` | 返回 |
+| :--- | :--- | :--- |
+| 單字卡 → 關於我 | `flashcards` | 單字卡 |
+| 單字卡 → 關於我 → 隱私權政策 → 資料來源 | `flashcards` | 單字卡 |
+| 首次畫面 → 聯絡我們 | `customizer` | 難易度設定（首次畫面，無導覽） |
+| 啟動帶 `#sources` | `null` | 主控台或首次畫面 |
+| 模擬測驗中 `hashchange` 為 `#sources` | `null` | 主控台（SP-6） |
+
+#### 7.25.6 頁尾與應用內三頁（FE-86、FE-87；SP-2、SP-3、SP-7～SP-9、SC-2～SC-4）
+
+**頁尾**（`index.html`，靜態，首次繪製就有）：
+
+```
+footer#app-footer
+ ├ div#footer-links.footer-links[role=group][aria-label=網站資訊]
+ │   ├ button#footer-about.btn.btn--link[data-go=about]
+ │   ├ button#footer-contact.btn.btn--link[data-go=contact]
+ │   ├ button#footer-privacy.btn.btn--link[data-go=privacy]
+ │   └ button#footer-sources.btn.btn--link[data-go=sources]   ← 保留既有 id
+ └ p#app-version（ui/version-line.js 建立；錨點由 #footer-sources 改為 #footer-links）
+```
+
+用 `div` 不用 `nav`，避免導覽計數混淆（AC-20-03）。`.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 8px; }`；`.btn` 已有 44×44。`shell.test.js` 比對文字與順序 = `FOOTER_LINKS`。
+
+**應用內 DOM**（`views/site-pages.js`，`index.html` 加 3 個 `section.view`）：
+
+```
+section#view-about.view[aria-label=關於我][hidden]
+ └ div.site-page
+    ├ button.btn.btn--link.site-return     ← 內容區外（SP-3、AC-55-01）
+    └ div.site-page__content[data-site-page-content=about]
+       ├ h2.site-page__title[tabindex=-1]
+       └ SC-2 對照輸出
+```
+
+| `SiteBlock` / `SiteInline` | 元素 |
+| :--- | :--- |
+| `heading` | `h3.site-page__heading` |
+| `paragraph` | `p` |
+| `list` | `ul > li` |
+| `contactLine` | `p.site-page__contact`，`textContent = SOURCES_CONTACT_TEXT`，無 `tabindex`、`title`、`aria-label` |
+| `external` | `a[href][target=_blank][rel=noopener]` |
+| `page` | `button.btn--link.site-page__link[data-go=target]`（行內樣式） |
+
+- 全部經 `core/dom.js` 的 `textContent`，不拼 HTML（C-7）。`mount` 建 1 次；`show` 只 `siteReturn.refresh`，並把焦點移到 `h2`（`preventScroll`），讓鍵盤使用者從內容開始。
+- `views/sources-page.js` 同樣在 `.src-page` 最前面放返回按鈕，頁面名稱與既有內容不動。
+- `styles/75-site-pages.css`：`.site-page { max-width: var(--content-narrow); margin: 0 auto; }`；文字色 `--text`；連結用既有 `--primary`；不用 `--accent`；`overflow-wrap: anywhere`；`.site-noscript` 也放這裡。底部遮擋沿用 `body` 既有的底部留白（AC-53-05），FE-89 實測。
+
+#### 7.25.7 單一文案來源（DS-49；SC-1～SC-6）
+
+| 問題 | 決定 |
+| :--- | :--- |
+| 位置 | `src/app/core/site-content.js`：`core/` 由 `listAppFiles` 打包進 HTML，與 `core/pwa.js`、`core/version.js` 同樣可由 Node `require` |
+| `LEGAL_STATEMENTS` | 同檔定義；關於我的 2 段與 `views/sources-page.js` 的 `TEXT.originalLicense`、`TEXT.trademarkNotice` 都引用它 |
+| `SOURCES_CONTACT_TEXT` | 移到同檔；`views/sources-page.js` 仍匯出同名鍵（取自 `core`），既有測試介面不變 |
+| 建置載入 | `loadSiteContent(appDir)`；與 HTML 打包的是**同一個檔案**，因此 `--app` 指向暫存複本時，改文案會同時改 HTML 與靜態頁（V-SITE-06） |
+| 執行期 | 不 `fetch`（SC-5）；文案隨程式打包 |
+| 不重複的檢查 | `site-static.test.js`：`src/app` 非測試原始碼中，隱私權政策第 1 段首句與常數原值都只在 `core/site-content.js` 出現 1 次（V-SITE-03） |
+
+#### 7.25.8 靜態頁（FE-85；DP-8、SC-2、SC-4、SP-7）
+
+```
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>、description、canonical、Open Graph（SE-3、SE-4，無 og:image）
+<link rel="icon" href="data:,">
+<style>…static-page.css…</style>
+</head>
+<body>
+<header class="sp-header"><a href="./">回到網站首頁</a></header>
+<main>
+  <h1>頁面名稱</h1>
+  blocks：heading → h2；paragraph → p；list → ul/li；contactLine → p；external → a；page → a
+</main>
+<nav class="sp-links" aria-label="網站資訊">依 FOOTER_LINKS 的 4 個 a</nav>
+</body>
+</html>
+```
+
+- `page` 目標 `about`／`contact`／`privacy` → `about.html` 等相對路徑；`sources` → `./#sources`（SP-6）。
+- 無 `<script>`、無 adsense meta、無 `noindex`、無外部資源。
+- `static-page.css`：色值與主程式同（背景 `#eef4fa`、文字與連結符合 AC-38-04）；`max-width: 720px`；`overflow-wrap: anywhere`；連結 `min-height: 44px`、`display: inline-flex`；不用 `url()`。
+- `<main>` 只有頁面名稱與 blocks，共用元素都在外（AC-55-01）。
+
+**SC-4 比對**：應用內取 `[data-site-page-content]`，靜態頁取 `<main>`，依序取 `h1,h2,h3,p,li` 的 `textContent`，`/\s+/g` → 單一空格並 trim，以換行連接；應用內的 `h2`／`h3` 與靜態頁的 `h1`／`h2` 層級不同，但文字序列相同。
+
+#### 7.25.9 信箱（DS-52；ML-1～ML-5）
+
+| 位置 | 處理 | 任務或負責 |
+| :--- | :--- | :--- |
+| `core/site-content.js` | 新值 `email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m` | FE-83 |
+| `views/sources-page.js`、`__tests__/sources-page.test.js`、`__tests__/contact-static.test.js` | 改引用常數；移除舊字面值；測試的所在檔案改為 `core/site-content.js` | FE-87 |
+| `dist/` | 重新建置 | FE-89 |
+| `tests/static/legal-check.mjs`（連續地址）、`tests/e2e/e2e-legal.mjs` | 依 ML-3 改寫 | **QA**，§10.11 Q5；不派 PG |
+| `docs/03-design/architecture.md` | 本版已把 §7.22.2、§10.8 的舊值改為引用 | SD（完成） |
+| `docs/03-design/tasks.json` FE-77 | 仍有舊的空白形式；本次指示既有任務內容不動，不符 ML-3 判定、不影響 AC-55-04 | 主控決定（SD-FB-78） |
+| `docs/04-qa/bug-reports/` | 由 QA 與主控決定（DS-52） | QA、主控 |
+
+**自檢**（FE-89 的 `site-static.test.js`）：只掃 `src/app`、`tools` 與建置輸出，依 ML-3 以字串拼接組規則、依 ML-4 判定。掃描全部 `git ls-files` 的 V-MAIL-01 **不放進 `npm test`**：`legal-check.mjs` 由 QA 修改前必定失敗，放進去 PG 就無法完成（SD-FB-83）。
+
+#### 7.25.10 實測方法（FE-89）
+
+以 playwright-core 搭配本機 Chrome 或 Edge，腳本放 scratchpad，寬度 375×667、1366×768。
+
+| 環境 | 項目 | 判定 |
+| :--- | :--- | :--- |
+| `file://` `dist/english-master-track.html` | 主控台第 3 格、結算區（K = 48、Q = 200；K = 200） | 逐字；≥ 14px；`tabular-nums`；不裁切；AC-39-09 量測並回報 |
+| 同上 | 頁尾 | 4 個連結順序、≥ 44×44、版本行在其下、375px 換行不裁切 |
+| 同上 | 4 頁開啟與返回（一般、首次） | 回原畫面；首次模式無狀態鍵；`setItem` 0 次 |
+| 同上 | `#sources` | 開啟後 `location.hash` 為空；重新載入回一般起始畫面 |
+| 同上 | 請求與 Console | 非 file 請求 0；Console 無本系統錯誤 |
+| 路由模擬正式網址到 `dist/site` | 第一階段 | 跨來源請求 0；`#ad-slot` 不存在；`ins.adsbygoogle` 0；`window.adsbygoogle` 未定義 |
+| 同上 | 靜態頁 | 停用 JS 可讀；無水平捲軸；文字依 SC-4 與應用內相同 |
+| 暫存測試建置 + scratchpad 替身 | `filled` | 切頁 3 次：`ins` 為同一節點（比對參考）、`push` 1 次、腳本 1 次；只有主控台可見；距離 ≥ 48px |
+| 同上 | `filled`、`unfilled`、失敗、永不回應 | 4 個學習區塊 `getBoundingClientRect` 前後差 = 0；`unfilled` 後容器 `display: none`；永不回應以縮短的假計時或實等 10 秒 |
+| 同上 | 切頁時 `loading` | 主控台載入中切到單字卡，`ins.getBoundingClientRect().width > 0` |
+
+**不合格時**：只能修改 `styles/85-ad.css`、`styles/75-site-pages.css`、`src/app/site/static-page.css`、`styles/10-dashboard.css` 的 `.db-stat` 系列版面規則；不得改文字、不得加 `nowrap`。原因在其他檔案時標 `blocked` 回報主控。
 
 ---
 
@@ -3242,7 +3603,7 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | :--- | :--- | :--- | :--- |
 | `pwa-core.test.js`（改） | FE-77 | 期望物件的 `PWA_TEXTS.updateNotice` 改為 `有新版本，請更新版本`、`updateButton` 改為 `更新版本`（逐字、全形逗號）；其餘鍵與凍結斷言不變 | UP-6、AC-36-03 |
 | `pwa-notice.test.js`（改） | FE-77 | `span.textContent` 逐字 `有新版本，請更新版本`、按鈕 `更新版本`；首次模式 `host.textContent` 逐字 `有新版本，請更新版本更新版本`；新增：`host.textContent` 不含 `重新整理`；其餘行為案例（hidden 切換、點擊 2 次 → `onReload` 1 次）不變 | UP-6、V-PWA-10、AC-36-03 |
-| `sources-page.test.js`（改） | FE-77 | 以既有 `renderInSandbox` 新增：(1) `P.SOURCES_CONTACT_TEXT` 逐字等於 `email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m`，且結構檢查：以 `"email: "` 開頭、其後以單一半形空格分隔的 27 個單字元 token、無全形字元、無連續空格；(2) `.src-contact` 節點恰 1 個，`tagName === "P"`，`className === "src-muted src-contact"`，`textContent.trim()` 逐字等於常數；(3) 為 `.src-page` 的**最後一個**子元素，位於 `.src-project` 之後；(4) 非連結、不可聚焦：自身與所有祖先 `tagName !== "A"`，`attrs` 無 `href`、`tabindex`、`role`、`data-go`，節點的 `addEventListener` 呼叫 0 次（測試以包裝假 DOM 記錄）；(5) 整個 `rootEl.textContent` 不含 `mailto:`，也不含由常數推導的去空格位址（不分大小寫）；(6) 既有 AC-23-02 聲明 4 條與「原創內容來源」案例仍通過 | AC-23-07 (1)(2)(7)、L-7、E-118 |
+| `sources-page.test.js`（改） | FE-77 | 以既有 `renderInSandbox` 新增：(1) `P.SOURCES_CONTACT_TEXT` 逐字等於當時的常數值（v0.14 註：現行值依 ML-1，舊值不再列出），且結構檢查：以 `"email: "` 開頭、其後以單一半形空格分隔的 27 個單字元 token、無全形字元、無連續空格；(2) `.src-contact` 節點恰 1 個，`tagName === "P"`，`className === "src-muted src-contact"`，`textContent.trim()` 逐字等於常數；(3) 為 `.src-page` 的**最後一個**子元素，位於 `.src-project` 之後；(4) 非連結、不可聚焦：自身與所有祖先 `tagName !== "A"`，`attrs` 無 `href`、`tabindex`、`role`、`data-go`，節點的 `addEventListener` 呼叫 0 次（測試以包裝假 DOM 記錄）；(5) 整個 `rootEl.textContent` 不含 `mailto:`，也不含由常數推導的去空格位址（不分大小寫）；(6) 既有 AC-23-02 聲明 4 條與「原創內容來源」案例仍通過 | AC-23-07 (1)(2)(7)、L-7、E-118 |
 | `contact-static.test.js`（新） | FE-77 | 以 `build({ write: false, log() {}, warn() {} })` 對專案預設 `src/app`、`src/data`、`package.json` 建置（不寫 `dist/`）：`html` 不含 `mailto:`（不分大小寫）、不含去空格位址（不分大小寫）、`SOURCES_CONTACT_TEXT` 恰 1 次、不含 `有新版本，重新整理`、含 `有新版本，請更新版本` 與 `更新版本`、`emt-app-version` 為 `package.json` `version`（1.1.0）；回傳的 `sw.js` 內容（`r.site.files.find((f) => f.path === "sw.js").bytes`，同 `build.test.js` 寫法）不含 `mailto:` 與去空格位址；另掃描 `src/app/` 非 `__tests__` 檔案（`.js`、`.css`、`.html`、`.txt`）：無 `mailto:`、無去空格位址、常數原值只在 `views/sources-page.js` 出現 1 次；`70-sources.css` 的 `.src-contact` 規則不含 `nowrap`、`user-select`、`--accent`、`#f7893b` | AC-23-07 (2)(3)、L-7 (3)、FB-62、DS-40 (3)、AC-36-03、AC-42-04 |
 
 **建置與交付檢查（FE-77，附指令與輸出）**
@@ -3456,6 +3817,132 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 
 **人工驗收**（不阻擋本次發布判定，併入既有待人工清單）：TC-TRK-H2 加 `lockedReview` 與清除按鈕的 TalkBack、VoiceOver 朗讀；TC-VER-H2 部署後比對版本 1.2.0；TC-VER-H3 已安裝 App 出現更新提示並顯示 1.2.0（E-131）。
 
+### 10.11 v0.14 測試範圍（PRD v0.19；契約 V-ANS、V-AD、V-SITE、V-SEO、V-MAIL、DS-47～DS-56）
+
+**中間狀態的已知失敗**
+
+| 完成到 | 預期失敗 | 由誰修復 |
+| :--- | :--- | :--- |
+| FE-83 | `dashboard.test.js`、`naming.test.js`（`statAccuracyLabel` 已移除）、`part5.test.js`（`clearConfirmMustInclude`） | FE-84 |
+| FE-84、FE-85 同批 | 只有對方任務的測試 | 兩者都完成 |
+| FE-85 之後 | 應全過 | — |
+| FE-86～FE-89 | 應全過 | — |
+
+`tests/`（QA）在更新前會有下方列出的預期失敗，不算缺陷。
+
+**單元測試（`npm test`）**
+
+| 檔案 | 任務 | 必含案例 | 契約 |
+| :--- | :--- | :--- | :--- |
+| `site-content.test.js`（新） | FE-83 | 以 `node:vm` 取 `data-schema.ts` 中各常數的字面值，與模組**深度相等**；`SITE_ORIGIN`、canonical、sitemap 一致；description 50～160 字元；V-SEO-06 字詞；AC-54-02 字詞 0 次；AC-53-02 無禁用宣稱；常數為 JSON 相容 | V-SITE-02、V-SEO-01、V-SEO-06 |
+| `ad-core.test.js`（新） | FE-83 | V-AD-01、V-AD-02 判定表；`decide` 全組合；轉移表（含終態不回頭） | V-AD-01、V-AD-02 |
+| `part5flow.test.js`（改） | FE-83 | V-ANS-01 全表；含不存在與重複 id；Q = 0 → `null`；無 NaN | V-ANS-01 |
+| `goal.test.js`、`layout.test.js`（改） | FE-83 | `TAB_LABELS` 10 項；`:198` 的聯集加 3 頁；`clearConfirmMustInclude`；`statPart5Label`；`:76` 移除舊鍵 | SP-1、AS-6 |
+| `load-order.test.js`（改） | FE-83 | 兩個新 core 模組載入時不取用其他模組 | LD-1 |
+| `dashboard.test.js`、`naming.test.js`（改） | FE-84 | `:249`、`:305`、`:708`、`:789` 與 `naming :246`～`:250` 改寫；V-ANS-01 的畫面字串；Q = 0 顯示「—」；作答、清除後更新 | AS-3、AS-4、AC-49-01、AC-49-02 |
+| `part5.test.js`（改） | FE-84 | `:860`、`:880`、`:1189` 改寫；結算已答對行 a = 0 也顯示；`allCorrect` 無已答對行；Q = 0 無節點；對話框 2 段新文字；不含舊句 | AS-5、AS-6 |
+| `store-track.test.js`（改） | FE-84 | V-ANS-02：主控台、結算、`correctCount` 的 K、Q 相同；作答後 `totalAnswered` 仍更新 | V-ANS-02、V-ANS-03 |
+| `build.test.js`（改） | FE-85 | `:191`、`:596`、`:785`～`:789`、`:810`、`:609`、`:896`、`:702`、`:990`、`:1024` 依 §5.9 調整；SEO 順序與逐字；B-22～B-25 每種中止碼；注入的 5 層保護；V-AD-03 兩次建置差異；V-SITE-06 決定性 | SE-2、SE-9、AD-15、V-AD-03、V-SITE-06、V-SEO-07 |
+| `site-pages-render.test.js`（新） | FE-85 | `renderStaticPage`、`renderHomeHead`、`renderNoscript`、`escapeHtml`；DP-8 結構；SC-2 靜態端對照 | DP-8、SE-3～SE-6、V-SEO-02～05 |
+| `pwa-core.test.js`（改） | FE-85 | `:95` 改 13 檔；`precached` 與 7 項一致 | DP-9 |
+| `shell.test.js`（改） | FE-85、FE-86 | FE-85：`:403`、`:418`、`:474` 改為標記；FE-86：section、頁尾與 `FOOTER_LINKS` 一致 | SE-2、SP-2 |
+| `store-site.test.js`（新） | FE-86 | §7.25.5 的 `sitePageReturnTab` 表；首次模式 `setItem` 0 次；`initAd` 只生效 1 次；`adEvent` 依轉移表；AD-10 (a)(b)(c)(d) | SP-3、SP-4、AD-5、AD-10 |
+| `router-motion.test.js`（改） | FE-86 | `:513` 移除；`:593` 改 10 個；`back`；`#sources`（V-SITE-07）；隱藏頁片段回歸 | SP-3、SP-6、V-SITE-07 |
+| `first-run.test.js`（改） | FE-86 | `:461`～`:464`、`:481`～`:483` 改寫；首次模式可到 5 個頁面 | SP-4、AC-25-07 |
+| `version-line.test.js`（改） | FE-86 | 錨點改 `#footer-links`；`:127`、`:164` 調整 | VR-7 |
+| `site-pages.test.js`（新） | FE-87 | SC-2 應用內對照；SP-7 層級；`contactLine` 非連結；`external` 含 `rel`；返回按鈕在內容區外；聯絡我們內容區恰 2 個元素，無表單 | V-SITE-01、V-SITE-02、V-MAIL-02 |
+| `sources-page.test.js`、`contact-static.test.js`、`legal-static.test.js`（改） | FE-87 | 常數改引用；`contact-static :112` 的檔案改為 `core/site-content.js`；V-LGL-05 範圍加入三頁 | ML-1、V-LGL-05 |
+| `ad-service.test.js`（新） | FE-88 | V-AD-04 全部結果；逾時後 `filled` 忽略；`push` 恆為 `{}`；不重試；無 `console.error` | V-AD-04、AD-7、AD-8、AD-11 |
+| `ad-slot.test.js`（新） | FE-88 | `ineligible` 不建 DOM；容器與 `ins` 只建 1 次、父節點不變；主控台重繪後為同一節點；`85-ad.css` 的 `loading` 規則不含 `display: none`；標籤 filled 才顯示 | DS-47、DS-48、AD-9、AD-14 |
+| `site-static.test.js`（新） | FE-89 | 真實建置：V-SITE-03、V-SITE-04、V-SEO-01～V-SEO-07；ML-3 與 ML-4（範圍見 §7.25.9）；`AD_SCRIPT_URL` 不在 `sw.js`；「正確率」「累計答對」不在畫面文字來源；`CURRENT_SCHEMA_VERSION` = 3 | V-SITE、V-SEO、V-MAIL-02、V-ANS-03、DS-56 |
+
+**建置與交付檢查（FE-89，附指令與輸出）**
+
+| 檢查 | 判定 | AC／契約 |
+| :--- | :--- | :--- |
+| 開工前 | `package.json` `version` = 1.3.0，否則標 `blocked`，不得自行修改 | Q-85 A、MC-07 |
+| `npm test`、`npm run validate:data` | 全數通過、錯誤 0 | DS-56 |
+| `npm run build` 兩次 | `dist/` 14 檔 SHA-256 兩次相同；兩份 HTML 相同；`dist/site` 恰 13 檔；`emt-app-version` = 1.3.0；BUILD_ID 一致；回報新舊值 | AC-36-01、AC-36-07、AC-42-02、AC-57-06 |
+| 第一階段 | 交付 HTML 含 `var AD_SLOT_ID = null;`；無 `<script src`；有 AD-15 meta；`ads.txt` 與 `sources/deploy/ads.txt` 相同 | AC-50-02、AC-50-03、AC-50-09 |
+| 匯出備份 | `schemaVersion` 3，欄位集合與 v1.2.0 相同 | AC-49-06、DS-56 |
+| 實測 | 依 §7.25.10 | 見該節 |
+
+**主控檢查（FE-89 完成後）**
+
+| # | 項目 | 方法 |
+| :--- | :--- | :--- |
+| M-1 | MC-07 的 `package.json` diff 只有 `version` 1 行 | `git diff package.json` |
+| M-2 | FE-83～FE-89 未越界：`tests/`、`src/data/`、`docs/`、`package-lock.json`、`.github/` diff 為 0；`tools/` 只有 §12.13 的 3 檔 | `git status`、`git diff --stat` |
+| M-3 | FE-89 實測齊全；未完成時主控以 Windows Chrome 執行 §7.25.10 | 讀回報或實測 |
+| M-4 | **MC-08 已取得人類授權並完成**，否則不得 push（部署會失敗） | 詢問人類、`git diff .github/` |
+
+**給 QA 的項目（不派給 PG）**
+
+| # | 範圍 | 內容 |
+| :--- | :--- | :--- |
+| Q1 | 新增 AC | AC-49-01～AC-57-06 共 57 個，各至少 1 個 TC；E-135～E-155 併入。AC-50-10、AC-52 實際廣告內容列人工 |
+| Q2 | 修改的 AC | §13.11 列出的 36 個 |
+| Q3 | 舊文字、舊結構 | 下表 |
+| Q4 | V-AD 基礎設施 | `tests/e2e/fixtures/ad-stub.js`、`tests/tools/build-ad-test.mjs`（§7.25.4）；不得進部署目錄 |
+| Q5 | 信箱 | `tests/static/legal-check.mjs` 移除連續地址（ML-5）；`tests/e2e/e2e-legal.mjs` 改新值；新增 `tests/static/mail-scan.mjs` 掃 `git ls-files`（V-MAIL-01）；歷史 QA 紀錄是否改寫與主控決定 |
+| Q6 | 回歸 | `npm test`、`validate:data`、`static-check`、`pwa-static`、越界檢查（第 9 輪，可由 `boundary-r8.mjs` 複製；授權例外：MC-07 的 `package.json`、MC-08 的 `static.yml`）；全部 `e2e-*`，含 AC-51-03 效能重測 |
+
+**Q3：SD 已搜尋、確定仍是舊值的位置**
+
+| 檔案 | 位置 | 要做的事 |
+| :--- | :--- | :--- |
+| `tests/static/static-check.mjs` | `:42`～`:48` | 白名單加逐字 canonical |
+| 同上 | `:183` | `<title>` 改 `SITE_HOME_SEO.documentTitle` |
+| 同上 | `:257`、`:258` | 改 `clearConfirmMustInclude` 新值 |
+| 同上 | `:270` | 排除 AD-7 允許的字串；確認 `googleapis` 不命中 |
+| `tests/static/pwa-static.mjs` | `:45`、`:190`、`:193` | 8 檔 → 13 檔；`-eq 8` 依 MC-08 結果 |
+| 同上 | `:84`、`:85` | `<link>` 2 個；`<title>` 新值 |
+| `tests/e2e/e2e-layout.mjs` | `:272` | 移除 `#footer-first-run-back` |
+| 同上 | `:403`、`:404`、`:418` | 第 3 格新 class 與文字 |
+| `tests/e2e/e2e-firstrun.mjs` | `:103`～`:105` | 改點 `.site-return` |
+| `tests/e2e/e2e-progress.mjs` | `:37`、`:61`、`:306` | 第 3 格 |
+| `tests/e2e/e2e-content.mjs` | `:23`、`:94`、`:97`、`:98` | 第 3 格 |
+| `tests/e2e/e2e-track.mjs`、`e2e-reinit.mjs`、`e2e-track-p5.mjs`、`e2e-lock.mjs` | `:498`；`:51`；`:69`；`:81` | 第 3 格 class |
+| `tests/e2e/e2e-goal.mjs` | `:185` | 舊標籤 |
+| `tests/e2e/e2e-lock.mjs` | `:268`、`:277`、`:283`、`:296`、`:339`、`:391` | 累計行改已答對行；對話框新文字 |
+| `tests/e2e/e2e-track-p5.mjs` | `:301`、`:356` | 同上 |
+| `tests/e2e/e2e-version.mjs` | `:186` | 1.2.0 → 1.3.0 |
+| `tests/tools/tc-desc.json`、`docs/04-qa/test-plan.md` | 相關 TC | 期望文字改現行 AC |
+
+**新增 TC 的必驗重點**
+
+| AC | 重點 | 環境 |
+| :--- | :--- | :--- |
+| AC-49-01～08 | 字串逐字、(29, 200) 顯示 15%；一致性含不存在 id；v1.2.0 舊資料（`git show` 取舊交付檔） | 375、1366、`file://` |
+| AC-50-01、02 | 5 種網址；第一階段正式網址 | V-AD (b) |
+| AC-50-03、05 | 兩次建置比對（同 V-AD-03） | 靜態 |
+| AC-50-04、AC-52-06 | `ins` 節點同一性、`push` 次數、靜置 5 分鐘 | V-AD (b) |
+| AC-50-06～08 | 全請求匯出；`zzsentinelword` 命中 0 | V-AD (b) |
+| AC-51-01 | 5 種失敗；第 11 秒才到的 `filled` 被忽略 | V-AD (b) |
+| AC-51-02、03 | 效能 | 基準環境 |
+| AC-52-03、05 | 距離、Layout Instability、1366 無捲軸到有捲軸的情況 | 全尺寸 |
+| AC-53～55 | 文案逐字與禁用字詞；無表單 | 應用內、靜態 |
+| AC-56-01～10 | 原始 HTML 解析；爬蟲規則解析；`file://` 0 請求 | 靜態、`file://` |
+| AC-57-01～06 | 頁尾、返回、SC-4 比對、離線 | 全尺寸、V-PWA |
+
+**部署後由主控驗證**（須正式網址，push 後執行；人類項目另註）
+
+| # | 項目 | 依據 |
+| :--- | :--- | :--- |
+| D-1 | GitHub Actions 部署成功（前提 MC-08） | AC-36-07 |
+| D-2 | 正式網址 13 檔皆 200，內容與 artifact 相同；無 `docs/`、`src/`、`sources/` | AC-36-07、AC-57-06 |
+| D-3 | `/robots.txt`、`/sitemap.xml`、`/ads.txt` 回應 200；sitemap 每個網址 200 且未 `noindex` | AC-56-08、AC-56-09、AC-50-09 |
+| D-4 | `/icons/icon-512.png` 回應 200 | AC-56-03 |
+| D-5 | `/privacy.html` 直接開啟，有無本系統狀態都可讀 | AC-53-04 |
+| D-6 | 主控台跨來源請求 0；無版位 | AC-50-02 |
+| D-7 | 版本行「版本 1.3.0（建置 xxxxxxx）」；已安裝 App 出現更新提示 | AC-42-02、AC-36-03 |
+| D-8 | 靜態頁連網不被 service worker 攔截；離線開靜態頁為瀏覽器離線頁 | AC-57-05、E-152 |
+| D-9 | 第 8 輪遺留：H-8-1（TC-M07 效能）、H-8-2（TC-VER-H2、TC-VER-H3、TC-PWA-H4），`docs/04-qa/test-report.md` §19.9 | QA 第 8 輪 |
+| D-10 | `tests/static/legal-check.mjs` 已無連續地址（V-MAIL-01 命中 0） | ML-5、AC-55-04 |
+| D-11 | 人類：讀過公開文案（FB-71）、AdSense 後台與 Privacy & messaging、Search Console | AC-50-10、R-28 |
+
+**給 QA 的已知設計行為**：(1) `#view-*` 外的 `#ad-slot` 在第一階段不存在，不是缺陷。(2) `collapsed` 後容器仍可能留在 DOM（`display: none`）。(3) 首次模式返回鈕文字為「返回難易度設定」，`#footer-first-run-back` 已移除。(4) `html[data-ad-env]` 的 `scrollbar-gutter` 只在環境成立時存在。(5) 頁尾 `#footer-links` 是 `div[role=group]`，不算導覽。
+
 ---
 
 ## 11. 技術風險與對策
@@ -3565,6 +4052,17 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | T-101 | （v0.13）說明文字與清除按鈕讓 375px 擁擠、重疊或產生水平捲軸；文字寬度因系統字型而異 | AC-48-11、AC-48-12、AC-40-02 不通過 | `flex-basis: 100%` 獨佔一行、可換行；FE-82 實測 2 種寬度；只調整版面規則 |
 | T-102 | （v0.13）常駐清除入口誤觸，且清除無法復原（PRD R-26 風險 (1)） | 使用者遺失答對紀錄 | 確認對話框防護（AC-46-08）；次要按鈕樣式；不用主要或危險色強調 |
 | T-103 | （v0.13）`tests/` 未更新就跑 QA，舊行為斷言誤判失敗；或 QA 只改 PRD 列出的案例而漏掉 TC-45-07、e2e-version、e2e-pwa-update | QA 誤判缺陷 | §10.10 列出檔案與行號；QA 先更新再跑；PG 不得代改 |
+| T-104 | （v0.14）**`static.yml:42` 寫死 8 檔**，13 檔輸出會讓部署中止；Q-46 的授權已用完 | 網站無法更新 | 列 MC-08，須人類授權；M-4 擋在 push 前（SD-FB-77）。**SD 無法自行解決** |
+| T-105 | （v0.14）廣告框被重建或換父節點，等於請求新廣告 | 違反 AD-9、Google 規定 | 容器在 `#app-main` 之外；切頁只靠 CSS；`ad-slot.test.js` 與 §7.25.10 比對節點同一性 |
+| T-106 | （v0.14）真實 AdSense 可能對 `ins` 或祖先設 inline `height`，甚至帶 `!important`；替身無法重現 | `loading` 或非主控台時廣告短暫露出 | `max-height: 0` 與 `overflow: hidden` 雙重處理；學習區塊在版位之前，位移仍為 0。**只有第二階段真實廣告才能驗證**，列 FB-73 核對項（SD-FB-81） |
+| T-107 | （v0.14）AdSense 量寬度的時機晚於 `push`，使用者已切頁 | 寬度 0 導致失敗 | `loading` 不論頁面都不用 `display: none`；§7.25.10 量測。`collapsed`、`dismissed` 後的第三方錯誤訊息屬瀏覽器與腳本，不是本系統錯誤 |
+| T-108 | （v0.14）非覆蓋式捲軸在廣告撐高時出現，置中內容左右移動 | 違反 AC-52-05 | `html[data-ad-env] { scrollbar-gutter: stable }`（SD-FB-80）；QA 在 1366 量測 |
+| T-109 | （v0.14）測試注入值流入正式產物 | 第一階段就有廣告請求 | §7.25.4 的 5 層保護 |
+| T-110 | （v0.14）文案在應用內與靜態頁的渲染對照不一致 | 違反 AC-57-03 | SC-4 比對列入 `site-static.test.js` 與 §7.25.10 |
+| T-111 | （v0.14）375px 第 3 格 2～3 行，列高增加，可能影響 AC-39-09 首屏 | AC-39-09 不符 | FE-89 量測；只可調間距。若調整間距仍不符，標 `blocked` 由主控回 SA／PM |
+| T-112 | （v0.14）`<noscript>` 或 JSON-LD 使既有檢查誤判，放寬規則時順帶打開其他漏洞 | AC-19-01 防護變弱 | 逐字白名單，不改 `FORBIDDEN_PATTERNS` 既有項目（§5.9） |
+| T-113 | （v0.14）`tests/` 未更新就跑 QA，新 class、新標題、13 檔造成大量預期失敗 | QA 誤判 | §10.11 Q3 列出位置；QA 先更新再跑 |
+| T-114 | （v0.14）Windows checkout 的 CRLF 使靜態頁換行與 CI 不同 | 違反 DP-7 | 所有靜態頁輸入先正規化為 LF；`site-pages-render.test.js` 驗證無 `\r` |
 
 ---
 
@@ -3890,6 +4388,44 @@ FE-19 與 FE-18 的先後（v0.3）：**FE-19 在前**。理由：FE-18 的 done
 本次由主控或人類 commit，SD 與 PG 不 commit。
 
 任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 82（FE-01～FE-82），共 108 個；主控手動項目 MC-01～MC-06。
+
+### 12.13 v0.14 增量任務與執行批次（PRD v0.19、契約 v0.19）
+
+既有 108 個任務與 MC-01～MC-06 全部 `done`，內容與 status 不變。不需 CT 任務（DS-56）。
+
+| ID | 標題 | 批次 | dependsOn | paths |
+| :--- | :--- | :--- | :--- | :--- |
+| FE-83 | L1 常數與純函式：文案、廣告、已答對 | v0.14-1 | FE-82（已 done） | `core/site-content.js`（新）、`core/ad.js`（新）、`core/constants.js`、`core/layout.js`、`core/part5flow.js`、`__tests__/site-content.test.js`（新）、`__tests__/ad-core.test.js`（新）、`__tests__/part5flow.test.js`、`__tests__/goal.test.js`、`__tests__/layout.test.js`、`__tests__/load-order.test.js` |
+| FE-84 | 已答對顯示：主控台第 3 格、結算區、對話框 | v0.14-2 | FE-83 | `views/dashboard.js`、`views/part5.js`、`styles/10-dashboard.css`、`styles/40-part5.css`、`__tests__/dashboard.test.js`、`__tests__/naming.test.js`、`__tests__/part5.test.js`、`__tests__/store-track.test.js` |
+| FE-85 | 建置：SEO、`<noscript>`、靜態頁、爬蟲檔、13 檔、測試注入 | v0.14-2 | FE-83 | `tools/build.mjs`、`tools/site-pages.mjs`（新）、`tools/serve.mjs`、`site/static-page.css`（新）、`core/pwa.js`、`index.html`（head、標記）、`__tests__/build.test.js`、`__tests__/site-pages-render.test.js`（新）、`__tests__/pwa-core.test.js`、`__tests__/shell.test.js` |
+| FE-86 | 路由、store 與頁尾殼層 | v0.14-3 | FE-85 | `state/store.js`、`ui/router.js`、`ui/version-line.js`、`index.html`（頁尾、section）、`styles/00-base.css`、`__tests__/store-site.test.js`（新）、`__tests__/router-motion.test.js`、`__tests__/first-run.test.js`、`__tests__/version-line.test.js`、`__tests__/shell.test.js` |
+| FE-87 | 應用內三頁、返回按鈕、資料來源頁引用共用文案 | v0.14-4 | FE-86 | `ui/site-return.js`（新）、`views/site-pages.js`（新）、`views/sources-page.js`、`styles/75-site-pages.css`（新）、`styles/70-sources.css`、`__tests__/site-pages.test.js`（新）、`__tests__/sources-page.test.js`、`__tests__/contact-static.test.js`、`__tests__/legal-static.test.js` |
+| FE-88 | 廣告執行期：版位、載入、結果、隱藏 | v0.14-4 | FE-86 | `services/ad.js`（新）、`ui/ad-slot.js`（新）、`main.js`、`styles/85-ad.css`（新）、`__tests__/ad-service.test.js`（新）、`__tests__/ad-slot.test.js`（新） |
+| FE-89 | 交付關卡：靜態檢查、全測試、375／1366 實測、重新建置 | v0.14-5 | FE-84、FE-87、FE-88；manualPrereqs MC-07 | `__tests__/site-static.test.js`（新）；只在實測不合格時：`styles/85-ad.css`、`styles/75-site-pages.css`、`site/static-page.css`、`styles/10-dashboard.css`；`dist/english-master-track.html`、`dist/site/` 下 13 檔 |
+
+（FE 任務的 paths 省略前綴 `src/app/`，`tools/`、`dist/` 除外。`tools/` 歸屬 pg-frontend，同 FE-47、FE-63 慣例。）
+
+| 順序 | 項目 | 執行者 | 前置 | 說明 |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | FE-83 | pg-frontend | 無 | 完成後 `dashboard`、`naming`、`part5` 測試預期失敗 |
+| 2 | FE-84、FE-85（可平行） | pg-frontend | FE-83 | paths 不重疊 |
+| 3 | FE-86 | pg-frontend | FE-85 | `index.html`、`shell.test.js` 接在 FE-85 之後 |
+| 4 | FE-87、FE-88（可平行） | pg-frontend | FE-86 | paths 不重疊 |
+| 5 | MC-07：`package.json` 改為 1.3.0 | 主控 | FE-84、FE-87、FE-88 | Q-85 A 一次性授權；只改 `version` 1 行 |
+| 6 | FE-89 | pg-frontend | FE-84、FE-87、FE-88、MC-07 | 必須最後執行 |
+| 7 | QA | qa | FE-89 | §10.11 |
+| 8 | MC-08：`static.yml` 檔案數 | 主控 | **人類授權**、FE-89 | 沒有授權就不得 push |
+| 9 | 部署後驗證 | 主控 | push | §10.11 D-1～D-11 |
+
+**PG 不得越界的目錄**
+
+| 代理 | 可寫 | 不得寫入 |
+| :--- | :--- | :--- |
+| pg-frontend（FE-83～FE-89） | 只有上表 paths | `src/data/`、`tests/`、`docs/`、`package.json`、`package-lock.json`、`.github/`、`sources/`、`src/app/assets/`、`__tests__/_samples/`；只有 FE-89 可寫 `dist/` |
+
+本次由主控或人類 commit，SD 與 PG 不 commit。
+
+任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 89（FE-01～FE-89），共 115 個；主控手動項目 MC-01～MC-08。
 
 ---
 
@@ -4530,6 +5066,92 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 
 **回歸**：AC-46-08（清除對話框，FE-81 測試保留）；AC-45-01、AC-45-02、AC-45-05、AC-45-07、AC-46-03、AC-46-10、AC-47-01～AC-47-08（FE-80、FE-82）；AC-40-01、AC-40-02（FE-82 實測）；AC-19-01、AC-21-01、AC-36-01、AC-36-07、AC-42-04（FE-82 建置檢查）。其餘 275 個應驗收 AC 的對照與 §13～§13.9 相同（300 − 新增 12 − 修改 13）；**300 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。
 
+### 13.11 v0.14 追加對照（PRD v0.19：384 個 AC，本版應驗收 357 個）
+
+**新增 AC（57）**
+
+| AC | 任務 | 設計 | 驗證 |
+| :--- | :--- | :--- | :--- |
+| AC-49-01、AC-49-02 | FE-83、FE-84、FE-89 | §7.25.1 | `part5flow.test.js`、`dashboard.test.js`；QA TC |
+| AC-49-03 | FE-84、FE-89 | §7.25.1 | `part5.test.js`；QA TC |
+| AC-49-04、AC-49-05 | FE-83、FE-84、FE-89 | §7.25.1 | `store-track.test.js`；QA TC |
+| AC-49-06、AC-49-07 | FE-84、FE-89 | §7.25.1、§7.25.2 | `store-track.test.js`、`site-static.test.js`；QA TC |
+| AC-49-08 | FE-84、FE-89 | §7.25.1 | §7.25.10；QA TC |
+| AC-50-01、AC-50-02 | FE-83、FE-88、FE-89 | §7.25.3 | `ad-core.test.js`、§7.25.10；QA TC |
+| AC-50-03、AC-50-05 | FE-85、FE-89 | §5.9、§7.25.4 | `build.test.js`；QA TC |
+| AC-50-04 | FE-88、FE-89 | §7.25.3 | `ad-slot.test.js`；QA TC |
+| AC-50-06 | FE-85、FE-88、FE-89 | §5.9、§7.25.3 | `sw.test.js`（回歸）、`site-static.test.js`；QA TC |
+| AC-50-07、AC-50-08 | FE-88、FE-89 | §7.25.3 | `ad-service.test.js`；QA TC |
+| AC-50-09 | FE-85、FE-89 | §5.9 B-20、B-24 | `build.test.js`；QA TC |
+| AC-50-10 | FE-88 | §7.25.3（不自建同意、不保存） | 程式碼檢查；**人類實機** |
+| AC-51-01、AC-51-04 | FE-88、FE-89 | §7.25.3 | `ad-service.test.js`、§7.25.10；QA TC |
+| AC-51-02、AC-51-03 | FE-88、FE-89 | §7.25.3 | QA 效能 TC |
+| AC-52-01 | FE-88、FE-89 | §7.25.3 | `ad-slot.test.js`、§7.25.10；QA TC |
+| AC-52-02 | FE-86、FE-88、FE-89 | §7.25.3 | `store-site.test.js`；QA TC |
+| AC-52-03、AC-52-04、AC-52-05 | FE-88、FE-89 | §7.25.3 DS-48 | §7.25.10；QA TC |
+| AC-52-06 | FE-88、FE-89 | §7.25.3 DS-47 | `ad-slot.test.js`；QA TC |
+| AC-52-07 | FE-88、FE-89 | §7.25.3 | QA TC |
+| AC-53-01 | FE-86、FE-87、FE-89 | §7.25.5、§7.25.6 | `store-site.test.js`；QA TC |
+| AC-53-02、AC-53-06 | FE-83、FE-87、FE-89 | §7.25.7 | `site-content.test.js`；QA TC |
+| AC-53-03、AC-53-05 | FE-87、FE-89 | §7.25.6 | §7.25.10；QA TC |
+| AC-53-04 | FE-85、FE-89 | §7.25.8 | `site-pages-render.test.js`；部署後 D-5 |
+| AC-54-01、AC-54-02 | FE-83、FE-87、FE-89 | §7.25.7 | `site-content.test.js`；QA TC |
+| AC-55-01、AC-55-02、AC-55-03 | FE-83、FE-85、FE-87、FE-89 | §7.25.6、§7.25.8 | `site-pages.test.js`、`site-static.test.js`；QA TC |
+| AC-55-04 | FE-83、FE-87、FE-89（各自範圍）；**全掃描歸 QA** | §7.25.9 | `site-static.test.js`；QA `mail-scan.mjs`；主控 D-10 |
+| AC-56-01、AC-56-02、AC-56-03 | FE-83、FE-85、FE-89 | §5.9、§7.25.8 | `build.test.js`、`site-static.test.js`；部署後 D-4 |
+| AC-56-04 | FE-85、FE-87、FE-89 | SP-7、§7.25.6 | `site-pages.test.js`；QA TC |
+| AC-56-05、AC-56-06 | FE-83、FE-85、FE-89 | §5.9 | `site-pages-render.test.js`；QA TC |
+| AC-56-07 | FE-83、FE-89 | §7.25.7 | `site-content.test.js`；QA TC |
+| AC-56-08、AC-56-09 | FE-83、FE-85、FE-89 | §5.9 B-23 | `build.test.js`；部署後 D-3 |
+| AC-56-10 | FE-85、FE-89 | §5.9 | §7.25.10；QA TC |
+| AC-57-01 | FE-86、FE-87、FE-89 | §7.25.5、§7.25.6 | `store-site.test.js`、`shell.test.js`；QA TC |
+| AC-57-02 | FE-87、FE-89 | §7.25.6 | §7.25.10；QA TC |
+| AC-57-03 | FE-83、FE-85、FE-87、FE-89 | §7.25.7、§7.25.8 | `site-static.test.js`；QA TC |
+| AC-57-04 | FE-85、FE-86、FE-89 | §7.25.5、§7.25.8 | `router-motion.test.js`、`site-pages-render.test.js`；QA TC |
+| AC-57-05 | FE-85、FE-89 | §5.9 | `pwa-core.test.js`；部署後 D-8 |
+| AC-57-06 | FE-85、FE-89 | §5.9 | `build.test.js`；部署後 D-2 |
+
+**v0.19 修改的 AC（36，追加任務）**
+
+| AC | 修改重點 | 追加任務 | 驗證 |
+| :--- | :--- | :--- | :--- |
+| AC-11-07 | K 不變，累計不顯示 | FE-84、FE-89 | `part5.test.js` |
+| AC-17-01、AC-17-04、AC-30-01、AC-30-10、AC-39-05、AC-39-06、AC-38-07 | 第 3 格為已答對行 | FE-83、FE-84、FE-89 | `dashboard.test.js`；QA |
+| AC-18-06、AC-21-03、AC-24-01、AC-42-03、AC-47-08 | 廣告請求的解讀；學習操作不發請求 | FE-88、FE-89 | `ad-service.test.js`；QA |
+| AC-19-01 | canonical、JSON-LD 不算外部資源；無靜態廣告標籤 | FE-85、FE-89 | `build.test.js` |
+| AC-21-01、AC-37-05 | 廣告與靜態頁例外 | FE-85、FE-88、FE-89 | §7.25.10；QA |
+| AC-23-07 | 新信箱，位置擴及 2 頁 | FE-83、FE-87、FE-89 | `sources-page.test.js`、`site-static.test.js` |
+| AC-23-08 | 範圍擴及 SEO 與靜態頁 | FE-83、FE-87、FE-89 | `legal-static.test.js`、`site-static.test.js` |
+| AC-25-01、AC-41-04 | 頁尾連結列 | FE-86、FE-89 | `first-run.test.js`；§7.25.10 |
+| AC-32-02 | 清除後 K = 0、累計歸 0 的顯示 | FE-84、FE-89 | `dashboard.test.js` |
+| AC-34-01、AC-34-02、AC-38-10 | `<title>` 改為 Q-90 B，App 名稱不變 | FE-85、FE-89 | `build.test.js` |
+| AC-36-01、AC-36-07 | 新增 5 檔、決定性、13 檔 | FE-85、FE-89、MC-08 | `build.test.js`；D-1、D-2 |
+| AC-39-01 | 版位順序 | FE-88、FE-89 | §7.25.10 |
+| AC-42-01 | 版本行在連結列下 | FE-86、FE-89 | `version-line.test.js` |
+| AC-42-02 | 版本 1.3.0 | MC-07、FE-89 | FE-89 建置檢查；`e2e-version.mjs` |
+| AC-45-05、AC-45-06 | K、Q 一致；累計不顯示 | FE-84、FE-89 | `store-track.test.js` |
+| AC-46-08、AC-48-11 | 對話框新文字 | FE-83、FE-84、FE-89 | `part5.test.js` |
+| AC-47-04 | 舊資料相容 | FE-84、FE-89 | `store-track.test.js` |
+| AC-48-02 | 瀏覽不計入 K | FE-84、FE-89 | `store-track.test.js` |
+| AC-48-06 | y = 0 也顯示已答對行 | FE-84、FE-89 | `part5.test.js` |
+
+**邊界情況**
+
+| E | 任務 | 備註 |
+| :--- | :--- | :--- |
+| E-18、E-27、E-125、E-135～E-137 | FE-84 | Q = 0、y = 0、舊資料 |
+| E-138、E-139、E-147 | FE-83 | 環境與單元 ID 判定 |
+| E-140～E-143 | FE-88、FE-86 | 結果、隱藏、不重建、尺寸 |
+| E-144～E-146 | FE-88 | 資料與同意；E-146 人類 |
+| E-148 | FE-86 | 首次模式 |
+| E-149 | FE-83、FE-87 | 信箱 |
+| E-150、E-151 | FE-85 | `<noscript>` |
+| E-152 | FE-85 | 靜態頁不快取 |
+| E-153 | FE-86 | 頁尾 |
+| E-154、E-155 | FE-85 | 爬蟲檔 |
+
+**回歸**：AC-20-01、AC-20-03、AC-20-04、AC-22-05、AC-25-07、AC-35-01、AC-35-02、AC-36-03、AC-37-01、AC-37-02、AC-39-09、AC-42-04（FE-86、FE-89）。其餘 264 個應驗收 AC 的對照與 §13～§13.10 相同（357 − 新增 57 − 修改 36）；**357 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。AC-50-10 的實機確認、AC-55-04 的全庫掃描與 AC-56-03、AC-56-08、AC-56-09 的網路回應不由 PG 完成，已分別列給人類、QA 與主控。
+
 ---
 
 ## 14. 回應契約 §9 指名 SD 的回饋
@@ -4597,6 +5219,17 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | DS-44（v0.18） | 說明文字與清除按鈕放 `.p5-record`，依序在開關之後；375px 估算與實測方法已列；全部答對說明句**刪除**（不改寫） | §7.24.2、§7.24.3、§7.24.4、FE-81 |
 | DS-45（v0.18） | 主控 MC-06 於 FE-82 前修改，不列 PG 任務；由原始碼重新建置 | §5.8、MC-06、FE-82 |
 | DS-46（v0.18） | 同意：持久化結構不變、無遷移、`src/data/` 不變、不建 CT 任務；不需要改結構，不必退回 PM | §7.24.1、§12.12 |
+| DS-47（v0.19） | 容器在 `#app-main` 之後、`#app-footer` 之前，由 `ui/ad-slot.js` 建立 1 次；切頁只靠 `body[data-tab]` 與 CSS；不存回節點 | §7.25.3、FE-88 |
+| DS-48（v0.19） | `loading` 不論頁面都 `height: 0; max-height: 0; overflow: hidden`，不用 `display: none`；學習區塊在版位之前，位移必為 0；AC-52-05 以 Layout Instability 與座標比對；另加 `scrollbar-gutter` | §7.25.3、§7.25.10、T-106～T-108 |
+| DS-49（v0.19） | `SITE_PAGES` 等放 `core/site-content.js`；靜態頁樣板在 `tools/site-pages.mjs`，CSS 在 `src/app/site/static-page.css`；SEO 在 BUILD_ID 之前寫入 | §5.9、§7.25.7、§7.25.8 |
+| DS-50（v0.19） | 兩處 `TAB_IDS`、`FIRST_RUN_TABS` 同步；返回按鈕與 `sitePageReturnTab`；`#sources` 只在啟動與 `hashchange` 處理；`#footer-first-run-back` **移除** | §7.25.5、§7.25.6、SD-FB-79 |
+| DS-51（v0.19） | 文字定稿表已更新；對話框內文重寫（取代 DS-35 的舊句）；受影響位置已依程式搜尋列出 | §7.25.2 |
+| DS-52（v0.19） | 位置逐一分派；`legal-check.mjs` 歸 QA；本文件舊值已移除；tasks.json FE-77 依指示不動 | §7.25.9、SD-FB-78 |
+| DS-53（v0.19） | 第一階段不建版位、無腳本請求；V-AD 以 `build({ adSlotIdOverride })`；`package.json` 列 MC-07 | §5.9、§7.25.4 |
+| DS-54（v0.19） | 替身放 `tests/e2e/fixtures/ad-stub.js`（QA），單元測試用內建假物件；都不進部署目錄 | §7.25.4 |
+| DS-55（v0.19） | build 只加逐字 canonical；其他項目不命中既有樣式或改為逐字放行；不放寬既有規則 | §5.9、§10.11 Q3 |
+| DS-56（v0.19） | 同意：不需持久化；狀態全部在記憶體；不建 CT 任務；不需退回人類 | §4.12、§12.13 |
+| FB-70～FB-75（v0.19，知會） | FB-70 依 SP-6 實作；FB-71 列 D-11；FB-72 依 AD-10；FB-73 列第二階段核對與 T-106；FB-74 建置比對 V-AD-03；FB-75 文件不列舊地址 | §7.25、§10.11 |
 | FB-65～FB-69（v0.18，知會） | 依契約定案實作：FB-65 `inSummary` = `phase = "summary"` 且 y ≥ 1；FB-66 依 LV-6（§7.24.2 表）；FB-67 `canAnswer` 不看開關；FB-68 依 WR-2，列入給 QA 的已知設計行為；FB-69 使用 `filterHint` 定稿文字 | §4.11、§7.24、§10.10 |
 | FB-63（v0.17，知會） | 依 V-LGL-05 定案的分句符號實作 `legal-static.test.js`；現有 `scenarioZh`「入門：最高頻的生活基礎字彙」不算命中 | §10.9 |
 | FB-64（v0.17，知會） | 依契約，其他程式註解不算違反；SD 另一併改寫 4 處註解，讓 FE-79 能直接對整份 HTML 搜尋，判定標準比契約嚴格但結果相容 | §7.23.1、§10.9 |
@@ -4687,6 +5320,14 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | SD-FB-74 | （v0.13）`answered` 且資料不完整時，現況會在回饋與 `.p5-warning` 各顯示 1 次「這一題的資料不完整。」。LV-6「恰 1 次」只規範 `lockedReview`，本版保持現況，避免範圍外變更 | SA、QA | 待辦（知會） | 不需改契約；QA 不以 LV-6 判定此情境 |
 | SD-FB-75 | （v0.13）`package-lock.json` 的 `version` 一直是 `0.1.0`，與 `package.json` 不同；建置與 CI（不執行 `npm ci`）都不讀取，MC-04 也未更新 | 主控 | 待辦（知會） | 本版維持不動，只改 `package.json`。日後若要對齊，另行處理 |
 | SD-FB-76 | （v0.13）契約未指定 K = 0 或題庫為空時 store 層 `clearPart5CorrectIds` 的回應。SD 定為 `{ ok: false }`、不寫入，與舊有防護一致；畫面本來就不提供入口（CR-10） | SA、QA | 待辦（知會） | 不需改契約 |
+| SD-FB-77 | （v0.14）**部署會失敗**：`.github/workflows/static.yml:42` 檢查 `dist/site` 恰 8 檔，`:45` 只列 8 檔。契約 DP-1、PRD AC-36-07 要求 13 檔，但都沒有授權修改 workflow；Q-46 是一次性授權，已由 MC-03 用完（SD-FB-38） | **人類** | **待決定（阻擋部署）** | 請人類授權主控修改一次（MC-08）：`:42` 改 `-eq 13`，`:45` 的清單加 5 檔，`:53` 註解改 13 檔；其餘不動。不授權就無法部署 v1.3.0；不影響 FE 任務與 QA |
+| SD-FB-78 | （v0.14）`docs/03-design/tasks.json` FE-77（`done`）的文字仍含舊信箱的空白形式。本次指示既有任務內容不動，所以保留；不違反 ML-3、AC-55-04（只掃連續形式），但 ML-1 寫「全站只有一種寫法」 | 主控、SA | 待決定 | 主控決定是否授權單獨改這 1 處；不影響實作 |
+| SD-FB-79 | （v0.14，DS-50）移除 `#footer-first-run-back`，取代 SD-FB-12、SD-FB-55。AC-25-07 的返回由內容區的「返回難易度設定」滿足，文字相同、位置不同 | QA | 待辦（知會） | QA 改定位 `.site-return` |
+| SD-FB-80 | （v0.14）契約未提到捲軸造成的位移。SD 加 `html[data-ad-env] { scrollbar-gutter: stable }`，只在環境成立時生效；第一階段的正式網址也不受影響（`ineligible`） | SA、QA | 待辦（知會） | 第二階段起 1366 版面右側會保留捲軸寬度，屬預期 |
+| SD-FB-81 | （v0.14）DS-48 的做法依 AdSense 公開行為推定，替身無法重現 inline 樣式與實際量測（T-106）。第一階段沒有真實廣告可驗 | 主控、人類 | 待辦（**第二階段啟用前**） | 併入 FB-73：填入單元 ID 後，第一次部署先以正式網址檢查 `loading`、切頁、`unfilled` 的版面 |
+| SD-FB-82 | （v0.14）AD-10 (b) 判定的時間點定為 `importBackup` 成功、資料已取代之後；AD-10 (a) 只在 `confirmApplyGoal` 成功路徑。寫入失敗時資料未改變，不隱藏 | SA、QA | 待辦（知會） | 不需改契約 |
+| SD-FB-83 | （v0.14）V-MAIL-01 的全庫掃描放 QA 的 `tests/static/mail-scan.mjs`，不放 `npm test`：`legal-check.mjs` 歸 QA，由 PG 跑一定失敗。FE-89 只掃自己範圍 | QA、主控 | 待辦（知會） | 主控以 D-10 驗證 |
+| SD-FB-84 | （v0.14）`SP-6` 的「正規化後恰為 `sources`」沿用既有 `normalizeHash`，因此 `#view-sources`、`#/sources` 也會開啟資料來源頁；隱藏頁片段行為不變 | QA | 待辦（知會） | 不需改契約 |
 
 ---
 
@@ -4709,3 +5350,4 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | 0.11 | 2026-11-04 | sd-agent | 修訂已核准的 v0.10（JimmyLin 授權、主控代填），原因：PRD v0.16（approved，JimmyLin，2026-11-04；R-24：人類手改產物後決定併入 1.1.0——更新提示文字改為「有新版本，請更新版本」／「更新版本」、「資料來源與授權」頁新增 1 行聯絡 email；新增 AC-23-07，修改 AC-36-03、AC-42-04 文字，E-118～E-120）與契約 v0.16（三檔 approved，主控代核：`PWA_TEXTS` 新文字、`SOURCES_CONTACT_TEXT`、L-7、DS-40、FB-61、FB-62）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件與 v0.11 導讀（含舊提示文字的改讀規則）；§1 新增 3 列；§3 新增 D-16；(2) 新增 §5.6（不改建置程式、靜態檢查放測試、重新建置取代手改 `dist/`、版本 1.1.0）；(3) 新增 §7.22：提示文字修改點與不改清單、聯絡行常數位置、DOM 位置、非連結與不可聚焦、樣式與字級理由（0.8125rem，備援 0.75rem）、防爬蟲靜態規則；(4) 新增 §10.8：單元測試、建置與交付檢查、可選量測、主控檢查 H-1～H-4（使用者決定本次不跑 QA）；(5) §11 新增 T-87～T-90；(6) 新增 §12.10 任務 FE-77 與 1 個批次；(7) 新增 §13.8 對照（應驗收 288 個 AC 全部涵蓋）；(8) §14 回應 DS-40、FB-61、FB-62；§15 新增 SD-FB-65～SD-FB-67。tasks.json 同步升為 v0.10（只新增 FE-77，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3）、不改 `src/data/`、不改 `package.json` |
 | 0.12 | 2026-11-04 | sd-agent | 修訂已核准的 v0.11（JimmyLin 授權、主控代填），原因：PRD v0.17（approved，JimmyLin，2026-11-04；R-25：權利與商標文字修訂；新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）與契約 v0.17（`README.md`、`data-schema.ts` approved，主控代核：L-8、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空，須人類核准，不代核。增量內容：(1) 文首上游、搭配文件、v0.12 導讀與舊文字改讀規則；§1 新增 3 列；§3 新增 D-17 並更新 2 個檔案註記；(2) 就地標註舊標題說明與品牌標識聲明段落（§4.7、§7.13、§7.19.6、§7.21.4、§10.1）；(3) 新增 §5.7（不改建置程式、版本 1.1.0）；(4) 新增 §7.23：畫面文字修改點、HTML 開頭註解結構、`p5-009`、375px 預期 2 行與實測方法；(5) 新增 §10.9：單元測試、`legal-static.test.js`、交付檢查、主控檢查 M-1～M-3、給 QA 的項目；(6) §11 新增 T-91～T-95；(7) 新增 §12.11 任務 CT-26、FE-78、FE-79、MC-05 與批次；(8) 新增 §13.9 對照（應驗收 289 個 AC 全部涵蓋）；(9) §14 回應 DS-41、DS-42、FB-63、FB-64；§15 新增 SD-FB-68～SD-FB-71。tasks.json 同步升為 v0.11（只新增任務，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3）、不改 `package.json`、`p5-103`、頁尾與 AC-23-07；不新增外部資源 |
 | 0.13 | 2026-11-04 | sd-agent | 修訂已核准的 v0.12（JimmyLin 授權、主控代填），原因：PRD v0.18（approved，JimmyLin，2026-11-04；R-26：模擬測驗已答對鎖定檢視、開關說明、常駐清除入口、結算 y = 0、移除「全部題目再練一次（保留紀錄）」；新增 US-48、AC-48-01～12，修改 13 條，移除 AC-46-07，E-124～E-134，Q-77～Q-80）與契約 v0.18（`README.md`、`data-schema.ts` approved，主控代核：LV-1～LV-7、SM-1～SM-3、HN-1、CR-10、UO-7、UO-8、UO-10、V-ST-23～27、DS-43～DS-46、FB-65～FB-69；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件、v0.13 導讀與改讀規則；§1 新增 4 列；§3 新增 D-18；§4.10、§7.21.3、§7.21.4 就地標註；(2) 新增 §4.11 模組介面；(3) 新增 §5.8（不改建置程式、MC-06 順序與理由）；(4) 新增 §7.24：狀態轉移與邊界驗算、DOM 與 3 種狀態對照、樣式、375px 估算、文字定稿與移除清單（全部答對說明句刪除）、實測方法；(5) 新增 §10.10：單元測試、`part5-static.test.js`、交付檢查、主控檢查、QA 範圍 Q1～Q5（AC-48-xx、R-26 修改的 AC、§10.9 與 v0.11 舊文字、版本假設、v0.17 TC）、v1.1.0 樣本；(6) §11 新增 T-96～T-103；(7) 新增 §12.12 任務 FE-80～FE-82、MC-06；(8) 新增 §13.10 對照（應驗收 300 個 AC 全部涵蓋）；(9) §14 回應 DS-43～DS-46、FB-65～FB-69；§15 新增 SD-FB-72～SD-FB-76。tasks.json 同步升為 v0.12（只新增任務，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`。主控代核（2026-11-04）：人類授權「調整好後完成測試直接推上去」；已驗證 tasks.json 可解析、任務編號不重複、相依皆存在 |
+| 0.14 | 2026-11-05 | sd-agent | 修訂已核准的 v0.13（主控代核），原因：PRD v0.19（approved，JimmyLin，2026-11-05；R-27、R-28：已答對顯示、廣告框架、隱私權政策、關於我、聯絡我們、SEO、爬蟲檔；新增 US-49～US-57、AC-49-01～AC-57-06，修改 36 條 AC，E-135～E-155，Q-81～Q-93）與契約 v0.19（`README.md`、`data-schema.ts` approved，主控代核：§13、DS-47～DS-56、FB-70～FB-75；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件、v0.14 導讀與改讀規則；§1 新增 7 列；新增 §3.1（D-19）；(2) 新增 §4.12 模組介面；(3) 新增 §5.9（B-20～B-25、DS-55 逐字放行、13 檔、MC-07 順序、workflow 風險）；(4) 新增 §7.25：已答對公式與畫面、文字定稿、廣告分工與狀態、DS-47、DS-48、測試注入與替身、路由、頁尾與應用內頁、單一文案來源、靜態頁、信箱分派、實測方法；(5) §7.21.4、§7.22.2、§7.24.3、§10.8 就地標註，**移除本文件中的舊信箱值**；(6) 新增 §10.11：單元測試、交付檢查、主控檢查、QA 範圍 Q1～Q6、舊值位置、部署後驗證 D-1～D-11；(7) §11 新增 T-104～T-114；(8) 新增 §12.13 任務 FE-83～FE-89、MC-07、MC-08；(9) 新增 §13.11 對照（應驗收 357 個 AC 全部涵蓋）；(10) §14 回應 DS-47～DS-56、FB-70～FB-75；§15 新增 SD-FB-77～SD-FB-84（SD-FB-77 須人類決定）。tasks.json 同步升為 v0.13（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/` |

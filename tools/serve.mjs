@@ -38,6 +38,8 @@ export const MIME = Object.freeze({
   ".js": "text/javascript; charset=utf-8",
   ".png": "image/png",
   ".txt": "text/plain; charset=utf-8",
+  // （v0.14，FE-85）sitemap.xml（契約 §10.2）
+  ".xml": "application/xml; charset=utf-8",
 });
 
 /** 模擬 GitHub Pages 的快取標頭 */

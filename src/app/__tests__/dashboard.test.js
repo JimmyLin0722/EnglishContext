@@ -1,11 +1,13 @@
 /*
  * dashboard.test.js — 主控台純邏輯與下載服務單元測試（FE-08 測試移入，FE-19；FE-31 今日學習進度）
  * 受測：views/dashboard.js（goalInfoOf、importMessage、progressModel、dashboardModel、ringGeometry）、services/download.js
- * 涵蓋：AC-17-04（正確率 0 題「—」、10 題 7 對 70%）、AC-24-05、AC-24-06、AC-24-09、契約 IM-6（R6-4 write_failed）；
+ * 涵蓋：AC-17-04（v0.19 改驗已答對行）、AC-24-05、AC-24-06、AC-24-09、契約 IM-6（R6-4 write_failed）；
  *       （FE-31）AC-30-02、AC-30-05、AC-30-07、AC-30-08、AC-30-10、AC-17-01 統計標籤
  * v0.12（FE-58；architecture.md v0.8 §7.19.4、§10.5 dashboard.test.js 列；契約 DB-1～DB-6、V-LAY-07、V-LAY-08）：
  *       移除 summaryOf、ENTRIES（功能入口）案例；新增 dashboardModel 與假 DOM 版面案例（區塊順序、AC-39-06 文字次數、
  *       「開始今日學習」「變更」的 data-go、收合區塊與 setItem 0 次、收合時 NT-1 與安裝鈕不顯示）。
+ * v0.19（FE-84；architecture.md v0.14 §7.25.1、§10.11；契約 AS-1～AS-4、AS-7、DB-5、V-ANS-01～V-ANS-03）：
+ *       第 3 格改驗「模擬測驗」與已答對行；Q = 0 顯示「—」；作答、清除後更新；累計資料不影響顯示。
  */
 "use strict";
 
@@ -14,7 +16,6 @@ const assert = require("node:assert/strict");
 
 const D = require("../views/dashboard.js");
 const DL = require("../services/download.js");
-const stats = require("../core/stats.js");
 
 describe("dashboard.test.js", () => {
   const base = {
@@ -234,37 +235,40 @@ describe("dashboard.test.js", () => {
     noBad(m);
   });
 
-  test("progressModel AC-30-10：200 字中掌握 50、另 10 個不在單字集 → 25%；10 題 7 對 → 70%", () => {
+  /** n 題模擬測驗（dashboard 只用到 id） */
+  const bankN = (n) => Array.from({ length: n }, (_, i) => ({ id: "p5-" + String(i + 1).padStart(3, "0") }));
+  const firstIds = (n) => bankN(n).map((q) => q.id);
+
+  test("progressModel AC-30-10：200 字中掌握 50、另 10 個不在單字集 → 25%；K = 48、Q = 200 → 已答對行（不由累計計算）", () => {
     const set = keys(200).map((k) => ({ wordKey: k }));
     const mastered = keys(50).concat(keys(10, "x"));
     const m = D.progressModel(stateOf(
-      { masteredWordKeys: mastered, part5: { ...base.part5, totalAnswered: 10, totalCorrect: 7 } },
+      { masteredWordKeys: mastered, part5CorrectIds: firstIds(48), part5: { ...base.part5, totalAnswered: 300, totalCorrect: 210 } },
       { studySet: set }
-    ), TODAY);
+    ), TODAY, bankN(200));
     assert.equal(m.mastery.label, "單字掌握率");
     assert.equal(m.mastery.numer, 50);
     assert.equal(m.mastery.denom, 200);
     assert.equal(m.mastery.text, "25%");
     assert.equal(m.mastery.ratio, 0.25);
-    assert.equal(m.accuracy.label, "模擬測驗正確率");
-    assert.equal(m.accuracy.text, "70%");
-    assert.equal(m.accuracy.ratio, 0.7);
+    assert.equal(m.answered.label, "模擬測驗");
+    assert.deepEqual(m.answered.summary, { k: 48, q: 200, p: 24 });
+    assert.equal(m.answered.text, "已答對 48 / 200 題（24%）");
+    assert.ok(!JSON.stringify(m).includes("70%"), "由累計計算的數字不再出現（AC-49-01）");
+    assert.equal(Object.prototype.hasOwnProperty.call(m, "accuracy"), false);
     // 環形填滿比例與數字一致（誤差 ≤ 1 個百分點）
     const g = D.ringGeometry(m.mastery.ratio);
     const filled = 1 - Number(g.dashoffset) / Number(g.dasharray);
     assert.ok(Math.abs(filled * 100 - 25) <= 1);
-    // 與統計區正確率文字一致（AC-17-04 四捨五入規則）
-    assert.equal(m.accuracy.text, stats.accuracyText(10, 7));
   });
 
-  test("progressModel AC-30-10：單字集為空、答題數 0 → 空環「—」，不出現 NaN、Infinity", () => {
+  test("progressModel AC-30-10：單字集為空、Q = 0 → 空環「—」，不出現 NaN、Infinity", () => {
     const m = D.progressModel(stateOf(), TODAY);
     assert.equal(m.mastery.percent, null);
     assert.equal(m.mastery.text, "—");
     assert.equal(m.mastery.ratio, 0);
-    assert.equal(m.accuracy.percent, null);
-    assert.equal(m.accuracy.text, "—");
-    assert.equal(m.accuracy.ratio, 0);
+    assert.equal(m.answered.summary, null);
+    assert.equal(m.answered.text, "—");
     const g = D.ringGeometry(0);
     assert.equal(g.dashoffset, g.dasharray); // 空環
     noBad(m);
@@ -302,43 +306,72 @@ describe("dashboard.test.js", () => {
 
   test("畫面文字逐字（AC-30-01、AC-30-05、AC-30-10、AC-17-01）；v0.11 舊標籤已移除（AC-39-06）", () => {
     assert.equal(D.TEXT.goalDone, "今日目標達成");
-    assert.equal(D.TEXT.accuracy, "模擬測驗正確率");
+    assert.equal(Object.prototype.hasOwnProperty.call(D.TEXT, "accuracy"), false);
     assert.equal(D.TEXT.empty, "—");
     assert.equal(D.TEXT.todayTitle, "今日任務");
     assert.equal(D.TEXT.chartTitle, "近 7 天已學字數");
     const all = JSON.stringify(D.TEXT);
-    for (const bad of ["單字掌握數", "目前目標色級", "目前生效色級", "功能入口", "學習統計", "目前目標", "今日學習進度", "目前單字集掌握率"]) {
+    for (const bad of ["單字掌握數", "目前目標色級", "目前生效色級", "功能入口", "學習統計", "目前目標", "今日學習進度", "目前單字集掌握率", "正確率", "累計答對"]) {
       assert.ok(!all.includes(bad), bad);
     }
   });
 
   // ── dashboardModel（v0.12，FE-58；DB-2～DB-6） ──
 
-  test("dashboardModel AC-39-05：打卡 3 天、200 字掌握 50（另 10 不在單字集）、10 題 7 對 → 「3」「天」「25%」「已掌握 60 字」「70%」", () => {
+  test("dashboardModel AC-39-05：打卡 3 天、200 字掌握 50（另 10 不在單字集）、K = 48、Q = 200 → 「3」「天」「25%」「已掌握 60 字」、已答對行", () => {
     const set = keys(200).map((k) => ({ wordKey: k }));
     const m = D.dashboardModel(stateOf(
       {
         masteredWordKeys: keys(50).concat(keys(10, "x")),
+        part5CorrectIds: firstIds(48),
         part5: { ...base.part5, totalAnswered: 10, totalCorrect: 7 },
         streak: { days: 3, lastActiveDate: TODAY },
       },
       { studySet: set }
-    ), TODAY);
+    ), TODAY, bankN(200));
     assert.deepEqual(m.stats, {
       streakValue: "3",
       streakUnit: "天",
       masteryText: "25%",
       masteredText: "已掌握 60 字",
-      accuracyText: "70%",
+      answeredText: "已答對 48 / 200 題（24%）",
     });
-    assert.equal(m.stats.accuracyText, stats.accuracyText(10, 7));
   });
 
-  test("dashboardModel：空資料 → 掌握率、正確率「—」、已掌握 0 字、打卡 0；不出現 NaN／Infinity（AC-30-10、E-48）", () => {
+  test("V-ANS-01 畫面字串：Q = 200，K = 0、1、7、29、199、200；K = 0 不顯示「—」（AC-49-02、AC-17-04）", () => {
+    for (const [k, text] of [
+      [0, "已答對 0 / 200 題（0%）"], [1, "已答對 1 / 200 題（1%）"], [7, "已答對 7 / 200 題（4%）"],
+      [29, "已答對 29 / 200 題（15%）"], [199, "已答對 199 / 200 題（99%）"], [200, "已答對 200 / 200 題（100%）"]
+    ]) {
+      const m = D.dashboardModel(stateOf({ part5CorrectIds: firstIds(k) }), TODAY, bankN(200));
+      assert.equal(m.stats.answeredText, text);
+      noBad(m);
+    }
+  });
+
+  test("AC-17-04、AC-49-04：累計 10 題 7 對不影響第 3 格；不存在與重複的 id 不計，K ≤ Q", () => {
+    let m = D.dashboardModel(stateOf({ part5CorrectIds: firstIds(7), part5: { ...base.part5, totalAnswered: 10, totalCorrect: 7 } }), TODAY, bankN(200));
+    assert.equal(m.stats.answeredText, "已答對 7 / 200 題（4%）");
+    m = D.dashboardModel(stateOf({ part5CorrectIds: ["p5-001", "p5-001", "p5-999", "", 7] }), TODAY, bankN(3));
+    assert.equal(m.stats.answeredText, "已答對 1 / 3 題（33%）");
+    m = D.dashboardModel(stateOf({ part5CorrectIds: firstIds(5).concat(["p5-999"]) }), TODAY, bankN(5));
+    assert.equal(m.stats.answeredText, "已答對 5 / 5 題（100%）");
+  });
+
+  test("AS-4、V-ANS-01：Q = 0 或題庫異常 → 「—」，K ≥ 1 的舊紀錄也不產生「0 / 0」", () => {
+    for (const bank of [[], null, 7, "x"]) {
+      const m = D.dashboardModel(stateOf({ part5CorrectIds: ["p5-001"] }), TODAY, bank);
+      assert.equal(m.stats.answeredText, "—");
+      assert.ok(!JSON.stringify(m).includes("0 / 0"));
+      noBad(m);
+    }
+  });
+
+  test("dashboardModel：空資料 → 掌握率、已答對行「—」、已掌握 0 字、打卡 0；不出現 NaN／Infinity（AC-30-10、E-48）", () => {
     for (const st of [stateOf(), null, {}, { data: null, runtime: null }]) {
       const m = D.dashboardModel(st, TODAY);
       assert.equal(m.stats.masteryText, "—");
-      assert.equal(m.stats.accuracyText, "—");
+      assert.equal(m.stats.answeredText, "—");
       assert.equal(m.stats.masteredText.startsWith("已掌握 "), true);
       noBad(m);
     }
@@ -531,7 +564,8 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
 
   /**
    * 載入 dashboard 並 mount。
-   * @param {{ pwa?: object, tab?: string, firstRun?: boolean, noService?: boolean }} [o]
+   * @param {{ pwa?: object, tab?: string, firstRun?: boolean, noService?: boolean, content?: object }} [o]
+   *   content：同時作為 store 的 content 與 EMT.content（與正式環境相同，題庫來自同一份快照）
    */
   function setup(o = {}) {
     const document = {
@@ -544,7 +578,7 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     sandbox.window = sandbox;
     vm.createContext(sandbox);
     for (const rel of ["core/constants.js", "core/wordkey.js", "core/dom.js", "core/goal.js", "core/layout.js", "core/streak.js",
-      "core/stats.js", "core/learning.js", "core/pwa.js"]) {
+      "core/stats.js", "core/learning.js", "core/pwa.js", "core/part5flow.js"]) {
       vm.runInContext(read(rel), sandbox, { filename: rel });
     }
     const views = {};
@@ -561,7 +595,8 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
       data.goal = o.goal;
       preset = F.fakeStorage({ "englishMasterTrack:state": JSON.stringify(PERSIST.buildRecord(data, new Date("2026-10-29T00:00:00Z"))) });
     }
-    const { store, a, storage } = F.makeStore({ firstRun: o.firstRun, storage: preset });
+    if (o.content) sandbox.EMT.content = o.content;
+    const { store, a, storage } = F.makeStore({ firstRun: o.firstRun, storage: preset, content: o.content });
     if (o.pwa) a.setPwa(o.pwa);
     if (o.tab) a.setTab(o.tab);
     // （v0.12，FE-58）預設展開「資料備份」（v0.11 既有案例檢查的是展開後的內容；收合行為另有案例）
@@ -705,7 +740,8 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
 
   test("AC-39-06：列舉文字各 1 次；無舊標籤、無功能入口、無 data-go=sources；色級名稱只在目標行", () => {
     const s = setup({ expanded: true });
-    for (const t of ["模擬測驗正確率", "單字掌握率", "連續打卡天數"]) assert.equal(countText(s, t), 1, t);
+    for (const t of ["模擬測驗", "單字掌握率", "連續打卡天數"]) assert.equal(countText(s, t), 1, t);
+    for (const t of ["正確率", "累計答對"]) assert.equal(countText(s, t), 0, t);
     const st = s.store.getState();
     const x = D.dashboardModel(st, s.store.today()).today;
     assert.equal(countText(s, x.x + " / " + x.d), 1, "X / D 只出現 1 次");
@@ -786,7 +822,77 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.equal(icon.getAttribute("aria-hidden"), "true");
     assert.equal(byClass(streak, "db-stat__unit")[0].textContent, "天");
     assert.equal(byClass(s.rootEl, "db-stat__sub")[0].textContent, "已掌握 0 字");
-    assert.equal(byClass(s.rootEl, "db-stat--accuracy")[0].textContent, "模擬測驗正確率—");
+    assert.equal(byClass(s.rootEl, "db-stat--accuracy").length, 0);
+    // 未設定 EMT.content：Q = 0 顯示「—」（AS-4）
+    assert.equal(byClass(s.rootEl, "db-stat--answered")[0].textContent, "模擬測驗—");
+  });
+
+  // ── 第 3 格（v0.19，FE-84；AS-3、AS-4、V-ANS-02） ──
+
+  /** 與 store 共用同一份 content，並取得目前第 1 題的正確選項與答錯選項 */
+  function setupAnswered() {
+    const s = setup({ expanded: false, content: F.loadContent() });
+    const bank = s.sandbox.EMT.content.part5;
+    const value = () => byClass(s.rootEl, "db-stat__value--answered")[0].textContent;
+    return { s, bank, value };
+  }
+
+  test("第 3 格：標籤「模擬測驗」、值元素 class、已答對行在主控台恰 1 次（AC-49-01）", () => {
+    const { s, bank, value } = setupAnswered();
+    const cell = byClass(s.rootEl, "db-stat--answered")[0];
+    assert.equal(byClass(cell, "db-stat__label")[0].textContent, "模擬測驗");
+    const el = byClass(cell, "db-stat__value--answered")[0];
+    assert.equal(el.tagName, "P");
+    assert.ok(el.classList.contains("db-stat__value"));
+    const text = "已答對 0 / " + bank.length + " 題（0%）";
+    assert.equal(value(), text);
+    assert.equal(countText(s, text), 1);
+    assert.equal(countText(s, "正確率"), 0);
+  });
+
+  test("V-ANS-02：作答答對 → K + 1 並即時更新；答錯 → 不變；清除 → K = 0，累計照常保留（AC-49-04、AC-49-05、AC-46-08）", () => {
+    const { s, bank, value } = setupAnswered();
+    const line = (k) => {
+      const p = Math.floor((200 * k + bank.length) / (2 * bank.length));
+      return "已答對 " + k + " / " + bank.length + " 題（" + p + "%）";
+    };
+    assert.ok(bank.length >= 2, "fixture 至少 2 題");
+    s.a.setTab("part5");
+    s.a.answerPart5(bank[0].correctIndex);
+    assert.equal(value(), line(1));
+    s.a.nextPart5();
+    s.a.answerPart5((bank[1].correctIndex + 1) % 4);
+    assert.equal(value(), line(1), "答錯不變");
+    assert.deepEqual([s.store.getState().data.part5.totalAnswered, s.store.getState().data.part5.totalCorrect], [2, 1], "累計照常更新（AS-7）");
+    const r = s.a.clearPart5CorrectIds();
+    assert.equal(r.ok, true);
+    assert.equal(value(), line(0), "清除後主控台不需換頁即更新");
+    assert.deepEqual([s.store.getState().data.part5.totalAnswered, s.store.getState().data.part5.totalCorrect], [2, 1], "清除不動累計");
+  });
+
+  test("畫面只讀不寫：K、Q、P 不寫入任何儲存（AS-7）；第 3 格不含累計數字", () => {
+    const { s, bank } = setupAnswered();
+    s.a.answerPart5(bank[0].correctIndex);
+    const raw = s.storage.map.get("englishMasterTrack:state");
+    const data = JSON.parse(raw).data;
+    const writes = s.storage.setCalls.length;
+    s.view.show();
+    assert.equal(s.storage.setCalls.length, writes, "重繪不寫入");
+    assert.equal(s.storage.map.get("englishMasterTrack:state"), raw);
+    assert.deepEqual(data.part5CorrectIds, [bank[0].id]);
+    for (const key of ["answeredSummary", "answered", "k", "q", "p"]) {
+      assert.equal(Object.prototype.hasOwnProperty.call(data, key), false, key);
+    }
+  });
+
+  test("原始碼：第 3 格走 answeredSummary／answeredSummaryText；不再引用累計欄位、statAccuracyLabel、percentOf", () => {
+    const src = read("views/dashboard.js").replace(/\/\*[\s\S]*?\*\//g, "");
+    assert.ok(src.includes("PF.answeredSummary("));
+    assert.ok(src.includes("PF.answeredSummaryText("));
+    for (const w of ["statAccuracyLabel", "totalAnswered", "totalCorrect", "percentOf", "accuracy", "正確率"]) {
+      assert.ok(!src.includes(w), w);
+    }
+    assert.ok(D.PROGRESS_TAGS.includes("part5"), "清除紀錄後主控台須更新");
   });
 
   test("近 7 天：無資料 → 只顯示「開始學習後會顯示紀錄」，長條 hidden；學 1 字後 show() → 長條（AC-39-07、E-88）", () => {
@@ -881,6 +987,15 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.equal(v(rule(".db-bars__item--today .db-bars__fill"), "background"), "var(--brand-deep)");
     assert.equal(v(rule(".db-stat__icon"), "fill"), "var(--accent)");
     assert.doesNotMatch(css, /\.dash-entr|\.db-mini/);
+    // （v0.19，FE-84）已答對行 ≥ 14px、可換行、tabular-nums；無 --accent、nowrap（§7.25.1、AC-49-08）
+    const ans = rule(".db-stat__value--answered");
+    assert.equal(v(ans, "font-size"), "0.875rem");
+    assert.ok(0.875 * 16 >= 14);
+    assert.equal(v(ans, "line-height"), "1.35");
+    assert.equal(v(ans, "font-variant-numeric"), "tabular-nums");
+    assert.equal(v(ans, "overflow-wrap"), "anywhere");
+    assert.doesNotMatch(ans, /--accent|nowrap|ellipsis/);
+    assert.ok(css.indexOf(".db-stat__value--answered") > css.indexOf(".db-stat__value {"), "須在基底規則之後才能覆寫字級");
   });
 
   test("（v0.9，FE-66）原始碼不含 goalLineCapped、goalLineSeparator、builtinCap、btn--link、LAY.goalLine(、db-goal__sep", () => {

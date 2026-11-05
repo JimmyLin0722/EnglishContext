@@ -4,6 +4,7 @@
  *       契約 README §5.11 CR-1～CR-8、UO-1～UO-9、§5.3 RD-3 (c)、§6.2 IM-10 (2)、(4)
  * 涵蓋：AC-45-01～AC-45-03、AC-45-05、AC-45-07、AC-46-02～AC-46-06、AC-46-08、AC-46-09、AC-47-05、V-ST-19、V-ST-20、E-109～E-112
  * （v0.18，FE-80；architecture.md v0.13 §7.24.1、§10.10）LV-1、LV-3、UO-8、UO-10；AC-48-01～AC-48-05、AC-48-07、AC-48-10；V-ST-23、V-ST-24、V-ST-26
+ * （v0.19，FE-83；architecture.md v0.14 §7.25.1、§10.11）AS-1～AS-3；AC-49-01、AC-49-02、AC-49-04、AC-49-05、AC-17-04；V-ANS-01
  */
 "use strict";
 const test = require("node:test");
@@ -594,10 +595,16 @@ test("隨機 1,000 組狀態不變式：currentIndex < Q、開關開啟時未鎖
   }
 });
 
-test("原始碼：無 require、無遞迴、nextUnanswered 單一迴圈、不碰 DOM 與儲存（LD-1、UO-9）", function () {
+test("原始碼：只有 constantsModule 於呼叫時 require constants、無遞迴、nextUnanswered 單一迴圈、不碰 DOM 與儲存（LD-1、UO-9）", function () {
   const src = fs.readFileSync(path.join(__dirname, "..", "core", "part5flow.js"), "utf8");
+  // （v0.19，FE-83）answeredSummaryText 取用 ANSWERED_SUMMARY_TEXT 的唯一例外；其他位置仍不得出現 require
+  const fnRe = /function constantsModule\(\) \{[\s\S]*?\n {2}\}/;
+  assert.match(src, fnRe);
+  assert.equal((fnRe.exec(src)[0].match(/\brequire\(/g) || []).length, 1);
+  assert.match(fnRe.exec(src)[0], /require\("\.\/constants\.js"\)/);
+  const rest = src.replace(fnRe, "");
   ["require", "document", "localStorage", "innerHTML", "window."].forEach(function (w) {
-    assert.equal(src.indexOf(w), -1, w);
+    assert.equal(rest.indexOf(w), -1, w);
   });
   // 每個具名函式本體不呼叫自己
   const re = /function (\w+)\s*\(([^)]*)\)\s*\{/g;
@@ -613,4 +620,93 @@ test("原始碼：無 require、無遞迴、nextUnanswered 單一迴圈、不碰
       assert.equal((body.match(/\b(for|while)\s*\(/g) || []).length, 1, "nextUnanswered 單一迴圈");
     }
   }
+});
+
+// ── answeredSummary、answeredSummaryText（v0.19，FE-83；AS-1～AS-3、V-ANS-01）──
+
+/** 前 k 題答對的 (bankIds, ids) */
+function answered(k, q) {
+  const bank = ids(q);
+  return F.answeredSummary(bank, bank.slice(0, k));
+}
+
+test("V-ANS-01：P 表格（整數公式），含浮點陷阱 (29, 200) → 15", function () {
+  const table = [[0, 200, 0], [1, 200, 1], [7, 200, 4], [29, 200, 15], [48, 200, 24], [199, 200, 99], [200, 200, 100], [1, 3, 33], [2, 3, 67]];
+  for (const [k, q, p] of table) {
+    assert.deepEqual(answered(k, q), { k, q, p }, k + "/" + q);
+  }
+  // 反證：浮點寫法會得到 14，確認本表確實擋得住（AS-2）
+  assert.equal(Math.round(29 / 200 * 100), 14);
+});
+
+test("AS-2：K < Q 時 P 最大 99；K = Q 恰為 100；Q 很大時 K ≥ 1 可為 0%", function () {
+  const q = 1000;
+  assert.equal(answered(999, q).p, 99);
+  assert.equal(answered(995, q).p, 99);
+  assert.equal(answered(q, q).p, 100);
+  assert.equal(answered(1, 1).p, 100);
+  assert.equal(answered(0, 1).p, 0);
+  assert.equal(answered(1, q).p, 0);
+});
+
+test("AS-2：所有 (K, Q) 的 P 為 0～100 的整數，K < Q 不到 100（Q ≤ 300 窮舉）", function () {
+  for (let q = 1; q <= 300; q++) {
+    const bank = ids(q);
+    for (let k = 0; k <= q; k++) {
+      const s = F.answeredSummary(bank, bank.slice(0, k));
+      assert.ok(Number.isInteger(s.p) && s.p >= 0 && s.p <= 100, k + "/" + q);
+      if (k < q) assert.ok(s.p <= 99, k + "/" + q);
+    }
+  }
+});
+
+test("AS-1：不存在與重複的 id 不計；K ≤ Q（AC-49-04）", function () {
+  const bank = ids(3);
+  assert.deepEqual(F.answeredSummary(bank, ["p5-001", "p5-001", "p5-999", "x"]), { k: 1, q: 3, p: 33 });
+  assert.deepEqual(F.answeredSummary(bank, ["p5-999", "p5-998", "p5-997", "p5-996"]), { k: 0, q: 3, p: 0 });
+  // 題庫本身有重複與無合法 id：同一 id 只計一次，null 不計
+  const s = F.answeredSummary(["p5-001", "p5-001", null], ["p5-001"]);
+  assert.deepEqual(s, { k: 1, q: 3, p: 33 });
+  assert.ok(s.k <= s.q);
+  // 非字串與空字串的答對紀錄不計
+  assert.equal(F.answeredSummary(bank, [1, null, "", "  ", {}]).k, 0);
+});
+
+test("AS-1：K 與模擬測驗頁使用的 countCorrect 相同（同一個函式來源）", function () {
+  const bank = ids(10);
+  const list = ["p5-002", "p5-009", "p5-777", "p5-002"];
+  assert.equal(F.answeredSummary(bank, list).k, F.countCorrect(bank, F.correctSet(list)));
+  assert.equal(F.answeredSummary(bank, list).q, bank.length);
+});
+
+test("V-ANS-01：Q = 0 → null；非陣列題庫 → null；ids 異常不產生 NaN、Infinity、undefined", function () {
+  assert.equal(F.answeredSummary([], ["p5-001"]), null);
+  assert.equal(F.answeredSummary(null, []), null);
+  assert.equal(F.answeredSummary(undefined, undefined), null);
+  assert.equal(F.answeredSummary({}, []), null);
+  for (const bad of [null, undefined, "p5-001", 3, {}, NaN]) {
+    assert.deepEqual(F.answeredSummary(ids(2), bad), { k: 0, q: 2, p: 0 });
+  }
+});
+
+test("AS-6：清除後 K = 0；answeredSummary 不修改傳入值（AC-49-05）", function () {
+  const bank = Object.freeze(ids(2));
+  const list = Object.freeze(["p5-001"]);
+  assert.deepEqual(F.answeredSummary(bank, list), { k: 1, q: 2, p: 50 });
+  assert.deepEqual(F.answeredSummary(bank, F.clearAndRestart(p5()).ids), { k: 0, q: 2, p: 0 });
+});
+
+test("AS-3：已答對行逐字；斜線前後半形空格、全形括號、不加千分位（AC-49-01）", function () {
+  assert.equal(F.answeredSummaryText({ k: 48, q: 200, p: 24 }), "已答對 48 / 200 題（24%）");
+  assert.equal(F.answeredSummaryText({ k: 0, q: 200, p: 0 }), "已答對 0 / 200 題（0%）");
+  assert.equal(F.answeredSummaryText({ k: 200, q: 200, p: 100 }), "已答對 200 / 200 題（100%）");
+  assert.equal(F.answeredSummaryText({ k: 1000, q: 2000, p: 50 }), "已答對 1000 / 2000 題（50%）");
+  assert.equal(F.answeredSummaryText(answered(29, 200)), "已答對 29 / 200 題（15%）");
+});
+
+test("V-ANS-01：answeredSummaryText 對無效輸入回傳 null，不產生「0 / 0」、NaN、undefined", function () {
+  assert.equal(F.answeredSummaryText(F.answeredSummary([], [])), null);
+  const bad = [null, undefined, 0, "x", {}, [], { k: 0, q: 0, p: 0 }, { k: NaN, q: 1, p: 0 }, { k: 0, q: Infinity, p: 0 },
+    { k: 0, q: 1, p: NaN }, { k: 0, q: 1 }, { q: 1, p: 0 }, { k: -1, q: 1, p: 0 }];
+  for (const v of bad) assert.equal(F.answeredSummaryText(v), null, JSON.stringify(v));
 });

@@ -30,7 +30,10 @@ for (const r of results) for (const id of expand(r.ac)) if (map.has(id)) map.get
 const HUMAN_ESSENTIAL = { "AC-33-01": "V-MIC-1", "AC-33-02": "V-MIC-2", "AC-23-04": "TC-M08", "AC-27-03": "TC-M09（虛擬鍵盤）",
   "AC-34-02": "TC-PWA-H1／H2", "AC-34-03": "TC-PWA-H1／H2", "AC-34-05": "TC-PWA-H3（iOS）", "AC-35-03": "TC-PWA-H2", "AC-36-07": "TC-PWA-H4（MC-03 後）",
   // 第 8 輪：4 倍降速參考值不符（test-report §19.3），不以其餘 TC 判通過，依 TC-M07
-  "AC-22-01": "TC-M07（第 8 輪 4 倍降速參考值不符）", "AC-22-02": "TC-M07（第 8 輪 4 倍降速參考值不符）", "AC-22-03": "TC-M07（第 8 輪 4 倍降速參考值不符）", "AC-22-04": "TC-M07（第 8 輪 4 倍降速參考值不符）" };
+  // 第 9 輪：AC-22-01～04 的 4 倍降速參考值 2 次皆符合，不再列必要人工（結果仍為「通過（另待人工確認）」，TC-M07）；第 8 輪的待人工標記移除
+  // 第 9 輪：只有第二階段、部署後或人類才能判定（不記通過）
+  "AC-50-10": "TC-50-10h（第二階段，人類實機）", "AC-56-08": "部署後 D-3（正式網址回應）", "AC-56-09": "部署後 D-3（正式網址回應）",
+  "AC-51-03": "TC-M07（4 倍降速本次載入首次作答 > 100 ms，同條件無廣告也一樣，§20.5）" };
 const rows = [];
 for (const a of acs) {
   const rs = map.get(a.id);
@@ -38,7 +41,7 @@ for (const a of acs) {
   let verdict;
   // 第 8 輪：AC-46-07 於 PRD v0.18 移除（Q-77 決議 A），編號保留、不驗收
   if (a.id === "AC-46-07") verdict = "不適用（v0.18 移除）";
-  else if (a.paused) verdict = "不適用（暫停）";
+  else if (a.paused) verdict = "不適用（暫停）"; // 第 9 輪起 AC-46-07 以外的暫停規則不變
   else if (rs.some((r) => r.result === "失敗")) verdict = "失敗";
   else if (HUMAN_ESSENTIAL[a.id]) verdict = "待人工";
   else if (rs.filter((r) => r.result === "通過").length === 0) verdict = rs.length ? "待人工" : "未涵蓋";

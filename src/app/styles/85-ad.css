@@ -1,0 +1,48 @@
+/*
+ * 85-ad.css — 廣告版位（FE-88）
+ * 依據：architecture.md v0.14 §7.25.3 DS-48、SD-FB-80；契約 README §13.2 AD-5、AD-14；AC-52-01、AC-52-03～AC-52-05、AC-52-07
+ * 版位只由 ui/ad-slot.js 在 loading 時建立；切頁不執行程式，顯示與否全靠本檔與 body[data-tab]。
+ */
+
+/* 非覆蓋式捲軸在廣告撐高頁面時出現，會讓置中內容左右移動；只在環境成立時套用，第一階段與 file:// 無影響 */
+html[data-ad-env] {
+  scrollbar-gutter: stable;
+}
+
+/* 與主控台內容同寬 */
+.ad-slot {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(var(--content-narrow) + 32px);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* 等待結果（不論目前頁面）：高度 0 但寬度可量。腳本可能在使用者切頁後才量寬度；
+   max-height 是因為 AdSense 可能以 inline 樣式改 height（T-106） */
+.ad-slot[data-ad-state="loading"] {
+  height: 0;
+  max-height: 0;
+  overflow: hidden;
+  padding-block: 0;
+  border: 0;
+}
+
+.ad-slot[data-ad-state="collapsed"],
+.ad-slot[data-ad-state="dismissed"],
+.ad-slot[data-ad-state="filled"] {
+  display: none;
+}
+
+/* 只有主控台顯示；距「資料備份」控制項與頁尾連結皆 ≥ 48px（AC-52-03） */
+body[data-tab="dashboard"] .ad-slot[data-ad-state="filled"] {
+  display: block;
+  margin-block: 48px;
+}
+
+/* 標籤：對 --bg 約 5.4:1，不用強調色、不用卡片，避免與學習內容同標題或同卡片（AC-52-04） */
+.ad-slot__label {
+  margin: 0 0 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

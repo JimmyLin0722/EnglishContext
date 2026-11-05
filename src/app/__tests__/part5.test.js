@@ -80,8 +80,8 @@ describe("part5.test.js", () => {
 
   test("buildViewModel 結算（AC-11-07）", () => {
     const v = P.buildViewModel({ ...base, phase: "summary", roundAnswered: 3, roundCorrect: 2, totalAnswered: 10, totalCorrect: 7 }, [q(1, 0)]);
-    // （v0.15，FE-75）各 kind 另附 k、q、only（未傳 record → k 0、only false）
-    assert.deepEqual(v, { kind: "summary", roundCorrect: 2, roundAnswered: 3, totalCorrect: 7, totalAnswered: 10, k: 0, q: 1, only: false });
+    // （v0.15，FE-75）各 kind 另附 k、q、only（未傳 record → k 0、only false）；（v0.19，FE-84）累計欄位改為已答對行（AS-5）
+    assert.deepEqual(v, { kind: "summary", roundCorrect: 2, roundAnswered: 3, answeredText: "已答對 0 / 1 題（0%）", k: 0, q: 1, only: false });
   });
 
   test("fixture 題庫（符合 Part5Question，4 題型）每題皆可組出完整畫面（AC-10-02、AC-11-02）", () => {
@@ -614,8 +614,12 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
   test("RECORD_TEXT 為定稿文字（§7.24.3）；確認內文逐字包含契約兩段；fillText 以 split／join 代入", () => {
     assert.deepEqual(Object.keys(P.RECORD_TEXT), ["confirmTitle", "confirmMessage"]);
     assert.equal(P.RECORD_TEXT.confirmTitle, "清除答對紀錄");
-    assert.equal(P.RECORD_TEXT.confirmMessage, "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。");
+    assert.equal(P.RECORD_TEXT.confirmMessage, "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。");
     for (const part of T.clearConfirmMustInclude) assert.ok(P.RECORD_TEXT.confirmMessage.includes(part), part);
+    // （v0.19，FE-84；DS-51、AC-49-07）不含舊句；原始碼的字串常值也不留畫面文字
+    for (const bad of ["正確率", "累計"]) assert.ok(!P.RECORD_TEXT.confirmMessage.includes(bad), bad);
+    const src = fs.readFileSync(path.join(APP, "views", "part5.js"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    for (const bad of ["正確率", "累計答對", "累計答題數", "p5-summary__total", "totalAnswered", "totalCorrect"]) assert.ok(!src.includes(bad), bad);
     assert.equal(P.fillText(T.correctCount, { k: 0, q: 200 }), "已答對 0 / 200 題");
     assert.equal(P.fillText(T.allCorrectTitle, { q: 200 }), "200 題全部答對！");
     assert.equal(P.fillText(null, { k: 1 }), "");
@@ -838,17 +842,25 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
 
   // ── 結算（SM-1～SM-3） ──
 
-  /** 結算區不得出現的字串（SM-2、V-ST-25） */
-  function assertCleanSummary(text) {
-    for (const bad of ["0 / 0", "NaN", "Infinity", "undefined", "%"]) {
-      assert.ok(!text.includes(bad), bad + " 出現於：" + text);
+  /** 已答對行字串（AS-3；K、Q 同 correctCount） */
+  const answeredOf = (k, q) => "已答對 " + k + " / " + q + " 題（" + Math.floor((200 * k + q) / (2 * q)) + "%）";
+
+  /** 結算區不得出現的字串（SM-2、V-ST-25）；（v0.19）「%」只可出現在已答對行，故先扣除該行 */
+  function assertCleanSummary(card, answeredText) {
+    const text = card.textContent;
+    assert.equal(text.split(answeredText).length - 1, 1, "已答對行恰 1 次：" + text);
+    const rest = text.replace(answeredText, "");
+    for (const bad of ["0 / 0", "NaN", "Infinity", "undefined", "%", "累計答對", "正確率"]) {
+      assert.ok(!rest.includes(bad), bad + " 出現於：" + rest);
     }
+    assert.ok(!answeredText.includes("0 / 0"));
   }
 
   for (const only of [false, true]) {
-    test("結算 y = 0（SM-2；開關" + (only ? "開啟" : "關閉") + "）：標題與 summaryNoNewAnswers；a ≥ 1 有累計行、a = 0 沒有；有「重新開始」、進度條 100%", () => {
+    test("結算 y = 0（SM-2、AS-5；開關" + (only ? "開啟" : "關閉") + "）：標題與 summaryNoNewAnswers；其下為已答對行，a ≥ 1、a = 0 都顯示；有「重新開始」、進度條 100%", () => {
       const bank = bankOf(4);
       const ids = only ? ["p5-001"] : idsOf(bank);
+      const line = answeredOf(ids.length, 4);
       let { rootEl } = mountWith({ store: fakeStore(dataOf(prog({ phase: "summary", currentIndex: 3, totalAnswered: 7, totalCorrect: 5 }), ids, only)), bank });
       let card = cardOf(rootEl, "card p5-summary");
       assert.equal(one(rootEl, "summary-title").textContent, "本輪結算");
@@ -857,29 +869,85 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
       assert.equal(none.className, "p5-summary__none");
       assert.equal(none.textContent, "本輪沒有新作答的題目");
       assert.equal(q$(rootEl, "summary-score").length, 0);
-      assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total")[0].textContent, "累計答對 5 / 7");
+      const answered = one(rootEl, "summary-answered");
+      assert.equal(answered.tagName, "P");
+      assert.equal(answered.className, "p5-summary__answered");
+      assert.equal(answered.textContent, line);
+      assert.ok(card.childNodes.indexOf(none) < card.childNodes.indexOf(answered), "已答對行在說明之下");
+      assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total").length, 0);
       assert.equal(q$(rootEl, "restart").length, 1);
-      assertCleanSummary(card.textContent);
+      assertCleanSummary(card, line);
       const bar = findAll(rootEl, (n) => n.className === "p5-progress")[0];
       assert.equal(bar.childNodes[0].style.width, "100%");
       // a = 0
       ({ rootEl } = mountWith({ store: fakeStore(dataOf(prog({ phase: "summary", currentIndex: 3 }), ids, only)), bank }));
       card = cardOf(rootEl, "card p5-summary");
-      assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total").length, 0);
+      assert.equal(one(rootEl, "summary-answered").textContent, line, "a = 0 也顯示");
       assert.equal(one(rootEl, "summary-none").textContent, "本輪沒有新作答的題目");
-      assertCleanSummary(card.textContent);
+      assertCleanSummary(card, line);
     });
   }
 
-  test("結算 y ≥ 1（SM-1）：「答對 x / y」與累計行；無 summaryNoNewAnswers", () => {
+  test("結算 y ≥ 1（SM-1、AS-5）：「答對 x / y」與其下的已答對行；K = 0 也顯示；無累計行、無 summaryNoNewAnswers", () => {
     const { rootEl } = mountWith({
       store: fakeStore(dataOf(prog({ phase: "summary", roundAnswered: 3, roundCorrect: 0, totalAnswered: 3, totalCorrect: 0 }), [])),
       bank: bankOf(4)
     });
     assert.equal(one(rootEl, "summary-score").textContent, "答對 0 / 3");
-    assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total")[0].textContent, "累計答對 0 / 3");
+    const card = cardOf(rootEl, "card p5-summary");
+    const answered = one(rootEl, "summary-answered");
+    assert.equal(answered.textContent, "已答對 0 / 4 題（0%）");
+    assert.ok(card.childNodes.indexOf(one(rootEl, "summary-score")) < card.childNodes.indexOf(answered), "已答對行在分數之下");
+    assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total").length, 0);
     assert.equal(q$(rootEl, "summary-none").length, 0);
     assert.ok(!rootEl.textContent.includes("本輪沒有新作答的題目"));
+    assert.ok(!rootEl.textContent.includes("累計答對"));
+  });
+
+  test("結算已答對行 V-ANS-01：K = 1、199、200（開關關閉）的字串與進度條旁計數行 K、Q 相同；不存在與重複的 id 不計（AC-49-02、AC-49-04）", () => {
+    const bank = bank200;
+    for (const [ids, text, count] of [
+      [["p5-001"], "已答對 1 / 200 題（1%）", "已答對 1 / 200 題"],
+      [idsOf(bank).slice(0, 199), "已答對 199 / 200 題（99%）", "已答對 199 / 200 題"],
+      [idsOf(bank), "已答對 200 / 200 題（100%）", "已答對 200 / 200 題"],
+      [["p5-001", "p5-001", "p5-999"], "已答對 1 / 200 題（1%）", "已答對 1 / 200 題"]
+    ]) {
+      const { rootEl } = mountWith({ store: fakeStore(dataOf(prog({ phase: "summary", currentIndex: 199, roundAnswered: 1, roundCorrect: 1 }), ids)), bank });
+      assert.equal(one(rootEl, "summary-answered").textContent, text);
+      assert.equal(one(rootEl, "correct-count").textContent, count);
+    }
+  });
+
+  test("allCorrect 畫面不加已答對行（AS-5、AC-46-06、SM-3），y ≥ 1 的「答對 x / y」與標題不變", () => {
+    const bank = bankOf(4);
+    let { rootEl } = mountWith({ store: fakeStore(dataOf(prog({ phase: "summary", currentIndex: 3, roundAnswered: 2, roundCorrect: 2 }), idsOf(bank), true)), bank });
+    assert.equal(one(rootEl, "allcorrect-title").textContent, "4 題全部答對！");
+    assert.equal(one(rootEl, "summary-score").textContent, "答對 2 / 2");
+    assert.equal(q$(rootEl, "summary-answered").length, 0);
+    assert.ok(!rootEl.textContent.includes("%"));
+    ({ rootEl } = mountWith({ store: fakeStore(dataOf(prog(), idsOf(bank), true)), bank }));
+    assert.equal(q$(rootEl, "summary-answered").length, 0);
+  });
+
+  test("題目畫面與 Q = 0 不顯示已答對行（AS-5、V-ANS-01）：無節點、無「0 / 0」", () => {
+    const bank = bankOf(4);
+    let { rootEl } = mountWith({ store: fakeStore(dataOf(prog(), ["p5-001"])), bank });
+    assert.equal(q$(rootEl, "summary-answered").length, 0);
+    assert.equal(one(rootEl, "correct-count").textContent, "已答對 1 / 4 題");
+    ({ rootEl } = mountWith({ store: fakeStore(dataOf(prog({ phase: "summary" }), ["p5-001"])), bank: [] }));
+    assert.equal(q$(rootEl, "summary-answered").length, 0);
+    assert.ok(!rootEl.textContent.includes("0 / 0"));
+    assert.ok(!rootEl.textContent.includes("%"));
+  });
+
+  test("40-part5.css：.p5-summary__answered 可換行、tabular-nums，無 --accent、nowrap；.p5-summary__total 已移除（§7.25.1）", () => {
+    const css = fs.readFileSync(path.join(APP, "styles", "40-part5.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const m = /\.p5-summary__answered\s*\{([^}]*)\}/.exec(css);
+    assert.ok(m, "找不到 .p5-summary__answered");
+    assert.match(m[1], /font-variant-numeric:\s*tabular-nums/);
+    assert.match(m[1], /overflow-wrap:\s*anywhere/);
+    assert.doesNotMatch(m[1], /--accent|nowrap|font-size/);
+    assert.ok(!css.includes("p5-summary__total"));
   });
 
   // ── 開關說明（HN-1）與常駐清除（CR-10） ──
@@ -1023,7 +1091,7 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     assert.equal(seen.length, 1);
     assert.deepEqual(JSON.parse(JSON.stringify(seen[0])), {
       title: "清除答對紀錄",
-      message: "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。",
+      message: "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。",
       okText: "確定",
       cancelText: "取消"
     });
@@ -1053,7 +1121,7 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
       await tick();
       assert.deepEqual(store.calls.map((c) => c.name), ["clearPart5CorrectIds"]);
       assert.equal(seen[1].title, "清除答對紀錄");
-      assert.equal(seen[1].message, "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。");
+      assert.equal(seen[1].message, "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。");
       assert.equal(seen[1].okText, "確定");
       assert.equal(seen[1].cancelText, "取消");
     });
@@ -1186,7 +1254,8 @@ describe("part5.test.js — 答對紀錄與只練沒答對（v0.15，FE-75）", 
     one(rootEl, "next").click();
     assert.equal(one(rootEl, "summary-none").textContent, "本輪沒有新作答的題目");
     assert.equal(q$(rootEl, "summary-score").length, 0);
-    assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total")[0].textContent, "累計答對 " + t0[1] + " / " + t0[0]);
+    assert.equal(one(rootEl, "summary-answered").textContent, "已答對 4 / 4 題（100%）");
+    assert.equal(findAll(rootEl, (n) => n.className === "p5-summary__total").length, 0);
     assert.equal(env.focused, one(rootEl, "summary-title"));
     assert.equal(q$(rootEl, "clear").length, 1);
     assert.deepEqual(totals(), t0);

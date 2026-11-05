@@ -169,6 +169,14 @@
   min-width: 0;
 }
 
+/* （v0.19，FE-84）已答對行字串較長：≥ 14px、可換行，3 格維持同列（AS-4、AC-38-07 例外、AC-49-08；§7.25.1） */
+.db-stat__value--answered {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
 /* 連續打卡格的強調橘圖示（VC-3：var(--accent) 只在此處與 .btn--accent） */
 .db-stat__icon {
   flex: none;

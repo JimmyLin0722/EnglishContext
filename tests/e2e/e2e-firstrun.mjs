@@ -100,11 +100,11 @@ let BACKUP_V2, BACKUP_V1;
     await p.click('.cz-level[data-color="brown"]');
     await p.click("#footer-sources"); await sleep(350);
     const s = await p.ev(`({ tab: EMT.router.current(), sources: !document.getElementById("view-sources").hidden && document.getElementById("view-sources").innerText.length > 200, entry: document.body.dataset.entry })`);
-    const navInSources = await vis(p, "#app-nav"); const back = await vis(p, "#footer-first-run-back");
-    const backText = await p.ev(`(document.getElementById("footer-first-run-back") || {}).textContent`);
-    await p.click("#footer-first-run-back"); await sleep(350);
+    const navInSources = await vis(p, "#app-nav"); const back = await vis(p, "#view-sources .site-return"); const oldBack = await p.ev(`!!document.getElementById("footer-first-run-back")`);
+    const backText = await p.ev(`(document.querySelector("#view-sources .site-return") || {}).textContent`);
+    await p.click("#view-sources .site-return"); await sleep(350);
     const a = await firstRunInfo(p); const key = await stored(p);
-    const ok = s.tab === "sources" && s.sources && s.entry === "firstRun" && !navInSources && back && a.entry === "firstRun" && a.tab === "customizer" && !a.nav && !a.dashboard && a.start && key === null;
+    const ok = s.tab === "sources" && s.sources && s.entry === "firstRun" && !navInSources && back && !oldBack && backText === "返回難易度設定" && a.entry === "firstRun" && a.tab === "customizer" && !a.nav && !a.dashboard && a.start && key === null;
     return { ok, note: `資料來源頁 ${JSON.stringify(s)}、導覽可見=${navInSources}、返回連結「${backText}」可見=${back}；返回後 ${a.entry}/${a.tab}、導覽=${a.nav}、主控台=${a.dashboard}、選中 ${a.pressed}、分數 ${a.input}；狀態鍵 ${key === null ? "無" : "有"}` };
   });
   await R.check("TC-25-11", "AC-25-11", async () => {

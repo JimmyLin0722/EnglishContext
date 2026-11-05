@@ -37,8 +37,12 @@
  *   AC-11-04、AC-46-06、AC-48-01、AC-48-06、AC-48-09、AC-48-11、AC-48-12）
  * - question 依 part5flow.questionState 分 answered、lockedReview、idle；lockedReview 不可作答，有回饋、解析與「下一題」，
  *   鎖定只由狀態推導，本檔不寫入任何狀態（LV-4）。資料不完整時回饋為 TEXT.badData，全畫面恰 1 次，解析只顯示非空段落（LV-6）。
- * - 結算 y = 0 顯示 summaryNoNewAnswers，a ≥ 1 才顯示累計行（SM-2）；allCorrect 只在 phase = summary 且 y ≥ 1 顯示本輪結算（SM-3）。
+ * - 結算 y = 0 顯示 summaryNoNewAnswers（SM-2）；allCorrect 只在 phase = summary 且 y ≥ 1 顯示本輪結算（SM-3）。
  * - .p5-record 於開關後顯示開關說明（HN-1）；K ≥ 1 且不是 allCorrect 時另有清除按鈕；allCorrect 的清除按鈕為唯一按鈕（CR-10、UO-7）。
+ *
+ * （v0.19，FE-84；architecture.md v0.14 §7.25.1、§7.25.2；契約 README §13.1 AS-3、AS-5、AS-6、§5.11 CR-5、SM-2、DS-51；
+ *   AC-49-02～AC-49-05、AC-49-07）結算區以已答對行取代累計行：y ≥ 1、y = 0 都顯示，a = 0 也顯示，Q = 0 不建節點；
+ *   allCorrect 畫面不加。確認對話框改為定稿文字。totalAnswered、totalCorrect 由 store 照常更新，本檔不再顯示。
  *
  * 寫法：純邏輯（splitSentence、splitStructure、optionState、buildViewModel、feedbackOf、shouldIgnoreClick 等）
  * 在 Node 下以 module.exports 匯出供測試；
@@ -96,15 +100,15 @@
     summaryNoNewAnswers: "本輪沒有新作答的題目",
     filterHint: "關閉時顯示全部題目，答對過的題目會以綠色鎖定。",
     filterHintAllCorrect: "要檢視全部題目，請關閉上方的「只練沒答對的題目」。",
-    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "「已答對」會回到 0 題"],
     confirmOk: "確定",
     confirmCancel: "取消"
   };
 
-  // （v0.15，FE-75）SD 定稿文字（architecture.md §7.21.4 文字定稿表，逐字）
+  // （v0.15，FE-75；v0.19，FE-84）SD 定稿文字（architecture.md v0.14 §7.25.2 文字定稿表，逐字）
   var RECORD_TEXT = {
     confirmTitle: "清除答對紀錄",
-    confirmMessage: "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。"
+    confirmMessage: "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。"
   };
 
   /** 取得契約常數（Node 下 require，瀏覽器下讀 EMT.core.constants） */
@@ -224,7 +228,7 @@
    * @param {{ ids?: string[], only?: boolean }} [record] （v0.15）答對紀錄與開關；缺省 { ids: [], only: false }
    * @returns {object} （v0.15）各 kind 皆附 k（已答對題數）、q（題庫題數）、only（開關）
    *   { kind: "empty" }
-   *   { kind: "summary", roundCorrect, roundAnswered, totalCorrect, totalAnswered }
+   *   { kind: "summary", roundCorrect, roundAnswered, answeredText }（v0.19，AS-5；answeredText 為已答對行）
    *   { kind: "allCorrect", inSummary, roundCorrect, roundAnswered }（v0.15，UO-3、UO-7）
    *   { kind: "question", index, number, total, typeLabel, segments, options[], locked, correctIndex,
    *     isCorrect, valid, explanation: { coreStrategy, structureLines }, correctBadge, questionState }（v0.18，LV-1）
@@ -264,8 +268,7 @@
         kind: "summary",
         roundCorrect: roundC,
         roundAnswered: roundA,
-        totalCorrect: isIndex(p.totalCorrect) ? p.totalCorrect : 0,
-        totalAnswered: isIndex(p.totalAnswered) ? p.totalAnswered : 0,
+        answeredText: PF.answeredSummaryText(PF.answeredSummary(bankIds, rec.ids)),
         k: kCount,
         q: qCount,
         only: rec.only
@@ -693,7 +696,7 @@
     ]);
   }
 
-  /** 結算畫面（AC-11-04、AC-11-07；v0.18，SM-1、SM-2：y = 0 改顯示 summaryNoNewAnswers，a = 0 無累計行） */
+  /** 結算畫面（AC-11-04、AC-11-07；v0.18，SM-1、SM-2：y = 0 改顯示 summaryNoNewAnswers；v0.19，AS-5：其下為已答對行，取代累計行） */
   function renderSummary(vm, T) {
     var D = dom();
     var restartBtn = D.el("button", {
@@ -713,9 +716,8 @@
         ? D.el("p", { className: "p5-summary__score", attrs: { "data-p5": "summary-score" },
           text: "答對 " + vm.roundCorrect + " / " + vm.roundAnswered })
         : D.el("p", { className: "p5-summary__none", attrs: { "data-p5": "summary-none" }, text: T.summaryNoNewAnswers }),
-      vm.totalAnswered >= 1
-        ? D.el("p", { className: "p5-summary__total",
-          text: "累計答對 " + vm.totalCorrect + " / " + vm.totalAnswered })
+      vm.answeredText
+        ? D.el("p", { className: "p5-summary__answered", attrs: { "data-p5": "summary-answered" }, text: vm.answeredText })
         : null,
       D.el("div", { className: "btn-row" }, [restartBtn])
     ]);

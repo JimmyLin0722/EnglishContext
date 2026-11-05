@@ -4,7 +4,7 @@
     "tc": "TC-23-08s",
     "ac": "AC-23-08 (1)(3)、E-122（V-LGL-05 (b) 畫面文字）、AC-38-10 (1)",
     "result": "通過",
-    "note": "檢視 首次畫面、dashboard、customizer、flashcards、part5、鎖定檢視（p5-009 解析）、清除對話框=true、結算、全部答對、初始化對話框=true、資料來源頁、Toast 0 則；文字節點 195 種；「多益常考」「多益最常見」0；A＋B 同句 0；單獨「常考」「必考」0；LT-2、LT-5 仍在=true"
+    "note": "檢視 首次畫面、dashboard、customizer、flashcards、part5、鎖定檢視（p5-009 解析）、清除對話框=true、結算、全部答對、初始化對話框=true、資料來源頁、Toast 0 則；文字節點 201 種；「多益常考」「多益最常見」0；A＋B 同句 0；單獨「常考」「必考」0；LT-2、LT-5 仍在=true"
   },
   {
     "suite": "e2e-legal",
@@ -109,6 +109,6 @@
     "tc": "TC-23-07h",
     "ac": "AC-23-07 (4)(5)（V-PWA (b)）、AC-37-05",
     "result": "通過",
-    "note": "http 版聯絡行逐字=true、版本行「版本 1.2.0（建置 be5c8e6）」；開啟資料來源頁新增請求 0 筆；全程跨來源或非 GET 0"
+    "note": "http 版聯絡行逐字=true、版本行「版本 1.3.0（建置 2769ee9）」；開啟資料來源頁新增請求 0 筆；全程跨來源或非 GET 0"
   }
 ]

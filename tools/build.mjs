@@ -1,8 +1,8 @@
 // English Master Track 建置腳本（FE-01；architecture.md §5 B-1～B-9；v0.7 PWA 建置 FE-47，§5.1 B-10～B-16；
-// v0.9 網站版本號注入 FE-63，§5.4 B-17～B-19）
+// v0.9 網站版本號注入 FE-63，§5.4 B-17～B-19；v0.14 SEO、靜態頁、爬蟲檔與測試注入 FE-85，§5.9 B-20～B-25）
 // 將 src/app/index.html 模板、授權標頭、樣式、內容資料與程式串接為單一離線 HTML；
-// （v0.7）PWA 模式下另產生部署目錄（index.html、manifest.webmanifest、sw.js、4 張圖示、ads.txt，恰 8 檔）。
-// 只使用 Node 內建模組（fs、path、vm、url、crypto、module），無 npm 相依。
+// （v0.7）PWA 模式下另產生部署目錄（v0.14 起恰 13 檔，清單見 core/pwa.js 的 PWA_DEPLOY_FILES）。
+// 只使用 Node 內建模組（fs、path、vm、url、crypto、module）與同目錄的 site-pages.mjs，無 npm 相依。
 // 可重現（AC-36-01）：不使用時間、亂數、環境變數；BUILD_ID 只由內容計算（§7.18.2）。
 // （v0.9）版本號只讀 --package 檔（預設專案根目錄 package.json）的 version 欄位，先寫入 HTML 再計算 BUILD_ID（VR-4）。
 //
@@ -17,6 +17,8 @@
 //     --ads      ads.txt 來源，預設 sources/deploy/ads.txt
 //     --package  版本號來源（只讀 version 欄位），預設專案根目錄 package.json（v0.9，B-18）
 //
+// （v0.14，DS-53）廣告單元 ID 的測試注入只有 build({ adSlotIdOverride }) 這個 JS 參數：命令列與環境都無法傳入。
+//
 // 結束碼：0 成功；1 建置中止（錯誤訊息輸出至 stderr，不寫出產物、不動部署目錄）。
 
 import fs from "node:fs";
@@ -25,6 +27,18 @@ import vm from "node:vm";
 import crypto from "node:crypto";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
+import {
+  checkCrawlerFiles,
+  checkHomeHead,
+  checkStaticPage,
+  escapeForScript,
+  escapeHtml,
+  renderHomeHead,
+  renderNoscript,
+  renderStaticPage,
+} from "./site-pages.mjs";
+
+export { escapeForScript };
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 /** 專案根目錄（tools/ 的上一層） */
@@ -43,6 +57,13 @@ export const DEFAULTS = Object.freeze({
 export const PWA_CORE_FILE = path.join(PROJECT_ROOT, "src", "app", "core", "pwa.js");
 /** 版本號契約常數與驗證函式的固定來源（B-18 (2)：固定取專案檔，不隨 --app 改變） */
 export const APP_VERSION_CORE_FILE = path.join(PROJECT_ROOT, "src", "app", "core", "version.js");
+/** 對外頁面文案與廣告設定的相對路徑；--app 內有檔案就用，否則用專案檔（v0.14，§4.12） */
+const SITE_CONTENT_REL = path.join("core", "site-content.js");
+const AD_CORE_REL = path.join("core", "ad.js");
+/** 靜態頁 CSS 相對 --app 的位置（§5.9） */
+const STATIC_PAGE_CSS_REL = path.join("site", "static-page.css");
+/** 正式交付目錄：測試注入不得寫入（B-25） */
+const PROJECT_DIST = path.join(PROJECT_ROOT, "dist");
 
 /** 產物大小上限（AC-19-04） */
 export const MAX_BYTES = 5242880;
@@ -94,18 +115,27 @@ export const FORBIDDEN_PATTERNS = Object.freeze([
     name: "<link rel=PWA 附屬檔>",
     re: /<link\b[^>]*\brel=["']?(?:manifest|apple-touch-icon|apple-touch-startup-image|preload|prefetch|modulepreload)\b/i,
   },
+  // v0.14（FE-85）：HTML 不得有靜態廣告框（AD-7、DS-55）
+  { name: "靜態廣告框", re: /<ins\b[^>]*adsbygoogle/i },
 ]);
 
 /**
  * B-7 逐字白名單（v0.7）：PWA 模式下必須恰 1 次；檢查 FORBIDDEN_PATTERNS 前只從檢查用副本移除這一個字串，
  * FORBIDDEN_PATTERNS 本身一條都不放寬（HD-1、HD-4）。
  */
-export const ALLOWED_STATIC_TAGS = Object.freeze(['<link rel="icon" href="data:,">']);
+export const ALLOWED_STATIC_TAGS = Object.freeze([
+  '<link rel="icon" href="data:,">',
+  // v0.14（DS-55）：首頁 canonical；其他任何 <link href> 仍中止
+  '<link rel="canonical" href="https://jimmyfantasyworld.com/">',
+]);
 
 /** 建置識別碼佔位（B-10、B-15） */
 export const BUILD_ID_PLACEHOLDER = "@@BUILD_ID@@";
 /** 網站版本號佔位（v0.9，B-17、B-18；只能出現在 index.html 的 emt-app-version meta） */
 export const APP_VERSION_PLACEHOLDER = "@@APP_VERSION@@";
+/** SEO 與 noscript 的模板標記（v0.14，B-20、B-21） */
+export const SEO_HEAD_MARKER = "<!-- @@SEO_HEAD@@ -->";
+export const NOSCRIPT_MARKER = "<!-- @@NOSCRIPT@@ -->";
 /** 產物不得殘留的佔位樣式（B-19、V-VER-01） */
 const PLACEHOLDER_RE = /@@[A-Za-z0-9_]+@@/;
 /** sw 範本中預先快取清單的佔位（B-15） */
@@ -313,11 +343,6 @@ export function sortByRank(items) {
       return ra === rb ? a.i - b.i : ra - rb;
     })
     .map((x) => x.item);
-}
-
-/** B-3：資料 JSON 內嵌於 <script> 前的跳脫（</ → <\/、<!-- → <\!--） */
-export function escapeForScript(json) {
-  return json.replace(/<!--/g, "<\\!--").replace(/<\//g, "<\\/");
 }
 
 /**
@@ -836,11 +861,11 @@ export function readPwaInputs(appDir, pwa, site, adsFile) {
 }
 
 /**
- * B-12：HD-1 靜態元素各逐字恰 1 次且皆在 </head> 之前；（v0.12，FE-56，§5.3）<title>${PWA_APP_NAME}</title> 恰 1 次。
+ * B-12：HD-1 靜態元素各逐字恰 1 次且皆在 </head> 之前；（v0.14，FE-85，§5.9）<title> 逐字為 ver.documentTitle 且 <head> 內恰 1 個。
  * （v0.9，FE-63）ver.appVersion 為字串時加第 8 項 <meta name="emt-app-version" content="<版本號>">（對 HTML₀′ 檢查）。
  * @param {string} html HTML₀′（版本號已寫入、emt-build-id 仍為佔位）
  * @param {object} pwa core/pwa.js
- * @param {{ appVersion?: string|null, metaName?: string }} [ver]
+ * @param {{ appVersion?: string|null, metaName?: string, documentTitle?: string }} [ver]
  * @returns {string[]} HD-1 元素清單
  */
 export function checkPwaHead(html, pwa, ver = {}) {
@@ -862,10 +887,11 @@ export function checkPwaHead(html, pwa, ver = {}) {
       throw new BuildError("PWA_HEAD", `HTML 的 HD-1 元素 ${e} 必須位於 </head> 之前`);
     }
   }
-  // （v0.12，NM-1）<title> = APP_DISPLAY_NAME = PWA_APP_NAME「EnglishContext」
-  const title = `<title>${pwa.PWA_APP_NAME}</title>`;
-  if (countOf(html, title) !== 1) {
-    throw new BuildError("PWA_HEAD", `HTML 的 ${title} 必須恰 1 次`);
+  // （v0.14，Q-90 決議 B）<title> = SITE_HOME_SEO.documentTitle；apple-mobile-web-app-title 維持 PWA_APP_NAME
+  const title = `<title>${escapeHtml(ver.documentTitle)}</title>`;
+  const head = headEnd < 0 ? html : html.slice(0, headEnd);
+  if (countOf(html, title) !== 1 || (head.match(/<title\b/gi) || []).length !== 1) {
+    throw new BuildError("PWA_HEAD", `HTML 的 ${title} 必須恰 1 次，且 <head> 內只能有這個 <title>`);
   }
   return elements;
 }
@@ -1004,6 +1030,158 @@ function verifySite(siteDir, siteFiles, outFile, pwa) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// v0.14 SEO、靜態頁、廣告驗證與測試注入（B-20～B-25；architecture.md §5.9、§7.25.4、§7.25.8）
+// ─────────────────────────────────────────────────────────────
+
+/** 重新讀取 CommonJS 模組（同一程序內檔案改變時不用舊快取） */
+function requireFresh(file) {
+  const require = createRequire(import.meta.url);
+  delete require.cache[require.resolve(file)];
+  return require(file);
+}
+
+/** appDir 內的檔案；不存在時用專案檔（§4.12） */
+function coreFile(appDir, rel) {
+  const own = path.join(appDir, rel);
+  return fs.existsSync(own) ? own : path.join(DEFAULTS.app, rel);
+}
+
+/** 讀對外頁面文案：與 HTML 打包的是同一個檔案（§7.25.7、V-SITE-06） */
+export function loadSiteContent(appDir) {
+  return requireFresh(coreFile(appDir, SITE_CONTENT_REL));
+}
+
+/** 讀廣告設定（B-24、B-25） */
+export function loadAdCore(appDir) {
+  return requireFresh(coreFile(appDir, AD_CORE_REL));
+}
+
+/** target 是否為 dir 本身或位於其內 */
+function isInsideDir(dir, target) {
+  const rel = path.relative(dir, target);
+  return rel === "" || (rel.split(path.sep)[0] !== ".." && !path.isAbsolute(rel));
+}
+
+/**
+ * B-25：把測試用單元 ID 寫入 HTML₀（只有 build() 參數有值才呼叫）。
+ * 值須符合 AD_SLOT_ID_PATTERN；寫檔時 out、site 不得落在專案 dist/ 內；宣告須恰 1 次。
+ * @param {string} html HTML₀
+ * @param {*} value adSlotIdOverride
+ * @param {object} adCore core/ad.js
+ * @param {string[]} writeTargets 會寫入的路徑（write: false 時為空陣列）
+ * @returns {string}
+ */
+export function applyAdSlotOverride(html, value, adCore, writeTargets) {
+  if (typeof value !== "string" || !new RegExp(adCore.AD_SLOT_ID_PATTERN).test(value)) {
+    throw new BuildError("AD_OVERRIDE", `adSlotIdOverride ${JSON.stringify(value)} 不符 ${adCore.AD_SLOT_ID_PATTERN}`);
+  }
+  for (const target of writeTargets) {
+    if (isInsideDir(PROJECT_DIST, target)) {
+      throw new BuildError("AD_OVERRIDE", `adSlotIdOverride 不得寫入專案 dist/：${target}`);
+    }
+  }
+  const hits = [...html.matchAll(/var AD_SLOT_ID = [^;\n]*;/g)];
+  if (hits.length !== 1) {
+    throw new BuildError("AD_OVERRIDE", `HTML 中 AD_SLOT_ID 宣告必須恰 1 次（目前 ${hits.length} 次）`);
+  }
+  const at = hits[0].index;
+  return html.slice(0, at) + `var AD_SLOT_ID = ${JSON.stringify(value)};` + html.slice(at + hits[0][0].length);
+}
+
+/**
+ * B-20、B-21：檢查模板與組合後 HTML 中的 SEO、noscript 標記。
+ * PWA 模式 → 各恰 1 次；SEO 標記在 </head> 之前；noscript 標記緊接 <body> 標籤的下一行；程式與資料不得含標記。
+ * 非 PWA 模式 → 兩者都沒有就略過（舊 fixture），有就中止（canonical 只在 PWA 模式列入白名單）。
+ * @returns {boolean} 是否寫入 SEO
+ */
+export function checkSeoTemplate(template, html0, pwaMode) {
+  const nHead = countOf(template, SEO_HEAD_MARKER);
+  const nBody = countOf(template, NOSCRIPT_MARKER);
+  if (!pwaMode) {
+    if (nHead === 0 && nBody === 0) return false;
+    throw new BuildError("SEO_TEMPLATE", `非 PWA 模式的模板不得含 ${SEO_HEAD_MARKER}、${NOSCRIPT_MARKER}`);
+  }
+  if (nHead !== 1 || nBody !== 1) {
+    throw new BuildError(
+      "SEO_TEMPLATE",
+      `index.html 的 ${SEO_HEAD_MARKER}（${nHead} 次）與 ${NOSCRIPT_MARKER}（${nBody} 次）必須各恰 1 次`
+    );
+  }
+  const headEnd = template.search(/<\/head>/i);
+  if (headEnd < 0 || template.indexOf(SEO_HEAD_MARKER) > headEnd) {
+    throw new BuildError("SEO_TEMPLATE", `index.html 的 ${SEO_HEAD_MARKER} 必須位於 </head> 之前`);
+  }
+  if (!/<body\b[^>]*>\r?\n<!-- @@NOSCRIPT@@ -->/i.test(template)) {
+    throw new BuildError("SEO_TEMPLATE", `index.html 的 ${NOSCRIPT_MARKER} 必須在 <body> 標籤的下一行`);
+  }
+  if (countOf(html0, SEO_HEAD_MARKER) !== 1 || countOf(html0, NOSCRIPT_MARKER) !== 1) {
+    throw new BuildError("SEO_TEMPLATE", "程式或資料不得含 SEO、noscript 標記");
+  }
+  return true;
+}
+
+/**
+ * B-24：publisherId 格式；有讀 ads.txt 時，內容（trim 後）須逐字符合且數字段相同（AD-15）。
+ * @param {Buffer|null} ads ads.txt 位元組；--no-site 時為 null
+ * @param {object} adCore core/ad.js
+ */
+export function checkAdPublisher(ads, adCore) {
+  const publisherId = adCore.AD_CONFIG.publisherId;
+  if (typeof publisherId !== "string" || !new RegExp(adCore.AD_PUBLISHER_ID_PATTERN).test(publisherId)) {
+    throw new BuildError("AD_PUBLISHER_MISMATCH", `publisherId ${JSON.stringify(publisherId)} 不符 ${adCore.AD_PUBLISHER_ID_PATTERN}`);
+  }
+  if (ads === null) return;
+  const digits = publisherId.slice("ca-pub-".length);
+  const expected = `google.com, pub-${digits}, DIRECT, f08c47fec0942fa0`;
+  if (ads.toString("utf8").trim() !== expected) {
+    throw new BuildError("AD_PUBLISHER_MISMATCH", `ads.txt 必須為「${expected}」（AD-15）`);
+  }
+}
+
+/** 讀靜態頁 CSS：換行正規化為 LF；含 @import、url(、</style 即中止（§5.9、T-114） */
+export function readStaticPageCss(appDir) {
+  const file = path.join(appDir, STATIC_PAGE_CSS_REL);
+  let css;
+  try {
+    css = readText(file);
+  } catch (err) {
+    throw new BuildError("SITE_PAGE_CHECK", `找不到或無法讀取靜態頁樣式 ${file}`);
+  }
+  for (const [name, re] of [["@import", /@import/i], ["url(", /url\(/i], ["</style", /<\/style/i]]) {
+    if (re.test(css)) throw new BuildError("SITE_PAGE_CHECK", `靜態頁樣式含有 ${name}`);
+  }
+  return css.replace(/\r\n?/g, "\n");
+}
+
+/**
+ * B-23：產生 3 個靜態頁、robots.txt、sitemap.xml 並檢查。
+ * @returns {[string, Buffer][]} byPath 的項目
+ */
+export function buildSitePages(appDir, site, adCore) {
+  const crawler = checkCrawlerFiles(site);
+  if (crawler.length) throw new BuildError("SITE_PAGE_CHECK", crawler.join("；"));
+  const css = readStaticPageCss(appDir);
+  const entries = [
+    ["robots.txt", Buffer.from(site.ROBOTS_TXT, "utf8")],
+    ["sitemap.xml", Buffer.from(site.SITEMAP_XML, "utf8")],
+  ];
+  for (const page of site.SITE_PAGES) {
+    let html;
+    try {
+      html = renderStaticPage(page, site, css);
+    } catch (err) {
+      throw new BuildError("SITE_PAGE_CHECK", `${page.staticPath}：${err.message}`);
+    }
+    const problems = checkStaticPage(html, page, adCore);
+    if (problems.length) {
+      throw new BuildError("SITE_PAGE_CHECK", `${page.staticPath}：${problems.join("；")}`);
+    }
+    entries.push([page.staticPath, Buffer.from(html, "utf8")]);
+  }
+  return entries;
+}
+
+// ─────────────────────────────────────────────────────────────
 // B-9（備用，未實作）
 // ─────────────────────────────────────────────────────────────
 
@@ -1026,11 +1204,13 @@ export function compressVocabLayer2(items) {
 
 /**
  * 執行建置。全部檢查在記憶體完成後才寫出產物（中止時 out 與部署目錄都不寫、不刪）。
- * 執行順序（§5.4）：B-1～B-6 → B-10 → B-17 → B-18 → B-11 → B-12（HTML₀′）→ B-13 → B-14（HTML₀′）→ B-15
- *   → B-7（對最終 HTML，含 B-19）→ B-16 → B-8。
+ * 執行順序（§5.9）：B-1～B-6 → B-10 → B-25 → B-17 → B-18 → B-20、B-21（HTML₀′）→ B-11 → B-24 → B-12 → B-13
+ *   → B-14（HTML₀′）→ B-15 → B-22 → B-23 → B-7（對最終 HTML，含 B-19）→ B-16 → B-8。
  * @param {{ out?: string, data?: string, app?: string, site?: string|false, ads?: string, packageFile?: string,
- *           log?: (s: string) => void, warn?: (s: string) => void, write?: boolean, now?: Date }} [options]
+ *           log?: (s: string) => void, warn?: (s: string) => void, write?: boolean, now?: Date,
+ *           adSlotIdOverride?: string }} [options]
  *   site：部署目錄；未指定時為 out 所在目錄下的 site；false = 不輸出部署目錄（--no-site）
+ *   adSlotIdOverride：測試用廣告單元 ID（B-25）；寫檔時 out、site 不得在專案 dist/ 內
  * @returns {{ html: string, bytes: number, sections: { name: string, bytes: number }[],
  *             vocabCount: number, vocabAvgBytes: number|null, warnings: string[], out: string,
  *             buildId: string|null, site: { dir: string, files: { path: string, bytes: Buffer }[] }|null,
@@ -1103,11 +1283,29 @@ export function build(options = {}) {
     throw new BuildError("PWA_TEMPLATE", `組合後的 HTML 中 ${BUILD_ID_PLACEHOLDER} 必須恰 1 次（程式或資料不得含此字串）`);
   }
 
-  // B-17 版本佔位、B-18 讀版本並寫入（HTML₀′）；非 PWA 模式且無佔位時略過
+  // B-25 測試用單元 ID（只有 build() 參數有值才動作）
+  const adCore = loadAdCore(appDir);
+  const override = options.adSlotIdOverride;
+  const hasOverride = override !== undefined && override !== null;
+  const writeTargets = options.write === false ? [] : site === false ? [out] : [out, site];
+  const html0a = hasOverride ? applyAdSlotOverride(html0, override, adCore, writeTargets) : html0;
+
+  // B-17 版本佔位、B-18 讀版本並寫入；非 PWA 模式且無佔位時略過
   const versionCore = loadVersionCore();
-  const versionOn = checkAppVersionTemplate(template, html0, pwaMode, versionCore.APP_VERSION_META_NAME);
+  const versionOn = checkAppVersionTemplate(template, html0a, pwaMode, versionCore.APP_VERSION_META_NAME);
   const appVersion = versionOn ? readAppVersion(packageFile, versionCore) : null;
-  const html0v = versionOn ? replaceOnce(html0, APP_VERSION_PLACEHOLDER, appVersion) : html0;
+  const html0b = versionOn ? replaceOnce(html0a, APP_VERSION_PLACEHOLDER, appVersion) : html0a;
+
+  // B-20、B-21：SEO 與 noscript 在計算 BUILD_ID 之前寫入（HTML₀′，SE-9）
+  const seoOn = checkSeoTemplate(template, html0b, pwaMode);
+  const siteContent = seoOn ? loadSiteContent(appDir) : null;
+  const html0v = seoOn
+    ? replaceOnce(
+        replaceOnce(html0b, SEO_HEAD_MARKER, renderHomeHead(siteContent, adCore)),
+        NOSCRIPT_MARKER,
+        renderNoscript(siteContent)
+      )
+    : html0b;
 
   let html = html0v;
   let buildId = null;
@@ -1115,8 +1313,14 @@ export function build(options = {}) {
   if (pwaMode) {
     // B-11 PWA 輸入
     const inputs = readPwaInputs(appDir, pwa, site, adsFile);
+    // B-24 ads.txt 與 publisherId
+    checkAdPublisher(inputs.ads, adCore);
     // B-12 HTML head（對 HTML₀′；版本 meta 為第 8 項）
-    checkPwaHead(html0v, pwa, { appVersion, metaName: versionCore.APP_VERSION_META_NAME });
+    checkPwaHead(html0v, pwa, {
+      appVersion,
+      metaName: versionCore.APP_VERSION_META_NAME,
+      documentTitle: siteContent.SITE_HOME_SEO.documentTitle,
+    });
     // B-13 manifest
     const manifest = buildManifest(pwa);
     // B-14 BUILD_ID
@@ -1132,6 +1336,9 @@ export function build(options = {}) {
     // B-15 注入
     html = replaceOnce(html0v, BUILD_ID_PLACEHOLDER, buildId);
     const sw = buildServiceWorker(inputs.swTemplate, buildId, pwa);
+    // B-22 首頁 SEO 標記（canonical 的白名單在 B-7）
+    const headProblems = checkHomeHead(html, siteContent, adCore);
+    if (headProblems.length) throw new BuildError("SITE_PAGE_CHECK", `首頁：${headProblems.join("；")}`);
     if (site !== false) {
       const byPath = new Map([
         ["index.html", Buffer.from(html, "utf8")],
@@ -1139,6 +1346,8 @@ export function build(options = {}) {
         ["sw.js", Buffer.from(sw, "utf8")],
         ["ads.txt", inputs.ads],
         ...inputs.icons.map((i) => [i.path, i.bytes]),
+        // B-23 靜態頁與爬蟲檔（不納入 BUILD_ID，SW-2）
+        ...buildSitePages(appDir, siteContent, adCore),
       ]);
       siteFiles = pwa.PWA_DEPLOY_FILES.map((f) => ({ path: f.path, bytes: byPath.get(f.path) }));
     }
@@ -1198,6 +1407,7 @@ export function build(options = {}) {
     `  資料檔：${data.files.length} 個；程式檔：${app.files.length} 個；樣式檔：${styles.files.length} 個`,
     `  版本號：${appVersion === null ? "（略過：模板無版本佔位）" : appVersion}`,
     `  PWA 模式：${pwaMode ? "是" : "否"}` + (buildId ? `；BUILD_ID：${buildId}` : ""),
+    `  廣告單元 ID：${hasOverride ? `${override}（測試注入）` : adCore.AD_CONFIG.adSlotId === null ? "未設定" : adCore.AD_CONFIG.adSlotId}`,
     ...(siteFiles
       ? [`  部署目錄：${site}`, ...siteFiles.map((f) => `    ${f.path}：${fmt(f.bytes.length)} bytes`)]
       : []),

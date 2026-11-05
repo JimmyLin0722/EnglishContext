@@ -48,7 +48,7 @@ const info = (p) => p.ev(`(() => { const v = document.getElementById("view-part5
     badge: t("[data-p5=correct-badge]"), badges: v.querySelectorAll("[data-p5=correct-badge]").length, only: only ? only.checked : null,
     optCount: opts.length, optEnabled: opts.filter((o) => !o.disabled && o.getAttribute("aria-disabled") !== "true").length,
     locked: opts.length > 0 && opts.every((o) => o.disabled || o.getAttribute("aria-disabled") === "true"),
-    allCorrect: !!q("[data-p5=allcorrect-title]"), title: t("[data-p5=allcorrect-title]"), score: t("[data-p5=summary-score]"), none: t("[data-p5=summary-none]"), total: t(".p5-summary__total"), summaryTitle: !!q("[data-p5=summary-title]"),
+    allCorrect: !!q("[data-p5=allcorrect-title]"), title: t("[data-p5=allcorrect-title]"), score: t("[data-p5=summary-score]"), none: t("[data-p5=summary-none]"), total: t("[data-p5=summary-answered]"), summaryTitle: !!q("[data-p5=summary-title]"),
     feedback: t("[data-p5=feedback]"), hint: t("[data-p5=filter-hint]"), hints: v.querySelectorAll("[data-p5=filter-hint]").length, clearCount: v.querySelectorAll("[data-p5=clear]").length, optStates: opts.map((o) => o.dataset.state).join(","),
     restart: !!q("[data-p5=restart]"), clear: t("[data-p5=clear]"), next: !!q("[data-p5=next]"), qIndex: q(".p5-question") ? Number(q(".p5-question").dataset.index) : null,
     bar: bar ? { now: bar.getAttribute("aria-valuenow"), max: bar.getAttribute("aria-valuemax"), fill: (q(".p5-progress__fill") || {}).style ? q(".p5-progress__fill").style.width || getComputedStyle(q(".p5-progress__fill")).width : null } : null,
@@ -66,7 +66,7 @@ const isLR = (a) => a.locked && a.feedback === LOCK_FB && a.badge === "✓ 曾�
 const isIdle = (a) => !a.locked && a.optEnabled === 4 && !a.badge && a.feedback === null && !a.next;
 /** 以真實滑鼠點目前題目的 4 個選項（disabled 也點，座標點擊） */
 const clickAllOptions = async (p) => { for (let k = 0; k < 4; k++) { await p.click("#view-part5 [data-p5=option]", k); await sleep(20); } };
-const dashAcc = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const e = document.querySelector("#view-dashboard .db-stat--accuracy .db-stat__value"); const t = document.querySelector("#view-dashboard").innerText; EMT.router.go("part5"); return { acc: e ? e.innerText.replace(/\\s+/g, "") : null, hasK: /已答對/.test(t) }; })()`);
+const dashAcc = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const e = document.querySelector("#view-dashboard .db-stat--answered .db-stat__value"); const t = document.querySelector("#view-dashboard").innerText; EMT.router.go("part5"); return { acc: e ? e.innerText.replace(/\\s+/g, "") : null, hasK: /已答對/.test(t) }; })()`);
 /** 對比：文字色對實際背景（向上找第一個不透明背景） */
 const contrastJs = (sel) => `(() => { const el = document.querySelector(${J(sel)}); if (!el) return null; const rgb = (s) => (s.match(/[\\d.]+/g) || []).map(Number);
   const lum = ([r, g, b]) => { const f = (c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
@@ -146,10 +146,10 @@ const contrastJs = (sel) => `(() => { const el = document.querySelector(${J(sel)
     const rec = JSON.parse(J(s1)); rec.data.part5.currentIndex = 199; rec.data.part5.lockedSelection = null; await p.ev(`localStorage.setItem(${J(KEY)}, ${J(J(rec))})`); await p.reload(); await p.go("part5");
     await answer(p, 199, true); await p.click("#view-part5 [data-p5=next]"); await sleep(60); const sm = await info(p);
     await p.click("#view-part5 [data-p5=restart]"); await sleep(60); const s2 = await ls(p); const d2 = await dashAcc(p); const k2 = await info(p);
-    const ok = isLR(lr) && lr.number === "第 3 / 200 題" && s1.data.part5.totalAnswered === 3 && s1.data.part5.totalCorrect === 1 && s1.data.part5.roundAnswered === 3 && s1.data.part5.roundCorrect === 1 && d1.acc === "33%" && !d1.hasK && k1.count === countText(2)
+    const ok = isLR(lr) && lr.number === "第 3 / 200 題" && s1.data.part5.totalAnswered === 3 && s1.data.part5.totalCorrect === 1 && s1.data.part5.roundAnswered === 3 && s1.data.part5.roundCorrect === 1 && d1.acc === "已答對2/200題（1%）" && k1.count === countText(2)
       && J(s1.data.part5CorrectIds) === J(["p5-003", "p5-001"]) && s1.data.streak.days === 1 && s1.data.streak.lastActiveDate === TODAY && s1.data.todayLearned.wordKeys.length === 0
-      && sm.score === "答對 2 / 4" && s2.data.part5.totalAnswered === 4 && s2.data.part5.totalCorrect === 2 && s2.data.part5.roundAnswered === 0 && J(s2.data.part5CorrectIds) === J(["p5-003", "p5-001", "p5-200"]) && d2.acc === "50%" && !d2.hasK && k2.count === countText(3) && k2.number === "第 1 / 200 題";
-    return { ok, note: `作答 3 題、經過鎖定檢視 p5-003（不計）：累計 ${s1.data.part5.totalAnswered}/${s1.data.part5.totalCorrect}、本輪 ${s1.data.part5.roundAnswered}/${s1.data.part5.roundCorrect}、主控台正確率 ${d1.acc}（主控台出現「已答對」=${d1.hasK}）、K「${k1.count}」、打卡 ${J(s1.data.streak)}、今日已學 ${s1.data.todayLearned.wordKeys.length}；最後一題答對後結算「${sm.score}」；重新開始後累計 ${s2.data.part5.totalAnswered}/${s2.data.part5.totalCorrect}、本輪 ${s2.data.part5.roundAnswered}、紀錄 ${J(s2.data.part5CorrectIds)}（不清除）、正確率 ${d2.acc}、「${k2.count}」「${k2.number}」` };
+      && sm.score === "答對 2 / 4" && s2.data.part5.totalAnswered === 4 && s2.data.part5.totalCorrect === 2 && s2.data.part5.roundAnswered === 0 && J(s2.data.part5CorrectIds) === J(["p5-003", "p5-001", "p5-200"]) && d2.acc === "已答對3/200題（2%）" && k2.count === countText(3) && k2.number === "第 1 / 200 題";
+    return { ok, note: `作答 3 題、經過鎖定檢視 p5-003（不計）：累計 ${s1.data.part5.totalAnswered}/${s1.data.part5.totalCorrect}、本輪 ${s1.data.part5.roundAnswered}/${s1.data.part5.roundCorrect}、主控台 ${d1.acc}、K「${k1.count}」、打卡 ${J(s1.data.streak)}、今日已學 ${s1.data.todayLearned.wordKeys.length}；最後一題答對後結算「${sm.score}」；重新開始後累計 ${s2.data.part5.totalAnswered}/${s2.data.part5.totalCorrect}、本輪 ${s2.data.part5.roundAnswered}、紀錄 ${J(s2.data.part5CorrectIds)}（不清除）、主控台 ${d2.acc}、「${k2.count}」「${k2.number}」` };
   });
   await R.check("TC-45-07", "AC-45-07、CR-3、Q-71、E-109", async () => {
     const n0 = (await toasts(p)).length;
@@ -205,7 +205,7 @@ for (const [w, h] of [[375, 667], [1366, 900]]) {
         const g = await p.ev(`(() => { const v = document.getElementById("view-part5"); const c = v.querySelector("[data-p5=correct-count]"); const bar = v.querySelector(".p5-progress"); const num = v.querySelector("[data-p5=number]");
           const body = v.querySelector(".p5-question, .p5-summary, .p5-allcorrect"); const rc = c.getBoundingClientRect(); const rn = num ? num.getBoundingClientRect() : null; const ro = v.querySelector("[data-p5=only-label]").getBoundingClientRect();
           const inter = (a, b) => !!a && !!b && a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
-          return { text: c.textContent, n: (v.innerText.match(/已答對 \\d+ \\/ \\d+ 題/g) || []).length, tab: getComputedStyle(c).fontVariantNumeric, afterBar: !!bar && !!(bar.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_FOLLOWING),
+          return { text: c.textContent, n: (v.innerText.match(/已答對 \\d+ \\/ \\d+ 題(?!（)/g) || []).length, tab: getComputedStyle(c).fontVariantNumeric, afterBar: !!bar && !!(bar.compareDocumentPosition(c) & Node.DOCUMENT_POSITION_FOLLOWING),
             beforeBody: !!body && !!(c.compareDocumentPosition(body) & Node.DOCUMENT_POSITION_FOLLOWING), overlapNum: inter(rc, rn), overlapOnly: inter(rc, ro), clipped: rc.left < 0 || rc.right > document.documentElement.clientWidth || c.scrollWidth > c.clientWidth + 1,
             hscroll: document.documentElement.scrollWidth > document.documentElement.clientWidth, lines: Math.round(rc.height / parseFloat(getComputedStyle(c).lineHeight || 20)) }; })()`);
         const good = g.text === countText(k) && g.n === 1 && /tabular-nums/.test(g.tab) && g.afterBar && g.beforeBody && !g.overlapNum && !g.overlapOnly && !g.clipped && !g.hscroll;
@@ -298,7 +298,7 @@ for (const [w, h] of [[375, 667], [1366, 900]]) {
     // (a) 其後已無未答對：K < Q → 本輪結算（y = 0 依 AC-48-06）；K = Q → 全部答對
     await seed(p, { part5: { currentIndex: 9, totalAnswered: 5, totalCorrect: 3 }, ids: range(10, 200) }); const e0 = await info(p); await p.click("#view-part5 [data-p5=only-label]"); await sleep(80); const e1 = await info(p);
     await seed(p, { part5: { currentIndex: 9, totalAnswered: 5, totalCorrect: 3 }, ids: range(1, 200) }); const f0 = await info(p); await p.click("#view-part5 [data-p5=only-label]"); await sleep(80); const f1 = await info(p);
-    const edge = isLR(e0) && e1.summaryTitle && e1.none === NONE && e1.score === null && e1.total === "累計答對 3 / 5" && e1.bar.now === e1.bar.max && isLR(f0) && f1.allCorrect && f1.score === null && f1.optCount === 0;
+    const edge = isLR(e0) && e1.summaryTitle && e1.none === NONE && e1.score === null && e1.total === "已答對 191 / 200 題（96%）" && e1.bar.now === e1.bar.max && isLR(f0) && f1.allCorrect && f1.score === null && f1.optCount === 0;
     out.push(`其後無未答對 K < Q：開啟前鎖定檢視=${isLR(e0)} → 結算 y = 0「${e1.none}」「${e1.total}」進度 ${e1.bar.now}/${e1.bar.max}；K = Q：開啟前鎖定檢視=${isLR(f0)} → 全部答對=${f1.allCorrect}`);
     // 開啟、關閉開關不改計數
     const cnt = (s) => J([s.data.part5.roundAnswered, s.data.part5.roundCorrect, s.data.part5.totalAnswered, s.data.part5.totalCorrect]);
@@ -353,13 +353,13 @@ for (const [w, h] of [[375, 667], [1366, 900]]) {
       else if (how === "esc") await p.key("Escape", "Escape", 27);
       else { const pt = await p.ev(`(() => { const b = document.querySelector(".dialog-backdrop"); const r = b.getBoundingClientRect(); return { x: r.left + 5, y: r.top + 5 }; })()`); for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) await p.send("Input.dispatchMouseEvent", { type, x: pt.x, y: pt.y, button: "left", clickCount: 1 }); }
       await sleep(150); const a = await info(p); const raw1 = await lsRaw(p); const d2 = await dialogInfo(p); const foc = await p.ev(`document.activeElement && document.activeElement.dataset.p5`);
-      const good = !!d && d.message.includes("將清除全部題目的答對紀錄") && d.message.includes("累計答題數與正確率不受影響") && J([...d.buttons].sort()) === J(["取消", "確定"].sort()) && !d2 && a.allCorrect && raw0 === raw1;
+      const good = !!d && d.message.includes("將清除全部題目的答對紀錄") && d.message.includes("「已答對」會回到 0 題") && !d.message.includes("累計答題數與正確率") && J([...d.buttons].sort()) === J(["取消", "確定"].sort()) && !d2 && a.allCorrect && raw0 === raw1;
       ok = ok && good; out.push(`${how}：對話框「${d && d.title}」「${d && d.message}」按鈕 ${J(d && d.buttons)} → 關閉=${!d2}、留在全部答對畫面=${a.allCorrect}、資料不變=${raw0 === raw1}、焦點 ${foc}`);
     }
     await p.click("#view-part5 [data-p5=clear]"); await sleep(150); await p.click('.dialog [data-action="ok"]'); await sleep(150);
     const a = await info(p); const st = await ls(p); const acc1 = await dashAcc(p); await p.reload(); await p.go("part5"); const r = await info(p);
-    const g = J(st.data.part5CorrectIds) === "[]" && a.count === countText(0) && a.badges === 0 && a.only === true && a.number === "第 1 / 200 題" && !a.locked && st.data.part5.totalAnswered === 50 && st.data.part5.totalCorrect === 40 && acc0.acc === acc1.acc && r.count === countText(0);
-    ok = ok && g; out.push(`確定 → 紀錄 ${J(st.data.part5CorrectIds)}、「${a.count}」、標示 ${a.badges}、開關 ${a.only}、「${a.number}」未作答=${!a.locked}、累計 ${st.data.part5.totalAnswered}/${st.data.part5.totalCorrect}、正確率 ${acc0.acc}→${acc1.acc}；重新載入「${r.count}」`);
+    const g = J(st.data.part5CorrectIds) === "[]" && a.count === countText(0) && a.badges === 0 && a.only === true && a.number === "第 1 / 200 題" && !a.locked && st.data.part5.totalAnswered === 50 && st.data.part5.totalCorrect === 40 && acc0.acc === "已答對200/200題（100%）" && acc1.acc === "已答對0/200題（0%）" && r.count === countText(0);
+    ok = ok && g; out.push(`確定 → 紀錄 ${J(st.data.part5CorrectIds)}、「${a.count}」、標示 ${a.badges}、開關 ${a.only}、「${a.number}」未作答=${!a.locked}、累計 ${st.data.part5.totalAnswered}/${st.data.part5.totalCorrect}、主控台 ${acc0.acc}→${acc1.acc}；重新載入「${r.count}」`);
     return { ok, note: out.join("；") };
   });
   await R.check("TC-46-09", "AC-46-09、UO-8、AC-48-01", async () => {

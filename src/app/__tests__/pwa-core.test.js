@@ -44,6 +44,12 @@ const EXPECTED = {
     { path: "icons/icon-maskable-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "maskable", producedBy: "copy" },
     { path: "icons/apple-touch-icon-180.png", role: "appleTouchIcon", mime: "image/png", precached: true, sizePx: 180, producedBy: "copy" },
     { path: "ads.txt", role: "adsTxt", mime: "text/plain", precached: false, producedBy: "copy" },
+    // （v0.14，FE-85）DP-9：以下 5 檔不進預先快取
+    { path: "robots.txt", role: "robots", mime: "text/plain", precached: false, producedBy: "build" },
+    { path: "sitemap.xml", role: "sitemap", mime: "application/xml", precached: false, producedBy: "build" },
+    { path: "about.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
+    { path: "contact.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
+    { path: "privacy.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
   ],
   PWA_PRECACHE_URLS: [
     "./",
@@ -92,14 +98,17 @@ describe("契約常數（data-schema.ts §12）", () => {
     assert.equal(JSON.stringify(pwa.PWA_MANIFEST), JSON.stringify(EXPECTED.PWA_MANIFEST));
   });
 
-  test("PWA_DEPLOY_FILES 恰 8 檔、PWA_PRECACHE_URLS 恰 7 項；precached 與清單一致", () => {
-    assert.equal(pwa.PWA_DEPLOY_FILES.length, 8);
+  test("PWA_DEPLOY_FILES 恰 13 檔、PWA_PRECACHE_URLS 恰 7 項；precached 與清單雙向一致（DP-1、DP-9）", () => {
+    assert.equal(pwa.PWA_DEPLOY_FILES.length, 13);
     assert.equal(pwa.PWA_PRECACHE_URLS.length, 7);
     const precachedPaths = pwa.PWA_DEPLOY_FILES.filter((f) => f.precached).map((f) => "./" + f.path);
-    for (const p of precachedPaths) {
-      assert.ok(pwa.PWA_PRECACHE_URLS.includes(p), p);
-    }
+    assert.deepEqual([...pwa.PWA_PRECACHE_URLS].filter((u) => u !== "./").sort(), precachedPaths.sort());
     assert.ok(pwa.PWA_PRECACHE_URLS.includes("./"));
+    // 新增 5 檔不進預先快取；檔名與 .github/workflows/static.yml 的清單相同
+    for (const p of ["robots.txt", "sitemap.xml", "about.html", "contact.html", "privacy.html"]) {
+      assert.equal(pwa.PWA_DEPLOY_FILES.find((d) => d.path === p).precached, false, p);
+      assert.ok(!pwa.PWA_PRECACHE_URLS.includes("./" + p), p);
+    }
   });
 
   test("常數全部深度凍結（含 PWA_STATE_KEYS 與 api 物件本身）", () => {

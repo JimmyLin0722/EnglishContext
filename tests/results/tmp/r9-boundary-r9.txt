@@ -1,0 +1,239 @@
+  OK [M] .github/workflows/static.yml （MC-08：主控修改部署檢查 8 檔 → 13 檔，授權例外）
+  OK [M] dist/english-master-track.html FE-89
+  OK [ignored-modified] dist/site/about.html FE-89
+  OK [ignored-modified] dist/site/ads.txt FE-89
+  OK [ignored-modified] dist/site/contact.html FE-89
+  OK [ignored-modified] dist/site/icons/apple-touch-icon-180.png FE-89
+  OK [ignored-modified] dist/site/icons/icon-192.png FE-89
+  OK [ignored-modified] dist/site/icons/icon-512.png FE-89
+  OK [ignored-modified] dist/site/icons/icon-maskable-512.png FE-89
+  OK [ignored-modified] dist/site/index.html FE-89
+  OK [ignored-modified] dist/site/manifest.webmanifest FE-89
+  OK [ignored-modified] dist/site/privacy.html FE-89
+  OK [ignored-modified] dist/site/robots.txt FE-89
+  OK [ignored-modified] dist/site/sitemap.xml FE-89
+  OK [ignored-modified] dist/site/sw.js FE-89
+  OK [M] docs/01-PRD.md （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/02-contract/README.md （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/02-contract/data-schema.ts （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/03-design/architecture.md （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/03-design/tasks.json （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/04-qa/bug-reports/BUG-004.md （QA 自有）
+  OK [??] docs/04-qa/bug-reports/BUG-005.md （QA 自有）
+  OK [??] docs/04-qa/bug-reports/BUG-006.md （QA 自有）
+  OK [M] package.json （MC-07：主控修改 version 1.2.0 → 1.3.0，git diff 只有此行，授權例外）
+  OK [??] src/app/__tests__/ad-core.test.js FE-83
+  OK [??] src/app/__tests__/ad-service.test.js FE-88
+  OK [??] src/app/__tests__/ad-slot.test.js FE-88
+  OK [M] src/app/__tests__/build.test.js FE-85
+  OK [M] src/app/__tests__/contact-static.test.js FE-87
+  OK [M] src/app/__tests__/dashboard.test.js FE-84
+  OK [M] src/app/__tests__/first-run.test.js FE-86
+  OK [M] src/app/__tests__/goal.test.js FE-83
+  OK [M] src/app/__tests__/layout.test.js FE-83
+  OK [M] src/app/__tests__/legal-static.test.js FE-87
+  OK [M] src/app/__tests__/load-order.test.js FE-83、FE-87
+  OK [M] src/app/__tests__/naming.test.js FE-84、FE-86
+  OK [M] src/app/__tests__/part5.test.js FE-84
+  OK [M] src/app/__tests__/part5flow.test.js FE-83
+  OK [M] src/app/__tests__/pwa-core.test.js FE-85
+  OK [M] src/app/__tests__/router-motion.test.js FE-86
+  OK [M] src/app/__tests__/shell.test.js FE-85、FE-86
+  OK [??] src/app/__tests__/site-content.test.js FE-83
+  OK [??] src/app/__tests__/site-pages-render.test.js FE-85
+  OK [??] src/app/__tests__/site-pages.test.js FE-87
+  OK [??] src/app/__tests__/site-static.test.js FE-89
+  OK [M] src/app/__tests__/sources-page.test.js FE-87
+  OK [??] src/app/__tests__/store-site.test.js FE-86
+  OK [M] src/app/__tests__/store-track.test.js FE-84
+  OK [M] src/app/__tests__/version-line.test.js FE-86
+  OK [??] src/app/core/ad.js FE-83
+  OK [M] src/app/core/constants.js FE-83
+  OK [M] src/app/core/layout.js FE-83
+  OK [M] src/app/core/part5flow.js FE-83
+  OK [M] src/app/core/pwa.js FE-85
+  OK [??] src/app/core/site-content.js FE-83
+  OK [M] src/app/index.html FE-85、FE-86
+  OK [M] src/app/main.js FE-88
+  OK [??] src/app/services/ad.js FE-88
+  OK [??] src/app/site/static-page.css FE-85、FE-89
+  OK [M] src/app/state/store.js FE-86
+  OK [M] src/app/styles/00-base.css FE-86
+  OK [M] src/app/styles/10-dashboard.css FE-84、FE-89
+  OK [M] src/app/styles/40-part5.css FE-84
+  OK [??] src/app/styles/75-site-pages.css FE-87、FE-89
+  OK [??] src/app/styles/85-ad.css FE-88、FE-89
+  OK [??] src/app/ui/ad-slot.js FE-88
+  OK [M] src/app/ui/router.js FE-86
+  OK [??] src/app/ui/site-return.js FE-87
+  OK [M] src/app/ui/version-line.js FE-86
+  OK [M] src/app/views/dashboard.js FE-84
+  OK [M] src/app/views/part5.js FE-84
+  OK [??] src/app/views/site-pages.js FE-87
+  OK [M] src/app/views/sources-page.js FE-87
+  OK [??] tests/e2e/diag-r9-first-answer.mjs （QA 自有）
+  OK [??] tests/e2e/diag-r9-focus.mjs （QA 自有）
+  OK [??] tests/e2e/diag-r9-offline.mjs （QA 自有）
+  OK [??] tests/e2e/diag-r9-perf.mjs （QA 自有）
+  OK [??] tests/e2e/e2e-ad-perf.mjs （QA 自有）
+  OK [??] tests/e2e/e2e-ad.mjs （QA 自有）
+  OK [??] tests/e2e/e2e-answered.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-content.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-firstrun.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-goal.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-layout.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-legal.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-lock.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-progress.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-pwa.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-reinit.mjs （QA 自有）
+  OK [??] tests/e2e/e2e-site.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-track-p5.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-track.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-version.mjs （QA 自有）
+  OK [??] tests/e2e/fixtures/ad-stub.js （QA 自有）
+  OK [??] tests/e2e/lib/ad-env.mjs （QA 自有）
+  OK [M] tests/e2e/lib/state.mjs （QA 自有）
+  OK [M] tests/results/boundary-delta.json （QA 自有）
+  OK [M] tests/results/boundary.json （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-1366-dashboard.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-1366-firstrun.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-1366-flashcards.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-1366-part5.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-1366-sources.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-375-dashboard.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-375-firstrun.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-375-sources.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-1366.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-1920.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-375.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-1366x768.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-1920x1080.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-375x667.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-390x844.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-412x915.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-dash-fold-768x1024.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-fc-v012-1366.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-1920x1080.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-375x667.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-375x812.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-390x844.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-412x915.png （QA 自有）
+  OK [M] tests/results/diag/layout-r5/r5-firstrun-768x1024.png （QA 自有）
+  OK [M] tests/results/diag/perf-runs.json （QA 自有）
+  OK [??] tests/results/diag/r9-ad-layout-shift.json （QA 自有）
+  OK [??] tests/results/diag/r9-ad-load.json （QA 自有）
+  OK [??] tests/results/diag/r9-ad-perf.json （QA 自有）
+  OK [??] tests/results/diag/r9-ad-requests.json （QA 自有）
+  OK [??] tests/results/diag/r9-first-answer.json （QA 自有）
+  OK [??] tests/results/diag/r9-focus.json （QA 自有）
+  OK [??] tests/results/diag/r9-header-shift.json （QA 自有）
+  OK [??] tests/results/diag/r9-perf-ab-1x.json （QA 自有）
+  OK [??] tests/results/diag/r9-perf-ab-4x.json （QA 自有）
+  OK [??] tests/results/e2e-ad-edge.json （QA 自有）
+  OK [??] tests/results/e2e-ad-perf.json （QA 自有）
+  OK [??] tests/results/e2e-ad.json （QA 自有）
+  OK [??] tests/results/e2e-answered-edge.json （QA 自有）
+  OK [??] tests/results/e2e-answered.json （QA 自有）
+  OK [M] tests/results/e2e-cards.json （QA 自有）
+  OK [M] tests/results/e2e-content.json （QA 自有）
+  OK [M] tests/results/e2e-env.json （QA 自有）
+  OK [M] tests/results/e2e-firstrun.json （QA 自有）
+  OK [??] tests/results/e2e-focus.json （QA 自有）
+  OK [M] tests/results/e2e-goal-edge.json （QA 自有）
+  OK [M] tests/results/e2e-goal.json （QA 自有）
+  OK [M] tests/results/e2e-hidden-edge.json （QA 自有）
+  OK [M] tests/results/e2e-hidden.json （QA 自有）
+  OK [M] tests/results/e2e-layout.json （QA 自有）
+  OK [M] tests/results/e2e-legal.json （QA 自有）
+  OK [M] tests/results/e2e-lock-edge.json （QA 自有）
+  OK [M] tests/results/e2e-lock.json （QA 自有）
+  OK [M] tests/results/e2e-mic.json （QA 自有）
+  OK [M] tests/results/e2e-motion.json （QA 自有）
+  OK [M] tests/results/e2e-persist.json （QA 自有）
+  OK [M] tests/results/e2e-progress.json （QA 自有）
+  OK [M] tests/results/e2e-pwa-edge.json （QA 自有）
+  OK [M] tests/results/e2e-pwa-update.json （QA 自有）
+  OK [M] tests/results/e2e-pwa.json （QA 自有）
+  OK [M] tests/results/e2e-reinit.json （QA 自有）
+  OK [??] tests/results/e2e-site-edge.json （QA 自有）
+  OK [??] tests/results/e2e-site.json （QA 自有）
+  OK [M] tests/results/e2e-speech.json （QA 自有）
+  OK [M] tests/results/e2e-track-p5-edge.json （QA 自有）
+  OK [M] tests/results/e2e-track-p5.json （QA 自有）
+  OK [M] tests/results/e2e-track.json （QA 自有）
+  OK [M] tests/results/e2e-version-edge.json （QA 自有）
+  OK [M] tests/results/e2e-version.json （QA 自有）
+  OK [M] tests/results/legal.json （QA 自有）
+  OK [M] tests/results/pwa-static.json （QA 自有）
+  OK [M] tests/results/qa-review.json （QA 自有）
+  OK [??] tests/results/site-check.json （QA 自有）
+  OK [M] tests/results/static.json （QA 自有）
+  OK [M] tests/results/summary.json （QA 自有）
+  OK [??] tests/results/tmp/r9-boundary-r9.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-boundary.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-data.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-ad-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-ad-perf.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-ad.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-answered-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-answered.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-cards.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-content.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-env-run1.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-env-run2.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-env.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-firstrun.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-goal-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-goal.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-hidden-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-hidden.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-layout.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-legal.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-lock-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-lock.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-mic.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-motion.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-persist.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-progress.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-pwa-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-pwa-update.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-pwa.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-reinit.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-site-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-site.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-speech.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-track-p5-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-track-p5.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-track.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-version-edge.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-e2e-version.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-first-answer.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-first-pass.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-focus.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-legal.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-npmtest.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-perf-1x.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-perf-4x.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-pwa-static.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-records.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-site-check.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-static.txt （QA 自有）
+  OK [??] tests/results/tmp/r9-validate.txt （QA 自有）
+  OK [M] tests/run-all.mjs （QA 自有）
+  OK [??] tests/static/boundary-r9.mjs （QA 自有）
+  OK [M] tests/static/legal-check.mjs （QA 自有）
+  OK [??] tests/static/mail-scan.mjs （QA 自有）
+  OK [M] tests/static/pwa-static.mjs （QA 自有）
+  OK [??] tests/static/site-check.mjs （QA 自有）
+  OK [M] tests/static/static-check.mjs （QA 自有）
+  OK [M] tests/tools/ac-matrix.mjs （QA 自有）
+  OK [??] tests/tools/build-ad-test.mjs （QA 自有）
+  OK [??] tests/tools/qa-review-r9.mjs （QA 自有）
+  OK [??] tests/tools/run-r9.mjs （QA 自有）
+  OK [M] tests/tools/tc-desc.json （QA 自有）
+  OK [M] tests/tools/tc-list.mjs （QA 自有）
+  OK [M] tools/build.mjs FE-85
+  OK [M] tools/serve.mjs FE-85
+  OK [??] tools/site-pages.mjs FE-85
+HEAD 25e3c3f；變動 238 個檔案（PG 任務 66、授權例外與 QA 172）；超出任務 paths 0 個；必須無變動路徑命中 0 個；任務未 done 0 個；任務 paths 中未變動 1 個（src/app/styles/70-sources.css）

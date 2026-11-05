@@ -41,6 +41,11 @@
  *   未改變 → 單字卡狀態全部不變（FP-4、FB-54）。模擬測驗轉移集中在 core/part5flow（CR-2、LV-1、LV-3、UO-1～UO-10），
  *   題庫為空時 part5 action 一律不動作。
  *
+ * - （v0.19，FE-86）對外頁面與廣告的執行期狀態（契約 RuntimeState.ad、sitePageReturnTab、SP-3、SP-4、AD-5、AD-10；
+ *   architecture §4.12、§7.25.3、§7.25.5）：只在記憶體，setItem 0 次、不進備份。setTab 維護返回目標；
+ *   initAd 只生效 1 次；adEvent 經 core/ad.transition，有改變才通知 ["ad"]；confirmApplyGoal 成功路徑與
+ *   importBackup 成功後無學習紀錄時同步轉 dismissed（SD-FB-82），clearPart5CorrectIds 不動。
+ *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
  */
@@ -78,14 +83,15 @@
         REINIT: require("../core/reinit.js"),
         PWA: require("../core/pwa.js"),
         POS: require("../core/position.js"),
-        PF: require("../core/part5flow.js")
+        PF: require("../core/part5flow.js"),
+        AD: require("../core/ad.js")
       };
     } else {
       var c = root.EMT.core;
       coreCache = {
         C: c.constants, WK: c.wordkey, GOAL: c.goal, VOCAB: c.vocab, CUSTOM: c.custom,
         STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning,
-        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow
+        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow, AD: c.ad
       };
     }
     return coreCache;
@@ -99,9 +105,11 @@
   }
 
   // 契約列舉（data-schema.ts §7、§10）
-  var TAB_IDS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources"];
-  /** （v0.8）首次模式可停留的頁面（architecture §4.3 setTab、§7.9） */
-  var FIRST_RUN_TABS = ["customizer", "sources"];
+  var TAB_IDS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources", "about", "contact", "privacy"];
+  /** （v0.8）首次模式可停留的頁面（architecture §4.3 setTab、§7.9；v0.19 加 3 個對外頁面，SP-4） */
+  var FIRST_RUN_TABS = ["customizer", "sources", "about", "contact", "privacy"];
+  /** （v0.19）有返回目標的 4 個頁面（SP-3） */
+  var SITE_RETURN_TABS = ["sources", "about", "contact", "privacy"];
   var STT_STATUSES = ["idle", "notice", "listening"];
   var PHRASE_CATEGORIES = ["all", "gap", "aim", "findings", "limitations"];
 
@@ -122,6 +130,19 @@
     for (k in base) { if (hasOwn(base, k)) { out[k] = base[k]; } }
     for (k in patch) { if (hasOwn(patch, k)) { out[k] = patch[k]; } }
     return out;
+  }
+
+  /**
+   * （v0.19）切頁後的返回目標（SP-3、architecture §7.25.5）：
+   * 進入 4 頁 → 記下原頁面；在 4 頁之間切換 → 不覆蓋；離開 4 頁 → null。
+   * @param {string} current 目前頁面
+   * @param {string} next 下一頁
+   * @param {string|null} saved 目前的 sitePageReturnTab
+   * @returns {string|null}
+   */
+  function nextReturnTab(current, next, saved) {
+    if (SITE_RETURN_TABS.indexOf(next) === -1) { return null; }
+    return SITE_RETURN_TABS.indexOf(current) === -1 ? current : saved;
   }
 
   /** 是否為 0～3 的選項索引 */
@@ -246,6 +267,8 @@
     var startup = { status: "missing", migrated: false };
     /** 最近一次「一般寫入」的結果："ok"｜"quota"｜"error"｜"disabled" */
     var writeStatus = "ok";
+    /** （v0.19）initAd 是否已生效（AD-4 只在啟動時判定一次；只在模組內部，不進 state） */
+    var adInitDone = false;
 
     function now() {
       var d = nowFn();
@@ -345,7 +368,11 @@
         // （v0.11，FE-49）PWA 頁面端狀態（只在記憶體，不持久化，PV-1）；PE-1 由 main.js 經 setPwa 寫入
         pwa: pwaCore().initialPwaState(),
         // （v0.12，FE-55）主控台介面狀態（只在記憶體，不持久化，DB-6）；每次 init 皆為收合
-        dashboard: { backupExpanded: false }
+        dashboard: { backupExpanded: false },
+        // （v0.19，FE-86）廣告版位狀態（只在記憶體，AD-5）；啟動時由 main.js 經 initAd 設定
+        ad: { status: "ineligible" },
+        // （v0.19，FE-86）進入 4 個對外頁面之前的頁面（只在記憶體，SP-3）
+        sitePageReturnTab: null
       };
     }
 
@@ -395,6 +422,21 @@
       if (runtime.flashcard.index === 0) { return runtime; }
       var cc = cardChanged(runtime, runtime.studySet, 0);
       return assign(runtime, { flashcard: cc.flashcard, speech: cc.speech });
+    }
+
+    /**
+     * （v0.19，AD-10）把版位轉為 dismissed：狀態有改變才回傳新 runtime 並加 tag "ad"；終態與 ineligible 維持原物件（AD-5）。
+     * 只計算、不提交，由呼叫端併入同一次通知（同步，≤ 100ms）。
+     * @param {object} runtime
+     * @param {string[]} tags 會被加入 "ad"
+     * @returns {object} runtime
+     */
+    function dismissAd(runtime, tags) {
+      var cur = runtime.ad.status;
+      var next = core().AD.transition(cur, "dismiss");
+      if (next === cur) { return runtime; }
+      tags.push("ad");
+      return assign(runtime, { ad: { status: next } });
     }
 
     /** 題庫 id 陣列（part5flow.bankIdsOf，順序與題庫相同） */
@@ -567,6 +609,7 @@
       }
 
       writeStatus = available ? "ok" : "disabled";
+      adInitDone = false;
       // （v0.15）FP-2：依紀錄解析目前卡片；記憶體中的紀錄更新為解析結果，不寫入（RD-4）
       var rt0 = initialRuntime(data, available ? "ok" : "unavailable", entryMode);
       var placed = placeCard(rt0, data, rt0.studySet);
@@ -717,7 +760,8 @@
       // 單字集只由 goal 與 customVocab 推導，兩者在 g.data 與 newData 相同。
       // （v0.15）buildReinitData 已設 flashcardPosition = null；生效色級未改變卻被直接呼叫時（UI 不會發生），
       // 也回到第 1 張以維持「null ⇔ 第 1 張」（INV-FP）
-      state = { data: newData, runtime: firstCard(g.runtime) };
+      // （v0.19）AD-10 (a)：初始化成功才隱藏版位；寫入失敗（上方已返回）資料未改變，不隱藏（SD-FB-82）
+      state = { data: newData, runtime: dismissAd(firstCard(g.runtime), tags) };
       notify(tags);
       return { ok: true, write: w.ok ? "ok" : "disabled" };
     }
@@ -772,7 +816,7 @@
       var tags = ["entry", "goal", "studySet", "flashcard", "quiz", "speech"];
       // （v0.15）FP-4 末句：第一筆寫入的位置為 null，抽認卡為第 1 張
       var data = g.data.flashcardPosition === null ? g.data : assign(g.data, { flashcardPosition: null });
-      var runtime = assign(firstCard(g.runtime), { entryMode: "main", currentTab: "dashboard" });
+      var runtime = assign(firstCard(g.runtime), { entryMode: "main", currentTab: "dashboard", sitePageReturnTab: null });
       var w = commitWrite(data, runtime, tags, { bypassFirstRun: true });
       return { ok: true, write: w.ok ? "ok" : w.reason };
     }
@@ -1207,16 +1251,22 @@
     }
 
     /**
-     * 由 router 呼叫；（v0.8）首次模式只接受 customizer、sources，其他值忽略（AC-25-01、AC-25-07）。
+     * 由 router 呼叫；（v0.8）首次模式只接受 FIRST_RUN_TABS，其他值忽略（AC-25-01、AC-25-07、SP-4）。
      * （v0.9）HIDDEN_TAB_IDS（解碼器、句型庫）一律忽略，currentTab 永不為隱藏頁（HT-1、AC-20-04）；導向主控台由 router 負責。
+     * （v0.19）維護 sitePageReturnTab（SP-3）；opts.resetReturn 為 true 時一律設 null（SP-6 的 #sources 入口），
+     * 此時即使頁面相同也會更新。只改記憶體，setItem 0 次（SP-4）。
+     * @param {string} tabId
+     * @param {{resetReturn?: boolean}} [opts]
      */
-    function setTab(tabId) {
+    function setTab(tabId, opts) {
       ensureInit();
       var rt = state.runtime;
-      if (TAB_IDS.indexOf(tabId) === -1 || rt.currentTab === tabId) { return; }
+      if (TAB_IDS.indexOf(tabId) === -1) { return; }
       if (core().C.HIDDEN_TAB_IDS.indexOf(tabId) !== -1) { return; }
       if (rt.entryMode === "firstRun" && FIRST_RUN_TABS.indexOf(tabId) === -1) { return; }
-      commit(state.data, assign(rt, { currentTab: tabId }), ["tab"]);
+      var ret = opts && opts.resetReturn === true ? null : nextReturnTab(rt.currentTab, tabId, rt.sitePageReturnTab);
+      if (rt.currentTab === tabId && rt.sitePageReturnTab === ret) { return; }
+      commit(state.data, assign(rt, { currentTab: tabId, sitePageReturnTab: ret }), ["tab"]);
     }
 
     // ── actions：PWA（v0.11，FE-49）──
@@ -1268,6 +1318,38 @@
       var cur = !!(rt.dashboard && rt.dashboard.backupExpanded === true);
       if (cur === value) { return { changed: false }; }
       commit(state.data, assign(rt, { dashboard: { backupExpanded: value } }), ["dashboard"]);
+      return { changed: true };
+    }
+
+    // ── actions：廣告版位（v0.19，FE-86）──
+
+    /**
+     * 設定啟動時的環境判定結果（AD-4，architecture §4.12）：本頁只生效 1 次，且只能由 ineligible 轉為 waiting。
+     * 其他值忽略且不佔用這 1 次；不寫入 localStorage（setItem 0 次，首次與一般模式相同）。
+     * @param {"waiting"|"ineligible"} status core/ad.initialStatus 的結果
+     * @returns {{changed: boolean}}
+     */
+    function initAd(status) {
+      ensureInit();
+      if (adInitDone || (status !== "waiting" && status !== "ineligible")) { return { changed: false }; }
+      adInitDone = true;
+      var rt = state.runtime;
+      if (status !== "waiting" || rt.ad.status !== "ineligible") { return { changed: false }; }
+      commit(state.data, assign(rt, { ad: { status: status } }), ["ad"]);
+      return { changed: true };
+    }
+
+    /**
+     * 版位狀態事件（README §13.2 轉移表、AD-5）：經 core/ad.transition，有改變才通知 ["ad"]；setItem 0 次。
+     * @param {"load"|"filled"|"collapse"|"dismiss"} event
+     * @returns {{changed: boolean}}
+     */
+    function adEvent(event) {
+      ensureInit();
+      var rt = state.runtime;
+      var next = core().AD.transition(rt.ad.status, event);
+      if (next === rt.ad.status) { return { changed: false }; }
+      commit(state.data, assign(rt, { ad: { status: next } }), ["ad"]);
       return { changed: true };
     }
 
@@ -1356,8 +1438,12 @@
           }
           if (rt.entryMode === "firstRun") {
             // 首次還原成功 → 進入主控台（FS-5），首次畫面上未生效的分數與卡片選擇捨棄（資料全以備份為準）
-            runtime = assign(runtime, { entryMode: "main", currentTab: "dashboard" });
+            runtime = assign(runtime, { entryMode: "main", currentTab: "dashboard", sitePageReturnTab: null });
             tags.push("entry");
+          }
+          // （v0.19）AD-10 (b)：資料已取代後判定；無學習紀錄 → 隱藏版位（首次還原同樣經此，SD-FB-82）
+          if (!K.REINIT.hasLearningRecord(data, today())) {
+            runtime = dismissAd(runtime, tags);
           }
           state = { data: data, runtime: runtime };
           notify(tags);
@@ -1403,6 +1489,8 @@
         setTab: setTab,
         setPwa: setPwa,
         setBackupExpanded: setBackupExpanded,
+        initAd: initAd,
+        adEvent: adEvent,
         exportBackup: exportBackup,
         importBackup: importBackup
       }

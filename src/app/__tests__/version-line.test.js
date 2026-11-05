@@ -3,7 +3,7 @@
  * 依據：architecture.md v0.9 §4.9「EMT.ui.versionLine」、§7.20.1、§10.6「version-line.test.js」；
  *       契約 README §12.1 VR-5～VR-8、§12.4 V-VER-03～V-VER-05
  * 涵蓋：AC-42-01、AC-42-02、AC-42-03、AC-41-04、AC-23-02
- * 做法：假 document（querySelectorAll、getElementById、#footer-sources 與其 parent），core/dom.js 以 setDocument 注入。
+ * 做法：假 document（querySelectorAll、getElementById、#footer-links 與其 parent），core/dom.js 以 setDocument 注入。
  */
 "use strict";
 
@@ -118,14 +118,15 @@ function makeDoc(o = {}) {
   footer.setAttribute("id", "app-footer");
   doc.body.appendChild(footer);
   if (o.footer !== false) {
+    // （v0.19，FE-86）頁尾連結列：版本行的錨點；#footer-sources 是其中一個按鈕
+    const links = new FNode(doc, "div");
+    links.setAttribute("id", "footer-links");
     const src = new FNode(doc, "button");
     src.setAttribute("id", "footer-sources");
     src.textContent = "資料來源與授權";
-    footer.appendChild(src);
+    links.appendChild(src);
+    footer.appendChild(links);
   }
-  const back = new FNode(doc, "button");
-  back.setAttribute("id", "footer-first-run-back");
-  footer.appendChild(back);
   doc.footer = footer;
   return doc;
 }
@@ -148,7 +149,7 @@ function lines(doc) {
 }
 
 describe("version-line.test.js：合法值", () => {
-  test("建立 1 個 p#app-version.app-footer__version，文字逐字，位於 #footer-sources 的下一個兄弟；無 tabindex／role、非 a／button", () => {
+  test("建立 1 個 p#app-version.app-footer__version，文字逐字，位於 #footer-links 的下一個兄弟（v0.19，VR-7）；無 tabindex／role、非 a／button", () => {
     const doc = makeDoc();
     D.setDocument(doc);
     const r = VL.init(doc);
@@ -159,9 +160,9 @@ describe("version-line.test.js：合法值", () => {
     assert.equal(p.tagName, "P");
     assert.equal(p.className, "app-footer__version");
     assert.equal(p.textContent, GOOD_TEXT);
-    assert.equal(p.previousSibling.attrs.id, "footer-sources");
-    assert.equal(doc.getElementById("footer-sources").nextSibling, p);
-    assert.equal(p.nextSibling.attrs.id, "footer-first-run-back", "返回連結維持在版本行之後");
+    assert.equal(p.previousSibling.attrs.id, "footer-links");
+    assert.equal(doc.getElementById("footer-links").nextSibling, p);
+    assert.equal(p.nextSibling, null, "版本行是頁尾最後一個元素（返回連結已移除，SD-FB-79）");
     for (const k of ["tabindex", "role", "href"]) assert.ok(!(k in p.attrs), k);
     assert.deepEqual(Object.keys(p.listeners), []);
     assert.equal(errors.length, 0);
@@ -220,7 +221,7 @@ describe("version-line.test.js：V-VER-04 異常值", () => {
     });
   }
 
-  test("無 #footer-sources → 不建；已存在的版本行在不合法時移除", () => {
+  test("無 #footer-links → 不建；已存在的版本行在不合法時移除", () => {
     const doc = makeDoc({ footer: false });
     D.setDocument(doc);
     assert.deepEqual(VL.init(doc), { rendered: false, text: null });
@@ -230,7 +231,7 @@ describe("version-line.test.js：V-VER-04 異常值", () => {
     D.setDocument(bad);
     const stale = new FNode(bad, "p");
     stale.setAttribute("id", "app-version");
-    bad.footer.insertBefore(stale, bad.getElementById("footer-sources").nextSibling);
+    bad.footer.insertBefore(stale, bad.getElementById("footer-links").nextSibling);
     VL.init(bad);
     assert.equal(lines(bad).length, 0);
   });

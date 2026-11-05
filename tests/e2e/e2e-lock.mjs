@@ -58,7 +58,7 @@ const info = (p) => p.ev(`(() => { const v = document.getElementById("view-part5
   return { number: t("[data-p5=number]"), count: t("[data-p5=correct-count]"), badge: t("[data-p5=correct-badge]"), badges: n("[data-p5=correct-badge]"), only: only ? only.checked : null, onlies: n("[data-p5=only]"),
     optCount: opts.length, optDisabled: opts.filter((o) => o.disabled).length, pressedTrue: opts.filter((o) => o.getAttribute("aria-pressed") === "true").length, optStates: opts.map((o) => o.dataset.state).join(","), optBadges: opts.map((o) => (o.querySelector(".p5-option__badge") || {}).textContent || ""),
     feedback: t("[data-p5=feedback]"), feedbacks: n("[data-p5=feedback]"), core: t("[data-p5=core]"), coreTitle: t("[data-p5=core-title]"), structure: t("[data-p5=structure]"), structureTitle: t("[data-p5=structure-title]"), warn: t(".p5-warning"),
-    next: !!q("[data-p5=next]"), nextDisabled: q("[data-p5=next]") ? q("[data-p5=next]").disabled : null, allCorrect: !!q("[data-p5=allcorrect-title]"), title: t("[data-p5=allcorrect-title]"), score: t("[data-p5=summary-score]"), none: t("[data-p5=summary-none]"), total: t(".p5-summary__total"), summaryTitle: t("[data-p5=summary-title]"), summaryText: q(".p5-summary") ? q(".p5-summary").innerText : null,
+    next: !!q("[data-p5=next]"), nextDisabled: q("[data-p5=next]") ? q("[data-p5=next]").disabled : null, allCorrect: !!q("[data-p5=allcorrect-title]"), title: t("[data-p5=allcorrect-title]"), score: t("[data-p5=summary-score]"), none: t("[data-p5=summary-none]"), total: t("[data-p5=summary-answered]"), summaryTitle: t("[data-p5=summary-title]"), summaryText: q(".p5-summary") ? q(".p5-summary").innerText : null,
     restart: !!q("[data-p5=restart]"), hint: t("[data-p5=filter-hint]"), hints: n("[data-p5=filter-hint]"), clear: t("[data-p5=clear]"), clearCount: n("[data-p5=clear]"), clearInRecord: !!q(".p5-record [data-p5=clear]"), clearClass: q("[data-p5=clear]") ? q("[data-p5=clear]").className : null,
     qIndex: q(".p5-question") ? Number(q(".p5-question").dataset.index) : null, bar: bar ? { now: bar.getAttribute("aria-valuenow"), max: bar.getAttribute("aria-valuemax") } : null, text: v.innerText, html: v.textContent }; })()`);
 const isLR = (a) => a.optCount === 4 && a.optDisabled === 4 && a.pressedTrue === 0 && a.feedback === LOCK_FB && a.badge === "✓ 曾答對" && a.next && !a.nextDisabled;
@@ -78,7 +78,7 @@ const contrastJs = (sel) => `(() => { const el = document.querySelector(${J(sel)
   let bgEl = el, bg = null; while (bgEl) { const c = rgb(getComputedStyle(bgEl).backgroundColor); if (c.length >= 3 && (c.length < 4 || c[3] > 0.5)) { bg = c; break; } bgEl = bgEl.parentElement; } bg = bg || [255, 255, 255];
   const fg = rgb(getComputedStyle(el).color); const L1 = lum(fg), L2 = lum(bg); return { ratio: Math.round(((Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)) * 100) / 100, fg: getComputedStyle(el).color, bg: "rgb(" + bg.slice(0, 3).join(", ") + ")" }; })()`;
 const optStyles = (p) => p.ev(`[...document.querySelectorAll("#view-part5 [data-p5=option]")].map((o) => { const c = getComputedStyle(o); return { state: o.dataset.state, bg: c.backgroundColor, border: c.borderTopColor, color: c.color, opacity: c.opacity }; })`);
-const dashAcc = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const e = document.querySelector("#view-dashboard .db-stat--accuracy .db-stat__value"); const r = e ? e.innerText.replace(/\\s+/g, "") : null; EMT.router.go("part5"); return r; })()`);
+const dashAcc = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const e = document.querySelector("#view-dashboard .db-stat--answered .db-stat__value"); const r = e ? e.innerText.replace(/\\s+/g, "") : null; EMT.router.go("part5"); return r; })()`);
 const hscroll = (p) => p.ev(`document.documentElement.scrollWidth > document.documentElement.clientWidth`);
 const part5Of = (s) => s.data.part5;
 const CORE = (s) => J({ a: part5Of(s).totalAnswered, c: part5Of(s).totalCorrect, x: part5Of(s).roundCorrect, y: part5Of(s).roundAnswered, ids: s.data.part5CorrectIds, streak: s.data.streak, today: s.data.todayLearned });
@@ -147,7 +147,7 @@ for (const [w, h] of [[375, 667], [1366, 900]]) {
       // 按「下一題」：只有導航，a、c、x、y、K、打卡、今日已學不變（currentIndex 寫入 1 次）
       await next(p); const b = await info(p); const s2 = await ls(p); const acc1 = await dashAcc(p);
       const ok = r1.ok && hits.every(Boolean) && sets === 0 && raw2 === raw && isLR(a) && b.number === "第 6 / 200 題" && isIdle(b) && CORE(s2) === CORE(base) && acc0 === acc1;
-      return { ok, note: `${r1.note}；重新載入 setItem ${sets}、鎖定檢視=${isLR(a)}、資料不變=${raw2 === raw}；下一題「${b.number}」統計不變=${CORE(s2) === CORE(base)}（${CORE(s2)}）；主控台正確率 ${acc0}→${acc1}` };
+      return { ok, note: `${r1.note}；重新載入 setItem ${sets}、鎖定檢視=${isLR(a)}、資料不變=${raw2 === raw}；下一題「${b.number}」統計不變=${CORE(s2) === CORE(base)}（${CORE(s2)}）；主控台第 3 格 ${acc0}→${acc1}` };
     });
     await p.close();
   }
@@ -262,25 +262,25 @@ for (const [w, h] of [[375, 667], [1366, 900]]) {
   });
   await R.check("TC-48-06-1366", "AC-48-06、AC-11-04、SM-1、SM-2、E-125、E-27", async () => {
     const out = []; let ok = true;
-    const summaryClean = (a) => !/0 \/ 0|NaN|Infinity|undefined|%/.test(a.summaryText || "");
+    const summaryClean = (a) => !/0 \/ 0|NaN|Infinity|undefined|%/.test((a.summaryText || "").replace(a.total || "", "")); // v0.19：「%」只可在已答對行（AC-48-06）
     // 開關關閉、a ≥ 1
     await seed(p, { part5: { currentIndex: 198, totalAnswered: 12, totalCorrect: 7 }, ids: range(199, 200) }); await next(p); const q1 = await info(p); await next(p); const a = await info(p);
-    const g1 = q1.number === "第 200 / 200 題" && isLR(q1) && a.summaryTitle === "本輪結算" && a.none === NONE && a.score === null && a.total === "累計答對 7 / 12" && a.bar.now === a.bar.max && a.restart && summaryClean(a); ok = ok && g1;
+    const g1 = q1.number === "第 200 / 200 題" && isLR(q1) && a.summaryTitle === "本輪結算" && a.none === NONE && a.score === null && a.total === "已答對 2 / 200 題（1%）" && a.bar.now === a.bar.max && a.restart && summaryClean(a); ok = ok && g1;
     out.push(`關閉 a ≥ 1：「${a.summaryTitle}」「${a.none}」「${a.total}」進度 ${a.bar.now}/${a.bar.max}、結算區乾淨=${summaryClean(a)}`);
     // 開關關閉、a = 0
     await seed(p, { part5: { currentIndex: 199 }, ids: ["p5-200"] }); await next(p); const b = await info(p);
-    const g2 = b.none === NONE && b.score === null && b.total === null && b.restart && b.bar.now === b.bar.max && summaryClean(b); ok = ok && g2;
+    const g2 = b.none === NONE && b.score === null && b.total === "已答對 1 / 200 題（1%）" && b.restart && b.bar.now === b.bar.max && summaryClean(b); ok = ok && g2;
     out.push(`關閉 a = 0：「${b.none}」累計行 ${b.total}、結算區乾淨=${summaryClean(b)}（${J(b.summaryText)}）`);
-    await p.reload(); await p.go("part5"); const b2 = await info(p); ok = ok && b2.none === NONE && b2.total === null; out.push(`重新載入仍為 y = 0 結算=${b2.none === NONE}`);
+    await p.reload(); await p.go("part5"); const b2 = await info(p); ok = ok && b2.none === NONE && b2.total === "已答對 1 / 200 題（1%）"; out.push(`重新載入仍為 y = 0 結算=${b2.none === NONE}`);
     // 開關開啟、K < Q、開啟當下其後已無未答對
     await seed(p, { part5: { currentIndex: 9, totalAnswered: 5, totalCorrect: 3 }, ids: range(10, 200) }); await p.click("#view-part5 [data-p5=only-label]"); await sleep(80); const c = await info(p);
-    const g3 = c.only === true && c.none === NONE && c.score === null && c.total === "累計答對 3 / 5" && c.bar.now === c.bar.max && summaryClean(c) && !c.allCorrect; ok = ok && g3;
+    const g3 = c.only === true && c.none === NONE && c.score === null && c.total === "已答對 191 / 200 題（96%）" && c.bar.now === c.bar.max && summaryClean(c) && !c.allCorrect; ok = ok && g3;
     out.push(`開啟路徑 a ≥ 1：「${c.none}」「${c.total}」`);
     await seed(p, { part5: { currentIndex: 9 }, ids: range(10, 200) }); await p.click("#view-part5 [data-p5=only-label]"); await sleep(80); const d = await info(p);
-    const g4 = d.none === NONE && d.total === null && summaryClean(d); ok = ok && g4; out.push(`開啟路徑 a = 0：「${d.none}」累計行 ${d.total}`);
+    const g4 = d.none === NONE && d.total === "已答對 191 / 200 題（96%）" && summaryClean(d); ok = ok && g4; out.push(`開啟路徑 a = 0：「${d.none}」累計行 ${d.total}`);
     // y ≥ 1 回歸
     await seed(p, { part5: { currentIndex: 199, roundAnswered: 2, roundCorrect: 1, totalAnswered: 2, totalCorrect: 1 } }); await answer(p, 199, true); await next(p); const e = await info(p);
-    const g5 = e.score === "答對 2 / 3" && e.none === null && e.total === "累計答對 2 / 3"; ok = ok && g5; out.push(`y ≥ 1：「${e.score}」「${e.total}」`);
+    const g5 = e.score === "答對 2 / 3" && e.none === null && e.total === "已答對 1 / 200 題（1%）"; ok = ok && g5; out.push(`y ≥ 1：「${e.score}」「${e.total}」`);
     return { ok, note: out.join("；") };
   });
   await R.check("TC-48-07", "AC-48-07、E-126、UO-8、UO-10", async () => {
@@ -293,14 +293,14 @@ for (const [w, h] of [[375, 667], [1366, 900]]) {
     await p.click("#view-part5 [data-p5=restart]"); await sleep(60); const r = await info(p);
     await p.click("#view-part5 [data-p5=only-label]"); await sleep(80); const on = await info(p);
     await p.click("#view-part5 [data-p5=only-label]"); await sleep(80); const off = await info(p); const st = await ls(p);
-    const ok = isLR(a0) && a0.number === `第 ${i} / 200 題` && !a0.allCorrect && isLR(a1) && a1.number === a0.number && isLR(a2) && presses === expect && s.none === NONE && s.total === "累計答對 8 / 10" && s.clearCount === 1 && isLR(r) && r.number === "第 1 / 200 題" && r.clearCount === 1 && on.allCorrect && on.clearCount === 1 && !off.allCorrect && isLR(off) && off.number === "第 1 / 200 題" && off.clearCount === 1 && a0.count === countText(200) && s.count === countText(200) && off.count === countText(200) && st.data.part5CorrectIds.length === 200;
+    const ok = isLR(a0) && a0.number === `第 ${i} / 200 題` && !a0.allCorrect && isLR(a1) && a1.number === a0.number && isLR(a2) && presses === expect && s.none === NONE && s.total === "已答對 200 / 200 題（100%）" && s.clearCount === 1 && isLR(r) && r.number === "第 1 / 200 題" && r.clearCount === 1 && on.allCorrect && on.clearCount === 1 && !off.allCorrect && isLR(off) && off.number === "第 1 / 200 題" && off.clearCount === 1 && a0.count === countText(200) && s.count === countText(200) && off.count === countText(200) && st.data.part5CorrectIds.length === 200;
     return { ok, note: `第 ${i} 題鎖定檢視、進入／重新載入／切換功能區皆同；按「下一題」${presses} 次（Q − i + 1 = ${expect}）進入結算「${s.none}」「${s.total}」；重新開始「${r.number}」鎖定檢視=${isLR(r)}；開啟 → 全部答對=${on.allCorrect}；關閉 →「${off.number}」鎖定檢視=${isLR(off)}；全程清除鈕各 1 個、K = ${st.data.part5CorrectIds.length}；途中 ${seen.slice(0, 7).join("、")}` };
   });
   await R.check("TC-48-07b", "AC-48-07（i = 1 走完整輪）、AC-48-10（恰按 Q 次）", async () => {
     await seed(p, { ids: range(1, 200) });
     const n = await p.ev(`(async () => { let c = 0; while (c < 500) { const b = document.querySelector("#view-part5 [data-p5=next]"); if (!b) break; b.click(); c++; await new Promise((r) => setTimeout(r, 0)); } return c; })()`);
     const s = await info(p);
-    return { ok: n === 200 && s.none === NONE && s.total === null, note: `K = Q、i = 1：「下一題」${n} 次進入結算「${s.none}」（a = 0 無累計行：${s.total === null}）` };
+    return { ok: n === 200 && s.none === NONE && s.total === "已答對 200 / 200 題（100%）", note: `K = Q、i = 1：「下一題」${n} 次進入結算「${s.none}」「${s.total}」（a = 0 也顯示已答對行）` };
   });
   await R.check("TC-48-10", "AC-48-10、AC-46-09 (a)、AC-46-07 原驗證、E-111、UO-8、UO-7", async () => {
     const out = []; let ok = true;
@@ -336,7 +336,7 @@ for (const [w, h] of [[375, 667], [1366, 900]]) {
   if (w === 375) await R.check("TC-48-06-375", "AC-48-06、AC-40-02、E-125", async () => {
     await seed(p, { part5: { currentIndex: 199, totalAnswered: 12, totalCorrect: 7 }, ids: ["p5-200"] }); await next(p); const a = await info(p); const hs = await hscroll(p);
     const clip = await p.ev(`(() => { const e = document.querySelector("#view-part5 [data-p5=summary-none]"); const r = e.getBoundingClientRect(); return r.left < 0 || r.right > document.documentElement.clientWidth || e.scrollWidth > e.clientWidth + 1; })()`);
-    return { ok: a.none === NONE && a.total === "累計答對 7 / 12" && a.score === null && !hs && !clip && !/0 \/ 0|NaN|Infinity|undefined|%/.test(a.summaryText), note: `375px：「${a.none}」「${a.total}」、水平捲軸=${hs}、裁切=${clip}` };
+    return { ok: a.none === NONE && a.total === "已答對 1 / 200 題（1%）" && a.score === null && !hs && !clip && !/0 \/ 0|NaN|Infinity|undefined|%/.test((a.summaryText || "").replace(a.total || "", "")), note: `375px：「${a.none}」「${a.total}」、水平捲軸=${hs}、裁切=${clip}` };
   });
   // 共用：建立 11 個畫面組合
   const SCREENS = {
@@ -388,12 +388,12 @@ for (const [w, h] of [[375, 667], [1366, 900]]) {
         if (how === "cancel") await p.click('.dialog [data-action="cancel"]'); else if (how === "esc") await p.key("Escape", "Escape", 27);
         else { const pt = await p.ev(`(() => { const b = document.querySelector(".dialog-backdrop"); const r = b.getBoundingClientRect(); return { x: r.left + 5, y: r.top + 5 }; })()`); for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) await p.send("Input.dispatchMouseEvent", { type, x: pt.x, y: pt.y, button: "left", clickCount: 1 }); }
         await sleep(150); const a = await info(p); const raw1 = await lsRaw(p); const sets = await p.ev("window.__sets");
-        if (d && d.message.includes("將清除全部題目的答對紀錄") && d.message.includes("累計答題數與正確率不受影響") && [...d.buttons].sort().join() === ["取消", "確定"].sort().join() && !(await dialogInfo(p)) && raw0 === raw1 && sets === 0 && a.number === before.number && a.allCorrect === before.allCorrect && a.feedback === before.feedback) cancels++;
+        if (d && d.message.includes("將清除全部題目的答對紀錄") && d.message.includes("「已答對」會回到 0 題") && !d.message.includes("累計答題數與正確率") && [...d.buttons].sort().join() === ["取消", "確定"].sort().join() && !(await dialogInfo(p)) && raw0 === raw1 && sets === 0 && a.number === before.number && a.allCorrect === before.allCorrect && a.feedback === before.feedback) cancels++;
       }
       await p.click("#view-part5 [data-p5=clear]"); await sleep(150); await p.click('.dialog [data-action="ok"]'); await sleep(180);
       const a = await info(p); const s = await ls(p); const acc1 = await dashAcc(p); await p.go("part5"); await sleep(40); const aa = await info(p); await p.reload(); await p.go("part5"); await sleep(40); const r = await info(p); const s2 = await ls(p);
-      const good = cancels === 3 && J(s.data.part5CorrectIds) === "[]" && a.count === countText(0) && a.badges === 0 && a.only === only && a.number === "第 1 / 200 題" && isIdle(a) && a.clearCount === 0 && part5Of(s).roundAnswered === 0 && part5Of(s).roundCorrect === 0 && part5Of(s).totalAnswered === st.part5.totalAnswered && part5Of(s).totalCorrect === st.part5.totalCorrect && acc0 === acc1 && s.data.streak.days === 5 && s.data.streak.lastActiveDate === YESTERDAY && r.count === countText(0) && isIdle(r) && r.number === "第 1 / 200 題" && r.only === only && r.clearCount === 0 && !aa.allCorrect;
-      ok = ok && good; out.push(`${name}${good ? "" : "✗"}：取消／Esc／遮罩不變 ${cancels}/3；確定 → 紀錄 ${J(s.data.part5CorrectIds)}、「${a.count}」、「${a.number}」未作答=${isIdle(a)}、開關 ${a.only}、按鈕 ${a.clearCount}、本輪 ${part5Of(s).roundAnswered}、累計 ${part5Of(s).totalAnswered}/${part5Of(s).totalCorrect}、正確率 ${acc0}→${acc1}、打卡 ${J(s.data.streak)}；重新載入相同=${isIdle(r)}`);
+      const good = cancels === 3 && J(s.data.part5CorrectIds) === "[]" && a.count === countText(0) && a.badges === 0 && a.only === only && a.number === "第 1 / 200 題" && isIdle(a) && a.clearCount === 0 && part5Of(s).roundAnswered === 0 && part5Of(s).roundCorrect === 0 && part5Of(s).totalAnswered === st.part5.totalAnswered && part5Of(s).totalCorrect === st.part5.totalCorrect && acc1 === "已答對0/200題（0%）" && s.data.streak.days === 5 && s.data.streak.lastActiveDate === YESTERDAY && r.count === countText(0) && isIdle(r) && r.number === "第 1 / 200 題" && r.only === only && r.clearCount === 0 && !aa.allCorrect;
+      ok = ok && good; out.push(`${name}${good ? "" : "✗"}：取消／Esc／遮罩不變 ${cancels}/3；確定 → 紀錄 ${J(s.data.part5CorrectIds)}、「${a.count}」、「${a.number}」未作答=${isIdle(a)}、開關 ${a.only}、按鈕 ${a.clearCount}、本輪 ${part5Of(s).roundAnswered}、累計 ${part5Of(s).totalAnswered}/${part5Of(s).totalCorrect}、主控台 ${acc0}→${acc1}、打卡 ${J(s.data.streak)}；重新載入相同=${isIdle(r)}`);
     }
     return { ok, note: `${w}px：${out.join("；")}` };
   });

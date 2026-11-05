@@ -92,7 +92,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
         const stats = [...document.querySelectorAll(".db-stat")].filter(L.shown).map((e) => { const s = getComputedStyle(e); return [s.borderTopWidth, s.borderRightWidth, s.borderBottomWidth, s.borderLeftWidth].every((x) => parseFloat(x) === 0) || s.borderTopStyle === "none"; });
         const titles = [...document.querySelectorAll("#view-dashboard:not([hidden]) .section-title, #view-customizer:not([hidden]) .section-title, #view-customizer:not([hidden]) .cv-section__title, #view-part5:not([hidden]) .p5-number, #view-part5:not([hidden]) .p5-summary__title, #view-part5:not([hidden]) .p5-explain__title")].filter(L.shown).map((e) => { const s = getComputedStyle(e); return { t: e.textContent.trim().slice(0, 10), fs: parseFloat(s.fontSize), fw: Number(s.fontWeight) }; });
         const nums = [...document.querySelectorAll(".db-today__text, .db-stat__value, .db-bars__count, .cz-est-target, .cz-est-daily, .cz-est-weeks, .cz-est-mastered, .cz-firstbar__summary, .cz-level__vocab, .cz-level__daily, .fc-position, .p5-number")].filter(L.shown).map((e) => ({ c: e.className.split(" ")[0], tab: getComputedStyle(e).fontVariantNumeric.includes("tabular-nums") }));
-        const statSize = [...document.querySelectorAll(".db-stat__value")].filter(L.shown).map((e) => parseFloat(getComputedStyle(e).fontSize));
+        const statSize = [...document.querySelectorAll(".db-stat__value:not(.db-stat__value--answered)")].filter(L.shown).map((e) => parseFloat(getComputedStyle(e).fontSize));
         return { cards, btns, stats, titles, nums, statSize }; })()`);
       for (const k of c.cards) { const good = k.bg === "#ffffff" && k.rad === "16px/16px/16px/16px" && k.shadow !== "none" && (k.bw === "0px/0px/0px/0px" || k.bs === "none"); if (!good) bad.cards.push(`${w}px ${label} ${k.sel}：${k.bg}、${k.rad}、陰影 ${k.shadow === "none" ? "none" : "有"}、邊框 ${k.bw}`); }
       scan.cards.push(`${w}px ${label} ${c.cards.length} 張`);
@@ -269,7 +269,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   const texts = [];
   const grab = async (label) => { const t = await p.ev(`document.title + "\\n" + document.body.innerText + "\\n" + [...document.querySelectorAll("[aria-label]")].map((e) => e.getAttribute("aria-label")).join(" ")`); texts.push([label, t]); };
   await grab("首次畫面");
-  await p.click("#footer-sources"); await sleep(350); await grab("首次畫面→資料來源"); await p.click("#footer-first-run-back"); await sleep(350);
+  await p.click("#footer-sources"); await sleep(350); await grab("首次畫面→資料來源"); await p.click("#view-sources .site-return"); await sleep(350);
   await p.click("#cz-start"); await sleep(400);
   for (const tab of ["dashboard", "customizer", "flashcards", "part5", "sources"]) { await goTab(p, tab); if (tab === "sources") await p.ev(`document.querySelectorAll("#view-sources details").forEach((d) => d.open = true)`); await grab(tab); }
   // 對話框與 Toast：初始化確認視窗（有學習紀錄）、匯入確認、套用 toast
@@ -280,7 +280,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   const title = await p.ev(`document.title`);
   const orig = (texts.find(([l]) => l === "sources")[1].match(/原創內容來源：[^\n]*/) || [null])[0]; // 資料來源頁顯示時擷取的可見文字
   const html = fs.readFileSync(DIST, "utf8"); const first = (html.match(/<!--\s*\n?([^\n]*)/) || [])[1];
-  ok = ok && hits.length === 0 && title === "EnglishContext" && orig === "原創內容來源：EnglishContext 原創內容" && /^\s*EnglishContext\s*$/.test(first || "");
+  ok = ok && hits.length === 0 && title === "EnglishContext｜英文單字卡與模擬測驗" && orig === "原創內容來源：EnglishContext 原創內容" && /^\s*EnglishContext\s*$/.test(first || "");
   out.push(`(1) <title>「${title}」；畫面文字含 English Master Track 的畫面 ${hits.length}（${hits.join("、") || "無"}；檢查 ${texts.map(([l]) => l).join("、")}）；資料來源頁「${orig}」；HTML 開頭註解第一行「${(first || "").trim()}」`);
   // (2) 不變項：匯出檔名、localStorage 鍵、schemaVersion、備份 format
   await goTab(p, "dashboard"); await p.click(".db-backup__toggle"); await sleep(80);
@@ -390,7 +390,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
     await seed(p, stateRecord(215)); // 橘：單字集 1,000
     const keys = await p.ev(`MASTER_VOCAB_DATABASE.slice().sort((a, b) => a.rank - b.rank).map((w) => w.word.normalize("NFC").trim().replace(/\\s+/g, " ").toLowerCase())`);
     const mk = [...keys.slice(0, 250), ...keys.slice(2000, 2010)];
-    await seed(p, stateRecord(215, { masteredWordKeys: mk, vocabQuiz: { answered: 260, correct: 260 }, streak: { days: 3, lastActiveDate: TODAY }, part5: { currentIndex: 10, lockedSelection: null, phase: "question", roundAnswered: 10, roundCorrect: 7, totalAnswered: 10, totalCorrect: 7 } }));
+    await seed(p, stateRecord(215, { masteredWordKeys: mk, vocabQuiz: { answered: 260, correct: 260 }, part5CorrectIds: Array.from({ length: 48 }, (_, i) => "p5-" + String(i + 1).padStart(3, "0")), streak: { days: 3, lastActiveDate: TODAY }, part5: { currentIndex: 10, lockedSelection: null, phase: "question", roundAnswered: 10, roundCorrect: 7, totalAnswered: 10, totalCorrect: 7 } }));
     const out = []; let ok = true;
     for (const [w, h] of TWO) {
       await p.viewport(w, h); await goTab(p, "dashboard");
@@ -400,8 +400,8 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
         return { n: cells.length, row: new Set(tops).size === 1, ordered: lefts[0] < lefts[1] && lefts[1] < lefts[2], labels: cells.map((c) => c.querySelector(".db-stat__label").textContent).join("、"),
           streak: t(".db-stat--streak .db-stat__num") + t(".db-stat--streak .db-stat__unit"), numColor: L.hex(getComputedStyle(num).color), icon: icon ? L.hex(getComputedStyle(icon).fill) : null,
           mastery: t(".db-stat--mastery .db-stat__value"), sub: t(".db-stat--mastery .db-stat__sub"), subSmall: parseFloat(getComputedStyle(document.querySelector(".db-stat--mastery .db-stat__sub")).fontSize) < parseFloat(getComputedStyle(document.querySelector(".db-stat--mastery .db-stat__value")).fontSize),
-          acc: t(".db-stat--accuracy .db-stat__value"), rings: document.querySelectorAll(".db-stats svg:not(.db-stat__icon)").length, clipped }; })()`);
-      const good = r.n === 3 && r.row && r.ordered && r.labels === "連續打卡天數、單字掌握率、模擬測驗正確率" && r.streak === "3天" && r.numColor !== ACCENT && r.icon === ACCENT && r.mastery === "25%" && r.sub === "已掌握 260 字" && r.subSmall && r.acc === "70%" && r.rings === 0 && r.clipped.length === 0;
+          acc: t(".db-stat--answered .db-stat__value"), rings: document.querySelectorAll(".db-stats svg:not(.db-stat__icon)").length, clipped }; })()`);
+      const good = r.n === 3 && r.row && r.ordered && r.labels === "連續打卡天數、單字掌握率、模擬測驗" && r.streak === "3天" && r.numColor !== ACCENT && r.icon === ACCENT && r.mastery === "25%" && r.sub === "已掌握 260 字" && r.subSmall && r.acc === "已答對 48 / 200 題（24%）" && r.rings === 0 && r.clipped.length === 0;
       ok = ok && good; out.push(`${w}px：${JSON.stringify(r)}`);
     }
     return { ok, note: out.join("；") + "。PRD 範例為 200 字/50 字/另 10 字；正式資料最小單字集為 1,000（橘），以同比例 250/1,000 + 集外 10 驗證；無資料「—」見 TC-30-10b" };
@@ -413,9 +413,9 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
     for (const [w, h] of TWO) {
       await p.viewport(w, h); await goTab(p, "dashboard");
       const r = await p.ev(`(() => { const d = document.querySelector("#view-dashboard .dashboard"); const t = d.innerText; const c = (s) => t.split(s).length - 1;
-        const xd = (t.match(/\\d+ \\/ \\d+/g) || []).length;
+        const xd = (t.match(/今日已學 \\d+ \\/ \\d+/g) || []).length; /* v0.19：已答對行也含「K / Q」，只計今日已學（AC-39-06） */
         const goTargets = [...d.querySelectorAll("[data-go], a[href], button")].filter((e) => window.__qaL.shown(e)).map((e) => (e.dataset.go || "") + ":" + e.textContent.trim()).filter((x) => /^(customizer|flashcards|part5|sources|dashboard):/.test(x));
-        return { acc: c("模擬測驗正確率"), mas: c("單字掌握率"), streak: c("連續打卡天數"), xd, color: c("綠級"), banned: ["目前目標色級", "目前生效色級", "單字掌握數", "資料來源與授權"].filter((x) => t.includes(x)), minis: d.querySelectorAll(".db-mini").length, goTargets,
+        return { acc: c("已答對 "), mas: c("單字掌握率"), streak: c("連續打卡天數"), xd, color: c("綠級"), banned: ["目前目標色級", "目前生效色級", "單字掌握數", "資料來源與授權"].filter((x) => t.includes(x)), minis: d.querySelectorAll(".db-mini").length, goTargets,
           footer: window.__qaL.shown(document.getElementById("footer-sources")) }; })()`);
       const good = r.acc === 1 && r.mas === 1 && r.streak === 1 && r.xd === 1 && r.color === 1 && r.banned.length === 0 && r.minis === 0 && r.goTargets.join("、") === "flashcards:開始今日學習、customizer:變更" && r.footer;
       ok = ok && good; out.push(`${w}px：${JSON.stringify(r)}`);
@@ -660,7 +660,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
     const seq = [];
     for (let i = 0; i < 20; i++) { await p.key("Tab", "Tab", 9); const a = await p.ev(`(() => { const e = document.activeElement; if (!e) return null; return e.classList.contains("cz-level") ? "row:" + e.dataset.color : e.id || e.tagName; })()`); if (a) seq.push(a); if (a === "footer-sources") break; }
     const s = seq.join(",");
-    const tabOk = /^(.*,)?row:orange,row:brown,row:green,row:blue,row:gold,cz-start,cz-restore,footer-sources$/.test(s); ok = ok && tabOk;
+    const tabOk = /^(.*,)?row:orange,row:brown,row:green,row:blue,row:gold,cz-start,cz-restore,footer-about,footer-contact,footer-privacy,footer-sources$/.test(s); ok = ok && tabOk;
     out.push(`Tab 順序 ${s}`);
     await p.ev(`window.scrollTo(0, 0)`); await shot(p, "r5-firstrun-375-bottom");
     return { ok, note: out.join("；") };

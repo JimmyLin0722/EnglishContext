@@ -1,17 +1,21 @@
 /**
  * ---
  * doc: CONTRACT-SCHEMA
- * version: 0.18
+ * version: 0.19
  * status: approved
  * author: sa-agent
- * approved_by: JimmyLin（授權主控代核）
- * approved_at: 2026-11-04
+ * approved_by: JimmyLin（授權主控代核；對話中授權「核准 PRD v0.19，測完直接推」）
+ * approved_at: 2026-11-05
  * ---
  *
  * English Master Track — 資料契約（型別定義）
  *（專案代號仍為 English Master Track；v0.12 起 App 內顯示名稱為「EnglishContext」，見 §13 APP_DISPLAY_NAME 與 FROZEN_IDENTIFIERS。）
  *
- * 上游：docs/01-PRD.md v0.18（approved，JimmyLin，2026-11-04），以第 6 章「人類決議」與 R-15～R-26 為準。
+ * 上游：docs/01-PRD.md v0.19（approved，JimmyLin，2026-11-05），以第 6 章「人類決議」與 R-15～R-28 為準。
+ * v0.19（PRD R-27、R-28：US-49 已答對題數、US-50～US-52 廣告、US-53～US-55 隱私權政策／關於我／聯絡我們、US-56 SEO、US-57 入口與靜態頁，Q-81～Q-93）
+ *   **不改持久化結構**（schemaVersion 維持 3，PersistedData 12 欄、StorageRecord、BackupFile 不變，localStorage 鍵數 2，不需遷移）：
+ *   廣告與新頁面的狀態只放 RuntimeState（ad、sitePageReturnTab）。新增 §17；TabId +3 值；部署目錄 8 → 13 檔，預先快取 7 項不變；
+ *   SOURCES_CONTACT_TEXT 改值。規則見 README §13（AS、AD、SP、SC、SE、ML）。storage-schema.json 未修改，維持 v0.16。
  * v0.18（PRD R-26：US-48 顯示全部時曾答對的題目為綠色鎖定、移除 AC-46-07，Q-77～Q-80）**不改持久化結構**
  *   （schemaVersion 維持 3，PersistedData 12 欄、BackupFile 不變，不需遷移）：已答對鎖定檢視完全由既有欄位推導。
  *   §15 新增 type Part5QuestionState；PART5_RECORD_TEXTS 新增 4 個鍵、移除 replayKeepRecords；Part5Progress 只改註解。
@@ -51,7 +55,7 @@
  *
  * 本檔是「規格」不是實作：
  * - pg-content 依 §2～§7 產出 src/data/ 的資料檔；pg-frontend 依 §1、§8～§15 實作 src/app/（v0.11 §12 PWA 含建置輸出；v0.12 §13 版面與視覺；
- *   v0.14 §14 版本號；v0.15 §15 模擬測驗答對紀錄）。
+ *   v0.14 §14 版本號；v0.15 §15 模擬測驗答對紀錄；v0.16 §16 聯絡資訊；v0.19 §17 已答對顯示、廣告、對外頁面與 SEO）。
  * - 兩方都不得自創欄位；欄位變更必須先改本契約（版本遞增）。
  * - 下方的 export const 是契約常數（值本身就是規格），pg-frontend 實作時須使用相同數值。
  *
@@ -192,6 +196,14 @@
  * |      |            |          | (3) 註解：Part5ViewKind、Part5Progress、part5CorrectIds、APP_VERSION_META_NAME（本次 1.2.0，Q-79 A）。
  * |      |            |          | 型別數 69 → 70；契約常數 42 不變（PART5_RECORD_TEXTS 鍵值變更）；localStorage 鍵數 2 不變；
  * |      |            |          | schemaVersion 維持 3，不需遷移；內容資料檔格式與值不變。 |
+ * | 0.19 | 2026-11-05 | sa-agent | 修訂已核准的 v0.18（主控代核），原因：PRD v0.19 R-27、R-28（JimmyLin 2026-11-05 核准）。status 改為 in-review、核准欄位清空。
+ * |      |            |          | (1) 新增 §17：interface AnsweredSummary、AdConfig、AdRuntimeState、SiteSeoMeta、SitePage、FooterLinkItem；
+ * |      |            |          |     type AdSlotStatus、SitePageId、SiteLinkTarget、SiteInline、SiteBlock；常數 18 個（ANSWERED_SUMMARY_TEXT、AD_*、SITE_*、
+ * |      |            |          |     LEGAL_STATEMENTS、FOOTER_LINKS、ROBOTS_TXT、SITEMAP_XML）。
+ * |      |            |          | (2) TabId、TAB_LABELS 新增 about、contact、privacy；RuntimeState 新增 ad、sitePageReturnTab（皆不持久化）。
+ * |      |            |          | (3) PWA_DEPLOY_FILES 8 → 13；PwaDeployFileRole +3 值、PwaDeployFile.mime +1 值；PWA_PRECACHE_URLS 不變。
+ * |      |            |          | (4) LAYOUT_TEXTS 移除 statAccuracyLabel、新增 statPart5Label；clearConfirmMustInclude 第 2 段改寫；SOURCES_CONTACT_TEXT 改為新信箱。
+ * |      |            |          | 型別數 70 → 81；契約常數 42 → 60；localStorage 鍵數 2 不變；schemaVersion 維持 3，不需遷移；內容資料檔格式與值不變。 |
  */
 
 // ════════════════════════════════════════════════════════════════════
@@ -953,7 +965,7 @@ export interface Part5Progress {
   roundAnswered: number;
   /** 必填。本輪答對數（x），0～roundAnswered。 */
   roundCorrect: number;
-  /** 必填。累計答題數（正確率分母），「重新開始」不清除（AC-11-07）。 */
+  /** 必填。累計答題數，「重新開始」不清除（AC-11-07）。（v0.19，R-27）照常更新，畫面不顯示；「有學習紀錄」判定仍使用（AC-49-06）。 */
   totalAnswered: number;
   /** 必填。累計答對數，0～totalAnswered。 */
   totalCorrect: number;
@@ -1213,8 +1225,9 @@ export type ImportResult =
  * 識別字不因 R-15 更名而改（"customizer" = 難易度設定、"flashcards" = 單字卡、"part5" = 模擬測驗）；畫面文字見 TAB_LABELS。
  * （v0.9，R-18 三）"decoder"、"phrasebank" 保留在型別中（程式碼保留、未來可再開放），但屬 HIDDEN_TAB_IDS：
  *   RuntimeState.currentTab 不得為這兩個值（README §5.8 HT-1～HT-5）。
+ * （v0.19，R-28，Q-86 決議 C1）"about"、"contact"、"privacy" = 應用內的關於我、聯絡我們、隱私權政策；由頁尾連結進入，不在導覽列（README SP-1～SP-4）。
  */
-export type TabId = "dashboard" | "customizer" | "flashcards" | "part5" | "decoder" | "phrasebank" | "sources";
+export type TabId = "dashboard" | "customizer" | "flashcards" | "part5" | "decoder" | "phrasebank" | "sources" | "about" | "contact" | "privacy";
 
 /**
  * 頁面畫面名稱（契約常數，v0.8 依 PRD R-15、AC-20-03、AC-10-02、AC-23-02）。
@@ -1232,11 +1245,14 @@ export const TAB_LABELS: Readonly<Record<TabId, string>> = {
   decoder: "解碼器",
   phrasebank: "句型庫",
   sources: "資料來源與授權",
+  about: "關於我",
+  contact: "聯絡我們",
+  privacy: "隱私權政策",
 };
 
 /**
  * 導覽列項目與順序（契約常數，AC-20-03、AC-27-01、AC-27-04）：恰好 4 項（v0.9 由 6 項改為 4 項，移除 decoder、phrasebank，R-18 三）。
- * "sources" 不在導覽列，（v0.12）只由頁尾連結進入（AC-23-02、AC-39-06）。
+ * "sources" 不在導覽列，（v0.12）只由頁尾連結進入（AC-23-02、AC-39-06）；（v0.19）"about"、"contact"、"privacy" 同樣不在導覽列（AC-57-01）。
  * （v0.12，Q-50 決議 A）主控台**不再有**模組入口與「資料來源與授權」入口（AC-17-06、AC-39-01、AC-39-06）；
  *   主控台本體只有「開始今日學習」（→ "flashcards"）與目標行「變更」（→ "customizer"）兩個換頁控制項（README HT-2、DB-3、DB-4）。
  * 寬螢幕導覽與 ≤ 640px 底部導覽列共用此順序；斷點、圖示等屬設計層（README §5.6）。
@@ -1332,7 +1348,7 @@ export interface RuntimeState {
   entryMode: EntryMode;
   /**
    * 目前頁面；entryMode = "main" 啟動時為 "dashboard"。
-   * entryMode = "firstRun" 時只能是 "customizer"（首次畫面）或 "sources"（從頁尾開啟，返回後回到首次畫面，AC-25-07）。
+   * entryMode = "firstRun" 時只能是 "customizer"（首次畫面）、"sources"，或（v0.19）"about"、"contact"、"privacy"（從頁尾開啟，返回後回到首次畫面，AC-25-07、AC-57-01）。
    * （v0.9）任何時候都不得為 HIDDEN_TAB_IDS 中的值（README §5.8 HT-1、HT-3，AC-20-04）。
    * 切換到其他頁面時，若原頁面為 "flashcards"，須釋放麥克風（PRD AC-33-02；釋放實作屬設計層）。
    */
@@ -1404,6 +1420,16 @@ export interface RuntimeState {
    * 重新載入即回到初始值。見 §13 DashboardRuntimeState 與 README §11.4 DB-6。
    */
   dashboard: DashboardRuntimeState;
+  /**
+   * （v0.19，R-27）廣告版位狀態。只存在記憶體，不寫入 localStorage、備份檔或任何儲存；每次頁面載入重新判定（README §13.2）。
+   * 腳本元素、廣告框 DOM、計時器不得放入本欄，只能放在 src/app 模組內部變數。
+   */
+  ad: AdRuntimeState;
+  /**
+   * （v0.19，R-28）進入「資料來源與授權」或應用內三頁之前的頁面，供返回用（AC-57-01，README SP-3）。
+   * 只存在記憶體；初始 null。值不得為 "sources"、"about"、"contact"、"privacy" 或 HIDDEN_TAB_IDS 中的值。
+   */
+  sitePageReturnTab: TabId | null;
 }
 
 /** 應用程式狀態 = 持久化資料 + 執行期狀態。對應：規格書 2.2 AppState（已依 PRD 改寫）。 */
@@ -1552,8 +1578,9 @@ export const PWA_MANIFEST: PwaManifest = {
  * 部署目錄中檔案的角色。
  * "page" = index.html；"manifest" = manifest.webmanifest；"serviceWorker" = sw.js；
  * "icon" = manifest 參照的圖示；"appleTouchIcon" = iOS 主畫面圖示（不在 manifest 內）；"adsTxt" = ads.txt。
+ * （v0.19，R-28）"robots" = robots.txt；"sitemap" = sitemap.xml；"staticPage" = about.html、contact.html、privacy.html（§17）。
  */
-export type PwaDeployFileRole = "page" | "manifest" | "serviceWorker" | "icon" | "appleTouchIcon" | "adsTxt";
+export type PwaDeployFileRole = "page" | "manifest" | "serviceWorker" | "icon" | "appleTouchIcon" | "adsTxt" | "robots" | "sitemap" | "staticPage";
 
 /**
  * 部署目錄中的一個檔案。對應：AC-36-07、AC-34-01、AC-34-05、AC-35-01、Q-45、Q-46。
@@ -1565,8 +1592,8 @@ export interface PwaDeployFile {
   /** 必填。角色。 */
   role: PwaDeployFileRole;
   /** 必填。部署伺服器應回應的 MIME（QA 檢查用；GitHub Pages 依副檔名決定）。 */
-  mime: "text/html" | "application/manifest+json" | "text/javascript" | "image/png" | "text/plain";
-  /** 必填。是否在預先快取清單（PWA_PRECACHE_URLS）中。sw.js 與 ads.txt 為 false。 */
+  mime: "text/html" | "application/manifest+json" | "text/javascript" | "image/png" | "text/plain" | "application/xml";
+  /** 必填。是否在預先快取清單（PWA_PRECACHE_URLS）中。sw.js、ads.txt，（v0.19）robots.txt、sitemap.xml、靜態頁為 false。 */
   precached: boolean;
   /** PNG 必填，其他省略。正方形邊長（像素），實際像素必須相同。 */
   sizePx?: 180 | 192 | 512;
@@ -1577,7 +1604,7 @@ export interface PwaDeployFile {
 }
 
 /**
- * 部署目錄檔案清單（契約常數，恰好 8 個檔案，不多不少；AC-36-07）。
+ * 部署目錄檔案清單（契約常數，v0.19 起恰好 13 個檔案，不多不少；AC-36-07）。
  * 圖示 PNG 共通規格（README DP-4）：PNG、正方形、不含透明度通道（色彩類型 RGB），四角無灰色或透明殘留（Q-41 決議 A）。
  */
 export const PWA_DEPLOY_FILES: readonly PwaDeployFile[] = [
@@ -1589,12 +1616,18 @@ export const PWA_DEPLOY_FILES: readonly PwaDeployFile[] = [
   { path: "icons/icon-maskable-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "maskable", producedBy: "copy" },
   { path: "icons/apple-touch-icon-180.png", role: "appleTouchIcon", mime: "image/png", precached: true, sizePx: 180, producedBy: "copy" },
   { path: "ads.txt", role: "adsTxt", mime: "text/plain", precached: false, producedBy: "copy" },
+  // （v0.19，R-28）以下 5 檔不進預先快取（README DP-9）。
+  { path: "robots.txt", role: "robots", mime: "text/plain", precached: false, producedBy: "build" },
+  { path: "sitemap.xml", role: "sitemap", mime: "application/xml", precached: false, producedBy: "build" },
+  { path: "about.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
+  { path: "contact.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
+  { path: "privacy.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
 ];
 
 /**
  * 預先快取清單（PRD V-PWA 名詞「預先快取清單」；契約常數，恰好 7 項，順序不拘）。
  * 每項為相對於 sw.js 的網址；"./" 與 "./index.html" 是同一份 HTML 的兩個快取鍵（兩者內容逐位元組相同）。
- * 不含 sw.js（PRD 定義）與 ads.txt。service worker 只攔截、只回應這 7 個網址的同源 GET（SW-6）。
+ * 不含 sw.js（PRD 定義）、ads.txt，（v0.19）robots.txt、sitemap.xml、靜態頁。service worker 只攔截、只回應這 7 個網址的同源 GET（SW-6）。
  * 對應：AC-35-01、AC-35-02、AC-37-05、AC-21-03。
  */
 export const PWA_PRECACHE_URLS: readonly string[] = [
@@ -1728,7 +1761,7 @@ export interface PwaRuntimeState {
 // ════════════════════════════════════════════════════════════════════
 
 /**
- * App 顯示名稱（Q-49 決議）。用於：HTML <title>、頁面頂端標題列名稱（AC-38-05）、「資料來源與授權」頁原創內容來源名稱
+ * App 顯示名稱（Q-49 決議）。（v0.19，Q-90 決議 B）HTML <title> 改為 SITE_HOME_SEO.documentTitle，以本值開頭。用於：頁面頂端標題列名稱（AC-38-05）、「資料來源與授權」頁原創內容來源名稱
  * （"EnglishContext 原創內容"，由 sources.js 提供，§2 DataSourceEntry.fullName）、HTML 開頭授權註解第一行的作品名稱、
  * PWA 安裝名稱（= PWA_APP_NAME）。畫面文字（含對話框與 Toast）不得出現「English Master Track」（不分大小寫，AC-38-10 (1)）。
  * 對應：AC-38-05、AC-38-10、AC-34-01、AC-34-02、Q-49。
@@ -1866,15 +1899,18 @@ export const LAYOUT_TEXTS = {
    * 鍵名沿用 changeLink（識別字不改），值不變。
    */
   changeLink: "變更",
-  /** 3 格數據標籤（AC-39-05、AC-39-06）。順序固定：streak → mastery → accuracy。 */
+  /** 3 格數據標籤（AC-39-05、AC-39-06）。順序固定：streak → mastery → part5（v0.19）。 */
   statStreakLabel: "連續打卡天數",
   /** 連續打卡天數的單位（AC-39-05）。 */
   statStreakUnit: "天",
   statMasteryLabel: "單字掌握率",
   /** 單字掌握率格的小字（Q-52 決議 A；{n} = masteredWordKeys.length，AC-17-03）。 */
   statMasteredCount: "已掌握 {n} 字",
-  statAccuracyLabel: "模擬測驗正確率",
-  /** 無資料時的數值（單字集為空、模擬測驗答題 0；AC-30-10、E-48）。U+2014。 */
+  /**
+   * （v0.19，R-27，AC-49-01）第 3 格標籤；內容為 ANSWERED_SUMMARY_TEXT（§17）。取代 v0.18 的 statAccuracyLabel（已移除，畫面不得再出現「正確率」，AC-49-07）。
+   */
+  statPart5Label: "模擬測驗",
+  /** 無資料時的數值（單字集為空；v0.19 模擬測驗為 Q = 0，K = 0 不用本值；AC-30-10、AC-49-02、E-48）。U+2014。 */
   statNoData: "—",
   /** 近 7 天圖表空狀態（7 根全為 0 時唯一顯示的文字；AC-39-07 (b)、E-88）。 */
   chartEmpty: "開始學習後會顯示紀錄",
@@ -2051,8 +2087,11 @@ export const PART5_RECORD_TEXTS = {
   filterHint: "關閉時顯示全部題目，答對過的題目會以綠色鎖定。",
   /** （v0.18）「全部答對」畫面，開關下方恰 1 次，不同時顯示 filterHint（AC-48-12，README HN-1）。引號為全形「」，括住的文字同 unansweredOnlyLabel。 */
   filterHintAllCorrect: "要檢視全部題目，請關閉上方的「只練沒答對的題目」。",
-  /** 確認對話框文字必須**包含**的兩段（AC-46-08）；完整句子由 SD 組成（DS-35）。 */
-  clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+  /**
+   * 確認對話框文字必須**包含**的兩段（AC-46-08）；完整句子由 SD 組成（DS-35、DS-51）。
+   * （v0.19，R-27）第 2 段改寫；對話框不得再出現「累計答題數與正確率不受影響」與「正確率」（AC-49-07）。
+   */
+  clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "「已答對」會回到 0 題"],
   /** 確認對話框按鈕（AC-46-08：只有這 2 個按鈕）。 */
   confirmOk: "確定",
   confirmCancel: "取消",
@@ -2067,6 +2106,8 @@ export const PART5_RECORD_TEXTS = {
 
 /**
  * 「資料來源與授權」頁的聯絡資訊行（契約常數，**逐字**使用，不得改寫、不得增減空格）。
+ * （v0.19，R-28）改為新信箱；識別字沿用不改名。同一常數也用於隱私權政策與聯絡我們（SiteBlock "contactLine"，AC-53-02、AC-55-02），
+ *   全站只有這一種寫法（README ML-1～ML-5）；下方「位置」規則以 README L-7 (5) 為準。
  * 值的構成：小寫 "email:" + 1 個半形空格 U+0020，其後位址的每個字元之間各 1 個半形空格（含 "." 與 "@" 前後），
  * 全部為半形 ASCII 字元，無全形字元；字母間空格是刻意的防爬蟲設計（R-24 二）。
  *
@@ -2082,6 +2123,349 @@ export const PART5_RECORD_TEXTS = {
  * - file:// 與 https 兩種形態皆顯示且文字相同；斷網照常顯示（AC-23-07 (4)）。
  * 對應：AC-23-07、E-118、E-119、R-24 二。
  */
-export const SOURCES_CONTACT_TEXT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";
+export const SOURCES_CONTACT_TEXT = "email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m";
+
+// ════════════════════════════════════════════════════════════════════
+// §17 已答對顯示、廣告、對外頁面與 SEO（v0.19，PRD R-27、R-28、US-49～US-57、Q-81～Q-93）
+//     提供者：契約常數（pg-frontend 實作於 src/app/，建置程式共用；檔案位置由 SD 定）。pg-content 不涉及，src/data/ 不變。
+//     使用者：pg-frontend、建置程式、QA（README §13 AS、AD、SP、SC、SE、ML；V-ANS、V-AD、V-SITE、V-SEO、V-MAIL）
+//     本節全部不持久化：不新增 localStorage 鍵或欄位，schemaVersion 維持 3；不新增 window 全域變數。
+// ════════════════════════════════════════════════════════════════════
+
+// ── 已答對顯示（US-49）──────────────────────────────────────────────
+
+/**
+ * 已答對行的數值（執行期推導，不持久化）。對應：US-49、AC-49-01～AC-49-05、README AS-1、AS-2。
+ * 推導（Q = 0 時回傳 null）：
+ *   k = new Set(part5CorrectIds) 與題庫 id 交集的大小；q = 題庫長度；
+ *   p = Math.floor((200 * k + q) / (2 * q))，k < q 時再取 Math.min(p, 99)。不得用 k / q * 100 再四捨五入（浮點誤差，AS-2）。
+ */
+export interface AnsweredSummary {
+  /** 必填。已答對題數，0 ≤ k ≤ q。例 48。 */
+  k: number;
+  /** 必填。題庫題數，q ≥ 1。例 200。 */
+  q: number;
+  /** 必填。百分比整數，0～100；k < q 時最大 99。例 24。 */
+  p: number;
+}
+
+/**
+ * 已答對行（契約常數，逐字使用；AC-49-01）。斜線前後各 1 個半形空格，括號為全形。
+ * 例「已答對 48 / 200 題（24%）」。主控台第 3 格與本輪結算區使用；模擬測驗頁進度條附近仍用 PART5_RECORD_TEXTS.correctCount（無百分比）。
+ */
+export const ANSWERED_SUMMARY_TEXT = "已答對 {k} / {q} 題（{p}%）";
+
+// ── 廣告（US-50～US-52）──────────────────────────────────────────────
+
+/**
+ * 廣告設定。對應：US-50、AC-50-02、AC-50-05、README AD-1、AD-2。
+ */
+export interface AdConfig {
+  /** 必填。發布商 ID，須符合 AD_PUBLISHER_ID_PATTERN。例 "ca-pub-4051803210893105"。 */
+  publisherId: string;
+  /**
+   * 必填。廣告單元 ID，須符合 AD_SLOT_ID_PATTERN；未取得時為 null。
+   * null 或任何不符格式的值 = 未設定 = 零廣告請求（AC-50-02、E-139）。不得以假值代替。例 null（第一階段）。
+   */
+  adSlotId: string | null;
+}
+
+/**
+ * 廣告設定值（唯一來源，隨程式打包）。第一階段 adSlotId = null；人類獲准後只改此值即可（AC-50-05）。
+ * publisherId 數字段須與 HTML meta、ads.txt 相同（README AD-15）。
+ */
+export const AD_CONFIG: AdConfig = {
+  publisherId: "ca-pub-4051803210893105",
+  adSlotId: null,
+};
+
+/** 正式環境主機名稱（恰等於比對；不含 www，AC-50-01、README AD-3）。 */
+export const AD_PRODUCTION_HOSTNAME = "jimmyfantasyworld.com";
+
+/** 發布商 ID 格式（README AD-2）。 */
+export const AD_PUBLISHER_ID_PATTERN = "^ca-pub-[0-9]{16}$";
+
+/** 廣告單元 ID 格式（SA 定案：只驗純數字與合理長度，不寫死位數；README AD-2、E-139）。 */
+export const AD_SLOT_ID_PATTERN = "^[0-9]{6,20}$";
+
+/**
+ * 廣告腳本網址（依 Google 標準片段，第二階段啟用前由主控核對，FB-73）。
+ * 只可在 README AD-6 全部成立時由程式加入；HTML 不得有靜態標籤（AC-19-01、AC-50-03）。第一階段不得產生此請求。
+ */
+export const AD_SCRIPT_URL = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4051803210893105";
+
+/** 廣告腳本無結果的等待上限（毫秒，AC-51-01 (e)，README AD-8）。只用於記憶體計時。 */
+export const AD_LOAD_TIMEOUT_MS = 10_000;
+
+/** 廣告相關畫面文字（AC-52-04）。 */
+export const AD_TEXTS = {
+  /** 廣告上方緊鄰的標籤；對比 ≥ 4.5:1、不用強調橘；無廣告時不顯示。 */
+  label: "廣告",
+} as const;
+
+/**
+ * 廣告版位狀態（只在記憶體，不持久化）。轉移表見 README §13.2。
+ * - "ineligible"：環境條件不成立（含單元 ID 未設定）；本頁終態。
+ * - "waiting"：環境成立，尚未到載入時機（如無學習紀錄、不在主控台）。
+ * - "loading"：已加入腳本，等待結果；高度 0、無外框、無標籤。
+ * - "filled"：有廣告回傳；只在主控台可見。
+ * - "collapsed"：離線、遭阻擋、腳本失敗、無回傳、逾時；本頁終態，不重試。
+ * - "dismissed"：初始化或匯入後無學習紀錄；本頁終態。
+ * 對應：AC-50-01、AC-50-02、AC-50-04、AC-51-01、AC-52-01、AC-52-02。
+ */
+export type AdSlotStatus = "ineligible" | "waiting" | "loading" | "filled" | "collapsed" | "dismissed";
+
+/** RuntimeState.ad（只在記憶體）。初始值在啟動時依 README AD-4 判定。 */
+export interface AdRuntimeState {
+  /** 必填。版位狀態。例 "ineligible"。 */
+  status: AdSlotStatus;
+}
+
+// ── 對外頁面（US-53～US-55、US-57）：單一文案來源 ─────────────────
+
+/** 有應用內畫面與靜態頁的 3 個頁面（Q-86 決議 C1）。 */
+export type SitePageId = "about" | "contact" | "privacy";
+
+/** 頁內連結目標。"sources" 只有應用內畫面，靜態頁連到 "./#sources"（README SP-6）。 */
+export type SiteLinkTarget = SitePageId | "sources";
+
+/**
+ * 段落內的行內內容。文字一律純文字，不得含 HTML。
+ * - text：一般文字。
+ * - external：外部連結；輸出 target="_blank" rel="noopener"（AC-53-03）。
+ * - page：站內連結；應用內開啟畫面，靜態頁為相對連結（README SC-2）。
+ */
+export type SiteInline =
+  | { kind: "text"; text: string }
+  | { kind: "external"; text: string; href: string }
+  | { kind: "page"; text: string; target: SiteLinkTarget };
+
+/**
+ * 頁面內容區塊。兩端渲染對照見 README SC-2；標題層級由渲染端決定（SP-7）。
+ * - heading：小標題。
+ * - paragraph：段落。
+ * - list：清單；每項為 1 串行內內容。
+ * - contactLine：輸出 SOURCES_CONTACT_TEXT 的信箱行，不得另存地址（README SC-3）。
+ */
+export type SiteBlock =
+  | { kind: "heading"; text: string }
+  | { kind: "paragraph"; inlines: SiteInline[] }
+  | { kind: "list"; items: SiteInline[][] }
+  | { kind: "contactLine" };
+
+/** 頁面的 SEO 標記值（AC-56-01～AC-56-03）。 */
+export interface SiteSeoMeta {
+  /** 必填。<title> 與 og:title。例 "關於我｜EnglishContext"。 */
+  documentTitle: string;
+  /** 必填。meta description 與 og:description；不得含信箱。 */
+  description: string;
+  /** 必填。canonical 與 og:url，正式絕對網址。例 "https://jimmyfantasyworld.com/about.html"。 */
+  canonicalUrl: string;
+  /** 選填。og:image 絕對網址；只有首頁提供（AC-56-03）。 */
+  ogImageUrl?: string;
+}
+
+/**
+ * 一個對外頁面。應用內畫面與靜態頁都由這份資料產生（AC-57-03，README SC-1）。
+ * 值須為 JSON 相容，不依賴 DOM，瀏覽器與 Node 建置皆可載入。
+ */
+export interface SitePage {
+  /** 必填。頁面代碼，同時是 TabId。 */
+  id: SitePageId;
+  /** 必填。頁面名稱（應用內 h2、靜態頁 h1），= TAB_LABELS[id]。 */
+  title: string;
+  /** 必填。靜態頁路徑，相對於部署目錄，須在 PWA_DEPLOY_FILES 中。例 "about.html"。 */
+  staticPath: "about.html" | "contact.html" | "privacy.html";
+  /** 必填。SEO 標記。 */
+  seo: SiteSeoMeta;
+  /** 必填。內容區塊，依序輸出。 */
+  blocks: SiteBlock[];
+}
+
+/** 頁尾連結列的一項（AC-57-01）。 */
+export interface FooterLinkItem {
+  /** 必填。目標頁面。 */
+  target: SiteLinkTarget;
+  /** 必填。連結文字，= TAB_LABELS[target]。 */
+  label: string;
+}
+
+/**
+ * 頁尾連結列（契約常數，順序固定，各恰 1 次；AC-57-01）。375px 可換行；版本行在其正下方（AC-42-01）。
+ */
+export const FOOTER_LINKS: readonly FooterLinkItem[] = [
+  { target: "about", label: "關於我" },
+  { target: "contact", label: "聯絡我們" },
+  { target: "privacy", label: "隱私權政策" },
+  { target: "sources", label: "資料來源與授權" },
+];
+
+/**
+ * 跨頁共用的權利聲明（= README L-8 的 LT-3、LT-5，逐字）。「資料來源與授權」頁與關於我都引用此處，不得另存副本（AC-54-01 (4)、README SC-1）。
+ */
+export const LEGAL_STATEMENTS = {
+  /** LT-3，AC-23-02。 */
+  originalContent: "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權",
+  /** LT-5，AC-23-02。 */
+  trademark: "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。",
+} as const;
+
+/** 靜態頁共用元素的文字（位於 <main> 之外，AC-57-04）。 */
+export const SITE_PAGE_TEXTS = {
+  /** 回到網站首頁的連結文字；href = "./"。 */
+  homeLink: "回到網站首頁",
+} as const;
+
+/**
+ * 正式網站來源（SEO 宣告用，結尾無斜線）。對應：AC-56-02、README SE-1。
+ */
+export const SITE_ORIGIN = "https://jimmyfantasyworld.com";
+
+/**
+ * 3 個對外頁面的逐字文案（契約常數，唯一來源）。文字依 AC-53-02、AC-54-01、AC-55-01 定稿；公開前請人類讀過（FB-71）。
+ * 對應：AC-53-02、AC-53-06、AC-54-01、AC-54-02、AC-55-01、AC-55-02、AC-56-01、AC-57-03。
+ */
+export const SITE_PAGES: readonly SitePage[] = [
+  {
+    id: "about",
+    title: "關於我",
+    staticPath: "about.html",
+    seo: {
+      documentTitle: "關於我｜EnglishContext",
+      description: "EnglishContext 的網站用途、主要功能、使用方式與內容權利說明。",
+      canonicalUrl: "https://jimmyfantasyworld.com/about.html",
+    },
+    blocks: [
+      { kind: "heading", text: "網站用途" },
+      { kind: "paragraph", inlines: [{ kind: "text", text: "EnglishContext 的用途是提升英文能力、自我學習。" }] },
+      { kind: "heading", text: "主要功能" },
+      {
+        kind: "list",
+        items: [
+          [{ kind: "text", text: "單字卡：翻卡、美式語音示範、語音辨識吻合度、四選一。" }],
+          [{ kind: "text", text: "模擬測驗：題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容；作答後顯示解析。" }],
+          [{ kind: "text", text: "學習進度：連續打卡、今日已學、已答對題數。" }],
+        ],
+      },
+      { kind: "heading", text: "使用方式" },
+      {
+        kind: "list",
+        items: [
+          [{ kind: "text", text: "可離線使用（語音辨識需要連網；網站版須先連網開啟過一次）。" }],
+          [{ kind: "text", text: "學習紀錄存在你使用的瀏覽器，可用備份匯出與匯入。" }],
+        ],
+      },
+      { kind: "heading", text: "內容與權利" },
+      // 實作時由 LEGAL_STATEMENTS 引用，不得另存副本。
+      { kind: "paragraph", inlines: [{ kind: "text", text: "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權" }] },
+      { kind: "paragraph", inlines: [{ kind: "text", text: "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。" }] },
+      { kind: "heading", text: "相關頁面" },
+      {
+        kind: "list",
+        items: [
+          [{ kind: "page", text: "資料來源與授權", target: "sources" }],
+          [{ kind: "page", text: "隱私權政策", target: "privacy" }],
+          [{ kind: "page", text: "聯絡我們", target: "contact" }],
+        ],
+      },
+    ],
+  },
+  {
+    id: "contact",
+    title: "聯絡我們",
+    staticPath: "contact.html",
+    seo: {
+      documentTitle: "聯絡我們｜EnglishContext",
+      description: "EnglishContext 的聯絡方式。",
+      canonicalUrl: "https://jimmyfantasyworld.com/contact.html",
+    },
+    // AC-55-01：內容區只有標題與 1 行信箱（Q-91 決議 B）。
+    blocks: [{ kind: "contactLine" }],
+  },
+  {
+    id: "privacy",
+    title: "隱私權政策",
+    staticPath: "privacy.html",
+    seo: {
+      documentTitle: "隱私權政策｜EnglishContext",
+      description: "EnglishContext 如何處理學習資料、廣告服務、Cookie 與識別碼、語音辨識，以及個人化廣告的退出方式。",
+      canonicalUrl: "https://jimmyfantasyworld.com/privacy.html",
+    },
+    blocks: [
+      { kind: "heading", text: "學習資料" },
+      { kind: "paragraph", inlines: [{ kind: "text", text: "學習紀錄只存在你目前使用的瀏覽器。本系統沒有伺服器，不接收也不保存這些紀錄；備份檔由你自行保管。" }] },
+      { kind: "heading", text: "廣告服務" },
+      { kind: "paragraph", inlines: [{ kind: "text", text: "網站版（jimmyfantasyworld.com）使用 Google AdSense；以檔案開啟的版本不載入廣告。" }] },
+      { kind: "heading", text: "Cookie 與識別碼" },
+      { kind: "paragraph", inlines: [{ kind: "text", text: "Google 等第三方可能讀寫 Cookie 或使用識別碼，並依你造訪本網站或其他網站的紀錄投放廣告；這些資料由第三方依其政策處理。" }] },
+      { kind: "heading", text: "個人化廣告退出方式" },
+      {
+        kind: "paragraph",
+        inlines: [
+          { kind: "text", text: "你可以到 Google 廣告設定關閉個人化廣告，說明請見：" },
+          { kind: "external", text: "控制 Google 用於顯示廣告的資料", href: "https://support.google.com/My-Ad-Center-Help/answer/12156161" },
+        ],
+      },
+      { kind: "heading", text: "語音辨識" },
+      { kind: "paragraph", inlines: [{ kind: "text", text: "語音由瀏覽器廠商（如 Google、Microsoft）處理；本系統不錄音、不保存、不上傳錄音。" }] },
+      { kind: "heading", text: "聯絡方式" },
+      { kind: "contactLine" },
+    ],
+  },
+];
+
+// ── SEO 與爬蟲檔（US-56）────────────────────────────────────────────
+
+/** 首頁 SEO 標記值（AC-56-01～AC-56-03；Q-90 決議 B）。description 逐字同 PRD US-56，長度 81 字元。 */
+export const SITE_HOME_SEO: SiteSeoMeta = {
+  documentTitle: "EnglishContext｜英文單字卡與模擬測驗",
+  description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+  canonicalUrl: "https://jimmyfantasyworld.com/",
+  ogImageUrl: "https://jimmyfantasyworld.com/icons/icon-512.png",
+};
+
+/**
+ * 首頁結構化資料（Q-92 決議 A）。以 JSON.stringify 輸出到恰 1 段 application/ld+json；鍵不得增減（AC-56-05，README SE-5）。
+ * name = APP_DISPLAY_NAME；url、description = SITE_HOME_SEO。
+ */
+export const SITE_HOME_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "EnglishContext",
+  url: "https://jimmyfantasyworld.com/",
+  description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+} as const;
+
+/**
+ * 未執行 JavaScript 時的網站說明（放在 <noscript>；AC-56-06，README SE-6）。不含信箱；連結為正式網址（E-151）。
+ * 標題用 h2；靜態標題列已有 h1（AC-56-04）。
+ */
+export const SITE_NOSCRIPT = {
+  /** h2。 */
+  title: "EnglishContext",
+  /** 段落，= SITE_HOME_SEO.description。 */
+  description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+  /** 主要功能清單；學習功能須啟用 JavaScript（E-150）。 */
+  features: ["單字卡與美式發音練習", "模擬測驗（作答後顯示解析）", "學習進度（連續打卡、今日已學、已答對題數）"],
+  /** 一般連結，順序固定。 */
+  links: [
+    { text: "關於我", href: "https://jimmyfantasyworld.com/about.html" },
+    { text: "聯絡我們", href: "https://jimmyfantasyworld.com/contact.html" },
+    { text: "隱私權政策", href: "https://jimmyfantasyworld.com/privacy.html" },
+  ],
+} as const;
+
+/** robots.txt 逐字內容（換行 LF，結尾 1 個 LF；AC-56-08，README SE-7）。 */
+export const ROBOTS_TXT = "User-agent: *\nAllow: /\n\nSitemap: https://jimmyfantasyworld.com/sitemap.xml\n";
+
+/** sitemap.xml 逐字內容（換行 LF，結尾 1 個 LF；無 lastmod，AC-56-09、AC-36-01 (a)，README SE-8）。 */
+export const SITEMAP_XML =
+  '<?xml version="1.0" encoding="UTF-8"?>\n' +
+  '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+  "  <url><loc>https://jimmyfantasyworld.com/</loc></url>\n" +
+  "  <url><loc>https://jimmyfantasyworld.com/about.html</loc></url>\n" +
+  "  <url><loc>https://jimmyfantasyworld.com/contact.html</loc></url>\n" +
+  "  <url><loc>https://jimmyfantasyworld.com/privacy.html</loc></url>\n" +
+  "</urlset>\n";
 
 export {};

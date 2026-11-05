@@ -34,7 +34,7 @@ const progress = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const q = (s)
   return { text: tx(".db-today__text"), center: tx(".db-ring__value"), done: main.classList.contains("db-ring--done"), doneText: q(".db-today__done").hidden ? "" : q(".db-today__done").textContent,
     mainRatio: ratio(main.querySelector(".db-ring__bar")), mainStroke: getComputedStyle(main.querySelector(".db-ring__bar")).stroke,
     rings: document.querySelectorAll("#view-dashboard svg.db-ring, #view-dashboard .db-mini").length,
-    stats: { labels: [...document.querySelectorAll("#view-dashboard .db-stat__label")].map((e) => e.textContent).join("、"), mastery: tx(".db-stat--mastery .db-stat__value"), sub: tx(".db-stat--mastery .db-stat__sub"), accuracy: tx(".db-stat--accuracy .db-stat__value"), streak: tx(".db-stat--streak .db-stat__num") },
+    stats: { labels: [...document.querySelectorAll("#view-dashboard .db-stat__label")].map((e) => e.textContent).join("、"), mastery: tx(".db-stat--mastery .db-stat__value"), sub: tx(".db-stat--mastery .db-stat__sub"), accuracy: tx(".db-stat--answered .db-stat__value"), streak: tx(".db-stat--streak .db-stat__num") },
     chartTitle: tx("#db-chart-h"), empty: shown(q(".db-chart__empty")) ? q(".db-chart__empty").textContent : null, barsShown: shown(q(".db-bars")),
     bars: [...document.querySelectorAll("#view-dashboard .db-bars__item")].filter((b) => !b.hidden).map((b) => ({ date: b.dataset.date, label: b.querySelector(".db-bars__label").textContent, count: Number(b.querySelector(".db-bars__count").textContent), h: parseFloat(b.querySelector(".db-bars__fill").style.height) || 0 })) }; })()`);
 const X = async (p) => { const r = await progress(p); const m = r.text.match(/今日已學 (\d+) \/ (\d+) 字/); return m ? Number(m[1]) : NaN; };
@@ -58,7 +58,7 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     // v0.12：主環形圖 1 個；3 格數據以數字顯示（不使用小環形圖）；近 7 天無資料時為空狀態（AC-39-07）
     const r = await progress(p);
     const goal = await p.ev(`document.querySelectorAll("#view-dashboard .dash-stats--goal, #view-dashboard .dash-stat").length`);
-    const ok = r.text === "今日已學 0 / 15 字" && r.rings === 1 && r.stats.labels === "連續打卡天數、單字掌握率、模擬測驗正確率" && r.stats.mastery === "0%" && r.stats.sub === "已掌握 0 字" && r.stats.accuracy === "—"
+    const ok = r.text === "今日已學 0 / 15 字" && r.rings === 1 && r.stats.labels === "連續打卡天數、單字掌握率、模擬測驗" && r.stats.mastery === "0%" && r.stats.sub === "已掌握 0 字" && r.stats.accuracy === "已答對 0 / 200 題（0%）"
       && r.chartTitle && r.bars.length === 7 && r.bars[6].date === TODAY && r.empty === "開始學習後會顯示紀錄" && !r.barsShown && goal === 0;
     return { ok, note: `主環「${r.text}」（中央 ${r.center}）；環形圖 ${r.rings} 個；3 格 ${r.stats.labels}：${r.stats.streak}／${r.stats.mastery}（${r.stats.sub}）／${r.stats.accuracy}；圖表「${r.chartTitle}」空狀態「${r.empty}」、長條顯示=${r.barsShown}；舊目標區元素 ${goal}` };
   });
@@ -172,8 +172,8 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     for (let i = 0; i < 10; i++) { const ci = await p.ev(`PART5_QUESTION_BANK[${i}].correctIndex`); await p.click("[data-p5=option]", i < 7 ? ci : (ci + 1) % 4); await p.click("[data-p5=next]"); }
     const r = await progress(p); const n = await p.ev(`EMT.store.getState().runtime.studySet.length`);
     const s = r.stats; // v0.12：3 格數據（AC-30-10：掌握率 = 集內 ÷ 單字集；小字「已掌握 N 字」含集外）
-    const ok = n === 1000 && s.mastery === "25%" && s.sub === "已掌握 260 字" && s.accuracy === "70%" && r.rings === 1 && !/NaN|Infinity/.test(JSON.stringify(r));
-    return { ok, note: `單字集 ${n} 字、已掌握 260（集內 250、集外 10）→ 單字掌握率「${s.mastery}」、小字「${s.sub}」；模擬測驗 10 題對 7 → 正確率「${s.accuracy}」；環形圖 ${r.rings} 個（只有主環）。PRD 範例為 200 字/50 字，正式資料最小單字集為 1,000，故以同比例 250/1,000 驗證` };
+    const ok = n === 1000 && s.mastery === "25%" && s.sub === "已掌握 260 字" && s.accuracy === "已答對 7 / 200 題（4%）" && r.rings === 1 && !/NaN|Infinity/.test(JSON.stringify(r));
+    return { ok, note: `單字集 ${n} 字、已掌握 260（集內 250、集外 10）→ 單字掌握率「${s.mastery}」、小字「${s.sub}」；模擬測驗 10 題對 7 → 第 3 格「${s.accuracy}」；環形圖 ${r.rings} 個（只有主環）。PRD 範例為 200 字/50 字，正式資料最小單字集為 1,000，故以同比例 250/1,000 驗證` };
   });
 
   await R.check("TC-30-11", "AC-30-11", async () => {
@@ -302,8 +302,8 @@ if (FIX && fs.existsSync(FIX)) {
   await p.goto(pathToFileURL(FIX).href);
   await R.check("TC-30-10b", "AC-30-10、E-48", async () => {
     const r = await progress(p);
-    const ok = r.stats.mastery === "—" && r.stats.accuracy === "—" && !/NaN|Infinity|undefined/.test(JSON.stringify(r)) && r.text === "今日已學 0 / 15 字";
-    return { ok, note: `單字集 0、答題 0：單字掌握率「${r.stats.mastery}」（${r.stats.sub}）、模擬測驗正確率「${r.stats.accuracy}」；主環「${r.text}」` };
+    const ok = r.stats.mastery === "—" && r.stats.accuracy === "—" && !/NaN|Infinity|undefined/.test(JSON.stringify(r)) && r.text === "今日已學 0 / 15 字"; // 無內建資料：Q = 0 → 「—」（AC-49-02）
+    return { ok, note: `單字集 0、答題 0：單字掌握率「${r.stats.mastery}」（${r.stats.sub}）、模擬測驗「${r.stats.accuracy}」；主環「${r.text}」` };
   });
   await p.close();
 } else {

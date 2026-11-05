@@ -494,8 +494,8 @@ if (FIX && fs.existsSync(FIX)) {
       const extra = f === "v07-state.json" ? st.data.goal.appliedScore === src.data.goal.appliedScore && st.data.part5.totalAnswered === src.data.part5.totalAnswered && st.data.part5.totalCorrect === src.data.part5.totalCorrect && ex.data.part5.totalAnswered === src.data.part5.totalAnswered : true;
       const same = extra && keep.every((k) => J(st.data[k]) === J(src.data[k]) && J(ex.data[k]) === J(src.data[k]));
       await p.go("part5"); const q = await p5info(p); await p.go("flashcards"); const c = await fc(p);
-      const p5 = src.data.part5; const accExp = p5.totalAnswered ? Math.round((p5.totalCorrect / p5.totalAnswered) * 100) + "%" : "—";
-      await p.go("dashboard"); const acc = await p.ev(`(document.querySelector("#view-dashboard .db-stat--accuracy .db-stat__value") || {}).innerText`);
+      const p5 = src.data.part5; const accExp = "已答對0/200題（0%）"; // v0.19：舊資料答對紀錄為空 → K = 0，E-135
+      await p.go("dashboard"); const acc = await p.ev(`(document.querySelector("#view-dashboard .db-stat--answered .db-stat__value") || {}).innerText`);
       const p5same = f === "v014-state.json" ? J(st.data.part5) === J(p5) && q.number === `第 ${p5.currentIndex + 1} / 200 題` : true;
       const good = entry === "main" && !t.some((x) => /資料讀取失敗|錯誤/.test(x)) && sets1 === 1 && sets2 === 0 && raw1 === raw2 && J(keys) === J([KEY]) && st.schemaVersion === SV && same && p5same
         && (acc || "").replace(/\s+/g, "") === accExp && m.flashcardPosition === null && J(m.part5CorrectIds) === "[]" && m.part5UnansweredOnly === false && c.pos.startsWith("第 1 /") && q.count === "已答對 0 / 200 題" && q.only === false;

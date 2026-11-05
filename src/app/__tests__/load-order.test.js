@@ -7,6 +7,7 @@
  * （FE-69）v0.14：新增 core/version.js、ui/version-line.js 與 layout.goalLineText、levelStatusText 斷言。
  * （FE-76）v0.15：新增 core/position.js、core/part5flow.js（載入時不讀 document、不取用 persist）、
  *           CURRENT_SCHEMA_VERSION 3 與 PART5_RECORD_TEXTS 凍結斷言。
+ * （FE-83）v0.19：新增 core/ad.js、core/site-content.js（載入時不取用其他模組）與 answeredSummaryText 於瀏覽器環境的斷言。
  * 背景：R6-1（backup.js 早於 persist.js 載入，載入時取用 EMT.core.persist 得到 undefined）在 Node 單元測試中
  *       因 require 不受順序影響而測不到；本檔對全部模組做同樣的瀏覽器環境模擬。
  */
@@ -118,7 +119,8 @@ describe("load-order.test.js", () => {
     const coreFiles = files.filter((f) => f.startsWith("core/"));
     assert.ok(coreFiles.length >= 13);
     for (const rel of coreFiles) {
-      const name = path.basename(rel, ".js");
+      // 檔名含連字號者掛在駝峰命名下（site-content.js → EMT.core.siteContent，§4.12）
+      const name = path.basename(rel, ".js").replace(/-(\w)/g, (all, c) => c.toUpperCase());
       const mod = name === "content" ? EMT.content : EMT.core[name];
       assert.ok(mod && (typeof mod === "object" || typeof mod === "function"), "缺少模組：" + rel);
     }
@@ -184,7 +186,7 @@ describe("load-order.test.js", () => {
     assert.equal(EMT.core.goal.scoreForCard("green"), EMT.core.constants.SCORE_DEFAULT);
   });
 
-  test("LD-2、HT-5：views 載入時只登錄頁面（主控台與 6 個功能區共 7 個頁籤皆經 EMT.views.register 登錄；隱藏頁 decoder、phrasebank 仍登錄）", async () => {
+  test("LD-2、HT-5：views 載入時只登錄頁面（主控台、6 個功能區與 3 個對外頁面共 10 個頁籤皆經 EMT.views.register 登錄；隱藏頁 decoder、phrasebank 仍登錄）", async () => {
     const { files } = await appFiles();
     const { sandbox } = makeSandbox();
     vm.createContext(sandbox);
@@ -201,7 +203,7 @@ describe("load-order.test.js", () => {
       }
     });
     const tabs = Array.from(new Set(registered)).sort();
-    assert.deepEqual(tabs, ["customizer", "dashboard", "decoder", "flashcards", "part5", "phrasebank", "sources"].sort());
+    assert.deepEqual(tabs, ["about", "contact", "customizer", "dashboard", "decoder", "flashcards", "part5", "phrasebank", "privacy", "sources"].sort());
     // 自訂器頁 = customizer + custom-vocab 兩個模組
     assert.equal(registered.filter((t) => t === "customizer").length, 2);
   });
@@ -540,5 +542,74 @@ describe("load-order.test.js：單字卡位置與答對紀錄（v0.15，FE-76）
     ]);
     assert.equal(T.correctBadge, "✓ 曾答對");
     assert.equal(T.correctCount, "已答對 {k} / {q} 題");
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// （v0.19，FE-83）core/ad.js、core/site-content.js；依據：architecture.md v0.14 §10.11 load-order.test.js 列；LD-1、LD-2
+// ─────────────────────────────────────────────────────────────
+
+describe("load-order.test.js：廣告與對外文案模組（v0.19，FE-83）", () => {
+  const APP_DIR = path.join(__dirname, "..");
+  const BUILD_MJS = path.join(APP_DIR, "..", "..", "tools", "build.mjs");
+  const NEW_CORE = [["core/ad.js", "ad"], ["core/site-content.js", "siteContent"]];
+
+  test("兩個新模組在建置清單中，位於 state/ 之前", async () => {
+    const build = await import(pathToFileURL(BUILD_MJS).href);
+    const files = build.listAppFiles(APP_DIR).filter((f) => f !== "main.js");
+    for (const [rel] of NEW_CORE) {
+      assert.ok(files.includes(rel), "建置清單缺少 " + rel);
+      assert.ok(files.indexOf(rel) < files.findIndex((f) => f.startsWith("state/")), rel + " 應在 state/ 之前");
+    }
+  });
+
+  for (const [rel, name] of NEW_CORE) {
+    test(rel + "：載入時不取用其他模組、不讀環境（單獨載入也成立；LD-1、LD-2、AD-4）", () => {
+      const reads = [];
+      const sandbox = {};
+      sandbox.self = sandbox;
+      sandbox.window = sandbox;
+      for (const env of ["document", "location", "navigator", "localStorage", "require", "adsbygoogle", "setTimeout"]) {
+        Object.defineProperty(sandbox, env, { configurable: true, get() { reads.push(env); return undefined; } });
+      }
+      // EMT.core 上的任何讀取都視為取用其他模組；模組自己的指派正常保存
+      const assigned = {};
+      sandbox.EMT = {
+        core: new Proxy(assigned, {
+          get(target, key) { reads.push("EMT.core." + String(key)); return target[key]; },
+          set(target, key, value) { target[key] = value; return true; }
+        })
+      };
+      vm.createContext(sandbox);
+      vm.runInContext(fs.readFileSync(path.join(APP_DIR, rel), "utf8"), sandbox, { filename: rel });
+      assert.deepEqual(reads, []);
+      assert.deepEqual(Object.keys(assigned), [name]);
+      assert.ok(Object.isFrozen(assigned[name]), name + " 應凍結");
+    });
+  }
+
+  test("依建置順序載入後兩個模組與 answeredSummaryText 可用（瀏覽器環境於呼叫時取用 constants）；CURRENT_SCHEMA_VERSION 仍為 3", async () => {
+    const build = await import(pathToFileURL(BUILD_MJS).href);
+    const files = build.listAppFiles(APP_DIR).filter((f) => f !== "main.js");
+    const sandbox = { console: { log() {}, info() {}, debug() {}, warn() {}, error() {} } };
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    for (const rel of files) vm.runInContext(fs.readFileSync(path.join(APP_DIR, rel), "utf8"), sandbox, { filename: rel });
+    const E = sandbox.EMT;
+    assert.equal(E.core.ad.transition("waiting", "load"), "loading");
+    assert.equal(E.core.siteContent.SITE_PAGES.length, 3);
+    assert.equal(E.core.part5flow.answeredSummaryText({ k: 29, q: 200, p: 15 }), "已答對 29 / 200 題（15%）");
+    assert.equal(E.core.constants.CURRENT_SCHEMA_VERSION, 3);
+  });
+
+  test("LD-3：瀏覽器環境缺少 EMT.core.constants 時，answeredSummaryText 丟出含模組名稱的 Error", () => {
+    const sandbox = {};
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    const rel = "core/part5flow.js";
+    vm.runInContext(fs.readFileSync(path.join(APP_DIR, rel), "utf8"), sandbox, { filename: rel });
+    assert.throws(() => sandbox.EMT.core.part5flow.answeredSummaryText({ k: 1, q: 2, p: 50 }), /constants/);
   });
 });

@@ -1,0 +1,9 @@
+[
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-38-09f",
+    "ac": "AC-38-09 (a)",
+    "result": "失敗",
+    "note": "375×667 真實 Tab：v1.3.0 被遮 8：主控台（有近 7 天資料、收合）：.db-backup__toggle「資料備份」（可見 0%）、主控台（有近 7 天資料、展開）：.db-backup__toggle「資料備份」（可見 0%）、難易度設定：.cz-level.cz-level--gold[gold]「金✓即將開放—」（可見 13%）、難易度設定：BUTTON「新增單字」（可見 49%）、單字卡：.fc-flip「翻面」（可見 94%）、單字卡：.fc-next「下一張」（可見 94%）、模擬測驗：.p5-option.p5-option--idle「C.reminded」（可見 57%）、模擬測驗：.p5-option.p5-option--idle「D.attended」（可見 0%）；v1.2.0 被遮 10：主控台（資料備份收合）：#footer-sources「資料來源與授權」（可見 0%）、主控台（有近 7 天資料、收合）：.db-backup__toggle「資料備份」（可見 0%）、主控台（有近 7 天資料、展開）：.db-backup__toggle「資料備份」（可見 0%）、難易度設定：.cz-level.cz-level--gold[gold]「金✓即將開放—」（可見 13%）、難易度設定：BUTTON「新增單字」（可見 49%）、單字卡：.fc-flip「翻面」（可見 94%）、單字卡：.fc-next「下一張」（可見 94%）、單字卡：#footer-sources「資料來源與授權」（可見 0%）、模擬測驗：.p5-option.p5-option--idle「C.reminded」（可見 57%）、模擬測驗：.p5-option.p5-option--idle「D.attended」（可見 0%）（BUG-005，舊有；390×844 見 tests/results/diag/r9-focus.json）"
+  }
+]

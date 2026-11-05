@@ -4,7 +4,7 @@
     "tc": "TC-D18",
     "ac": "AC-23-02、AC-23-03（architecture §8.4 紀錄完整性）",
     "result": "通過",
-    "note": "沿用第 1 輪逐筆判讀；第 8 輪 src/data 無變動（git status：無），records-check 本輪重跑"
+    "note": "沿用第 1 輪逐筆判讀；第 9 輪 src/data 無變動（git status：M tools/build.mjs、 M tools/serve.mjs、?? tools/site-pages.mjs），records-check 本輪重跑"
   },
   {
     "suite": "qa-review",
@@ -25,28 +25,28 @@
     "tc": "TC-B01",
     "ac": "（越界檢查：檔案歸屬）",
     "result": "通過",
-    "note": "boundary-check：屬於任務 184、人類／上游文件 46、QA tests/ 259、人類自放或主控授權（非 PG）11［.gitattributes、.github/workflows/static.yml、.gitignore、LICENSE、NOTICE.md、package-lock.json、src/app/assets/icons/apple-touch-icon-180.png、src/app/assets/icons/icon-192.png、src/app/assets/icons/icon-512.png、src/app/assets/icons/icon-maskable-512.png、src/data/NOTICE.md］、不屬於任何任務 0；任務 paths 中不存在 src/app/styles/90-overrides.css（90-overrides.css 只在發現問題時才寫，非缺陷）"
+    "note": "boundary-check：屬於任務 207、人類／上游文件 48、QA tests/ 344、人類自放或主控授權（非 PG）11［.gitattributes、.github/workflows/static.yml、.gitignore、LICENSE、NOTICE.md、package-lock.json、src/app/assets/icons/apple-touch-icon-180.png、src/app/assets/icons/icon-192.png、src/app/assets/icons/icon-512.png、src/app/assets/icons/icon-maskable-512.png、src/data/NOTICE.md］、不屬於任何任務 0；任務 paths 中不存在 src/app/styles/90-overrides.css（90-overrides.css 只在發現問題時才寫，非缺陷）"
   },
   {
     "suite": "qa-review",
     "tc": "TC-B02",
     "ac": "（越界檢查：原始需求、sources/、docs/、tests/）",
     "result": "通過",
-    "note": "english_master_track.md 最後修改 2026-10-29T06:02:20.495Z（git 無變動）；sources/ 無檔案晚於 HEAD f57145a（0 個）；docs/ 本輪變動只有 PRD、契約 README 與 data-schema、architecture、tasks.json（上游代理與主控）及 docs/04-qa（QA）；storage-schema.json、tools/、src/data/、package-lock.json 變動 0 個；package.json git diff 只有 version 1.1.0→1.2.0 一行=true（MC-06、Q-79 決議 A）；tests/ 變動皆為 QA 本輪修改 120 個"
+    "note": "english_master_track.md 最後修改 2026-10-29T06:02:20.495Z（git 無變動）；sources/ 無檔案晚於 HEAD 25e3c3f（0 個）；docs/ 本輪變動只有 PRD、契約 README 與 data-schema、architecture、tasks.json（上游代理與主控）及 docs/04-qa（QA）；storage-schema.json、src/data/、package-lock.json、sources/ 變動 0 個；package.json git diff 只有 version 1.2.0→1.3.0 一行=true（MC-07）；.github/workflows/static.yml 8 檔→13 檔（MC-08，授權例外）；tests/ 變動皆為 QA 本輪修改 165 個"
   },
   {
     "suite": "qa-review",
     "tc": "TC-B03",
-    "ac": "（越界檢查：第 8 輪增量 FE-80～FE-82）",
+    "ac": "（越界檢查：第 9 輪增量 FE-83～FE-89）",
     "result": "通過",
-    "note": "boundary-r8：與 git HEAD f57145a 比對（含 .gitignore 的 dist/site/ 依修改時間）變動 146 個檔案；PG 任務 paths 內 20 個；超出 0 個；授權例外 6 個（docs/01-PRD.md、docs/02-contract/README.md、docs/02-contract/data-schema.ts、docs/03-design/architecture.md、docs/03-design/tasks.json、package.json）；QA 自有 120 個；任務 paths 中未變動 無"
+    "note": "boundary-r9：與 git HEAD 25e3c3f 比對（含 .gitignore 的 dist/site/ 依修改時間）變動 238 個檔案；PG 任務 paths 內 66 個；超出 0 個；授權例外 7 個（.github/workflows/static.yml、docs/01-PRD.md、docs/02-contract/README.md、docs/02-contract/data-schema.ts、docs/03-design/architecture.md、docs/03-design/tasks.json、package.json）；QA 自有 165 個；任務 paths 中未變動 src/app/styles/70-sources.css"
   },
   {
     "suite": "qa-review",
     "tc": "TC-X-edge",
-    "ac": "AC-19-02（Chrome／Edge）跨瀏覽器冒煙、AC-34-01、AC-35-01、AC-35-02、AC-37-01、AC-42-01、AC-43-01、AC-44-01、AC-45-01、AC-46-01、AC-48-01",
+    "ac": "AC-19-02（Chrome／Edge）跨瀏覽器冒煙、AC-34-01、AC-35-01、AC-35-02、AC-37-01、AC-42-01、AC-43-01、AC-44-01、AC-45-01、AC-46-01、AC-48-01、AC-49-01、AC-50-02、AC-53-01、AC-57-01",
     "result": "通過",
-    "note": "以 Microsoft Edge（headless）重跑：e2e-goal-edge.json：通過 22、不適用（暫停）5、不適用（移除）0、失敗 0（共 27）；e2e-hidden-edge.json：通過 5、不適用（暫停）0、不適用（移除）0、失敗 0（共 5）；e2e-lock-edge.json：通過 40、不適用（暫停）0、不適用（移除）0、失敗 0（共 40）；e2e-pwa-edge.json：通過 8、不適用（暫停）0、不適用（移除）0、失敗 0（共 8）；e2e-track-p5-edge.json：通過 26、不適用（暫停）0、不適用（移除）1、失敗 0（共 27）；e2e-version-edge.json：通過 9、不適用（暫停）5、不適用（移除）0、失敗 0（共 14）"
+    "note": "以 Microsoft Edge（headless）重跑：e2e-ad-edge.json：通過 16、不適用（暫停）0、不適用（移除）0、待人工 5、失敗 1（共 22）；e2e-ad-extra-edge.json：通過 2、不適用（暫停）0、不適用（移除）0、待人工 0、失敗 0（共 2）；e2e-answered-edge.json：通過 20、不適用（暫停）0、不適用（移除）0、待人工 0、失敗 0（共 20）；e2e-goal-edge.json：通過 22、不適用（暫停）5、不適用（移除）0、待人工 0、失敗 0（共 27）；e2e-hidden-edge.json：通過 5、不適用（暫停）0、不適用（移除）0、待人工 0、失敗 0（共 5）；e2e-lock-edge.json：通過 40、不適用（暫停）0、不適用（移除）0、待人工 0、失敗 0（共 40）；e2e-pwa-edge.json：通過 8、不適用（暫停）0、不適用（移除）0、待人工 0、失敗 0（共 8）；e2e-site-edge.json：通過 25、不適用（暫停）0、不適用（移除）0、待人工 0、失敗 0（共 25）；e2e-track-p5-edge.json：通過 26、不適用（暫停）0、不適用（移除）1、待人工 0、失敗 0（共 27）；e2e-version-edge.json：通過 9、不適用（暫停）5、不適用（移除）0、待人工 0、失敗 0（共 14）；失敗（BUG-006，與 Chrome 相同）：e2e-ad-edge.json TC-52-05b"
   },
   {
     "suite": "qa-review",
@@ -193,21 +193,21 @@
     "tc": "TC-VER-H1",
     "ac": "AC-42-01、AC-27-03、AC-41-04、E-95",
     "result": "待人工",
-    "note": "實機版本行：Android Chrome、iPhone Safari 以正式網址開啟與從主畫面啟動已安裝 App，首次畫面與 4 個功能區、資料來源頁捲到底，「版本 1.2.0（建置 xxxxxxx）」完整顯示在底部導覽列或固定底部列上方、單行不裁切；含瀏海／Home Indicator 機型"
+    "note": "實機版本行：Android Chrome、iPhone Safari 以正式網址開啟與從主畫面啟動已安裝 App，首次畫面與 4 個功能區、資料來源頁捲到底，「版本 1.3.0（建置 xxxxxxx）」完整顯示在底部導覽列或固定底部列上方、單行不裁切；含瀏海／Home Indicator 機型"
   },
   {
     "suite": "qa-review",
     "tc": "TC-VER-H2",
     "ac": "AC-42-02、AC-36-07",
     "result": "待人工",
-    "note": "部署後比對：push 後 Actions 成功，正式網址 https://jimmyfantasyworld.com/ 檢視原始碼 emt-app-version＝1.2.0、emt-build-id 前 7 碼＝頁尾建置碼＝sw.js BUILD_ID 前 7 碼（CI 為 LF 建置，建置碼與本機不同屬正常）"
+    "note": "部署後比對：push 後 Actions 成功，正式網址 https://jimmyfantasyworld.com/ 檢視原始碼 emt-app-version＝1.3.0、emt-build-id 前 7 碼＝頁尾建置碼＝sw.js BUILD_ID 前 7 碼（CI 為 LF 建置，建置碼與本機不同屬正常）"
   },
   {
     "suite": "qa-review",
     "tc": "TC-VER-H3",
     "ac": "AC-42-04 (b)、AC-36-03、E-97、E-131",
     "result": "待人工",
-    "note": "已安裝 App 連網開啟出現「有新版本，請更新版本」與「更新版本」按鈕（E-120：提示由 V1 的程式顯示），按下後頁尾版本行為 1.2.0；更新前舊版仍可重答曾答對題目屬預期（E-131）；並確認 version 與預期一致"
+    "note": "已安裝 App 連網開啟出現「有新版本，請更新版本」與「更新版本」按鈕（E-120：提示由 V1 的程式顯示），按下後頁尾版本行為 1.3.0；更新前舊版仍可重答曾答對題目屬預期（E-131）；並確認 version 與預期一致"
   },
   {
     "suite": "qa-review",
@@ -221,7 +221,14 @@
     "tc": "TC-TRK-H1",
     "ac": "AC-47-04、AC-36-03、AC-44-01、AC-45-05、E-114",
     "result": "待人工",
-    "note": "實機升級：Android Chrome、iPhone Safari 已安裝舊版 PWA 且有學習紀錄者，push 1.2.0 後出現「有新版本，請更新版本」並按「更新版本」；既有進度（主控台今日已學、連續打卡、掌握率、模擬測驗正確率、自訂單字、已答對紀錄）未遺失；曾答對題改為已答對鎖定檢視；之後換卡到第 10 張、關閉 App 重開仍在第 10 張"
+    "note": "實機升級：Android Chrome、iPhone Safari 已安裝舊版 PWA 且有學習紀錄者，push 1.3.0 後出現「有新版本，請更新版本」並按「更新版本」；既有進度（主控台今日已學、連續打卡、掌握率、模擬測驗已答對行、自訂單字、已答對紀錄）未遺失；曾答對題改為已答對鎖定檢視；之後換卡到第 10 張、關閉 App 重開仍在第 10 張"
+  },
+  {
+    "suite": "qa-review",
+    "tc": "TC-SITE-H1",
+    "ac": "AC-53-02、AC-54-01、AC-56-03、AC-56-08、AC-56-09、AC-57-05、AC-57-06",
+    "result": "待人工",
+    "note": "部署後（主控 D-2～D-5、D-8；人類 D-11）：正式網址 13 檔與爬蟲檔回應、og:image 200、靜態頁連網與離線、人類讀過公開文案（FB-71）"
   },
   {
     "suite": "qa-review",

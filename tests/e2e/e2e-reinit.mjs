@@ -48,7 +48,7 @@ const progress = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const q = (s)
   const shown = (e) => !!e && !e.hidden && e.getClientRects().length > 0;
   return { today: tx(".db-today__text"), bars: [...document.querySelectorAll("#view-dashboard .db-bars__item")].map((b) => Number(b.querySelector(".db-bars__count").textContent)).join(","),
     empty: shown(q(".db-chart__empty")) ? tx(".db-chart__empty") : "", barsShown: shown(q(".db-bars")),
-    stats: [tx(".db-stat--streak .db-stat__num") + " " + tx(".db-stat--streak .db-stat__unit"), tx(".db-stat--mastery .db-stat__value"), tx(".db-stat--mastery .db-stat__sub"), tx(".db-stat--accuracy .db-stat__value")].join("｜") }; })()`);
+    stats: [tx(".db-stat--streak .db-stat__num") + " " + tx(".db-stat--streak .db-stat__unit"), tx(".db-stat--mastery .db-stat__value"), tx(".db-stat--mastery .db-stat__sub"), tx(".db-stat--answered .db-stat__value")].join("｜") }; })()`);
 const fcPos = (p) => p.ev(`(() => { EMT.router.go("flashcards"); return [document.querySelector(".fc-position").textContent, document.querySelector(".fc-card") ? document.querySelector(".fc-card").dataset.flipped : null]; })()`);
 const p5Pos = (p) => p.ev(`(() => { EMT.router.go("part5"); const n = document.querySelector("[data-p5=number]"); return [n ? n.textContent : "", [...document.querySelectorAll("[data-p5=option]")].every((b) => !b.disabled)]; })()`);
 async function freshDefaults() {
@@ -100,7 +100,7 @@ const DEFAULTS = await freshDefaults();
     const backup = JSON.parse(await p.ev(`EMT.store.actions.exportBackup().json`)).data;
     const ok = closed && st.data.goal.appliedScore === 465 && st.data.goal.appliedColor === "brown" && st.data.goal.effectiveColor === "brown" && g === GOAL_LINE.brown
       && fc[0] === "第 1 / 2812 張" && fc[1] === "false" && e.mastered === "0 字" && e.weeks === "41 週"
-      && pr.today === "今日已學 0 / 10 字" && pr.bars === "0,0,0,0,0,0,0" && pr.empty === "開始學習後會顯示紀錄" && !pr.barsShown && pr.stats === "0 天｜0%｜已掌握 0 字｜—"
+      && pr.today === "今日已學 0 / 10 字" && pr.bars === "0,0,0,0,0,0,0" && pr.empty === "開始學習後會顯示紀錄" && !pr.barsShown && pr.stats === "0 天｜0%｜已掌握 0 字｜已答對 0 / 200 題（0%）"
       && p5[0].startsWith("第 1 /") && p5[1] && same(pr, pr2) && same(st.data, st2.data) && fc2[0] === "第 1 / 2812 張" && p52[0].startsWith("第 1 /")
       && same(pick(backup, LEARN), DEFAULTS);
     return { ok, note: `確定後視窗關閉=${closed}；localStorage goal ${JSON.stringify(st.data.goal)}；主控台 ${g}、${pr.today}、長條 ${pr.bars}、近 7 天「${pr.empty}」、3 格 ${pr.stats}；試算 c=${e.mastered}、棕 ${e.weeks}；單字卡 ${fc.join("/")}；模擬測驗 ${p5[0]}（未作答=${p5[1]}）；重新載入後相同=${same(pr, pr2) && same(st.data, st2.data)}；匯出備份 7 欄（第 7 輪含答對紀錄）${JSON.stringify(pick(backup, LEARN))} 與首次啟動預設相同=${same(pick(backup, LEARN), DEFAULTS)}` };

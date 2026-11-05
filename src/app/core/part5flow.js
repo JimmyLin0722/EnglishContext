@@ -9,14 +9,17 @@
  *   AC-48-01～AC-48-05、AC-48-07、AC-48-10）新增 questionState、canAnswer；next 可由已答對鎖定檢視前進；
  *   開關由開變關依切換前畫面種類分流。鎖定狀態為推導值，本模組不為了顯示鎖定而設定 lockedSelection（LV-4）。
  *
- * - L1 模組：載入時不取用任何其他模組（LD-1）；不讀 DOM、不讀 window 資料、不碰儲存。
+ * （v0.19，FE-83；architecture.md v0.14 §4.12、§7.25.1；契約 README §13.1 AS-1～AS-3、§13.7 V-ANS-01；
+ *   AC-49-01、AC-49-02、AC-49-04、AC-49-05）新增 answeredSummary、answeredSummaryText。K、Q、P 為推導值，不寫入任何儲存。
+ *
+ * - L1 模組：載入時不取用任何其他模組（LD-1；answeredSummaryText 於呼叫時才取用 core/constants.js）；不讀 DOM、不讀 window 資料、不碰儲存。
  * - 全部為純函式：不修改傳入值、對任何輸入不拋例外、不遞迴；nextUnanswered 為單一有界迴圈（UO-9）。
  * - 題庫 id 以 bankIds 陣列傳入（bankIdsOf 結果）；null 代表該題沒有合法 id：永遠「未答對」、不可被記錄。
  * - 名詞：Q = bankIds.length；set = correctSet(part5CorrectIds)；only = part5UnansweredOnly；p5 = Part5Progress。
  * - store 只負責取 bankIds、組 data 與寫入；寫入與否以回傳的 changed 判斷。
  */
 (function (root, factory) {
-  var api = factory();
+  var api = factory(root);
   if (typeof module === "object" && module.exports) {
     module.exports = api;
   } else {
@@ -24,7 +27,7 @@
     root.EMT.core = root.EMT.core || {};
     root.EMT.core.part5flow = api;
   }
-})(typeof self !== "undefined" ? self : this, function () {
+})(typeof self !== "undefined" ? self : this, function (root) {
   "use strict";
 
   /** 淺複製並套用 patch，回傳新物件（不修改 base） */
@@ -350,6 +353,52 @@
     return { part5: freshRound(p5), ids: [] };
   }
 
+  /**
+   * AS-1、AS-2：已答對行的數值。Q = 0 → null（呼叫端依 AS-4、AS-5 處理）。
+   * P 一律用整數公式，不得用 k / q * 100 再四捨五入（29 / 200 會得到 14.499…）；K < Q 時最大 99。
+   * @param {Array<string|null>} bankIds
+   * @param {*} ids part5CorrectIds
+   * @returns {{k: number, q: number, p: number}|null}
+   */
+  function answeredSummary(bankIds, ids) {
+    var list = idsOf(bankIds);
+    var q = list.length;
+    if (q === 0) {
+      return null;
+    }
+    var k = countCorrect(list, correctSet(ids));
+    var p = Math.floor((200 * k + q) / (2 * q));
+    return { k: k, q: q, p: k < q ? Math.min(p, 99) : p };
+  }
+
+  /** 呼叫時才取用 core/constants.js；取不到屬程式組裝錯誤，丟出含模組名稱的 Error（LD-1、LD-3） */
+  function constantsModule() {
+    if (typeof require === "function" && typeof module === "object") {
+      return require("./constants.js");
+    }
+    var emt = root && root.EMT;
+    if (!emt || !emt.core || !emt.core.constants) {
+      throw new Error("缺少模組 EMT.core.constants");
+    }
+    return emt.core.constants;
+  }
+
+  /**
+   * AS-3：已答對行字串（逐字 ANSWERED_SUMMARY_TEXT，不做 HTML 跳脫，呼叫端以 textContent 寫入）。
+   * summary 不是 answeredSummary 的有效結果（含 null、Q = 0、非有限數值）→ null，不產生「0 / 0」或 NaN。
+   * @param {{k: number, q: number, p: number}|null} summary
+   * @returns {string|null}
+   */
+  function answeredSummaryText(summary) {
+    if (!summary || typeof summary !== "object" || !(summary.q >= 1) || !isFinite(summary.q) ||
+        !(summary.k >= 0) || !isFinite(summary.k) || !(summary.p >= 0) || !isFinite(summary.p)) {
+      return null;
+    }
+    return constantsModule().ANSWERED_SUMMARY_TEXT.replace(/\{([kqp])\}/g, function (all, key) {
+      return String(summary[key]);
+    });
+  }
+
   return Object.freeze({
     bankIdsOf: bankIdsOf,
     normalizeIds: normalizeIds,
@@ -365,6 +414,8 @@
     next: next,
     restart: restart,
     setOnly: setOnly,
-    clearAndRestart: clearAndRestart
+    clearAndRestart: clearAndRestart,
+    answeredSummary: answeredSummary,
+    answeredSummaryText: answeredSummaryText
   });
 });

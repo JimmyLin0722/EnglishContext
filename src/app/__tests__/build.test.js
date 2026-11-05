@@ -4,6 +4,7 @@
 // 新增 PWA 建置（B-10～B-16、V-PWA-01～V-PWA-06、AC-36-01 三情境）與 tools/serve.mjs 測試，見檔尾。
 // （v0.9，FE-63）PWA fixture 模板加 emt-app-version meta，並以暫存 package.json（packageFile）建置；HD-1 改為 8 項；
 // 新增 B-17～B-19（V-VER-01、V-VER-02、V-VER-06、VR-4）測試，見檔尾。舊非 PWA fixture 無版本佔位 → 略過版本步驟。
+// （v0.14，FE-85）PWA fixture 模板改為 SEO、noscript 標記，部署目錄 13 檔；新增 B-20～B-25（DS-53、DS-55、V-AD-03、V-SITE-06）測試，見檔尾。
 "use strict";
 
 const test = require("node:test");
@@ -187,8 +188,10 @@ test("B-1：專案的 src/app/index.html 通過標記檢查且含必要元素", 
   assert.match(tpl, /<html lang="zh-Hant-TW">/);
   assert.match(tpl, /<meta charset="utf-8">/);
   assert.match(tpl, /<meta name="viewport"/);
-  // （v0.12，FE-56，NM-1）
-  assert.match(tpl, /<title>EnglishContext<\/title>/);
+  // （v0.14，FE-85）<title> 改由建置寫入（SE-2）
+  assert.match(tpl, /<!-- @@SEO_HEAD@@ -->/);
+  assert.match(tpl, /<!-- @@NOSCRIPT@@ -->/);
+  assert.doesNotMatch(tpl, /<title\b/i);
   assert.doesNotMatch(tpl, /english\s*master\s*track/i);
   assert.match(tpl, /<style>\/\* @@STYLES@@ \*\/<\/style>/);
 });
@@ -593,11 +596,12 @@ const PWA_TEMPLATE_HTML = [
   '<meta charset="utf-8">',
   "<!-- @@LICENSE@@ -->",
   '<meta name="viewport" content="width=device-width, initial-scale=1">',
-  "<title>EnglishContext</title>",
+  "<!-- @@SEO_HEAD@@ -->",
   ...HD1,
   "<style>/* @@STYLES@@ */</style>",
   "</head>",
   "<body>",
+  "<!-- @@NOSCRIPT@@ -->",
   "<!-- @@DATA@@ -->",
   "<!-- @@APP@@ -->",
   "</body>",
@@ -606,7 +610,9 @@ const PWA_TEMPLATE_HTML = [
 ].join("\n");
 
 const SW_TEMPLATE_REAL = fs.readFileSync(path.join(__dirname, "..", "pwa", "sw.template.js"), "utf8");
-const ADS = "google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0\n";
+const ADS = "google.com, pub-4051803210893105, DIRECT, f08c47fec0942fa0\n";
+/** 靜態頁 CSS（fixture 用；v0.14） */
+const STATIC_CSS = "body { background: #eef4fa; }\n";
 
 /** PWA fixture 的預設檔案（{ 相對路徑: 內容 }；Buffer 原樣寫入） */
 function pwaFiles(over = {}) {
@@ -615,6 +621,7 @@ function pwaFiles(over = {}) {
       "app/index.html": PWA_TEMPLATE_HTML,
       "app/license-header.txt": LICENSE,
       "app/pwa/sw.template.js": SW_TEMPLATE_REAL,
+      "app/site/static-page.css": STATIC_CSS,
       "app/styles/00-base.css": ":root {\n  --bg: #eef4fa;\n  --primary: #0866ad;\n}\nbody { background: var(--bg); }\n",
       "app/core/a.js": "/* APP_A */ var a = 1;\n",
       "app/assets/icons/icon-192.png": makePng(192),
@@ -694,12 +701,12 @@ function listFiles(dir, rel = "") {
   return out.sort();
 }
 
-test("PWA (1) V-PWA-01：部署目錄恰 8 檔、大小寫相同；index.html = out；ads.txt、PNG 與來源位元組相同；build() 回傳 buildId、site", async () => {
+test("PWA (1) V-PWA-01：部署目錄恰 13 檔、大小寫相同；index.html = out；ads.txt、PNG 與來源位元組相同；build() 回傳 buildId、site", async () => {
   const { res, fx } = await pwaBuild();
   try {
     const files = listFiles(fx.siteDir);
     assert.deepEqual(files, PWA.PWA_DEPLOY_FILES.map((f) => f.path).sort());
-    assert.equal(files.length, 8);
+    assert.equal(files.length, 13);
     const outBytes = fs.readFileSync(fx.out);
     assert.ok(fs.readFileSync(path.join(fx.siteDir, "index.html")).equals(outBytes));
     assert.ok(fs.readFileSync(path.join(fx.siteDir, "ads.txt")).equals(fs.readFileSync(fx.opts.ads)));
@@ -712,7 +719,7 @@ test("PWA (1) V-PWA-01：部署目錄恰 8 檔、大小寫相同；index.html = 
     assert.deepEqual(res.site.files.map((f) => f.path), PWA.PWA_DEPLOY_FILES.map((f) => f.path));
     assert.equal(res.html, outBytes.toString("utf8"));
     // 文字檔 UTF-8 無 BOM（DP-7）
-    for (const n of ["index.html", "manifest.webmanifest", "sw.js"]) {
+    for (const n of ["index.html", "manifest.webmanifest", "sw.js", "robots.txt", "sitemap.xml", "about.html", "contact.html", "privacy.html"]) {
       const b = fs.readFileSync(path.join(fx.siteDir, n));
       assert.ok(!(b[0] === 0xef && b[1] === 0xbb && b[2] === 0xbf), n);
     }
@@ -778,15 +785,12 @@ test("PWA (4) V-PWA-04、HD-3：HD-1 缺任一 → PWA_HEAD；靜態 manifest／
   }
   // HD-1 元素不在 </head> 之前
   await expectPwaAbort(
-    { "app/index.html": PWA_TEMPLATE_HTML.replace(HD1[2] + "\n", "").replace("<body>", "<body>\n" + HD1[2]) },
+    { "app/index.html": PWA_TEMPLATE_HTML.replace(HD1[2] + "\n", "").replace("<!-- @@NOSCRIPT@@ -->", "<!-- @@NOSCRIPT@@ -->\n" + HD1[2]) },
     "PWA_HEAD"
   );
-  // <title> 換成其他字串（v0.12：必須為 <title>${PWA_APP_NAME}</title>，§5.3）
-  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<title>EnglishContext</title>", "<title>Other</title>") }, "PWA_HEAD");
-  // 舊標題（v0.11）→ 中止
-  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<title>EnglishContext</title>", "<title>English Master Track</title>") }, "PWA_HEAD");
-  // 標題出現 2 次 → 中止
-  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<title>EnglishContext</title>", "<title>EnglishContext</title><title>EnglishContext</title>") }, "PWA_HEAD");
+  // （v0.14，§5.9）模板以 <title> 取代 SEO 標記 → SEO_TEMPLATE；SEO 標記之外另有 <title> → PWA_HEAD
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<!-- @@SEO_HEAD@@ -->", "<title>Other</title>") }, "SEO_TEMPLATE");
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<!-- @@SEO_HEAD@@ -->", "<!-- @@SEO_HEAD@@ -->\n<title>EnglishContext</title>") }, "PWA_HEAD");
   // 靜態 manifest、apple-touch-icon（無論 href 在前或在後、或無 href）
   for (const tag of [
     '<link rel="manifest" href="manifest.webmanifest">',
@@ -805,9 +809,9 @@ test("PWA (4) V-PWA-04、HD-3：HD-1 缺任一 → PWA_HEAD；靜態 manifest／
   await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("</head>", '<link rel="icon" href="icons/icon-192.png">\n</head>') }, "EXTERNAL_RESOURCE");
 });
 
-test("PWA (4b) B-7 白名單：只有 1 個逐字字串；FORBIDDEN_PATTERNS 既有 10 條未刪改", async () => {
+test("PWA (4b) B-7 白名單：只有 2 個逐字字串；FORBIDDEN_PATTERNS 既有 11 條未刪改，只新增靜態廣告框（DS-55）", async () => {
   const { ALLOWED_STATIC_TAGS, FORBIDDEN_PATTERNS } = await loadBuild();
-  assert.deepEqual([...ALLOWED_STATIC_TAGS], ['<link rel="icon" href="data:,">']);
+  assert.deepEqual([...ALLOWED_STATIC_TAGS], ['<link rel="icon" href="data:,">', '<link rel="canonical" href="https://jimmyfantasyworld.com/">']);
   const expected = [
     ["<script src>", "/<script[^>]*\\ssrc=/i"],
     ["<link href>", "/<link[^>]*\\shref=/i"],
@@ -821,8 +825,9 @@ test("PWA (4b) B-7 白名單：只有 1 個逐字字串；FORBIDDEN_PATTERNS 既
     ["MediaRecorder", "/MediaRecorder/"],
   ];
   assert.deepEqual(FORBIDDEN_PATTERNS.slice(0, 10).map((p) => [p.name, String(p.re)]), expected);
-  assert.equal(FORBIDDEN_PATTERNS.length, 11);
+  assert.equal(FORBIDDEN_PATTERNS.length, 12);
   assert.equal(FORBIDDEN_PATTERNS[10].name, "<link rel=PWA 附屬檔>");
+  assert.equal(FORBIDDEN_PATTERNS[11].name, "靜態廣告框");
 });
 
 test("PWA (5) V-PWA-05：sw.js 的 BUILD_ID = HTML meta、CACHE_NAME 前綴、預先快取 7 項；範本違規 → PWA_SW／PWA_SW_TEMPLATE", async () => {
@@ -893,7 +898,8 @@ test("PWA (6) V-PWA-06、AC-36-01：write: false 連續 2 次三檔相同；改�
     ids.add(r.buildId);
   }
   assert.equal(ids.size, Object.keys(variants).length + 1, "各變更的 BUILD_ID 互不相同");
-  const adsOnly = once({ "ads.txt": "google.com, pub-1111111111111111, DIRECT, f08c47fec0942fa0\n" });
+  // （v0.14，B-24）內容須符合 publisherId；只改結尾換行仍可建置，且不影響 BUILD_ID
+  const adsOnly = once({ "ads.txt": ADS + "\n" });
   assert.equal(adsOnly.buildId, a.buildId);
   assert.deepEqual(three(adsOnly), three(a));
 });
@@ -975,7 +981,7 @@ test("PWA (10) parseArgs：--site、--no-site、--ads 與衝突", async () => {
   assert.throws(() => parseArgs(["--no-site=1"]), (e) => e.code === "BAD_ARGS");
 });
 
-test("PWA (10b) CLI：預設部署目錄 = --out 所在目錄下的 site；報告含 BUILD_ID 與 8 檔 bytes", () => {
+test("PWA (10b) CLI：預設部署目錄 = --out 所在目錄下的 site；報告含 BUILD_ID、單元 ID 未設定與 13 檔 bytes", () => {
   const fx = pwaFixture();
   try {
     const r = spawnSync(
@@ -986,8 +992,9 @@ test("PWA (10b) CLI：預設部署目錄 = --out 所在目錄下的 site；報�
     assert.equal(r.status, 0, r.stderr);
     assert.match(r.stdout, /BUILD_ID：[0-9a-f]{16}/);
     assert.match(r.stdout, /版本號：1\.0\.0/);
+    assert.match(r.stdout, /廣告單元 ID：未設定/);
     for (const f of PWA.PWA_DEPLOY_FILES) assert.ok(r.stdout.includes(`${f.path}：`), f.path);
-    assert.equal(listFiles(fx.siteDir).length, 8);
+    assert.equal(listFiles(fx.siteDir).length, 13);
   } finally {
     fx.cleanup();
   }
@@ -995,13 +1002,20 @@ test("PWA (10b) CLI：預設部署目錄 = --out 所在目錄下的 site；報�
 
 test("PWA (11) 原始碼掃描：build.mjs 無 Math.random、Date.now、process.env、npm_package_version、performance.now；new Date( 只在 buildLicenseHeader 預設參數", () => {
   const src = fs.readFileSync(BUILD, "utf8");
-  for (const w of ["Math.random", "Date.now", "process.env", "npm_package_version", "performance.now"]) assert.ok(!src.includes(w), w);
+  const pagesSrc = fs.readFileSync(path.join(ROOT, "tools", "site-pages.mjs"), "utf8");
+  for (const w of ["Math.random", "Date.now", "process.env", "npm_package_version", "performance.now"]) {
+    assert.ok(!src.includes(w), w);
+    assert.ok(!pagesSrc.includes(w), "site-pages " + w);
+  }
+  assert.ok(!pagesSrc.includes("new Date("));
+  assert.ok(!/^import /m.test(pagesSrc), "site-pages.mjs 為純函式，無 import");
   const dates = src.split("\n").filter((l) => l.includes("new Date("));
   assert.equal(dates.length, 1);
   assert.match(dates[0], /export function buildLicenseHeader\(text, license, warn, now = new Date\(\)\)/);
   // 只用 Node 內建模組
-  const imports = [...src.matchAll(/^import .* from "([^"]+)";/gm)].map((m) => m[1]);
-  const allowed = ["node:fs", "node:path", "node:vm", "node:url", "node:crypto", "node:module"];
+  const imports = [...src.matchAll(/^(?:import .*|\} ?)from "([^"]+)";/gm)].map((m) => m[1]);
+  assert.ok(imports.includes("./site-pages.mjs"));
+  const allowed = ["node:fs", "node:path", "node:vm", "node:url", "node:crypto", "node:module", "./site-pages.mjs"];
   for (const m of imports) assert.ok(allowed.includes(m), m);
 });
 
@@ -1030,6 +1044,7 @@ test("PWA (12) serve.mjs：MIME、Cache-Control、base 外 404、路徑穿越 40
   fs.writeFileSync(path.join(site, "manifest.webmanifest"), "{}");
   fs.writeFileSync(path.join(site, "sw.js"), "/* sw */");
   fs.writeFileSync(path.join(site, "ads.txt"), "ads");
+  fs.writeFileSync(path.join(site, "sitemap.xml"), "<urlset/>");
   fs.writeFileSync(path.join(site, "icons", "icon-192.png"), makePng(4));
   fs.writeFileSync(path.join(dir, "secret.txt"), "secret");
   const s = await serve.startServer({ dir: site, port: 0, base: "/english-master-track/" });
@@ -1042,6 +1057,8 @@ test("PWA (12) serve.mjs：MIME、Cache-Control、base 外 404、路徑穿越 40
       "sw.js": "text/javascript; charset=utf-8",
       "icons/icon-192.png": "image/png",
       "ads.txt": "text/plain; charset=utf-8",
+      // （v0.14，FE-85）
+      "sitemap.xml": "application/xml; charset=utf-8",
     };
     for (const [rel, type] of Object.entries(mime)) {
       const r = await request(s.port, "GET", B + rel);
@@ -1298,4 +1315,355 @@ test("build.mjs 常數：APP_VERSION_PLACEHOLDER、APP_VERSION_CORE_FILE 固定�
   assert.equal(B.DEFAULTS.package, PROJECT_PKG);
   assert.equal(B.loadVersionCore().APP_VERSION_META_NAME, "emt-app-version");
   assert.ok(fs.readFileSync(PROJECT_PKG).equals(PROJECT_PKG_BEFORE));
+});
+
+// ═══════════════════════════════════════════════════════════════
+// （v0.14，FE-85）SEO、noscript、靜態頁、爬蟲檔、ads.txt 比對與測試注入 B-20～B-25
+// 依據：architecture.md v0.14 §5.9、§7.25.4、§7.25.8、§10.11；契約 README §10.2 DP、§13.2 AD-15、§13.5 SE、V-AD-03、V-SITE-06
+// 一律寫到暫存目錄，不寫 dist/。
+// ═══════════════════════════════════════════════════════════════
+
+const crypto = require("node:crypto");
+const SITE = require("../core/site-content.js");
+const AD = require("../core/ad.js");
+const AD_SRC = fs.readFileSync(path.join(__dirname, "..", "core", "ad.js"), "utf8");
+const SITE_SRC = fs.readFileSync(path.join(__dirname, "..", "core", "site-content.js"), "utf8");
+const CANONICAL = '<link rel="canonical" href="https://jimmyfantasyworld.com/">';
+/** 文案與廣告設定都用 fixture 內的複本（與 HTML 打包同一份） */
+const REAL_CORE = { "app/core/ad.js": AD_SRC, "app/core/site-content.js": SITE_SRC };
+
+/** 以 write: false 建置並回傳結果 */
+async function dryBuild(over, extra) {
+  const { build } = await loadBuild();
+  const fx = pwaFixture(over);
+  try {
+    return build(Object.assign({}, fx.opts, { write: false }, extra));
+  } finally {
+    fx.cleanup();
+  }
+}
+
+/** build() 回傳的部署檔案 → { 路徑: 文字 } */
+function siteTexts(res) {
+  return Object.fromEntries(res.site.files.map((f) => [f.path, f.bytes.toString("latin1")]));
+}
+
+test("B-20 SE-2、SE-4、AD-15：head 依序逐字含全部標記，位於 BUILD_ID 之前寫入（VR-4 同法重算）", async () => {
+  const { computeBuildId } = await loadBuild();
+  const { res, fx } = await pwaBuild();
+  try {
+    const seo = SITE.SITE_HOME_SEO;
+    const expected = [
+      `<title>${seo.documentTitle}</title>`,
+      `<meta name="description" content="${seo.description}">`,
+      CANONICAL,
+      `<meta property="og:title" content="${seo.documentTitle}">`,
+      `<meta property="og:description" content="${seo.description}">`,
+      '<meta property="og:url" content="https://jimmyfantasyworld.com/">',
+      '<meta property="og:type" content="website">',
+      '<meta property="og:site_name" content="EnglishContext">',
+      '<meta property="og:locale" content="zh_TW">',
+      '<meta property="og:image" content="https://jimmyfantasyworld.com/icons/icon-512.png">',
+      '<meta name="google-adsense-account" content="ca-pub-4051803210893105">',
+      `<script type="application/ld+json">${JSON.stringify(SITE.SITE_HOME_JSON_LD)}</script>`,
+    ].join("\n");
+    assert.ok(res.html.includes(expected), "SE-2 區塊逐字且順序固定");
+    assert.ok(res.html.includes('<meta name="apple-mobile-web-app-title" content="EnglishContext">'));
+    assert.ok(!res.html.includes("@@"));
+    assert.doesNotMatch(res.html, /<meta[^>]*name="keywords"/i);
+    assert.doesNotMatch(res.html, /noindex/i);
+    // 恰 1 段 JSON-LD，深度相等
+    const ld = [...res.html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+    assert.equal(ld.length, 1);
+    assert.deepEqual(JSON.parse(ld[0][1]), JSON.parse(JSON.stringify(SITE.SITE_HOME_JSON_LD)));
+    // SE-9：BUILD_ID 的 HTML 輸入已含 SEO
+    const files = pwaFiles();
+    const html0v = res.html.replace(`content="${res.buildId}"`, 'content="@@BUILD_ID@@"');
+    const records = (h) => [
+      { path: "index.html", bytes: Buffer.from(h, "utf8") },
+      { path: "manifest.webmanifest", bytes: res.site.files.find((f) => f.path === "manifest.webmanifest").bytes },
+      ...PWA.PWA_DEPLOY_FILES.filter((f) => f.sizePx).map((f) => ({ path: f.path, bytes: files["app/assets/icons/" + f.path.replace("icons/", "")] })),
+      { path: "sw.js", bytes: Buffer.from(SW_TEMPLATE_REAL, "utf8") },
+    ];
+    assert.equal(computeBuildId(records(html0v)), res.buildId);
+    assert.notEqual(computeBuildId(records(html0v.replace(`<title>${seo.documentTitle}</title>`, ""))), res.buildId);
+  } finally {
+    fx.cleanup();
+  }
+});
+
+test("B-21 SE-6：noscript 緊接 <body>，含名稱、說明、功能與 3 個正式網址連結", async () => {
+  const res = await dryBuild();
+  const m = /<body>\n(<noscript>[\s\S]*?<\/noscript>)\n/.exec(res.html);
+  assert.ok(m, "noscript 在 <body> 的下一行");
+  assert.ok(m[1].includes(`<h2>${SITE.SITE_NOSCRIPT.title}</h2>`));
+  assert.ok(m[1].includes(SITE.SITE_NOSCRIPT.description));
+  for (const f of SITE.SITE_NOSCRIPT.features) assert.ok(m[1].includes(`<li>${f}</li>`), f);
+  for (const l of SITE.SITE_NOSCRIPT.links) assert.ok(m[1].includes(`<a href="${l.href}">${l.text}</a>`), l.href);
+});
+
+test("SEO_TEMPLATE：標記缺少、重複、位置不符、程式含標記 → 中止且不寫檔；非 PWA 舊 fixture 無標記略過、有標記中止", async () => {
+  const H = "<!-- @@SEO_HEAD@@ -->";
+  const N = "<!-- @@NOSCRIPT@@ -->";
+  const cases = [
+    PWA_TEMPLATE_HTML.replace(H + "\n", ""),
+    PWA_TEMPLATE_HTML.replace(N + "\n", ""),
+    PWA_TEMPLATE_HTML.replace(H, H + "\n" + H),
+    PWA_TEMPLATE_HTML.replace(N, N + "\n" + N),
+    // SEO 標記在 </head> 之後
+    PWA_TEMPLATE_HTML.replace(H + "\n", "").replace("</head>", "</head>\n" + H),
+    // noscript 不在 <body> 下一行
+    PWA_TEMPLATE_HTML.replace(N + "\n", "").replace("<!-- @@DATA@@ -->", N + "\n<!-- @@DATA@@ -->").replace("<body>", "<body>\n<div></div>"),
+  ];
+  for (const tpl of cases) await expectPwaAbort({ "app/index.html": tpl }, "SEO_TEMPLATE");
+  await expectPwaAbort({ "app/core/z.js": `var p = '${H}';\n` }, "SEO_TEMPLATE");
+  // 資料內的 <!-- 已被 B-3 跳脫，不會命中標記；殘留的佔位字串由 B-19 中止
+  await expectPwaAbort({ "data/part5.js": `window.PART5_QUESTION_BANK = [{ "id": "${N}" }];` }, "PWA_HEAD");
+
+  const { build } = await loadBuild();
+  const old = fixture({});
+  try {
+    assert.doesNotMatch(build(Object.assign({}, old.opts, { write: false })).html, /canonical/);
+  } finally {
+    old.cleanup();
+  }
+  const bad = fixture({ "app/index.html": TEMPLATE.replace("<title>T</title>", H) });
+  try {
+    assert.throws(() => build(Object.assign({}, bad.opts, { write: false })), (e) => e.code === "SEO_TEMPLATE");
+  } finally {
+    bad.cleanup();
+  }
+});
+
+test("B-22、DS-55：只放行逐字 canonical；其他 <link href>、大小寫或網址不同的 canonical、第二個 canonical、靜態廣告框一律中止", async () => {
+  const before = (tag) => ({ "app/index.html": PWA_TEMPLATE_HTML.replace("</head>", tag + "\n</head>") });
+  await expectPwaAbort(before('<link rel="stylesheet" href="a.css">'), "EXTERNAL_RESOURCE");
+  await expectPwaAbort(before('<link rel="canonical" href="https://example.com/">'), "EXTERNAL_RESOURCE");
+  await expectPwaAbort(before('<link href="https://jimmyfantasyworld.com/" rel="canonical">'), "EXTERNAL_RESOURCE");
+  await expectPwaAbort(before('<script src="https://pagead2.googlesyndication.com/x.js"></script>'), "EXTERNAL_RESOURCE");
+  // 逐字 canonical 第 2 次（模板或程式）
+  await expectPwaAbort(before(CANONICAL), "SITE_PAGE_CHECK");
+  await expectPwaAbort({ "app/core/z.js": `var s = '${CANONICAL}';\n` }, "PWA_HEAD");
+  // 靜態廣告框（模板、程式）
+  const ins = '<ins class="adsbygoogle"></ins>';
+  await expectPwaAbort({ "app/index.html": PWA_TEMPLATE_HTML.replace("<!-- @@DATA@@ -->", ins + "\n<!-- @@DATA@@ -->") }, "EXTERNAL_RESOURCE");
+  await expectPwaAbort({ "app/core/z.js": `// ${ins}\n` }, "EXTERNAL_RESOURCE");
+  // 其他 og、noscript 連結不在 B-7 樣式內，建置成功已於上一則驗證；head 另有 keywords、noindex → 中止
+  await expectPwaAbort(before('<meta name="keywords" content="x">'), "SITE_PAGE_CHECK");
+  await expectPwaAbort(before('<meta name="robots" content="noindex">'), "SITE_PAGE_CHECK");
+  await expectPwaAbort(before('<script type="application/ld+json">{}</script>'), "SITE_PAGE_CHECK");
+  await expectPwaAbort(before('<meta name="google-adsense-account" content="ca-pub-1">'), "SITE_PAGE_CHECK");
+  await expectPwaAbort(before('<meta name="description" content="x">'), "SITE_PAGE_CHECK");
+});
+
+test("B-23 DP-7、DP-8、V-SEO-07：robots、sitemap 逐字；靜態頁通過結構檢查、無 CR；CSS 違規與缺檔 → SITE_PAGE_CHECK", async () => {
+  const { res, fx } = await pwaBuild({ "app/site/static-page.css": "body {\r\n  color: #000;\r\n}\r\n" });
+  try {
+    assert.equal(fs.readFileSync(path.join(fx.siteDir, "robots.txt"), "utf8"), SITE.ROBOTS_TXT);
+    assert.equal(fs.readFileSync(path.join(fx.siteDir, "sitemap.xml"), "utf8"), SITE.SITEMAP_XML);
+    for (const page of SITE.SITE_PAGES) {
+      const html = fs.readFileSync(path.join(fx.siteDir, page.staticPath), "utf8");
+      assert.ok(html.startsWith('<!doctype html>\n<html lang="zh-Hant-TW">'), page.id);
+      assert.ok(!html.includes("\r"), page.id + " 無 CR");
+      assert.ok(html.includes("body {\n  color: #000;\n}\n</style>"), page.id + " CSS 內嵌");
+      assert.equal((html.match(/<script\b/gi) || []).length, 0);
+      assert.equal((html.match(/<main>/g) || []).length, 1);
+      assert.ok(!html.includes("google-adsense-account"));
+      assert.ok(!html.includes("noindex"));
+    }
+    assert.equal(res.site.files.length, 13);
+  } finally {
+    fx.cleanup();
+  }
+  await expectPwaAbort({ "app/site/static-page.css": null }, "SITE_PAGE_CHECK");
+  await expectPwaAbort({ "app/site/static-page.css": "@import 'a.css';\n" }, "SITE_PAGE_CHECK");
+  await expectPwaAbort({ "app/site/static-page.css": "a { background: url(a.png); }\n" }, "SITE_PAGE_CHECK");
+  await expectPwaAbort({ "app/site/static-page.css": "</style><script></script>\n" }, "SITE_PAGE_CHECK");
+  // 文案指向不存在的頁面、sitemap 與 canonical 不符、robots 有 Disallow → 中止
+  await expectPwaAbort({ "app/core/site-content.js": SITE_SRC.replace('target: "privacy"', 'target: "nope"') }, "SITE_PAGE_CHECK");
+  await expectPwaAbort({ "app/core/site-content.js": SITE_SRC.replace("<loc>https://jimmyfantasyworld.com/about.html</loc>", "<loc>https://example.com/</loc>") }, "SITE_PAGE_CHECK");
+  await expectPwaAbort({ "app/core/site-content.js": SITE_SRC.replace("Allow: /", "Disallow: /") }, "SITE_PAGE_CHECK");
+  // --no-site 不產生靜態頁，也不需要 CSS
+  const noSite = await dryBuild({ "app/site/static-page.css": null }, { site: false });
+  assert.equal(noSite.site, null);
+});
+
+test("B-24 AD-15：ads.txt 數字段不同、格式不同 → AD_PUBLISHER_MISMATCH；publisherId 不合格式 → 中止；--no-site 不比對 ads.txt", async () => {
+  await expectPwaAbort({ "ads.txt": "google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0\n" }, "AD_PUBLISHER_MISMATCH");
+  await expectPwaAbort({ "ads.txt": "google.com, pub-4051803210893105, RESELLER, f08c47fec0942fa0\n" }, "AD_PUBLISHER_MISMATCH");
+  await expectPwaAbort({ "ads.txt": ADS + "extra\n" }, "AD_PUBLISHER_MISMATCH");
+  await expectPwaAbort({ "app/core/ad.js": AD_SRC.replace('publisherId: "ca-pub-4051803210893105"', 'publisherId: "ca-pub-1"') }, "AD_PUBLISHER_MISMATCH");
+  // publisherId 與 ads.txt 不同（ads.txt 維持原值）
+  await expectPwaAbort({ "app/core/ad.js": AD_SRC.replace('publisherId: "ca-pub-4051803210893105"', 'publisherId: "ca-pub-1111111111111111"') }, "AD_PUBLISHER_MISMATCH");
+  const ok = await dryBuild({ "ads.txt": "google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0\n" }, { site: false });
+  assert.equal(ok.site, null);
+});
+
+test("B-25 保護 2：parseArgs 不接受任何單元 ID 參數；原始碼不讀環境變數", async () => {
+  const { parseArgs } = await loadBuild();
+  for (const a of ["--ad-slot", "--ad-slot=123456", "--adSlotIdOverride", "--adSlotIdOverride=123456", "--ad-slot-id=123456", "--slot=123456"]) {
+    assert.throws(() => parseArgs([a, "123456"]), (e) => e.code === "BAD_ARGS", a);
+  }
+  assert.ok(!fs.readFileSync(BUILD, "utf8").includes("process.env"));
+  const r = spawnSync(process.execPath, [BUILD, "--ad-slot", "1234567890", "--out", path.join(os.tmpdir(), "emt-nope.html")], { encoding: "utf8" });
+  assert.equal(r.status, 1);
+  assert.match(r.stderr, /BAD_ARGS/);
+});
+
+test("B-25 保護 3、4：值不符格式、out 或 site 落在專案 dist/ → AD_OVERRIDE，且未寫入；write: false 不受 dist 限制；宣告不是恰 1 次 → 中止", async () => {
+  for (const v of ["", "123", "TODO", "12345a", 1234567890, {}]) {
+    await expectPwaAbort(REAL_CORE, "AD_OVERRIDE", { adSlotIdOverride: v });
+  }
+  const { build } = await loadBuild();
+  const distDir = path.join(ROOT, "dist");
+  const snapshot = () => (fs.existsSync(distDir) ? listFiles(distDir).map((f) => [f, fs.statSync(path.join(distDir, f)).mtimeMs]) : []);
+  const before = snapshot();
+  const fx = pwaFixture(REAL_CORE);
+  try {
+    const tmpOut = path.join(fx.dir, "o", "t.html");
+    const tmpSite = path.join(fx.dir, "o", "s");
+    for (const extra of [
+      { out: path.join(distDir, "english-master-track.html"), site: tmpSite },
+      { out: tmpOut, site: path.join(distDir, "site") },
+      { out: path.join(distDir, "x", "t.html"), site: false },
+      { out: tmpOut, site: distDir },
+    ]) {
+      assert.throws(
+        () => build(Object.assign({}, fx.opts, { adSlotIdOverride: "1234567890" }, extra)),
+        (e) => e.code === "AD_OVERRIDE",
+        JSON.stringify(extra)
+      );
+    }
+    assert.equal(fs.existsSync(tmpOut), false);
+    // 名稱只是開頭相同的同層目錄不算在 dist/ 內（只判定路徑，不寫入）
+    const { applyAdSlotOverride } = await loadBuild();
+    assert.equal(
+      applyAdSlotOverride("var AD_SLOT_ID = null;", "1234567890", AD, [path.join(ROOT, "dist-x", "t.html")]),
+      'var AD_SLOT_ID = "1234567890";'
+    );
+    // write: false 不寫檔，不受 dist/ 限制
+    const r = build(Object.assign({}, fx.opts, { adSlotIdOverride: "1234567890", write: false, out: path.join(distDir, "t.html"), site: false }));
+    assert.ok(r.html.includes('var AD_SLOT_ID = "1234567890";'));
+    // 未注入時行為不變（不寫入，只驗證判定不觸發）
+    build(Object.assign({}, fx.opts, { write: false, out: path.join(distDir, "t.html"), site: false }));
+  } finally {
+    fx.cleanup();
+  }
+  assert.deepEqual(snapshot(), before, "dist/ 未被寫入");
+  // 宣告 0 次（fixture 沒有打包 ad.js）、2 次
+  await expectPwaAbort({}, "AD_OVERRIDE", { adSlotIdOverride: "1234567890" });
+  await expectPwaAbort(Object.assign({ "app/core/z.js": "var AD_SLOT_ID = null;\n" }, REAL_CORE), "AD_OVERRIDE", { adSlotIdOverride: "1234567890" });
+});
+
+test("B-25 保護 1、5、V-AD-03：未設定與已設定兩次建置只有 AD_SLOT_ID 行與由它衍生的 BUILD_ID、sw.js 不同；報告列出值", async () => {
+  const lines = [];
+  const a = await dryBuild(REAL_CORE, { log: (s) => lines.push(s) });
+  assert.match(lines[0], /廣告單元 ID：未設定/);
+  lines.length = 0;
+  const b = await dryBuild(REAL_CORE, { adSlotIdOverride: "1234567890", log: (s) => lines.push(s) });
+  assert.match(lines[0], /廣告單元 ID：1234567890/);
+  assert.ok(a.html.includes("var AD_SLOT_ID = null;"));
+  assert.ok(!a.html.includes("1234567890"));
+  assert.ok(b.html.includes('var AD_SLOT_ID = "1234567890";'));
+  assert.ok(!b.html.includes("var AD_SLOT_ID = null;"));
+  // 兩份 HTML 無靜態廣告腳本
+  for (const h of [a.html, b.html]) assert.doesNotMatch(h, /<script[^>]*\ssrc=/i);
+  assert.notEqual(a.buildId, b.buildId);
+  // 把差異還原後逐字相同
+  const norm = (h, id) => h.split(id).join("<BUILD_ID>").replace('var AD_SLOT_ID = "1234567890";', "var AD_SLOT_ID = null;");
+  assert.equal(norm(b.html, b.buildId), norm(a.html, a.buildId));
+  const ta = siteTexts(a);
+  const tb = siteTexts(b);
+  for (const p of Object.keys(ta)) {
+    if (p === "index.html") continue;
+    if (p === "sw.js") {
+      assert.notEqual(tb[p], ta[p]);
+      assert.equal(tb[p].split(b.buildId).join("<ID>"), ta[p].split(a.buildId).join("<ID>"));
+    } else {
+      assert.equal(tb[p], ta[p], p);
+    }
+  }
+});
+
+test("V-SITE-06、AC-57-06：不改檔連續建置 14 檔相同；改 1 句文案 → HTML、對應靜態頁、BUILD_ID 同時改變；只改靜態頁 CSS → 只有靜態頁改變", async () => {
+  const { build } = await loadBuild();
+  const sha = (dir, out) => {
+    const m = {};
+    for (const f of listFiles(dir)) m[f] = crypto.createHash("sha256").update(fs.readFileSync(path.join(dir, f))).digest("hex");
+    m["(out)"] = crypto.createHash("sha256").update(fs.readFileSync(out)).digest("hex");
+    return m;
+  };
+  const fx = pwaFixture(REAL_CORE);
+  try {
+    build(fx.opts);
+    const first = sha(fx.siteDir, fx.out);
+    build(fx.opts);
+    assert.deepEqual(sha(fx.siteDir, fx.out), first);
+    assert.equal(Object.keys(first).length, 14);
+  } finally {
+    fx.cleanup();
+  }
+
+  const base = await dryBuild(REAL_CORE);
+  const sentence = "學習紀錄只存在你目前使用的瀏覽器。";
+  assert.equal(SITE_SRC.split(sentence).length - 1, 1);
+  const changed = await dryBuild({ "app/core/ad.js": AD_SRC, "app/core/site-content.js": SITE_SRC.replace(sentence, "學習紀錄只存在你的瀏覽器。") });
+  assert.notEqual(changed.html, base.html);
+  assert.notEqual(changed.buildId, base.buildId);
+  const tb = siteTexts(base);
+  const tc = siteTexts(changed);
+  assert.notEqual(tc["privacy.html"], tb["privacy.html"]);
+  assert.ok(Buffer.from(tc["privacy.html"], "latin1").toString("utf8").includes("學習紀錄只存在你的瀏覽器。"));
+  assert.ok(changed.html.includes("學習紀錄只存在你的瀏覽器。"));
+  assert.equal(tc["about.html"], tb["about.html"]);
+  assert.equal(tc["contact.html"], tb["contact.html"]);
+  assert.notEqual(tc["sw.js"], tb["sw.js"]);
+
+  const cssOnly = await dryBuild(Object.assign({ "app/site/static-page.css": STATIC_CSS + "h1 { margin: 0; }\n" }, REAL_CORE));
+  assert.equal(cssOnly.buildId, base.buildId);
+  assert.equal(cssOnly.html, base.html);
+  const ts = siteTexts(cssOnly);
+  assert.equal(ts["sw.js"], tb["sw.js"]);
+  assert.deepEqual(/var PRECACHE_URLS = \[[^\]]*\];/.exec(ts["sw.js"])[0], /var PRECACHE_URLS = \[[^\]]*\];/.exec(tb["sw.js"])[0]);
+  assert.notEqual(ts["about.html"], tb["about.html"]);
+});
+
+test("真實 src/app 暫存建置：13 檔與 static.yml 清單相同、index = 交付 HTML、預先快取 7 項、AD_SLOT_ID 為來源值、無連續信箱地址", async () => {
+  const { build } = await loadBuild();
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "emt-real-"));
+  try {
+    const out = path.join(dir, "english-master-track.html");
+    const res = build({ out, log: () => {}, warn: () => {} });
+    const site = path.join(dir, "site");
+    const files = listFiles(site);
+    assert.deepEqual(files, PWA.PWA_DEPLOY_FILES.map((f) => f.path).sort());
+    assert.equal(files.length, 13);
+    assert.ok(fs.readFileSync(path.join(site, "index.html")).equals(fs.readFileSync(out)));
+    assert.ok(fs.readFileSync(path.join(site, "ads.txt")).equals(fs.readFileSync(path.join(ROOT, "sources", "deploy", "ads.txt"))));
+    // 與 workflow 的逐檔清單相同（AC-36-07）
+    const yml = fs.readFileSync(path.join(ROOT, ".github", "workflows", "static.yml"), "utf8");
+    const list = /for f in ([^;]+); do/.exec(yml)[1].trim().split(/\s+/).sort();
+    assert.deepEqual(list, files);
+    assert.match(yml, /find dist\/site -type f \| wc -l\)" -eq 13/);
+    // 預先快取清單不變
+    assert.equal(PWA.PWA_PRECACHE_URLS.length, 7);
+    const sw = fs.readFileSync(path.join(site, "sw.js"), "utf8");
+    assert.deepEqual(JSON.parse("[" + /var PRECACHE_URLS = \[([^\]]*)\];/.exec(sw)[1] + "]"), [...PWA.PWA_PRECACHE_URLS]);
+    // 單元 ID 只有來源這一處；第一階段不寫死 null（AC-50-05），只比對來源
+    const decl = /var AD_SLOT_ID = [^;\n]*;/.exec(AD_SRC)[0];
+    assert.ok(res.html.includes(decl));
+    assert.doesNotMatch(res.html, /<script[^>]*\ssrc=/i);
+    assert.doesNotMatch(res.html, /<ins\b[^>]*adsbygoogle/i);
+    assert.ok(res.html.includes('<meta name="google-adsense-account" content="ca-pub-4051803210893105">'));
+    // ML-3：以字串拼接組規則，測試原始碼不含完整地址
+    const AT = String.fromCharCode(64);
+    const DOMAIN = "gm" + "ail" + "\\." + "c" + "om";
+    const RE = new RegExp("[A-Za-z0-9._%+-]*" + AT + DOMAIN, "i");
+    for (const f of files.filter((n) => !n.endsWith(".png"))) {
+      assert.doesNotMatch(fs.readFileSync(path.join(site, f), "utf8"), RE, f);
+    }
+    assert.doesNotMatch(fs.readFileSync(path.join(site, "contact.html"), "utf8"), /mailto:/i);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

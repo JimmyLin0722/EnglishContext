@@ -120,7 +120,7 @@ export const GOAL_LINE = { orange: "橘級・每日 10 字｜變更", brown: "�
 export async function injectTpl(p, id) { const r = await p.ev(`EMT.store.actions.injectTemplate(${JSON.stringify(id)})`); await sleep(60); return r; }
 /** 第 5 輪：主控台 3 格數據（AC-39-05）{ streak, mastery, masteredSub, accuracy }，數值為可見文字 */
 export const dashStats = (p) => p.ev(`(() => { const q = (s) => document.querySelector("#view-dashboard " + s); const t = (s) => (q(s) ? q(s).innerText.replace(/\\s+/g, " ").trim() : null);
-  return { streak: t(".db-stat--streak .db-stat__value"), mastery: t(".db-stat--mastery .db-stat__value"), masteredSub: t(".db-stat--mastery .db-stat__sub"), accuracy: t(".db-stat--accuracy .db-stat__value"),
+  return { streak: t(".db-stat--streak .db-stat__value"), mastery: t(".db-stat--mastery .db-stat__value"), masteredSub: t(".db-stat--mastery .db-stat__sub"), accuracy: t(".db-stat--answered .db-stat__value"),
     labels: [...document.querySelectorAll("#view-dashboard .db-stat__label")].map((e) => e.textContent).join("、") }; })()`);
 /** 第 5 輪：展開主控台「資料備份」（AC-39-08；已展開則不動作）。需在主控台頁 */
 export async function expandBackup(p) {

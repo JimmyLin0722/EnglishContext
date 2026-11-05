@@ -8,6 +8,7 @@
  *   - 靜態讀 styles/00-base.css：@media (max-width: 640px) 區塊含 position: fixed、bottom: 0、
  *     .app-nav__btn 的 min-height／min-width ≥ 44px（或 var(--touch)）、is-typing 隱藏規則；≥ 641px 隱藏圖示。
  *   - 以極簡假 DOM ＋ node:vm 載入 ui/bottom-nav.js：focusin 輸入框加 is-typing、focusout 移除、按鈕聚焦不加；重複 init 只綁一次。
+ *   - （v0.19，FE-86）靜態讀頁尾：按鈕文字與順序 = FOOTER_LINKS、#view-about 等 3 個 section（SP-1、SP-2）。
  * 實機尺寸（getBoundingClientRect ≥ 44、文字不裁切、無水平捲軸）屬 headless 瀏覽器實測與 QA E2E。
  */
 "use strict";
@@ -179,6 +180,90 @@ describe("shell.test.js：index.html 導覽", () => {
     const raw = read("index.html");
     assert.match(raw, /^\s*<!DOCTYPE html>\s*<html\b[^>]*>\s*<head>\s*<meta charset="utf-8">\s*<!-- @@LICENSE@@ -->/i);
     assert.ok(raw.indexOf("<!-- @@LICENSE@@ -->") < raw.indexOf('<meta name="viewport"'));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// （v0.19，FE-86）頁尾連結列與應用內三頁的 section（契約 SP-1、SP-2、V-SITE-01；architecture.md §7.25.6）
+// ─────────────────────────────────────────────────────────────
+
+describe("shell.test.js：頁尾連結列（v0.19，FE-86）", () => {
+  const Site = require("../core/site-content.js");
+
+  /** 去除註解後的頁尾內容 */
+  function footerHtml() {
+    const m = indexHtml().match(/<footer id="app-footer"[^>]*>([\s\S]*?)<\/footer>/);
+    assert.ok(m, "找不到 #app-footer");
+    return m[1];
+  }
+
+  /** 頁尾按鈕：[{ id, go, cls, text }] */
+  function footerButtons() {
+    return [...footerHtml().matchAll(/<button\b([^>]*)>([^<]*)<\/button>/g)].map((m) => ({
+      id: (m[1].match(/\bid="([^"]+)"/) || [])[1],
+      go: (m[1].match(/\bdata-go="([^"]+)"/) || [])[1],
+      cls: (m[1].match(/\bclass="([^"]+)"/) || [])[1],
+      type: (m[1].match(/\btype="([^"]+)"/) || [])[1],
+      text: m[2].trim()
+    }));
+  }
+
+  test("4 個按鈕的目標、文字與順序 = FOOTER_LINKS，各恰 1 次；文字 = TAB_LABELS（AC-57-01）", () => {
+    const btns = footerButtons();
+    assert.deepEqual(btns.map((b) => b.go), Site.FOOTER_LINKS.map((x) => x.target));
+    assert.deepEqual(btns.map((b) => b.text), Site.FOOTER_LINKS.map((x) => x.label));
+    assert.deepEqual(btns.map((b) => b.text), btns.map((b) => C.TAB_LABELS[b.go]));
+    assert.deepEqual(btns.map((b) => b.id), ["footer-about", "footer-contact", "footer-privacy", "footer-sources"]);
+    for (const b of btns) {
+      assert.equal(b.cls, "btn btn--link", b.id);
+      assert.equal(b.type, "button", b.id);
+    }
+  });
+
+  test("連結列：div#footer-links.footer-links、role=group、aria-label（不用 nav，導覽仍恰 4 項；AC-20-03）", () => {
+    const m = footerHtml().match(/<div\b([^>]*)>/);
+    assert.ok(m);
+    assert.match(m[1], /\bid="footer-links"/);
+    assert.match(m[1], /\bclass="footer-links"/);
+    assert.match(m[1], /\brole="group"/);
+    assert.match(m[1], /\baria-label="網站資訊"/);
+    assert.equal((indexHtml().match(/<nav\b/g) || []).length, 1, "只有 #app-nav 一個 nav");
+    assert.equal(navButtons().length, 4);
+  });
+
+  test("無 #footer-first-run-back；模板無廣告容器與 ins 標籤（SD-FB-79、AD-7）", () => {
+    const raw = read("index.html");
+    assert.ok(!raw.includes("footer-first-run-back"));
+    assert.doesNotMatch(raw, /<ins\b/i);
+    assert.doesNotMatch(raw, /adsbygoogle/i);
+    assert.doesNotMatch(raw, /\bid="[^"]*\bad\b[^"]*"/i);
+  });
+
+  test("#view-about、#view-contact、#view-privacy：在 #app-main 內、空 section、hidden、aria-label = TAB_LABELS（SP-1）", () => {
+    const html = indexHtml();
+    const main = html.match(/<main id="app-main"[^>]*>([\s\S]*?)<\/main>/)[1];
+    for (const t of ["about", "contact", "privacy"]) {
+      const m = main.match(new RegExp('<section id="view-' + t + '" class="view" aria-label="([^"]+)" hidden></section>'));
+      assert.ok(m, "#view-" + t);
+      assert.equal(m[1], C.TAB_LABELS[t]);
+    }
+  });
+
+  test("版本行建立在 #footer-links 之後（VR-7）：錨點常數與模板 id 一致", () => {
+    assert.match(read("ui/version-line.js"), /var ANCHOR_ID = "footer-links";/);
+    assert.ok(footerHtml().includes('id="footer-links"'));
+  });
+
+  test("00-base.css：.footer-links 可換行且置中；.btn--link 觸控目標 ≥ 44px；無 #footer-first-run-back 規則（SP-2）", () => {
+    const src = css();
+    const rule = rulesOf(src, ".footer-links");
+    assert.equal(prop(rule, "display"), "flex");
+    assert.equal(prop(rule, "flex-wrap"), "wrap");
+    assert.equal(prop(rule, "justify-content"), "center");
+    const link = rulesOf(src, ".btn--link");
+    assert.ok(isTouchSize(prop(link, "min-height")));
+    assert.ok(isTouchSize(prop(link, "min-width")));
+    assert.ok(!src.includes("footer-first-run-back"));
   });
 });
 
@@ -398,9 +483,9 @@ describe("shell.test.js：PWA（v0.7，FE-50）", () => {
     '<link rel="icon" href="data:,">',
   ];
 
-  test("HD-1：8 個靜態元素逐字各 1 次、依序在 <title> 之後、</head> 之前（AC-34-04、AC-34-05、AC-36-02）", () => {
+  test("HD-1：8 個靜態元素逐字各 1 次、依序在 SEO 標記之後、</head> 之前（AC-34-04、AC-34-05、AC-36-02）", () => {
     const headEnd = raw.indexOf("</head>");
-    let prev = raw.indexOf("<title>EnglishContext</title>");
+    let prev = raw.indexOf("<!-- @@SEO_HEAD@@ -->");
     assert.ok(prev > 0);
     for (const e of HD1) {
       assert.equal(raw.split(e).length - 1, 1, e);
@@ -415,9 +500,16 @@ describe("shell.test.js：PWA（v0.7，FE-50）", () => {
     assert.ok(raw.includes(`<meta name="${pwa.PWA_BUILD_ID_META_NAME}" content="@@BUILD_ID@@">`));
   });
 
-  test("<title>EnglishContext</title> 恰 1 次（v0.12，NM-1）；@@BUILD_ID@@ 恰 1 次（HD-5）", () => {
-    assert.equal(raw.split("<title>EnglishContext</title>").length - 1, 1);
+  test("（v0.14，SE-2）模板無 <title>，改為 SEO 標記恰 1 次、在 </head> 之前；@@BUILD_ID@@ 恰 1 次（HD-5）", () => {
+    assert.equal(raw.split("<!-- @@SEO_HEAD@@ -->").length - 1, 1);
+    assert.ok(raw.indexOf("<!-- @@SEO_HEAD@@ -->") < raw.indexOf("</head>"));
+    assert.doesNotMatch(raw, /<title\b/i);
     assert.equal(raw.split("@@BUILD_ID@@").length - 1, 1);
+  });
+
+  test("（v0.14，SE-6）noscript 標記恰 1 次，緊接 <body> 標籤的下一行", () => {
+    assert.equal(raw.split("<!-- @@NOSCRIPT@@ -->").length - 1, 1);
+    assert.match(raw, /<body\b[^>]*>\r?\n<!-- @@NOSCRIPT@@ -->/);
   });
 
   // ── （v0.14，FE-63）網站版本號 meta（VR-2、HD-1、architecture.md §5.4）──
@@ -471,8 +563,8 @@ describe("shell.test.js：名稱 EnglishContext 與標題列圖示（v0.12，FE-
   const raw = read("index.html");
   const html = indexHtml();
 
-  test("NM-1：<title>EnglishContext</title> 恰 1 次；去除註解後不分大小寫無「English Master Track」", () => {
-    assert.equal(raw.split("<title>EnglishContext</title>").length - 1, 1);
+  test("NM-1：<title> 由 SEO 標記產生；去除註解後不分大小寫無「English Master Track」", () => {
+    assert.equal(raw.split("<!-- @@SEO_HEAD@@ -->").length - 1, 1);
     assert.doesNotMatch(html, /english\s*master\s*track/i);
   });
 

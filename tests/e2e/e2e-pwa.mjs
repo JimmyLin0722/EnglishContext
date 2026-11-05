@@ -119,7 +119,7 @@ async function fileCase(tc, ac, url, { offline = false, label }) {
     const blobData = env.log.requests.filter((r) => /^(blob|data):/.test(r.url)).map((r) => r.url.slice(0, 30));
     const bad = consoleBad(env.log);
     const noCache = caches.unavailable || Object.keys(caches).length === 0;
-    const ok = (reg === 0 || reg === "無 API" || String(reg).startsWith("拒絕")) && !links.some((l) => /^(manifest|apple-touch-icon)=/.test(l)) && links.every((l) => l === "icon=data:,")
+    const ok = (reg === 0 || reg === "無 API" || String(reg).startsWith("拒絕")) && !links.some((l) => /^(manifest|apple-touch-icon)=/.test(l)) && links.every((l) => l === "icon=data:," || l === "canonical=https://jimmyfantasyworld.com/") /* 第 9 輪放寬：v0.19 逐字 canonical（SE-2），不產生請求 */
       && net.length === 0 && bad.length === 0 && !prevented && ist.visible === 0 && ist.n === 0 && !ist.update && ist2.visible === 0 && !ist2.update
       && nt.exists && nt.exact && nt.afterExport && noCache && Array.isArray(idb) && idb.length === 0 && backup && backup.schemaVersion !== undefined;
     await env.ctx.close();
@@ -231,7 +231,7 @@ if (!SMOKE) {
       title: [...document.querySelectorAll('meta[name="apple-mobile-web-app-title"]')].map((m) => m.content), docTitle: document.title }));
     const r = a.link[0] ? await env.ctx.request.get(a.link[0].abs) : null; const d = r ? decodePng(await r.body()) : {};
     await env.ctx.close();
-    const ok = a.link.length === 1 && a.link[0].sizes === "180x180" && r && r.status() === 200 && d.w === 180 && d.h === 180 && d.ct === 2 && !d.tRNS && a.title.length === 1 && a.title[0] === "EnglishContext" && a.docTitle === "EnglishContext";
+    const ok = a.link.length === 1 && a.link[0].sizes === "180x180" && r && r.status() === 200 && d.w === 180 && d.h === 180 && d.ct === 2 && !d.tRNS && a.title.length === 1 && a.title[0] === "EnglishContext" && a.docTitle === "EnglishContext｜英文單字卡與模擬測驗";
     return { ok, note: `apple-touch-icon ${JSON.stringify(a.link)} → ${r && r.status()}、${d.w}×${d.h}、色彩類型 ${d.ct}（2=RGB 無 alpha）、tRNS=${d.tRNS}；apple-mobile-web-app-title=${JSON.stringify(a.title)}；<title>「${a.docTitle}」` };
   });
 

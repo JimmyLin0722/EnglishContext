@@ -175,7 +175,7 @@ describe("naming.test.js", () => {
     assert.deepEqual(btns.map(text), ["主控台", "難易度設定", "單字卡", "模擬測驗"]);
   });
 
-  test("7 個 section：id 為 view-<TabId>；可見頁 aria-label = TAB_LABELS，隱藏頁保留 hidden、無 aria-label（HT-5）", () => {
+  test("10 個 section：id 為 view-<TabId>；可見頁 aria-label = TAB_LABELS，隱藏頁保留 hidden、無 aria-label（HT-5）", () => {
     const secs = [...indexHtml().matchAll(/<section\b([^>]*)>/g)]
       .map((m) => m[1])
       .filter((a) => /\bid="view-/.test(a))
@@ -185,7 +185,7 @@ describe("naming.test.js", () => {
         hidden: /\shidden(?:\s|=|$)/.test(a)
       }));
     assert.deepEqual(secs.map((x) => x.id),
-      ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources"]);
+      ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources", "about", "contact", "privacy"]);
     for (const x of secs) {
       assert.equal(x.hidden, true, "section #view-" + x.id + " 起始應 hidden");
       if (C.HIDDEN_TAB_IDS.includes(x.id)) {
@@ -243,13 +243,19 @@ describe("naming.test.js", () => {
     assert.deepEqual(hits, []);
   });
 
-  test("主控台統計標籤為「模擬測驗正確率」（TEXT 與 LAYOUT_TEXTS 一致）；無「單字掌握數」", () => {
+  test("主控台第 3 格標籤為「模擬測驗」（v0.19，AS-4）；無「模擬測驗正確率」、statAccuracyLabel、「單字掌握數」", () => {
     const D = require("../views/dashboard.js");
     const L = require("../core/layout.js");
-    assert.equal(D.TEXT.accuracy, "模擬測驗正確率");
-    assert.equal(L.LAYOUT_TEXTS.statAccuracyLabel, D.TEXT.accuracy);
-    const lits = stringLiterals(read(path.join(VIEWS_DIR, "dashboard.js")));
-    assert.ok(!lits.some((s) => s.includes("單字掌握數")));
+    assert.equal(L.LAYOUT_TEXTS.statPart5Label, "模擬測驗");
+    assert.equal(Object.prototype.hasOwnProperty.call(D.TEXT, "accuracy"), false);
+    assert.equal(Object.prototype.hasOwnProperty.call(L.LAYOUT_TEXTS, "statAccuracyLabel"), false);
+    const src = read(path.join(VIEWS_DIR, "dashboard.js"));
+    assert.ok(src.includes("LT.statPart5Label"));
+    assert.ok(!src.includes("statAccuracyLabel"));
+    const lits = stringLiterals(src);
+    for (const bad of ["單字掌握數", "正確率", "累計答對"]) {
+      assert.ok(!lits.some((s) => s.includes(bad)), bad);
+    }
   });
 
   test("各頁標題與說明（§7.13）", () => {

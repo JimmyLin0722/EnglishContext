@@ -94,7 +94,7 @@ async function screensCheck(base, width, height, { offline = false } = {}) {
       return { bar: bar ? (bar.id || bar.className) : "無固定列", vBottom: Math.round(r.bottom * 10) / 10, barTop: Math.round(top * 10) / 10, inView: r.top >= 0 && r.bottom <= innerHeight, ok: r.bottom <= top + 0.5 && r.top >= 0 }; });
     const body = await page.evaluate(() => document.body.innerText);
     const bad = ["@@", "undefined", "（建置 ）", "（建置）"].filter((k) => body.includes(k)).concat(/\bnull\b/.test(body) ? ["null"] : []);
-    const good = l.count === 1 && l.text === EXPECT_LINE && LINE_RE.test(l.text) && l.prevId === "footer-sources" && l.parentId === "app-footer" && l.tag === "P" && l.tabindex === null && l.role === null && !l.inLink
+    const good = l.count === 1 && l.text === EXPECT_LINE && LINE_RE.test(l.text) && l.prevId === "footer-links" && l.parentId === "app-footer" && l.tag === "P" && l.tabindex === null && l.role === null && !l.inLink
       && l.lines === 1 && l.scrollW <= l.clientW && l.contrast >= 4.5 && l.color !== ORANGE && l.shown && occl && occl.ok && bad.length === 0 && l.cursor !== "pointer";
     ok = ok && good; texts.add(l.text);
     out.push(`${s}：${l.count} 行「${l.text}」<${l.tag}> 前一兄弟 #${l.prevId}、行數 ${l.lines}、對比 ${l.contrast}、色 ${l.color}、捲到底下緣 ${occl && occl.vBottom} ≤ ${occl && occl.bar} 上緣 ${occl && occl.barTop}=${occl && occl.ok}${bad.length ? "、畫面含 " + bad.join("/") : ""}${good ? "" : "（不符）"}`);
@@ -183,7 +183,7 @@ await R.check("TC-42-02", "AC-42-02、AC-36-02、AC-36-07、E-96", async () => {
   const swLeft = sw.match(/@@[A-Za-z0-9_]+@@/g) || [];
   const pkgInSite = fs.readdirSync(SITE).filter((f) => /package/.test(f));
   const fileText = (globalThis.__fileText || [])[0];
-  const ok = PKG.version === "1.2.0" && APP_VER === PKG.version && metaCount === 1 && /^[0-9a-f]{16}$/.test(BUILD_ID) && swId === BUILD_ID && swId.slice(0, 7) === BUILD_ID.slice(0, 7)
+  const ok = PKG.version === "1.3.0" && APP_VER === PKG.version && metaCount === 1 && /^[0-9a-f]{16}$/.test(BUILD_ID) && swId === BUILD_ID && swId.slice(0, 7) === BUILD_ID.slice(0, 7)
     && same && leftovers.length === 0 && swLeft.length === 0 && pkgInSite.length === 0 && fileText === `版本 ${PKG.version}（建置 ${BUILD_ID.slice(0, 7)}）`;
   return { ok, note: `package.json version ${PKG.version}；emt-app-version ${APP_VER}（${metaCount} 個）；emt-build-id ${BUILD_ID}；sw.js BUILD_ID ${swId}、CACHE_NAME ${cacheName && cacheName.trim()}；畫面「${fileText}」；dist 與 site/index.html 逐位元組相同=${same}；@@ 殘留 HTML ${leftovers.length}／sw ${swLeft.length}；site 內 package 檔 ${pkgInSite.length}（共 ${fs.readdirSync(SITE, { recursive: true }).filter((f) => fs.statSync(path.join(SITE, f)).isFile()).length} 檔）` };
 });

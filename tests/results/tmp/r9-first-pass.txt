@@ -1,0 +1,23 @@
+data：結束碼 0、0 秒、FAIL 0；03:55:15；可用記憶體 9912 MB
+records：結束碼 0、0 秒、FAIL 0；03:55:15；可用記憶體 9957 MB
+static：結束碼 0、0 秒、FAIL 0；03:55:16；可用記憶體 9947 MB
+legal：結束碼 0、0 秒、FAIL 0；03:55:16；可用記憶體 9937 MB
+boundary：結束碼 0、0 秒、FAIL 0；03:55:16；可用記憶體 9936 MB
+boundary-r9：結束碼 0、0 秒、FAIL 0；03:55:17；可用記憶體 9934 MB
+pwa-static：結束碼 0、22 秒、FAIL 1：FAIL TC-PS-06 AC-19-01（附屬檔參照） HTML 中類檔名字；03:55:38；可用記憶體 9912 MB
+e2e-content：結束碼 0、15 秒、FAIL 0；03:55:53；可用記憶體 9885 MB
+e2e-progress：結束碼 0、64 秒、FAIL 1：FAIL TC-30-10b AC-30-10、E-48 單字集 0、答題 0：；03:56:57；可用記憶體 9621 MB
+e2e-goal：結束碼 0、45 秒、FAIL 0；03:57:42；可用記憶體 9414 MB
+e2e-firstrun：結束碼 0、109 秒、FAIL 0；03:59:30；可用記憶體 9250 MB
+e2e-hidden：結束碼 0、24 秒、FAIL 0；03:59:54；可用記憶體 9286 MB
+e2e-reinit：結束碼 0、43 秒、FAIL 0；04:00:37；可用記憶體 9439 MB
+e2e-track：結束碼 0、105 秒、FAIL 0；04:02:22；可用記憶體 9607 MB
+e2e-track-p5：結束碼 0、72 秒、FAIL 5：FAIL TC-45-06 AC-45-06、CR-5、CR-7、AC-17-0｜FAIL TC-45-05-375 AC-45-05、AC-40-01、AC-3｜FAIL TC-45-05-1366 AC-45-05、AC-40-01、AC-｜FAIL TC-46-04 AC-46-04、UO-4、E-110、AC-48-｜FAIL TC-46-08 AC-46-08、CR-6、UO-7 (b)、AC-；04:03:35；可用記憶體 9886 MB
+e2e-lock：結束碼 0、166 秒、FAIL 6：FAIL TC-48-06-1366 AC-48-06、AC-11-04、SM-｜FAIL TC-48-07 AC-48-07、E-126、UO-8、UO-10 ｜FAIL TC-48-07b AC-48-07（i = 1 走完整輪）、AC-4｜FAIL TC-48-06-375 AC-48-06、AC-40-02、E-12｜FAIL TC-48-11c-375 AC-48-11（取消、Esc、遮罩、確定｜FAIL TC-48-11c-1366 AC-48-11（取消、Esc、遮罩、確；04:06:20；可用記憶體 8406 MB
+e2e-legal：結束碼 0、41 秒、FAIL 0；04:07:02；可用記憶體 8190 MB
+e2e-layout：結束碼 0、144 秒、FAIL 4：FAIL TC-38-07 AC-38-07 區塊標題 375px 首次畫面 ；｜FAIL TC-38-10 AC-38-10、AC-24-03 (1) <tit｜FAIL TC-39-05 AC-39-05、AC-17-01、AC-30-10｜FAIL TC-41-04 AC-41-04、AC-25-07、AC-25-11；04:09:25；可用記憶體 8199 MB
+e2e-motion：結束碼 0、61 秒、FAIL 0；04:10:26；可用記憶體 7936 MB
+e2e-persist：結束碼 0、6 秒、FAIL 0；04:10:32；可用記憶體 7936 MB
+e2e-mic：結束碼 0、50 秒、FAIL 0；04:11:22；可用記憶體 7871 MB
+e2e-speech：結束碼 0、28 秒、FAIL 0；04:11:50；可用記憶體 6664 MB
+e2e-cards：結束碼 0、71 秒、FAIL 0；04:13:01；可用記憶體 7693 MB

@@ -20,10 +20,10 @@ const p5 = () => p.ev(`(() => { const q = document.querySelector(".p5-question")
     next: !!document.querySelector("[data-p5=next]") }; })()`);
 const totals = () => p.ev(`EMT.store.getState().data.part5`);
 const correctIdx = (i) => p.ev(`PART5_QUESTION_BANK[${i}].correctIndex`);
-const accText = async () => { await p.go("dashboard"); return p.ev(`document.querySelector("#view-dashboard .db-stat--accuracy .db-stat__value").textContent`); };
+const accText = async () => { await p.go("dashboard"); return p.ev(`document.querySelector("#view-dashboard .db-stat--answered .db-stat__value").textContent`); };
 
 // ═════════ Part 5 ═════════
-await R.check("TC-17-04a", "AC-17-04", async () => { const t = await accText(); return { ok: t === "—", note: `答題數 0 時顯示「${t}」` }; });
+await R.check("TC-17-04a", "AC-17-04", async () => { const t = await accText(); return { ok: t === "已答對 0 / 200 題（0%）", note: `K = 0、答題數 0 時顯示「${t}」（v0.19：K = 0 不顯示「—」，AC-49-02）` }; });
 await p.go("part5");
 await R.check("TC-10-02", "AC-10-02", async () => {
   const out = []; let ok = true;
@@ -87,15 +87,15 @@ await R.check("TC-17-04b", "AC-17-04", async () => {
   await p.ev(`localStorage.clear()`); await p.reload(); await p.go("part5");
   for (let i = 0; i < 10; i++) { const ci = await correctIdx(i); await p.click("[data-p5=option]", i < 7 ? ci : (ci + 1) % 4); await p.click("[data-p5=next]"); }
   const t = await totals(); const a = await accText();
-  return { ok: t.totalAnswered === 10 && t.totalCorrect === 7 && a === "70%", note: `答題 ${t.totalAnswered}、答對 ${t.totalCorrect} → 正確率「${a}」` };
+  return { ok: t.totalAnswered === 10 && t.totalCorrect === 7 && a === "已答對 7 / 200 題（4%）", note: `答題 ${t.totalAnswered}、答對 ${t.totalCorrect} → 第 3 格「${a}」（AC-17-04 v0.19）` };
 });
 await R.check("TC-17-01", "AC-17-01", async () => {
   await p.go("dashboard");
-  // v0.12：3 格依序為連續打卡天數、單字掌握率（大字）＋小字「已掌握 N 字」（= 單字掌握數）、模擬測驗正確率；各只出現 1 次
+  // v0.12：3 格依序為連續打卡天數、單字掌握率（大字）＋小字「已掌握 N 字」（= 單字掌握數）、模擬測驗（v0.19 已答對行）；各只出現 1 次
   const s = await p.ev(`[...document.querySelectorAll("#view-dashboard .db-stat")].map((d) => d.innerText.replace(/\\s*\\n\\s*/g, "="))`);
   const body = await p.ev(`document.querySelector("#view-dashboard .dashboard").innerText`);
-  const once = ["連續打卡天數", "單字掌握率", "模擬測驗正確率", "已掌握"].every((w) => body.split(w).length === 2);
-  return { ok: s.length === 3 && s[0].startsWith("連續打卡天數") && s[1].startsWith("單字掌握率") && /=已掌握 \d[\d,]* 字$/.test(s[1]) && s[2].startsWith("模擬測驗正確率") && once && !/單字掌握數/.test(body) && !/NaN|Infinity|undefined/.test(s.join()), note: s.join("；") + `；各只出現 1 次=${once}` };
+  const once = ["連續打卡天數", "單字掌握率", "模擬測驗", "已掌握", "已答對"].every((w) => body.split(w).length === 2);
+  return { ok: s.length === 3 && s[0].startsWith("連續打卡天數") && s[1].startsWith("單字掌握率") && /=已掌握 \d[\d,]* 字$/.test(s[1]) && s[2].startsWith("模擬測驗=已答對 ") && once && !/單字掌握數/.test(body) && !/NaN|Infinity|undefined/.test(s.join()), note: s.join("；") + `；各只出現 1 次=${once}` };
 });
 
 // ═════════ 解碼器、句型庫（PRD v0.9 R-18 三：暫停（隱藏），本版不驗收）═════════

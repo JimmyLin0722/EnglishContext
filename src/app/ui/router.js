@@ -17,16 +17,24 @@
  * 並呼叫 performance.mark("emt-page-shown")（QA 量 AC-22-01 的輔助點）。同頁重複 go 不重播。
  * 起始頁（尚無目前頁面）不播放動畫，只做 mark。
  * （v0.4，FE-32）首次進入模式（§4.2 v0.4 router 新行為、§7.9；契約 §5.5 FS-2、FS-3）：
- * - go(tabId) 成功時設 document.body.dataset.tab = tabId（CSS 依此顯示頁尾「返回難易度設定」，AC-25-07）。
- * - body[data-entry="firstRun"] 時只接受 customizer、sources，其他回 false（AC-25-01、AC-20-03）。
+ * - go(tabId) 成功時設 document.body.dataset.tab = tabId（供 CSS 依目前頁面調整版面）。
+ * - body[data-entry="firstRun"] 時只接受 FIRST_RUN_TABS，其他回 false（AC-25-01、AC-20-03、SP-4）。
  * - start() 訂閱 store：收到 "entry" tag 且 runtime.entryMode === "main" → body.dataset.entry = "main"、
  *   go("dashboard")（「開始學習」與首次還原成功共用此路徑，view 不直接切頁；換頁動畫照常）。
  * （v0.5，FE-38）隱藏頁守門（§4.2 v0.5 router 新行為、§7.16；契約 §5.8 HT-3、HT-5、DS-05；AC-20-04、E-68）：
  * - go(tabId) 遇 HIDDEN_TAB_IDS（呼叫時取 EMT.core.constants）→ 首次模式回 false、不切頁；
  *   一般模式改 go("dashboard") 並回 false。不顯示錯誤、不 console.error。[data-go]、程式內部呼叫皆經此守門，
- *   因此隱藏頁的 view 照常登錄（TAB_IDS、register 仍接受 7 個 TabId），但永遠不會 mount。
+ *   因此隱藏頁的 view 照常登錄（TAB_IDS、register 接受全部 TabId），但永遠不會 mount。
  * - start() 綁定 window 的 hashchange，並在啟動時檢查一次 location.hash：片段正規化（normalizeHash）後
  *   屬隱藏頁 → 一般模式 go("dashboard")、首次模式不動作；其他片段一律忽略（本系統不使用 hash 路由，不改網址）。
+ * （v0.19，FE-86）對外頁面與返回（§4.12、§7.25.5；契約 SP-1～SP-6、DS-50；AC-57-01、AC-57-04、AC-20-04）：
+ * - TAB_IDS 10 個、FIRST_RUN_TABS 5 個（與 store.js 同步）。
+ * - go(tabId, opts)：opts.resetReturn 交給 store.setTab。切到不同頁時先同步外殼與 store，再呼叫新頁 show：
+ *   show 內的 returnTarget()（返回按鈕文字）才讀得到本次的 sitePageReturnTab。
+ * - back() → go(returnTarget())；returnTarget() 讀 runtime.sitePageReturnTab，null 時首次模式 customizer、一般模式 dashboard。
+ *   返回目標只在記憶體，本檔不碰任何瀏覽器儲存（SP-4）。
+ * - checkHash：片段正規化後恰為 sources → go("sources", { resetReturn: true })，再以 history.replaceState 移除片段
+ *   （失敗靜默，SP-6）；隱藏頁片段與其他片段行為不變，不新增其他 hash 路由。
  * 載入時只做登錄，不操作 DOM、不讀其他模組成員（LD-2）。
  */
 (function (root) {
@@ -35,10 +43,16 @@
   var EMT = (root.EMT = root.EMT || {});
 
   // 契約 TabId 的全部值（data-schema.ts §10）
-  var TAB_IDS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources"];
+  var TAB_IDS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources", "about", "contact", "privacy"];
   var DEFAULT_TAB = "dashboard";
-  // （v0.4，FE-32）首次模式可到達的頁面（契約 FS-2、FS-3；與 store.setTab 的限制一致）
-  var FIRST_RUN_TABS = ["customizer", "sources"];
+  // 首次模式的預設返回目標（SP-3）
+  var FIRST_RUN_HOME_TAB = "customizer";
+  // （v0.4，FE-32）首次模式可到達的頁面（契約 FS-2、FS-3、SP-4；與 store.setTab 的限制一致）
+  var FIRST_RUN_TABS = ["customizer", "sources", "about", "contact", "privacy"];
+  // （v0.19）有返回目標的 4 個頁面（SP-3）；不得作為返回目標（契約 RuntimeState.sitePageReturnTab）
+  var SITE_RETURN_TABS = ["sources", "about", "contact", "privacy"];
+  // （v0.19）唯一有導向行為的頁面片段（SP-6）
+  var SOURCES_HASH = "sources";
   // （v0.5，FE-38）constants 模組不存在時的退路（值同契約 HIDDEN_TAB_IDS）
   var FALLBACK_HIDDEN_TAB_IDS = ["decoder", "phrasebank"];
   // 換頁進場動畫 class（05-motion.css）
@@ -182,18 +196,40 @@
   }
 
   /**
+   * 同步外殼（導覽、body[data-tab]、選單）與 store.currentTab。
+   * @param {string} tabId
+   * @param {{resetReturn?: boolean}} [opts]
+   */
+  function syncShell(tabId, opts) {
+    markNav(tabId);
+    markBodyTab(tabId);
+    setMenuOpen(false);
+
+    // 同步執行期狀態（store 存在才呼叫）
+    var store = EMT.store;
+    if (store && store.actions && typeof store.actions.setTab === "function") {
+      try {
+        store.actions.setTab(tabId, opts);
+      } catch (e2) {
+        if (typeof console !== "undefined") console.error("[EMT.router] setTab 失敗", e2);
+      }
+    }
+  }
+
+  /**
    * 切換頁籤。
    * @param {string} tabId 契約 TabId；不合法時忽略
+   * @param {{resetReturn?: boolean}} [opts] resetReturn：不記錄返回目標（SP-6 的 #sources 入口）
    * @returns {boolean} 是否切換成功
    */
-  function go(tabId) {
+  function go(tabId, opts) {
     if (!isTabId(tabId)) return false;
     // （v0.5）隱藏頁：首次模式維持原頁；一般模式改顯示主控台（HT-3、E-68，不顯示錯誤）
     if (isHiddenTab(tabId)) {
       if (!isFirstRun()) go(DEFAULT_TAB);
       return false;
     }
-    // 首次模式只能在難易度設定與資料來源頁之間往返（AC-25-01、AC-25-07）
+    // 首次模式只能在難易度設定與 4 個對外頁面之間往返（AC-25-01、AC-25-07、SP-4）
     if (isFirstRun() && FIRST_RUN_TABS.indexOf(tabId) < 0) return false;
     var next = sectionOf(tabId);
     if (!next) return false;
@@ -223,26 +259,49 @@
       if (mo && hadPrev) mo.enter(next, ENTER_CLASS, pageAnimMs());
       markShown();
       currentTab = tabId;
+      // （v0.19）先同步再 show：show 內的 returnTarget() 須讀到本次切頁後的返回目標（§7.25.6）
+      syncShell(tabId, opts);
       for (var s = 0; s < mods.length; s++) callSafe(mods[s], "show");
       if (typeof root.scrollTo === "function") {
         try { root.scrollTo(0, 0); } catch (e) { /* 部分環境不支援，忽略 */ }
       }
+      return true;
     }
 
-    markNav(tabId);
-    markBodyTab(tabId);
-    setMenuOpen(false);
-
-    // 同步執行期狀態（store 存在才呼叫）
-    var store = EMT.store;
-    if (store && store.actions && typeof store.actions.setTab === "function") {
-      try {
-        store.actions.setTab(tabId);
-      } catch (e2) {
-        if (typeof console !== "undefined") console.error("[EMT.router] setTab 失敗", e2);
-      }
+    syncShell(tabId, opts);
+    // （v0.19）已在同一頁又經 #sources 進入：返回目標被清除，重呼 show 讓返回按鈕文字同步（SP-6）
+    if (opts && opts.resetReturn === true) {
+      for (var r = 0; r < mods.length; r++) callSafe(mods[r], "show");
     }
     return true;
+  }
+
+  /**
+   * （v0.19）返回目標（SP-3）：runtime.sitePageReturnTab；為 null 或不是可返回的頁面時，
+   * 首次模式回 customizer、一般模式回 dashboard。
+   * @returns {string} TabId
+   */
+  function returnTarget() {
+    var saved = null;
+    var store = EMT.store;
+    if (store && typeof store.getState === "function") {
+      try {
+        var st = store.getState();
+        saved = st && st.runtime ? st.runtime.sitePageReturnTab : null;
+      } catch (e) {
+        saved = null;
+      }
+    }
+    if (isTabId(saved) && !isHiddenTab(saved) && SITE_RETURN_TABS.indexOf(saved) < 0) return saved;
+    return isFirstRun() ? FIRST_RUN_HOME_TAB : DEFAULT_TAB;
+  }
+
+  /**
+   * （v0.19）返回進入對外頁面之前的畫面（SP-3、SP-4）；只切頁，不寫入任何儲存。
+   * @returns {boolean} 是否切換成功
+   */
+  function back() {
+    return go(returnTarget());
   }
 
   /** 往上找具有指定屬性的元素（不超過 boundary） */
@@ -292,12 +351,34 @@
   }
 
   /**
-   * （v0.5）檢查目前網址片段：屬隱藏頁 → 一般模式顯示主控台；首次模式與其他片段不動作、不改網址。
-   * @returns {boolean} 是否因隱藏頁片段導向主控台
+   * （v0.19）移除網址片段，重新載入時回到一般起始畫面（SP-6）；replaceState 不會再觸發 hashchange。
+   * 環境不支援或拋例外（部分 file:// 環境）→ 靜默略過。
+   */
+  function removeHash() {
+    var loc = root.location;
+    var hist = root.history;
+    if (!loc || !hist || typeof hist.replaceState !== "function") return;
+    try {
+      hist.replaceState(null, "", String(loc.pathname || "") + String(loc.search || ""));
+    } catch (e) {
+      /* 失敗靜默（SP-6） */
+    }
+  }
+
+  /**
+   * 檢查目前網址片段（只由 start 與 hashchange 呼叫）：
+   * （v0.19）恰為 sources → 開啟資料來源頁並移除片段，首次模式也可（SP-6）；
+   * （v0.5）屬隱藏頁 → 一般模式顯示主控台，首次模式不動作；其他片段不動作。後兩者不改網址。
+   * @returns {boolean} 是否因片段而切頁
    */
   function checkHash() {
     var loc = root.location;
     var tab = normalizeHash(loc && typeof loc.hash === "string" ? loc.hash : "");
+    if (tab === SOURCES_HASH) {
+      if (!go(SOURCES_HASH, { resetReturn: true })) return false;
+      removeHash();
+      return true;
+    }
     if (!tab || !isHiddenTab(tab) || isFirstRun()) return false;
     go(DEFAULT_TAB);
     return true;
@@ -360,6 +441,8 @@
     TAB_IDS: TAB_IDS.slice(),
     start: start,
     go: go,
+    back: back,
+    returnTarget: returnTarget,
     current: function () {
       return currentTab;
     },

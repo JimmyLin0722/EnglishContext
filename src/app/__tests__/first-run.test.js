@@ -458,10 +458,27 @@ describe("first-run.test.js：應用殼與樣式", () => {
     assert.ok(!/<html[^>]*data-entry/.test(html));
   });
 
-  test("index.html：頁尾有 #footer-first-run-back（data-go=customizer、文字「返回難易度設定」），與「資料來源與授權」並存", () => {
+  test("（v0.19，FE-86）index.html：頁尾無 #footer-first-run-back，「資料來源與授權」保留既有 id（SD-FB-79、AC-25-07 改由內容區返回按鈕滿足）", () => {
     const footer = html.match(/<footer[^>]*>([\s\S]*?)<\/footer>/)[1];
-    assert.match(footer, /<button type="button" id="footer-first-run-back" class="btn btn--link" data-go="customizer">返回難易度設定<\/button>/);
+    assert.ok(!html.includes("footer-first-run-back"));
+    assert.ok(!footer.includes("返回難易度設定"));
     assert.match(footer, /id="footer-sources"[^>]*data-go="sources">資料來源與授權</);
+  });
+
+  test("（v0.19，FE-86）首次模式可到 5 個頁面，其他頁忽略；開啟與返回都不寫入、仍為首次模式（SP-4、AC-25-07）", () => {
+    const m = F.makeStore({ firstRun: true });
+    const before = m.storage.setCalls.length;
+    for (const t of ["sources", "about", "contact", "privacy", "customizer"]) {
+      m.a.setTab(t);
+      assert.equal(m.store.getState().runtime.currentTab, t, t);
+    }
+    for (const t of ["dashboard", "flashcards", "part5", "decoder", "phrasebank"]) {
+      m.a.setTab(t);
+      assert.equal(m.store.getState().runtime.currentTab, "customizer", t);
+    }
+    assert.equal(m.store.getState().runtime.entryMode, "firstRun");
+    assert.equal(m.storage.setCalls.length, before, "setItem 0 次");
+    assert.equal(m.storage.getItem(MAIN_KEY), null, "無狀態鍵");
   });
 
   test("00-base.css：boot 隱藏 #app-nav、#nav-toggle、#app-main", () => {
@@ -478,9 +495,8 @@ describe("first-run.test.js：應用殼與樣式", () => {
     assert.ok(!has(topLevelDecls('body[data-entry="firstRun"] #app-main'), "display", "none"), "首次模式不隱藏主要內容");
   });
 
-  test("00-base.css：#footer-first-run-back 預設隱藏，只在 firstRun 且 data-tab=sources 顯示（AC-25-07）", () => {
-    assert.ok(has(topLevelDecls("#footer-first-run-back"), "display", "none"));
-    assert.ok(has(topLevelDecls('body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back'), "display", "inline-flex"));
+  test("（v0.19，FE-86）00-base.css：#footer-first-run-back 規則已移除（SD-FB-79）", () => {
+    assert.ok(!source("styles/00-base.css").includes("footer-first-run-back"));
   });
 
   test("main.js：store.init 後設 body.dataset.entry，再 router.start(firstRun ? customizer : dashboard)；bottomNav、emt-ready 順序保留", () => {

@@ -7,6 +7,7 @@
  *       AC-47-01、AC-47-02、AC-47-04、AC-47-07、AC-18-01、AC-32-02、AC-03-05、AC-04-08、AC-30-14
  * （v0.18，FE-80；architecture.md v0.13 §7.24.1、§10.10）LV-1～LV-7、UO-8、UO-10、CR-6、CR-10；
  *       AC-48-02、AC-48-05、AC-48-08、AC-48-09、AC-48-10、AC-48-11；V-ST-23、V-ST-24、V-ST-26
+ * （v0.19，FE-84；architecture.md v0.14 §7.25.1、§10.11）V-ANS-02、V-ANS-03；AC-49-04～AC-49-06
  *
  * 做法：
  * - 以注入的假 storage（計數 setItem、可設定 quota／一般例外／停用）與假 content（21 個內建字、6 題模擬測驗）測試 createStore。
@@ -25,6 +26,8 @@ const P = require("../core/persist.js");
 const C = require("../core/constants.js");
 const POS = require("../core/position.js");
 const PF = require("../core/part5flow.js");
+const DASH = require("../views/dashboard.js");
+const P5V = require("../views/part5.js");
 
 const KEY = C.STORAGE_KEYS.state;
 const UNREADABLE = C.STORAGE_KEYS.unreadable;
@@ -686,7 +689,7 @@ function v014Model(bank) {
   return m;
 }
 
-test("AC-45-06、CR-5、UO-2、LV-3、UO-10：開關關閉時計數、結算、主控台正確率與參考模型同一操作序列完全相同", () => {
+test("AC-45-06、CR-5、UO-2、LV-3、UO-10：開關關閉時計數、結算、累計比例與參考模型同一操作序列完全相同", () => {
   const { store, storage, a } = makeStore();
   const m = v014Model(part5Bank());
   const ops = [
@@ -707,6 +710,117 @@ test("AC-45-06、CR-5、UO-2、LV-3、UO-10：開關關閉時計數、結算、�
   });
   assert.deepEqual(store.getState().data.streak, { days: 1, lastActiveDate: TODAY });
   assert.deepEqual(store.getState().data.todayLearned, { date: null, wordKeys: [] }, "模擬測驗不計入今日已學");
+});
+
+// ── V-ANS-02、V-ANS-03（v0.19，FE-84；AS-1、AS-6、AS-7） ──
+
+/**
+ * 斷言主控台、結算區、模擬測驗頁計數行的 K、Q、P 相同，並回傳已答對行。
+ * 結算區以「同一份資料切到 summary 畫面」組出（只讀不寫），開關固定以關閉計算，避免 K = Q 時進入不顯示已答對行的 allCorrect 畫面。
+ */
+function assertAnsweredConsistent(store, bank, expectK) {
+  const st = store.getState();
+  const d = st.data;
+  const dash = DASH.dashboardModel(st, TODAY, bank);
+  const record = { ids: d.part5CorrectIds, only: false };
+  const summary = P5V.buildViewModel(Object.assign({}, d.part5, { phase: "summary", lockedSelection: null }), bank, null, record);
+  const question = P5V.buildViewModel(Object.assign({}, d.part5, { phase: "question", lockedSelection: null, currentIndex: 0 }), bank, null, record);
+  const q = bank.length;
+  const p = Math.floor((200 * expectK + q) / (2 * q));
+  const text = "已答對 " + expectK + " / " + q + " 題（" + (expectK < q ? Math.min(p, 99) : p) + "%）";
+  assert.equal(dash.stats.answeredText, text, "主控台");
+  assert.equal(summary.kind, "summary");
+  assert.equal(summary.answeredText, text, "結算區");
+  assert.equal(P5V.fillText(C.PART5_RECORD_TEXTS.correctCount, { k: summary.k, q: summary.q }), "已答對 " + expectK + " / " + q + " 題", "結算畫面計數行");
+  assert.deepEqual([question.k, question.q], [expectK, q], "題目畫面計數行");
+  assert.ok(expectK <= q);
+  return text;
+}
+
+test("V-ANS-02：答對 +1；答錯、經過鎖定檢視、重新開始不變；清除歸 0；三處 K、Q、P 相同，累計照常更新（AC-49-04、AC-49-05、AC-49-06）", () => {
+  const { store, storage, a } = makeStore();
+  const bank = part5Bank();
+  const totals = () => [store.getState().data.part5.totalAnswered, store.getState().data.part5.totalCorrect];
+  assertAnsweredConsistent(store, bank, 0);
+  a.answerPart5(0);
+  assertAnsweredConsistent(store, bank, 1);
+  assert.deepEqual(totals(), [1, 1]);
+  a.nextPart5();
+  a.answerPart5(1);
+  assertAnsweredConsistent(store, bank, 1);
+  assert.deepEqual(totals(), [2, 1], "答錯仍計入累計");
+  a.restartPart5();
+  assertAnsweredConsistent(store, bank, 1);
+  assert.equal(writesDuring(storage, () => a.nextPart5()), 1, "經過鎖定檢視只前進");
+  assertAnsweredConsistent(store, bank, 1);
+  assert.deepEqual(totals(), [2, 1], "經過鎖定檢視不計入");
+  assert.deepEqual(a.clearPart5CorrectIds(), { ok: true });
+  assertAnsweredConsistent(store, bank, 0);
+  assert.deepEqual(totals(), [2, 1], "清除不動累計（AC-49-05 (b)）");
+  const rec = JSON.parse(storage.map.get(KEY));
+  assert.equal(rec.schemaVersion, 3);
+  assert.deepEqual(rec.data.part5.totalAnswered, 2);
+});
+
+test("V-ANS-02：part5CorrectIds 含不存在與重複 id 時只計有效且不重複者，K ≤ Q；資料保留不改寫（AC-49-04 (d)、AC-45-07）", () => {
+  const { store } = storeWithData((d) => { d.part5CorrectIds = ["p5-001", "p5-999", "p5-002"]; });
+  const bank = part5Bank();
+  assertAnsweredConsistent(store, bank, 2);
+  assert.ok(store.getState().data.part5CorrectIds.includes("p5-999"), "不存在的 id 保留（Q-71）");
+  // 重複 id 只計 1 次（不經 store 正規化，直接驗模型與 view 同一結果）
+  const st = { data: Object.assign({}, store.getState().data, { part5CorrectIds: ["p5-001", "p5-001", "p5-999"] }), runtime: store.getState().runtime };
+  assert.equal(DASH.dashboardModel(st, TODAY, bank).stats.answeredText, "已答對 1 / 6 題（17%）");
+  const v = P5V.buildViewModel(Object.assign({}, st.data.part5, { phase: "summary" }), bank, null, { ids: st.data.part5CorrectIds, only: false });
+  assert.equal(v.answeredText, "已答對 1 / 6 題（17%）");
+  assert.deepEqual([v.k, v.q], [1, 6]);
+});
+
+test("V-ANS-02：匯入依備份計算（AC-49-05 (d)）；匯入後三處相同；備份頂層與 schemaVersion 不變（V-ANS-03）", async () => {
+  const src = storeWithData((d) => { d.part5CorrectIds = ["p5-001", "p5-002", "p5-003"]; d.part5.totalAnswered = 9; d.part5.totalCorrect = 4; });
+  const json = src.a.exportBackup().json;
+  const parsed = JSON.parse(json);
+  assert.equal(parsed.schemaVersion, 3);
+  assert.equal(Object.keys(parsed).length, 5, "備份頂層 5 欄");
+  const dst = makeStore();
+  assertAnsweredConsistent(dst.store, part5Bank(), 0);
+  const r = await dst.a.importBackup(json, () => true);
+  assert.equal(r.ok, true);
+  assertAnsweredConsistent(dst.store, part5Bank(), 3);
+  assert.deepEqual([dst.store.getState().data.part5.totalAnswered, dst.store.getState().data.part5.totalCorrect], [9, 4]);
+});
+
+test("V-ANS-02：切換生效色級確認初始化 → K = 0、累計歸 0（AC-49-05 (c)、AC-32-02）", () => {
+  const { store, a } = storeWithData((d) => { d.part5CorrectIds = ["p5-001"]; d.part5.totalAnswered = 5; d.part5.totalCorrect = 3; });
+  const bank = part5Bank();
+  assertAnsweredConsistent(store, bank, 1);
+  a.clickColor("brown");
+  assert.equal(a.requestApplyGoal().status, "confirm");
+  assert.equal(a.confirmApplyGoal().ok, true);
+  assertAnsweredConsistent(store, bank, 0);
+  assert.deepEqual([store.getState().data.part5.totalAnswered, store.getState().data.part5.totalCorrect], [0, 0]);
+});
+
+test("V-ANS-02：Q = 0 → 主控台「—」、結算不顯示已答對行；不產生「0 / 0」（AC-49-02）", () => {
+  const { store } = makeStore({ content: fakeContent({ part5: [] }) });
+  const st = store.getState();
+  const dash = DASH.dashboardModel(st, TODAY, []);
+  assert.equal(dash.stats.answeredText, "—");
+  assert.equal(P5V.buildViewModel(st.data.part5, [], null, { ids: [], only: false }).kind, "empty");
+});
+
+test("V-ANS-03：K、Q、P 不寫入主鍵；PersistedData 欄位不因作答而增減；hasLearningRecord 仍以累計答題數判定（AS-7、AC-49-06）", () => {
+  const { storage, a } = makeStore();
+  const keysBefore = Object.keys(P.defaultData()).sort();
+  a.answerPart5(1);
+  const stored = storedData(storage);
+  assert.deepEqual(Object.keys(stored).sort(), keysBefore);
+  assert.equal(stored.part5.totalAnswered, 1);
+  assert.equal(stored.part5.totalCorrect, 0);
+  assert.deepEqual(stored.part5CorrectIds, []);
+  assert.deepEqual(Object.keys(stored.part5).sort(), ["currentIndex", "lockedSelection", "phase", "roundAnswered", "roundCorrect", "totalAnswered", "totalCorrect"]);
+  const R = require("../core/reinit.js");
+  assert.equal(typeof R.hasLearningRecord, "function");
+  assert.equal(R.hasLearningRecord(stored, TODAY), true, "只答錯 1 題（K = 0）仍算有學習紀錄");
 });
 
 test("AC-48-03：只含未曾答對題目的操作序列，計數與寫入與 v0.14 相同（每題作答 1 次寫入，idle 不可按「下一題」）", () => {

@@ -1,0 +1,93 @@
+/* ─── 應用內「關於我」「聯絡我們」「隱私權政策」三頁（FE-87；architecture v0.14 §7.25.6；SP-9） ─── */
+/* 文字色 --text、連結 --primary、信箱行次要文字 --text-muted（AC-23-07 (3)）；不用強調橘（AC-38-01）。
+ * 無水平捲軸：長字串一律可換行。底部遮擋沿用 body 既有的底部留白（AC-53-05）。 */
+
+.site-page {
+  max-width: var(--content-narrow);
+  margin: 0 auto;
+  min-width: 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.site-page a,
+.site-page__link {
+  color: var(--primary);
+}
+
+/* 4 頁共用的返回按鈕：貼齊內容左緣，觸控目標沿用 .btn--link 的 44px */
+.site-return {
+  margin: 0 0 8px;
+  padding-left: 0;
+}
+
+.site-page__title {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+}
+
+/* 焦點由程式移入（show），不是使用者可操作的控制項；鍵盤焦點框仍依 :focus-visible 顯示 */
+.site-page__title:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.site-page__heading {
+  margin: 20px 0 8px;
+  font-size: 1.1rem;
+}
+
+.site-page__content p {
+  margin: 0 0 8px;
+}
+
+.site-page__content ul {
+  margin: 0 0 8px;
+  padding-left: 1.4em;
+}
+
+.site-page__content li {
+  margin: 2px 0;
+}
+
+/* 行內連結型按鈕：外觀同一般連結，高度沿用 .btn--link 的 44px（AC-27-03） */
+.site-page__link {
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* 信箱行：與 .src-contact 同規則，375px 維持 1 行；不禁止換行與選取（E-118、E-119） */
+.site-page__contact {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+/* （FE-89 實測）≤ 640px 底部列固定：以 Tab 移動焦點時，瀏覽器只把控制項捲進視窗，不知道底部列會蓋住它。
+ * 375×667 首次畫面的頁尾連結因此落在底部列後方（AC-41-04、AC-57-01）；保留底部列高度，版面不變。 */
+@media (max-width: 640px) {
+  .footer-links .btn,
+  .site-return,
+  .site-page a,
+  .site-page__link {
+    scroll-margin-bottom: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  body[data-entry="firstRun"][data-tab="customizer"] .footer-links .btn {
+    scroll-margin-bottom: calc(var(--emt-firstbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+}
+
+/* 未執行 JavaScript 時的網站說明（SE-6；標記由建置寫入） */
+.site-noscript {
+  max-width: var(--content-narrow);
+  margin: 0 auto;
+  padding: 16px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.site-noscript a {
+  color: var(--primary);
+}

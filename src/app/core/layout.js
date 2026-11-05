@@ -15,6 +15,7 @@
  *   goalLineCapped、goalLineSeparator 兩鍵保留（契約仍含），但 view 不得再使用；goalLine 標記 @deprecated。
  * - （v0.10，FE-72；契約 v0.15 §11.6 MT-1）part5Progress 新增 kind "allCorrect"（同 summary：100%、now = max）；
  *   其他函式、LAYOUT_TEXTS 與載入規則（LD-1）不變。
+ * - （v0.19，FE-83；契約 v0.19 §13、AS-4、DS-51）LAYOUT_TEXTS 移除 statAccuracyLabel、同一位置新增 statPart5Label。
  */
 (function (root, factory) {
   var api = factory();
@@ -101,7 +102,7 @@
     statStreakUnit: "天",
     statMasteryLabel: "單字掌握率",
     statMasteredCount: "已掌握 {n} 字",
-    statAccuracyLabel: "模擬測驗正確率",
+    statPart5Label: "模擬測驗",
     statNoData: "—",
     chartEmpty: "開始學習後會顯示紀錄",
     backupSectionTitle: "資料備份",

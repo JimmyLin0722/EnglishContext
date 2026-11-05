@@ -20,7 +20,11 @@
  * - （v0.11，FE-77；architecture.md v0.11 §7.22.2、契約 data-schema.ts §16、README §4.3 L-7、AC-23-07）
  *   .src-page 最後（授權聲明區之後）加 1 行聯絡資訊 p.src-muted.src-contact，以 textContent 寫入常數 SOURCES_CONTACT_TEXT。
  *   防爬蟲：常數為帶空格的原值，不做任何字串處理；不是連結、不可聚焦（無 href／tabindex／role／title／data-go）、
- *   不掛事件。全 src/app 非測試原始碼只有下方常數 1 處字面值，註解不重複寫出。
+ *   不掛事件。
+ * - （v0.19，FE-87；architecture.md v0.14 §7.25.6、§7.25.7、契約 SC-1、SP-3、ML-1）
+ *   TEXT.originalLicense、TEXT.trademarkNotice 改取 LEGAL_STATEMENTS，聯絡行改取 core/site-content 的 SOURCES_CONTACT_TEXT，
+ *   本檔不再存這些文字；api 仍匯出同名鍵。皆於讀取時才向 core 取用（LD-2）。
+ *   .src-page 最前面加共用返回按鈕（內容不動），文字由 show 依返回目標更新。
  *
  * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution、brandStatement）可在 Node 測試；
  * 瀏覽器下登錄 EMT.views.register("sources", { mount })。
@@ -34,13 +38,25 @@
     root.EMT.views = root.EMT.views || {};
     root.EMT.views.sourcesPage = api;
     if (typeof root.EMT.views.register === "function") {
-      root.EMT.views.register("sources", { mount: api.mount });
+      root.EMT.views.register("sources", { mount: api.mount, show: api.show });
     }
   }
 })(typeof self !== "undefined" ? self : this, function (root) {
   "use strict";
 
-  /** 畫面固定文字（AC-23-02、Q-31 原文；originalLicense、trademarkNotice 逐字照契約 L-8 LT-3、LT-5） */
+  /** 取得 core/site-content（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function siteContent() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../core/site-content.js");
+    } else {
+      m = root.EMT && root.EMT.core && root.EMT.core.siteContent;
+    }
+    if (!m) { throw new Error("EMT.core.siteContent 未載入（views/sources-page.js）"); }
+    return m;
+  }
+
+  /** 畫面固定文字（AC-23-02、Q-31 原文；originalLicense、trademarkNotice 取自 LEGAL_STATEMENTS，SC-1） */
   var TEXT = {
     title: "資料來源與授權",
     intro: "本檔案使用下列外部資料。網址僅以文字列出，需要時請自行複製到瀏覽器開啟。",
@@ -52,19 +68,16 @@
     licenseHeading: "本系統的授權",
     codeLicense: "程式碼以 MIT 授權（Copyright JimmyLin）",
     dataLicense: "單字資料以 CC BY-SA 4.0 授權",
-    originalLicense: "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權",
-    trademarkNotice: "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。",
+    get originalLicense() { return siteContent().LEGAL_STATEMENTS.originalContent; },
+    get trademarkNotice() { return siteContent().LEGAL_STATEMENTS.trademark; },
     codeLicenseUrlLabel: "MIT 條款網址",
     dataLicenseUrlLabel: "CC BY-SA 4.0 條款網址",
     // （v0.12，FE-60；NM-3、SD-FB-49）原創內容來源一行的前綴；名稱取 registry 中 ORIGINAL 的 fullName，不寫死
     originalSource: "原創內容來源："
   };
 
-  /**
-   * （v0.11，FE-77）聯絡行文字：逐字照契約 data-schema.ts §16 複製（半形空格 U+0020 分隔，防爬蟲，L-7）。
-   * 不得去空格、replace、split／join 或拼接。
-   */
-  var SOURCES_CONTACT_TEXT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";
+  /** （v0.19，FE-87）目前頁面的返回按鈕（render 建立，show 更新文字） */
+  var returnBtn = null;
 
   /** 欄位標籤 */
   var LABEL = {
@@ -230,6 +243,18 @@
     return root.EMT && root.EMT.core && root.EMT.core.dom;
   }
 
+  /** （v0.19，FE-87）取得 ui/site-return（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function siteReturn() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../ui/site-return.js");
+    } else {
+      m = root.EMT && root.EMT.ui && root.EMT.ui.siteReturn;
+    }
+    if (!m) { throw new Error("EMT.ui.siteReturn 未載入（views/sources-page.js）"); }
+    return m;
+  }
+
   /** 一列「標籤：值」 */
   function row(dom, label, value, valueClass) {
     return dom.el("div", { className: "src-row" }, [
@@ -359,15 +384,18 @@
       ? entries.map(function (e) { return entryCard(dom, e); })
       : [dom.el("p", { className: "card src-muted", text: TEXT.empty })];
 
+    returnBtn = siteReturn().create(dom);
+
     dom.clear(rootEl);
     dom.append(rootEl, dom.el("div", { className: "src-page" }, [
+      returnBtn,
       dom.el("h2", { className: "src-page__title", text: TEXT.title }),
       dom.el("p", { className: "src-muted", text: TEXT.intro }),
       dom.el("h3", { className: "src-section-title", text: TEXT.externalHeading }),
       dom.el("div", { className: "src-list" }, list),
       licenseSection(dom, picked.wordlists, content.license, content.sources),
       // （v0.11，FE-77）聯絡行：純文字段落、非連結、不可聚焦、無事件（§7.22.2）
-      dom.el("p", { className: "src-muted src-contact", text: SOURCES_CONTACT_TEXT })
+      dom.el("p", { className: "src-muted src-contact", text: siteContent().SOURCES_CONTACT_TEXT })
     ]));
   }
 
@@ -376,9 +404,14 @@
     render(rootEl);
   }
 
+  /** （v0.19，FE-87）router 的 show：依本次的返回目標更新按鈕文字（SP-3） */
+  function show() {
+    if (returnBtn) siteReturn().refresh(returnBtn);
+  }
+
   return {
     TEXT: TEXT,
-    SOURCES_CONTACT_TEXT: SOURCES_CONTACT_TEXT,
+    get SOURCES_CONTACT_TEXT() { return siteContent().SOURCES_CONTACT_TEXT; },
     selectEntries: selectEntries,
     originalSourceName: originalSourceName,
     formatCount: formatCount,
@@ -386,6 +419,7 @@
     derivedAttribution: derivedAttribution,
     brandStatement: brandStatement,
     render: render,
-    mount: mount
+    mount: mount,
+    show: show
   };
 });

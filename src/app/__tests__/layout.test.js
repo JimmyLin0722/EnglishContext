@@ -73,7 +73,8 @@ const EXPECTED = {
     statStreakUnit: "天",
     statMasteryLabel: "單字掌握率",
     statMasteredCount: "已掌握 {n} 字",
-    statAccuracyLabel: "模擬測驗正確率",
+    // （v0.19，FE-83）取代 statAccuracyLabel（AS-4、DS-51）
+    statPart5Label: "模擬測驗",
     statNoData: "—",
     chartEmpty: "開始學習後會顯示紀錄",
     backupSectionTitle: "資料備份",
@@ -119,6 +120,12 @@ describe("契約常數（data-schema.ts §13）", () => {
     for (const k of Object.keys(EXPECTED)) assertDeepFrozen(layout[k], k);
     assertDeepFrozen(layout.UI_LAYOUT, "UI_LAYOUT");
     assert.ok(Object.isFrozen(layout));
+  });
+
+  test("（v0.19，FE-83）statPart5Label「模擬測驗」；statAccuracyLabel 已移除、文字不含「正確率」（AS-4、AC-49-07）", () => {
+    assert.equal(layout.LAYOUT_TEXTS.statPart5Label, "模擬測驗");
+    assert.equal(Object.prototype.hasOwnProperty.call(layout.LAYOUT_TEXTS, "statAccuracyLabel"), false);
+    for (const v of Object.values(layout.LAYOUT_TEXTS)) assert.ok(!v.includes("正確率"), v);
   });
 
   test("分隔符號：U+30FB 與 U+3000", () => {

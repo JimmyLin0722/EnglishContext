@@ -14,7 +14,7 @@ const LT2 = "題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內
 const LT3 = "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權";
 const LT4 = "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0";
 const LT5 = "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。";
-const CONTACT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";
+const CONTACT = "email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m";
 const A = ["多益", "TOEIC"]; const B = ["常考", "必考", "最常考", "最常見", "最常用", "高頻"];
 const ACCENT = "rgb(247, 137, 59)";
 const P5 = (o = {}) => ({ currentIndex: 0, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 0, totalCorrect: 0, ...o });

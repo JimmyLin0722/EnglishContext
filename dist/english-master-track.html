@@ -39,14 +39,25 @@ PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext
 外部字表與辭典資料的出處與授權，請見程式內「資料來源與授權」頁。
 -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>EnglishContext</title>
+<title>EnglishContext｜英文單字卡與模擬測驗</title>
+<meta name="description" content="EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。">
+<link rel="canonical" href="https://jimmyfantasyworld.com/">
+<meta property="og:title" content="EnglishContext｜英文單字卡與模擬測驗">
+<meta property="og:description" content="EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。">
+<meta property="og:url" content="https://jimmyfantasyworld.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="EnglishContext">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://jimmyfantasyworld.com/icons/icon-512.png">
+<meta name="google-adsense-account" content="ca-pub-4051803210893105">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"EnglishContext","url":"https://jimmyfantasyworld.com/","description":"EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。"}</script>
 <meta name="theme-color" content="#1e9bf0">
 <meta name="apple-mobile-web-app-title" content="EnglishContext">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="emt-build-id" content="be5c8e6ad7ed6061">
-<meta name="emt-app-version" content="1.2.0">
+<meta name="emt-build-id" content="2769ee9fc5c56941">
+<meta name="emt-app-version" content="1.3.0">
 <link rel="icon" href="data:,">
 <style>
 /* 00-base.css */
@@ -278,6 +289,13 @@ pre {
 }
 
 /* （v0.9，FE-64）頁尾版本行：「資料來源與授權」正下方、純文字、單行（VR-7；architecture.md §7.20.1） */
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 8px;
+}
+
 .app-footer__version {
   margin: 4px 0 0;
   font-size: 0.75rem;
@@ -733,15 +751,6 @@ body[data-entry="firstRun"] .toast-root {
   bottom: 16px;
 }
 
-/* 頁尾「返回難易度設定」：只在首次模式且目前為資料來源頁時顯示（AC-25-07） */
-#footer-first-run-back {
-  display: none;
-}
-
-body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
-  display: inline-flex;
-}
-
 /* 05-motion.css */
 /*
  * styles/05-motion.css — 動畫時間變數、換頁動畫、減少動態總開關（FE-24）
@@ -958,6 +967,14 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   line-height: 1.2;
   color: var(--text);
   min-width: 0;
+}
+
+/* （v0.19，FE-84）已答對行字串較長：≥ 14px、可換行，3 格維持同列（AS-4、AC-38-07 例外、AC-49-08；§7.25.1） */
+.db-stat__value--answered {
+  font-size: 0.875rem;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 /* 連續打卡格的強調橘圖示（VC-3：var(--accent) 只在此處與 .btn--accent） */
@@ -2687,8 +2704,11 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   color: var(--text);
 }
 
-.p5-summary__total {
+/* （v0.19，FE-84）已答對行：取代累計行；可換行（AS-5、AC-49-08） */
+.p5-summary__answered {
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
 
 .p5-summary .btn-row {
@@ -3410,6 +3430,101 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   overflow-wrap: anywhere;
 }
 
+/* 75-site-pages.css */
+/* ─── 應用內「關於我」「聯絡我們」「隱私權政策」三頁（FE-87；architecture v0.14 §7.25.6；SP-9） ─── */
+/* 文字色 --text、連結 --primary、信箱行次要文字 --text-muted（AC-23-07 (3)）；不用強調橘（AC-38-01）。
+ * 無水平捲軸：長字串一律可換行。底部遮擋沿用 body 既有的底部留白（AC-53-05）。 */
+
+.site-page {
+  max-width: var(--content-narrow);
+  margin: 0 auto;
+  min-width: 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.site-page a,
+.site-page__link {
+  color: var(--primary);
+}
+
+/* 4 頁共用的返回按鈕：貼齊內容左緣，觸控目標沿用 .btn--link 的 44px */
+.site-return {
+  margin: 0 0 8px;
+  padding-left: 0;
+}
+
+.site-page__title {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+}
+
+/* 焦點由程式移入（show），不是使用者可操作的控制項；鍵盤焦點框仍依 :focus-visible 顯示 */
+.site-page__title:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.site-page__heading {
+  margin: 20px 0 8px;
+  font-size: 1.1rem;
+}
+
+.site-page__content p {
+  margin: 0 0 8px;
+}
+
+.site-page__content ul {
+  margin: 0 0 8px;
+  padding-left: 1.4em;
+}
+
+.site-page__content li {
+  margin: 2px 0;
+}
+
+/* 行內連結型按鈕：外觀同一般連結，高度沿用 .btn--link 的 44px（AC-27-03） */
+.site-page__link {
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* 信箱行：與 .src-contact 同規則，375px 維持 1 行；不禁止換行與選取（E-118、E-119） */
+.site-page__contact {
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+
+/* （FE-89 實測）≤ 640px 底部列固定：以 Tab 移動焦點時，瀏覽器只把控制項捲進視窗，不知道底部列會蓋住它。
+ * 375×667 首次畫面的頁尾連結因此落在底部列後方（AC-41-04、AC-57-01）；保留底部列高度，版面不變。 */
+@media (max-width: 640px) {
+  .footer-links .btn,
+  .site-return,
+  .site-page a,
+  .site-page__link {
+    scroll-margin-bottom: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  body[data-entry="firstRun"][data-tab="customizer"] .footer-links .btn {
+    scroll-margin-bottom: calc(var(--emt-firstbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+}
+
+/* 未執行 JavaScript 時的網站說明（SE-6；標記由建置寫入） */
+.site-noscript {
+  max-width: var(--content-narrow);
+  margin: 0 auto;
+  padding: 16px;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.site-noscript a {
+  color: var(--primary);
+}
+
 /* 80-pwa.css */
 /* ─── PWA 新版提示列（FE-50；architecture.md v0.7 §7.18.7、§9 v0.7；契約 UP-6） ─── */
 /* 頁首之後、#app-banner 之後的頁面流元素；sticky 頂端，不可能被底部導覽列遮住（AC-27-03）。
@@ -3441,9 +3556,60 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   min-height: var(--touch);
   min-width: var(--touch);
 }
+
+/* 85-ad.css */
+/*
+ * 85-ad.css — 廣告版位（FE-88）
+ * 依據：architecture.md v0.14 §7.25.3 DS-48、SD-FB-80；契約 README §13.2 AD-5、AD-14；AC-52-01、AC-52-03～AC-52-05、AC-52-07
+ * 版位只由 ui/ad-slot.js 在 loading 時建立；切頁不執行程式，顯示與否全靠本檔與 body[data-tab]。
+ */
+
+/* 非覆蓋式捲軸在廣告撐高頁面時出現，會讓置中內容左右移動；只在環境成立時套用，第一階段與 file:// 無影響 */
+html[data-ad-env] {
+  scrollbar-gutter: stable;
+}
+
+/* 與主控台內容同寬 */
+.ad-slot {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(var(--content-narrow) + 32px);
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* 等待結果（不論目前頁面）：高度 0 但寬度可量。腳本可能在使用者切頁後才量寬度；
+   max-height 是因為 AdSense 可能以 inline 樣式改 height（T-106） */
+.ad-slot[data-ad-state="loading"] {
+  height: 0;
+  max-height: 0;
+  overflow: hidden;
+  padding-block: 0;
+  border: 0;
+}
+
+.ad-slot[data-ad-state="collapsed"],
+.ad-slot[data-ad-state="dismissed"],
+.ad-slot[data-ad-state="filled"] {
+  display: none;
+}
+
+/* 只有主控台顯示；距「資料備份」控制項與頁尾連結皆 ≥ 48px（AC-52-03） */
+body[data-tab="dashboard"] .ad-slot[data-ad-state="filled"] {
+  display: block;
+  margin-block: 48px;
+}
+
+/* 標籤：對 --bg 約 5.4:1，不用強調色、不用卡片，避免與學習內容同標題或同卡片（AC-52-04） */
+.ad-slot__label {
+  margin: 0 0 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
 </style>
 </head>
 <body data-entry="boot">
+<noscript><div class="site-noscript"><h2>EnglishContext</h2><p>EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。</p><ul><li>單字卡與美式發音練習</li><li>模擬測驗（作答後顯示解析）</li><li>學習進度（連續打卡、今日已學、已答對題數）</li></ul><p><a href="https://jimmyfantasyworld.com/about.html">關於我</a> <a href="https://jimmyfantasyworld.com/contact.html">聯絡我們</a> <a href="https://jimmyfantasyworld.com/privacy.html">隱私權政策</a></p></div></noscript>
 <!-- （v0.4，FE-32）data-entry：boot（啟動前）→ firstRun／main，由 main.js、router 設定；data-tab 由 router 設定（architecture.md §4.2、§7.9） -->
 <!-- 應用殼（FE-02；architecture.md §4.2 掛載點、§9 RWD）。各頁內容由 views 於 mount 時以 core/dom.js 建立。 -->
 <header class="app-header">
@@ -3475,11 +3641,19 @@ body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
   <section id="view-decoder" class="view" hidden></section>
   <section id="view-phrasebank" class="view" hidden></section>
   <section id="view-sources" class="view" aria-label="資料來源與授權" hidden></section>
+  <!-- （v0.19，FE-86）應用內三頁（SP-1）：內容由 views 於 mount 時建立，內建於交付 HTML -->
+  <section id="view-about" class="view" aria-label="關於我" hidden></section>
+  <section id="view-contact" class="view" aria-label="聯絡我們" hidden></section>
+  <section id="view-privacy" class="view" aria-label="隱私權政策" hidden></section>
 </main>
 <footer id="app-footer" class="app-footer">
-  <button type="button" id="footer-sources" class="btn btn--link" data-go="sources">資料來源與授權</button>
-  <!-- （v0.4，FE-32）首次模式且位於資料來源頁時才以 CSS 顯示（AC-25-07） -->
-  <button type="button" id="footer-first-run-back" class="btn btn--link" data-go="customizer">返回難易度設定</button>
+  <!-- （v0.19，FE-86）頁尾連結列（SP-2、AC-57-01）：順序與文字同 FOOTER_LINKS；VR-7 的那一行由 ui/version-line.js 插在本列之後 -->
+  <div id="footer-links" class="footer-links" role="group" aria-label="網站資訊">
+    <button type="button" id="footer-about" class="btn btn--link" data-go="about">關於我</button>
+    <button type="button" id="footer-contact" class="btn btn--link" data-go="contact">聯絡我們</button>
+    <button type="button" id="footer-privacy" class="btn btn--link" data-go="privacy">隱私權政策</button>
+    <button type="button" id="footer-sources" class="btn btn--link" data-go="sources">資料來源與授權</button>
+  </div>
 </footer>
 <div id="toast-root" class="toast-root" role="status" aria-live="polite"></div>
 <div id="dialog-root" class="dialog-root"></div>
@@ -3506,6 +3680,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * （FE-73）契約 v0.15 持久化升版：CURRENT_SCHEMA_VERSION 2 → 3、SUPPORTED_SCHEMA_VERSIONS [1, 2] → [1, 2, 3]；
  *   LEARNING_PROGRESS_FIELDS 6 → 7 項（加 part5CorrectIds，Q-67 A）；新增 PART5_RECORD_TEXTS（data-schema.ts §15）。
  * （FE-80）契約 v0.18：PART5_RECORD_TEXTS 新增 4 個鍵並移除 1 個鍵，共 12 個鍵（UO-7、Q-77 A）；持久化結構不變。
+ * （FE-83）契約 v0.19：TAB_LABELS 7 → 10 項（about、contact、privacy，SP-1）；新增 ANSWERED_SUMMARY_TEXT（data-schema.ts §17、AS-3）；
+ *   clearConfirmMustInclude 第 2 段改寫（AS-6、DS-51）；持久化結構不變。
  * 契約變更時必須同步更新本檔與 src/app/__tests__/goal.test.js 的字面值斷言。
  * 本模組不碰 DOM；Node 以 require 載入，瀏覽器掛到 EMT.core.constants。
  */
@@ -3603,7 +3779,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     part5: "模擬測驗",
     decoder: "解碼器",
     phrasebank: "句型庫",
-    sources: "資料來源與授權"
+    sources: "資料來源與授權",
+    about: "關於我",
+    contact: "聯絡我們",
+    privacy: "隱私權政策"
   };
 
   // §8（v0.9）學習進度紀錄欄位（US-32、README §5.7 CI-4）：切換難易度初始化時只覆寫這些欄（白名單），順序同 data-schema.ts
@@ -3628,10 +3807,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     summaryNoNewAnswers: "本輪沒有新作答的題目",
     filterHint: "關閉時顯示全部題目，答對過的題目會以綠色鎖定。",
     filterHintAllCorrect: "要檢視全部題目，請關閉上方的「只練沒答對的題目」。",
-    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "「已答對」會回到 0 題"],
     confirmOk: "確定",
     confirmCancel: "取消"
   };
+
+  // §17（v0.19）已答對行（AC-49-01、AS-3）：斜線前後各 1 個半形空格，括號為全形；{k}、{q}、{p} 為佔位符；以 textContent 寫入（C-7）
+  var ANSWERED_SUMMARY_TEXT = "已答對 {k} / {q} 題（{p}%）";
 
   return deepFreeze({
     COLOR_LEVELS: COLOR_LEVELS,
@@ -3654,7 +3836,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     NAV_TAB_ORDER: NAV_TAB_ORDER,
     HIDDEN_TAB_IDS: HIDDEN_TAB_IDS,
     LEARNING_PROGRESS_FIELDS: LEARNING_PROGRESS_FIELDS,
-    PART5_RECORD_TEXTS: PART5_RECORD_TEXTS
+    PART5_RECORD_TEXTS: PART5_RECORD_TEXTS,
+    ANSWERED_SUMMARY_TEXT: ANSWERED_SUMMARY_TEXT
   });
 });
 
@@ -3691,6 +3874,193 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   return Object.freeze({ wordKey: wordKey });
+});
+
+/* core/ad.js */
+/*
+ * EMT.core.ad — 廣告設定與純函式（FE-83）
+ * 依據：architecture.md v0.14 §4.12「EMT.core.ad」、§5.9 B-25、§7.25.3；
+ *       契約 data-schema.ts §17、README §13.2 AD-1～AD-6、轉移表、§13.7 V-AD-01、V-AD-02
+ * 涵蓋：US-50、AC-50-01、AC-50-02、AC-50-05、E-138、E-139、E-147
+ *
+ * - 常數與 data-schema.ts §17 逐字相同；全部深度凍結。
+ * - 只有環境判定、載入時機判定與狀態轉移：不碰 DOM、計時器、網路、學習資料，不寫入任何儲存（AD-11）。
+ *   standalone、online、「開始今日學習」是否可點擊都由呼叫端以參數傳入。
+ * - L1 模組：factory 無任何依賴，載入時不取用其他模組（LD-1）。
+ * - 本檔同時由 tools/build.mjs 以 createRequire 讀取：Node 下 module.exports 即同一個 api 物件。
+ * - 廣告單元 ID 的唯一宣告是下方 AD_SLOT_ID 那一行；取得單元 ID 後只改該行的值（AC-50-05）。
+ *   建置的測試注入（B-25）也比對該行，所以同樣的宣告寫法在本檔只能出現 1 次，註解也不得出現。
+ */
+(function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.core = root.EMT.core || {};
+    root.EMT.core.ad = api;
+  }
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // 深層凍結：物件與其中所有子物件、陣列都不可再修改
+  function deepFreeze(obj) {
+    Object.getOwnPropertyNames(obj).forEach(function (name) {
+      var value = obj[name];
+      if (value && typeof value === "object") {
+        deepFreeze(value);
+      }
+    });
+    return Object.freeze(obj);
+  }
+
+  // ── data-schema.ts §17 常數（逐字複製，不得自行修改）──
+
+  // 廣告單元 ID（AD-1）：未取得前不得以假值代替
+  var AD_SLOT_ID = null;
+
+  /** 廣告設定值（唯一來源，隨程式打包；AD-1） */
+  var AD_CONFIG = {
+    publisherId: "ca-pub-4051803210893105",
+    adSlotId: AD_SLOT_ID
+  };
+
+  /** 正式環境主機名稱（恰等於比對；不含 www，AD-3） */
+  var AD_PRODUCTION_HOSTNAME = "jimmyfantasyworld.com";
+
+  /** 發布商 ID 格式（AD-2） */
+  var AD_PUBLISHER_ID_PATTERN = "^ca-pub-[0-9]{16}$";
+
+  /** 廣告單元 ID 格式（AD-2、E-139） */
+  var AD_SLOT_ID_PATTERN = "^[0-9]{6,20}$";
+
+  /** 廣告腳本網址（只可在 AD-6 全部成立時由程式加入；第一階段不得產生此請求） */
+  var AD_SCRIPT_URL = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4051803210893105";
+
+  /** 廣告腳本無結果的等待上限（毫秒；AD-8、AC-51-01 (e)） */
+  var AD_LOAD_TIMEOUT_MS = 10000;
+
+  /** 廣告相關畫面文字（AC-52-04） */
+  var AD_TEXTS = {
+    label: "廣告"
+  };
+
+  var PUBLISHER_RE = new RegExp(AD_PUBLISHER_ID_PATTERN);
+  var SLOT_RE = new RegExp(AD_SLOT_ID_PATTERN);
+
+  /** 版位狀態轉移表（README §13.2、AD-5）；未列出的組合維持原狀態，終態不回頭 */
+  var TRANSITIONS = {
+    waiting: { load: "loading", collapse: "collapsed", dismiss: "dismissed" },
+    loading: { filled: "filled", collapse: "collapsed", dismiss: "dismissed" },
+    filled: { dismiss: "dismissed" }
+  };
+
+  /**
+   * AD-2：單元 ID 已設定 = adSlotId 是符合格式的字串，且 publisherId 是符合格式的字串。
+   * null、空字串、佔位文字、格式不完整、非字串一律視為未設定（E-139）。
+   * @param {*} config AdConfig
+   * @returns {boolean}
+   */
+  function isSlotConfigured(config) {
+    if (!config || typeof config !== "object") {
+      return false;
+    }
+    var slot = config.adSlotId;
+    var publisher = config.publisherId;
+    return typeof slot === "string" && SLOT_RE.test(slot) &&
+      typeof publisher === "string" && PUBLISHER_RE.test(publisher);
+  }
+
+  /**
+   * AD-3：正式環境 = protocol 恰為 https: 且 hostname 恰為正式主機（不含 www，不做子字串比對）。
+   * @param {*} loc 具 protocol、hostname 的物件（通常為 location）
+   * @returns {boolean}
+   */
+  function isProductionLocation(loc) {
+    return !!loc && loc.protocol === "https:" && loc.hostname === AD_PRODUCTION_HOSTNAME;
+  }
+
+  /**
+   * AD-4：啟動時判定一次，整段 try，例外視為不成立。
+   * 只有單元 ID 已設定、正式環境、明確不是獨立視窗（isStandalone === false）才回傳 "waiting"。
+   * @param {{location: *, config: *, isStandalone: boolean}} opts isStandalone 由呼叫端依 IN-2 算好後傳入
+   * @returns {"waiting"|"ineligible"}
+   */
+  function initialStatus(opts) {
+    try {
+      var eligible = isSlotConfigured(opts.config) && isProductionLocation(opts.location) && opts.isStandalone === false;
+      return eligible ? "waiting" : "ineligible";
+    } catch (e) {
+      return "ineligible";
+    }
+  }
+
+  /**
+   * AD-6：載入時機判定（每次進入主控台與主控台資料更新時由呼叫端評估）。
+   * status = "waiting"、entryMode = "main"、currentTab = "dashboard"、hasLearningRecord 皆成立時：
+   * online 不是 true → "collapse"；否則 startReady 為 true → "load"。其餘 → null（不動作）。
+   * @param {{status: *, entryMode: *, currentTab: *, hasLearningRecord: *, online: *, startReady: *}} ctx
+   *   hasLearningRecord：reinit.hasLearningRecord 的結果；online：navigator.onLine；
+   *   startReady：「開始今日學習」按鈕存在且未 disabled
+   * @returns {"load"|"collapse"|null}
+   */
+  function decide(ctx) {
+    if (!ctx || typeof ctx !== "object") {
+      return null;
+    }
+    if (ctx.status !== "waiting" || ctx.entryMode !== "main" || ctx.currentTab !== "dashboard" || ctx.hasLearningRecord !== true) {
+      return null;
+    }
+    if (ctx.online !== true) {
+      return "collapse";
+    }
+    return ctx.startReady === true ? "load" : null;
+  }
+
+  /**
+   * 狀態轉移（README §13.2 轉移表、AD-5）。未列出的組合回傳原狀態。
+   * @param {*} status AdSlotStatus
+   * @param {*} event "load" | "filled" | "collapse" | "dismiss"
+   * @returns {*} 下一狀態
+   */
+  function transition(status, event) {
+    if (typeof status !== "string" || typeof event !== "string") {
+      return status;
+    }
+    if (!Object.prototype.hasOwnProperty.call(TRANSITIONS, status)) {
+      return status;
+    }
+    var row = TRANSITIONS[status];
+    return Object.prototype.hasOwnProperty.call(row, event) ? row[event] : status;
+  }
+
+  /**
+   * AD-8：廣告框 data-ad-status 的值 → transition 事件。尚無結果或其他值 → null。
+   * @param {*} value
+   * @returns {"filled"|"collapse"|null}
+   */
+  function resultOfAdStatus(value) {
+    if (value === "filled") {
+      return "filled";
+    }
+    return value === "unfilled" ? "collapse" : null;
+  }
+
+  return deepFreeze({
+    AD_CONFIG: AD_CONFIG,
+    AD_PRODUCTION_HOSTNAME: AD_PRODUCTION_HOSTNAME,
+    AD_PUBLISHER_ID_PATTERN: AD_PUBLISHER_ID_PATTERN,
+    AD_SLOT_ID_PATTERN: AD_SLOT_ID_PATTERN,
+    AD_SCRIPT_URL: AD_SCRIPT_URL,
+    AD_LOAD_TIMEOUT_MS: AD_LOAD_TIMEOUT_MS,
+    AD_TEXTS: AD_TEXTS,
+    isSlotConfigured: isSlotConfigured,
+    isProductionLocation: isProductionLocation,
+    initialStatus: initialStatus,
+    decide: decide,
+    transition: transition,
+    resultOfAdStatus: resultOfAdStatus
+  });
 });
 
 /* core/backup.js */
@@ -5012,6 +5382,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   goalLineCapped、goalLineSeparator 兩鍵保留（契約仍含），但 view 不得再使用；goalLine 標記 @deprecated。
  * - （v0.10，FE-72；契約 v0.15 §11.6 MT-1）part5Progress 新增 kind "allCorrect"（同 summary：100%、now = max）；
  *   其他函式、LAYOUT_TEXTS 與載入規則（LD-1）不變。
+ * - （v0.19，FE-83；契約 v0.19 §13、AS-4、DS-51）LAYOUT_TEXTS 移除 statAccuracyLabel、同一位置新增 statPart5Label。
  */
 (function (root, factory) {
   var api = factory();
@@ -5098,7 +5469,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     statStreakUnit: "天",
     statMasteryLabel: "單字掌握率",
     statMasteredCount: "已掌握 {n} 字",
-    statAccuracyLabel: "模擬測驗正確率",
+    statPart5Label: "模擬測驗",
     statNoData: "—",
     chartEmpty: "開始學習後會顯示紀錄",
     backupSectionTitle: "資料備份",
@@ -5828,14 +6199,17 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   AC-48-01～AC-48-05、AC-48-07、AC-48-10）新增 questionState、canAnswer；next 可由已答對鎖定檢視前進；
  *   開關由開變關依切換前畫面種類分流。鎖定狀態為推導值，本模組不為了顯示鎖定而設定 lockedSelection（LV-4）。
  *
- * - L1 模組：載入時不取用任何其他模組（LD-1）；不讀 DOM、不讀 window 資料、不碰儲存。
+ * （v0.19，FE-83；architecture.md v0.14 §4.12、§7.25.1；契約 README §13.1 AS-1～AS-3、§13.7 V-ANS-01；
+ *   AC-49-01、AC-49-02、AC-49-04、AC-49-05）新增 answeredSummary、answeredSummaryText。K、Q、P 為推導值，不寫入任何儲存。
+ *
+ * - L1 模組：載入時不取用任何其他模組（LD-1；answeredSummaryText 於呼叫時才取用 core/constants.js）；不讀 DOM、不讀 window 資料、不碰儲存。
  * - 全部為純函式：不修改傳入值、對任何輸入不拋例外、不遞迴；nextUnanswered 為單一有界迴圈（UO-9）。
  * - 題庫 id 以 bankIds 陣列傳入（bankIdsOf 結果）；null 代表該題沒有合法 id：永遠「未答對」、不可被記錄。
  * - 名詞：Q = bankIds.length；set = correctSet(part5CorrectIds)；only = part5UnansweredOnly；p5 = Part5Progress。
  * - store 只負責取 bankIds、組 data 與寫入；寫入與否以回傳的 changed 判斷。
  */
 (function (root, factory) {
-  var api = factory();
+  var api = factory(root);
   if (typeof module === "object" && module.exports) {
     module.exports = api;
   } else {
@@ -5843,7 +6217,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     root.EMT.core = root.EMT.core || {};
     root.EMT.core.part5flow = api;
   }
-})(typeof self !== "undefined" ? self : this, function () {
+})(typeof self !== "undefined" ? self : this, function (root) {
   "use strict";
 
   /** 淺複製並套用 patch，回傳新物件（不修改 base） */
@@ -6169,6 +6543,52 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return { part5: freshRound(p5), ids: [] };
   }
 
+  /**
+   * AS-1、AS-2：已答對行的數值。Q = 0 → null（呼叫端依 AS-4、AS-5 處理）。
+   * P 一律用整數公式，不得用 k / q * 100 再四捨五入（29 / 200 會得到 14.499…）；K < Q 時最大 99。
+   * @param {Array<string|null>} bankIds
+   * @param {*} ids part5CorrectIds
+   * @returns {{k: number, q: number, p: number}|null}
+   */
+  function answeredSummary(bankIds, ids) {
+    var list = idsOf(bankIds);
+    var q = list.length;
+    if (q === 0) {
+      return null;
+    }
+    var k = countCorrect(list, correctSet(ids));
+    var p = Math.floor((200 * k + q) / (2 * q));
+    return { k: k, q: q, p: k < q ? Math.min(p, 99) : p };
+  }
+
+  /** 呼叫時才取用 core/constants.js；取不到屬程式組裝錯誤，丟出含模組名稱的 Error（LD-1、LD-3） */
+  function constantsModule() {
+    if (typeof require === "function" && typeof module === "object") {
+      return require("./constants.js");
+    }
+    var emt = root && root.EMT;
+    if (!emt || !emt.core || !emt.core.constants) {
+      throw new Error("缺少模組 EMT.core.constants");
+    }
+    return emt.core.constants;
+  }
+
+  /**
+   * AS-3：已答對行字串（逐字 ANSWERED_SUMMARY_TEXT，不做 HTML 跳脫，呼叫端以 textContent 寫入）。
+   * summary 不是 answeredSummary 的有效結果（含 null、Q = 0、非有限數值）→ null，不產生「0 / 0」或 NaN。
+   * @param {{k: number, q: number, p: number}|null} summary
+   * @returns {string|null}
+   */
+  function answeredSummaryText(summary) {
+    if (!summary || typeof summary !== "object" || !(summary.q >= 1) || !isFinite(summary.q) ||
+        !(summary.k >= 0) || !isFinite(summary.k) || !(summary.p >= 0) || !isFinite(summary.p)) {
+      return null;
+    }
+    return constantsModule().ANSWERED_SUMMARY_TEXT.replace(/\{([kqp])\}/g, function (all, key) {
+      return String(summary[key]);
+    });
+  }
+
   return Object.freeze({
     bankIdsOf: bankIdsOf,
     normalizeIds: normalizeIds,
@@ -6184,7 +6604,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     next: next,
     restart: restart,
     setOnly: setOnly,
-    clearAndRestart: clearAndRestart
+    clearAndRestart: clearAndRestart,
+    answeredSummary: answeredSummary,
+    answeredSummaryText: answeredSummaryText
   });
 });
 
@@ -7240,7 +7662,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     ]
   };
 
-  /** 部署目錄檔案清單（恰 8 檔，DP-1） */
+  /** 部署目錄檔案清單（恰 13 檔，DP-1；v0.14，FE-85：末 5 檔不進預先快取，DP-9） */
   var PWA_DEPLOY_FILES = [
     { path: "index.html", role: "page", mime: "text/html", precached: true, producedBy: "build" },
     { path: "manifest.webmanifest", role: "manifest", mime: "application/manifest+json", precached: true, producedBy: "build" },
@@ -7249,7 +7671,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     { path: "icons/icon-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "any", producedBy: "copy" },
     { path: "icons/icon-maskable-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "maskable", producedBy: "copy" },
     { path: "icons/apple-touch-icon-180.png", role: "appleTouchIcon", mime: "image/png", precached: true, sizePx: 180, producedBy: "copy" },
-    { path: "ads.txt", role: "adsTxt", mime: "text/plain", precached: false, producedBy: "copy" }
+    { path: "ads.txt", role: "adsTxt", mime: "text/plain", precached: false, producedBy: "copy" },
+    { path: "robots.txt", role: "robots", mime: "text/plain", precached: false, producedBy: "build" },
+    { path: "sitemap.xml", role: "sitemap", mime: "application/xml", precached: false, producedBy: "build" },
+    { path: "about.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
+    { path: "contact.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
+    { path: "privacy.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" }
   ];
 
   /** 預先快取清單（恰 7 項；相對於 sw.js 的網址，SW-6） */
@@ -7905,6 +8332,218 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   };
 });
 
+/* core/site-content.js */
+/*
+ * EMT.core.siteContent — 對外頁面文案與 SEO 常數的單一來源（FE-83）
+ * 依據：architecture.md v0.14 §3.1、§4.12「EMT.core.siteContent」、§7.25.7、§7.25.9；
+ *       契約 data-schema.ts §16、§17、README §13.4 SC-1、§13.6 ML-1～ML-3、§13.7 V-SITE-02、V-SEO-01、V-SEO-06、DS-49
+ * 涵蓋：US-53、US-54、US-55、US-56、AC-53-02、AC-53-06、AC-54-01、AC-54-02、AC-55-01～AC-55-04、
+ *       AC-56-01、AC-56-02、AC-56-03、AC-56-05～AC-56-09、AC-57-03
+ *
+ * - 全部常數與 data-schema.ts 逐字相同（site-content.test.js 以 node:vm 取契約字面值做深度相等）；不得自行改寫。
+ * - 全部深度凍結且為 JSON 相容的純資料；不依賴 DOM，不持久化（SC-1、SC-6）。
+ * - 本檔同時由 tools/build.mjs 以 createRequire 讀取：Node 下 module.exports 即同一個 api 物件。
+ * - L1 模組：factory 無任何依賴，載入時不取用其他模組（LD-1）。
+ * - 信箱只有 SOURCES_CONTACT_TEXT 這一種寫法（ML-1）；內文的信箱行只放 { kind: "contactLine" }，不另存地址（SC-3）。
+ * - 文字一律純文字：應用內以 textContent 寫入，靜態頁由建置跳脫（SC-2）。
+ */
+(function (root, factory) {
+  var api = factory();
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.core = root.EMT.core || {};
+    root.EMT.core.siteContent = api;
+  }
+})(typeof self !== "undefined" ? self : this, function () {
+  "use strict";
+
+  // 深層凍結：物件與其中所有子物件、陣列都不可再修改
+  function deepFreeze(obj) {
+    Object.getOwnPropertyNames(obj).forEach(function (name) {
+      var value = obj[name];
+      if (value && typeof value === "object") {
+        deepFreeze(value);
+      }
+    });
+    return Object.freeze(obj);
+  }
+
+  // ── data-schema.ts §16、§17 常數（逐字複製，不得自行修改）──
+
+  /** 信箱行（ML-1；每個字元之間各 1 個半形空格是刻意的防爬蟲設計，執行期不得組出無空白形式，ML-2） */
+  var SOURCES_CONTACT_TEXT = "email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m";
+
+  /** 頁尾連結列（順序固定，各恰 1 次；AC-57-01） */
+  var FOOTER_LINKS = [
+    { target: "about", label: "關於我" },
+    { target: "contact", label: "聯絡我們" },
+    { target: "privacy", label: "隱私權政策" },
+    { target: "sources", label: "資料來源與授權" }
+  ];
+
+  /** 跨頁共用的權利聲明（= README L-8 的 LT-3、LT-5；AC-54-01 (4)、SC-1） */
+  var LEGAL_STATEMENTS = {
+    originalContent: "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權",
+    trademark: "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。"
+  };
+
+  /** 靜態頁共用元素的文字（位於 <main> 之外，AC-57-04） */
+  var SITE_PAGE_TEXTS = {
+    homeLink: "回到網站首頁"
+  };
+
+  /** 正式網站來源（SEO 宣告用，結尾無斜線；AC-56-02、SE-1） */
+  var SITE_ORIGIN = "https://jimmyfantasyworld.com";
+
+  /** 3 個對外頁面的逐字文案（AC-53-02、AC-54-01、AC-55-01；應用內畫面與靜態頁共用，AC-57-03） */
+  var SITE_PAGES = [
+    {
+      id: "about",
+      title: "關於我",
+      staticPath: "about.html",
+      seo: {
+        documentTitle: "關於我｜EnglishContext",
+        description: "EnglishContext 的網站用途、主要功能、使用方式與內容權利說明。",
+        canonicalUrl: "https://jimmyfantasyworld.com/about.html"
+      },
+      blocks: [
+        { kind: "heading", text: "網站用途" },
+        { kind: "paragraph", inlines: [{ kind: "text", text: "EnglishContext 的用途是提升英文能力、自我學習。" }] },
+        { kind: "heading", text: "主要功能" },
+        {
+          kind: "list",
+          items: [
+            [{ kind: "text", text: "單字卡：翻卡、美式語音示範、語音辨識吻合度、四選一。" }],
+            [{ kind: "text", text: "模擬測驗：題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容；作答後顯示解析。" }],
+            [{ kind: "text", text: "學習進度：連續打卡、今日已學、已答對題數。" }]
+          ]
+        },
+        { kind: "heading", text: "使用方式" },
+        {
+          kind: "list",
+          items: [
+            [{ kind: "text", text: "可離線使用（語音辨識需要連網；網站版須先連網開啟過一次）。" }],
+            [{ kind: "text", text: "學習紀錄存在你使用的瀏覽器，可用備份匯出與匯入。" }]
+          ]
+        },
+        { kind: "heading", text: "內容與權利" },
+        // 兩段聲明以變數引用 LEGAL_STATEMENTS，不另存字串（SC-1）
+        { kind: "paragraph", inlines: [{ kind: "text", text: LEGAL_STATEMENTS.originalContent }] },
+        { kind: "paragraph", inlines: [{ kind: "text", text: LEGAL_STATEMENTS.trademark }] },
+        { kind: "heading", text: "相關頁面" },
+        {
+          kind: "list",
+          items: [
+            [{ kind: "page", text: "資料來源與授權", target: "sources" }],
+            [{ kind: "page", text: "隱私權政策", target: "privacy" }],
+            [{ kind: "page", text: "聯絡我們", target: "contact" }]
+          ]
+        }
+      ]
+    },
+    {
+      id: "contact",
+      title: "聯絡我們",
+      staticPath: "contact.html",
+      seo: {
+        documentTitle: "聯絡我們｜EnglishContext",
+        description: "EnglishContext 的聯絡方式。",
+        canonicalUrl: "https://jimmyfantasyworld.com/contact.html"
+      },
+      // AC-55-01：內容區只有標題與 1 行信箱（Q-91 決議 B）
+      blocks: [{ kind: "contactLine" }]
+    },
+    {
+      id: "privacy",
+      title: "隱私權政策",
+      staticPath: "privacy.html",
+      seo: {
+        documentTitle: "隱私權政策｜EnglishContext",
+        description: "EnglishContext 如何處理學習資料、廣告服務、Cookie 與識別碼、語音辨識，以及個人化廣告的退出方式。",
+        canonicalUrl: "https://jimmyfantasyworld.com/privacy.html"
+      },
+      blocks: [
+        { kind: "heading", text: "學習資料" },
+        { kind: "paragraph", inlines: [{ kind: "text", text: "學習紀錄只存在你目前使用的瀏覽器。本系統沒有伺服器，不接收也不保存這些紀錄；備份檔由你自行保管。" }] },
+        { kind: "heading", text: "廣告服務" },
+        { kind: "paragraph", inlines: [{ kind: "text", text: "網站版（jimmyfantasyworld.com）使用 Google AdSense；以檔案開啟的版本不載入廣告。" }] },
+        { kind: "heading", text: "Cookie 與識別碼" },
+        { kind: "paragraph", inlines: [{ kind: "text", text: "Google 等第三方可能讀寫 Cookie 或使用識別碼，並依你造訪本網站或其他網站的紀錄投放廣告；這些資料由第三方依其政策處理。" }] },
+        { kind: "heading", text: "個人化廣告退出方式" },
+        {
+          kind: "paragraph",
+          inlines: [
+            { kind: "text", text: "你可以到 Google 廣告設定關閉個人化廣告，說明請見：" },
+            { kind: "external", text: "控制 Google 用於顯示廣告的資料", href: "https://support.google.com/My-Ad-Center-Help/answer/12156161" }
+          ]
+        },
+        { kind: "heading", text: "語音辨識" },
+        { kind: "paragraph", inlines: [{ kind: "text", text: "語音由瀏覽器廠商（如 Google、Microsoft）處理；本系統不錄音、不保存、不上傳錄音。" }] },
+        { kind: "heading", text: "聯絡方式" },
+        { kind: "contactLine" }
+      ]
+    }
+  ];
+
+  /** 首頁 SEO 標記值（AC-56-01～AC-56-03；Q-90 決議 B） */
+  var SITE_HOME_SEO = {
+    documentTitle: "EnglishContext｜英文單字卡與模擬測驗",
+    description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+    canonicalUrl: "https://jimmyfantasyworld.com/",
+    ogImageUrl: "https://jimmyfantasyworld.com/icons/icon-512.png"
+  };
+
+  /** 首頁結構化資料（Q-92 決議 A；鍵不得增減，AC-56-05、SE-5） */
+  var SITE_HOME_JSON_LD = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "EnglishContext",
+    url: "https://jimmyfantasyworld.com/",
+    description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。"
+  };
+
+  /** 未執行 JavaScript 時的網站說明（AC-56-06、SE-6）；不含信箱，連結為正式網址（E-151） */
+  var SITE_NOSCRIPT = {
+    title: "EnglishContext",
+    description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+    features: ["單字卡與美式發音練習", "模擬測驗（作答後顯示解析）", "學習進度（連續打卡、今日已學、已答對題數）"],
+    links: [
+      { text: "關於我", href: "https://jimmyfantasyworld.com/about.html" },
+      { text: "聯絡我們", href: "https://jimmyfantasyworld.com/contact.html" },
+      { text: "隱私權政策", href: "https://jimmyfantasyworld.com/privacy.html" }
+    ]
+  };
+
+  /** robots.txt 逐字內容（換行 LF，結尾 1 個 LF；AC-56-08、SE-7） */
+  var ROBOTS_TXT = "User-agent: *\nAllow: /\n\nSitemap: https://jimmyfantasyworld.com/sitemap.xml\n";
+
+  /** sitemap.xml 逐字內容（換行 LF，結尾 1 個 LF；無 lastmod，AC-56-09、SE-8） */
+  var SITEMAP_XML =
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    "  <url><loc>https://jimmyfantasyworld.com/</loc></url>\n" +
+    "  <url><loc>https://jimmyfantasyworld.com/about.html</loc></url>\n" +
+    "  <url><loc>https://jimmyfantasyworld.com/contact.html</loc></url>\n" +
+    "  <url><loc>https://jimmyfantasyworld.com/privacy.html</loc></url>\n" +
+    "</urlset>\n";
+
+  return deepFreeze({
+    SITE_PAGES: SITE_PAGES,
+    LEGAL_STATEMENTS: LEGAL_STATEMENTS,
+    SOURCES_CONTACT_TEXT: SOURCES_CONTACT_TEXT,
+    FOOTER_LINKS: FOOTER_LINKS,
+    SITE_PAGE_TEXTS: SITE_PAGE_TEXTS,
+    SITE_ORIGIN: SITE_ORIGIN,
+    SITE_HOME_SEO: SITE_HOME_SEO,
+    SITE_HOME_JSON_LD: SITE_HOME_JSON_LD,
+    SITE_NOSCRIPT: SITE_NOSCRIPT,
+    ROBOTS_TXT: ROBOTS_TXT,
+    SITEMAP_XML: SITEMAP_XML
+  });
+});
+
 /* core/stats.js */
 /*
  * core/stats.js — 正確率（FE-05）
@@ -8455,6 +9094,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   未改變 → 單字卡狀態全部不變（FP-4、FB-54）。模擬測驗轉移集中在 core/part5flow（CR-2、LV-1、LV-3、UO-1～UO-10），
  *   題庫為空時 part5 action 一律不動作。
  *
+ * - （v0.19，FE-86）對外頁面與廣告的執行期狀態（契約 RuntimeState.ad、sitePageReturnTab、SP-3、SP-4、AD-5、AD-10；
+ *   architecture §4.12、§7.25.3、§7.25.5）：只在記憶體，setItem 0 次、不進備份。setTab 維護返回目標；
+ *   initAd 只生效 1 次；adEvent 經 core/ad.transition，有改變才通知 ["ad"]；confirmApplyGoal 成功路徑與
+ *   importBackup 成功後無學習紀錄時同步轉 dismissed（SD-FB-82），clearPart5CorrectIds 不動。
+ *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
  */
@@ -8492,14 +9136,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         REINIT: require("../core/reinit.js"),
         PWA: require("../core/pwa.js"),
         POS: require("../core/position.js"),
-        PF: require("../core/part5flow.js")
+        PF: require("../core/part5flow.js"),
+        AD: require("../core/ad.js")
       };
     } else {
       var c = root.EMT.core;
       coreCache = {
         C: c.constants, WK: c.wordkey, GOAL: c.goal, VOCAB: c.vocab, CUSTOM: c.custom,
         STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning,
-        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow
+        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow, AD: c.ad
       };
     }
     return coreCache;
@@ -8513,9 +9158,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   // 契約列舉（data-schema.ts §7、§10）
-  var TAB_IDS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources"];
-  /** （v0.8）首次模式可停留的頁面（architecture §4.3 setTab、§7.9） */
-  var FIRST_RUN_TABS = ["customizer", "sources"];
+  var TAB_IDS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources", "about", "contact", "privacy"];
+  /** （v0.8）首次模式可停留的頁面（architecture §4.3 setTab、§7.9；v0.19 加 3 個對外頁面，SP-4） */
+  var FIRST_RUN_TABS = ["customizer", "sources", "about", "contact", "privacy"];
+  /** （v0.19）有返回目標的 4 個頁面（SP-3） */
+  var SITE_RETURN_TABS = ["sources", "about", "contact", "privacy"];
   var STT_STATUSES = ["idle", "notice", "listening"];
   var PHRASE_CATEGORIES = ["all", "gap", "aim", "findings", "limitations"];
 
@@ -8536,6 +9183,19 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     for (k in base) { if (hasOwn(base, k)) { out[k] = base[k]; } }
     for (k in patch) { if (hasOwn(patch, k)) { out[k] = patch[k]; } }
     return out;
+  }
+
+  /**
+   * （v0.19）切頁後的返回目標（SP-3、architecture §7.25.5）：
+   * 進入 4 頁 → 記下原頁面；在 4 頁之間切換 → 不覆蓋；離開 4 頁 → null。
+   * @param {string} current 目前頁面
+   * @param {string} next 下一頁
+   * @param {string|null} saved 目前的 sitePageReturnTab
+   * @returns {string|null}
+   */
+  function nextReturnTab(current, next, saved) {
+    if (SITE_RETURN_TABS.indexOf(next) === -1) { return null; }
+    return SITE_RETURN_TABS.indexOf(current) === -1 ? current : saved;
   }
 
   /** 是否為 0～3 的選項索引 */
@@ -8660,6 +9320,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     var startup = { status: "missing", migrated: false };
     /** 最近一次「一般寫入」的結果："ok"｜"quota"｜"error"｜"disabled" */
     var writeStatus = "ok";
+    /** （v0.19）initAd 是否已生效（AD-4 只在啟動時判定一次；只在模組內部，不進 state） */
+    var adInitDone = false;
 
     function now() {
       var d = nowFn();
@@ -8759,7 +9421,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         // （v0.11，FE-49）PWA 頁面端狀態（只在記憶體，不持久化，PV-1）；PE-1 由 main.js 經 setPwa 寫入
         pwa: pwaCore().initialPwaState(),
         // （v0.12，FE-55）主控台介面狀態（只在記憶體，不持久化，DB-6）；每次 init 皆為收合
-        dashboard: { backupExpanded: false }
+        dashboard: { backupExpanded: false },
+        // （v0.19，FE-86）廣告版位狀態（只在記憶體，AD-5）；啟動時由 main.js 經 initAd 設定
+        ad: { status: "ineligible" },
+        // （v0.19，FE-86）進入 4 個對外頁面之前的頁面（只在記憶體，SP-3）
+        sitePageReturnTab: null
       };
     }
 
@@ -8809,6 +9475,21 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       if (runtime.flashcard.index === 0) { return runtime; }
       var cc = cardChanged(runtime, runtime.studySet, 0);
       return assign(runtime, { flashcard: cc.flashcard, speech: cc.speech });
+    }
+
+    /**
+     * （v0.19，AD-10）把版位轉為 dismissed：狀態有改變才回傳新 runtime 並加 tag "ad"；終態與 ineligible 維持原物件（AD-5）。
+     * 只計算、不提交，由呼叫端併入同一次通知（同步，≤ 100ms）。
+     * @param {object} runtime
+     * @param {string[]} tags 會被加入 "ad"
+     * @returns {object} runtime
+     */
+    function dismissAd(runtime, tags) {
+      var cur = runtime.ad.status;
+      var next = core().AD.transition(cur, "dismiss");
+      if (next === cur) { return runtime; }
+      tags.push("ad");
+      return assign(runtime, { ad: { status: next } });
     }
 
     /** 題庫 id 陣列（part5flow.bankIdsOf，順序與題庫相同） */
@@ -8981,6 +9662,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
 
       writeStatus = available ? "ok" : "disabled";
+      adInitDone = false;
       // （v0.15）FP-2：依紀錄解析目前卡片；記憶體中的紀錄更新為解析結果，不寫入（RD-4）
       var rt0 = initialRuntime(data, available ? "ok" : "unavailable", entryMode);
       var placed = placeCard(rt0, data, rt0.studySet);
@@ -9131,7 +9813,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       // 單字集只由 goal 與 customVocab 推導，兩者在 g.data 與 newData 相同。
       // （v0.15）buildReinitData 已設 flashcardPosition = null；生效色級未改變卻被直接呼叫時（UI 不會發生），
       // 也回到第 1 張以維持「null ⇔ 第 1 張」（INV-FP）
-      state = { data: newData, runtime: firstCard(g.runtime) };
+      // （v0.19）AD-10 (a)：初始化成功才隱藏版位；寫入失敗（上方已返回）資料未改變，不隱藏（SD-FB-82）
+      state = { data: newData, runtime: dismissAd(firstCard(g.runtime), tags) };
       notify(tags);
       return { ok: true, write: w.ok ? "ok" : "disabled" };
     }
@@ -9186,7 +9869,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var tags = ["entry", "goal", "studySet", "flashcard", "quiz", "speech"];
       // （v0.15）FP-4 末句：第一筆寫入的位置為 null，抽認卡為第 1 張
       var data = g.data.flashcardPosition === null ? g.data : assign(g.data, { flashcardPosition: null });
-      var runtime = assign(firstCard(g.runtime), { entryMode: "main", currentTab: "dashboard" });
+      var runtime = assign(firstCard(g.runtime), { entryMode: "main", currentTab: "dashboard", sitePageReturnTab: null });
       var w = commitWrite(data, runtime, tags, { bypassFirstRun: true });
       return { ok: true, write: w.ok ? "ok" : w.reason };
     }
@@ -9621,16 +10304,22 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
 
     /**
-     * 由 router 呼叫；（v0.8）首次模式只接受 customizer、sources，其他值忽略（AC-25-01、AC-25-07）。
+     * 由 router 呼叫；（v0.8）首次模式只接受 FIRST_RUN_TABS，其他值忽略（AC-25-01、AC-25-07、SP-4）。
      * （v0.9）HIDDEN_TAB_IDS（解碼器、句型庫）一律忽略，currentTab 永不為隱藏頁（HT-1、AC-20-04）；導向主控台由 router 負責。
+     * （v0.19）維護 sitePageReturnTab（SP-3）；opts.resetReturn 為 true 時一律設 null（SP-6 的 #sources 入口），
+     * 此時即使頁面相同也會更新。只改記憶體，setItem 0 次（SP-4）。
+     * @param {string} tabId
+     * @param {{resetReturn?: boolean}} [opts]
      */
-    function setTab(tabId) {
+    function setTab(tabId, opts) {
       ensureInit();
       var rt = state.runtime;
-      if (TAB_IDS.indexOf(tabId) === -1 || rt.currentTab === tabId) { return; }
+      if (TAB_IDS.indexOf(tabId) === -1) { return; }
       if (core().C.HIDDEN_TAB_IDS.indexOf(tabId) !== -1) { return; }
       if (rt.entryMode === "firstRun" && FIRST_RUN_TABS.indexOf(tabId) === -1) { return; }
-      commit(state.data, assign(rt, { currentTab: tabId }), ["tab"]);
+      var ret = opts && opts.resetReturn === true ? null : nextReturnTab(rt.currentTab, tabId, rt.sitePageReturnTab);
+      if (rt.currentTab === tabId && rt.sitePageReturnTab === ret) { return; }
+      commit(state.data, assign(rt, { currentTab: tabId, sitePageReturnTab: ret }), ["tab"]);
     }
 
     // ── actions：PWA（v0.11，FE-49）──
@@ -9682,6 +10371,38 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var cur = !!(rt.dashboard && rt.dashboard.backupExpanded === true);
       if (cur === value) { return { changed: false }; }
       commit(state.data, assign(rt, { dashboard: { backupExpanded: value } }), ["dashboard"]);
+      return { changed: true };
+    }
+
+    // ── actions：廣告版位（v0.19，FE-86）──
+
+    /**
+     * 設定啟動時的環境判定結果（AD-4，architecture §4.12）：本頁只生效 1 次，且只能由 ineligible 轉為 waiting。
+     * 其他值忽略且不佔用這 1 次；不寫入 localStorage（setItem 0 次，首次與一般模式相同）。
+     * @param {"waiting"|"ineligible"} status core/ad.initialStatus 的結果
+     * @returns {{changed: boolean}}
+     */
+    function initAd(status) {
+      ensureInit();
+      if (adInitDone || (status !== "waiting" && status !== "ineligible")) { return { changed: false }; }
+      adInitDone = true;
+      var rt = state.runtime;
+      if (status !== "waiting" || rt.ad.status !== "ineligible") { return { changed: false }; }
+      commit(state.data, assign(rt, { ad: { status: status } }), ["ad"]);
+      return { changed: true };
+    }
+
+    /**
+     * 版位狀態事件（README §13.2 轉移表、AD-5）：經 core/ad.transition，有改變才通知 ["ad"]；setItem 0 次。
+     * @param {"load"|"filled"|"collapse"|"dismiss"} event
+     * @returns {{changed: boolean}}
+     */
+    function adEvent(event) {
+      ensureInit();
+      var rt = state.runtime;
+      var next = core().AD.transition(rt.ad.status, event);
+      if (next === rt.ad.status) { return { changed: false }; }
+      commit(state.data, assign(rt, { ad: { status: next } }), ["ad"]);
       return { changed: true };
     }
 
@@ -9770,8 +10491,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           }
           if (rt.entryMode === "firstRun") {
             // 首次還原成功 → 進入主控台（FS-5），首次畫面上未生效的分數與卡片選擇捨棄（資料全以備份為準）
-            runtime = assign(runtime, { entryMode: "main", currentTab: "dashboard" });
+            runtime = assign(runtime, { entryMode: "main", currentTab: "dashboard", sitePageReturnTab: null });
             tags.push("entry");
+          }
+          // （v0.19）AD-10 (b)：資料已取代後判定；無學習紀錄 → 隱藏版位（首次還原同樣經此，SD-FB-82）
+          if (!K.REINIT.hasLearningRecord(data, today())) {
+            runtime = dismissAd(runtime, tags);
           }
           state = { data: data, runtime: runtime };
           notify(tags);
@@ -9817,6 +10542,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         setTab: setTab,
         setPwa: setPwa,
         setBackupExpanded: setBackupExpanded,
+        initAd: initAd,
+        adEvent: adEvent,
         exportBackup: exportBackup,
         importBackup: importBackup
       }
@@ -9828,6 +10555,220 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     browserStorage: browserStorage,
     detectSpeech: detectSpeech,
     isQuotaError: isQuotaError
+  };
+});
+
+/* services/ad.js */
+/*
+ * EMT.services.ad — 廣告環境判定、腳本載入與結果監看（FE-88）
+ * 依據：architecture.md v0.14 §7.25.3「分工」「啟動」「載入流程」「隱私」；契約 README §13.2 AD-4、AD-7、AD-8、AD-11、AD-13、V-AD-02、V-AD-04
+ * 涵蓋：US-50、US-51、AC-50-01、AC-50-02、AC-50-07、AC-50-08、AC-50-10、AC-51-01、AC-51-04
+ *
+ * EMT.services.ad.start({ initAd, adEvent, getStatus })
+ * - 啟動時判定一次（AD-4）。不成立 → 只回傳 "ineligible"，不讀 AD_SCRIPT_URL、不碰廣告全域變數、不建立任何節點。
+ * - 成立 → initAd("waiting")，並設 html[data-ad-env]（SD-FB-80 的 scrollbar-gutter 依此生效）。
+ *
+ * EMT.services.ad.load(insEl)（由 ui/ad-slot.js 在狀態已轉 loading 後呼叫；本頁至多執行 1 次）
+ * - 順序：開始監看與計時 → 加入腳本 → push({})。push 參數恆為空物件（AD-7、AD-11）。
+ * - 結果：只判定 1 次，先確認狀態仍是 loading；結束時 disconnect、clearTimeout。不重試（AD-8）。
+ *
+ * 隱私（AD-11）：本檔不取用 store，只經呼叫端傳入的 3 個函式得知版位狀態與回報事件，拿不到學習資料。
+ * 全部靜默（AD-8）：不提示使用者、不輸出錯誤訊息到主控台；任何例外都視為失敗並收合版位。
+ * 不自建同意視窗、不讀取或保存同意狀態（AD-13）；不寫入任何瀏覽器儲存（DS-56）。
+ * 載入時只做登錄，不讀 document、不取用其他模組（LD-2）；Node 下 module.exports 供測試。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.services = root.EMT.services || {};
+    root.EMT.services.ad = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (root) {
+  "use strict";
+
+  /** 廣告框上回報結果的屬性（AD-8） */
+  var STATUS_ATTR = "data-ad-status";
+
+  /**
+   * 呼叫時才取用 core 模組（LD-2）：Node 以 require，瀏覽器以 EMT.core.<name>。
+   * @param {"ad"|"pwa"} name
+   * @returns {object}
+   */
+  function coreOf(name) {
+    if (typeof module === "object" && module.exports && typeof require === "function") {
+      return name === "ad" ? require("../core/ad.js") : require("../core/pwa.js");
+    }
+    return root.EMT.core[name];
+  }
+
+  /**
+   * 是否為獨立視窗（判定同 IN-2，不依賴 pwa.eligible）。
+   * core/pwa.isStandalone 會把 matchMedia 不可用或拋例外當成「不是獨立視窗」；對廣告而言那是「無法確認」，
+   * AD-4 要求例外視為不成立，所以此時回傳 null，讓 initialStatus 判為 ineligible。
+   * @param {object} g 全域物件
+   * @param {object} pwaCore core/pwa.js
+   * @returns {boolean|null} true、false，或無法確認時 null
+   */
+  function standaloneOf(g, pwaCore) {
+    var known = typeof g.matchMedia === "function";
+    var result = pwaCore.isStandalone({
+      matchMedia: function (query) {
+        try {
+          return g.matchMedia(query);
+        } catch (e) {
+          known = false;
+          throw e;
+        }
+      },
+      navigator: g.navigator
+    });
+    if (result === true) { return true; }
+    return known ? false : null;
+  }
+
+  /**
+   * 建立服務實例（測試注入替身；預設實例使用瀏覽器全域）。
+   * @param {object} g 全域物件（location、navigator、matchMedia、document、MutationObserver、計時器、adsbygoogle）
+   * @param {{ad?: object, pwa?: object}} [deps] 測試可替換 core 模組
+   * @returns {{start: function, load: function}}
+   */
+  function create(g, deps) {
+    var d = deps || {};
+    var callbacks = null;
+    var started = false;
+    var startedStatus = "ineligible";
+    var loadCalled = false;
+
+    function adCore() {
+      return d.ad || coreOf("ad");
+    }
+
+    function pwaCore() {
+      return d.pwa || coreOf("pwa");
+    }
+
+    /**
+     * AD-4：以 getter 延後讀取，前面的條件不成立時不碰後面的環境物件；例外由 initialStatus 視為不成立。
+     * @returns {"waiting"|"ineligible"}
+     */
+    function computeStatus() {
+      return adCore().initialStatus({
+        config: adCore().AD_CONFIG,
+        get location() { return g.location; },
+        get isStandalone() { return standaloneOf(g, pwaCore()); }
+      });
+    }
+
+    /**
+     * 啟動判定（只生效 1 次）。不拋例外。
+     * @param {{initAd: function(string): void, adEvent: function(string): void, getStatus: function(): string}} opts
+     * @returns {"waiting"|"ineligible"}
+     */
+    function start(opts) {
+      if (started) { return startedStatus; }
+      started = true;
+      try {
+        if (computeStatus() !== "waiting") { return startedStatus; }
+        callbacks = opts;
+        opts.initAd("waiting");
+        g.document.documentElement.setAttribute("data-ad-env", "1");
+        startedStatus = "waiting";
+      } catch (e) {
+        /* 判定或初始化失敗：視為環境不成立（AD-4），靜默 */
+      }
+      return startedStatus;
+    }
+
+    /** 目前版位狀態；讀取失敗回 null（任何結果都會被忽略） */
+    function statusNow() {
+      try {
+        return callbacks.getStatus();
+      } catch (e) {
+        return null;
+      }
+    }
+
+    /** 回報事件（靜默） */
+    function report(event) {
+      try {
+        callbacks.adEvent(event);
+      } catch (e) {
+        /* 靜默（AD-8） */
+      }
+    }
+
+    /**
+     * 加入腳本並要求廣告（AD-7、AD-8）。
+     * @param {Element} ins 由 ui/ad-slot.js 建立的廣告框
+     * @returns {boolean} 本次呼叫是否已加入腳本並完成 push
+     */
+    function load(ins) {
+      if (loadCalled || startedStatus !== "waiting") { return false; }
+      loadCalled = true;
+
+      var settled = false;
+      var timer = null;
+      var observer = null;
+
+      /** 結束監看並回報結果；只生效 1 次，狀態已離開 loading（例如已 dismissed）時不回報 */
+      function settle(event) {
+        if (settled) { return; }
+        settled = true;
+        if (observer) {
+          try { observer.disconnect(); } catch (e) { /* 靜默 */ }
+        }
+        if (timer !== null) { g.clearTimeout(timer); }
+        if (statusNow() === "loading") { report(event); }
+      }
+
+      if (!ins || statusNow() !== "loading") {
+        settle("collapse");
+        return false;
+      }
+
+      var ad = adCore();
+      try {
+        // 1. 開始監看：MutationObserver 不存在時只剩逾時，結果仍收斂到 collapsed
+        if (typeof g.MutationObserver === "function") {
+          observer = new g.MutationObserver(function () {
+            var result = ad.resultOfAdStatus(ins.getAttribute(STATUS_ATTR));
+            if (result) { settle(result); }
+          });
+          observer.observe(ins, { attributes: true, attributeFilter: [STATUS_ATTR] });
+        }
+        timer = g.setTimeout(function () { settle("collapse"); }, ad.AD_LOAD_TIMEOUT_MS);
+
+        // 2. 加入腳本（本頁至多 1 次，由 loadCalled 保證）
+        var script = g.document.createElement("script");
+        script.async = true;
+        script.crossOrigin = "anonymous";
+        script.addEventListener("error", function () { settle("collapse"); });
+        script.src = ad.AD_SCRIPT_URL;
+        g.document.head.appendChild(script);
+
+        // 3. 要求廣告：參數恆為空物件（AD-7、AD-11）
+        g.adsbygoogle = g.adsbygoogle || [];
+        g.adsbygoogle.push({});
+      } catch (e) {
+        settle("collapse");
+        return false;
+      }
+      return true;
+    }
+
+    return { start: start, load: load };
+  }
+
+  // 預設實例：建立時只設定區域變數，不呼叫任何瀏覽器 API（LD-2）
+  var instance = create(root);
+
+  return {
+    start: instance.start,
+    load: instance.load,
+    create: create
   };
 });
 
@@ -11461,6 +12402,220 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   };
 });
 
+/* ui/ad-slot.js */
+/*
+ * EMT.ui.adSlot — 廣告版位容器與載入時機（FE-88）
+ * 依據：architecture.md v0.14 §7.25.3「評估」「DS-47」「隱私」；契約 README §13.2 AD-5、AD-6、AD-7、AD-9、AD-10、AD-11、AD-14、V-AD-05
+ * 涵蓋：US-52、AC-50-04、AC-51-02、AC-52-01、AC-52-02、AC-52-04、AC-52-06、AC-52-07、E-141、E-142
+ *
+ * EMT.ui.adSlot.init()（main.js 在 router.start、bottomNav.init 之後呼叫；只生效 1 次）
+ * - ineligible：立即結束，不訂閱、不建 DOM（第一階段頁面上完全沒有版位）。
+ * - waiting：訂閱 store，每次通知評估 core/ad.decide；init 時也評估 1 次，因為 router.start 的通知早於訂閱。
+ * - decide 有結果 → requestAnimationFrame 再 setTimeout(0)，確保在繪製之後（AD-6 (5)、AC-51-02）。
+ *   分頁在背景時 rAF 不觸發，回到前景才繼續，不算失敗。
+ * - 執行前重新評估：router 先發 "tab" 通知、之後才呼叫新頁 show，通知當下的畫面還沒更新；
+ *   等待期間也可能已切頁、被隱藏或斷線。一律以執行當下的結果為準（AD-6）。
+ *
+ * DS-47：容器與廣告框只建立 1 次，插在 #app-footer 之前（位於 #app-main 之外，主控台重繪碰不到）。
+ * 之後不移除、不換父節點、不重新 push。切頁不經本檔：顯示與否只靠 body[data-tab] 與 styles/85-ad.css。
+ * 本檔之後的工作只有同步 data-ad-state 與標籤的 hidden。
+ *
+ * 隱私（AD-11）：學習資料只用於判斷是否載入，結果不寫入 DOM、不傳給 services/ad.js。
+ * 全部靜默：不輸出錯誤訊息到主控台（AD-8）。
+ * 載入時只做登錄，不讀 document、不取用其他模組（LD-2）；Node 下 module.exports 供測試。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.ui = root.EMT.ui || {};
+    root.EMT.ui.adSlot = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (root) {
+  "use strict";
+
+  // DOM 識別（architecture.md §7.25.3 DS-47）
+  var SLOT_ID = "ad-slot";
+  var SLOT_ARIA_LABEL = "廣告版位";
+  var FOOTER_ID = "app-footer";
+  var START_BUTTON_SELECTOR = "#view-dashboard .db-start";
+
+  /**
+   * 預設依賴：呼叫時才取用（LD-2）。
+   * @returns {{store: object, ad: object, reinit: object, service: object}}
+   */
+  function defaultDeps() {
+    if (typeof module === "object" && module.exports && typeof require === "function") {
+      return { store: null, ad: require("../core/ad.js"), reinit: require("../core/reinit.js"), service: require("../services/ad.js") };
+    }
+    var emt = root.EMT;
+    return { store: emt.store, ad: emt.core.ad, reinit: emt.core.reinit, service: emt.services.ad };
+  }
+
+  /**
+   * 建立實例（測試注入替身；預設實例使用瀏覽器全域）。
+   * @param {object} g 全域物件（document、navigator、requestAnimationFrame、setTimeout）
+   * @param {function(): {store: object, ad: object, reinit: object, service: object}} [getDeps]
+   * @returns {{init: function(): boolean}}
+   */
+  function create(g, getDeps) {
+    var deps = null;
+    var initialized = false;
+    var pending = false;
+    var refs = null;
+
+    /** 目前版位狀態 */
+    function statusNow() {
+      return deps.store.getState().runtime.ad.status;
+    }
+
+    /**
+     * AD-6 評估。不在主控台時不必計算學習紀錄（學習中的每次通知都會經過這裡）。
+     * @returns {"load"|"collapse"|null}
+     */
+    function evaluate() {
+      var st = deps.store.getState();
+      var rt = st.runtime;
+      if (rt.ad.status !== "waiting" || rt.currentTab !== "dashboard") { return null; }
+      var btn = g.document.querySelector(START_BUTTON_SELECTOR);
+      return deps.ad.decide({
+        status: rt.ad.status,
+        entryMode: rt.entryMode,
+        currentTab: rt.currentTab,
+        hasLearningRecord: deps.reinit.hasLearningRecord(st.data, deps.store.today()) === true,
+        online: g.navigator.onLine,
+        startReady: !!btn && btn.disabled !== true
+      });
+    }
+
+    /**
+     * 建立容器與廣告框（只會成功 1 次，DS-47）。屬性依 AD-7，不加入其他 data-*（AD-11）。
+     * 找不到 #app-footer → 不建立；run 會因此收合版位。
+     */
+    function build() {
+      var doc = g.document;
+      var footer = doc.getElementById(FOOTER_ID);
+      if (!footer || !footer.parentNode) { return; }
+      var config = deps.ad.AD_CONFIG;
+
+      var slot = doc.createElement("aside");
+      slot.setAttribute("id", SLOT_ID);
+      slot.setAttribute("class", "ad-slot");
+      slot.setAttribute("aria-label", SLOT_ARIA_LABEL);
+
+      var label = doc.createElement("p");
+      label.setAttribute("class", "ad-slot__label");
+      label.textContent = deps.ad.AD_TEXTS.label;
+      label.hidden = true;
+
+      var frame = doc.createElement("div");
+      frame.setAttribute("class", "ad-slot__frame");
+
+      var ins = doc.createElement("ins");
+      ins.setAttribute("class", "adsbygoogle");
+      ins.setAttribute("style", "display:block");
+      ins.setAttribute("data-ad-client", config.publisherId);
+      ins.setAttribute("data-ad-slot", config.adSlotId);
+      ins.setAttribute("data-ad-format", "auto");
+      ins.setAttribute("data-full-width-responsive", "false");
+
+      frame.appendChild(ins);
+      slot.appendChild(label);
+      slot.appendChild(frame);
+      refs = { slot: slot, label: label, ins: ins };
+      // 掛上文件前就設好狀態：不會有一瞬間未套用高度 0 的畫面
+      sync();
+      footer.parentNode.insertBefore(slot, footer);
+    }
+
+    /** 同步 data-ad-state 與標籤；只寫入狀態屬性，不動節點位置（AD-9） */
+    function sync() {
+      var status = statusNow();
+      if (!refs) {
+        // ineligible、waiting，以及未曾載入就 collapsed、dismissed：都不建容器（DS-47）
+        if (status === "loading") { build(); }
+        return;
+      }
+      if (refs.slot.getAttribute("data-ad-state") !== status) {
+        refs.slot.setAttribute("data-ad-state", status);
+      }
+      refs.label.hidden = status !== "filled";
+    }
+
+    /** 繪製之後執行：以當下狀態重新評估，條件已不成立就等下一次通知 */
+    function run() {
+      pending = false;
+      try {
+        var action = evaluate();
+        if (action === "collapse") {
+          deps.store.actions.adEvent("collapse");
+        } else if (action === "load") {
+          deps.store.actions.adEvent("load");
+          if (refs && refs.ins) {
+            deps.service.load(refs.ins);
+          } else {
+            deps.store.actions.adEvent("collapse");
+          }
+        }
+      } catch (e) {
+        /* 靜默（AD-8）：廣告失敗不得影響學習 */
+      }
+    }
+
+    /** 排程執行（等待期間不重複排程） */
+    function schedule() {
+      if (pending) { return; }
+      pending = true;
+      var later = function () { g.setTimeout(run, 0); };
+      if (typeof g.requestAnimationFrame === "function") {
+        g.requestAnimationFrame(later);
+      } else {
+        later();
+      }
+    }
+
+    /** 每次 store 通知：同步畫面；還在 waiting 才評估 */
+    function onChange() {
+      try {
+        sync();
+        if (evaluate()) { schedule(); }
+      } catch (e) {
+        /* 靜默（AD-8） */
+      }
+    }
+
+    /**
+     * 初始化（只生效 1 次）。不拋例外。
+     * @returns {boolean} 是否已開始監看（ineligible 或失敗時 false）
+     */
+    function init() {
+      if (initialized) { return false; }
+      initialized = true;
+      try {
+        deps = getDeps();
+        if (statusNow() === "ineligible") { return false; }
+        deps.store.subscribe(onChange);
+        onChange();
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    return { init: init };
+  }
+
+  // 預設實例：建立時只設定區域變數，不呼叫任何瀏覽器 API（LD-2）
+  var instance = create(root, defaultDeps);
+
+  return {
+    init: instance.init,
+    create: create
+  };
+});
+
 /* ui/banner.js */
 /*
  * ui/banner.js — 全域儲存警示列與讀取失敗提示（FE-07）
@@ -12256,16 +13411,24 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * 並呼叫 performance.mark("emt-page-shown")（QA 量 AC-22-01 的輔助點）。同頁重複 go 不重播。
  * 起始頁（尚無目前頁面）不播放動畫，只做 mark。
  * （v0.4，FE-32）首次進入模式（§4.2 v0.4 router 新行為、§7.9；契約 §5.5 FS-2、FS-3）：
- * - go(tabId) 成功時設 document.body.dataset.tab = tabId（CSS 依此顯示頁尾「返回難易度設定」，AC-25-07）。
- * - body[data-entry="firstRun"] 時只接受 customizer、sources，其他回 false（AC-25-01、AC-20-03）。
+ * - go(tabId) 成功時設 document.body.dataset.tab = tabId（供 CSS 依目前頁面調整版面）。
+ * - body[data-entry="firstRun"] 時只接受 FIRST_RUN_TABS，其他回 false（AC-25-01、AC-20-03、SP-4）。
  * - start() 訂閱 store：收到 "entry" tag 且 runtime.entryMode === "main" → body.dataset.entry = "main"、
  *   go("dashboard")（「開始學習」與首次還原成功共用此路徑，view 不直接切頁；換頁動畫照常）。
  * （v0.5，FE-38）隱藏頁守門（§4.2 v0.5 router 新行為、§7.16；契約 §5.8 HT-3、HT-5、DS-05；AC-20-04、E-68）：
  * - go(tabId) 遇 HIDDEN_TAB_IDS（呼叫時取 EMT.core.constants）→ 首次模式回 false、不切頁；
  *   一般模式改 go("dashboard") 並回 false。不顯示錯誤、不 console.error。[data-go]、程式內部呼叫皆經此守門，
- *   因此隱藏頁的 view 照常登錄（TAB_IDS、register 仍接受 7 個 TabId），但永遠不會 mount。
+ *   因此隱藏頁的 view 照常登錄（TAB_IDS、register 接受全部 TabId），但永遠不會 mount。
  * - start() 綁定 window 的 hashchange，並在啟動時檢查一次 location.hash：片段正規化（normalizeHash）後
  *   屬隱藏頁 → 一般模式 go("dashboard")、首次模式不動作；其他片段一律忽略（本系統不使用 hash 路由，不改網址）。
+ * （v0.19，FE-86）對外頁面與返回（§4.12、§7.25.5；契約 SP-1～SP-6、DS-50；AC-57-01、AC-57-04、AC-20-04）：
+ * - TAB_IDS 10 個、FIRST_RUN_TABS 5 個（與 store.js 同步）。
+ * - go(tabId, opts)：opts.resetReturn 交給 store.setTab。切到不同頁時先同步外殼與 store，再呼叫新頁 show：
+ *   show 內的 returnTarget()（返回按鈕文字）才讀得到本次的 sitePageReturnTab。
+ * - back() → go(returnTarget())；returnTarget() 讀 runtime.sitePageReturnTab，null 時首次模式 customizer、一般模式 dashboard。
+ *   返回目標只在記憶體，本檔不碰任何瀏覽器儲存（SP-4）。
+ * - checkHash：片段正規化後恰為 sources → go("sources", { resetReturn: true })，再以 history.replaceState 移除片段
+ *   （失敗靜默，SP-6）；隱藏頁片段與其他片段行為不變，不新增其他 hash 路由。
  * 載入時只做登錄，不操作 DOM、不讀其他模組成員（LD-2）。
  */
 (function (root) {
@@ -12274,10 +13437,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   var EMT = (root.EMT = root.EMT || {});
 
   // 契約 TabId 的全部值（data-schema.ts §10）
-  var TAB_IDS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources"];
+  var TAB_IDS = ["dashboard", "customizer", "flashcards", "part5", "decoder", "phrasebank", "sources", "about", "contact", "privacy"];
   var DEFAULT_TAB = "dashboard";
-  // （v0.4，FE-32）首次模式可到達的頁面（契約 FS-2、FS-3；與 store.setTab 的限制一致）
-  var FIRST_RUN_TABS = ["customizer", "sources"];
+  // 首次模式的預設返回目標（SP-3）
+  var FIRST_RUN_HOME_TAB = "customizer";
+  // （v0.4，FE-32）首次模式可到達的頁面（契約 FS-2、FS-3、SP-4；與 store.setTab 的限制一致）
+  var FIRST_RUN_TABS = ["customizer", "sources", "about", "contact", "privacy"];
+  // （v0.19）有返回目標的 4 個頁面（SP-3）；不得作為返回目標（契約 RuntimeState.sitePageReturnTab）
+  var SITE_RETURN_TABS = ["sources", "about", "contact", "privacy"];
+  // （v0.19）唯一有導向行為的頁面片段（SP-6）
+  var SOURCES_HASH = "sources";
   // （v0.5，FE-38）constants 模組不存在時的退路（值同契約 HIDDEN_TAB_IDS）
   var FALLBACK_HIDDEN_TAB_IDS = ["decoder", "phrasebank"];
   // 換頁進場動畫 class（05-motion.css）
@@ -12421,18 +13590,40 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
+   * 同步外殼（導覽、body[data-tab]、選單）與 store.currentTab。
+   * @param {string} tabId
+   * @param {{resetReturn?: boolean}} [opts]
+   */
+  function syncShell(tabId, opts) {
+    markNav(tabId);
+    markBodyTab(tabId);
+    setMenuOpen(false);
+
+    // 同步執行期狀態（store 存在才呼叫）
+    var store = EMT.store;
+    if (store && store.actions && typeof store.actions.setTab === "function") {
+      try {
+        store.actions.setTab(tabId, opts);
+      } catch (e2) {
+        if (typeof console !== "undefined") console.error("[EMT.router] setTab 失敗", e2);
+      }
+    }
+  }
+
+  /**
    * 切換頁籤。
    * @param {string} tabId 契約 TabId；不合法時忽略
+   * @param {{resetReturn?: boolean}} [opts] resetReturn：不記錄返回目標（SP-6 的 #sources 入口）
    * @returns {boolean} 是否切換成功
    */
-  function go(tabId) {
+  function go(tabId, opts) {
     if (!isTabId(tabId)) return false;
     // （v0.5）隱藏頁：首次模式維持原頁；一般模式改顯示主控台（HT-3、E-68，不顯示錯誤）
     if (isHiddenTab(tabId)) {
       if (!isFirstRun()) go(DEFAULT_TAB);
       return false;
     }
-    // 首次模式只能在難易度設定與資料來源頁之間往返（AC-25-01、AC-25-07）
+    // 首次模式只能在難易度設定與 4 個對外頁面之間往返（AC-25-01、AC-25-07、SP-4）
     if (isFirstRun() && FIRST_RUN_TABS.indexOf(tabId) < 0) return false;
     var next = sectionOf(tabId);
     if (!next) return false;
@@ -12462,26 +13653,49 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       if (mo && hadPrev) mo.enter(next, ENTER_CLASS, pageAnimMs());
       markShown();
       currentTab = tabId;
+      // （v0.19）先同步再 show：show 內的 returnTarget() 須讀到本次切頁後的返回目標（§7.25.6）
+      syncShell(tabId, opts);
       for (var s = 0; s < mods.length; s++) callSafe(mods[s], "show");
       if (typeof root.scrollTo === "function") {
         try { root.scrollTo(0, 0); } catch (e) { /* 部分環境不支援，忽略 */ }
       }
+      return true;
     }
 
-    markNav(tabId);
-    markBodyTab(tabId);
-    setMenuOpen(false);
-
-    // 同步執行期狀態（store 存在才呼叫）
-    var store = EMT.store;
-    if (store && store.actions && typeof store.actions.setTab === "function") {
-      try {
-        store.actions.setTab(tabId);
-      } catch (e2) {
-        if (typeof console !== "undefined") console.error("[EMT.router] setTab 失敗", e2);
-      }
+    syncShell(tabId, opts);
+    // （v0.19）已在同一頁又經 #sources 進入：返回目標被清除，重呼 show 讓返回按鈕文字同步（SP-6）
+    if (opts && opts.resetReturn === true) {
+      for (var r = 0; r < mods.length; r++) callSafe(mods[r], "show");
     }
     return true;
+  }
+
+  /**
+   * （v0.19）返回目標（SP-3）：runtime.sitePageReturnTab；為 null 或不是可返回的頁面時，
+   * 首次模式回 customizer、一般模式回 dashboard。
+   * @returns {string} TabId
+   */
+  function returnTarget() {
+    var saved = null;
+    var store = EMT.store;
+    if (store && typeof store.getState === "function") {
+      try {
+        var st = store.getState();
+        saved = st && st.runtime ? st.runtime.sitePageReturnTab : null;
+      } catch (e) {
+        saved = null;
+      }
+    }
+    if (isTabId(saved) && !isHiddenTab(saved) && SITE_RETURN_TABS.indexOf(saved) < 0) return saved;
+    return isFirstRun() ? FIRST_RUN_HOME_TAB : DEFAULT_TAB;
+  }
+
+  /**
+   * （v0.19）返回進入對外頁面之前的畫面（SP-3、SP-4）；只切頁，不寫入任何儲存。
+   * @returns {boolean} 是否切換成功
+   */
+  function back() {
+    return go(returnTarget());
   }
 
   /** 往上找具有指定屬性的元素（不超過 boundary） */
@@ -12531,12 +13745,34 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
-   * （v0.5）檢查目前網址片段：屬隱藏頁 → 一般模式顯示主控台；首次模式與其他片段不動作、不改網址。
-   * @returns {boolean} 是否因隱藏頁片段導向主控台
+   * （v0.19）移除網址片段，重新載入時回到一般起始畫面（SP-6）；replaceState 不會再觸發 hashchange。
+   * 環境不支援或拋例外（部分 file:// 環境）→ 靜默略過。
+   */
+  function removeHash() {
+    var loc = root.location;
+    var hist = root.history;
+    if (!loc || !hist || typeof hist.replaceState !== "function") return;
+    try {
+      hist.replaceState(null, "", String(loc.pathname || "") + String(loc.search || ""));
+    } catch (e) {
+      /* 失敗靜默（SP-6） */
+    }
+  }
+
+  /**
+   * 檢查目前網址片段（只由 start 與 hashchange 呼叫）：
+   * （v0.19）恰為 sources → 開啟資料來源頁並移除片段，首次模式也可（SP-6）；
+   * （v0.5）屬隱藏頁 → 一般模式顯示主控台，首次模式不動作；其他片段不動作。後兩者不改網址。
+   * @returns {boolean} 是否因片段而切頁
    */
   function checkHash() {
     var loc = root.location;
     var tab = normalizeHash(loc && typeof loc.hash === "string" ? loc.hash : "");
+    if (tab === SOURCES_HASH) {
+      if (!go(SOURCES_HASH, { resetReturn: true })) return false;
+      removeHash();
+      return true;
+    }
     if (!tab || !isHiddenTab(tab) || isFirstRun()) return false;
     go(DEFAULT_TAB);
     return true;
@@ -12599,6 +13835,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     TAB_IDS: TAB_IDS.slice(),
     start: start,
     go: go,
+    back: back,
+    returnTarget: returnTarget,
     current: function () {
       return currentTab;
     },
@@ -12610,6 +13848,95 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
   };
 })(typeof self !== "undefined" ? self : this);
+
+/* ui/site-return.js */
+/*
+ * ui/site-return.js — 對外頁面共用的返回按鈕（FE-87）
+ * 依據：architecture.md v0.14 §4.12「EMT.ui.siteReturn」、§7.25.5、§7.25.6；契約 README §13.3 SP-3、SP-4
+ * 涵蓋：US-57、AC-53-01、AC-55-01、AC-57-01、AC-25-07
+ *
+ * EMT.ui.siteReturn
+ * - create(dom) → button.btn.btn--link.site-return：點擊只呼叫 EMT.router.back()，本檔不改 store、不碰瀏覽器儲存。
+ *   建立時不寫文字：mount 早於本次切頁的 store 同步，文字一律由 view 的 show 呼叫 refresh 寫入。
+ * - refresh(btn)：文字依 EMT.router.returnTarget() 更新為「返回{TAB_LABELS[目標]}」。
+ * - returnText(target, labels)：組字純函式，可單獨測試。
+ * 按鈕由各頁放在內容區（data-site-page-content）之外，不算入 AC-55-01 的內容。
+ * 載入時只做登錄，不讀 document、不取用其他模組（LD-2）；取用的模組不存在時丟出含模組名稱的 Error（LD-3）。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.ui = root.EMT.ui || {};
+    root.EMT.ui.siteReturn = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (root) {
+  "use strict";
+
+  /** 取得 core/constants（呼叫時取用，LD-2） */
+  function constants() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../core/constants.js");
+    } else {
+      m = root.EMT && root.EMT.core && root.EMT.core.constants;
+    }
+    if (!m) { throw new Error("EMT.core.constants 未載入（ui/site-return.js）"); }
+    return m;
+  }
+
+  /** 取得 router（呼叫時取用，LD-2） */
+  function router() {
+    var r = root && root.EMT && root.EMT.router;
+    if (!r) { throw new Error("EMT.router 未載入（ui/site-return.js）"); }
+    return r;
+  }
+
+  /**
+   * 返回按鈕文字（純函式）。
+   * @param {string} target 返回目標 TabId
+   * @param {Object<string, string>} labels TAB_LABELS
+   * @returns {string}
+   */
+  function returnText(target, labels) {
+    var label = labels && labels[target];
+    return "返回" + (typeof label === "string" ? label : "");
+  }
+
+  /**
+   * 建立返回按鈕。
+   * @param {object} dom EMT.core.dom
+   * @returns {HTMLButtonElement}
+   */
+  function create(dom) {
+    return dom.el("button", {
+      className: "btn btn--link site-return",
+      attrs: { type: "button" },
+      on: {
+        click: function () {
+          router().back();
+        }
+      }
+    });
+  }
+
+  /**
+   * 依目前的返回目標更新按鈕文字。
+   * @param {HTMLElement} btn create 建立的按鈕
+   */
+  function refresh(btn) {
+    if (!btn) return;
+    btn.textContent = returnText(router().returnTarget(), constants().TAB_LABELS);
+  }
+
+  return {
+    returnText: returnText,
+    create: create,
+    refresh: refresh
+  };
+});
 
 /* ui/toast.js */
 /*
@@ -12697,9 +14024,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * EMT.ui.versionLine.init(doc?)
  * - 只從 DOM 讀 name 為 emt-app-version 與 emt-build-id 兩個 meta 的 content（各須恰 1 個），
  *   交給 EMT.core.version.versionLineText 組字；同一份 document 只讀一次（結果存模組變數）。
- * - 文字合法且有 #footer-sources → 以 core/dom.js 建立 <p id="app-version" class="app-footer__version">（textContent），
- *   插在 #footer-sources 之後（「正下方」）；已存在則只更新文字（重入安全）。不設 tabindex、role、事件。
- * - 文字不合法（任一 meta 缺少／重複、版本或 BUILD_ID 不符格式）或找不到 #footer-sources → 不建節點，已存在則移除（VR-8）。
+ * - 文字合法且有 #footer-links（v0.19，FE-86：錨點由 #footer-sources 改為頁尾連結列，VR-7、architecture §7.25.6）
+ *   → 以 core/dom.js 建立 <p id="app-version" class="app-footer__version">（textContent），
+ *   插在 #footer-links 之後（「正下方」）；已存在則只更新文字（重入安全）。不設 tabindex、role、事件。
+ * - 文字不合法（任一 meta 缺少／重複、版本或 BUILD_ID 不符格式）或找不到 #footer-links → 不建節點，已存在則移除（VR-8）。
  * - 整個 init 包在 try 內：任何例外回 { rendered: false, text: null }，不拋出、不輸出錯誤訊息到主控台。
  * - 不發任何請求、不讀檔、不碰 store 與瀏覽器儲存；版本號一律來自 meta，本檔不寫死任何版本號（VR-5、VR-6）。
  * - 頁尾位於 #app-main 之外，所有畫面共用同一個節點 → 每個畫面恰 1 行（由 DOM 結構保證）。
@@ -12720,8 +14048,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   /** 版本行元素 id 與 class（architecture.md §7.20.1） */
   var LINE_ID = "app-version";
   var LINE_CLASS = "app-footer__version";
-  /** 版本行的錨點：頁尾「資料來源與授權」連結 */
-  var ANCHOR_ID = "footer-sources";
+  /** 版本行的錨點：頁尾連結列（v0.19，FE-86） */
+  var ANCHOR_ID = "footer-links";
 
   /** 已讀取的 document 與組好的文字（同一份 document 只讀一次） */
   var readDoc = null;
@@ -14449,7 +15777,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - （v0.9，FE-66；契約 v0.14 DB-4、AC-39-04、Q-61）目標行一律以生效色級組字（藍、金套用時為「綠級・每日 15 字」），
  *   不再顯示目標與生效兩個色級的對照註記與「・」分隔；色點亦依生效色級；「變更」改為外框按鈕（10-dashboard.css）。
  * - (2) 3 格數據 section.card.db-stats（aria-label「學習數據」）：連續打卡天數（強調橘圖示 + 數字 + 天）→
- *   單字掌握率（大字 % + 小字「已掌握 N 字」）→ 模擬測驗正確率；無資料「—」（DB-5）
+ *   單字掌握率（大字 % + 小字「已掌握 N 字」）→ 模擬測驗已答對行（v0.19）；無資料「—」（DB-5）
  * - (3) 近 7 天圖表 section.card.db-chart：ol.db-bars（7 根）或空狀態「開始學習後會顯示紀錄」（layout.chartIsEmpty）
  * - (4) 「資料備份」收合區塊 section.card.db-backup：標題列 toggle（aria-expanded = runtime.dashboard.backupExpanded）→
  *   展開區：備份說明 → 「匯出備份」「匯入備份」→ NT-1 → 「安裝 App」（IN-1）→ 隱藏 file input（DB-6）
@@ -14458,6 +15786,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   toggle 只呼叫 store.actions.setBackupExpanded（不寫 localStorage）；訂閱 "dashboard" tag 時只更新 aria-expanded、
  *   展開區 hidden 與安裝區，節點不重建（焦點留在 toggle）
  * 所有文字以 textContent 呈現（經 core/dom.js）；版面文字於呼叫時取 EMT.core.layout（LD-2）。
+ *
+ * （v0.19，FE-84；architecture.md v0.14 §7.25.1、§7.25.2；契約 README §13.1 AS-1、AS-3、AS-4、AS-7、§11.4 DB-5、DS-51；
+ *   AC-49-01、AC-49-02、AC-49-04、AC-49-08）第 3 格改為標籤「模擬測驗」與已答對行（K、Q、P 由 part5flow.answeredSummary 計算，
+ *   與模擬測驗頁同一份題庫與同一個函式）；Q = 0 顯示 statNoData。totalAnswered、totalCorrect 照常保存但不再顯示。
  *
  * 寫法：純邏輯（dashboardModel、goalInfoOf、importMessage、progressModel、ringGeometry）以 module.exports 匯出供 Node 測試；
  * 瀏覽器下登錄 EMT.views "dashboard"，載入時不操作 DOM。
@@ -14485,11 +15817,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         GOAL: require("../core/goal.js"),
         STREAK: require("../core/streak.js"),
         LEARN: require("../core/learning.js"),
-        LAY: require("../core/layout.js")
+        LAY: require("../core/layout.js"),
+        PF: require("../core/part5flow.js")
       };
     } else {
       var c = root.EMT.core;
-      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, LEARN: c.learning, LAY: c.layout };
+      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, LEARN: c.learning, LAY: c.layout, PF: c.part5flow };
     }
     return coreCache;
   }
@@ -14521,7 +15854,6 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   // ── 畫面文字（AC 引號內文案逐字使用；v0.12 主控台版面文字取 EMT.core.layout.LAYOUT_TEXTS）──
   var TEXT = {
     title: "學習主控台",
-    accuracy: "模擬測驗正確率",
     // （v0.12，SD-FB-41）今日任務卡標題、3 格數據區的 aria-label、近 7 天圖表標題
     todayTitle: "今日任務",
     statsLabel: "學習數據",
@@ -14658,24 +15990,31 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     };
   }
 
+  /** （v0.19，FE-84）模擬測驗題庫：與 views/part5.js 相同的取得方式（AS-1）；取不到 → 空題庫 */
+  function part5Bank() {
+    var c = root && root.EMT && root.EMT.content;
+    return c && Array.isArray(c.part5) ? c.part5 : [];
+  }
+
   /**
-   * 今日進度、掌握率、正確率與近 7 天長條的計算值（FE-31；契約 README §5.4 LR-6）。dashboardModel 由此組出畫面文字。
+   * 今日進度、掌握率、已答對行與近 7 天長條的計算值（FE-31；契約 README §5.4 LR-6）。dashboardModel 由此組出畫面文字。
    * - 主環：X = learning.todayCount、D = learning.dailyGoal(生效色級)；X 可超過 D；X ≥ D → done、滿圈。
    * - 掌握率 = learning.masteryRate(runtime.studySet, data.masteredWordKeys)；
-   *   正確率 = learning.percentOf(part5.totalCorrect, part5.totalAnswered)；null → 「—」。
+   *   已答對行 = part5flow.answeredSummary(題庫 id, part5CorrectIds)（AS-1～AS-4）；Q = 0 → statNoData「—」。
    * - 長條：learning.chartSeries(learnedHistory, X, today)，由舊到新 7 筆；高度 = 字數 ÷ 最大字數（全 0 → 0）。
    * 不修改傳入值；state 缺漏時以預設值計算，不拋錯。
    * @param {{data: object, runtime: object}|null} state store.getState() 的結果
    * @param {string} today 本地日期 YYYY-MM-DD（store.today()）
+   * @param {*} [bank] 模擬測驗題庫；省略時取 EMT.content.part5
    * @returns {{
    *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
    *   mastery: { label: string, numer: number, denom: number, percent: (number|null), ratio: number, text: string },
-   *   accuracy: { label: string, percent: (number|null), ratio: number, text: string },
+   *   answered: { label: string, summary: ({k: number, q: number, p: number}|null), text: string },
    *   bars: { date: string, label: string, count: number, heightPct: number, isToday: boolean }[],
    *   maxCount: number
    * }}
    */
-  function progressModel(state, today) {
+  function progressModel(state, today, bank) {
     var K = core();
     var L = K.LEARN;
     var LT = K.LAY.LAYOUT_TEXTS;
@@ -14701,11 +16040,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       doneText: done ? TEXT.goalDone : ""
     };
 
-    // 掌握率、正確率（AC-30-10、AC-39-05）
+    // 掌握率、已答對行（AC-30-10、AC-39-05、AS-4）
     var mr = L.masteryRate(Array.isArray(rt.studySet) ? rt.studySet : [],
       Array.isArray(d.masteredWordKeys) ? d.masteredWordKeys : []);
-    var p5 = d.part5 && typeof d.part5 === "object" ? d.part5 : {};
-    var acc = L.percentOf(p5.totalCorrect, p5.totalAnswered);
+    var bankIds = K.PF.bankIdsOf(bank === undefined ? part5Bank() : bank);
+    var answered = K.PF.answeredSummary(bankIds, d.part5CorrectIds);
 
     // 近 7 天長條圖（AC-30-08）；最右（today）一律用 X
     var series = L.chartSeries(d.learnedHistory || null, x, today);
@@ -14734,11 +16073,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         ratio: mr.percent === null ? 0 : clampRatio(mr.percent / 100),
         text: percentText(mr.percent)
       },
-      accuracy: {
-        label: LT.statAccuracyLabel,
-        percent: acc,
-        ratio: acc === null ? 0 : clampRatio(acc / 100),
-        text: percentText(acc)
+      answered: {
+        label: LT.statPart5Label,
+        summary: answered,
+        text: K.PF.answeredSummaryText(answered) || LT.statNoData
       },
       bars: bars,
       maxCount: max
@@ -14749,22 +16087,23 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * （v0.12，FE-58）主控台全部顯示值（architecture.md §4.8；契約 DB-2～DB-6）。文字全部經 EMT.core.layout。
    * @param {{data: object, runtime: object}|null} state store.getState() 的結果
    * @param {string} today 本地日期 YYYY-MM-DD
+   * @param {*} [bank] 模擬測驗題庫；省略時取 EMT.content.part5
    * @returns {{
    *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
    *   goal: { text: string, colorId: (string|null) },
-   *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, accuracyText: string },
+   *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, answeredText: string },
    *   chart: { empty: boolean, bars: object[] },
    *   backupExpanded: boolean
    * }}
    */
-  function dashboardModel(state, today) {
+  function dashboardModel(state, today, bank) {
     var K = core();
     var LAY = K.LAY;
     var LT = LAY.LAYOUT_TEXTS;
     var st = state && typeof state === "object" ? state : {};
     var d = st.data && typeof st.data === "object" ? st.data : {};
     var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
-    var p = progressModel(st, today);
+    var p = progressModel(st, today, bank);
 
     // 目標行（DB-4 v0.14）：只以生效色級組字與上色（goalInfoOf 以 appliedScore 推導生效色級）
     var info = goalInfoOf(d.goal || null);
@@ -14781,7 +16120,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         streakUnit: LT.statStreakUnit,
         masteryText: p.mastery.text,
         masteredText: LAY.fill(LT.statMasteredCount, { n: LAY.formatInt(masteredN) }),
-        accuracyText: p.accuracy.text
+        answeredText: p.answered.text
       },
       chart: {
         empty: LAY.chartIsEmpty(p.bars.map(function (b) { return b.count; })),
@@ -14926,7 +16265,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       D.setText(refs.streakValue, m.stats.streakValue);
       D.setText(refs.masteryValue, m.stats.masteryText);
       D.setText(refs.masteredSub, m.stats.masteredText);
-      D.setText(refs.accuracyValue, m.stats.accuracyText);
+      D.setText(refs.answeredValue, m.stats.answeredText);
 
       // 近 7 天（AC-39-07）：空狀態只顯示一行文字；否則 7 根長條，節點固定，只改高度與文字
       refs.bars.hidden = m.chart.empty;
@@ -15137,7 +16476,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var streakValue = D.el("span", { className: "db-stat__num", text: TEXT.empty });
       var masteryValue = D.el("p", { className: "db-stat__value", text: TEXT.empty });
       var masteredSub = D.el("p", { className: "db-stat__sub", text: "" });
-      var accuracyValue = D.el("p", { className: "db-stat__value", text: TEXT.empty });
+      var answeredValue = D.el("p", { className: "db-stat__value db-stat__value--answered", text: TEXT.empty });
       var section = D.el("section", { className: "card db-stats", attrs: { "aria-label": TEXT.statsLabel } }, [
         D.el("div", { className: "db-stat db-stat--streak" }, [
           D.el("p", { className: "db-stat__label", text: LT.statStreakLabel }),
@@ -15152,13 +16491,13 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           masteryValue,
           masteredSub
         ]),
-        D.el("div", { className: "db-stat db-stat--accuracy" }, [
-          D.el("p", { className: "db-stat__label", text: LT.statAccuracyLabel }),
-          accuracyValue
+        D.el("div", { className: "db-stat db-stat--answered" }, [
+          D.el("p", { className: "db-stat__label", text: LT.statPart5Label }),
+          answeredValue
         ])
       ]);
       return { section: section, streakValue: streakValue, masteryValue: masteryValue,
-        masteredSub: masteredSub, accuracyValue: accuracyValue };
+        masteredSub: masteredSub, answeredValue: answeredValue };
     }
 
     /** (3) 近 7 天圖表：長條（節點固定 DASHBOARD_CHART_DAYS 組）與空狀態 */
@@ -15260,7 +16599,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         streakValue: stats.streakValue,
         masteryValue: stats.masteryValue,
         masteredSub: stats.masteredSub,
-        accuracyValue: stats.accuracyValue,
+        answeredValue: stats.answeredValue,
         bars: chart.bars,
         chartEmpty: chart.empty,
         barCells: chart.cells,
@@ -17065,8 +18404,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   AC-11-04、AC-46-06、AC-48-01、AC-48-06、AC-48-09、AC-48-11、AC-48-12）
  * - question 依 part5flow.questionState 分 answered、lockedReview、idle；lockedReview 不可作答，有回饋、解析與「下一題」，
  *   鎖定只由狀態推導，本檔不寫入任何狀態（LV-4）。資料不完整時回饋為 TEXT.badData，全畫面恰 1 次，解析只顯示非空段落（LV-6）。
- * - 結算 y = 0 顯示 summaryNoNewAnswers，a ≥ 1 才顯示累計行（SM-2）；allCorrect 只在 phase = summary 且 y ≥ 1 顯示本輪結算（SM-3）。
+ * - 結算 y = 0 顯示 summaryNoNewAnswers（SM-2）；allCorrect 只在 phase = summary 且 y ≥ 1 顯示本輪結算（SM-3）。
  * - .p5-record 於開關後顯示開關說明（HN-1）；K ≥ 1 且不是 allCorrect 時另有清除按鈕；allCorrect 的清除按鈕為唯一按鈕（CR-10、UO-7）。
+ *
+ * （v0.19，FE-84；architecture.md v0.14 §7.25.1、§7.25.2；契約 README §13.1 AS-3、AS-5、AS-6、§5.11 CR-5、SM-2、DS-51；
+ *   AC-49-02～AC-49-05、AC-49-07）結算區以已答對行取代累計行：y ≥ 1、y = 0 都顯示，a = 0 也顯示，Q = 0 不建節點；
+ *   allCorrect 畫面不加。確認對話框改為定稿文字。totalAnswered、totalCorrect 由 store 照常更新，本檔不再顯示。
  *
  * 寫法：純邏輯（splitSentence、splitStructure、optionState、buildViewModel、feedbackOf、shouldIgnoreClick 等）
  * 在 Node 下以 module.exports 匯出供測試；
@@ -17124,15 +18467,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     summaryNoNewAnswers: "本輪沒有新作答的題目",
     filterHint: "關閉時顯示全部題目，答對過的題目會以綠色鎖定。",
     filterHintAllCorrect: "要檢視全部題目，請關閉上方的「只練沒答對的題目」。",
-    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "累計答題數與正確率不受影響"],
+    clearConfirmMustInclude: ["將清除全部題目的答對紀錄", "「已答對」會回到 0 題"],
     confirmOk: "確定",
     confirmCancel: "取消"
   };
 
-  // （v0.15，FE-75）SD 定稿文字（architecture.md §7.21.4 文字定稿表，逐字）
+  // （v0.15，FE-75；v0.19，FE-84）SD 定稿文字（architecture.md v0.14 §7.25.2 文字定稿表，逐字）
   var RECORD_TEXT = {
     confirmTitle: "清除答對紀錄",
-    confirmMessage: "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。"
+    confirmMessage: "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。"
   };
 
   /** 取得契約常數（Node 下 require，瀏覽器下讀 EMT.core.constants） */
@@ -17252,7 +18595,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * @param {{ ids?: string[], only?: boolean }} [record] （v0.15）答對紀錄與開關；缺省 { ids: [], only: false }
    * @returns {object} （v0.15）各 kind 皆附 k（已答對題數）、q（題庫題數）、only（開關）
    *   { kind: "empty" }
-   *   { kind: "summary", roundCorrect, roundAnswered, totalCorrect, totalAnswered }
+   *   { kind: "summary", roundCorrect, roundAnswered, answeredText }（v0.19，AS-5；answeredText 為已答對行）
    *   { kind: "allCorrect", inSummary, roundCorrect, roundAnswered }（v0.15，UO-3、UO-7）
    *   { kind: "question", index, number, total, typeLabel, segments, options[], locked, correctIndex,
    *     isCorrect, valid, explanation: { coreStrategy, structureLines }, correctBadge, questionState }（v0.18，LV-1）
@@ -17292,8 +18635,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         kind: "summary",
         roundCorrect: roundC,
         roundAnswered: roundA,
-        totalCorrect: isIndex(p.totalCorrect) ? p.totalCorrect : 0,
-        totalAnswered: isIndex(p.totalAnswered) ? p.totalAnswered : 0,
+        answeredText: PF.answeredSummaryText(PF.answeredSummary(bankIds, rec.ids)),
         k: kCount,
         q: qCount,
         only: rec.only
@@ -17721,7 +19063,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     ]);
   }
 
-  /** 結算畫面（AC-11-04、AC-11-07；v0.18，SM-1、SM-2：y = 0 改顯示 summaryNoNewAnswers，a = 0 無累計行） */
+  /** 結算畫面（AC-11-04、AC-11-07；v0.18，SM-1、SM-2：y = 0 改顯示 summaryNoNewAnswers；v0.19，AS-5：其下為已答對行，取代累計行） */
   function renderSummary(vm, T) {
     var D = dom();
     var restartBtn = D.el("button", {
@@ -17741,9 +19083,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         ? D.el("p", { className: "p5-summary__score", attrs: { "data-p5": "summary-score" },
           text: "答對 " + vm.roundCorrect + " / " + vm.roundAnswered })
         : D.el("p", { className: "p5-summary__none", attrs: { "data-p5": "summary-none" }, text: T.summaryNoNewAnswers }),
-      vm.totalAnswered >= 1
-        ? D.el("p", { className: "p5-summary__total",
-          text: "累計答對 " + vm.totalCorrect + " / " + vm.totalAnswered })
+      vm.answeredText
+        ? D.el("p", { className: "p5-summary__answered", attrs: { "data-p5": "summary-answered" }, text: vm.answeredText })
         : null,
       D.el("div", { className: "btn-row" }, [restartBtn])
     ]);
@@ -18610,6 +19951,202 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   };
 });
 
+/* views/site-pages.js */
+/*
+ * views/site-pages.js — 應用內「關於我」「聯絡我們」「隱私權政策」三頁（FE-87）
+ * 依據：architecture.md v0.14 §4.12、§7.25.6、§7.25.7；契約 data-schema.ts §17、README §13.3 SP-3、SP-5、SP-7～SP-9、
+ *       §13.4 SC-1～SC-6、§13.6 ML-1、ML-2
+ * 涵蓋：US-53、US-54、US-55、US-57、AC-53-01～AC-53-03、AC-53-05、AC-54-01、AC-55-01～AC-55-03、AC-56-04、AC-57-01～AC-57-03
+ *
+ * 規則：
+ * - 文案只取自 EMT.core.siteContent，本檔不存任何文案（SC-1）；隨程式打包，執行期不發請求（SC-5）。
+ * - 全部經 core/dom.js 建立並以 textContent 寫入，不拼接 HTML（C-7、SC-2）。
+ * - 內容區根元素標 data-site-page-content="{id}"，只含頁面名稱與 blocks；返回按鈕在內容區之外（SP-3、SC-4、AC-55-01）。
+ * - 標題層級：頁面名稱 h2、heading h3（品牌標題列已是 h1，SP-7）。
+ * - 信箱行：純文字 p，非連結，無 tabindex、title、aria-label、事件（SC-3、ML-2）。
+ * - page 連結用 data-go，由 router 的委派事件切頁（同 SP-3）；本檔不碰 store 與瀏覽器儲存（SP-5、SC-6）。
+ * - mount 建 1 次；show 只更新返回按鈕文字並把焦點移到 h2（§7.25.6）。
+ *
+ * 純邏輯（findPage、renderBlock、renderPage）傳入 dom 即可在 Node 測試；
+ * 瀏覽器下登錄 3 個頁面，載入時不取用其他模組（LD-2），取用的模組不存在時丟出含模組名稱的 Error（LD-3）。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.views = root.EMT.views || {};
+    root.EMT.views.sitePages = api;
+    if (typeof root.EMT.views.register === "function") {
+      api.PAGE_IDS.forEach(function (id) {
+        root.EMT.views.register(id, api.createModule(id));
+      });
+    }
+  }
+})(typeof self !== "undefined" ? self : this, function (root) {
+  "use strict";
+
+  /** 本檔登錄的頁面代碼（SP-1） */
+  var PAGE_IDS = ["about", "contact", "privacy"];
+
+  /** 取得 core/dom（呼叫時取用，LD-2） */
+  function domApi() {
+    var m = root && root.EMT && root.EMT.core && root.EMT.core.dom;
+    if (!m) { throw new Error("EMT.core.dom 未載入（views/site-pages.js）"); }
+    return m;
+  }
+
+  /** 取得 core/site-content（呼叫時取用，LD-2） */
+  function siteContent() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../core/site-content.js");
+    } else {
+      m = root.EMT && root.EMT.core && root.EMT.core.siteContent;
+    }
+    if (!m) { throw new Error("EMT.core.siteContent 未載入（views/site-pages.js）"); }
+    return m;
+  }
+
+  /** 取得 ui/site-return（呼叫時取用，LD-2） */
+  function siteReturn() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../ui/site-return.js");
+    } else {
+      m = root.EMT && root.EMT.ui && root.EMT.ui.siteReturn;
+    }
+    if (!m) { throw new Error("EMT.ui.siteReturn 未載入（views/site-pages.js）"); }
+    return m;
+  }
+
+  /**
+   * 依代碼找頁面（純函式）；找不到回 null。
+   * @param {Array<object>} pages SITE_PAGES
+   * @param {string} id
+   * @returns {object|null}
+   */
+  function findPage(pages, id) {
+    var list = Array.isArray(pages) ? pages : [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && list[i].id === id) return list[i];
+    }
+    return null;
+  }
+
+  /**
+   * 建立行內內容（SC-2）：text → 字串（由 dom.append 轉為文字節點）；external → a；page → data-go 按鈕。
+   * @param {object} dom
+   * @param {object} inline SiteInline
+   * @returns {string|HTMLElement|null}
+   */
+  function renderInline(dom, inline) {
+    if (inline.kind === "text") return inline.text;
+    if (inline.kind === "external") {
+      return dom.el("a", { attrs: { href: inline.href, target: "_blank", rel: "noopener" }, text: inline.text });
+    }
+    if (inline.kind === "page") {
+      return dom.el("button", {
+        className: "btn--link site-page__link",
+        attrs: { type: "button", "data-go": inline.target },
+        text: inline.text
+      });
+    }
+    return null;
+  }
+
+  /** 把行內內容陣列轉為子節點 */
+  function renderInlines(dom, inlines) {
+    return inlines.map(function (inline) {
+      return renderInline(dom, inline);
+    });
+  }
+
+  /**
+   * 建立區塊元素（SC-2、SC-3）。
+   * @param {object} dom
+   * @param {object} block SiteBlock
+   * @param {string} contactText SOURCES_CONTACT_TEXT
+   * @returns {HTMLElement|null} 不認識的 kind 回 null
+   */
+  function renderBlock(dom, block, contactText) {
+    if (block.kind === "heading") {
+      return dom.el("h3", { className: "site-page__heading", text: block.text });
+    }
+    if (block.kind === "paragraph") {
+      return dom.el("p", null, renderInlines(dom, block.inlines));
+    }
+    if (block.kind === "list") {
+      return dom.el("ul", null, block.items.map(function (item) {
+        return dom.el("li", null, renderInlines(dom, item));
+      }));
+    }
+    if (block.kind === "contactLine") {
+      return dom.el("p", { className: "site-page__contact", text: contactText });
+    }
+    return null;
+  }
+
+  /**
+   * 建立整頁（§7.25.6 的 DOM 結構）。
+   * @param {object} dom
+   * @param {object} page SitePage
+   * @param {string} contactText SOURCES_CONTACT_TEXT
+   * @param {HTMLElement} returnBtn 返回按鈕（放在內容區之外）
+   * @returns {{ el: HTMLElement, title: HTMLElement }}
+   */
+  function renderPage(dom, page, contactText, returnBtn) {
+    var title = dom.el("h2", { className: "site-page__title", attrs: { tabindex: "-1" }, text: page.title });
+    var blocks = page.blocks.map(function (block) {
+      return renderBlock(dom, block, contactText);
+    });
+    var content = dom.el("div", {
+      className: "site-page__content",
+      attrs: { "data-site-page-content": page.id }
+    }, [title].concat(blocks));
+    return { el: dom.el("div", { className: "site-page" }, [returnBtn, content]), title: title };
+  }
+
+  /**
+   * 建立單一頁面的 router 模組。
+   * @param {string} id PAGE_IDS 之一
+   * @returns {{ mount: Function, show: Function }}
+   */
+  function createModule(id) {
+    var returnBtn = null;
+    var title = null;
+
+    return {
+      mount: function (rootEl) {
+        var dom = domApi();
+        var site = siteContent();
+        var page = findPage(site.SITE_PAGES, id);
+        if (!rootEl || !page) return;
+        returnBtn = siteReturn().create(dom);
+        var built = renderPage(dom, page, site.SOURCES_CONTACT_TEXT, returnBtn);
+        title = built.title;
+        dom.clear(rootEl);
+        dom.append(rootEl, built.el);
+      },
+      show: function () {
+        if (!returnBtn) return;
+        siteReturn().refresh(returnBtn);
+        // 鍵盤使用者從內容開始；router 隨後自行捲回頁首，這裡不捲動
+        if (title && typeof title.focus === "function") title.focus({ preventScroll: true });
+      }
+    };
+  }
+
+  return {
+    PAGE_IDS: PAGE_IDS,
+    findPage: findPage,
+    renderBlock: renderBlock,
+    renderPage: renderPage,
+    createModule: createModule
+  };
+});
+
 /* views/sources-page.js */
 /*
  * views/sources-page.js — 資料來源與授權頁（FE-17）
@@ -18633,7 +20170,11 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * - （v0.11，FE-77；architecture.md v0.11 §7.22.2、契約 data-schema.ts §16、README §4.3 L-7、AC-23-07）
  *   .src-page 最後（授權聲明區之後）加 1 行聯絡資訊 p.src-muted.src-contact，以 textContent 寫入常數 SOURCES_CONTACT_TEXT。
  *   防爬蟲：常數為帶空格的原值，不做任何字串處理；不是連結、不可聚焦（無 href／tabindex／role／title／data-go）、
- *   不掛事件。全 src/app 非測試原始碼只有下方常數 1 處字面值，註解不重複寫出。
+ *   不掛事件。
+ * - （v0.19，FE-87；architecture.md v0.14 §7.25.6、§7.25.7、契約 SC-1、SP-3、ML-1）
+ *   TEXT.originalLicense、TEXT.trademarkNotice 改取 LEGAL_STATEMENTS，聯絡行改取 core/site-content 的 SOURCES_CONTACT_TEXT，
+ *   本檔不再存這些文字；api 仍匯出同名鍵。皆於讀取時才向 core 取用（LD-2）。
+ *   .src-page 最前面加共用返回按鈕（內容不動），文字由 show 依返回目標更新。
  *
  * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution、brandStatement）可在 Node 測試；
  * 瀏覽器下登錄 EMT.views.register("sources", { mount })。
@@ -18647,13 +20188,25 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     root.EMT.views = root.EMT.views || {};
     root.EMT.views.sourcesPage = api;
     if (typeof root.EMT.views.register === "function") {
-      root.EMT.views.register("sources", { mount: api.mount });
+      root.EMT.views.register("sources", { mount: api.mount, show: api.show });
     }
   }
 })(typeof self !== "undefined" ? self : this, function (root) {
   "use strict";
 
-  /** 畫面固定文字（AC-23-02、Q-31 原文；originalLicense、trademarkNotice 逐字照契約 L-8 LT-3、LT-5） */
+  /** 取得 core/site-content（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function siteContent() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../core/site-content.js");
+    } else {
+      m = root.EMT && root.EMT.core && root.EMT.core.siteContent;
+    }
+    if (!m) { throw new Error("EMT.core.siteContent 未載入（views/sources-page.js）"); }
+    return m;
+  }
+
+  /** 畫面固定文字（AC-23-02、Q-31 原文；originalLicense、trademarkNotice 取自 LEGAL_STATEMENTS，SC-1） */
   var TEXT = {
     title: "資料來源與授權",
     intro: "本檔案使用下列外部資料。網址僅以文字列出，需要時請自行複製到瀏覽器開啟。",
@@ -18665,19 +20218,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     licenseHeading: "本系統的授權",
     codeLicense: "程式碼以 MIT 授權（Copyright JimmyLin）",
     dataLicense: "單字資料以 CC BY-SA 4.0 授權",
-    originalLicense: "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權",
-    trademarkNotice: "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。",
+    get originalLicense() { return siteContent().LEGAL_STATEMENTS.originalContent; },
+    get trademarkNotice() { return siteContent().LEGAL_STATEMENTS.trademark; },
     codeLicenseUrlLabel: "MIT 條款網址",
     dataLicenseUrlLabel: "CC BY-SA 4.0 條款網址",
     // （v0.12，FE-60；NM-3、SD-FB-49）原創內容來源一行的前綴；名稱取 registry 中 ORIGINAL 的 fullName，不寫死
     originalSource: "原創內容來源："
   };
 
-  /**
-   * （v0.11，FE-77）聯絡行文字：逐字照契約 data-schema.ts §16 複製（半形空格 U+0020 分隔，防爬蟲，L-7）。
-   * 不得去空格、replace、split／join 或拼接。
-   */
-  var SOURCES_CONTACT_TEXT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";
+  /** （v0.19，FE-87）目前頁面的返回按鈕（render 建立，show 更新文字） */
+  var returnBtn = null;
 
   /** 欄位標籤 */
   var LABEL = {
@@ -18843,6 +20393,18 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return root.EMT && root.EMT.core && root.EMT.core.dom;
   }
 
+  /** （v0.19，FE-87）取得 ui/site-return（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function siteReturn() {
+    var m = null;
+    if (typeof require === "function" && typeof module === "object") {
+      m = require("../ui/site-return.js");
+    } else {
+      m = root.EMT && root.EMT.ui && root.EMT.ui.siteReturn;
+    }
+    if (!m) { throw new Error("EMT.ui.siteReturn 未載入（views/sources-page.js）"); }
+    return m;
+  }
+
   /** 一列「標籤：值」 */
   function row(dom, label, value, valueClass) {
     return dom.el("div", { className: "src-row" }, [
@@ -18972,15 +20534,18 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       ? entries.map(function (e) { return entryCard(dom, e); })
       : [dom.el("p", { className: "card src-muted", text: TEXT.empty })];
 
+    returnBtn = siteReturn().create(dom);
+
     dom.clear(rootEl);
     dom.append(rootEl, dom.el("div", { className: "src-page" }, [
+      returnBtn,
       dom.el("h2", { className: "src-page__title", text: TEXT.title }),
       dom.el("p", { className: "src-muted", text: TEXT.intro }),
       dom.el("h3", { className: "src-section-title", text: TEXT.externalHeading }),
       dom.el("div", { className: "src-list" }, list),
       licenseSection(dom, picked.wordlists, content.license, content.sources),
       // （v0.11，FE-77）聯絡行：純文字段落、非連結、不可聚焦、無事件（§7.22.2）
-      dom.el("p", { className: "src-muted src-contact", text: SOURCES_CONTACT_TEXT })
+      dom.el("p", { className: "src-muted src-contact", text: siteContent().SOURCES_CONTACT_TEXT })
     ]));
   }
 
@@ -18989,9 +20554,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     render(rootEl);
   }
 
+  /** （v0.19，FE-87）router 的 show：依本次的返回目標更新按鈕文字（SP-3） */
+  function show() {
+    if (returnBtn) siteReturn().refresh(returnBtn);
+  }
+
   return {
     TEXT: TEXT,
-    SOURCES_CONTACT_TEXT: SOURCES_CONTACT_TEXT,
+    get SOURCES_CONTACT_TEXT() { return siteContent().SOURCES_CONTACT_TEXT; },
     selectEntries: selectEntries,
     originalSourceName: originalSourceName,
     formatCount: formatCount,
@@ -18999,7 +20569,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     derivedAttribution: derivedAttribution,
     brandStatement: brandStatement,
     render: render,
-    mount: mount
+    mount: mount,
+    show: show
   };
 });
 
@@ -19912,6 +21483,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  * （v0.9，FE-64）banner.render 之後、pwa.start 之前 EMT.ui.versionLine.init()：讀 emt-app-version、emt-build-id 兩個 meta，
  *   合法才在頁尾「資料來源與授權」正下方建立版本行（VR-5～VR-8）；放在 router.start 前，首次繪製即含版本行。
  * emt-ready 位置不變：一般模式量到主控台入口可點擊，首次模式量到「開始學習」可點擊（AC-22-05）。
+ * （v0.19，FE-88）store.init 之後 EMT.services.ad.start（AD-4 判定；環境不成立時不做任何事）；
+ *   bottomNav.init 之後 EMT.ui.adSlot.init（ineligible 時不訂閱、不建 DOM；載入排在繪製之後，不影響 emt-ready，AC-51-02）。
  * 最後 performance.mark("emt-ready")，並設 document.documentElement.dataset.ready = "1"。
  */
 (function (root) {
@@ -19955,6 +21528,17 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     step("store.init", function () {
       if (EMT.store && typeof EMT.store.init === "function") EMT.store.init();
     });
+    // （v0.19，FE-88）廣告環境判定（AD-4）。服務只拿到版位狀態字串與事件函式，拿不到學習資料（AD-11）
+    step("ad.start", function () {
+      var store = EMT.store;
+      if (EMT.services && EMT.services.ad && typeof EMT.services.ad.start === "function" && store && store.actions) {
+        EMT.services.ad.start({
+          initAd: function (status) { store.actions.initAd(status); },
+          adEvent: function (event) { store.actions.adEvent(event); },
+          getStatus: function () { return store.getState().runtime.ad.status; }
+        });
+      }
+    });
     step("banner.render", function () {
       if (EMT.ui && EMT.ui.banner && typeof EMT.ui.banner.render === "function") EMT.ui.banner.render();
     });
@@ -19986,6 +21570,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     // （v0.4，FE-26）手機底部導覽列：輸入時隱藏（architecture.md §4.2 v0.4 啟動順序、§4.5）
     step("bottomNav.init", function () {
       if (EMT.ui && EMT.ui.bottomNav && typeof EMT.ui.bottomNav.init === "function") EMT.ui.bottomNav.init();
+    });
+    // （v0.19，FE-88）廣告版位（AD-6、DS-47）
+    step("adSlot.init", function () {
+      if (EMT.ui && EMT.ui.adSlot && typeof EMT.ui.adSlot.init === "function") EMT.ui.adSlot.init();
     });
     // （v0.7，FE-50）新版提示列（UP-4、UP-6）
     step("pwaNotice.init", function () {

@@ -39,10 +39,10 @@ jobs:
       - name: Verify deploy directory
         run: |
           set -eu
-          test "$(find dist/site -type f | wc -l)" -eq 8
+          test "$(find dist/site -type f | wc -l)" -eq 13
           cmp dist/site/index.html dist/english-master-track.html
           cmp dist/site/ads.txt sources/deploy/ads.txt
-          for f in index.html manifest.webmanifest sw.js ads.txt icons/icon-192.png icons/icon-512.png icons/icon-maskable-512.png icons/apple-touch-icon-180.png; do
+          for f in index.html manifest.webmanifest sw.js ads.txt about.html contact.html privacy.html robots.txt sitemap.xml icons/icon-192.png icons/icon-512.png icons/icon-maskable-512.png icons/apple-touch-icon-180.png; do
             test -f "dist/site/$f"
           done
       - name: Setup Pages
@@ -50,7 +50,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 只上傳部署目錄（恰 8 檔），不含 docs/、src/、sources/
+          # 只上傳部署目錄（恰 13 檔），不含 docs/、src/、sources/
           path: dist/site
       - name: Deploy to GitHub Pages
         id: deployment

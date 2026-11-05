@@ -64,7 +64,7 @@
     ]
   };
 
-  /** 部署目錄檔案清單（恰 8 檔，DP-1） */
+  /** 部署目錄檔案清單（恰 13 檔，DP-1；v0.14，FE-85：末 5 檔不進預先快取，DP-9） */
   var PWA_DEPLOY_FILES = [
     { path: "index.html", role: "page", mime: "text/html", precached: true, producedBy: "build" },
     { path: "manifest.webmanifest", role: "manifest", mime: "application/manifest+json", precached: true, producedBy: "build" },
@@ -73,7 +73,12 @@
     { path: "icons/icon-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "any", producedBy: "copy" },
     { path: "icons/icon-maskable-512.png", role: "icon", mime: "image/png", precached: true, sizePx: 512, purpose: "maskable", producedBy: "copy" },
     { path: "icons/apple-touch-icon-180.png", role: "appleTouchIcon", mime: "image/png", precached: true, sizePx: 180, producedBy: "copy" },
-    { path: "ads.txt", role: "adsTxt", mime: "text/plain", precached: false, producedBy: "copy" }
+    { path: "ads.txt", role: "adsTxt", mime: "text/plain", precached: false, producedBy: "copy" },
+    { path: "robots.txt", role: "robots", mime: "text/plain", precached: false, producedBy: "build" },
+    { path: "sitemap.xml", role: "sitemap", mime: "application/xml", precached: false, producedBy: "build" },
+    { path: "about.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
+    { path: "contact.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" },
+    { path: "privacy.html", role: "staticPage", mime: "text/html", precached: false, producedBy: "build" }
   ];
 
   /** 預先快取清單（恰 7 項；相對於 sw.js 的網址，SW-6） */

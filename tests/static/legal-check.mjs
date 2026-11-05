@@ -13,6 +13,9 @@ const out = process.argv[2];
 const results = [];
 function rec(tc, ac, ok, note) { results.push({ suite: "legal", tc, ac, result: ok ? "通過" : "失敗", note }); console.log(`  ${ok ? "PASS" : "FAIL"} ${tc} ${ac} ${note}`); }
 const J = (x) => JSON.stringify(x);
+// 第 9 輪（ML-1、ML-3、V-MAIL-02）：只保留現行空白格式；連續地址以規則判斷，本檔不含完整地址
+const CONTACT = "email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m";
+const MAIL_RE = new RegExp("[A-Za-z0-9._%+-]*" + String.fromCharCode(64) + "gm" + "ail" + "\\." + "c" + "om", "ig");
 const html = fs.readFileSync(path.join(ROOT, "dist/english-master-track.html"), "utf8");
 const LT = {
   1: "常用搭配詞",
@@ -72,9 +75,9 @@ rec("TC-23-08a", "AC-23-08 (1)(3)、E-122（V-LGL-05 (a)）", lit.length === 0 &
 {
   const gone = ["多益常考", "多益最常見", "題型對應多益 Part 5", "著作權人 JimmyLin", "保留所有權利"].filter((w) => html.includes(w));
   const count = (s) => html.split(s).length - 1;
-  const ok = gone.length === 0 && [1, 2, 3, 5, 6].every((k) => count(LT[k]) >= 1) && count("email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m") === 1 && count("mailto:") === 0 && count("jimmylin.58390722@gmail.com") === 0;
+  const ok = gone.length === 0 && [1, 2, 3, 5, 6].every((k) => count(LT[k]) >= 1) && count(CONTACT) >= 1 && count("mailto:") === 0 && (html.match(MAIL_RE) || []).length === 0;
   rec("TC-LGL-S01", "AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-07、AC-23-08（V-LGL-01～04、交付檔字串）", ok,
-    `舊文字 ${gone.join("、") || "0 次"}；LT-1 ${count(LT[1])} 次、LT-2 ${count(LT[2])} 次、LT-3 ${count(LT[3])} 次、LT-5 ${count(LT[5])} 次、LT-6 ${count(LT[6])} 次；聯絡行字串 ${count("email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m")} 次、mailto ${count("mailto:")}、無空格位址 ${count("jimmylin.58390722@gmail.com")}`);
+    `舊文字 ${gone.join("、") || "0 次"}；LT-1 ${count(LT[1])} 次、LT-2 ${count(LT[2])} 次、LT-3 ${count(LT[3])} 次、LT-5 ${count(LT[5])} 次、LT-6 ${count(LT[6])} 次；聯絡行字串 ${count(CONTACT)} 次（常數 1 處；v0.19 來源為 core/site-content.js）、mailto ${count("mailto:")}、無空格位址（ML-3 規則）${(html.match(MAIL_RE) || []).length}`);
 }
 // CSS（V-LGL-02、E-123、HN-1、E-134）
 {

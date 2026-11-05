@@ -7,6 +7,7 @@
  * - 建置程式不加權利文字規則（§5.7），檢查集中在本檔。
  * - 固定文字逐字照契約 L-8 複製，不從被測模組取值，避免來源改錯時測試一併跟著錯。
  * - 資料檔以 vm 載入後遞迴走訪字串值，因此不含註解（V-LGL-05 範圍外）；不含 _tools/、_records/。
+ * - （v0.19，FE-87）V-LGL-05 範圍 (c)：關於我、聯絡我們、隱私權政策與 SEO 文字（AC-23-08）；LEGAL_STATEMENTS 與 LT-3、LT-5 逐字相同（V-SITE-02）。
  */
 "use strict";
 
@@ -163,6 +164,40 @@ describe("legal-static.test.js", () => {
       const q = bank.filter((x) => x.id === "p5-009");
       assert.equal(q.length, 1);
       assert.equal(q[0].explanation.coreStrategy, LT_6);
+    });
+  });
+
+  describe("對外頁面文字（V-LGL-05 範圍 (c)，FE-87）", () => {
+    const SITE = require("../core/site-content.js");
+    const P = require("../views/sources-page.js");
+
+    test("三頁、title、description、結構化資料與 SITE_NOSCRIPT：「多益常考」「多益最常見」0 筆；A＋B 同句 0 筆", () => {
+      let n = 0;
+      const hits = [];
+      const scope = {
+        SITE_PAGES: SITE.SITE_PAGES,
+        LEGAL_STATEMENTS: SITE.LEGAL_STATEMENTS,
+        SITE_HOME_SEO: SITE.SITE_HOME_SEO,
+        SITE_HOME_JSON_LD: SITE.SITE_HOME_JSON_LD,
+        SITE_NOSCRIPT: SITE.SITE_NOSCRIPT
+      };
+      walkStrings(scope, "site", (s, where) => {
+        n += 1;
+        if (s.includes("多益常考") || s.includes("多益最常見") || claimSentences(s).length > 0) hits.push(where + "：" + s);
+      });
+      assert.ok(n > 30, "字串數量過少：" + n);
+      assert.deepEqual(hits, []);
+    });
+
+    test("LEGAL_STATEMENTS 逐字等於 LT-3、LT-5；資料來源頁與關於我都引用同一份（V-SITE-02、SC-1）", () => {
+      assert.equal(SITE.LEGAL_STATEMENTS.originalContent, LT_3);
+      assert.equal(SITE.LEGAL_STATEMENTS.trademark, LT_5);
+      assert.equal(P.TEXT.originalLicense, LT_3);
+      assert.equal(P.TEXT.trademarkNotice, LT_5);
+      const texts = [];
+      walkStrings(SITE.SITE_PAGES.find((p) => p.id === "about").blocks, "about", (s) => texts.push(s));
+      assert.ok(texts.includes(LT_3));
+      assert.ok(texts.includes(LT_5));
     });
   });
 

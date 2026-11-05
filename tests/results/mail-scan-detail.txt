@@ -1,0 +1,7 @@
+ml3=0
+ml4Good=41
+ml4Bad=docs/03-design/tasks.json:4876
+compact=
+generic=
+histCommits=25e3c3f
+histPaths=tests/static/legal-check.mjs

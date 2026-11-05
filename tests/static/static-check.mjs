@@ -45,11 +45,13 @@ const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:"
     [/\bcdn(js)?\.|jsdelivr|unpkg\.com/i, "CDN 網址"],
   ];
   // 第 4 輪：契約 HD-1／architecture B-7 逐字白名單 <link rel="icon" href="data:,">（恰 1 次），先自檢查用副本移除，其餘樣式一條都不放寬
-  const WL = '<link rel="icon" href="data:,">';
+  const WL = '<link rel="icon" href="data:,">'; const WL2 = '<link rel="canonical" href="https://jimmyfantasyworld.com/">';
   const wlCount = html.split(WL).length - 1;
-  const checkHtml = html.replace(WL, "");
+  const wl2Count = html.split(WL2).length - 1; // v0.19（SE-2、§5.9）canonical 逐字白名單 1 次，其餘樣式不放寬
+  const checkHtml = html.replace(WL, "").replace(WL2, "");
   const hits = pats.filter(([re]) => re.test(checkHtml)).map(([, n]) => n);
   if (wlCount !== 1) hits.push(`白名單連結出現 ${wlCount} 次（應 1 次）`);
+  if (wl2Count !== 1) hits.push(`canonical 白名單出現 ${wl2Count} 次（應 1 次）`);
   // 程式中動態載入外部資源的 API
   const dyn = [/\bfetch\s*\(/, /XMLHttpRequest/, /new\s+WebSocket/, /EventSource/, /navigator\.sendBeacon/, /importScripts/, /\.src\s*=\s*['"]https?:/].filter((re) => re.test(appJs)).map(String);
   const okFiles = distFiles.length === 1 && distFiles[0].endsWith(".html");
@@ -180,7 +182,7 @@ const stripCss = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
   const dataDir = path.join(ROOT, "src", "data");
   const dataHits = [];
   (function walkD(d) { for (const f of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, f.name); if (f.isDirectory()) { if (f.name !== "_records") walkD(p); } else if (/\.(js|mjs)$/.test(f.name) && /english\s*master\s*track/i.test(fs.readFileSync(p, "utf8"))) dataHits.push(path.relative(ROOT, p)); } })(dataDir);
-  const ok = titles.length === 1 && titles[0] === "<title>EnglishContext</title>" && firstLine === "EnglishContext" && !htmlHit && jsStr.length === 0 && dataHits.length === 0;
+  const ok = titles.length === 1 && titles[0] === "<title>EnglishContext｜英文單字卡與模擬測驗</title>" && firstLine === "EnglishContext" && !htmlHit && jsStr.length === 0 && dataHits.length === 0;
   rec("TC-L-S02", "AC-38-10 (1)、AC-34-01、AC-34-02（V-LAY-05、NM-1、NM-4）", ok, `${titles.join("")}；授權註解第一行「${firstLine}」；HTML 文字節點命中=${htmlHit}；程式字串常值（空白分隔）命中 ${jsStr.length}${jsStr.length ? JSON.stringify(jsStr.slice(0, 3)) : ""}；src/data（不含 _records）命中 ${dataHits.join("、") || "無"}`);
 }
 
@@ -254,8 +256,8 @@ const stripCss = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
   const l1 = ["src/app/core/position.js", "src/app/core/part5flow.js"];
   const l1Bad = l1.flatMap((f) => [...NET, "document.", "localStorage", "sessionStorage", "indexedDB", "innerHTML", "window."].filter((k) => nc(f).includes(k)).map((k) => f + ":" + k));
   const viewBad = ["src/app/views/part5.js", "src/app/state/store.js", "src/app/core/persist.js", "src/app/core/backup.js", "src/app/core/reinit.js"].flatMap((f) => [...NET, "innerHTML", "insertAdjacentHTML"].filter((k) => nc(f).includes(k)).map((k) => f + ":" + k));
-  const texts = ["✓ 曾答對", "已答對 {k} / {q} 題", "只練沒答對的題目", "{q} 題全部答對！", "清除答對紀錄，重新來過", "你之前答對過這一題", "本輪沒有新作答的題目", "關閉時顯示全部題目，答對過的題目會以綠色鎖定。", "要檢視全部題目，請關閉上方的「只練沒答對的題目」。", "將清除全部題目的答對紀錄", "累計答題數與正確率不受影響",
-    "清除答對紀錄", "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。累計答題數與正確率不受影響。"];
+  const texts = ["✓ 曾答對", "已答對 {k} / {q} 題", "只練沒答對的題目", "{q} 題全部答對！", "清除答對紀錄，重新來過", "你之前答對過這一題", "本輪沒有新作答的題目", "關閉時顯示全部題目，答對過的題目會以綠色鎖定。", "要檢視全部題目，請關閉上方的「只練沒答對的題目」。", "將清除全部題目的答對紀錄", "「已答對」會回到 0 題",
+    "清除答對紀錄", "將清除全部題目的答對紀錄，「已答對」會回到 0 題，並從第 1 題重新開始。"];
   const miss = texts.filter((t) => !appJs.includes(t) && !appJs.includes(JSON.stringify(t).slice(1, -1)));
   // 第 8 輪（V-ST-27）：交付 HTML 與 src/app 非 __tests__ 檔案中 4 個舊字串皆 0 次
   const GONE = ["全部題目再練一次", "再練一次", "replayKeepRecords", "replayPart5KeepRecords"];
@@ -267,7 +269,9 @@ const stripCss = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "");
   const only = newRules.find((r) => /^\.p5-only$/.test(r.sel)); const cnt = newRules.find((r) => /^\.p5-record__count$/.test(r.sel));
   const okCss = cssBad.length === 0 && !!only && /min-height:\s*var\(--touch\)/.test(only.body) && !!cnt && /tabular-nums/.test(cnt.body);
   const sizeOk = buf.length <= 5242880;
-  const extLib = /cdn\.|unpkg|jsdelivr|googleapis|<script[^>]+src=/i.test(html);
+  // v0.19：只排除 AD-7 允許的 1 個逐字字串（AD_SCRIPT_URL）；其餘規則不放寬
+  const AD_URL = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4051803210893105";
+  const extLib = /cdn\.|unpkg|jsdelivr|googleapis|<script[^>]+src=/i.test(html.split(AD_URL).join(""));
   rec("TC-T-S01", "AC-47-08、AC-45-04、AC-45-05、AC-46-01、AC-46-06、AC-48-12（WR-4、CR-9、C-7、V-ST-27）", goneHtml.length === 0 && goneSrc.length === 0 && l1Bad.length === 0 && viewBad.length === 0 && miss.length === 0 && okCss && sizeOk && !extLib,
     `V-ST-27 舊字串：交付 HTML ${goneHtml.join("、") || "0 筆"}、src/app ${goneSrc.join("、") || "0 筆"}；L1 新模組（position、part5flow）去註解後禁用 API／DOM／儲存：${l1Bad.join("、") || "無"}；part5 view／store／persist／backup／reinit 網路 API 與 HTML 插入：${viewBad.join("、") || "無"}；畫面文字 ${texts.length} 則缺 ${miss.length}${miss.length ? "：" + miss.join("、") : ""}；40-part5.css 新規則 ${newRules.length} 條（用強調橘／色碼／動畫：${cssBad.join("、") || "無"}；.p5-only min-height var(--touch)=${!!only && /min-height:\s*var\(--touch\)/.test(only.body)}；.p5-record__count tabular-nums=${!!cnt && /tabular-nums/.test(cnt.body)}）；交付檔 ${buf.length.toLocaleString()} bytes ≤ 5 MB=${sizeOk}；外部函式庫或外部 script=${extLib}`);
 }

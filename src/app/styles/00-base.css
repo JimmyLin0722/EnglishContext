@@ -226,6 +226,13 @@ pre {
 }
 
 /* （v0.9，FE-64）頁尾版本行：「資料來源與授權」正下方、純文字、單行（VR-7；architecture.md §7.20.1） */
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 8px;
+}
+
 .app-footer__version {
   margin: 4px 0 0;
   font-size: 0.75rem;
@@ -679,13 +686,4 @@ body[data-entry="firstRun"] {
 
 body[data-entry="firstRun"] .toast-root {
   bottom: 16px;
-}
-
-/* 頁尾「返回難易度設定」：只在首次模式且目前為資料來源頁時顯示（AC-25-07） */
-#footer-first-run-back {
-  display: none;
-}
-
-body[data-entry="firstRun"][data-tab="sources"] #footer-first-run-back {
-  display: inline-flex;
 }

@@ -8,6 +8,7 @@
  * 資料：一律使用 _fixtures.js 的 DataSourceEntry（不讀正式內容資料檔）
  * （v0.11，FE-77）新增聯絡行案例（architecture.md v0.11 §7.22.2、§10.8；契約 data-schema.ts §16、README §4.3 L-7；AC-23-07）。
  *   去空格位址一律於執行期由常數推導，本檔不寫出其字面值（FB-62）。
+ * （v0.19，FE-87）聲明與信箱改引用 core/site-content；新增返回按鈕案例（architecture.md v0.14 §7.25.6、§7.25.9；SC-1、SP-3、ML-1）。
  */
 "use strict";
 
@@ -16,6 +17,9 @@ const assert = require("node:assert/strict");
 
 const P = require("../views/sources-page.js");
 const F = require("./_fixtures.js");
+
+/** 依建置方式載入本頁需要的模組（v0.19：文案取自 core/site-content，返回按鈕取自 ui/site-return） */
+const PAGE_MODULES = ["core/dom.js", "core/pwa.js", "core/site-content.js", "ui/site-return.js", "views/sources-page.js"];
 
 describe("sources-page.test.js", () => {
   const REG = F.registry();
@@ -169,7 +173,7 @@ describe("sources-page.test.js", () => {
     const sandbox = { console: { warn() {}, error() {}, log() {} } };
     sandbox.self = sandbox;
     vm.createContext(sandbox);
-    for (const rel of ["core/dom.js", "core/pwa.js", "views/sources-page.js"]) {
+    for (const rel of PAGE_MODULES) {
       vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox, { filename: rel });
     }
     sandbox.EMT.core.dom.setDocument(fakeDocument());
@@ -210,12 +214,29 @@ describe("sources-page.test.js", () => {
     const sandbox = { console: { warn() {}, error() {}, log() {} } };
     sandbox.self = sandbox;
     vm.createContext(sandbox);
-    for (const rel of ["core/dom.js", "views/sources-page.js"]) {
+    for (const rel of PAGE_MODULES.filter((r) => r !== "core/pwa.js")) {
       vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox);
     }
     sandbox.EMT.core.dom.setDocument(fakeDocument());
     const rootEl = fakeDocument().createElement("section");
     assert.throws(() => sandbox.EMT.views.sourcesPage.render(rootEl, { sources: REG, builtin: F.builtin() }), /EMT\.core\.pwa/);
+  });
+
+  test("（FE-87）core/site-content、ui/site-return 未載入時 render 丟出含模組名稱的錯誤（LD-3）", () => {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const vm = require("node:vm");
+    for (const [missing, re] of [["core/site-content.js", /EMT\.core\.siteContent/], ["ui/site-return.js", /EMT\.ui\.siteReturn/]]) {
+      const sandbox = { console: { warn() {}, error() {}, log() {} } };
+      sandbox.self = sandbox;
+      vm.createContext(sandbox);
+      for (const rel of PAGE_MODULES.filter((r) => r !== missing)) {
+        vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox);
+      }
+      sandbox.EMT.core.dom.setDocument(fakeDocument());
+      const rootEl = fakeDocument().createElement("section");
+      assert.throws(() => sandbox.EMT.views.sourcesPage.render(rootEl, { sources: REG, builtin: F.builtin() }), re);
+    }
   });
 
   // ── （v0.12，FE-60）原創內容來源（契約 NM-3、§4.3；architecture.md §7.19.8、SD-FB-49；AC-38-10 (1)） ──
@@ -228,7 +249,7 @@ describe("sources-page.test.js", () => {
     const sandbox = { console: { warn() {}, error() {}, log() {} } };
     sandbox.self = sandbox;
     vm.createContext(sandbox);
-    for (const rel of ["core/dom.js", "core/pwa.js", "views/sources-page.js"]) {
+    for (const rel of PAGE_MODULES) {
       vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox, { filename: rel });
     }
     sandbox.EMT.core.dom.setDocument(fakeDocument());
@@ -281,8 +302,8 @@ describe("sources-page.test.js", () => {
 
   // ── （v0.11，FE-77）聯絡行（AC-23-07 (1)(2)(7)、L-7、E-118；architecture.md §7.22.2、§10.8） ──
 
-  /** 契約 data-schema.ts §16 原文（逐字複製） */
-  const CONTACT = "email: j i m m y l i n . 5 8 3 9 0 7 2 2 @ g m a i l . c o m";
+  /** 契約 ML-1 原文（逐字複製，不從被測模組取值） */
+  const CONTACT = "email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m";
 
   /** 去空格位址：執行期由常數推導（測試原始碼不寫字面值，FB-62） */
   function compactAddress(text) {
@@ -297,7 +318,7 @@ describe("sources-page.test.js", () => {
     const sandbox = { console: { warn() {}, error() {}, log() {} } };
     sandbox.self = sandbox;
     vm.createContext(sandbox);
-    for (const rel of ["core/dom.js", "core/pwa.js", "views/sources-page.js"]) {
+    for (const rel of PAGE_MODULES) {
       vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox, { filename: rel });
     }
     const rec = { listeners: [] };
@@ -308,16 +329,16 @@ describe("sources-page.test.js", () => {
     return { rootEl, rec, api: sandbox.EMT.views.sourcesPage };
   }
 
-  test("（FE-77）SOURCES_CONTACT_TEXT 逐字等於契約 §16，且結構為「email: 」＋27 個以單一半形空格分隔的單字元 token", () => {
+  test("（FE-77）SOURCES_CONTACT_TEXT 逐字等於契約 ML-1，且結構為「email: 」＋22 個以單一半形空格分隔的單字元 token", () => {
     assert.equal(P.SOURCES_CONTACT_TEXT, CONTACT);
     const t = P.SOURCES_CONTACT_TEXT;
     assert.ok(t.startsWith("email: "));
     const tokens = t.slice("email: ".length).split(" ");
-    assert.equal(tokens.length, 27);
+    assert.equal(tokens.length, 22);
     for (const tok of tokens) assert.equal(tok.length, 1, `token「${tok}」應為單一字元`);
     assert.doesNotMatch(t, /[^\x20-\x7e]/, "無全形或非 ASCII 字元");
     assert.doesNotMatch(t, / {2}/, "無連續空格");
-    assert.equal(t.length, 60);
+    assert.equal(t.length, 50);
     // 推導出的去空格位址形態正確（不寫字面值）
     assert.match(compactAddress(t), /^[a-z0-9.]+@[a-z.]+$/);
   });
@@ -363,5 +384,80 @@ describe("sources-page.test.js", () => {
     const ul = findAll(rootEl, (n) => n.className === "src-statements")[0];
     assert.deepEqual(ul.childNodes.map((li) => li.textContent), [P.TEXT.codeLicense, P.TEXT.dataLicense, P.TEXT.originalLicense, BRAND, P.TEXT.trademarkNotice]);
     assert.equal(findAll(rootEl, (n) => n.className === "src-original")[0].textContent, "原創內容來源：EnglishContext 原創內容");
+  });
+
+  // ── （v0.19，FE-87）共用文案與返回按鈕（SC-1、SP-3、ML-1；architecture.md v0.14 §7.25.6、§7.25.7） ──
+
+  test("（FE-87）聲明與信箱都取自 core/site-content，本檔原始碼不留字面值（SC-1、ML-1）", () => {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const SITE = require("../core/site-content.js");
+    assert.equal(P.TEXT.originalLicense, SITE.LEGAL_STATEMENTS.originalContent);
+    assert.equal(P.TEXT.trademarkNotice, SITE.LEGAL_STATEMENTS.trademark);
+    assert.equal(P.SOURCES_CONTACT_TEXT, SITE.SOURCES_CONTACT_TEXT);
+    const src = fs.readFileSync(path.join(__dirname, "..", "views", "sources-page.js"), "utf8");
+    for (const literal of [LT_3, LT_5, CONTACT]) assert.equal(src.includes(literal), false, literal);
+    assert.doesNotMatch(src, /(?:[A-Za-z0-9._%+-] ){3,}@(?: [A-Za-z0-9._%+-])+/, "不留任何空白形式的地址");
+  });
+
+  test("（FE-87）載入時不取用 core/site-content、ui/site-return（LD-2）", () => {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const vm = require("node:vm");
+    const sandbox = {};
+    sandbox.self = sandbox;
+    const reads = [];
+    sandbox.EMT = {
+      core: new Proxy({}, { get(t, k) { reads.push("core." + String(k)); return t[k]; } }),
+      ui: new Proxy({}, { get(t, k) { reads.push("ui." + String(k)); return t[k]; } })
+    };
+    vm.createContext(sandbox);
+    vm.runInContext(fs.readFileSync(path.join(__dirname, "..", "views", "sources-page.js"), "utf8"), sandbox);
+    assert.deepEqual(reads, []);
+  });
+
+  test("（FE-87）返回按鈕是 .src-page 第一個子元素，頁面名稱與既有內容順序不變；show 依 returnTarget 更新文字，點擊只呼叫 back", () => {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const vm = require("node:vm");
+    const sandbox = { console: { warn() {}, error() {}, log() {} } };
+    sandbox.self = sandbox;
+    vm.createContext(sandbox);
+    for (const rel of ["core/constants.js"].concat(PAGE_MODULES)) {
+      vm.runInContext(fs.readFileSync(path.join(__dirname, "..", rel), "utf8"), sandbox, { filename: rel });
+    }
+    let target = "flashcards";
+    let backs = 0;
+    sandbox.EMT.router = { returnTarget: () => target, back: () => { backs += 1; return true; } };
+    const handlers = [];
+    const doc = fakeDocument();
+    const createElement = doc.createElement;
+    doc.createElement = (t) => {
+      const n = createElement(t);
+      n.addEventListener = (type, fn) => handlers.push({ node: n, type, fn });
+      return n;
+    };
+    sandbox.EMT.core.dom.setDocument(doc);
+    const rootEl = doc.createElement("section");
+    const page = sandbox.EMT.views.sourcesPage;
+    page.render(rootEl, { sources: REG, builtin: F.builtin(), license: F.license() });
+    const srcPage = rootEl.childNodes[0];
+    const btn = srcPage.childNodes[0];
+    assert.equal(btn.tagName, "BUTTON");
+    assert.equal(btn.className, "btn btn--link site-return");
+    assert.equal(btn.attrs.type, "button");
+    assert.equal(srcPage.childNodes[1].tagName, "H2");
+    assert.equal(srcPage.childNodes[1].textContent, "資料來源與授權");
+
+    page.show();
+    assert.equal(btn.textContent, "返回單字卡");
+    target = "customizer";
+    page.show();
+    assert.equal(btn.textContent, "返回難易度設定");
+
+    const click = handlers.find((h) => h.node === btn && h.type === "click");
+    assert.ok(click, "應綁定 click");
+    click.fn();
+    assert.equal(backs, 1);
   });
 });

@@ -1,0 +1,29 @@
+【1.3.0@375x667】
+  主控台（資料備份收合）：Tab 停點 7；被遮 0：無
+  主控台（有近 7 天資料、收合）：Tab 停點 7；被遮 1：.db-backup__toggle「資料備份」（可見 0%）
+  主控台（有近 7 天資料、展開）：Tab 停點 9；被遮 1：.db-backup__toggle「資料備份」（可見 0%）
+  難易度設定：Tab 停點 17；被遮 2：.cz-level.cz-level--gold[gold]「金✓即將開放—」（可見 13%）、BUTTON「新增單字」（可見 49%）
+  單字卡：Tab 停點 10；被遮 2：.fc-flip「翻面」（可見 94%）、.fc-next「下一張」（可見 94%）
+  模擬測驗：Tab 停點 10；被遮 2：.p5-option.p5-option--idle「C.reminded」（可見 57%）、.p5-option.p5-option--idle「D.attended」（可見 0%）
+【1.3.0@390x844】
+  主控台（資料備份收合）：Tab 停點 7；被遮 0：無
+  主控台（有近 7 天資料、收合）：Tab 停點 7；被遮 0：無
+  主控台（有近 7 天資料、展開）：Tab 停點 9；被遮 2：[export-backup]「匯出備份」（可見 89%）、[import-backup]「匯入備份」（可見 89%）
+  難易度設定：Tab 停點 17；被遮 0：無
+  單字卡：Tab 停點 10；被遮 0：無
+  模擬測驗：Tab 停點 10；被遮 0：無
+【1.2.0@375x667】
+  主控台（資料備份收合）：Tab 停點 4；被遮 1：#footer-sources「資料來源與授權」（可見 0%）
+  主控台（有近 7 天資料、收合）：Tab 停點 4；被遮 1：.db-backup__toggle「資料備份」（可見 0%）
+  主控台（有近 7 天資料、展開）：Tab 停點 6；被遮 1：.db-backup__toggle「資料備份」（可見 0%）
+  難易度設定：Tab 停點 14；被遮 2：.cz-level.cz-level--gold[gold]「金✓即將開放—」（可見 13%）、BUTTON「新增單字」（可見 49%）
+  單字卡：Tab 停點 7；被遮 3：.fc-flip「翻面」（可見 94%）、.fc-next「下一張」（可見 94%）、#footer-sources「資料來源與授權」（可見 0%）
+  模擬測驗：Tab 停點 7；被遮 2：.p5-option.p5-option--idle「C.reminded」（可見 57%）、.p5-option.p5-option--idle「D.attended」（可見 0%）
+【1.2.0@390x844】
+  主控台（資料備份收合）：Tab 停點 4；被遮 0：無
+  主控台（有近 7 天資料、收合）：Tab 停點 4；被遮 1：#footer-sources「資料來源與授權」（可見 98%）
+  主控台（有近 7 天資料、展開）：Tab 停點 6；被遮 2：[export-backup]「匯出備份」（可見 89%）、[import-backup]「匯入備份」（可見 89%）
+  難易度設定：Tab 停點 14；被遮 1：#footer-sources「資料來源與授權」（可見 0%）
+  單字卡：Tab 停點 7；被遮 0：無
+  模擬測驗：Tab 停點 7；被遮 1：#footer-sources「資料來源與授權」（可見 58%）
+  FAIL TC-38-09f AC-38-09 (a) 375×667 真實 Tab：v1.3.0 被遮 8：主控台（有近 7 天資料、收合）：.db-backup__toggle「資料備份」（可見 0%）、主控台（有近 7 天資料、展開）：.db-backup__toggle「資料備份」（可見 0%）、難易度設定：.cz-level.cz-level--gold[gold]「金✓即將開放—」（可見 13%）、難易度設定：BUTTON「新增單字」（可見 49%）、單字卡：.fc-flip「翻面」（可見 94%）、單字卡：.fc-next「下一張」（可見 94%）、模擬測驗：.p5-option.p5-option--idle「C.reminded」（可見 57%）、模擬測驗：.p5-option.p5-option--idle「D.attended」（可見 0%）；v1.2.0 被遮 10：主控台（資料備份收合）：#footer-sources「資料來源與授權」（可見 0%）、主控台（有近 7 天資料、收合）：.db-backup__toggle「資料備份」（可見 0%）、主控台（有近 7 天資料、展開）：.db-backup__toggle「資料備份」（可見 0%）、難易度設定：.cz-level.cz-level--gold[gold]「金✓即將開放—」（可見 13%）、難易度設定：BUTTON「新增單字」（可見 49%）、單字卡：.fc-flip「翻面」（可見 94%）、單字卡：.fc-next「下一張」（可見 94%）、單字卡：#footer-sources「資料來源與授權」（可見 0%）、模擬測驗：.p5-option.p5-option--idle「C.reminded」（可見 57%）、模擬測驗：.p5-option.p5-option--idle「D.attended」（可見 0%）（BUG-005，舊有；390×844 見 tests/results/diag/r9-focus.json）

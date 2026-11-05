@@ -19,7 +19,7 @@ const results = [];
 const rec = (tc, ac, ok, note) => { results.push({ suite: "pwa-static", tc, ac, result: ok ? "通過" : "失敗", note }); console.log(`  ${ok ? "PASS" : "FAIL"} ${tc} ${ac} ${note}`); };
 const manualRec = (tc, ac, note) => { results.push({ suite: "pwa-static", tc, ac, result: "待人工", note }); console.log(`  MANUAL ${tc} ${ac} ${note}`); };
 const sha = (b) => crypto.createHash("sha256").update(b).digest("hex").slice(0, 12);
-const DEPLOY = ["index.html", "manifest.webmanifest", "sw.js", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon-180.png", "ads.txt"];
+const DEPLOY = ["index.html", "manifest.webmanifest", "sw.js", "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-512.png", "icons/apple-touch-icon-180.png", "ads.txt", "about.html", "contact.html", "privacy.html", "robots.txt", "sitemap.xml"];
 const ICONS = { "icons/icon-192.png": 192, "icons/icon-512.png": 512, "icons/icon-maskable-512.png": 512, "icons/apple-touch-icon-180.png": 180 };
 const PRECACHE = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png", "./icons/apple-touch-icon-180.png"];
 function listFiles(dir, base = dir, acc = []) { for (const f of fs.readdirSync(dir, { withFileTypes: true })) { const p = path.join(dir, f.name); if (f.isDirectory()) listFiles(p, base, acc); else acc.push(path.relative(base, p).split(path.sep).join("/")); } return acc; }
@@ -42,7 +42,7 @@ const sw = fs.readFileSync(path.join(SITE, "sw.js"), "utf8");
   const lower = files.every((f) => f === f.toLowerCase());
   const forbidden = files.filter((f) => /^(docs|src|sources)\//.test(f) || f.endsWith(".map") || f === "english-master-track.html");
   rec("TC-PS-01", "AC-36-07、AC-19-01（V-PWA-01）", same && idx && ads.equals(adsSrc) && (!adsOld || ads.equals(adsOld)) && iconSame && lower && forbidden.length === 0,
-    `dist/site 檔案 ${files.length} 個 ${JSON.stringify(files)}，與契約 8 檔相同=${same}；全小寫=${lower}；index.html 與 dist/english-master-track.html 位元組相同=${idx}；ads.txt 與 sources/deploy/ads.txt 相同=${ads.equals(adsSrc)}、與 dist/ads.txt 相同=${adsOld ? ads.equals(adsOld) : "（無）"}（${JSON.stringify(ads.toString("utf8").trim())}）；4 張 PNG 與 src/app/assets/icons 位元組相同=${iconSame}；不得出現的檔案 ${forbidden.length}`);
+    `dist/site 檔案 ${files.length} 個 ${JSON.stringify(files)}，與契約 13 檔相同=${same}；全小寫=${lower}；index.html 與 dist/english-master-track.html 位元組相同=${idx}；ads.txt 與 sources/deploy/ads.txt 相同=${ads.equals(adsSrc)}、與 dist/ads.txt 相同=${adsOld ? ads.equals(adsOld) : "（無）"}（${JSON.stringify(ads.toString("utf8").trim())}）；4 張 PNG 與 src/app/assets/icons 位元組相同=${iconSame}；不得出現的檔案 ${forbidden.length}`);
 }
 
 // TC-PS-02 V-PWA-02、MF-1～MF-3、DP-7
@@ -82,7 +82,7 @@ const sw = fs.readFileSync(path.join(SITE, "sw.js"), "utf8");
   const forb = [/<link\b[^>]*\brel=["']?(manifest|apple-touch-icon|apple-touch-startup-image|preload|prefetch|modulepreload)\b/i, /<script\b[^>]*\bsrc\s*=/i, /<link\b[^>]*rel=["']?icon["']?[^>]*href=["'](?!data:,)/i].filter((re) => re.test(htmlS)).map(String);
   const titles = htmlS.match(/<title>[^<]*<\/title>/g) || [];
   const linkTags = htmlS.match(/<link\b[^>]*>/gi) || [];
-  rec("TC-PS-04", "AC-34-04、AC-34-05、AC-36-02、AC-37-01、AC-19-01（V-PWA-04）", HD1.every((t) => cnt(htmlS, t) === 1 && cnt(head, t) === 1) && /^[0-9a-f]{16}$/.test(id || "") && cnt(htmlS, "<meta name=\"emt-build-id\"") === 1 && forb.length === 0 && titles.length === 1 && titles[0] === "<title>EnglishContext</title>" && linkTags.length === 1 && !htmlS.includes("@@"),
+  rec("TC-PS-04", "AC-34-04、AC-34-05、AC-36-02、AC-37-01、AC-19-01（V-PWA-04）", HD1.every((t) => cnt(htmlS, t) === 1 && cnt(head, t) === 1) && /^[0-9a-f]{16}$/.test(id || "") && cnt(htmlS, "<meta name=\"emt-build-id\"") === 1 && forb.length === 0 && titles.length === 1 && titles[0] === "<title>EnglishContext｜英文單字卡與模擬測驗</title>" && linkTags.length === 2 && linkTags.includes('<link rel="canonical" href="https://jimmyfantasyworld.com/">') && !htmlS.includes("@@"),
     `HD-1 各元素（全檔／head 內）次數 ${hd1.join("、")}；emt-build-id=${id}；禁止元素命中 ${forb.length}${forb.length ? forb.join("、") : ""}；<link> 標籤 ${JSON.stringify(linkTags)}；${titles.join("")}；殘留佔位 @@=${htmlS.includes("@@")}`);
 }
 
@@ -105,7 +105,9 @@ const sw = fs.readFileSync(path.join(SITE, "sw.js"), "utf8");
 {
   const refs = [...new Set([...htmlS.matchAll(/["'](\.{0,2}\/?[\w./-]+\.(?:webmanifest|png|js|json|ico|txt|css|html))["']/g)].map((m) => m[1]))];
   const bad = refs.filter((r) => !["manifest.webmanifest", "icons/apple-touch-icon-180.png", "icons/icon-192.png", "./sw.js", "./"].includes(r));
-  const abs = (htmlS.match(/(?:src|href)\s*=\s*["']\s*(?:https?:)?\/\//gi) || []);
+  // 第 9 輪（§10.11 Q3、§5.9 DS-55；放寬判定）：只排除逐字 canonical 與 <noscript> 內 3 個一般連結（使用者點擊才離開，不是資源）；其餘 src、href 絕對網址仍判失敗
+  const absSrc = htmlS.replace('<link rel="canonical" href="https://jimmyfantasyworld.com/">', "").replace(/<noscript>[\s\S]*?<\/noscript>/, "");
+  const abs = (absSrc.match(/(?:src|href)\s*=\s*["']\s*(?:https?:)?\/\//gi) || []);
   rec("TC-PS-06", "AC-19-01（附屬檔參照）", abs.length === 0,
     `HTML 中類檔名字串 ${refs.length} 種：PWA 附屬檔 ${JSON.stringify(refs.filter((r) => !bad.includes(r)))}；其他（內容資料中的字串，非資源參照，人工判讀）${JSON.stringify(bad.slice(0, 15))}；src/href 絕對網址 ${abs.length}`);
 }
@@ -165,9 +167,8 @@ const ids = {};
 
 // TC-36-07a：MC-03 新 workflow 本機模擬（architecture §5.2 全文中的 Build、Verify 步驟；以 LF 換行的乾淨複本模擬 CI checkout）
 {
-  const arch = fs.readFileSync(path.join(ROOT, "docs/03-design/architecture.md"), "utf8").replace(/\r\n/g, "\n");
-  const sec = arch.slice(arch.indexOf("### 5.2 v0.7 部署 workflow"));
-  const yaml = (sec.match(/```yaml\n([\s\S]*?)```/) || [])[1] || "";
+  // 第 9 輪：§5.2 的 yaml 為 v0.7 歷史（仍寫 8 檔），改讀實際部署的 .github/workflows/static.yml（MC-08）
+  const yaml = fs.readFileSync(path.join(ROOT, ".github/workflows/static.yml"), "utf8").replace(/\r\n/g, "\n");
   const verify = (yaml.match(/- name: Verify deploy directory\n\s+run: \|\n([\s\S]*?)\n\s+- name:/) || [])[1] || "";
   const verifyScript = verify.split("\n").map((l) => l.replace(/^ {10}/, "")).join("\n");
   const buildCmd = (yaml.match(/- name: Build\n\s+run: (.+)/) || [])[1];
@@ -187,10 +188,10 @@ const ids = {};
   const need = ["src/app/assets/icons/icon-192.png", "src/app/assets/icons/icon-512.png", "src/app/assets/icons/icon-maskable-512.png", "src/app/assets/icons/apple-touch-icon-180.png",
     "sources/deploy/ads.txt", "src/app/core/pwa.js", "src/app/pwa/sw.template.js", "src/app/services/pwa.js", "src/app/ui/pwa-notice.js", "src/app/styles/80-pwa.css", "tools/serve.mjs", "tools/build.mjs", "package.json", ".gitattributes"];
   const untracked = need.filter((f) => spawnSync("git", ["ls-files", "--error-unmatch", f], { cwd: ROOT, encoding: "utf8" }).status !== 0);
-  const ok = bRes.status === 0 && vRes.status === 0 && files.length === 8 && buildCmd === "npm run build" && upload === "dist/site" && noNpmCi && verifyScript.includes("-eq 8");
+  const ok = bRes.status === 0 && vRes.status === 0 && files.length === 13 && buildCmd === "npm run build" && upload === "dist/site" && noNpmCi && verifyScript.includes("-eq 13");
   rec("TC-36-07a", "AC-36-07（本機模擬 MC-03 新 workflow）", ok,
-    `取 architecture §5.2 workflow：Build「${buildCmd}」、上傳 path「${upload}」、不執行 npm ci=${noNpmCi}；以不含 .git／node_modules／dist 的複本（${conv} 個文字檔轉 LF，模擬 .gitattributes eol=lf 的 CI checkout）執行 npm run build → 結束碼 ${bRes.status}；Verify 步驟（逐字取自 §5.2，以 Git Bash 執行）結束碼 ${vRes.status}${vRes.status ? "：" + (vRes.stdout + vRes.stderr).slice(-200) : ""}；dist/site 恰 ${files.length} 個檔案 ${JSON.stringify(files.sort())}；CI 模擬 BUILD_ID ${ciId}（本機 CRLF 工作目錄 ${ids.base}；${ciId === ids.base ? "相同" : "不同，屬 SD-FB-37 已知事項"}）；CI 建置所需但尚未被 git 追蹤的檔案 ${untracked.length} 個${untracked.length ? JSON.stringify(untracked) : ""}`);
-  manualRec("TC-PWA-H4", "AC-36-07（GitHub Pages 部署結果）", `MC-03 由主控整檔取代 static.yml 後，push 到 main：Actions 成功；部署網址下 8 個檔案皆 200 且與 artifact 相同；網站不含 docs/、src/、sources/。第 5 輪：static.yml 已為 MC-03 新版（npm run build＋Verify deploy directory），v0.11 部署時主控回報 Actions 成功、正式網址 8 檔皆 200；v0.12（本輪）尚未提交與部署，push 後由人類重驗`);
+    `取 .github/workflows/static.yml（MC-08）：Build「${buildCmd}」、上傳 path「${upload}」、不執行 npm ci=${noNpmCi}；以不含 .git／node_modules／dist 的複本（${conv} 個文字檔轉 LF，模擬 .gitattributes eol=lf 的 CI checkout）執行 npm run build → 結束碼 ${bRes.status}；Verify 步驟（逐字取自 static.yml，以 Git Bash 執行）結束碼 ${vRes.status}${vRes.status ? "：" + (vRes.stdout + vRes.stderr).slice(-200) : ""}；dist/site 恰 ${files.length} 個檔案 ${JSON.stringify(files.sort())}；CI 模擬 BUILD_ID ${ciId}（本機 CRLF 工作目錄 ${ids.base}；${ciId === ids.base ? "相同" : "不同，屬 SD-FB-37 已知事項"}）；CI 建置所需但尚未被 git 追蹤的檔案 ${untracked.length} 個${untracked.length ? JSON.stringify(untracked) : ""}`);
+  manualRec("TC-PWA-H4", "AC-36-07（GitHub Pages 部署結果）", `MC-03 由主控整檔取代 static.yml 後，push 到 main：Actions 成功；部署網址下 13 個檔案皆 200 且與 artifact 相同；網站不含 docs/、src/、sources/。第 5 輪：static.yml 已為 MC-03 新版（npm run build＋Verify deploy directory），v0.11 部署時主控回報 Actions 成功、正式網址 8 檔皆 200；v0.12（本輪）尚未提交與部署，push 後由人類重驗`);
 }
 
 const sum = { pass: results.filter((r) => r.result === "通過").length, fail: results.filter((r) => r.result === "失敗").length };
