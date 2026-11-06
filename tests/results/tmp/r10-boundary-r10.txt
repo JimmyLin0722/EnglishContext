@@ -1,0 +1,83 @@
+  OK [M] dist/english-master-track.html FE-94
+  OK [ignored-modified] dist/site/about.html FE-94
+  OK [ignored-modified] dist/site/ads.txt FE-94
+  OK [ignored-modified] dist/site/contact.html FE-94
+  OK [ignored-modified] dist/site/icons/apple-touch-icon-180.png FE-94
+  OK [ignored-modified] dist/site/icons/icon-192.png FE-94
+  OK [ignored-modified] dist/site/icons/icon-512.png FE-94
+  OK [ignored-modified] dist/site/icons/icon-maskable-512.png FE-94
+  OK [ignored-modified] dist/site/index.html FE-94
+  OK [ignored-modified] dist/site/manifest.webmanifest FE-94
+  OK [ignored-modified] dist/site/privacy.html FE-94
+  OK [ignored-modified] dist/site/robots.txt FE-94
+  OK [ignored-modified] dist/site/sitemap.xml FE-94
+  OK [ignored-modified] dist/site/sw.js FE-94
+  OK [M] docs/01-PRD.md （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/02-contract/README.md （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/02-contract/data-schema.ts （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/03-design/architecture.md （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/03-design/tasks.json （上游文件：PM／SA／SD 產出，核准欄位與變更紀錄由主控填寫，授權例外）
+  OK [M] docs/04-qa/bug-reports/BUG-005.md （QA 自有）
+  OK [??] docs/04-qa/bug-reports/BUG-007.md （QA 自有）
+  OK [M] docs/04-qa/test-plan.md （QA 自有）
+  OK [M] package.json （MC-09：主控修改 version 1.3.0 → 1.3.1，git diff 只有此行，授權例外）
+  OK [??] src/app/__tests__/_speech-env.js FE-92
+  OK [??] src/app/__tests__/focus-scroll.test.js FE-93
+  OK [??] src/app/__tests__/speech-flow.test.js FE-92
+  OK [M] src/app/__tests__/speech.test.js FE-90、FE-92
+  OK [M] src/app/__tests__/store.test.js FE-91
+  OK [M] src/app/services/stt.js FE-90
+  OK [M] src/app/state/store.js FE-91
+  OK [M] src/app/styles/00-base.css FE-93、FE-94
+  OK [M] src/app/styles/31-speech.css FE-92、FE-94
+  OK [M] src/app/styles/75-site-pages.css FE-93、FE-94
+  OK [M] src/app/views/speech-panel.js FE-92
+  OK [??] tests/e2e/diag-r10-focus.mjs （QA 自有）
+  OK [??] tests/e2e/diag-r10-perf.mjs （QA 自有）
+  OK [??] tests/e2e/diag-r10-scrollbar.mjs （QA 自有）
+  OK [??] tests/e2e/e2e-compat-r10.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-env.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-mic.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-motion.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-progress.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-reinit.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-speech.mjs （QA 自有）
+  OK [??] tests/e2e/e2e-stt-flow.mjs （QA 自有）
+  OK [M] tests/e2e/e2e-version.mjs （QA 自有）
+  OK [M] tests/e2e/lib/cdp.mjs （QA 自有）
+  OK [M] tests/e2e/lib/inits.mjs （QA 自有）
+  OK [M] tests/results/boundary-delta.json （QA 自有）
+  OK [M] tests/results/boundary.json （QA 自有）
+  OK [??] tests/results/diag/r10-focus.json （QA 自有）
+  OK [??] tests/results/diag/r10-perf-ab.json （QA 自有）
+  OK [??] tests/results/diag/r10-perf-raw.txt （QA 自有）
+  OK [??] tests/results/diag/r10-scrollbar.json （QA 自有）
+  OK [??] tests/results/e2e-compat-r10.json （QA 自有）
+  OK [M] tests/results/e2e-focus.json （QA 自有）
+  OK [??] tests/results/e2e-speech-noas.json （QA 自有）
+  OK [M] tests/results/e2e-speech.json （QA 自有）
+  OK [??] tests/results/e2e-stt-flow.json （QA 自有）
+  OK [M] tests/results/static.json （QA 自有）
+  OK [??] tests/results/tmp/r10-boundary-r10.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-boundary.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-data.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-diag-r10-focus.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-diag-r10-perf.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-diag-r10-scrollbar.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-e2e-compat-r10.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-e2e-stt-flow.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-legal.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-npmtest.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-records.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-run.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-static.txt （QA 自有）
+  OK [??] tests/results/tmp/r10-validate.txt （QA 自有）
+  OK [M] tests/run-all.mjs （QA 自有）
+  OK [??] tests/static/boundary-r10.mjs （QA 自有）
+  OK [M] tests/tools/ac-matrix.mjs （QA 自有）
+  OK [??] tests/tools/qa-review-r10.mjs （QA 自有）
+  OK [M] tests/tools/rebuild-summary.mjs （QA 自有）
+  OK [??] tests/tools/run-r10.mjs （QA 自有）
+  OK [M] tests/tools/tc-desc.json （QA 自有）
+  OK [M] tests/tools/tc-list.mjs （QA 自有）
+HEAD a358556；變動 82 個檔案（PG 任務 25、授權例外與 QA 57）；超出任務 paths 0 個；必須無變動路徑命中 0 個；static.yml diff 0 字元；package.json 只改 version=true；任務未 done 0 個；任務 paths 中未變動 1 個（src/app/ui/bottom-nav.js）

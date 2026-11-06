@@ -18,7 +18,7 @@
     "tc": "TC-32-03",
     "ac": "AC-32-03",
     "result": "通過",
-    "note": "自訂單字與確定前完全相同=true（monetization、qareinitalpha、qareinitbeta）；單字集 2812 = 2,809 + 3；monetization 仍計入掌握=false；STT 已讀保留=true、按麥克風出現說明=false、狀態 listening"
+    "note": "自訂單字與確定前完全相同=true（monetization、qareinitalpha、qareinitbeta）；單字集 2812 = 2,809 + 3；monetization 仍計入掌握=false；STT 已讀保留=true、按麥克風出現說明=false、狀態 listening（序列 preparing→listening）"
   },
   {
     "suite": "e2e-reinit",

@@ -1,0 +1,14 @@
+  PASS TC-18-03 AC-18-03、AC-24-01 警示「進度將無法保存」；點棕套用 + 自訂 1 + 範本 10 → 共 2820 張；Part 5 作答 1；匯出 english-master-track-backup-20261106.json（分數 465、自訂 11）；主控台 連續打卡天數=1=天；單字掌握率=0%=已掌握 0 字；模擬測驗=已答對 1 / 200 題（1%）；例外 0
+  PASS TC-18-04 AC-18-04 新增時訊息 ["儲存空間不足"]；範本注入 toast []、狀態「」；localStorage 不變=true；記憶體自訂字 qaquotaok
+  PASS TC-24-09 AC-24-09 提示 ["儲存空間不足，未匯入"]；localStorage 不變=true；記憶體不變=true
+  PASS TC-18-05 AC-18-05 非 JSON：toast ["資料讀取失敗，已重設"]、主控台 綠級・每日 15 字｜變更、localStorage 目標分數 725、原字串保存=true、畫面正常顯示=true；Schema 不符：toast ["資料讀取失敗，已重設"]、主控台 綠級・每日 15 字｜變更、localStorage 目標分數 725、原字串保存=true、畫面正常顯示=true；版本 99：toast ["資料讀取失敗，已重設"]、主控台 綠級・每日 15 字｜變更、localStorage 目標分數 725、原字串保存=true、畫面正常顯示=true；V-ST-03 違反：toast ["資料讀取失敗，已重設"]、主控台 綠級・每日 15 字｜變更、localStorage 目標分數 725、原字串保存=true、畫面正常顯示=true
+  PASS TC-21-01 AC-21-01、AC-18-06、AC-19-03 操作含點卡片套用、自訂單字、範本、翻卡、TTS、麥克風收音條與 STT、四選一、模擬測驗、初始化確認、資料來源頁、匯出；整個工作階段請求 1 筆（["file:///D:/Demo/Clude/%E6%88%91%E7%9A%84%E5%A4%9A%E7%9B%8A%E6%94%BB%E7%95%A5/dis"]）；載入後操作期間請求 0 筆（[]）；非本機請求 0；Console 資源錯誤 0；以 file:// 直接開啟（無伺服器）正常運作
+  PASS TC-19-02a AC-19-02 離線模擬下各頁 dashboard:true customizer:true flashcards:true part5:true sources:true；TTS（本機語音）朗讀 1 次；Console 錯誤 0；實機斷網列人工 TC-M03
+  PASS TC-20-01 AC-20-01 40 個畫面狀態（4 尺寸 × 10 狀態）；問題 0
+  PASS TC-23-02b AC-23-02（375px） sources：水平捲軸=false、超出 0、裁切 0；sources/details：水平捲軸=false、超出 0、裁切 0
+  N/A TC-14-02 AC-14-02 PRD v0.10 標「v0.9 暫停（隱藏）」，本版不驗收（原 375px 閱讀策略檢查）；AC-23-02 的 375px 部分改由 TC-23-02b
+  PASS TC-20-03 AC-20-03 375px 以導覽到達：dashboard:true customizer:true flashcards:true part5:true；導覽文字「主控台、難易度設定、單字卡、模擬測驗」；導覽 position=fixed、距視窗底 0px、選單鈕 display=none
+  PASS TC-20-02 AC-20-02 375px 觸控操作 41 項：導覽 dashboard:OK、導覽 customizer:OK、導覽 flashcards:OK、導覽 part5:OK、導覽 customizer:OK、色級 orange:OK、色級 brown:OK、色級 blue:OK、色級 gold:OK、色級 green:OK、套用:OK、英文單字欄:OK、中文釋義欄:OK、新增單字:OK、刪除自訂字:OK、導覽 flashcards:OK、翻面:OK、點卡片翻回:OK、下一張:OK、上一張:OK、TTS 1.0x:OK、TTS 0.75x:OK、麥克風:OK、說明 我知道了:OK、麥克風停止:OK、測驗模式:OK、四選一選項:OK、離開測驗模式:OK、導覽 part5:OK、Part 5 選項:OK、下一題:OK、頁尾 資料來源:OK、導覽 dashboard:OK、資料備份 展開:OK、變更:OK、導覽 dashboard:OK、開始今日學習:OK、導覽 customizer:OK、色級 橘（有紀錄）:OK、套用（跳出確認視窗）:OK、確認視窗 取消:OK；小於 44px 的點擊目標：無
+  效能第 1/7 輪：4 倍降速切頁 嚴格 82.1、41.7、41、19.6、51.1、77.1、23.9、14.8、72.8、38｜寬鬆 29.1、41.7、41、19.6、51.1、27.6、23.9、14.8、72.8、38
+  效能第 2/7 輪：4 倍降速切頁 嚴格 54.9、22.4、18.8、13.3、40、37.2、15.9、15、40.6、18.2｜寬鬆 22.5、22.4、18.8、13.3、40、16.2、15.9、15、40.6、18.2
+  效能第 3/7 輪：4 倍降速切頁 嚴格 70.2、23.9、21.5、19.4、44、40.3、13.5、16.8、35.2、16.1｜寬鬆 33.4、23.9、21.5、19.4、44、17.3、13.5、16.8、35.2、16.1

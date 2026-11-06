@@ -1,0 +1,3 @@
+  PASS TC-50-01s AC-50-01、E-147、Q-89（獨立視窗不載入） 【替身驗證】display-mode: standalone：廣告請求 0、狀態 ineligible、框 0、data-ad-env null（matchMedia 替身；實機已安裝 App 見 TC-PWA-H1）
+  PASS TC-50-08b AC-50-08、E-144（第三方寫入同網域儲存） 【替身驗證】模擬第三方寫入 localStorage、Cookie、IndexedDB；備份與本系統狀態含第三方內容=false；備份頂層 format、schemaVersion、exportedAt、contentDataVersion、data；schemaVersion 3、12 欄；第三方項目保留不動=true；提示「」
+e2e-ad-extra：通過 2、失敗 0

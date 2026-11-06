@@ -4,14 +4,14 @@
     "tc": "TC-55-04a",
     "ac": "AC-55-04（V-MAIL-01、ML-3）",
     "result": "通過",
-    "note": "掃描 572 個文字檔（git ls-files 493、未追蹤 111、dist/site 13；二進位略過 45、已不存在 0）；ML-3 連續地址命中 0；含本檔自身"
+    "note": "掃描 755 個文字檔（git ls-files 604、未追蹤 183、dist/site 13；二進位略過 45、已不存在 0）；ML-3 連續地址命中 0；含本檔自身"
   },
   {
     "suite": "mail-scan",
     "tc": "TC-55-04b",
     "ac": "AC-23-07 (8)、AC-55-04（ML-4）",
     "result": "通過",
-    "note": "ML-4 空白形式：等於現行值 41 處；不等於現行值 1 處（上游 tasks.json FE-77 1 處，SD-FB-78 由主控決定；其他 0 處）"
+    "note": "ML-4 空白形式：等於現行值 51 處；不等於現行值 0 處（上游 tasks.json FE-77 0 處，SD-FB-78 由主控決定；其他 0 處）"
   },
   {
     "suite": "mail-scan",
@@ -25,6 +25,6 @@
     "tc": "TC-55-04h",
     "ac": "AC-55-04（不含 Git 歷史，只回報）",
     "result": "通過",
-    "note": "AC 明定不含 Git 歷史；回報：全部分支有 1 個 commit 異動過連續地址（25e3c3f），路徑 tests/static/legal-check.mjs。未改寫歷史（人類決定）；本工具不輸出地址"
+    "note": "AC 明定不含 Git 歷史；回報：全部分支有 2 個 commit 異動過連續地址（a358556、25e3c3f），路徑 tests/static/legal-check.mjs。未改寫歷史（人類決定）；本工具不輸出地址"
   }
 ]

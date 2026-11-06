@@ -1,0 +1,20 @@
+  PASS TC-08-13 AC-08-13 常駐標示「需要連網」；首次按下說明「語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統只即時讀取音量以顯示收音條，不錄音、不保存、不上傳錄音。停留在單字卡頁期間，瀏覽器可能持續顯示麥克風使用中圖示，離開單字卡頁即停止使用麥克風」[我知道了/取消]；取消後 starts 0→0、getUserMedia 呼叫 0、狀態 idle、已讀 false；說明顯示期間按鈕 idle；「我知道了」後狀態序列 preparing→listening、getUserMedia 1；再按仍顯示說明=true；我知道了 → starts 1、狀態 listening、localStorage 已讀 true；之後再按顯示說明=false
+  PASS TC-07-01 AC-07-01、AC-07-02 [{"text":"Latency","lang":"en-US","rate":1,"voice":"QA en-US local","queueBefore":false},{"text":"Latency","lang":"en-US","rate":0.75,"voice":"QA en-US local","queueBefore":false}]
+  PASS TC-07-03 AC-07-03 cancel 次數：播放前 5 → 第一次播放 6 → 播放中再按 7 → 切換卡片 8；每次 speak 前皆已無朗讀中=true
+  PASS TC-08-01 AC-08-01 lang=en-US、interimResults=false；按鈕狀態 listening、文字「聆聽中」；收音條 待機 00000 → 聆聽中（替身 −25 dBFS）11100
+  PASS TC-08-03 AC-08-03 Latency. → 100、綠燈
+  PASS TC-08-04 AC-08-04 address ← adress → 86、黃燈
+  PASS TC-08-05 AC-08-05 sitting ← kitten → 57、紅燈
+  PASS TC-08-12 AC-08-12 Comply with. → 100；complied with → 75、黃燈
+  PASS TC-08-06 AC-08-06、AC-08-07、AC-08-08 100→100/綠燈；90→90/綠燈；89→89/黃燈/提示；65→65/黃燈/提示；64→64/紅燈/並列；0→0/紅燈/並列；徽章底色 {"綠燈":"rgb(22, 163, 74)","黃燈":"rgb(202, 138, 4)","紅燈":"rgb(220, 38, 38)"}
+  PASS TC-08-11 AC-08-11 標題「辨識吻合度」；說明「此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」；畫面含「發音評分」=false
+  PASS TC-08-09 AC-08-09（含 §7.6 錯誤對照表） not-allowed：「需要麥克風權限  開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。」、idle、收音條 00000；service-not-allowed：「需要麥克風權限  開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。」、idle、收音條 00000；audio-capture：「找不到麥克風裝置  請確認裝置已連接麥克風後再按一次」、idle、收音條 00000；network：「語音辨識需要網路連線」、idle、收音條 00000；no-speech：「未偵測到語音，請再試一次」、idle、收音條 00000；aborted：「語音辨識發生錯誤，請稍後再試一次」、idle、收音條 00000；language-not-supported：「語音辨識發生錯誤，請稍後再試一次」、idle、收音條 00000
+  PASS TC-08-10 AC-08-10 空結果：「有收到聲音，但沒聽出英文單字，請再說一次」、idle；逾時：「未偵測到語音，請再試一次」、idle；再按停止：listening → idle、訊息「」
+  PASS TC-22-03 AC-22-03 onresult → 徽章繪製 ms：3.1、7、11.8、16.1、6.8、10.3、17.9、11.1、15.4、17.5；中位數 11.1、p90 17.5、最大 17.9（無頭 Chrome、未降速）
+  PASS TC-21-03 AC-21-03（執行期） localStorage 鍵與長度 {"englishMasterTrack:state":6837}；含音訊樣式字串=false
+  PASS TC-08-14 AC-08-14 離線 navigator.onLine=false：「語音辨識需要網路連線」、idle、收音條 00000、未開始辨識=true、顯示分數=false；辨識中 network 錯誤：「語音辨識需要網路連線」、idle、收音條 00000、顯示分數=false
+  PASS TC-08-14b AC-08-14 先評分 100/綠燈，離線再按麥克風：訊息「語音辨識需要網路連線」、idle、分數區文字「」、lastResult=null；恢復連線再評分 100/綠燈
+  PASS TC-X-speech （全套件）無未處理例外 []
+  PASS TC-07-04 AC-07-04 按鈕 [{"aria":"true","title":"此瀏覽器不支援語音朗讀","disabled":false,"opacity":"0.5","cursor":"not-allowed"},{"aria":"true","title":"此瀏覽器不支援語音朗讀","disabled":false,"opacity":"0.5","cursor":"not-allowed"}]；點擊 toast ["此瀏覽器不支援語音朗讀"]；其他功能（翻面）正常=true
+  PASS TC-08-02 AC-08-02 麥克風 aria-disabled=true、title「建議使用 Google Chrome / Edge」、disabled 屬性=false；toast ["建議使用 Google Chrome / Edge"]；狀態 idle；getUserMedia 呼叫 0（應 0）；收音條 00000
+  PASS TC-07-05 AC-07-05 toast ["此裝置未安裝美式英語語音"]；實際朗讀 0 次；未處理例外 0

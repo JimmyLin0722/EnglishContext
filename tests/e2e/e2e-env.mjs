@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { launch, recorder, sleep, FILE_URL, resultPath } from "./lib/cdp.mjs";
-import { TOAST_RECORDER, fakeTts, fakeStt, fakeClipboard, storageMode, fakeMic } from "./lib/inits.mjs";
+import { TOAST_RECORDER, fakeTts, fakeStt, fakeClipboard, storageMode, fakeMic, micOnStrict } from "./lib/inits.mjs";
 import { stateRecord, readState, dashGoal, GOAL_LINE, expandBackup, injectTpl } from "./lib/state.mjs";
 
 const R = recorder("e2e-env");
@@ -13,7 +13,8 @@ const TMP = process.env.QA_TMP || path.resolve("tests/results/tmp");
 fs.mkdirSync(TMP, { recursive: true });
 const TABS = ["dashboard", "customizer", "flashcards", "part5", "sources"];
 /** 按麥克風並等待進入聆聽中 */
-async function micOn(p) { await p.click(".fc-front .sp-mic"); for (let i = 0; i < 40; i++) { if ((await p.ev(`document.querySelector(".fc-front .sp-mic").dataset.status`)) === "listening") break; await sleep(25); } }
+// 第 10 輪（v0.20 US-58）：先準備中，替身 audiostart 或 T_FALLBACK 後才聆聽中；未經準備中即拋出（architecture §10.12 Q2）
+async function micOn(p) { return micOnStrict(p); }
 const toasts = (p) => p.ev(`window.__qaToasts.map((t) => t.text)`);
 
 async function open(inits = [], vp = [1366, 900]) {

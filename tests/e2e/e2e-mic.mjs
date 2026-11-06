@@ -3,7 +3,7 @@
 // 權限詢問次數、瀏覽器使用中圖示等真實行為無法在無頭環境驗證，列 V-MIC-1～V-MIC-5 待人類實機。
 import fs from "node:fs";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
-import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic } from "./lib/inits.mjs";
+import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic, micOnStrict } from "./lib/inits.mjs";
 import { stateRecord, seed } from "./lib/state.mjs";
 
 const R = recorder("e2e-mic");
@@ -29,9 +29,10 @@ const st = (p) => p.ev(`(() => { const b = document.querySelector(".fc-front .sp
   const bars = [...document.querySelectorAll(".fc-front .sp-meter__bar")]; const meter = document.querySelector(".fc-front .sp-meter");
   return { status: b.dataset.status, bars: bars.map((x) => (x.classList.contains("is-on") ? 1 : 0)).join(""), nBars: bars.length, meterShown: !!meter && !meter.hidden && meter.getClientRects().length > 0,
     msg: m && !m.hidden ? m.innerText.replace(/\\s+/g, " ") : "", score: !!(r && !r.hidden && r.querySelector(".sp-result__badge")), dialog: !!document.querySelector(".dialog") }; })()`);
+// 第 10 輪（v0.20 US-58）：等聆聽中時改用 micOnStrict（先準備中、替身 audiostart 或 T_FALLBACK 後聆聽中；未經準備中即拋出）
 async function micPress(p, wait = "listening") {
+  if (wait === "listening") { await micOnStrict(p); await sleep(10); return; }
   await p.click(".fc-front .sp-mic");
-  for (let i = 0; i < 40; i++) { const s = await p.ev(`document.querySelector(".fc-front .sp-mic").dataset.status`); if (!wait || s === wait) break; await sleep(25); }
   await sleep(30);
 }
 const finish = (p, text = "Latency") => p.ev(`(() => { const r = window.__qaStt.last; r.emitResult(${JSON.stringify(text)}); r.emitEnd(); })()`);

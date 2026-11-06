@@ -20,13 +20,18 @@ const BROWSERS = {
 export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** 結果檔路徑：tests/results/<name>[-<瀏覽器>].json（非 chrome 時加後綴） */
+// 第 10 輪：QA_STT_AUDIOSTART=0（替身模擬不支援 audiostart）時另加 -noas，兩種替身的結果分開保存
 export function resultPath(name) {
   const b = process.env.QA_BROWSER && process.env.QA_BROWSER !== "chrome" ? "-" + process.env.QA_BROWSER : "";
-  return path.join(ROOT, "tests", "results", name + b + ".json");
+  const v = process.env.QA_STT_AUDIOSTART === "0" ? "-noas" : "";
+  return path.join(ROOT, "tests", "results", name + b + v + ".json");
 }
 
 /** 啟動瀏覽器並連上第一個分頁 */
-export async function launch({ browser = process.env.QA_BROWSER || "chrome", tmpRoot } = {}) {
+// 第 11 輪：args 追加啟動參數（例如 --use-fake-device-for-media-stream、--host-resolver-rules）；autoplayFlag=false 時不加
+// --autoplay-policy=no-user-gesture-required，用來驗證真實自動播放政策下 AudioContext 狀態（architecture v0.16 §7.28.6）。
+// 一律不加 --hide-scrollbars（傳統捲軸 15 px，與 Windows 桌面版相同）。
+export async function launch({ browser = process.env.QA_BROWSER || "chrome", tmpRoot, args = [], autoplayFlag = true } = {}) {
   const exe = BROWSERS[browser] || browser;
   const port = 9400 + Math.floor(Math.random() * 2000);
   const base = tmpRoot || process.env.QA_TMP || os.tmpdir();
@@ -39,7 +44,8 @@ export async function launch({ browser = process.env.QA_BROWSER || "chrome", tmp
     "--disable-background-networking", "--disable-component-update", "--disable-sync",
     "--allow-file-access-from-files",
     // （第 3 輪）麥克風替身以 Web Audio 產生測試音源，避免無頭模式的自動播放政策讓 AudioContext 停在 suspended
-    "--autoplay-policy=no-user-gesture-required",
+    ...(autoplayFlag ? ["--autoplay-policy=no-user-gesture-required"] : []),
+    ...args,
     "about:blank",
   ], { stdio: "ignore" });
 

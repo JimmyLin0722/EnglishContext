@@ -1,0 +1,812 @@
+{
+ "1.3.1@1366x768": [
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "comply with",
+   "before": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1366,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "stable"
+   },
+   "moved": false
+  },
+  {
+   "light": "黃燈",
+   "got": "黃燈",
+   "word": "comply with",
+   "before": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "stable"
+   },
+   "moved": false
+  },
+  {
+   "light": "紅燈",
+   "got": "紅燈",
+   "word": "sitting",
+   "before": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1366,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "stable"
+   },
+   "moved": false
+  },
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "Latency",
+   "before": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1366,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "stable"
+   },
+   "moved": false
+  }
+ ],
+ "1.3.0@1366x768": [
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "comply with",
+   "before": {
+    "tts": "290.4,432.9|362.5,432.9",
+    "mic": "252,486.9",
+    "meter": "396,499.9",
+    "cw": 1366,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "moved": true
+  },
+  {
+   "light": "黃燈",
+   "got": "黃燈",
+   "word": "comply with",
+   "before": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "紅燈",
+   "got": "紅燈",
+   "word": "sitting",
+   "before": {
+    "tts": "290.4,432.9|362.5,432.9",
+    "mic": "252,486.9",
+    "meter": "396,499.9",
+    "cw": 1366,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "moved": true
+  },
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "Latency",
+   "before": {
+    "tts": "290.4,432.9|362.5,432.9",
+    "mic": "252,486.9",
+    "meter": "396,499.9",
+    "cw": 1366,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "moved": true
+  }
+ ],
+ "1.3.1-r10css@1366x768": [
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "comply with",
+   "before": {
+    "tts": "290.4,432.9|362.5,432.9",
+    "mic": "252,486.9",
+    "meter": "396,499.9",
+    "cw": 1366,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "moved": true
+  },
+  {
+   "light": "黃燈",
+   "got": "黃燈",
+   "word": "comply with",
+   "before": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "紅燈",
+   "got": "紅燈",
+   "word": "sitting",
+   "before": {
+    "tts": "290.4,432.9|362.5,432.9",
+    "mic": "252,486.9",
+    "meter": "396,499.9",
+    "cw": 1366,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "moved": true
+  },
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "Latency",
+   "before": {
+    "tts": "290.4,432.9|362.5,432.9",
+    "mic": "252,486.9",
+    "meter": "396,499.9",
+    "cw": 1366,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "282.9,432.9|355,432.9",
+    "mic": "244.5,486.9",
+    "meter": "388.5,499.9",
+    "cw": 1351,
+    "scrollable": true,
+    "gutter": "auto"
+   },
+   "moved": true
+  }
+ ],
+ "1.3.1@768x1024": [
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "comply with",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "moved": false
+  },
+  {
+   "light": "黃燈",
+   "got": "黃燈",
+   "word": "comply with",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "moved": false
+  },
+  {
+   "light": "紅燈",
+   "got": "紅燈",
+   "word": "sitting",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "moved": false
+  },
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "Latency",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "moved": false
+  }
+ ],
+ "1.3.0@768x1024": [
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "comply with",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "黃燈",
+   "got": "黃燈",
+   "word": "comply with",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "紅燈",
+   "got": "紅燈",
+   "word": "sitting",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "Latency",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  }
+ ],
+ "1.3.1-r10css@768x1024": [
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "comply with",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "黃燈",
+   "got": "黃燈",
+   "word": "comply with",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "紅燈",
+   "got": "紅燈",
+   "word": "sitting",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "Latency",
+   "before": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "87.4,424.9|159.5,424.9",
+    "mic": "49,478.9",
+    "meter": "193,491.9",
+    "cw": 768,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  }
+ ],
+ "1.3.1@1920x1080": [
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "comply with",
+   "before": {
+    "tts": "559.9,432.9|632,432.9",
+    "mic": "521.5,486.9",
+    "meter": "665.5,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "559.9,432.9|632,432.9",
+    "mic": "521.5,486.9",
+    "meter": "665.5,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "moved": false
+  },
+  {
+   "light": "黃燈",
+   "got": "黃燈",
+   "word": "comply with",
+   "before": {
+    "tts": "559.9,432.9|632,432.9",
+    "mic": "521.5,486.9",
+    "meter": "665.5,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "559.9,432.9|632,432.9",
+    "mic": "521.5,486.9",
+    "meter": "665.5,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "moved": false
+  },
+  {
+   "light": "紅燈",
+   "got": "紅燈",
+   "word": "sitting",
+   "before": {
+    "tts": "559.9,432.9|632,432.9",
+    "mic": "521.5,486.9",
+    "meter": "665.5,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "559.9,432.9|632,432.9",
+    "mic": "521.5,486.9",
+    "meter": "665.5,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "moved": false
+  },
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "Latency",
+   "before": {
+    "tts": "559.9,432.9|632,432.9",
+    "mic": "521.5,486.9",
+    "meter": "665.5,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "after": {
+    "tts": "559.9,432.9|632,432.9",
+    "mic": "521.5,486.9",
+    "meter": "665.5,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "stable"
+   },
+   "moved": false
+  }
+ ],
+ "1.3.0@1920x1080": [
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "comply with",
+   "before": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "黃燈",
+   "got": "黃燈",
+   "word": "comply with",
+   "before": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "紅燈",
+   "got": "紅燈",
+   "word": "sitting",
+   "before": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "Latency",
+   "before": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  }
+ ],
+ "1.3.1-r10css@1920x1080": [
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "comply with",
+   "before": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "黃燈",
+   "got": "黃燈",
+   "word": "comply with",
+   "before": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "紅燈",
+   "got": "紅燈",
+   "word": "sitting",
+   "before": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  },
+  {
+   "light": "綠燈",
+   "got": "綠燈",
+   "word": "Latency",
+   "before": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "after": {
+    "tts": "567.4,432.9|639.5,432.9",
+    "mic": "529,486.9",
+    "meter": "673,499.9",
+    "cw": 1920,
+    "scrollable": false,
+    "gutter": "auto"
+   },
+   "moved": false
+  }
+ ]
+}

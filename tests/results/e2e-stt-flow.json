@@ -1,0 +1,303 @@
+[
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-01",
+    "ac": "AC-58-01、AC-08-01（v0.20）",
+    "result": "通過",
+    "note": "前次分數 100綠燈 → 按下 1.5 ms 內 preparing/awaitingAudioStart「準備中」00000、aria-label「準備中，再按一次取消」、aria-pressed true、畫面含「聆聽中」=false；前次訊息「未偵測到語音，請再試一次」→ 按下 1.4 ms 內清除=true"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-02",
+    "ac": "AC-58-02、AC-33-03（v0.20 準備中全暗）",
+    "result": "通過",
+    "note": "start() 已回傳（awaitingAudioStart）、測試音源 −5 dBFS（足以亮 5 格）；4.4 秒內取樣 29 次全為「準備中、00000」=true"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-03",
+    "ac": "AC-58-03、AC-08-01、AC-33-03",
+    "result": "通過",
+    "note": "T_BUFFER = 0：#1 start 回傳 → audiostart 226 ms → 聆聽中 +0.3 ms、收音條 55.6 ms 後點亮；#2 start 回傳 → audiostart 267 ms → 聆聽中 +0.4 ms、收音條 55 ms 後點亮；#3 start 回傳 → audiostart 331 ms → 聆聽中 +0.2 ms、收音條 54.4 ms 後點亮；#4 start 回傳 → audiostart 380 ms → 聆聽中 +0.2 ms、收音條 56.7 ms 後點亮；#5 start 回傳 → audiostart 424 ms → 聆聽中 +0.3 ms、收音條 54.3 ms 後點亮"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-04b",
+    "ac": "AC-58-04 (b)",
+    "result": "通過",
+    "note": "已 start（awaitingAudioStart）再按：0.9 ms 回 idle「麥克風跟讀」00000、abort 2→3、Toast 增 0；之後替身對舊實例觸發 audiostart、soundstart、speechstart、result、nomatch、error、end → idle「麥克風跟讀」00000"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-05",
+    "ac": "AC-58-05（已開始辨識後取消再按）",
+    "result": "通過",
+    "note": "取消後 32.9 ms 再按 → preparing/awaitingAudioStart「準備中」00000；舊實例遲到 audiostart、result、end → preparing/awaitingAudioStart「準備中」00000；同時進行中的辨識工作 1 個；新實例 audiostart → listening、result → 100綠燈；未處理例外 0"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-06",
+    "ac": "AC-58-06、E-156",
+    "result": "通過",
+    "note": "start() 回傳到回待機 5007 ms（T_READY 5000 ± 200）、中止辨識=true；idle「麥克風跟讀」00000、訊息「語音辨識沒有回應，請再試一次」；遲到 audiostart、result、end → idle「麥克風跟讀」00000、訊息「語音辨識沒有回應，請再試一次」；再按 → preparing → audiostart → listening"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-07",
+    "ac": "AC-58-07",
+    "result": "通過",
+    "note": "SoundStart：同一處理器內進入聆聽中（0.3 ms）、5.4 秒後仍 listening（不套用 T_READY）；SpeechStart：同一處理器內進入聆聽中（0.4 ms）、5.4 秒後仍 listening（不套用 T_READY）；準備中直接 result「adress」→ 86 黃燈；準備中 nomatch → 「有收到聲音，但沒聽出英文單字，請再說一次」"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-08",
+    "ac": "AC-58-08、E-161",
+    "result": "通過",
+    "note": "not-allowed → 「需要麥克風權限 開啟方式：點網址列左側的圖示（鎖」；service-not-allowed → 「需要麥克風權限 開啟方式：點網址列左側的圖示（鎖」；audio-capture → 「找不到麥克風裝置 請確認裝置已連接麥克風後再按一」；network → 「語音辨識需要網路連線」；bad-grammar → 「語音辨識發生錯誤，請稍後再試一次」；no-speech → 「未偵測到語音，請再試一次」；無錯誤 end → 「語音辨識沒有回應，請再試一次」；start() 拋例外 → 「語音辨識發生錯誤，請稍後再試一次」、idle；未處理例外 0"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-11",
+    "ac": "AC-58-11、AC-33-06 (b)（v0.20 準備中）、E-160",
+    "result": "通過",
+    "note": "準備中（awaitingAudioStart、持有音軌 1）拔除 → 1.2 ms 回 idle「麥克風跟讀」00000、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、abort 5→6"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-FB85",
+    "ac": "AC-08-10（SD-FB-85：聆聽中停止後遲到的 result 不評分）",
+    "result": "通過",
+    "note": "聆聽中按停止 → idle、stop 1；之後替身送出 result「Latency」與 end → idle「麥克風跟讀」00000（不評分、不提示；與 v1.3.0「停止後仍可能評分」不同，屬 SD-FB-85 刻意變更）；今日已學 2"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-04a",
+    "ac": "AC-58-04 (a)、AC-58-01（含取得麥克風期間）、E-157",
+    "result": "通過",
+    "note": "按下 8.3 ms 內 preparing/acquiringMic「準備中」00000；取得中再按 9.3 ms 回 idle「麥克風跟讀」00000、Toast 增 0；放行擱置的 getUserMedia（1 個）後：辨識開始 0→0（不開始）、idle「麥克風跟讀」00000、保留音軌 1（live 1）；再按 getUserMedia 1→1（重用）、start 0→1"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-06b",
+    "ac": "AC-58-06（權限詢問不計入 T_READY）、E-157",
+    "result": "通過",
+    "note": "getUserMedia 擱置 6.2 秒（> T_READY）後仍 preparing/acquiringMic「準備中」00000；再按 1 ms 回 idle「麥克風跟讀」00000；之後才允許 → 不開始辨識（start 1→1）、idle「麥克風跟讀」00000"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-05b",
+    "ac": "AC-58-05（取得中取消後立即再按：共用取得、不出現第 2 個權限詢問）、PR-8",
+    "result": "通過",
+    "note": "取得中：按下 → 取消 → 22.1 ms 內再按 → preparing/acquiringMic「準備中」00000；getUserMedia 呼叫 2→3（第 2 次按下沿用擱置中的取得，不出現第 2 個權限詢問）；放行後只有新嘗試開始辨識（start 1→2、實例 1→2）→ listening → 14紅燈"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-10a",
+    "ac": "AC-58-10 (a) 取得麥克風期間、E-159",
+    "result": "通過",
+    "note": "換卡：acquiringMic → idle，取得完成後不開始（start 2→2）；切換測驗模式：acquiringMic → idle，取得完成後不開始（start 2→2）；按 TTS：acquiringMic → idle，取得完成後不開始（start 2→2）、照常朗讀 1 次；翻面（往返）：仍 preparing/acquiringMic，取得完成後 preparing/awaitingAudioStart（同聆聽中：翻面不中止）；離開單字卡頁（取得中）：3 ms 內音軌 live 0、回單字卡頁 idle「麥克風跟讀」00000、未開始辨識"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-10b",
+    "ac": "AC-58-10 (b) 已開始辨識期間、E-159",
+    "result": "通過",
+    "note": "換卡：awaitingAudioStart → idle、abort +1；遲到事件 → idle「麥克風跟讀」00000；切換測驗模式：awaitingAudioStart → idle、abort +1；遲到事件 → idle「麥克風跟讀」00000；按 TTS：awaitingAudioStart → idle、abort +1、朗讀 1 次；遲到事件 → idle「麥克風跟讀」00000；翻面：準備中 → preparing；聆聽中 → listening（行為相同）；離開單字卡頁：137 ms 內音軌 live 0；遲到事件後回單字卡頁 idle「麥克風跟讀」00000"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-12",
+    "ac": "AC-58-12、AC-30-04（v0.20 準備中取消與逾時）、AC-17-02",
+    "result": "通過",
+    "note": "取消、逾時、有收到聲音、未偵測到語音後：localStorage 位元組不變=true、鍵 [\"englishMasterTrack:state\"]、schemaVersion 3；匯出備份（去掉時間欄）不變=true、頂層 format,schemaVersion,exportedAt,contentDataVersion,data；含準備中或事件字樣=false；準備中重新載入 → idle、preparingPhase null；今日已學 1 / 15 字、打卡 1、掌握 0"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-09",
+    "ac": "AC-58-09、E-158",
+    "result": "通過",
+    "note": "替身沒有 onaudiostart 屬性（\"onaudiostart\" in rec 為 false）：#1 fallbackWait「準備中」00000 → start 回傳後 1509 ms 聆聽中、收音條 11111；再等 5.3 秒仍 listening（不套用 T_READY）；#2 fallbackWait「準備中」00000 → start 回傳後 1511 ms 聆聽中、收音條 11111；#3 fallbackWait「準備中」00000 → start 回傳後 1513 ms 聆聽中、收音條 11111；後備等待中再按 1.2 ms 回待機、1700 ms 後仍 idle；提前 speechstart → listening「聆聽中」11111；提前 result → idle「麥克風跟讀」00000、分數 100綠燈；提前 error network → idle「麥克風跟讀」00000、訊息「語音辨識需要網路連線」；提前 無錯誤 end → idle「麥克風跟讀」00000、訊息「語音辨識沒有回應，請再試一次」"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-59-01",
+    "ac": "AC-59-01、AC-08-10（v0.20）、E-05",
+    "result": "通過",
+    "note": "speechstart → end：idle「麥克風跟讀」00000、訊息「有收到聲音，但沒聽出英文單字，請再說一次」；訊息紀錄 [\"有收到聲音，但沒聽出英文單字，請再說一次\"]"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-59-02",
+    "ac": "AC-59-02",
+    "result": "通過",
+    "note": "無 speechstart：nomatch 後「有收到聲音，但沒聽出英文單字，請再說一次」、end 後「有收到聲音，但沒聽出英文單字，請再說一次」、訊息紀錄 1 則；有 speechstart：nomatch 後「有收到聲音，但沒聽出英文單字，請再說一次」、end 後「有收到聲音，但沒聽出英文單字，請再說一次」、訊息紀錄 1 則"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-59-03",
+    "ac": "AC-59-03、AC-60-04",
+    "result": "通過",
+    "note": "無 speechstart \"\" → 「有收到聲音，但沒聽出英文單字，請再說一次」、分數區=false、「辨識文字」標籤=false；無 speechstart \"   \" → 「有收到聲音，但沒聽出英文單字，請再說一次」、分數區=false、「辨識文字」標籤=false；無 speechstart \"...\" → 「有收到聲音，但沒聽出英文單字，請再說一次」、分數區=false、「辨識文字」標籤=false；有 speechstart \"\" → 「有收到聲音，但沒聽出英文單字，請再說一次」、分數區=false、「辨識文字」標籤=false；有 speechstart \"   \" → 「有收到聲音，但沒聽出英文單字，請再說一次」、分數區=false、「辨識文字」標籤=false；有 speechstart \"...\" → 「有收到聲音，但沒聽出英文單字，請再說一次」、分數區=false、「辨識文字」標籤=false"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-59-04",
+    "ac": "AC-59-04",
+    "result": "通過",
+    "note": "speechstart → error no-speech → end：idle「麥克風跟讀」00000、訊息「有收到聲音，但沒聽出英文單字，請再說一次」"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-59-05",
+    "ac": "AC-59-05、E-162",
+    "result": "通過",
+    "note": "(a) error no-speech → end：「未偵測到語音，請再試一次」；(b) 無錯誤 end：「未偵測到語音，請再試一次」；(c) soundstart → end：「未偵測到語音，請再試一次」（聆聽中 = 已確認開始收音）"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-59-06",
+    "ac": "AC-59-06、MS-6",
+    "result": "通過",
+    "note": "(a) 非空文字 → 100綠燈、訊息「」；(b) 再按停止 → idle「麥克風跟讀」00000；(b) 換卡 → idle「麥克風跟讀」00000；(c) speechstart → not-allowed → 「需要麥克風權限 開啟方式：點網址」；(c) speechstart → network → 「語音辨識需要網路連線」；(c) speechstart → audio-capture → 「找不到麥克風裝置 請確認裝置已連」；前一次有 speechstart（「有收到聲音，但沒聽出英文單字，請再說一次」），下一次只有 end → 「未偵測到語音，請再試一次」"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-59-07",
+    "ac": "AC-59-07、AC-30-04（v0.20 分流提示）",
+    "result": "通過",
+    "note": "「有收到聲音，但沒聽出英文單字，請再說一次」、「未偵測到語音，請再試一次」 顯示後：localStorage 位元組不變=true、匯出備份（去時間欄）不變=true；換卡後除 flashcardPosition 外不變=true；今日已學 1（前 1）、打卡 1（前 1）、掌握 0；再按 1.2 ms 內清除=true；換卡清除=true"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-01",
+    "ac": "AC-60-01、AC-60-02、AC-08-06～AC-08-08（v0.20）",
+    "result": "通過",
+    "note": "latency ← \"Latency.\"：100 綠燈、列 [\"辨識文字=Latency.\"]、lang en、子元素順序 sp-result__title > sp-result__score > sp-compare > sp-result__note；address ← \"adress\"：86 黃燈、列 [\"辨識文字=adress\"]、lang en、子元素順序 sp-result__title > sp-result__score > sp-result__tip > sp-compare > sp-result__note；sitting ← \"kitten\"：57 紅燈、列 [\"辨識文字=kitten\",\"目標文字=sitting\"]、lang en/en、子元素順序 sp-result__title > sp-result__score > sp-compare > sp-result__note"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-01o",
+    "ac": "AC-60-01（順序：分數與燈號 → 提示 → 文字列 → 說明）",
+    "result": "通過",
+    "note": "DOM 順序 標題 0 < 分數 2 < 提示 4 < 文字列 5 < 說明 9；畫面 y 580 < 651 < 682"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-03",
+    "ac": "AC-60-03、E-165、RT-4",
+    "result": "通過",
+    "note": "\"hello world\" → 10紅燈、辨識文字「hello world」、禁用字樣 []；\"你好\" → 0紅燈、辨識文字「你好」、禁用字樣 []；\"12345\" → 0紅燈、辨識文字「12345」、禁用字樣 []；\"Latency\" → 100綠燈、辨識文字「Latency」、禁用字樣 []"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-04",
+    "ac": "AC-60-04",
+    "result": "通過",
+    "note": "speechstart+end：分數區隱藏=true、「辨識文字」=false、訊息「有收到聲音，但沒聽出英文單字，請再說一次」；nomatch：分數區隱藏=true、「辨識文字」=false、訊息「有收到聲音，但沒聽出英文單字，請再說一次」；空白結果：分數區隱藏=true、「辨識文字」=false、訊息「有收到聲音，但沒聽出英文單字，請再說一次」；no-speech：分數區隱藏=true、「辨識文字」=false、訊息「未偵測到語音，請再試一次」；end：分數區隱藏=true、「辨識文字」=false、訊息「未偵測到語音，請再試一次」"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-05",
+    "ac": "AC-60-05、E-164、RT-3",
+    "result": "通過",
+    "note": "imgsrcxonerroralert1 ← \"<img src=x onerror=alert(1)>\"：100綠燈、值逐字=true、子元素 0、img/b 0；imgsrcxonerroralert1abc ← \"<img src=x onerror=alert(1)>\"：87黃燈、值逐字=true、子元素 0、img/b 0；ltbgt ← \"&lt;b&gt;\"：100綠燈、值逐字=true、子元素 0、img/b 0；imgsrcxonerroralert1 ← \"&lt;b&gt;\"：5紅燈、值逐字=true、子元素 0/0、img/b 0；alert 對話框 0、非本機請求 0；speech-panel.js（去註解）HTML 寫入 API 0 處"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-07",
+    "ac": "AC-60-07、AC-21-03、AC-24-02",
+    "result": "通過",
+    "note": "評分 100綠燈、辨識文字「QAuniquetext!」；換卡 → 分數區=false；回上一張 → 不殘留=true；切換模式往返 → 同一張卡分數區=true（同 1.3.0）、換卡後清除=true；離開頁面再回來 → 同一張卡分數區=true（同 1.3.0）、換卡後清除=true；再按麥克風 → preparing、分數區=false；localStorage／備份含辨識文字=false；重新載入後分數區=false；評分計入今日已學 6→7（recordSttScored 不變）"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-13-375",
+    "ac": "AC-58-13 (a)（375px）",
+    "result": "通過",
+    "note": "座標（左,上,寬,高）待機 33,290.31,136,44／準備中 33,290.31,136,44／聆聽中 33,290.31,136,44、收音條 177,303.31,42,18 vs 177,303.31,42,18；準備中 底 #ffffff 字 #0866ad 框 #1e9bf0 圓點 #1e9bf0、聆聽中 底 #dc2626 字 #ffffff 框 #dc2626、--light-red #dc2626；準備中 animation none／圓點 none、transition 0s；聆聽中 animation sp-blink；文字裁切 false/false、水平捲軸 false；準備中文字對比 5.98；Enter → preparing → idle、空白鍵 → preparing、觸控 → preparing"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-13-1366",
+    "ac": "AC-58-13 (a)（1366px）",
+    "result": "通過",
+    "note": "座標（左,上,寬,高）待機 244.5,486.92,136,44／準備中 244.5,486.92,136,44／聆聽中 244.5,486.92,136,44、收音條 388.5,499.92,42,18 vs 388.5,499.92,42,18；準備中 底 #ffffff 字 #0866ad 框 #1e9bf0 圓點 #1e9bf0、聆聽中 底 #dc2626 字 #ffffff 框 #dc2626、--light-red #dc2626；準備中 animation none／圓點 none、transition 0s；聆聽中 animation sp-blink；文字裁切 false/false、水平捲軸 false；準備中文字對比 5.98；Enter → preparing → idle、空白鍵 → preparing、觸控 → （> 640px 未測觸控）"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-13m-375",
+    "ac": "AC-58-13 (b)、AC-31-03、AC-33-08（v0.20）、E-66（375px）",
+    "result": "通過",
+    "note": "座標（左,上,寬,高）待機 33,290.31,136,44／準備中 33,290.31,136,44／聆聽中 33,290.31,136,44、收音條 177,303.31,42,18 vs 177,303.31,42,18；準備中 底 #ffffff 字 #0866ad 框 #1e9bf0 圓點 #1e9bf0、聆聽中 底 #dc2626 字 #ffffff 框 #dc2626、--light-red #dc2626；準備中 animation none／圓點 none、transition 0s；聆聽中 animation none；文字裁切 false/false、水平捲軸 false；準備中文字對比 5.98；Enter → preparing → idle、空白鍵 → preparing、觸控 → preparing"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-13m-1366",
+    "ac": "AC-58-13 (b)、AC-31-03、AC-33-08（v0.20）、E-66（1366px）",
+    "result": "通過",
+    "note": "座標（左,上,寬,高）待機 244.5,486.92,136,44／準備中 244.5,486.92,136,44／聆聽中 244.5,486.92,136,44、收音條 388.5,499.92,42,18 vs 388.5,499.92,42,18；準備中 底 #ffffff 字 #0866ad 框 #1e9bf0 圓點 #1e9bf0、聆聽中 底 #dc2626 字 #ffffff 框 #dc2626、--light-red #dc2626；準備中 animation none／圓點 none、transition 0s；聆聽中 animation none；文字裁切 false/false、水平捲軸 false；準備中文字對比 5.98；Enter → preparing → idle、空白鍵 → preparing、觸控 → （> 640px 未測觸控）"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-06-375",
+    "ac": "AC-60-06、E-164（375px）",
+    "result": "通過",
+    "note": "overflow-wrap anywhere：comply with 綠燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；comply with 黃燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；comply with 紅燈：水平捲軸 false、溢出 false、行數 1/1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；The quick br… 綠燈：水平捲軸 false、溢出 false、行數 4、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；The quick br… 黃燈：水平捲軸 false、溢出 false、行數 4、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；The quick br… 紅燈：水平捲軸 false、溢出 false、行數 4/1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；abcdefghijab… 綠燈：水平捲軸 false、溢出 false、行數 2、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；abcdefghijab… 黃燈：水平捲軸 false、溢出 false、行數 2、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；abcdefghijab… 紅燈：水平捲軸 false、溢出 false、行數 2/1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；分數出現前不可捲動 0 / 9 種情況"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-06-768",
+    "ac": "AC-60-06、E-164（768px）",
+    "result": "通過",
+    "note": "overflow-wrap anywhere：comply with 綠燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 false、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；comply with 黃燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 false、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；comply with 紅燈：水平捲軸 false、溢出 false、行數 1/1、上方座標不變 true、gutter stable、分數後可捲動 false、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；The quick br… 綠燈：水平捲軸 false、溢出 false、行數 2、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；The quick br… 黃燈：水平捲軸 false、溢出 false、行數 2、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；The quick br… 紅燈：水平捲軸 false、溢出 false、行數 2/1、上方座標不變 true、gutter stable、分數後可捲動 false、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；abcdefghijab… 綠燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 false、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；abcdefghijab… 黃燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 false、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；abcdefghijab… 紅燈：水平捲軸 false、溢出 false、行數 1/1、上方座標不變 true、gutter stable、分數後可捲動 false、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；分數出現前不可捲動 8 / 9 種情況"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-06-1366",
+    "ac": "AC-60-06、E-164（1366px）",
+    "result": "通過",
+    "note": "overflow-wrap anywhere：comply with 綠燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；comply with 黃燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；comply with 紅燈：水平捲軸 false、溢出 false、行數 1/1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；The quick br… 綠燈：水平捲軸 false、溢出 false、行數 2、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；The quick br… 黃燈：水平捲軸 false、溢出 false、行數 2、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；The quick br… 紅燈：水平捲軸 false、溢出 false、行數 2/1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；abcdefghijab… 綠燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；abcdefghijab… 黃燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；abcdefghijab… 紅燈：水平捲軸 false、溢出 false、行數 1/1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98；分數出現前不可捲動 4 / 9 種情況"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-60-06m-375",
+    "ac": "AC-60-06 (b)、E-164（375px）",
+    "result": "通過",
+    "note": "overflow-wrap anywhere：comply with 綠燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98、動畫 []；comply with 黃燈：水平捲軸 false、溢出 false、行數 1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98、動畫 []；comply with 紅燈：水平捲軸 false、溢出 false、行數 1/1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98、動畫 []；The quick br… 綠燈：水平捲軸 false、溢出 false、行數 4、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98、動畫 []；The quick br… 黃燈：水平捲軸 false、溢出 false、行數 4、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98、動畫 []；The quick br… 紅燈：水平捲軸 false、溢出 false、行數 4/1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98、動畫 []；abcdefghijab… 綠燈：水平捲軸 false、溢出 false、行數 2、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98、動畫 []；abcdefghijab… 黃燈：水平捲軸 false、溢出 false、行數 2、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98、動畫 []；abcdefghijab… 紅燈：水平捲軸 false、溢出 false、行數 2/1、上方座標不變 true、gutter stable、分數後可捲動 true、翻面/上一張/下一張 可見/可見/可見、最低對比 5.98、動畫 []；分數出現前不可捲動 0 / 9 種情況"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-01f",
+    "ac": "AC-58-01（本次載入第 1 次按下 ≤ 100 ms；BUG-007）",
+    "result": "通過",
+    "note": "chrome#1：第 1 次 0.9／0.9／2.5（t1 preparing、gUM 0/0/1）；第 2 次 0.6／0.6／2（t1 preparing、gUM 0/0/0）；離開再回來 0.4／0.5／1.8（t1 preparing、gUM 0/0/1）；chrome#2：第 1 次 1.3／1.3／2.7（t1 preparing、gUM 0/0/1）；第 2 次 0.5／0.6／2.1（t1 preparing、gUM 0/0/0）；離開再回來 0.5／0.5／1.5（t1 preparing、gUM 0/0/1）；chrome#3：第 1 次 1.1／1.1／2.7（t1 preparing、gUM 0/0/1）；第 2 次 0.4／0.4／1.8（t1 preparing、gUM 0/0/0）；離開再回來 0.5／0.6／2（t1 preparing、gUM 0/0/1）；edge#1：第 1 次 1／1.1／2.5（t1 preparing、gUM 0/0/1）；第 2 次 0.3／0.3／1.3（t1 preparing、gUM 0/0/0）；離開再回來 0.4／0.4／1.3（t1 preparing、gUM 0/0/1）；edge#2：第 1 次 0.8／0.8／2.3（t1 preparing、gUM 0/0/1）；第 2 次 0.3／0.4／1.2（t1 preparing、gUM 0/0/0）；離開再回來 0.5／0.6／1.5（t1 preparing、gUM 0/0/1）；edge#3：第 1 次 0.9／1／2.4（t1 preparing、gUM 0/0/1）；第 2 次 0.4／0.4／1.2（t1 preparing、gUM 0/0/0）；離開再回來 0.4／0.4／1.5（t1 preparing、gUM 0/0/1）（ms：處理器 t1−t0／狀態屬性／畫出 t2−t0；gUM = getUserMedia 呼叫數於 t1／t2／t2+250 ms。第 2 次沿用擱置中的取得，故 0。產品 new AudioContext 耗時（第 1 次／離開再回來）chrome#1 108.5/33.9、chrome#2 111.4/36.4、chrome#3 110.6/32.8、edge#1 118.5/36、edge#2 157.2/38.5、edge#3 150.4/35 ms，發生在畫出之後）"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-01g",
+    "ac": "AC-58-01（4 倍 CPU 降速；BUG-007 §21.5 的 2/16 超過）",
+    "result": "通過",
+    "note": "chrome：離開再回來後第 1 次 16/16 ≤ 100 ms（畫出 8,6.4,6.9,12.6,8.1,6.3,11.1,7.5,7.9,7,5.6,9.2,5.8,5.9,7.4,10.6；最大 12.6；處理器最大 3.1）；本次載入第 1 次（參考）畫出 22.1,10,7.7、處理器 8.8,2.8,1.8；edge：離開再回來後第 1 次 16/16 ≤ 100 ms（畫出 5.1,4,6.5,5.2,12.5,3.5,3.4,6.2,4.3,4.2,6.7,6.3,3.7,3.1,3.9,6.5；最大 12.5；處理器最大 3.5）；本次載入第 1 次（參考）畫出 15.2,8.9,5.6、處理器 3.5,1.5,0.4（ms；本機無頭、非基準環境）"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-58-04c",
+    "ac": "AC-58-04 (a)、AC-58-05（延後期間取消：不呼叫 getUserMedia；§7.28.3）",
+    "result": "通過",
+    "note": "chrome：按下 → preparing → 同一任務再按 → idle，300 ms 後 idle、getUserMedia 0 次、AudioContext 0 個、訊息「」、Toast 增 0；之後再按 → preparing，處理器結束時 getUserMedia 0、300 ms 後 1、AudioContext 1；edge：按下 → preparing → 同一任務再按 → idle，300 ms 後 idle、getUserMedia 0 次、AudioContext 0 個、訊息「」、Toast 增 0；之後再按 → preparing，處理器結束時 getUserMedia 0、300 ms 後 1、AudioContext 1"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-33-03r",
+    "ac": "AC-33-03、AC-58-01（§7.28.4：AudioContext 不在點按處理器內建立後仍為 running；收音條會亮）",
+    "result": "通過",
+    "note": "chrome 本次載入第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 141.2 ms）、音軌 1、收音條 2 秒內最多亮 4 格（取樣 0000000000442000004220000043200000442100）；chrome 離開再回來後第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 32.9 ms）、音軌 1、收音條 2 秒內最多亮 5 格（取樣 0000000000521000005210000052100000421000）；edge 本次載入第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 121 ms）、音軌 1、收音條 2 秒內最多亮 5 格（取樣 0000000000520000014200000042000000420000）；edge 離開再回來後第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 34.9 ms）、音軌 1、收音條 2 秒內最多亮 5 格（取樣 0000000000210000015100000051000000410000）（瀏覽器假音源；實機麥克風見 Q12 人工項）"
+  },
+  {
+    "suite": "e2e-stt-flow",
+    "tc": "TC-X-sttflow",
+    "ac": "（全套件）無未處理例外",
+    "result": "通過",
+    "note": "例外 0：[]；console.error 0：[]"
+  }
+]

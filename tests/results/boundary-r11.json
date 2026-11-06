@@ -1,0 +1,1612 @@
+{
+  "since": "2026-11-05T11:15:00.000Z",
+  "scope": [
+    "FE-95",
+    "FE-96",
+    "FE-97"
+  ],
+  "tasksVersion": "0.15",
+  "notDone": [],
+  "mustZeroHit": [],
+  "pgTests": [],
+  "rows": [
+    {
+      "file": "dist/english-master-track.html",
+      "mtime": "2026-11-06T01:09:08.313Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/about.html",
+      "mtime": "2026-11-06T01:09:08.326Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/ads.txt",
+      "mtime": "2026-11-06T01:09:08.323Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/contact.html",
+      "mtime": "2026-11-06T01:09:08.327Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/icons/apple-touch-icon-180.png",
+      "mtime": "2026-11-06T01:09:08.323Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/icons/icon-192.png",
+      "mtime": "2026-11-06T01:09:08.321Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/icons/icon-512.png",
+      "mtime": "2026-11-06T01:09:08.322Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/icons/icon-maskable-512.png",
+      "mtime": "2026-11-06T01:09:08.322Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/index.html",
+      "mtime": "2026-11-06T01:09:08.320Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/manifest.webmanifest",
+      "mtime": "2026-11-06T01:09:08.320Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/privacy.html",
+      "mtime": "2026-11-06T01:09:08.327Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/robots.txt",
+      "mtime": "2026-11-06T01:09:08.324Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/sitemap.xml",
+      "mtime": "2026-11-06T01:09:08.326Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "dist/site/sw.js",
+      "mtime": "2026-11-06T01:09:08.320Z",
+      "owner": [
+        "FE-97"
+      ]
+    },
+    {
+      "file": "docs/03-design/architecture.md",
+      "mtime": "2026-11-06T00:51:30.507Z",
+      "owner": [
+        "（上游：SD 產出、主控代核；PG 只改 tasks.json status，授權例外）"
+      ]
+    },
+    {
+      "file": "docs/03-design/tasks.json",
+      "mtime": "2026-11-06T01:15:24.818Z",
+      "owner": [
+        "（上游：SD 產出、主控代核；PG 只改 tasks.json status，授權例外）"
+      ]
+    },
+    {
+      "file": "docs/04-qa/bug-reports/BUG-006.md",
+      "mtime": "2026-11-06T01:50:23.605Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "docs/04-qa/bug-reports/BUG-007.md",
+      "mtime": "2026-11-06T01:42:48.918Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "docs/04-qa/bug-reports/BUG-008.md",
+      "mtime": "2026-11-06T01:40:45.990Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "docs/04-qa/test-plan.md",
+      "mtime": "2026-11-06T03:58:32.398Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "docs/04-qa/test-report.md",
+      "mtime": "2026-11-06T04:03:00.632Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/_speech-env.js",
+      "mtime": "2026-11-06T00:53:50.490Z",
+      "owner": [
+        "FE-95"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/ad-slot.test.js",
+      "mtime": "2026-11-06T01:01:58.203Z",
+      "owner": [
+        "FE-96"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/mic.test.js",
+      "mtime": "2026-11-06T00:53:34.007Z",
+      "owner": [
+        "FE-95"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/scrollbar-gutter.test.js",
+      "mtime": "2026-11-06T01:02:16.855Z",
+      "owner": [
+        "FE-96"
+      ]
+    },
+    {
+      "file": "src/app/__tests__/speech-flow.test.js",
+      "mtime": "2026-11-06T00:55:10.201Z",
+      "owner": [
+        "FE-95"
+      ]
+    },
+    {
+      "file": "src/app/services/mic.js",
+      "mtime": "2026-11-06T00:53:15.947Z",
+      "owner": [
+        "FE-95"
+      ]
+    },
+    {
+      "file": "src/app/styles/00-base.css",
+      "mtime": "2026-11-06T01:01:48.331Z",
+      "owner": [
+        "FE-96"
+      ]
+    },
+    {
+      "file": "src/app/styles/85-ad.css",
+      "mtime": "2026-11-06T01:01:51.673Z",
+      "owner": [
+        "FE-96"
+      ]
+    },
+    {
+      "file": "src/app/views/speech-panel.js",
+      "mtime": "2026-11-06T00:55:27.971Z",
+      "owner": [
+        "FE-95"
+      ]
+    },
+    {
+      "file": "tests/e2e/diag-r10-perf.mjs",
+      "mtime": "2026-11-06T01:29:25.572Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/e2e/diag-r10-scrollbar.mjs",
+      "mtime": "2026-11-06T01:29:44.069Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/e2e/diag-r11-gutter.mjs",
+      "mtime": "2026-11-06T01:33:32.087Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/e2e/diag-r11-navab.mjs",
+      "mtime": "2026-11-06T03:37:33.294Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/e2e/diag-r9-offline.mjs",
+      "mtime": "2026-11-06T01:29:44.069Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/e2e/e2e-ad.mjs",
+      "mtime": "2026-11-06T03:46:07.631Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/e2e/e2e-layout.mjs",
+      "mtime": "2026-11-06T01:57:13.601Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/e2e/e2e-stt-flow.mjs",
+      "mtime": "2026-11-06T01:26:11.980Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/e2e/lib/cdp.mjs",
+      "mtime": "2026-11-06T01:23:05.336Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/ac-matrix.json",
+      "mtime": "2026-11-06T03:57:59.282Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/boundary-r11.json",
+      "mtime": "2026-11-06T03:57:48.366Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/boundary.json",
+      "mtime": "2026-11-06T03:57:48.652Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/data.json",
+      "mtime": "2026-11-06T01:21:13.936Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag-r11-gutter.json",
+      "mtime": "2026-11-06T01:36:16.055Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-customizer.png",
+      "mtime": "2026-11-06T02:34:07.594Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-dashboard.png",
+      "mtime": "2026-11-06T02:34:07.110Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-firstrun.png",
+      "mtime": "2026-11-06T02:34:05.865Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-flashcards.png",
+      "mtime": "2026-11-06T02:34:08.074Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-part5.png",
+      "mtime": "2026-11-06T02:34:08.557Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-1366-sources.png",
+      "mtime": "2026-11-06T02:34:09.047Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-customizer.png",
+      "mtime": "2026-11-06T02:34:03.723Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-dashboard.png",
+      "mtime": "2026-11-06T02:34:03.253Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-firstrun.png",
+      "mtime": "2026-11-06T02:34:02.042Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-flashcards.png",
+      "mtime": "2026-11-06T02:34:04.193Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-part5.png",
+      "mtime": "2026-11-06T02:34:04.677Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-375-sources.png",
+      "mtime": "2026-11-06T02:34:05.204Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-1366.png",
+      "mtime": "2026-11-06T02:35:14.274Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-1920.png",
+      "mtime": "2026-11-06T02:35:14.764Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-375.png",
+      "mtime": "2026-11-06T02:35:13.784Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-1366x768.png",
+      "mtime": "2026-11-06T02:35:50.325Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-1920x1080.png",
+      "mtime": "2026-11-06T02:35:51.651Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-375x667.png",
+      "mtime": "2026-11-06T02:35:45.069Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-390x844.png",
+      "mtime": "2026-11-06T02:35:46.339Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-412x915.png",
+      "mtime": "2026-11-06T02:35:47.630Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-dash-fold-768x1024.png",
+      "mtime": "2026-11-06T02:35:49.033Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-fc-v011-1366.png",
+      "mtime": "2026-11-06T02:34:41.190Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-fc-v011-375.png",
+      "mtime": "2026-11-06T02:34:39.951Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-fc-v012-1366.png",
+      "mtime": "2026-11-06T02:34:45.175Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-fc-v012-375.png",
+      "mtime": "2026-11-06T02:34:43.951Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-1366x768.png",
+      "mtime": "2026-11-06T02:36:19.057Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-1920x1080.png",
+      "mtime": "2026-11-06T02:36:19.678Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-375-bottom.png",
+      "mtime": "2026-11-06T02:36:22.433Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-375x667.png",
+      "mtime": "2026-11-06T02:36:16.634Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-375x812.png",
+      "mtime": "2026-11-06T02:36:20.287Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-390x844.png",
+      "mtime": "2026-11-06T02:36:17.258Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-412x915.png",
+      "mtime": "2026-11-06T02:36:17.876Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/layout-r5/r5-firstrun-768x1024.png",
+      "mtime": "2026-11-06T02:36:18.449Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/perf-runs.json",
+      "mtime": "2026-11-06T03:08:23.256Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r10-focus.json",
+      "mtime": "2026-11-06T02:20:02.710Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r11-edge-scrollbar.json",
+      "mtime": "2026-11-06T03:27:45.895Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r11-first-press-4x.json",
+      "mtime": "2026-11-06T01:41:35.747Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r11-header-shift.json",
+      "mtime": "2026-11-06T03:56:17.349Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r11-navab.json",
+      "mtime": "2026-11-06T03:52:23.714Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r11-perf-ab.json",
+      "mtime": "2026-11-06T03:36:03.032Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r11-perf-raw.txt",
+      "mtime": "2026-11-06T03:36:03.056Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r11-scrollbar.json",
+      "mtime": "2026-11-06T01:31:12.813Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r9-ad-layout-shift.json",
+      "mtime": "2026-11-06T03:55:03.820Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r9-ad-load.json",
+      "mtime": "2026-11-06T03:57:34.179Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r9-ad-perf.json",
+      "mtime": "2026-11-06T02:17:32.920Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/diag/r9-ad-requests.json",
+      "mtime": "2026-11-06T03:56:34.615Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-ad-edge.json",
+      "mtime": "2026-11-06T03:57:35.071Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-ad-extra-edge.json",
+      "mtime": "2026-11-06T03:24:46.527Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-ad-extra.json",
+      "mtime": "2026-11-06T01:46:52.641Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-ad-perf.json",
+      "mtime": "2026-11-06T02:17:33.174Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-ad.json",
+      "mtime": "2026-11-06T01:46:48.430Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-answered-edge.json",
+      "mtime": "2026-11-06T03:18:47.477Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-answered.json",
+      "mtime": "2026-11-06T01:42:48.296Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-cards.json",
+      "mtime": "2026-11-06T02:08:48.330Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-compat-r10.json",
+      "mtime": "2026-11-06T02:20:14.955Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-content.json",
+      "mtime": "2026-11-06T01:53:12.865Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-env-noas.json",
+      "mtime": "2026-11-06T02:30:22.456Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-env.json",
+      "mtime": "2026-11-06T03:57:49.169Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-firstrun.json",
+      "mtime": "2026-11-06T02:00:28.879Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-focus.json",
+      "mtime": "2026-11-06T02:20:02.706Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-goal-edge.json",
+      "mtime": "2026-11-06T03:09:56.302Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-goal.json",
+      "mtime": "2026-11-06T01:58:34.428Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-hidden-edge.json",
+      "mtime": "2026-11-06T03:10:26.890Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-hidden.json",
+      "mtime": "2026-11-06T02:00:53.453Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-layout.json",
+      "mtime": "2026-11-06T02:36:23.046Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-legal.json",
+      "mtime": "2026-11-06T01:51:08.746Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-lock-edge.json",
+      "mtime": "2026-11-06T03:17:59.813Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-lock.json",
+      "mtime": "2026-11-06T01:49:20.251Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-mic-edge.json",
+      "mtime": "2026-11-06T03:26:27.335Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-mic-noas.json",
+      "mtime": "2026-11-06T02:23:00.047Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-mic.json",
+      "mtime": "2026-11-06T02:02:32.088Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-motion-noas.json",
+      "mtime": "2026-11-06T02:33:19.207Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-motion.json",
+      "mtime": "2026-11-06T01:56:37.605Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-persist.json",
+      "mtime": "2026-11-06T01:56:42.644Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-progress-noas.json",
+      "mtime": "2026-11-06T02:31:33.290Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-progress.json",
+      "mtime": "2026-11-06T01:57:48.948Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-pwa-edge.json",
+      "mtime": "2026-11-06T03:39:21.812Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-pwa-update.json",
+      "mtime": "2026-11-06T02:12:14.365Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-pwa.json",
+      "mtime": "2026-11-06T02:11:23.860Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-reinit-noas.json",
+      "mtime": "2026-11-06T02:32:17.529Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-reinit.json",
+      "mtime": "2026-11-06T02:01:38.577Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-site-edge.json",
+      "mtime": "2026-11-06T03:20:02.657Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-site.json",
+      "mtime": "2026-11-06T01:43:36.818Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-speech-edge.json",
+      "mtime": "2026-11-06T03:25:23.457Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-speech-noas.json",
+      "mtime": "2026-11-06T02:21:35.133Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-speech.json",
+      "mtime": "2026-11-06T02:03:05.091Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-stt-flow.json",
+      "mtime": "2026-11-06T01:42:14.900Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-track-p5-edge.json",
+      "mtime": "2026-11-06T03:14:29.225Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-track-p5.json",
+      "mtime": "2026-11-06T01:50:28.872Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-track.json",
+      "mtime": "2026-11-06T01:52:57.627Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-version-edge.json",
+      "mtime": "2026-11-06T03:13:06.033Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/e2e-version.json",
+      "mtime": "2026-11-06T02:14:13.160Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/legal.json",
+      "mtime": "2026-11-06T01:21:15.054Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/mail-scan-detail.txt",
+      "mtime": "2026-11-06T04:03:11.451Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/mail-scan.json",
+      "mtime": "2026-11-06T04:03:11.450Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/pwa-static.json",
+      "mtime": "2026-11-06T01:21:49.476Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/qa-review.json",
+      "mtime": "2026-11-06T03:57:49.172Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/records.json",
+      "mtime": "2026-11-06T01:21:14.142Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/site-check.json",
+      "mtime": "2026-11-06T01:21:26.448Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/static.json",
+      "mtime": "2026-11-06T01:21:14.592Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/summary.json",
+      "mtime": "2026-11-06T04:03:11.811Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-ac-matrix.txt",
+      "mtime": "2026-11-06T03:57:59.280Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-boundary.txt",
+      "mtime": "2026-11-06T01:21:15.176Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-data.txt",
+      "mtime": "2026-11-06T01:21:13.936Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-diag-r10-focus.txt",
+      "mtime": "2026-11-06T02:20:02.710Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-diag-r10-perf.txt",
+      "mtime": "2026-11-06T03:36:03.029Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-diag-r10-scrollbar-edge.txt",
+      "mtime": "2026-11-06T03:27:45.893Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-diag-r10-scrollbar.txt",
+      "mtime": "2026-11-06T01:31:12.812Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-diag-r11-gutter.txt",
+      "mtime": "2026-11-06T01:35:28.270Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-diag-r11-navab.txt",
+      "mtime": "2026-11-06T03:52:25.028Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-ad-edge-r10css.txt",
+      "mtime": "2026-11-06T03:50:34.099Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-ad-edge-run2.txt",
+      "mtime": "2026-11-06T03:52:49.692Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-ad-edge.txt",
+      "mtime": "2026-11-06T03:57:35.072Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-ad-extra-edge.txt",
+      "mtime": "2026-11-06T03:24:46.527Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-ad-extra.txt",
+      "mtime": "2026-11-06T01:46:52.641Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-ad-perf.txt",
+      "mtime": "2026-11-06T02:17:33.174Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-ad.txt",
+      "mtime": "2026-11-06T01:46:48.430Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-answered-edge.txt",
+      "mtime": "2026-11-06T03:18:47.478Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-answered.txt",
+      "mtime": "2026-11-06T01:42:48.296Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-cards.txt",
+      "mtime": "2026-11-06T02:08:47.636Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-compat-r10.txt",
+      "mtime": "2026-11-06T02:20:14.955Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-content.txt",
+      "mtime": "2026-11-06T01:53:12.135Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-env-noas.txt",
+      "mtime": "2026-11-06T02:30:22.454Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-env-run1.json",
+      "mtime": "2026-11-06T02:33:41.082Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-env-run1.txt",
+      "mtime": "2026-11-06T02:33:41.031Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-env-run2.txt",
+      "mtime": "2026-11-06T02:38:47.841Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-env-run3.txt",
+      "mtime": "2026-11-06T02:47:50.211Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-env.txt",
+      "mtime": "2026-11-06T02:47:48.716Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-firstrun.txt",
+      "mtime": "2026-11-06T02:00:28.877Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-goal-edge.txt",
+      "mtime": "2026-11-06T03:09:56.301Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-goal.txt",
+      "mtime": "2026-11-06T01:58:34.428Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-hidden-edge.txt",
+      "mtime": "2026-11-06T03:10:26.289Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-hidden.txt",
+      "mtime": "2026-11-06T02:00:52.690Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-layout-run1.txt",
+      "mtime": "2026-11-06T02:33:41.133Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-layout.txt",
+      "mtime": "2026-11-06T02:36:23.045Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-legal.txt",
+      "mtime": "2026-11-06T01:51:08.747Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-lock-edge.txt",
+      "mtime": "2026-11-06T03:17:59.813Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-lock.txt",
+      "mtime": "2026-11-06T01:49:20.251Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-mic-edge.txt",
+      "mtime": "2026-11-06T03:26:22.743Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-mic-noas.txt",
+      "mtime": "2026-11-06T02:22:55.816Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-mic.txt",
+      "mtime": "2026-11-06T02:02:27.750Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-motion-noas.txt",
+      "mtime": "2026-11-06T02:33:19.206Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-motion.txt",
+      "mtime": "2026-11-06T01:56:37.604Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-persist.txt",
+      "mtime": "2026-11-06T01:56:42.643Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-progress-noas.txt",
+      "mtime": "2026-11-06T02:31:32.716Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-progress.txt",
+      "mtime": "2026-11-06T01:57:48.285Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-pwa-edge.txt",
+      "mtime": "2026-11-06T03:39:21.813Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-pwa-update.txt",
+      "mtime": "2026-11-06T02:12:14.366Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-pwa.txt",
+      "mtime": "2026-11-06T02:11:23.860Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-reinit-noas.txt",
+      "mtime": "2026-11-06T02:32:17.528Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-reinit.txt",
+      "mtime": "2026-11-06T02:01:38.576Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-site-edge.txt",
+      "mtime": "2026-11-06T03:20:02.658Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-site.txt",
+      "mtime": "2026-11-06T01:43:36.818Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-speech-edge.txt",
+      "mtime": "2026-11-06T03:25:22.748Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-speech-noas.txt",
+      "mtime": "2026-11-06T02:21:34.549Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-speech.txt",
+      "mtime": "2026-11-06T02:03:04.511Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-stt-flow.txt",
+      "mtime": "2026-11-06T01:42:14.900Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-track-p5-edge.txt",
+      "mtime": "2026-11-06T03:14:29.226Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-track-p5.txt",
+      "mtime": "2026-11-06T01:50:28.872Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-track.txt",
+      "mtime": "2026-11-06T01:52:57.629Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-version-edge.txt",
+      "mtime": "2026-11-06T03:13:07.135Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-e2e-version.txt",
+      "mtime": "2026-11-06T02:14:13.486Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-env-ab.json",
+      "mtime": "2026-11-06T03:08:24.332Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-env-ab.txt",
+      "mtime": "2026-11-06T03:08:24.331Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-legal.txt",
+      "mtime": "2026-11-06T01:21:15.053Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-mail-scan.txt",
+      "mtime": "2026-11-06T04:02:03.223Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-npmtest.txt",
+      "mtime": "2026-11-06T01:19:32.771Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-pwa-static.txt",
+      "mtime": "2026-11-06T01:21:49.477Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-qa-review.txt",
+      "mtime": "2026-11-06T03:57:49.173Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-records.txt",
+      "mtime": "2026-11-06T01:21:14.142Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-run-edge.txt",
+      "mtime": "2026-11-06T03:44:01.632Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-run-edge3.txt",
+      "mtime": "2026-11-06T03:57:35.123Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-run-env3.txt",
+      "mtime": "2026-11-06T02:47:50.123Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-run.txt",
+      "mtime": "2026-11-06T02:33:20.614Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-site-check.txt",
+      "mtime": "2026-11-06T01:21:26.448Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-static.txt",
+      "mtime": "2026-11-06T01:21:14.592Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-summary.txt",
+      "mtime": "2026-11-06T03:57:50.101Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-tc-list.txt",
+      "mtime": "2026-11-06T03:57:59.759Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/results/tmp/r11-validate.txt",
+      "mtime": "2026-11-06T01:19:48.452Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/static/boundary-r11.mjs",
+      "mtime": "2026-11-06T01:20:27.955Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/tools/qa-review-r11.mjs",
+      "mtime": "2026-11-06T01:38:02.065Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/tools/run-r11.mjs",
+      "mtime": "2026-11-06T01:20:49.855Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/tools/tc-desc.json",
+      "mtime": "2026-11-06T01:38:53.357Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    },
+    {
+      "file": "tests/tools/tc-list.mjs",
+      "mtime": "2026-11-06T01:38:53.355Z",
+      "owner": [
+        "（QA 自有）"
+      ]
+    }
+  ],
+  "outside": [],
+  "untouched": []
+}

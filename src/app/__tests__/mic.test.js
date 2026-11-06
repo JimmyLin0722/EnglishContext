@@ -1,7 +1,8 @@
 /*
  * mic.test.js — 麥克風服務單元測試（FE-36）
  * 受測：services/mic.js（以 create() 注入替身 navigator、AudioContext、計時器）
- * 依據：architecture.md v0.5 §7.14「services/mic.js API」「麥克風生命週期」「錯誤對照（DS-03）」、§10.2「mic.test.js」列
+ * 依據：architecture.md v0.5 §7.14「services/mic.js API」「麥克風生命週期」「錯誤對照（DS-03）」、§10.2「mic.test.js」列；
+ *       v0.16 §7.28.4、§10.13（FE-95：suspended 補救）
  * 涵蓋：AC-33-01、AC-33-02、AC-33-03、AC-33-04、AC-33-05、AC-33-06、AC-33-07、AC-08-09、AC-21-03
  */
 "use strict";
@@ -49,6 +50,8 @@ function sineAt(db, n) {
  * opts.gum：自訂 getUserMedia 行為（回 Promise）；opts.noMedia：沒有 mediaDevices；
  * opts.ctxThrows：AudioContext 建構拋例外；opts.analyserThrows：createAnalyser 拋例外；
  * opts.byteOnly：analyser 只有 getByteTimeDomainData
+ * （v0.16 FE-95）opts.ctxState：AudioContext 初始 state（預設 "running"）；
+ * opts.resumeMode："reject"（預設，回傳 reject）| "throw"（同步拋例外）| "none"（沒有 resume 方法）
  */
 function env(opts = {}) {
   const log = { gum: [], ctxs: [], connects: [], timers: new Map(), cleared: [], listeners: [] };
@@ -60,12 +63,17 @@ function env(opts = {}) {
     if (opts.ctxThrows) throw new Error("no audio");
     const self = this;
     this.sampleRate = opts.sampleRate || 48000;
-    this.state = "running";
+    this.state = opts.ctxState || "running";
     this.closeCalls = 0;
     this.resumeCalls = 0;
     this.destination = { isDestination: true };
     this.close = function () { self.closeCalls++; self.state = "closed"; return opts.closeRejects ? Promise.reject(new Error("x")) : Promise.resolve(); };
-    this.resume = function () { self.resumeCalls++; return Promise.reject(new Error("resume 失敗也要吞掉")); };
+    if (opts.resumeMode === "throw") {
+      this.resume = function () { self.resumeCalls++; throw new Error("resume 同步例外也要吞掉"); };
+    } else if (opts.resumeMode !== "none") {
+      // 預設：回傳 reject（state 不變，模擬補救失敗）
+      this.resume = function () { self.resumeCalls++; return Promise.reject(new Error("resume 失敗也要吞掉")); };
+    }
     this.createMediaStreamSource = function (s) {
       const node = { kind: "source", stream: s, disconnected: 0,
         connect(t) { log.connects.push(["source", t]); }, disconnect() { this.disconnected++; } };
@@ -520,6 +528,53 @@ describe("mic.test.js", () => {
     assert.equal(mic.isActive(), false);
     assert.deepEqual(mic.tracks(), []);
     assert.doesNotThrow(() => { mic.stopMeter(); mic.release(); });
+  });
+
+  describe("v0.16 §10.13：AudioContext suspended 補救（FE-95、§7.28.4、AC-33-03、AC-33-07）", () => {
+    test("(a) suspended → acquire 同步階段 resume 1 次，取得成功後共 2 次；結果不變", async () => {
+      const e = env({ ctxState: "suspended" });
+      const p = e.m.acquire();
+      assert.equal(e.log.ctxs.length, 1);
+      assert.equal(e.log.ctxs[0].resumeCalls, 1, "建立後立即 resume");
+      const r = await p;
+      assert.deepEqual(r, { ok: true, reused: false, metering: true });
+      assert.equal(e.log.ctxs[0].resumeCalls, 2, "setupAnalyser 成功後再 resume 1 次");
+      assert.equal(e.log.gum.length, 1);
+    });
+
+    test("(b) resume 回傳 reject、同步拋例外、不存在 → 都不影響結果、不 reject", async () => {
+      for (const mode of ["reject", "throw", "none"]) {
+        const e = env({ ctxState: "suspended", resumeMode: mode });
+        let p;
+        assert.doesNotThrow(() => { p = e.m.acquire(); }, mode);
+        const r = await p;
+        assert.deepEqual(r, { ok: true, reused: false, metering: true }, mode);
+        assert.equal(e.m.isActive(), true, mode);
+        assert.equal(e.log.ctxs[0].resumeCalls, mode === "none" ? 0 : 2, mode);
+        await new Promise((res) => setImmediate(res));
+      }
+    });
+
+    test("(c) running → 新呼叫點 0 次（重用時的 resume 不變）", async () => {
+      const e = env();
+      const p = e.m.acquire();
+      assert.equal(e.log.ctxs[0].resumeCalls, 0);
+      await p;
+      assert.equal(e.log.ctxs[0].resumeCalls, 0);
+      await e.m.acquire();
+      assert.equal(e.log.ctxs[0].resumeCalls, 1, "重用路徑照舊呼叫 resume");
+    });
+
+    test("(d) suspended 且取得中被 release → 不呼叫第 2 次 resume，回 released", async () => {
+      let resolveGum;
+      const e = env({ ctxState: "suspended", gum: () => new Promise((r) => { resolveGum = r; }) });
+      const p = e.m.acquire();
+      assert.equal(e.log.ctxs[0].resumeCalls, 1);
+      e.m.release();
+      resolveGum(fakeStream());
+      assert.deepEqual(await p, { ok: false, reason: "released" });
+      assert.equal(e.log.ctxs[0].resumeCalls, 1);
+    });
   });
 
   test("原始碼掃描：mic.js 不含錄音、輸出與網路、儲存 API 名稱（AC-21-03）", () => {

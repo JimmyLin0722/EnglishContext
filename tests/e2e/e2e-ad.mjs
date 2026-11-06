@@ -18,7 +18,8 @@ const J = (x) => JSON.stringify(x);
 const SIZES = [[375, 667], [390, 844], [412, 915], [768, 1024], [1366, 768], [1920, 1080]];
 const TWO = [[375, 667], [1366, 768]];
 const STUB_TAG = "【替身驗證】";
-const built = await buildAdTest(path.join(TMP, "b"));
+// 第 11 輪：QA_AD_APP 可指定前端程式目錄（對照組診斷用；未設定時為 src/app）
+const built = await buildAdTest(path.join(TMP, "b"), process.env.QA_AD_APP ? { app: process.env.QA_AD_APP } : {});
 const AD_SITE = built.site;
 const INITS = [TOAST_RECORDER, fakeTts("ok"), fakeStt("ok"), fakeMic("ok")];
 const withRecord = (over = {}) => stateRecord(725, { sttNoticeAcknowledged: true, part5: { currentIndex: 5, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 3, totalCorrect: 2 }, part5CorrectIds: ["p5-001", "p5-002"], ...over });
@@ -142,17 +143,25 @@ const slotVisible = (page) => page.evaluate(() => { const s = document.getElemen
 {
   const rows = []; let adCaused = 0; const V12 = process.env.QA_V120 || path.join(process.env.QA_TMP || TMP, "v1.2.0.html"); const dirV12 = path.join(TMP, "v12site"); fs.mkdirSync(dirV12, { recursive: true }); if (fs.existsSync(V12)) fs.copyFileSync(V12, path.join(dirV12, "index.html"));
   for (const [sbName, br] of [["一般捲軸", browserSB], ["隱藏捲軸", browser]]) for (const [w, h] of [[1366, 768], [1920, 1080]]) for (const [name, site, state] of [["廣告環境成立（有紀錄，filled）", AD_SITE, withRecord()], ["第一階段（dist，無廣告環境）", SITE, withRecord()], ["v1.2.0（舊版）", dirV12, withRecord()]]) for (let i = 0; i < 3; i++) {
-    const s = await setup({ br, site, state, width: w, heightV: h, extra: [LAYOUT_SHIFT_INIT, "window.__qaLoadAt = null; new MutationObserver(() => { if (window.__qaLoadAt === null && document.querySelector('ins.adsbygoogle')) window.__qaLoadAt = performance.now(); }).observe(document, { childList: true, subtree: true });"] }); await openHome(s.page); await s.page.waitForTimeout(900);
+    // 第 11 輪（BUG-006 複驗，architecture v0.16 §7.29.5、SD-FB-97）：scrollbar-gutter 在第一階段也是 stable，不再以它判斷廣告環境（改看 html[data-ad-env] 屬性）；
+    // 另以每個畫格紀錄 gutter、data-ad-env、header 左緣，確認第一個畫格起即為 stable、header 不動。位移只在同一建置內比較（SD-FB-94）。
+    const FRAMES = "window.__qaF = []; (() => { const snap = () => { const de = document.documentElement; const h = document.querySelector('.app-header__inner'); window.__qaF.push({ t: Math.round(performance.now()), env: de.hasAttribute('data-ad-env'), gutter: getComputedStyle(de).scrollbarGutter, hl: h ? +h.getBoundingClientRect().left.toFixed(2) : null }); }; const tick = () => { snap(); if (performance.now() < 1200) requestAnimationFrame(tick); }; requestAnimationFrame(tick); })();";
+    const s = await setup({ br, site, state, width: w, heightV: h, extra: [LAYOUT_SHIFT_INIT, FRAMES, "window.__qaLoadAt = null; new MutationObserver(() => { if (window.__qaLoadAt === null && document.querySelector('ins.adsbygoogle')) window.__qaLoadAt = performance.now(); }).observe(document, { childList: true, subtree: true });"] }); await openHome(s.page); await s.page.waitForTimeout(900);
     const ls = await s.page.evaluate(() => window.__qaLS || []); const loadAt = await s.page.evaluate(() => window.__qaLoadAt); const hdr = ls.filter((e) => e.sources.some((x) => /app-header/.test(x.name))); const hdrMove = hdr.flatMap((e) => e.sources.filter((x) => /app-header/.test(x.name)).map((x) => ({ t: e.t, v: +e.value.toFixed(4), dx: x.from && x.to ? +(x.to[0] - x.from[0]).toFixed(2) : null, dy: x.from && x.to ? +(x.to[1] - x.from[1]).toFixed(2) : null })));
-    const afterAd = loadAt === null ? [] : ls.filter((e) => e.t >= loadAt && e.sources.some((x) => !/app-footer|footer-/.test(x.name))); adCaused += afterAd.length; rows.push({ sbName, w, h, name, i, loadAt: loadAt === null ? null : Math.round(loadAt), header: hdrMove, afterAdNonFooter: afterAd.length, total: ls.length, gutter: await s.page.evaluate(() => getComputedStyle(document.documentElement).scrollbarGutter) }); await s.env.ctx.close();
+    const fr = (await s.page.evaluate(() => window.__qaF || [])).filter((x) => x.hl !== null); const gut = [...new Set(fr.map((x) => x.gutter))]; const hls = [...new Set(fr.map((x) => x.hl))]; const envAttr = await s.page.evaluate(() => document.documentElement.hasAttribute("data-ad-env"));
+    const afterAd = loadAt === null ? [] : ls.filter((e) => e.t >= loadAt && e.sources.some((x) => !/app-footer|footer-/.test(x.name))); adCaused += afterAd.length; rows.push({ sbName, w, h, name, i, loadAt: loadAt === null ? null : Math.round(loadAt), header: hdrMove, afterAdNonFooter: afterAd.length, total: ls.length, envAttr, firstFrame: fr[0] || null, frames: fr.length, frameGutter: gut, frameHeaderLeft: hls, gutter: await s.page.evaluate(() => getComputedStyle(document.documentElement).scrollbarGutter) }); await s.env.ctx.close();
   }
-  fs.writeFileSync(path.join(ROOT, "tests/results/diag/r9-header-shift.json"), J(rows));
-  const brief = (sb, n, w) => { const r = rows.filter((x) => x.sbName === sb && x.name === n && x.w === w); const dx = [...new Set(r.flatMap((x) => x.header.map((y) => y.dx)))]; const ts = r.flatMap((x) => x.header.map((y) => y.t)); const v = r.flatMap((x) => x.header.map((y) => y.v)); return `${sb}｜${n} ${w}px：header 位移 dx ${J(dx)}、dy 0；時間 ${J(ts)} ms；CLS 值 ${J(v)}；廣告框建立 ${J(r.map((x) => x.loadAt))} ms`; };
-  const headerIn = (sb, n, w) => rows.filter((x) => x.sbName === sb && x.name === n && x.w === w).some((x) => x.header.some((y) => y.dx !== 0 || y.dy !== 0));
-  const adOnly = (sb) => [1366, 1920].filter((w) => headerIn(sb, "廣告環境成立（有紀錄，filled）", w) && !headerIn(sb, "第一階段（dist，無廣告環境）", w));
+  fs.writeFileSync(path.join(ROOT, "tests/results/diag/r11-header-shift.json"), J(rows));
+  const brief = (sb, n, w) => { const r = rows.filter((x) => x.sbName === sb && x.name === n && x.w === w); const dx = [...new Set(r.flatMap((x) => x.header.map((y) => y.dx)))]; const ts = r.flatMap((x) => x.header.map((y) => y.t)); const v = r.flatMap((x) => x.header.map((y) => y.v)); return `${sb}｜${n} ${w}px：header 位移 dx ${J(dx)}；時間 ${J(ts)} ms；CLS 值 ${J(v)}；data-ad-env ${J([...new Set(r.map((x) => x.envAttr))])}；逐畫格 gutter ${J([...new Set(r.flatMap((x) => x.frameGutter))])}、header 左緣 ${J([...new Set(r.flatMap((x) => x.frameHeaderLeft))])}（首畫格 ${J(r.map((x) => x.firstFrame && x.firstFrame.t))} ms）；廣告框建立 ${J(r.map((x) => x.loadAt))} ms`; };
+  const headerIn = (sb, n, w) => rows.filter((x) => x.sbName === sb && x.name === n && x.w === w).some((x) => x.header.some((y) => y.dx !== 0 || y.dy !== 0) || x.frameHeaderLeft.length > 1);
+  const CUR = ["廣告環境成立（有紀錄，filled）", "第一階段（dist，無廣告環境）"];
+  const curMoves = ["一般捲軸", "隱藏捲軸"].flatMap((sb) => [1366, 1920].flatMap((w) => CUR.filter((n) => headerIn(sb, n, w)).map((n) => `${sb} ${n} ${w}`)));
+  const curGutterOk = rows.filter((x) => CUR.includes(x.name)).every((x) => x.frameGutter.length === 1 && x.frameGutter[0] === "stable" && x.gutter === "stable");
+  const envOk = rows.filter((x) => x.name === CUR[0]).every((x) => x.envAttr) && rows.filter((x) => x.name === CUR[1]).every((x) => !x.envAttr);
   const detail = ["一般捲軸", "隱藏捲軸"].flatMap((sb) => [1366, 1920].flatMap((w) => ["廣告環境成立（有紀錄，filled）", "第一階段（dist，無廣告環境）", "v1.2.0（舊版）"].map((n) => brief(sb, n, w)))).join("；");
-  const verdict = adCaused === 0 && adOnly("一般捲軸").length === 0 && adOnly("隱藏捲軸").length === 0;
-  R[verdict ? "pass" : "fail"]("TC-52-05b", "AC-52-05（受影響元素只可為頁尾與版面底部；FE-89 回饋 2：app-header__inner）", `${STUB_TAG}` + detail + `；廣告框建立後非頁尾元素位移 ${adCaused} 筆；只在廣告環境出現的 header 位移（BUG-006）：一般捲軸 ${J(adOnly("一般捲軸"))} px 寬、隱藏捲軸 ${J(adOnly("隱藏捲軸"))} px 寬`);
+  const verdict = adCaused === 0 && curMoves.length === 0 && curGutterOk && envOk;
+  R[verdict ? "pass" : "fail"]("TC-52-05b", "AC-52-05（受影響元素只可為頁尾與版面底部；BUG-006：app-header__inner）", `${STUB_TAG}` + detail + `；廣告框建立後非頁尾元素位移 ${adCaused} 筆；目前建置（廣告環境、第一階段）header 位移 ${curMoves.length} 組${curMoves.length ? J(curMoves) : ""}；每個畫格 gutter 皆 stable=${curGutterOk}；data-ad-env 只在廣告環境=${envOk}（v1.2.0 列為參考，不判定；跨版本絕對座標差屬預期，SD-FB-94）`);
+
   // T-108：一般捲軸下，廣告撐高後才出現捲軸，學習區塊與 header 不左右移動
   {
     const notes = []; let okc = true;

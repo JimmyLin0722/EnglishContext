@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-05T11:14:27.999Z",
+  "total": 647,
+  "pass": 578,
+  "fail": 4,
+  "manual": 41,
+  "na": 24,
+  "failed": [
+    "e2e-ad.json TC-52-05b AC-52-05（受影響元素只可為頁尾與版面底部；FE-89 回饋 2：app-header__inner）",
+    "e2e-stt-flow.json TC-60-06-768 AC-60-06、E-164（768px）",
+    "e2e-stt-flow.json TC-60-06-1366 AC-60-06、E-164（1366px）",
+    "e2e-stt-flow.json TC-58-01f AC-58-01（本次載入第 1 次按下 ≤ 100 ms）"
+  ],
+  "edge": {
+    "total": 210,
+    "pass": 193,
+    "failed": [
+      "e2e-ad-edge.json TC-52-05b"
+    ]
+  },
+  "noas": {
+    "total": 100,
+    "pass": 97,
+    "failed": []
+  },
+  "exits": [],
+  "rebuilt": true
+}

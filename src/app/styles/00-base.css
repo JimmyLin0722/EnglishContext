@@ -89,6 +89,8 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* 傳統捲軸恆保留寬度，捲軸出現或消失時內容不左右移動（AC-52-05、AC-60-06；§7.29） */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -650,6 +652,19 @@ body.has-dialog {
 
   html.is-typing body {
     padding-bottom: 8px;
+  }
+
+  /* （v0.15，FE-93；KF-1、DS-62、BUG-005）鍵盤焦點不被底部導覽列遮住（AC-61-01、AC-38-09）：
+   * 以 Tab 移動焦點時，瀏覽器只把控制項捲進視窗；根元素的 scroll-padding 讓「捲進可見範圍」扣掉導覽列高度。
+   * 視窗的 scroll-padding 取自根元素，所以設在 html（設在 body 無效）；數值與上方 body 底部留白相同。
+   * 只影響焦點移動、scrollIntoView 與錨點，不影響滑鼠與觸控點擊、捲動位置（AC-61-02）。 */
+  html {
+    scroll-padding-bottom: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 8px);
+  }
+
+  /* 虛擬鍵盤開啟時導覽已隱藏（AC-27-03），維持 v1.3.0 行為 */
+  html.is-typing {
+    scroll-padding-bottom: 0;
   }
 }
 

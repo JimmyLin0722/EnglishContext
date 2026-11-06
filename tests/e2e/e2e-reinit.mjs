@@ -5,7 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
-import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic, storageMode } from "./lib/inits.mjs";
+import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic, storageMode, micOnStrict } from "./lib/inits.mjs";
 import { KEY, stateRecord, seed, readState, clickCard, apply, est, dashGoal, dialogInfo, todayYmd, addDays, GOAL_LINE, expandBackup } from "./lib/state.mjs";
 
 const R = recorder("e2e-reinit");
@@ -110,11 +110,12 @@ const DEFAULTS = await freshDefaults();
     const n = await p.ev(`EMT.store.getState().runtime.studySet.length`);
     const words = await p.ev(`EMT.store.getState().runtime.studySet.slice(-5).map((c) => c.word || (c.item && c.item.word))`);
     // 回到單字卡頁按麥克風：不再顯示 STT 說明
-    await p.go("flashcards"); await p.click(".fc-front .sp-mic"); await sleep(250);
+    // 第 10 輪（v0.20 US-58）：先準備中，替身 audiostart 或 T_FALLBACK 後才聆聽中（micOnStrict 未經準備中即拋出）
+    await p.go("flashcards"); let seq = ""; try { seq = (await micOnStrict(p)).seq.join("→"); } catch (e) { seq = "失敗：" + e.message; }
     const notice = !!(await dialogInfo(p)); const status = await p.ev(`document.querySelector(".fc-front .sp-mic").dataset.status`);
     await p.click(".fc-front .sp-mic"); await sleep(100);
-    const ok = same(st.data.customVocab, CUSTOM) && n === 2809 + 3 && !st.data.masteredWordKeys.includes("monetization") && st.data.masteredWordKeys.length === 0 && st.data.sttNoticeAcknowledged === true && !notice && status === "listening";
-    return { ok, note: `自訂單字與確定前完全相同=${same(st.data.customVocab, CUSTOM)}（${st.data.customVocab.map((c) => c.word).join("、")}）；單字集 ${n} = 2,809 + 3；monetization 仍計入掌握=${st.data.masteredWordKeys.includes("monetization")}；STT 已讀保留=${st.data.sttNoticeAcknowledged}、按麥克風出現說明=${notice}、狀態 ${status}` };
+    const ok = same(st.data.customVocab, CUSTOM) && n === 2809 + 3 && !st.data.masteredWordKeys.includes("monetization") && st.data.masteredWordKeys.length === 0 && st.data.sttNoticeAcknowledged === true && !notice && status === "listening" && /^preparing→listening/.test(seq);
+    return { ok, note: `自訂單字與確定前完全相同=${same(st.data.customVocab, CUSTOM)}（${st.data.customVocab.map((c) => c.word).join("、")}）；單字集 ${n} = 2,809 + 3；monetization 仍計入掌握=${st.data.masteredWordKeys.includes("monetization")}；STT 已讀保留=${st.data.sttNoticeAcknowledged}、按麥克風出現說明=${notice}、狀態 ${status}（序列 ${seq}）` };
   });
   await R.check("TC-32-10", "AC-32-10", async () => {
     const s1 = await readState(p);

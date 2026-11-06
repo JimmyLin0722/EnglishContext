@@ -1,6 +1,7 @@
 /* ─── 應用內「關於我」「聯絡我們」「隱私權政策」三頁（FE-87；architecture v0.14 §7.25.6；SP-9） ─── */
 /* 文字色 --text、連結 --primary、信箱行次要文字 --text-muted（AC-23-07 (3)）；不用強調橘（AC-38-01）。
- * 無水平捲軸：長字串一律可換行。底部遮擋沿用 body 既有的底部留白（AC-53-05）。 */
+ * 無水平捲軸：長字串一律可換行。底部遮擋沿用 body 既有的底部留白（AC-53-05）；
+ * ≤ 640px 鍵盤焦點的底部避讓由 00-base.css 的 html scroll-padding-bottom 統一處理（v0.15，FE-93），本檔只留首次畫面的差值。 */
 
 .site-page {
   max-width: var(--content-narrow);
@@ -64,18 +65,13 @@
   overflow-wrap: anywhere;
 }
 
-/* （FE-89 實測）≤ 640px 底部列固定：以 Tab 移動焦點時，瀏覽器只把控制項捲進視窗，不知道底部列會蓋住它。
- * 375×667 首次畫面的頁尾連結因此落在底部列後方（AC-41-04、AC-57-01）；保留底部列高度，版面不變。 */
+/* （v0.15，FE-93；architecture §7.27.2、KF-1、DS-62）≤ 640px 的一般控制項（含頁尾連結、返回按鈕、對外頁面連結）
+ * 改由 00-base.css 的 html { scroll-padding-bottom: 導覽 + 安全區 + 8px } 統一處理，本檔不再逐一設 scroll-margin。
+ * scroll-margin 與根元素的 scroll-padding 會相加，所以首次畫面只補上「首次底部列比導覽列高的差值」：
+ * 導覽 56 + 安全區 + 8 + (184 − 56) = 首次底部列 184 + 安全區 + 8，總和與 v1.3.0 相同（AC-41-04、AC-57-01）。 */
 @media (max-width: 640px) {
-  .footer-links .btn,
-  .site-return,
-  .site-page a,
-  .site-page__link {
-    scroll-margin-bottom: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 8px);
-  }
-
   body[data-entry="firstRun"][data-tab="customizer"] .footer-links .btn {
-    scroll-margin-bottom: calc(var(--emt-firstbar-h) + env(safe-area-inset-bottom, 0px) + 8px);
+    scroll-margin-bottom: calc(var(--emt-firstbar-h) - var(--emt-bottomnav-h));
   }
 }
 

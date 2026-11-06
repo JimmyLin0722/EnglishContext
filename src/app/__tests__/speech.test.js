@@ -5,6 +5,9 @@
  *       （需點擊提示的停用按鈕：aria-disabled="true" + title、沒有 disabled 屬性、點擊只顯示 toast）、
  *       §7.11 A-5、A-6、§7.14（生命週期、決定表、錯誤對照、speech-panel 修改重點）、§10.2「speech.test.js」列
  * 涵蓋：AC-07-01～AC-07-05、AC-08-01、AC-08-02～AC-08-14、AC-33-01～AC-33-08、AC-21-03、AC-30-04、AC-31-03
+ * （v0.15，FE-90）服務：8 欄 SttEndInfo、4 種新事件、audioStartSupported 判定（architecture §7.26.2、§10.12）
+ * （v0.15，FE-92）面板：按下先進入準備中再聆聽（本檔沙箱沒有 setTimeout → fallbackWait 直接聆聽，§7.26.3）；
+ *       綠燈也顯示「辨識文字」1 列；空結果 → heardNoWords；取得中再按 = 取消。假時鐘與事件順序見 speech-flow.test.js。
  */
 "use strict";
 
@@ -147,7 +150,8 @@ describe("speech.test.js", () => {
     const s = stt.create(g);
     const ev = [];
     const r = s.start({ lang: "en-US", onResult: (t) => ev.push("r:" + t), onError: (c) => ev.push("e:" + c), onEnd: (i) => ev.push("end:" + JSON.stringify(i)) });
-    assert.deepEqual(r, { ok: true });
+    // fakeSttGlobal 的原型沒有 onaudiostart → 不可依賴 audiostart（§7.26.2）
+    assert.deepEqual(r, { ok: true, audioStartSupported: false });
     const rec = made[0];
     assert.equal(rec.lang, "en-US");
     assert.equal(rec.interimResults, false);
@@ -156,8 +160,228 @@ describe("speech.test.js", () => {
     assert.equal(s.isListening(), true);
     rec.onresult(resultEv("Latency."));
     rec.onend();
-    assert.deepEqual(ev, ["r:Latency.", 'end:{"manual":false,"hadResult":true,"hadError":false}']);
+    // v0.15（FE-90）：onEnd 的 info 為 8 欄，順序固定
+    assert.deepEqual(ev, ["r:Latency.", 'end:{"manual":false,"hadResult":true,"hadError":false,"audioStarted":false,"soundStarted":false,"speechDetected":false,"nomatch":false,"errorCode":null}']);
     assert.equal(s.isListening(), false);
+  });
+
+  // ── v0.15（FE-90）：4 種新事件、8 欄 SttEndInfo、audiostart 可依賴判定（§7.26.2、§10.12） ──
+
+  const INFO_KEYS = ["manual", "hadResult", "hadError", "audioStarted", "soundStarted", "speechDetected", "nomatch", "errorCode"];
+
+  /** 記錄所有回呼；log 內每筆 [名稱, ...參數] */
+  function recorder() {
+    const log = [];
+    const opts = {
+      onAudioStart: (i) => log.push(["audiostart", i]),
+      onSoundStart: (i) => log.push(["soundstart", i]),
+      onSpeechStart: (i) => log.push(["speechstart", i]),
+      onResult: (t, i) => log.push(["result", t, i]),
+      onNomatch: (i) => log.push(["nomatch", i]),
+      onError: (c, i) => log.push(["error", c, i]),
+      onEnd: (i) => log.push(["end", i])
+    };
+    return { log, opts };
+  }
+
+  test("stt（FE-90）：onEnd info 8 欄、順序固定、初始值 false／null", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorder();
+    s.start(opts);
+    made[0].onend();
+    assert.equal(log.length, 1);
+    const info = log[0][1];
+    assert.deepEqual(Object.keys(info), INFO_KEYS);
+    assert.deepEqual(info, {
+      manual: false, hadResult: false, hadError: false, audioStarted: false,
+      soundStarted: false, speechDetected: false, nomatch: false, errorCode: null
+    });
+  });
+
+  test("stt（FE-90）：4 個新回呼依引擎順序轉送，info 為當下旗標的複本", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorder();
+    s.start(opts);
+    const rec = made[0];
+    rec.onaudiostart({});
+    rec.onsoundstart({});
+    rec.onspeechstart({});
+    rec.onnomatch({});
+    rec.onresult(resultEv("Latency."));
+    rec.onend({});
+    assert.deepEqual(log.map((x) => x[0]), ["audiostart", "soundstart", "speechstart", "nomatch", "result", "end"]);
+    // 每個 info 都是當下快照（之後的事件不改寫先前的物件）
+    assert.equal(log[0][1].audioStarted, true);
+    assert.equal(log[0][1].soundStarted, false);
+    assert.equal(log[1][1].soundStarted, true);
+    assert.equal(log[1][1].speechDetected, false);
+    assert.equal(log[2][1].speechDetected, true);
+    assert.equal(log[2][1].nomatch, false);
+    assert.equal(log[3][1].nomatch, true);
+    assert.equal(log[3][1].hadResult, false);
+    assert.equal(log[4][1], "Latency.");
+    assert.equal(log[4][2].hadResult, true);
+    assert.deepEqual(log[5][1], {
+      manual: false, hadResult: true, hadError: false, audioStarted: true,
+      soundStarted: true, speechDetected: true, nomatch: true, errorCode: null
+    });
+    // 每次都是新物件
+    const objs = [log[0][1], log[1][1], log[2][1], log[3][1], log[4][2], log[5][1]];
+    assert.equal(new Set(objs).size, objs.length);
+  });
+
+  test("stt（FE-90）：服務不重排事件（speechstart 先於 audiostart 時照原順序轉送）", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorder();
+    s.start(opts);
+    made[0].onspeechstart({});
+    made[0].onaudiostart({});
+    made[0].onend({});
+    assert.deepEqual(log.map((x) => x[0]), ["speechstart", "audiostart", "end"]);
+    assert.equal(log[0][1].audioStarted, false);
+  });
+
+  test("stt（FE-90）：呼叫端修改 info 不影響服務", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    let endInfo = null;
+    s.start({
+      onAudioStart: (i) => { i.audioStarted = false; i.manual = true; i.errorCode = "x"; },
+      onEnd: (i) => { endInfo = i; }
+    });
+    made[0].onaudiostart({});
+    made[0].onend({});
+    assert.equal(endInfo.audioStarted, true);
+    assert.equal(endInfo.manual, false);
+    assert.equal(endInfo.errorCode, null);
+  });
+
+  test("stt（FE-90）：errorCode 只記第一個；onError 收到 (code, info)", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorder();
+    s.start(opts);
+    made[0].onerror({ error: "no-speech" });
+    made[0].onerror({ error: "network" });
+    made[0].onerror({});
+    made[0].onend({});
+    assert.deepEqual(log.map((x) => x[0] === "error" ? "error:" + x[1] : x[0]), ["error:no-speech", "error:network", "error:unknown", "end"]);
+    assert.equal(log[0][2].errorCode, "no-speech");
+    assert.equal(log[0][2].hadError, true);
+    assert.equal(log[1][2].errorCode, "no-speech");
+    assert.equal(log[3][1].errorCode, "no-speech");
+    assert.equal(log[3][1].hadError, true);
+  });
+
+  test("stt（FE-90）：手動停止造成的 aborted 不記入 errorCode、不回呼；非手動 aborted 照常記錄", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorder();
+    s.start(opts);
+    assert.equal(s.stop(), true);
+    made[0].onerror({ error: "aborted" });
+    made[0].onend({});
+    assert.deepEqual(log.map((x) => x[0]), ["end"]);
+    assert.equal(log[0][1].manual, true);
+    assert.equal(log[0][1].hadError, false);
+    assert.equal(log[0][1].errorCode, null);
+    const r2 = recorder();
+    s.start(r2.opts);
+    made[1].onerror({ error: "aborted" });
+    made[1].onend({});
+    assert.equal(r2.log[0][1], "aborted");
+    assert.equal(r2.log[1][1].errorCode, "aborted");
+  });
+
+  test("stt（FE-90）：每次 start() 旗標重設為初始值", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    s.start({});
+    made[0].onspeechstart({});
+    made[0].onerror({ error: "network" });
+    made[0].onend({});
+    let info = null;
+    s.start({ onEnd: (i) => { info = i; } });
+    made[1].onend({});
+    assert.deepEqual(info, {
+      manual: false, hadResult: false, hadError: false, audioStarted: false,
+      soundStarted: false, speechDetected: false, nomatch: false, errorCode: null
+    });
+  });
+
+  test("stt（FE-90）：end、abort、start 失敗後 7 個處理器屬性皆為 null", () => {
+    const PROPS = ["onaudiostart", "onsoundstart", "onspeechstart", "onresult", "onnomatch", "onerror", "onend"];
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    s.start({});
+    for (const p of PROPS) assert.equal(typeof made[0][p], "function", p + " 已綁定");
+    made[0].onend({});
+    for (const p of PROPS) assert.equal(made[0][p], null, "end 後 " + p);
+    s.start({});
+    s.abort();
+    for (const p of PROPS) assert.equal(made[1][p], null, "abort 後 " + p);
+    const f = fakeSttGlobal();
+    f.g.webkitSpeechRecognition.prototype.start = () => { throw new Error("x"); };
+    stt.create(f.g).start({});
+    for (const p of PROPS) assert.equal(f.made[0][p], null, "start 失敗後 " + p);
+  });
+
+  test("stt（FE-90）：原型有 onaudiostart → audioStartSupported true；沒有 → false；判定拋例外 → false", () => {
+    // 支援：原型上有 onaudiostart（同 Chrome、Edge、Safari）
+    const a = fakeSttGlobal();
+    a.g.webkitSpeechRecognition.prototype.onaudiostart = null;
+    assert.deepEqual(stt.create(a.g).start({}), { ok: true, audioStartSupported: true });
+    // 支援：建構子設定
+    function R2() { this.onaudiostart = null; }
+    R2.prototype.start = function () {};
+    assert.deepEqual(stt.create({ SpeechRecognition: R2, navigator: { onLine: true } }).start({}), { ok: true, audioStartSupported: true });
+    // 不支援：完全沒有這個屬性
+    assert.deepEqual(stt.create(fakeSttGlobal().g).start({}), { ok: true, audioStartSupported: false });
+    // 判定時拋例外 → false（以 Proxy 的 has 陷阱模擬）
+    function R3() {
+      return new Proxy(this, { has() { throw new Error("boom"); } });
+    }
+    R3.prototype.start = function () {};
+    assert.deepEqual(stt.create({ SpeechRecognition: R3, navigator: { onLine: true } }).start({}), { ok: true, audioStartSupported: false });
+    // 判定在 rec.start() 之前：start 內才加上的屬性不影響結果
+    function R4() {}
+    R4.prototype.start = function () { if (!("onaudiostart" in this)) this.onaudiostart = null; };
+    assert.deepEqual(stt.create({ SpeechRecognition: R4, navigator: { onLine: true } }).start({}), { ok: true, audioStartSupported: false });
+    // 失敗的 3 種 reason 不變
+    assert.deepEqual(stt.create({}).start({}), { ok: false, reason: "unsupported" });
+    assert.deepEqual(stt.create(fakeSttGlobal(false).g).start({}), { ok: false, reason: "offline" });
+  });
+
+  test("stt（FE-90）：abort 後替身再觸發任何事件（含握有舊處理器）都不回呼", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorder();
+    s.start(opts);
+    const rec = made[0];
+    const held = {
+      onaudiostart: rec.onaudiostart, onsoundstart: rec.onsoundstart, onspeechstart: rec.onspeechstart,
+      onresult: rec.onresult, onnomatch: rec.onnomatch, onerror: rec.onerror, onend: rec.onend
+    };
+    s.abort();
+    assert.equal(rec.aborted, 1);
+    held.onaudiostart({});
+    held.onsoundstart({});
+    held.onspeechstart({});
+    held.onresult(resultEv("late"));
+    held.onnomatch({});
+    held.onerror({ error: "network" });
+    held.onend({});
+    assert.deepEqual(log, []);
+    assert.equal(s.isListening(), false);
+  });
+
+  test("transcriptOf（FE-90 不變）：多段結果以半形空白連接、各段 trim、空段略過", () => {
+    assert.equal(stt.transcriptOf({ resultIndex: 0, results: [[{ transcript: " comply " }], [{ transcript: "" }], [{ transcript: "with " }]] }), "comply with");
+    assert.equal(stt.transcriptOf({ resultIndex: 0, results: [[{ transcript: "   " }]] }), "");
+    assert.equal(stt.transcriptOf({ resultIndex: -1, results: [[{ transcript: "a" }]] }), "a");
   });
 
   test("stt：錯誤代碼原樣回呼；手動停止的 aborted 不回呼", () => {
@@ -249,13 +473,15 @@ describe("speech.test.js", () => {
     assert.equal(m.lightLabel, "綠燈");
     assert.equal(m.note, "此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度");
     assert.equal(m.tip, null);
-    assert.equal(m.compare, null);
+    // v0.15（FE-92，STT_RESULT_ROWS.green）：綠燈 1 列「辨識文字」，值為引擎原文
+    assert.deepEqual(m.compare, [{ label: "辨識文字", value: "Latency." }]);
 
     assert.equal(panel.buildResult("adress", "address", sim).score, 86);
     const y = panel.resultModel(panel.buildResult("complied with", "comply with", sim));
     assert.equal(y.scoreText, "75");
     assert.equal(y.light, "yellow");
     assert.equal(y.tip, "放慢速度或重聽 0.75x 示範");
+    assert.deepEqual(y.compare, [{ label: "辨識文字", value: "complied with" }]);
     assert.equal(panel.buildResult("Comply with.", "comply with", sim).score, 100);
     const red = panel.resultModel(panel.buildResult("kitten", "sitting", sim));
     assert.equal(red.scoreText, "57");
@@ -367,11 +593,12 @@ describe("speech.test.js", () => {
     for (const rel of files) {
       vm.runInContext(fs.readFileSync(path.join(APP_DIR, rel), "utf8"), sandbox, { filename: rel });
     }
-    const log = { toasts: [], speak: 0, start: 0, stop: 0, abort: 0, statuses: [], actions: [] };
+    // statuses：狀態序列；phases：同序列但準備中附子階段（"preparing:acquiringMic"）
+    const log = { toasts: [], speak: 0, start: 0, stop: 0, abort: 0, statuses: [], phases: [], actions: [] };
     const sttCb = {};
     const state = {
       data: { sttNoticeAcknowledged: o.acknowledged !== false },
-      runtime: { speech: { ttsSupported: o.ttsSupported, sttSupported: o.sttSupported, sttStatus: "idle", lastResult: null } }
+      runtime: { speech: { ttsSupported: o.ttsSupported, sttSupported: o.sttSupported, sttStatus: "idle", preparingPhase: null, lastResult: null } }
     };
     const subs = [];
     const notify = () => subs.forEach((f) => f(state, ["speech"]));
@@ -394,7 +621,14 @@ describe("speech.test.js", () => {
       }
     });
     const actions = {
-      setSttStatus: (s) => { state.runtime.speech.sttStatus = s; log.statuses.push(s); notify(); },
+      // v0.15（FE-91 介面）：準備中附子階段；其他狀態子階段為 null
+      setSttStatus: (s, phase) => {
+        state.runtime.speech.sttStatus = s;
+        state.runtime.speech.preparingPhase = s === "preparing" ? phase : null;
+        log.statuses.push(s);
+        log.phases.push(s === "preparing" ? s + ":" + phase : s);
+        notify();
+      },
       setSttResult: (r) => { state.runtime.speech.lastResult = r; notify(); },
       recordSttScored() {},
       acknowledgeSttNotice() { state.data.sttNoticeAcknowledged = true; }
@@ -418,6 +652,17 @@ describe("speech.test.js", () => {
     const mic = buttons.find((b) => b.className.includes("sp-mic"));
     const msgBox = container.findAll((n) => n.className.includes("sp-msg") && !n.className.includes("sp-msg__"))[0];
     return { sandbox, container, tts, mic, msgBox, log, state, sttCb };
+  }
+
+  /**
+   * （v0.15）按下後先經過準備中（acquiringMic → fallbackWait）才進入聆聽中（AC-58-01、AC-58-09）。
+   * 本檔替身 start() 回 { ok: true }（沒有 audioStartSupported）且沙箱沒有 setTimeout，所以 fallbackWait 直接聆聽。
+   */
+  function assertPreparedThenListening(env, label) {
+    const p = env.log.phases;
+    const i = p.lastIndexOf("preparing:acquiringMic");
+    assert.ok(i >= 0, (label || "") + " 先進入準備中：" + JSON.stringify(p));
+    assert.deepEqual(p.slice(i, i + 3), ["preparing:acquiringMic", "preparing:fallbackWait", "listening"], (label || "") + JSON.stringify(p));
   }
 
   /** 訊息列目前的主訊息與補充說明 */
@@ -482,6 +727,7 @@ describe("speech.test.js", () => {
     for (const [code, text, help] of cases) {
       const env = panelEnv({ ttsSupported: true, sttSupported: true });
       env.mic.click();
+      assertPreparedThenListening(env, code);
       assert.equal(env.state.runtime.speech.sttStatus, "listening", code);
       assert.equal(env.mic.getAttribute("aria-pressed"), "true", code);
       assert.doesNotThrow(() => { env.sttCb.onError(code); env.sttCb.onEnd({ manual: false, hadResult: false, hadError: true }); }, code);
@@ -497,6 +743,7 @@ describe("speech.test.js", () => {
   test("麥克風流程：aborted 非手動停止 →「語音辨識發生錯誤，請稍後再試一次」（§7.6 對照表）", () => {
     const env = panelEnv({ ttsSupported: true, sttSupported: true });
     env.mic.click();
+    assertPreparedThenListening(env);
     env.sttCb.onError("aborted");
     env.sttCb.onEnd({ manual: false, hadResult: false, hadError: true });
     assert.equal(env.state.runtime.speech.sttStatus, "idle");
@@ -511,6 +758,7 @@ describe("speech.test.js", () => {
     const env1 = panelEnv({ ttsSupported: true, sttSupported: true, sttImpl: stt.create(f1.g) });
     env1.mic.click();
     assert.equal(f1.made.length, 1);
+    assertPreparedThenListening(env1);
     assert.equal(env1.state.runtime.speech.sttStatus, "listening");
     f1.made[0].onerror({ error: "aborted" });
     f1.made[0].onend();
@@ -543,18 +791,28 @@ describe("speech.test.js", () => {
     assert.deepEqual(env.log.toasts, []);
   });
 
-  test("麥克風流程：結束時無結果 → 未偵測提示、不顯示分數（AC-08-10）", () => {
+  test("麥克風流程：結束時無結果 → 依是否已確認收音分流、不顯示分數（AC-08-10、AC-59-03、AC-59-05、AC-58-08）", () => {
+    // 已確認開始收音（本沙箱 fallbackWait 直接聆聽 = 後備時間已到）且無結果 →「未偵測到語音」（MS-1 (5)）
     const env = panelEnv({ ttsSupported: true, sttSupported: true });
     env.mic.click();
+    assert.equal(env.state.runtime.speech.sttStatus, "listening");
     env.sttCb.onEnd({ manual: false, hadResult: false, hadError: false });
     assert.equal(messageOf(env).text, "未偵測到語音，請再試一次");
     assert.equal(env.state.runtime.speech.lastResult, null);
-    // 辨識文字清洗後為空也一樣
+    // v0.15：辨識文字清洗後為空 →「有收到聲音，但沒聽出英文單字，請再說一次」（AC-59-03）
     const env2 = panelEnv({ ttsSupported: true, sttSupported: true });
     env2.mic.click();
     env2.sttCb.onResult("...");
-    assert.equal(messageOf(env2).text, "未偵測到語音，請再試一次");
+    assert.equal(messageOf(env2).text, "有收到聲音，但沒聽出英文單字，請再說一次");
     assert.equal(env2.state.runtime.speech.lastResult, null);
+    // 未經確認就結束（start 內同步 end，仍在準備中）→「語音辨識沒有回應，請再試一次」（MS-1 (6)）
+    const env3 = panelEnv({ ttsSupported: true, sttSupported: true });
+    const svc = env3.sandbox.EMT.services.stt;
+    svc.start = (opts) => { env3.log.start++; opts.onEnd({ manual: false, hadResult: false, hadError: false }); return { ok: true }; };
+    env3.mic.click();
+    assert.equal(messageOf(env3).text, "語音辨識沒有回應，請再試一次");
+    assert.equal(env3.state.runtime.speech.sttStatus, "idle");
+    assert.equal(env3.state.runtime.speech.lastResult, null);
   });
 
   test("麥克風流程：離線 → 不開始聆聽、提示「語音辨識需要網路連線」（AC-08-14）", () => {
@@ -568,6 +826,7 @@ describe("speech.test.js", () => {
   test("麥克風流程：辨識成功 → 寫入結果、顯示分數區（AC-08-03、AC-08-11）", () => {
     const env = panelEnv({ ttsSupported: true, sttSupported: true });
     env.mic.click();
+    assertPreparedThenListening(env);
     env.sttCb.onResult("Latency.");
     const r = env.state.runtime.speech.lastResult;
     assert.equal(r.score, 100);
@@ -813,9 +1072,12 @@ describe("speech.test.js", () => {
     assert.equal(mic.log.acquire, 1, "我知道了 → 取得麥克風");
     assert.equal(env.log.start, 0, "取得完成前不開始辨識");
     assert.equal(env.state.data.sttNoticeAcknowledged, true);
+    assert.equal(env.state.runtime.speech.sttStatus, "preparing", "v0.15：取得期間為準備中");
+    assert.equal(env.state.runtime.speech.preparingPhase, "acquiringMic");
     mic.resolveAll();
     await flush();
     assert.equal(env.log.start, 1);
+    assertPreparedThenListening(env);
     assert.equal(env.state.runtime.speech.sttStatus, "listening");
     assert.equal(mic.log.startMeter, 1);
   });
@@ -867,6 +1129,7 @@ describe("speech.test.js", () => {
     for (const result of [{ ok: false, reason: "unavailable" }, { ok: true, reused: false, metering: false }]) {
       const env = await listeningEnv({ micOpts: { result } });
       assert.equal(env.log.start, 1, JSON.stringify(result));
+      assertPreparedThenListening(env, JSON.stringify(result));
       assert.equal(env.state.runtime.speech.sttStatus, "listening");
       assert.equal(messageOf(env).hidden, true);
       assert.deepEqual(env.log.toasts, []);
@@ -888,6 +1151,7 @@ describe("speech.test.js", () => {
 
   test("聆聽中 onLevel(k) → 恰亮前 k 格，亮格從左側連續（AC-33-03、AC-33-04）", async () => {
     const env = await listeningEnv();
+    assertPreparedThenListening(env);
     assert.equal(env.state.runtime.speech.sttStatus, "listening");
     assert.equal(env.micSvc.log.startMeter, 1, "進入聆聽後才開始讀音量");
     assert.deepEqual(barsOf(env), DARK);
@@ -936,22 +1200,30 @@ describe("speech.test.js", () => {
     assert.equal(env.state.runtime.speech.sttStatus, "idle");
   });
 
-  test("取得中再按忽略；取得中換卡（reset）→ 完成後不開始辨識（§7.14）", async () => {
+  test("取得中再按 = 取消（v0.15，AC-58-04 (a)）；取得中換卡（reset）→ 完成後不開始辨識（§7.14）", async () => {
     const mic = fakeMic({ deferred: true });
     const env = panelEnv({ ttsSupported: true, sttSupported: true, mic });
     env.mic.click();
-    env.mic.click();
-    env.mic.click();
-    assert.equal(mic.log.acquire, 1, "取得中再按忽略");
+    assert.equal(env.state.runtime.speech.sttStatus, "preparing");
+    assert.equal(mic.log.acquire, 1);
+    env.mic.click(); // 取消
+    assert.equal(env.state.runtime.speech.sttStatus, "idle", "取得中再按 = 取消，回待機");
+    assert.equal(env.state.runtime.speech.preparingPhase, null);
+    assert.equal(messageOf(env).hidden, true, "取消不提示");
+    env.mic.click(); // 新嘗試（替身每次回新的待決 Promise；真正 mic.js 共用同一個，見 speech-flow.test.js）
+    assert.equal(mic.log.acquire, 2);
+    assert.equal(env.state.runtime.speech.sttStatus, "preparing");
     mic.resolveAll();
     await flush();
-    assert.equal(env.log.start, 1);
+    assert.equal(env.log.start, 1, "只有新代號開始辨識");
+    assert.equal(env.state.runtime.speech.sttStatus, "listening");
     env.mic.click(); // 停止
     assert.equal(env.state.runtime.speech.sttStatus, "idle");
 
     env.mic.click();
-    assert.equal(mic.log.acquire, 2);
+    assert.equal(mic.log.acquire, 3);
     env.sandbox.EMT.components.speechPanel.reset(); // 換卡
+    assert.equal(env.state.runtime.speech.sttStatus, "idle", "準備中換卡 → 待機");
     mic.resolveAll();
     await flush();
     assert.equal(env.log.start, 1, "gen 已變：不開始辨識");
@@ -1074,9 +1346,11 @@ describe("speech.test.js", () => {
     const sp = env.sandbox.EMT.components.speechPanel;
 
     env.mic.click();
+    assert.equal(env.state.runtime.speech.sttStatus, "preparing", "取得中為準備中");
     await flush();
     assert.equal(gum.length, 1);
     assert.deepEqual(gum[0], { audio: true });
+    assertPreparedThenListening(env);
     assert.equal(env.state.runtime.speech.sttStatus, "listening");
     // 以 −25 dBFS 的 1 kHz 正弦樣本 → 3 格（AC-33-04）
     const amp = Math.pow(10, -25 / 20) * Math.SQRT2;

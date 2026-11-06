@@ -1,17 +1,22 @@
 /**
  * ---
  * doc: CONTRACT-SCHEMA
- * version: 0.19
+ * version: 0.20
  * status: approved
  * author: sa-agent
- * approved_by: JimmyLin（授權主控代核；對話中授權「核准 PRD v0.19，測完直接推」）
+ * approved_by: JimmyLin（授權主控代核）
  * approved_at: 2026-11-05
  * ---
  *
  * English Master Track — 資料契約（型別定義）
  *（專案代號仍為 English Master Track；v0.12 起 App 內顯示名稱為「EnglishContext」，見 §13 APP_DISPLAY_NAME 與 FROZEN_IDENTIFIERS。）
  *
- * 上游：docs/01-PRD.md v0.19（approved，JimmyLin，2026-11-05），以第 6 章「人類決議」與 R-15～R-28 為準。
+ * 上游：docs/01-PRD.md v0.20（approved，JimmyLin，2026-11-05；Q-94～Q-102 全部採 PM 建議），以第 6 章「人類決議」與 R-15～R-29 為準。
+ * v0.20（PRD R-29：US-58 麥克風準備中、US-59 無文字訊息分流、US-60 三種燈號都顯示辨識文字、US-61 窄視窗鍵盤焦點（BUG-005），Q-94～Q-102）
+ *   **不改持久化結構**（schemaVersion 維持 3，PersistedData 12 欄、StorageRecord、BackupFile 不變，localStorage 鍵數 2，不需遷移）：
+ *   SttStatus 新增 "preparing"；RuntimeState.speech 新增 preparingPhase（皆只在記憶體）。新增 §18（辨識事件、結束資訊、訊息分流、
+ *   時間常數範圍、分數區文字列）。US-61 是版面與捲動行為，不涉資料契約。規則見 README §14（PR、MS、RT、KF、V-STT）。
+ *   storage-schema.json 未修改，維持 v0.16。
  * v0.19（PRD R-27、R-28：US-49 已答對題數、US-50～US-52 廣告、US-53～US-55 隱私權政策／關於我／聯絡我們、US-56 SEO、US-57 入口與靜態頁，Q-81～Q-93）
  *   **不改持久化結構**（schemaVersion 維持 3，PersistedData 12 欄、StorageRecord、BackupFile 不變，localStorage 鍵數 2，不需遷移）：
  *   廣告與新頁面的狀態只放 RuntimeState（ad、sitePageReturnTab）。新增 §17；TabId +3 值；部署目錄 8 → 13 檔，預先快取 7 項不變；
@@ -55,7 +60,8 @@
  *
  * 本檔是「規格」不是實作：
  * - pg-content 依 §2～§7 產出 src/data/ 的資料檔；pg-frontend 依 §1、§8～§15 實作 src/app/（v0.11 §12 PWA 含建置輸出；v0.12 §13 版面與視覺；
- *   v0.14 §14 版本號；v0.15 §15 模擬測驗答對紀錄；v0.16 §16 聯絡資訊；v0.19 §17 已答對顯示、廣告、對外頁面與 SEO）。
+ *   v0.14 §14 版本號；v0.15 §15 模擬測驗答對紀錄；v0.16 §16 聯絡資訊；v0.19 §17 已答對顯示、廣告、對外頁面與 SEO；
+ *   v0.20 §18 語音辨識準備中、訊息分流與辨識文字）。
  * - 兩方都不得自創欄位；欄位變更必須先改本契約（版本遞增）。
  * - 下方的 export const 是契約常數（值本身就是規格），pg-frontend 實作時須使用相同數值。
  *
@@ -204,6 +210,15 @@
  * |      |            |          | (3) PWA_DEPLOY_FILES 8 → 13；PwaDeployFileRole +3 值、PwaDeployFile.mime +1 值；PWA_PRECACHE_URLS 不變。
  * |      |            |          | (4) LAYOUT_TEXTS 移除 statAccuracyLabel、新增 statPart5Label；clearConfirmMustInclude 第 2 段改寫；SOURCES_CONTACT_TEXT 改為新信箱。
  * |      |            |          | 型別數 70 → 81；契約常數 42 → 60；localStorage 鍵數 2 不變；schemaVersion 維持 3，不需遷移；內容資料檔格式與值不變。 |
+ * | 0.20 | 2026-11-05 | sa-agent | 修訂已核准的 v0.19（主控代核），原因：PRD v0.20 R-29（JimmyLin 2026-11-05 核准，Q-94～Q-102 全採 PM 建議）：
+ * |      |            |          | 新增 US-58～US-61；修改 AC-08-01、AC-08-06、AC-08-07、AC-08-08、AC-08-10、AC-08-13、AC-22-03、AC-30-04、AC-31-03、
+ * |      |            |          | AC-33-01、AC-33-03、AC-33-06、AC-33-07、AC-33-08、AC-42-02。status 改為 in-review、核准欄位清空。
+ * |      |            |          | (1) SttStatus 新增 "preparing"（只在記憶體）；RuntimeState.speech 新增 preparingPhase: SttPreparingPhase | null。
+ * |      |            |          | (2) 新增 §18：type SttEngineEventKind、SttPreparingPhase、SttNoTextOutcome、SttResultRowKind；
+ * |      |            |          |     interface SttEndInfo、SttTimingRange；常數 STT_FLOW_TEXTS、STT_TIMING、STT_RESULT_ROWS。
+ * |      |            |          | (3) 註解：SttResult（recognizedText 三種燈號都顯示、不清洗）、APP_VERSION_META_NAME（1.3.0、本次 1.3.1，Q-102 A）。
+ * |      |            |          | 型別數 81 → 87（interface 42、type 45）；契約常數 60 → 63；localStorage 鍵數 2 不變；
+ * |      |            |          | schemaVersion 維持 3，備份格式不變，不需遷移；內容資料檔格式與值不變（pg-content 無工作）。 |
  */
 
 // ════════════════════════════════════════════════════════════════════
@@ -1316,11 +1331,20 @@ export interface VocabQuizQuestion {
 /** STT 燈號：score ≥ 90 green、65～89 yellow、< 65 red（AC-08-06）。 */
 export type SttLight = "green" | "yellow" | "red";
 
-/** STT 評分結果（執行期，不持久化，AC-21-03）。對應：AC-08-03～AC-08-08、AC-08-11、AC-08-12。 */
+/**
+ * STT 評分結果（執行期，不持久化，AC-21-03、AC-60-07）。對應：AC-08-03～AC-08-08、AC-08-11、AC-08-12、AC-60-01～AC-60-07。
+ * （v0.20，US-60）分數區依 §18 STT_RESULT_ROWS 決定文字列：綠、黃燈只顯示「辨識文字」；紅燈顯示「辨識文字」與「目標文字」（Q-98 A）。
+ * 只有「清洗後非空」的辨識文字才會產生本物件；清洗後為空屬 US-59「有收到聲音」訊息，不產生 SttResult（AC-59-03、AC-60-04）。
+ */
 export interface SttResult {
-  /** 辨識原文（未清洗）。 */
+  /**
+   * 必填。辨識原文（未清洗）：語音辨識服務回傳的字串原樣保存，不改大小寫、不去標點（AC-60-01，例 "Latency."、"adress"、"kitten"）。
+   * 唯一允許的處理是服務取出文字時的既有串接（各結果第 1 候選、各段 trim 後以 1 個半形空白連接，README RT-1）。
+   * 畫面一律以 textContent 寫入，值元素 lang="en"（AC-60-05）；不得寫入 localStorage 或備份（AC-60-07）。
+   * 這是引擎輸出，不代表使用者實際發音，也不是語言判斷結果（AC-60-03、Q-101 A）。
+   */
   recognizedText: string;
-  /** 目標文字（卡片 word 原文）。 */
+  /** 必填。目標文字（卡片 word 原文）。（v0.20）只在紅燈顯示（STT_RESULT_ROWS.red）。 */
   targetText: string;
   /** 辨識吻合度 0～100 整數。 */
   score: number;
@@ -1328,8 +1352,19 @@ export interface SttResult {
   light: SttLight;
 }
 
-/** 麥克風狀態。"notice" = 顯示首次說明中（AC-08-13）。 */
-export type SttStatus = "idle" | "notice" | "listening";
+/**
+ * 麥克風狀態（執行期，不持久化，AC-58-12）。
+ * - "idle"：待機。按鈕文字「麥克風跟讀」；說明對話框顯示期間按鈕也是待機外觀，但狀態值為 "notice"。
+ * - "notice"：顯示首次說明中（AC-08-13）。按「我知道了」→ "preparing"；按「取消」→ "idle"（不呼叫 getUserMedia）。
+ * - "preparing"：（v0.20，US-58）準備中 = 按下麥克風後、進入聆聽中之前。從按下（或「我知道了」）起算，包含取得麥克風與
+ *   權限詢問期間（Q-97 A），直到引擎確認開始收音（README PR-3）。按鈕文字 STT_FLOW_TEXTS.micPreparing「準備中」、
+ *   aria-label STT_FLOW_TEXTS.micPreparingLabel；收音條 5 格全暗（AC-58-02）；不使用聆聽中的紅色與閃爍、無動畫（AC-58-13）。
+ *   子階段見 RuntimeState.speech.preparingPhase。屬「未聆聽」（AC-33-03）。
+ * - "listening"：聆聽中（AC-08-01）；收音條依音量點亮。
+ * 轉移規則見 README §14.1 PR-1～PR-12。
+ * 對應：AC-08-01、AC-08-13、AC-33-03、AC-58-01～AC-58-13。
+ */
+export type SttStatus = "idle" | "notice" | "preparing" | "listening";
 
 /** localStorage 可用狀態。"unavailable" 時顯示「進度將無法保存」（AC-18-03），但所有功能可在本次工作階段使用。 */
 export type StorageStatus = "ok" | "unavailable";
@@ -1342,6 +1377,9 @@ export type StorageStatus = "ok" | "unavailable";
  *   只能放在 src/app 模組內部變數；收音條亮格數（0～5）、RMS／dBFS 音量值屬即時畫面暫態，
  *   不得寫入 PersistedData、localStorage、備份檔或任何其他儲存（AC-21-03、NFR-3）。
  *   是否把亮格數放進 RuntimeState、門檻 T1～T5、分析視窗與音軌釋放時機由 SD 決定（README §9.3 DS-01～DS-03）。
+ * （v0.20，US-58、US-59）T_READY、T_BUFFER、T_FALLBACK 的計時器 ID、嘗試代號（用來忽略遲到事件）、
+ *   本次辨識的事件紀錄（§18 SttEndInfo 的旗標）只能放在 src/app 模組內部變數；不得寫入 PersistedData、localStorage、
+ *   備份檔或任何其他儲存（AC-58-12、AC-59-07）。AppState 只多 speech.sttStatus 的 "preparing" 值與 speech.preparingPhase。
  */
 export interface RuntimeState {
   /** （v0.8）進入模式；啟動時依 README §5.5 FS-1 判定。 */
@@ -1380,9 +1418,17 @@ export interface RuntimeState {
     ttsSupported: boolean;
     /** 瀏覽器是否支援 SpeechRecognition（AC-08-02）。 */
     sttSupported: boolean;
-    /** 麥克風狀態。 */
+    /** 麥克風狀態。（v0.20）含 "preparing"；重新載入一律 "idle"（AC-58-12）。 */
     sttStatus: SttStatus;
-    /** 最近一次評分結果；切換卡片時清為 null。 */
+    /**
+     * （v0.20，US-58）準備中的子階段。必填；sttStatus ≠ "preparing" 時必為 null，= "preparing" 時必不為 null。
+     * 只在記憶體，不寫入 localStorage、備份檔或任何儲存（AC-58-12）。值域與轉移見 §18 SttPreparingPhase、README PR-2。
+     */
+    preparingPhase: SttPreparingPhase | null;
+    /**
+     * 最近一次評分結果；切換卡片時清為 null。
+     * （v0.20）按下麥克風進入 "preparing" 時也清為 null（AC-58-01「前次分數與訊息清除」，README PR-4）。
+     */
     lastResult: SttResult | null;
   };
   /** 長難句解碼器。（v0.9 頁面隱藏，欄位保留；啟動時照常初始化為 sentenceIndex 0、isModifierDimmed false，本版不使用。） */
@@ -1979,7 +2025,10 @@ export interface DashboardRuntimeState {
  * 寫法：<meta name="emt-app-version" content="X.Y.Z">，屬 HD-1 靜態元素（file:// 與 https 都有，不產生請求）。
  * - 來源：建置時專案根目錄 package.json 的 "version" 欄位（人類發布時手動維護；v0.14 發布 1.0.0，Q-58、Q-62；
  *   v0.15 發布 1.1.0，Q-70 A：授權主控本次實作時一次性修改 package.json，之後仍由人類維護；
- *   v0.18 發布 1.2.0，Q-79 A：同樣授權主控本次一次性修改，版本行為「版本 1.2.0（建置 xxxxxxx）」，AC-42-02）。契約不寫死版本值。
+ *   v0.18 發布 1.2.0，Q-79 A：同樣授權主控本次一次性修改，版本行為「版本 1.2.0（建置 xxxxxxx）」，AC-42-02；
+ *   v0.19 第一階段發布 1.3.0，Q-85 A：同樣授權主控本次一次性修改，版本行為「版本 1.3.0（建置 xxxxxxx）」；
+ *   v0.20 發布 1.3.1，Q-102 A：同樣授權主控本次一次性修改，版本行為「版本 1.3.1（建置 xxxxxxx）」；第二階段版本號屆時由人類決定）。
+ *   契約不寫死版本值。
  * - 原始模板中 content 為**固定佔位字串**（比照 emt-build-id 的佔位規則：以 "@@" 前後包夾、模板中恰出現 1 次且位於本 meta 內；
  *   佔位字串的實際值由 SD 定，建議 "@@APP_VERSION@@"）。建置以 package.json 的 version 取代後，產物不得殘留佔位字串。
  * - **寫入順序**：先寫入版本號，再以「已含版本號、emt-build-id 仍為佔位」的 HTML 計算 BUILD_ID（README SW-2 v0.14），
@@ -2468,4 +2517,138 @@ export const SITEMAP_XML =
   "  <url><loc>https://jimmyfantasyworld.com/privacy.html</loc></url>\n" +
   "</urlset>\n";
 
+// ════════════════════════════════════════════════════════════════════
+// §18 語音辨識準備中、訊息分流與辨識文字（v0.20，PRD R-29、US-58～US-60、Q-94～Q-99、Q-101）
+//     提供者：契約常數（pg-frontend 實作；services/stt.js 提供事件，views/speech-panel.js 決定狀態與訊息，模組分工由 SD 定）
+//     使用者：pg-frontend、QA（V-STT-STUB 替身，README §14.5 V-STT-01～V-STT-10）
+//     本節全部「不持久化」：不寫入 localStorage、備份檔或任何儲存；不新增 window 全域變數；pg-content 無工作。
+//     SpeechRecognition 實例、計時器、事件物件不得放入 AppState（§10 RuntimeState 禁放規則）。
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * 語音辨識服務必須能分辨並回報的引擎事件（SpeechRecognition 的同名事件）。對應：US-58、US-59、AC-58-03、AC-58-07、AC-58-08、
+ * AC-59-01～AC-59-06。
+ * - "audiostart"：開始收音事件（PRD US-58 名詞）。準備中收到 → 經 T_BUFFER 後進入聆聽中（AC-58-03）。
+ * - "soundstart"：偵測到聲音。準備中收到 → 立即聆聽中（AC-58-07）。**不算偵測到語音**（AC-59-05 (c)）。
+ * - "speechstart"：偵測到語音。準備中收到 → 立即聆聽中（AC-58-07）；記錄 speechDetected（US-59 分流依據）。
+ * - "result"：辨識結果（文字可能為空，AC-59-03）。
+ * - "nomatch"：引擎有結果但無可用文字（AC-59-02）。
+ * - "error"：錯誤，附 SpeechRecognitionErrorEvent.error 字串（not-allowed、audio-capture、network、no-speech、aborted 等）。
+ * - "end"：本次辨識結束（附 SttEndInfo）。
+ * 其他事件（audioend、soundend、speechend）不影響狀態與訊息，服務可不回報。
+ * 本次嘗試已取消、逾時中止或被新嘗試取代後，任何事件都不得再影響畫面（AC-58-04 (b)、AC-58-05、AC-58-06，README PR-9）。
+ * 「瀏覽器不支援 audiostart」的判定方式由 SD 訂定（AC-58-09），契約只要求服務能告知呼叫端「本次是否可依賴 audiostart」。
+ */
+export type SttEngineEventKind = "audiostart" | "soundstart" | "speechstart" | "result" | "nomatch" | "error" | "end";
+
+/**
+ * 準備中的子階段（RuntimeState.speech.preparingPhase；只在記憶體）。對應：AC-58-01、AC-58-04、AC-58-06、AC-58-09、Q-96、Q-97。
+ * - "acquiringMic"：已按下、正在取得麥克風（getUserMedia 或權限詢問未完成，AC-58-04 (a)）。不計入 T_READY（AC-58-06）。
+ *   取得失敗依既有規則：權限拒絕 → AC-08-09；找不到裝置 → AC-33-05；其他原因 → 收音條全暗、照常開始辨識（AC-33-07）。
+ * - "awaitingAudioStart"：已呼叫並回傳 start()，引擎可依賴 audiostart，正在等待（AC-58-02）；自 start() 回傳起套用 T_READY。
+ *   收到 audiostart 後、T_BUFFER 尚未結束時仍為本值（畫面仍是準備中）。
+ * - "fallbackWait"：已呼叫並回傳 start()，引擎不可依賴 audiostart（AC-58-09）；維持 T_FALLBACK 後進入聆聽中，不套用 T_READY。
+ */
+export type SttPreparingPhase = "acquiringMic" | "awaitingAudioStart" | "fallbackWait";
+
+/**
+ * 本次辨識結束資訊（服務 → 呼叫端，"end" 事件附帶；執行期，不持久化，AC-59-07）。
+ * 擴充既有 onEnd({ manual, hadResult, hadError }) 的 3 欄，新增 5 欄；所有旗標在每次新的 start() 都重設為初始值（AC-59-06 末句）。
+ * 欄位全部必填。對應：AC-58-07、AC-58-08、AC-59-01～AC-59-06、README MS-1～MS-6。
+ */
+export interface SttEndInfo {
+  /** 必填。使用者主動停止或取消（再按一次、換卡、切換模式、按 TTS、離開頁面）。true 時不提示（AC-08-10、AC-58-04、AC-58-10）。 */
+  manual: boolean;
+  /** 必填。本次是否收到過 "result"（不論文字是否為空）。 */
+  hadResult: boolean;
+  /** 必填。本次是否收到過 "error"（手動停止造成的 aborted 不算）。 */
+  hadError: boolean;
+  /** 必填。（v0.20）本次是否收到過 "audiostart"。 */
+  audioStarted: boolean;
+  /** 必填。（v0.20）本次是否收到過 "soundstart"。只用於轉入聆聽中，不算偵測到語音（AC-59-05 (c)）。 */
+  soundStarted: boolean;
+  /** 必填。（v0.20）本次是否收到過 "speechstart"（偵測到語音，AC-59-01、AC-59-04）。 */
+  speechDetected: boolean;
+  /** 必填。（v0.20）本次是否收到過 "nomatch"（AC-59-02）。 */
+  nomatch: boolean;
+  /** 必填。（v0.20）第一個 error 代碼；沒有錯誤為 null。例："no-speech"、"network"。 */
+  errorCode: string | null;
+}
+
+/**
+ * 沒有分數時的訊息種類（US-59、AC-58-06、AC-58-08）。判定順序見 README §14.2 MS-1。
+ * - "heardNoWords"：偵測到語音但沒有文字、nomatch、或辨識文字清洗後為空 → STT_FLOW_TEXTS.heardNoWords。
+ * - "noSpeech"：已開始收音（或後備時間已到）但完全沒偵測到語音 → STT_FLOW_TEXTS.noSpeech（沿用 v1.3.0 原文）。
+ * - "noResponse"：未經開始收音就結束，或 T_READY 逾時 → STT_FLOW_TEXTS.noResponse。
+ * 錯誤代碼 not-allowed、audio-capture、network 等仍用既有訊息，不屬本型別（AC-58-08、AC-59-06 (c)）。
+ */
+export type SttNoTextOutcome = "heardNoWords" | "noSpeech" | "noResponse";
+
+/** 時間常數範圍（毫秒，整數）。defaultMs 為契約預設值；SD 實測後可在 [minMs, maxMs] 內調整（含兩端），主控代核（README PR-11）。 */
+export interface SttTimingRange {
+  /** 必填。預設值（ms）。 */
+  defaultMs: number;
+  /** 必填。可調整下限（ms，含）。 */
+  minMs: number;
+  /** 必填。可調整上限（ms，含）。 */
+  maxMs: number;
+}
+
+/** 分數區文字列種類（US-60）。"recognized" = 「辨識文字」；"target" = 「目標文字」。 */
+export type SttResultRowKind = "recognized" | "target";
+
+/**
+ * 語音辨識流程的畫面文字（契約常數，逐字使用；以 textContent 或 setAttribute 寫入）。對應：AC-58-01、AC-58-06、AC-58-08、
+ * AC-59-01～AC-59-05、AC-60-01、AC-08-08、Q-99 A。
+ * - micPreparing：準備中按鈕文字（AC-58-01）。
+ * - micPreparingLabel：準備中按鈕 aria-label（AC-58-01）。中間為全形逗號「，」U+FF0C。
+ * - heardNoWords：US-59「有收到聲音」訊息（AC-59-01）。「英文單字」只是引導文字，不是語言判斷（Q-99、Q-101）。
+ * - noSpeech：US-59「未偵測到語音」訊息（AC-59-05）；與 v1.3.0 原文相同，不改。
+ * - noResponse：未經開始收音就結束或逾時（AC-58-06、AC-58-08）。
+ * - labelRecognized、labelTarget：分數區文字列標籤（AC-08-08、AC-60-01），與 v1.3.0 相同，不改。
+ * 既有的「麥克風跟讀」「聆聽中」「聆聽中，再按一次停止」、錯誤訊息與 AC-08-11 說明文字不變，由 SD 文字定稿表維持。
+ * 本節訊息全部是 info 層級提示，不算評分，不改今日已學、打卡、掌握數（AC-30-04、AC-59-07）。
+ */
+export const STT_FLOW_TEXTS = {
+  micPreparing: "準備中",
+  micPreparingLabel: "準備中，再按一次取消",
+  heardNoWords: "有收到聲音，但沒聽出英文單字，請再說一次",
+  noSpeech: "未偵測到語音，請再試一次",
+  noResponse: "語音辨識沒有回應，請再試一次",
+  labelRecognized: "辨識文字",
+  labelTarget: "目標文字",
+} as const;
+
+/**
+ * 準備中的時間常數（PRD US-58 名詞；架構常數的契約範圍）。對應：AC-58-03、AC-58-06、AC-58-09、Q-94 A、Q-95 C、Q-96 B。
+ * - readyTimeout = **T_READY**：自 start() 回傳起等待開始收音事件的上限。預設 5000，可在 3000～10000 內調整；
+ *   超出範圍須回 PM（AC-58-06）。只用於 preparingPhase = "awaitingAudioStart"；權限詢問期間不計入。
+ * - buffer = **T_BUFFER**：收到 audiostart 到顯示「聆聽中」的緩衝。預設 0，可在 0～500 內調整（AC-58-03）。
+ *   收到 soundstart、speechstart 時不再套用（AC-58-07）。
+ * - fallback = **T_FALLBACK**（後備時間）：不可依賴 audiostart 時，自 start() 回傳起維持準備中的固定時間。預設 1500，
+ *   可在 1000～2000 內調整（AC-58-09）。
+ * **主控實測後可在上述範圍內代核調整**（調整後的實際值寫在 docs/03-design/architecture.md，契約常數維持預設與範圍，
+ * 不需改契約；README PR-11）。值為毫秒整數。
+ */
+export const STT_TIMING: Readonly<Record<"readyTimeout" | "buffer" | "fallback", SttTimingRange>> = {
+  readyTimeout: { defaultMs: 5000, minMs: 3000, maxMs: 10000 },
+  buffer: { defaultMs: 0, minMs: 0, maxMs: 500 },
+  fallback: { defaultMs: 1500, minMs: 1000, maxMs: 2000 },
+} as const;
+
+/**
+ * 分數區各燈號顯示的文字列與順序（US-60、Q-98 A）。對應：AC-08-06～AC-08-08、AC-60-01、AC-60-02、AC-60-04。
+ * - green、yellow：只有「辨識文字」1 列，不顯示「目標文字」（目標單字已在同一張卡片上）。
+ * - red：「辨識文字」、「目標文字」2 列並列（AC-08-08，與 v1.3.0 相同）。
+ * 分數區整體順序（AC-60-01）：分數與燈號 → 提示（只有黃燈，「放慢速度或重聽 0.75x 示範」）→ 本常數的文字列 → AC-08-11 說明。
+ * 每列 = 標籤（STT_FLOW_TEXTS.labelRecognized／labelTarget）+ 值（SttResult.recognizedText／targetText）；值元素 lang="en"。
+ * 沒有分數時（US-59 任一訊息、錯誤、取消）不顯示分數區，也不得出現空白的「辨識文字」標籤（AC-60-04）。
+ */
+export const STT_RESULT_ROWS: Readonly<Record<SttLight, readonly SttResultRowKind[]>> = {
+  green: ["recognized"],
+  yellow: ["recognized"],
+  red: ["recognized", "target"],
+} as const;
+
 export {};
+// 主控代核（2026-11-05）：依已核准 PRD v0.20 修訂；不改 PRD、不改 localStorage 持久化結構（schemaVersion 3，storage-schema.json 未改）；tsc --strict 通過。

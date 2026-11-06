@@ -17,6 +17,8 @@
  * （v0.15，FE-74）一般寫入容量不足改為「learningQuota 整個工作階段至多 1 次、不發 storage」，一般例外不提示（WR-2、§7.21.5）；
  *       applyGoal 生效色級未改變不回第 1 張（FB-54）；deleteCustomWord 定位經 placeCard、結果同 AC-04-08；
  *       gotoCard 換卡依 FP-3 寫入位置。位置、答對紀錄、開關的完整案例見 store-track.test.js。
+ * （v0.20，FE-91）sttStatus 4 種狀態與 preparingPhase 子階段規則（AC-58-01、AC-58-12、AC-59-07、V-STT-01、V-STT-10）：
+ *       只在記憶體、setItem 0 次；寫入主鍵與匯出備份皆不含 sttStatus、preparingPhase。
  */
 "use strict";
 const test = require("node:test");
@@ -895,7 +897,7 @@ test("Part 5 題庫為空時作答忽略、不白屏", () => {
 
 // ════════════════════════════ 語音與其他執行期狀態 ════════════════════════════
 
-test("acknowledgeSttNotice 設為 true 並保存（AC-08-13、V-ST-08）；sttStatus 只接受列舉值", () => {
+test("acknowledgeSttNotice 設為 true 並保存（AC-08-13、V-ST-08）；sttStatus 只接受 4 種列舉值（v0.20）", () => {
   const { store, storage, a } = makeStore();
   assert.equal(store.getState().data.sttNoticeAcknowledged, false);
   a.acknowledgeSttNotice();
@@ -904,6 +906,117 @@ test("acknowledgeSttNotice 設為 true 並保存（AC-08-13、V-ST-08）；sttSt
   assert.equal(store.getState().runtime.speech.sttStatus, "notice");
   a.setSttStatus("weird");
   assert.equal(store.getState().runtime.speech.sttStatus, "notice");
+  a.setSttStatus("preparing", "acquiringMic");
+  assert.equal(store.getState().runtime.speech.sttStatus, "preparing");
+  a.setSttStatus("listening");
+  assert.equal(store.getState().runtime.speech.sttStatus, "listening");
+  a.setSttStatus("idle");
+  assert.equal(store.getState().runtime.speech.sttStatus, "idle");
+});
+
+// ── v0.20（FE-91）：準備中與子階段（architecture §4.13、§10.12） ──
+
+test("runtime.speech 啟動時 preparingPhase 為 null，欄位集合固定 5 欄（AC-58-12）", () => {
+  const { store } = makeStore();
+  const sp = store.getState().runtime.speech;
+  assert.equal(sp.sttStatus, "idle");
+  assert.equal(sp.preparingPhase, null);
+  assert.deepEqual(Object.keys(sp).sort(), ["lastResult", "preparingPhase", "sttStatus", "sttSupported", "ttsSupported"]);
+  // 首次模式與重新 init 也一樣
+  const f = makeStore({ firstRun: true });
+  assert.equal(f.store.getState().runtime.speech.preparingPhase, null);
+});
+
+test("setSttStatus：preparing 的 3 種子階段生效；換卡等其他 action 保留 preparingPhase", () => {
+  const { store, a } = makeStore();
+  for (const ph of ["acquiringMic", "awaitingAudioStart", "fallbackWait"]) {
+    a.setSttStatus("preparing", ph);
+    const sp = store.getState().runtime.speech;
+    assert.equal(sp.sttStatus, "preparing", ph);
+    assert.equal(sp.preparingPhase, ph, ph);
+  }
+  a.setSttResult(null);
+  assert.equal(store.getState().runtime.speech.preparingPhase, "fallbackWait");
+  assert.equal(store.getState().runtime.speech.sttStatus, "preparing");
+});
+
+test("setSttStatus：preparing 缺少或錯誤子階段時整次忽略（狀態與子階段都不變、不通知）", () => {
+  const { store, a } = makeStore();
+  const got = [];
+  store.subscribe((st, tags) => got.push(tags));
+  const before = store.getState();
+  for (const ph of [undefined, null, "", "listening", "AcquiringMic", 1, {}]) {
+    a.setSttStatus("preparing", ph);
+  }
+  assert.equal(store.getState(), before);
+  assert.equal(got.length, 0);
+  // 已在準備中時，錯誤子階段也不改
+  a.setSttStatus("preparing", "awaitingAudioStart");
+  a.setSttStatus("preparing", "bogus");
+  a.setSttStatus("preparing");
+  assert.equal(store.getState().runtime.speech.preparingPhase, "awaitingAudioStart");
+  assert.equal(got.length, 1);
+});
+
+test("setSttStatus：非 preparing 狀態的子階段一律為 null（忽略 phase）", () => {
+  const { store, a } = makeStore();
+  a.setSttStatus("preparing", "acquiringMic");
+  a.setSttStatus("listening", "fallbackWait");
+  assert.deepEqual([store.getState().runtime.speech.sttStatus, store.getState().runtime.speech.preparingPhase], ["listening", null]);
+  a.setSttStatus("preparing", "fallbackWait");
+  a.setSttStatus("idle", "acquiringMic");
+  assert.deepEqual([store.getState().runtime.speech.sttStatus, store.getState().runtime.speech.preparingPhase], ["idle", null]);
+  a.setSttStatus("notice", "awaitingAudioStart");
+  assert.deepEqual([store.getState().runtime.speech.sttStatus, store.getState().runtime.speech.preparingPhase], ["notice", null]);
+  // 不在列舉的狀態忽略
+  a.setSttStatus("weird", "acquiringMic");
+  assert.equal(store.getState().runtime.speech.sttStatus, "notice");
+});
+
+test("setSttStatus：狀態與子階段都沒變就不通知；有變才通知 [\"speech\"]；setItem 0 次", () => {
+  const { store, storage, a } = makeStore();
+  const got = [];
+  store.subscribe((st, tags) => got.push(tags.slice()));
+  const calls = storage.setCalls.length;
+  a.setSttStatus("idle");
+  assert.equal(got.length, 0, "idle → idle 不通知");
+  a.setSttStatus("idle", "acquiringMic");
+  assert.equal(got.length, 0, "idle（phase 忽略）不通知");
+  a.setSttStatus("preparing", "acquiringMic");
+  a.setSttStatus("preparing", "acquiringMic");
+  assert.equal(got.length, 1, "同子階段不重複通知");
+  a.setSttStatus("preparing", "awaitingAudioStart");
+  assert.equal(got.length, 2, "子階段改變要通知");
+  a.setSttStatus("listening");
+  a.setSttStatus("listening");
+  a.setSttStatus("idle");
+  assert.equal(got.length, 4);
+  for (const t of got) assert.deepEqual(t, ["speech"]);
+  assert.equal(storage.setCalls.length, calls, "setItem 0 次");
+});
+
+test("寫入 localStorage 與匯出備份不含 sttStatus、preparingPhase（V-STT-10、AC-59-07）：schemaVersion 3、data 12 欄、頂層 5 欄", () => {
+  const { store, storage, a } = makeStore();
+  a.setSttStatus("preparing", "awaitingAudioStart");
+  // 準備中觸發一次持久化寫入
+  a.acknowledgeSttNotice();
+  a.setDraftScore(300);
+  const raw = storage.map.get(KEY);
+  assert.ok(!/sttStatus|preparingPhase|preparing|awaitingAudioStart/.test(raw), raw);
+  const rec = JSON.parse(raw);
+  assert.equal(rec.schemaVersion, 3);
+  assert.deepEqual(Object.keys(rec.data).sort(), P.DATA_KEYS.slice().sort());
+  assert.equal(Object.keys(rec.data).length, 12);
+  // 匯出備份
+  const out = a.exportBackup();
+  assert.ok(!/sttStatus|preparingPhase|awaitingAudioStart/.test(out.json));
+  const file = JSON.parse(out.json);
+  assert.equal(file.schemaVersion, 3);
+  assert.equal(Object.keys(file).length, 5);
+  assert.deepEqual(Object.keys(file.data).sort(), P.DATA_KEYS.slice().sort());
+  // localStorage 鍵名只有主鍵
+  assert.deepEqual([...storage.map.keys()], [KEY]);
+  assert.equal(store.getState().runtime.speech.preparingPhase, "awaitingAudioStart");
 });
 
 test("解碼器淡化跨句保留；索引夾在範圍內；句型篩選與頁籤", () => {

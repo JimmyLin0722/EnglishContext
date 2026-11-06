@@ -1023,7 +1023,7 @@ describe("85-ad.css（DS-48、AC-52-03～AC-52-05）", () => {
     assert.doesNotMatch(CSS, /fixed|sticky/);
   });
 
-  test("基本寬度與標籤樣式依 DS-48；scrollbar-gutter 只在 html[data-ad-env]（SD-FB-80）", () => {
+  test("基本寬度與標籤樣式依 DS-48；85-ad.css 不再設定 scrollbar-gutter（v0.16 §7.29）", () => {
     const base = rulesOf(".ad-slot").find((r) => r.selector === ".ad-slot");
     assert.match(base.body, /box-sizing:\s*border-box/);
     assert.match(base.body, /width:\s*100%/);
@@ -1033,10 +1033,9 @@ describe("85-ad.css（DS-48、AC-52-03～AC-52-05）", () => {
     assert.match(label.body, /color:\s*var\(--text-muted\)/);
     const gutter = rulesOf("scrollbar-gutter");
     assert.equal(gutter.length, 0, "scrollbar-gutter 不是選擇器");
-    const env = rulesOf("html[data-ad-env]");
-    assert.equal(env.length, 1);
-    assert.match(env[0].body, /scrollbar-gutter:\s*stable/);
-    assert.equal((NO_COMMENT.match(/scrollbar-gutter/g) || []).length, 1);
+    // v0.16 §7.29：改由 00-base.css 的 html 無條件設定，本檔不再有 html[data-ad-env] 規則
+    assert.equal(rulesOf("html[data-ad-env]").length, 0);
+    assert.equal((NO_COMMENT.match(/scrollbar-gutter/g) || []).length, 0);
   });
 });
 

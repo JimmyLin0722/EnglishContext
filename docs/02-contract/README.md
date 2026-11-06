@@ -1,15 +1,15 @@
 ---
 doc: CONTRACT
-version: 0.19
+version: 0.20
 status: approved
 author: sa-agent
-approved_by: JimmyLin（授權主控代核；對話中授權「核准 PRD v0.19，測完直接推」）
+approved_by: JimmyLin（授權主控代核）
 approved_at: 2026-11-05
 ---
 
 # English Master Track — 資料契約總覽
 
-> 上游：`docs/01-PRD.md` v0.19（approved，JimmyLin，2026-11-05），以第 6 章「人類決議」與 R-15～R-28 為準（v0.12 修訂內容見 §14 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列；v0.15 見 §5.3、§5.10～§5.12、§6、§8 v0.15 表與 0.15 列；v0.16 見 §4.3 L-7、§10.7 UP-6、§8 v0.16 表與 0.16 列；v0.17 見 §4.3 L-8、§7.8、§8 v0.17 表與 0.17 列；v0.18 見 §5.11、§7.7 V-ST-23～V-ST-27、§8 v0.18 表、§9.11 與 0.18 列；v0.19 見 §13、§4.3 L-7、§8 末表、§9.12 與 0.19 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
+> 上游：`docs/01-PRD.md` v0.20（approved，JimmyLin，2026-11-05；Q-94～Q-102 全採 PM 建議），以第 6 章「人類決議」與 R-15～R-29 為準（v0.20 見 §14、§8 v0.20 表、§9.13 與 0.20 列；v0.12 修訂內容見 §15 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列；v0.15 見 §5.3、§5.10～§5.12、§6、§8 v0.15 表與 0.15 列；v0.16 見 §4.3 L-7、§10.7 UP-6、§8 v0.16 表與 0.16 列；v0.17 見 §4.3 L-8、§7.8、§8 v0.17 表與 0.17 列；v0.18 見 §5.11、§7.7 V-ST-23～V-ST-27、§8 v0.18 表、§9.11 與 0.18 列；v0.19 見 §13、§4.3 L-7、§8 末表、§9.12 與 0.19 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
 > 本契約共 3 個檔案，視為一組審核：本檔、`data-schema.ts`（型別）、`storage-schema.json`（localStorage 與備份檔的 JSON Schema）。核准方式：把本檔 frontmatter 改為 `status: approved`，並同步填寫 `data-schema.ts` 開頭註解與 `storage-schema.json` `meta` 的 `status`、`approved_by`、`approved_at`（v0.5 起三檔狀態一律一致，SD-FB-04）。
 > 欄位的必填、值域、範例以 `data-schema.ts` 註解為準；本檔放總覽、規則、驗證與待辦。
 > v0.2：依主控 2026-10-29 連網查證結果，四份字表與 ECDICT 授權改為已確認、可收錄；原始字表已置於 `sources/wordlists/`；`N_B`、`N_G` 改為實際值（§4.2）。
@@ -27,6 +27,7 @@ approved_at: 2026-11-05
 > **v0.17：依 PRD v0.17（R-25，新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）做文字層級修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) 新增規則 **L-8**（§4.3）集中 6 段固定文字 LT-1～LT-6；(2) 新增 §7.8 驗證規則 V-LGL-01～V-LGL-06；(3) NM-3、NM-4、L-7 (7)、§8 品牌標識對照列同步；(4) `data-schema.ts` 只改註解，型別與常數不增減。**三檔同步的例外**（比照 v0.9）：`storage-schema.json` 本版未修改，維持 v0.16 approved；本版契約組合 = 本檔 v0.17 + `data-schema.ts` v0.17 + `storage-schema.json` v0.16（其內容對 v0.17 仍正確）。
 > **v0.18：依 PRD v0.18（R-26，新增 US-48、AC-48-01～AC-48-12，修改 13 條 AC，移除 AC-46-07，E-124～E-134，Q-77～Q-80）修訂行為規則，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) §5.11 新增已答對鎖定檢視 LV-1～LV-7，由 `lockedSelection`、`part5UnansweredOnly`、`currentIndex`、`part5CorrectIds` 推導，本次作答結果優先；(2) 新增 UO-10（開關關閉的「下一題」）、SM-1～SM-3（結算與 y = 0）、CR-10（K ≥ 1 常駐清除入口）、HN-1（開關說明文字）；(3) 修改 CR-2、CR-4～CR-7、UO-1～UO-3、UO-5～UO-8，開關在 allCorrect 畫面關閉時本輪歸 0（AC-48-10）；(4) **移除** `PART5_RECORD_TEXTS.replayKeepRecords` 與 `replayPart5KeepRecords` 動作（Q-77 A，理由見 UO-7）；(5) 新增型別 `Part5QuestionState` 與 4 段固定文字；(6) 網站版本 1.2.0（Q-79 A）。**三檔同步的例外**（比照 v0.9、v0.17）：`storage-schema.json` 本版未修改，維持 v0.16 approved；本版契約組合 = 本檔 v0.18 + `data-schema.ts` v0.18 + `storage-schema.json` v0.16。其中 `lockedSelection` 描述的「未作答為 null」，v0.18 起讀作「沒有本次作答結果為 null」（LV-1），不影響驗證結果。
 > **v0.19：依 PRD v0.19（R-27、R-28，新增 US-49～US-57、AC-49-01～AC-57-06，同版修訂既有 AC，E-135～E-155，Q-81～Q-93）修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：新增 **§13**——(1) 已答對顯示 AS-1～AS-7；(2) 廣告設定、載入條件與版位狀態 AD-1～AD-15（單元 ID 未設定＝零廣告請求，狀態只在 `RuntimeState.ad`）；(3) 頁尾與應用內三頁 SP-1～SP-9；(4) 單一文案來源 SC-1～SC-6；(5) SEO、`robots.txt`、`sitemap.xml` SE-1～SE-9；(6) 信箱與掃描 ML-1～ML-5；(7) 驗證 V-ANS、V-AD、V-SITE、V-SEO、V-MAIL。部署目錄 8 → 13 檔（DP-8～DP-10），**預先快取清單 7 項不變**。信箱全面改用新值（L-7、`SOURCES_CONTACT_TEXT`）。**三檔同步的例外**（比照 v0.9、v0.17、v0.18）：`storage-schema.json` 本版未修改，維持 v0.16 approved；本版契約組合 = 本檔 v0.19 + `data-schema.ts` v0.19 + `storage-schema.json` v0.16（其結構與說明對 v0.19 仍正確）。
+> **v0.20：依 PRD v0.20（R-29，新增 US-58～US-61、AC-58-01～AC-61-02，修改 15 條 AC，E-156～E-166，Q-94～Q-102 全採 PM 建議）修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：新增 **§14**——(1) 準備中狀態與轉移 PR-1～PR-12（`SttStatus` 新增 `"preparing"`、`RuntimeState.speech.preparingPhase`，只在記憶體；`T_READY`、`T_BUFFER`、`T_FALLBACK` 的預設與可調範圍）；(2) 無文字訊息分流 MS-1～MS-6；(3) 辨識文字顯示 RT-1～RT-6（綠、黃燈只顯示辨識文字，紅燈維持對照）；(4) 窄視窗鍵盤焦點 KF-1（不涉資料）；(5) 驗證 V-STT-01～V-STT-10。原「§14 變更紀錄」改為 §15。網站版本 1.3.1（Q-102 A，§12.1）。**三檔同步的例外**（比照 v0.9、v0.17～v0.19）：`storage-schema.json` 本版未修改，維持 v0.16 approved；其 `PersistedData` 說明已寫明「不含語音實例、音訊、畫面暫態」，對 v0.20 仍正確。本版契約組合 = 本檔 v0.20 + `data-schema.ts` v0.20 + `storage-schema.json` v0.16。
 > 專案代號、文件標題與識別字仍為 English Master Track；App 顯示名稱自 v0.12 起為「EnglishContext」（§11.1）。
 
 ---
@@ -71,6 +72,11 @@ approved_at: 2026-11-05
 | `AdConfig`、`AdSlotStatus`、`AdRuntimeState`（`RuntimeState.ad`）、`AD_CONFIG`、`AD_PRODUCTION_HOSTNAME`、`AD_PUBLISHER_ID_PATTERN`、`AD_SLOT_ID_PATTERN`、`AD_SCRIPT_URL`、`AD_LOAD_TIMEOUT_MS`、`AD_TEXTS`（v0.19） | 廣告設定、載入條件、版位狀態與標籤（只在記憶體；單元 ID 未設定＝零廣告請求） | 契約常數（pg-frontend 實作）；單元 ID 由人類獲准後提供 | pg-frontend、QA | US-50、US-51、US-52、AC-50-01～AC-52-07、§13.2 |
 | `SitePageId`、`SiteLinkTarget`、`SiteInline`、`SiteBlock`、`SitePage`、`SiteSeoMeta`、`SITE_PAGES`、`LEGAL_STATEMENTS`、`SITE_PAGE_TEXTS`、`FooterLinkItem`、`FOOTER_LINKS`（v0.19） | 關於我、聯絡我們、隱私權政策的單一文案來源（應用內與靜態頁共用）、頁尾連結列 | 契約常數（pg-frontend 實作；檔案位置由 SD 定） | pg-frontend、建置程式、QA | US-53、US-54、US-55、US-57、AC-53-01～AC-53-06、AC-54-01、AC-54-02、AC-55-01～AC-55-03、AC-57-01～AC-57-06、§13.3、§13.4 |
 | `SITE_ORIGIN`、`SITE_HOME_SEO`、`SITE_HOME_JSON_LD`、`SITE_NOSCRIPT`、`ROBOTS_TXT`、`SITEMAP_XML`（v0.19） | 首頁 SEO 標記、結構化資料、未執行 JavaScript 的說明、爬蟲檔內容 | 契約常數 → 建置程式 | 瀏覽器、爬蟲、QA | US-56、AC-56-01～AC-56-10、§13.5 |
+| `SttStatus`（v0.20 +`"preparing"`）、`SttPreparingPhase`、`RuntimeState.speech.preparingPhase`、`STT_TIMING`、`SttTimingRange`（v0.20） | 麥克風準備中狀態與子階段（只在記憶體）；`T_READY`、`T_BUFFER`、`T_FALLBACK` 預設與可調範圍 | pg-frontend（數值實測與定案由 SD，主控代核） | pg-frontend、QA | FR-2.3、US-58、AC-08-01、AC-08-13、AC-31-03、AC-33-01、AC-33-03、AC-33-06～AC-33-08、AC-58-01～AC-58-14、§14.1 |
+| `SttEngineEventKind`、`SttEndInfo`、`SttNoTextOutcome`、`STT_FLOW_TEXTS`（v0.20） | 語音辨識服務須回報的引擎事件、結束資訊旗標、無文字訊息分流與逐字文案 | pg-frontend（`services/stt.js` 提供事件，畫面模組決定訊息；分工由 SD 定） | pg-frontend、QA | FR-2.3、US-58、US-59、AC-08-10、AC-30-04、AC-58-06～AC-58-08、AC-59-01～AC-59-08、§14.1、§14.2 |
+| `SttResult`（v0.20 註解）、`SttResultRowKind`、`STT_RESULT_ROWS`（v0.20） | 分數區各燈號的文字列（綠、黃只顯示辨識文字；紅燈對照） | pg-frontend | pg-frontend、QA | FR-2.3、US-60、AC-08-06～AC-08-08、AC-22-03、AC-60-01～AC-60-07、§14.3 |
+
+型別數（v0.20）：81 → **87** 個（42 個 `interface`、45 個 `type`）；新增 `SttEndInfo`、`SttTimingRange`（interface）與 `SttEngineEventKind`、`SttPreparingPhase`、`SttNoTextOutcome`、`SttResultRowKind`（type）。契約常數 60 → **63**（新增 `STT_FLOW_TEXTS`、`STT_TIMING`、`STT_RESULT_ROWS`，見 `data-schema.ts` §18）。型別修改：`SttStatus`（+`"preparing"`）、`RuntimeState.speech`（+`preparingPhase`，不持久化）；`SttResult`、`APP_VERSION_META_NAME` 只改註解。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變；localStorage 鍵數維持 2。
 
 型別數（v0.19）：70 → **81** 個（40 個 `interface`、41 個 `type`）；新增 `AnsweredSummary`、`AdConfig`、`AdRuntimeState`、`SiteSeoMeta`、`SitePage`、`FooterLinkItem`（interface）與 `AdSlotStatus`、`SitePageId`、`SiteLinkTarget`、`SiteInline`、`SiteBlock`（type）。契約常數 42 → **60**（新增 18 個，見 `data-schema.ts` §17）。值變更：`SOURCES_CONTACT_TEXT`（新信箱）、`PWA_DEPLOY_FILES`（8 → 13）、`TAB_LABELS`（+3 鍵）、`LAYOUT_TEXTS`（`statAccuracyLabel` 移除、`statPart5Label` 新增）、`PART5_RECORD_TEXTS.clearConfirmMustInclude`。型別修改：`TabId`（+3 值）、`RuntimeState`（+`ad`、+`sitePageReturnTab`，不持久化）、`PwaDeployFileRole`（+3 值）、`PwaDeployFile.mime`（+1 值）。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變；localStorage 鍵數維持 2。
 
@@ -1053,6 +1059,27 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-42-02、Q-85 | §12.1 v0.19 註記（1.3.0） |
 | E-145 | 不需契約欄位；第三方資料不屬本系統狀態 |
 
+**v0.20 新增與修改（PRD R-29）**
+
+| PRD 項目 | 契約對應 |
+| :--- | :--- |
+| AC-08-01（修改）、AC-58-01、AC-58-02、AC-58-13、E-66 | `SttStatus` `"preparing"`、`STT_FLOW_TEXTS.micPreparing`／`micPreparingLabel`、PR-1～PR-4、PR-12、V-STT-01、V-STT-09 |
+| AC-58-03、AC-58-07、AC-58-09、Q-95、Q-96、E-158 | `SttEngineEventKind`、`SttPreparingPhase`（`awaitingAudioStart`、`fallbackWait`）、`STT_TIMING.buffer`／`fallback`、PR-5、PR-6、PR-11、V-STT-02、V-STT-03 |
+| AC-58-04、AC-58-05、AC-58-10、Q-97、E-157、E-159 | `SttPreparingPhase.acquiringMic`、`SttEndInfo.manual`、PR-7～PR-9、V-STT-04 |
+| AC-58-06、AC-58-08、Q-94、E-156、E-161 | `STT_TIMING.readyTimeout`、`SttNoTextOutcome.noResponse`、`STT_FLOW_TEXTS.noResponse`、PR-6、MS-1、V-STT-05 |
+| AC-58-11、AC-33-06（修改）、E-160 | PR-10（同聆聽中拔除） |
+| AC-58-12、AC-59-07、AC-60-07、AC-30-04（修改）、AC-21-03 | `RuntimeState.speech` 註解、MS-6、RT-5、V-STT-10；`storage-schema.json` 不變 |
+| AC-58-14、AC-59-08、E-163 | 人工測試，不需契約欄位；結果只能是分數或 `STT_FLOW_TEXTS`／既有訊息（MS-5） |
+| AC-08-10（修改）、AC-59-01～AC-59-06、E-162 | `SttEndInfo`、`SttNoTextOutcome`、`STT_FLOW_TEXTS.heardNoWords`／`noSpeech`、MS-1～MS-5、V-STT-06、V-STT-07 |
+| AC-08-06、AC-08-07、AC-08-08（修改）、AC-60-01、AC-60-02、Q-98 | `STT_RESULT_ROWS`、`STT_FLOW_TEXTS.labelRecognized`／`labelTarget`、`SttResult.recognizedText`、RT-1～RT-3、V-STT-08 |
+| AC-60-03、AC-60-04、AC-60-05、AC-60-06、Q-101、E-164、E-165 | RT-2～RT-4、RT-6；無語言欄位（Q-101 A）；版面量測屬設計與 QA |
+| AC-22-03（修改） | RT-3（繪製範圍含辨識文字）；效能量測屬 QA |
+| AC-08-13（修改） | PR-1（「我知道了」→ 準備中；說明顯示期間為 `"notice"`、按鈕待機外觀）；`sttNoticeAcknowledged` 規則不變（V-ST-08） |
+| AC-31-03、AC-33-08（修改） | PR-12（準備中不閃爍、無動畫）；樣式屬設計層 |
+| AC-33-01、AC-33-03、AC-33-07（修改） | PR-3、PR-7（同頁重用音軌、準備中收音條全暗、`getUserMedia` 失敗照常辨識） |
+| AC-61-01、AC-61-02、AC-38-09、Q-100、E-166 | KF-1：不需契約欄位 |
+| AC-42-02（修改）、Q-102 | §12.1 v0.20 註記（1.3.1） |
+
 ---
 
 ## 9. 回饋上游
@@ -1136,6 +1163,10 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | FB-73 | （v0.19 新增）AC-51-01 的「沒有廣告回傳」與 `adsbygoogle` 腳本網址都需要對應到 Google 的實際行為；R-27 列的頁面未涵蓋這些技術細節 | 主控、人類 | 待辦（**第二階段啟用前**） | 契約依 Google 公開的標準片段與 `data-ad-status` 行為定稿（AD-7、AD-8），未於本版連網核對。填入單元 ID 前由主控依 AdSense 後台提供的片段與現行文件核對；若不符改契約，不涉持久化。第一階段不載入，不受影響 |
 | FB-74 | （v0.19 新增）AC-50-03 寫「未設定與已設定各建置 1 次」後比對兩檔「內容相同」，字面可讀成跨兩次建置比對；但 AC-50-05 明定填入 ID 後 BUILD_ID 會改變，兩次建置不可能相同 | PM、QA | 待辦（知會，SA 定案） | 契約讀作**同一次建置內**的 `dist/english-master-track.html` 與 `dist/site/index.html` 相同（V-AD-03）。不需改 PRD 行為，PM 可在下次修訂時補文字 |
 | FB-75 | （v0.19 新增）AC-55-04 的「先前地址」若逐字列入規則，文件本身就會違反該條 | QA、SD | 待辦（知會，SA 定案） | 契約不列出任何先前地址：連續形式由 `@` 加 gmail 網域的通用規則涵蓋（ML-3），空白形式以「字元間空白的地址都必須等於現行值」判定（ML-4）。先前地址也已全數由 ML-4 涵蓋，測試不需持有 |
+| FB-76 | （v0.20 新增）AC-58-09 後備模式（不可依賴 `audiostart`）顯示「聆聽中」後，引擎無錯誤就 `end`、也沒有任何語音事件：AC-58-08 的「未經開始收音、無錯誤就結束 → 沒有回應」與 AC-59-05 (b)「聆聽中無錯誤 `end` → 未偵測到語音」兩條都可套用 | PM、QA | 待辦（知會，SA 定案） | 契約以「是否已確認開始收音」判定（MS-1 步驟 5、6）：後備時間 `T_FALLBACK` 已到視同已確認 →「未偵測到語音」；後備時間未到就結束 →「沒有回應」。與 v1.3.0 在後備瀏覽器上的訊息一致。不涉持久化 |
+| FB-77 | （v0.20 新增）AC-60-01 要求辨識文字「引擎原文，不清洗」，但現行 `services/stt.js` 取文字時會把各段 trim 後以空白串接（多段結果才有差異）；PRD 未說明此串接是否算清洗 | PM、QA | 待辦（知會，SA 定案） | 契約定為：服務取出文字的既有串接屬「取得引擎輸出」，不算清洗（RT-1）；之後不得再改大小寫、去標點或去空白。替身只回傳 1 段結果時兩者相同，AC-60-01 的 3 個例子不受影響 |
+| FB-78 | （v0.20 新增）AC-58-01 規定按下時清除前次分數與訊息，但前提是「STT 說明已讀」；首次按下顯示說明（AC-08-13）時是否清除未規定 | PM | 待辦（知會，SA 定案） | 契約定為進入 `"preparing"` 時清除（PR-4）：首次是在按「我知道了」時；說明顯示中或按「取消」時畫面上的前次分數與訊息不變。不涉持久化 |
+| FB-79 | （v0.20 新增）PRD v0.20 frontmatter 已記錄 Q-94～Q-102 全採 PM 建議，但第 6 章 Q-94～Q-102 的「人類決議」欄仍空白，開頭說明、US-58 前言、§6 註、覆蓋說明與多條 AC 仍寫「待人類決議」「暫依 Q-xx 建議」 | PM | 待辦（文字同步，不影響行為） | 契約以 frontmatter 的核准紀錄為準，一律按 PM 建議撰寫。請 PM 下次修訂時補填人類決議欄並移除「暫依」字樣；不需本版重新核准 |
 
 ### 9.1 下游回饋處理紀錄（v0.5，/pg-run 階段）
 
@@ -1264,6 +1295,18 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | DS-54 | 測試替身（V-AD (b)、AC-51-01） | AD-8、V-AD-04 | 替身腳本須依 `data-ad-status` 回報結果；請定替身的存放與注入方式，不得進入部署目錄 |
 | DS-55 | 既有靜態檢查（HD-3、AC-19-01、AC-23-07） | SE-2、SE-3 | 新增的 `application/ld+json` 內嵌腳本、canonical、Open Graph 絕對網址與 `SITE_NOSCRIPT` 的 `<a>` 可能觸發既有「外部網址」「script」檢查，請調整檢查邏輯，不得以放寬其他項目處理 |
 | DS-56 | 工作範圍 | **持久化結構不變**（`schemaVersion` 3、鍵數 2、備份不變）；`src/data/` 不變 | 不需 CT 任務。若設計認為廣告或新頁面必須跨工作階段記住狀態，**停止並回報**，須由人類決定 |
+
+### 9.13 回饋下游（v0.20，給 SD；PRD R-29、Q-94～Q-102）
+
+| 編號 | 事項 | 契約的立場 | 請 SD 處理 |
+| :--- | :--- | :--- | :--- |
+| DS-57 | 語音辨識服務介面（AC-58-03、AC-58-07、US-59） | `SttEngineEventKind`、`SttEndInfo`（8 欄）、PR-9 | `services/stt.js` 現在只處理 `onresult`、`onerror`、`onend`，`detach` 只清 `onnomatch` 而未設定它。請定新回呼名稱（例：`onAudioStart`、`onSoundStart`、`onSpeechStart`、`onNomatch`）、`onEnd` 附 `SttEndInfo`、`detach` 一併清除新增的處理器；定「本次可否依賴 `audiostart`」的判定方式（AC-58-09）與替身如何模擬「沒有 `onaudiostart` 屬性」 |
+| DS-58 | 準備中狀態機（US-58） | PR-1～PR-10、`SttPreparingPhase` | `speech-panel.js` 現在 `stt.start()` 回傳後立即 `setStatus("listening")`、`mic.startMeter`；改為依 PR-5、PR-6 轉入聆聽中後才點亮收音條。準備中再按用 `abort()`（不是 `stop()`），不等結果（AC-58-04）；以嘗試代號忽略遲到事件（AC-58-05） |
+| DS-59 | 取得麥克風期間取消（AC-58-04 (a)、AC-58-05、Q-97 A） | PR-7、PR-8 | `getUserMedia` 擱置中取消後，Promise 完成時保留音軌供同頁重用但不開始辨識；擱置中再按進入新的準備中時，**不得再呼叫一次 `getUserMedia`**，以免出現第 2 個權限詢問。現行 `services/mic.js` 的 `acquire()` 已共用擱置中的 Promise（`pending`），請確認取消與重按流程沿用它，畫面模組只以嘗試代號丟棄過期的完成結果 |
+| DS-60 | 時間常數（Q-94～Q-96） | `STT_TIMING`、PR-11 | 定 `T_READY`、`T_BUFFER`、`T_FALLBACK` 實際值並寫入 `architecture.md`；必須落在契約範圍內，超出須回 PM。查證 Q-95 的「Chromium 開頭約 300 ms」記憶，未查證前 `T_BUFFER` 用 0 |
+| DS-61 | 分數區與文案（US-60、Q-98 A、Q-99 A） | `STT_RESULT_ROWS`、`STT_FLOW_TEXTS`、RT-1～RT-6 | `resultModel` 的 `compare` 目前只在紅燈產生；改為依 `STT_RESULT_ROWS` 產生列。更新文字定稿表（3 段新訊息、按鈕文字與 `aria-label`）；準備中的樣式（底色或文字色與聆聽中不同、不用紅色與閃爍、與聆聽中座標差 0，AC-58-13）。若畫面以 `data-status` 屬性反映狀態，值用 `SttStatus` 字面值 |
+| DS-62 | 窄視窗鍵盤焦點（US-61、BUG-005、Q-100 A） | KF-1：不涉資料契約 | 分配 FE 任務與樣式歸屬（例：`scroll-padding-bottom` 或焦點時捲動）；4 個功能區都要涵蓋，不得只修 AC-38-09 字面的控制項；> 640px 不變（AC-61-02） |
+| DS-63 | 工作範圍 | **持久化結構不變**（`schemaVersion` 3、鍵數 2、備份不變）；`src/data/` 不變 | 不需 CT 任務。`package.json` 改為 `1.3.1` 由主控一次性修改，不列 PG 任務（Q-102 A）。既有測試中假設「按下即聆聽中」與單一 `noSpeech` 訊息的案例須更新（PRD 6.5 QA 列）。若設計認為準備中或事件紀錄必須跨工作階段保存，**停止並回報**，須由人類決定 |
 
 ---
 
@@ -1511,6 +1554,9 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 | 已答對行的 K、Q、P（v0.19） | 推導 | 否 | AS-1、AS-2 |
 | 廣告版位狀態（v0.19） | `RuntimeState.ad.status` | 否 | AD-5；腳本元素、廣告框、計時器只放模組內部變數 |
 | 應用內三頁的返回目標（v0.19） | `RuntimeState.sitePageReturnTab` | 否 | SP-3 |
+| 麥克風準備中與子階段（v0.20） | `RuntimeState.speech.sttStatus = "preparing"`、`speech.preparingPhase` | 否 | PR-2；重新載入一律待機（AC-58-12） |
+| 本次辨識的事件紀錄、`T_READY`／`T_BUFFER`／`T_FALLBACK` 計時器、嘗試代號（v0.20） | 模組內部變數（`SttEndInfo` 只經回呼傳遞） | 否 | MS-6、PR-9 |
+| 分數區辨識文字（v0.20 三種燈號） | `RuntimeState.speech.lastResult.recognizedText`（既有欄位） | 否 | RT-5 |
 | Google 同意狀態（v0.19） | 由 CMP 自行管理 | 本系統不保存 | AD-13 |
 
 ### 11.4 主控台（DB；US-39、Q-50、Q-52、Q-56）
@@ -1568,6 +1614,8 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 （v0.18 註記，Q-79 A、AC-42-02 修改）**v0.18 發布的版本號為 `1.2.0`**，由主控在本次實作時一次性修改 `package.json`，之後仍由人類維護。契約仍沒有版本值常數，本節規則全部不變；頁尾顯示「版本 1.2.0（建置 xxxxxxx）」。此時 `schemaVersion` 仍為 3，契約文件版本為 0.18。
 
 （v0.19 註記，Q-85 A、AC-42-02 修改）**v0.19 第一階段的版本號為 `1.3.0`**，由主控一次性修改 `package.json`；第二階段填入廣告單元 ID 時的版本號由人類決定。契約仍沒有版本值常數；頁尾顯示「版本 1.3.0（建置 xxxxxxx）」。此時 `schemaVersion` 仍為 3，契約文件版本為 0.19。
+
+（v0.20 註記，Q-102 A、AC-42-02 修改）**v0.20 發布的版本號為 `1.3.1`**（修正既有語音流程與 BUG-005，相容舊資料，屬修訂號），由主控一次性修改 `package.json`；廣告第二階段的版本號屆時由人類決定。契約仍沒有版本值常數，本節規則全部不變；頁尾顯示「版本 1.3.1（建置 xxxxxxx）」。此時 `schemaVersion` 仍為 3，契約文件版本為 0.20。
 
 名詞：**版本號** X.Y.Z = 建置時專案根目錄 `package.json` 的 `version`（人類發布時手動維護，v0.14 發布 1.0.0，v0.15 發布 1.1.0，v0.18 發布 1.2.0）；**建置碼** = BUILD_ID（`<meta name="emt-build-id">` 的 `content`，SW-2）前 `BUILD_CODE_LENGTH`（7）個字元；**版本行** = 頁尾的「版本 X.Y.Z（建置 xxxxxxx）」。
 
@@ -1759,7 +1807,86 @@ SC-2 渲染對照：
 
 ---
 
-## 14. 變更紀錄
+## 14. 語音辨識準備中、訊息分流與辨識文字契約（v0.20，PRD R-29、US-58～US-61、Q-94～Q-102；**不改持久化結構**）
+
+型別與常數見 `data-schema.ts` §18（`SttEngineEventKind`、`SttPreparingPhase`、`SttEndInfo`、`SttNoTextOutcome`、`SttTimingRange`、`SttResultRowKind`、`STT_FLOW_TEXTS`、`STT_TIMING`、`STT_RESULT_ROWS`）與 §10（`SttStatus`、`RuntimeState.speech.preparingPhase`、`SttResult`）。**持久化結構不變**：`schemaVersion` 3、鍵數 2、`PersistedData` 12 欄、備份格式都不變；本節所有狀態只在記憶體。名詞：**嘗試** = 一次按下麥克風到回到待機；**已確認開始收音** = 本次收到 `audiostart`、`soundstart` 或 `speechstart`，或後備模式的 `T_FALLBACK` 已到。
+
+### 14.1 準備中狀態與轉移（PR；US-58、Q-94～Q-97）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| PR-1 | **進入**：待機時按下麥克風（支援 STT、「STT 說明已讀」）→ ≤ 100ms 內 `sttStatus = "preparing"`、`preparingPhase = "acquiringMic"`。未讀 → `"notice"`（按鈕維持待機外觀）；按「我知道了」→ 記錄已讀（V-ST-08）並同上進入準備中；按「取消」→ `"idle"`，不呼叫 `getUserMedia`。不支援 STT 依 AC-08-02 維持待機；離線依 AC-08-14 回待機並顯示既有訊息（是否短暫經過準備中由 SD 定，畫面最終結果相同） | AC-58-01、AC-08-13、AC-08-02、AC-08-14 |
+| PR-2 | **子階段**：`acquiringMic` →（取得麥克風完成：成功；或依 AC-33-07 因其他原因失敗，收音條全暗照常辨識）呼叫 `start()`；`start()` 回傳成功 → 可依賴 `audiostart` 時為 `"awaitingAudioStart"`，否則為 `"fallbackWait"`。權限拒絕 → AC-08-09、找不到裝置 → AC-33-05、`start()` 失敗或拋例外 → 既有一般錯誤，皆回待機。同頁已持有音軌時 `acquiringMic` 立即完成，不再詢問權限（AC-33-01）。`sttStatus ≠ "preparing"` 時 `preparingPhase` 必為 `null` | AC-58-01、AC-58-08、AC-58-09、AC-33-01、AC-33-07 |
+| PR-3 | **畫面**：準備中按鈕文字 `STT_FLOW_TEXTS.micPreparing`、`aria-label` `micPreparingLabel`；收音條 5 格全暗，不因音量點亮；畫面不出現「聆聽中」。進入聆聽中的同時收音條才開始依音量點亮 | AC-58-01～AC-58-03、AC-33-03 |
+| PR-4 | **清除**：進入 `"preparing"` 時 `lastResult = null`，並清除前次訊息。說明對話框顯示中或按「取消」時畫面不變（FB-78） | AC-58-01 |
+| PR-5 | **轉入聆聽中**：(a) `awaitingAudioStart` 收到 `audiostart` → 等 `T_BUFFER` 後 `"listening"`，時間點不早於 `audiostart` + `T_BUFFER`、不晚於其後 100ms；(b) 收到 `soundstart` 或 `speechstart` → 立即 `"listening"`，不再套用 `T_BUFFER`；(c) `fallbackWait` 自 `start()` 回傳起經 `T_FALLBACK` → `"listening"`（此「聆聽中」未經引擎確認，E-158）；期間收到任何收音事件 → 立即 `"listening"`。任一收音事件、`result`、`nomatch`、`error`、`end` 到達時清除 `T_READY` 計時器 | AC-58-03、AC-58-07、AC-58-09 |
+| PR-6 | **準備中直接結束**：`result` → 清洗後非空依 AC-08-03～AC-08-08 評分，否則 `heardNoWords`；`nomatch` → `heardNoWords`；`error` 與 `end` 依 MS-1；`awaitingAudioStart` 自 `start()` 回傳起 `T_READY` 內未收到任何事件 → 誤差 ≤ 200ms 內中止（`abort`）、`noResponse`。`acquiringMic` 期間不計時 | AC-58-06～AC-58-08 |
+| PR-7 | **準備中再按 = 取消**：≤ 100ms 回 `"idle"`，不顯示提示、Toast 或分數，收音條全暗。`awaitingAudioStart`、`fallbackWait` → 中止辨識（`abort`，不是停止後等待結果）；`acquiringMic` → 取得完成後不開始辨識，音軌保留供同頁重用。聆聽中再按維持既有「停止」（AC-08-10） | AC-58-04、AC-08-10 |
+| PR-8 | **取消後立即再按**：開始新的嘗試與新的準備中；同時間只有 1 個辨識工作；`acquiringMic` 擱置中再按不得再呼叫 `getUserMedia`，不得出現第 2 個權限詢問（DS-59）；Console 無未處理錯誤 | AC-58-05 |
+| PR-9 | **嘗試代號**：每次進入準備中產生新代號；引擎事件、計時器、取得麥克風完成的回呼只在代號相符時生效；取消、逾時或新嘗試後解除事件處理器。代號、計時器、`SpeechRecognition` 實例只放模組內部變數 | AC-58-04～AC-58-06、AC-58-10 |
+| PR-10 | **其他中斷與聆聽中相同**：換卡、切換模式、按 TTS → 中止辨識、回待機、不提示、收音條全暗（按 TTS 後照常朗讀）；翻面行為同聆聽中；離開單字卡頁依 AC-33-02 於 1 秒內釋放音軌；拔除麥克風 →「找不到麥克風裝置」與其說明（AC-33-06 (b)）；重新載入後為待機 | AC-58-10、AC-58-11、AC-58-12 |
+| PR-11 | **時間常數**：`T_READY`、`T_BUFFER`、`T_FALLBACK` 的實際值由 SD 定並寫在 `architecture.md`，必須落在 `STT_TIMING` 的 [minMs, maxMs] 內（`T_READY` 3000～10000、`T_BUFFER` 0～500、`T_FALLBACK` 1000～2000，單位 ms）。**主控實測後可在上述範圍內代核調整**，不需改契約或 PRD；超出範圍須回 PM | AC-58-03、AC-58-06、AC-58-09、Q-94～Q-96 |
+| PR-12 | **樣式**：準備中按鈕的計算後底色或文字色與聆聽中不同，不使用聆聽中的紅色與閃爍，也沒有動畫（一般與 `prefers-reduced-motion: reduce` 皆同）；準備中與聆聽中切換時按鈕與收音條座標差 = 0；文字不裁切、對比符合 AC-38-04；鍵盤與觸控操作結果相同 | AC-58-13、AC-31-03、AC-33-08 |
+
+狀態轉移總表（只列 v0.20 新增；其餘同 v1.3.0）：
+
+| 起點 | 事件 | 終點 | 畫面 |
+| :--- | :--- | :--- | :--- |
+| `idle` | 按下（已讀） | `preparing` / `acquiringMic` | 「準備中」，清除前次結果 |
+| `notice` | 「我知道了」 | `preparing` / `acquiringMic` | 同上 |
+| `preparing` / `acquiringMic` | 取得完成、`start()` 成功 | `preparing` / `awaitingAudioStart` 或 `fallbackWait` | 「準備中」 |
+| `preparing` / `awaitingAudioStart` | `audiostart` + `T_BUFFER`；`soundstart`；`speechstart` | `listening` | 「聆聽中」，收音條點亮 |
+| `preparing` / `fallbackWait` | `T_FALLBACK` 到；任何收音事件 | `listening` | 同上 |
+| `preparing`（任一子階段） | 再按、換卡、切換模式、按 TTS、離開頁面 | `idle` | 無提示 |
+| `preparing` / `awaitingAudioStart` | `T_READY` 逾時 | `idle` | `noResponse` |
+| `preparing`（已呼叫 `start()`） | `result`、`nomatch`、`error`、`end` | `idle` | 分數或 MS-1 |
+
+### 14.2 無文字訊息分流（MS；US-59）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| MS-1 | **判定順序**（第一個成立者為準）：(1) 手動停止或取消 → 不提示；(2) 收到清洗後非空的 `result` → 評分，不顯示分流訊息；(3) `errorCode` 不是 `null` 也不是 `"no-speech"` → 既有錯誤訊息（`not-allowed`、`service-not-allowed` →「需要麥克風權限」；`audio-capture` →「找不到麥克風裝置」；`network` →「語音辨識需要網路連線」；其他 → 一般錯誤）；(4) `speechDetected` 或 `nomatch`，或收到 `result` 但清洗後為空 → `heardNoWords`（`speechstart` 後的 `no-speech` 屬此項）；(5) `errorCode = "no-speech"`，或已確認開始收音 → `noSpeech`（`soundstart` 不算偵測到語音）；(6) 其他（未確認開始收音就 `end`、`T_READY` 逾時）→ `noResponse` | AC-08-10、AC-58-06、AC-58-08、AC-59-01～AC-59-06、FB-76 |
+| MS-2 | **只決定 1 次**：結果在本次嘗試第一個終結點（`result`、`nomatch`、`error`、`end`、`T_READY` 逾時）依當時累積的旗標決定，之後的事件（如 `nomatch` 後的 `end`）不改變；每次嘗試最多 1 則訊息 | AC-59-02、AC-59-06 |
+| MS-3 | **顯示**：回待機、收音條全暗、不顯示分數區；3 則訊息的顯示位置與層級同既有「未偵測到語音」（訊息區提示，非錯誤 Toast）；文字逐字取自 `STT_FLOW_TEXTS` | AC-59-01、AC-59-05、AC-58-06、AC-60-04 |
+| MS-4 | **清洗**：沿用既有評分前的文字正規化（`core/similarity`）；結果為空字串即視為「清洗後為空」，例 `""`、`"   "`、`"..."` | AC-59-03 |
+| MS-5 | **結果集合**：每次嘗試的結果恰為下列之一：分數、`STT_FLOW_TEXTS` 的 3 則訊息之一、既有錯誤訊息、無提示 | AC-58-14、AC-59-08 |
+| MS-6 | **不計學習、不持久化**：3 則訊息都不呼叫評分紀錄，不改 `todayLearned`、`learnedHistory`、`streak`、`masteredWordKeys`；`SttEndInfo` 與旗標不寫入 localStorage 或備份；再按或換卡時訊息清除；每次新嘗試重設全部旗標，不沿用前一次的語音紀錄 | AC-59-06、AC-59-07、AC-30-04 |
+
+### 14.3 辨識文字（RT；US-60、Q-98 A、Q-101 A）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| RT-1 | **值**：顯示值 = `SttResult.recognizedText` = 語音辨識服務回傳的字串原樣；服務取出文字時「各結果第 1 候選、各段 trim 後以 1 個半形空白連接」屬取得引擎輸出，不算清洗（FB-77）；之後不得改大小寫、去標點或去空白；評分用的清洗結果不得回寫本欄 | AC-60-01 |
+| RT-2 | **列與順序**：依 `STT_RESULT_ROWS`：綠、黃燈 1 列「辨識文字」；紅燈「辨識文字」「目標文字」2 列。分數區順序：分數與燈號 → 提示（只有黃燈）→ 文字列 → AC-08-11 說明；標題與說明文字不變 | AC-08-06～AC-08-08、AC-60-01、AC-60-02 |
+| RT-3 | **寫入**：標籤與值一律以 `textContent` 寫入，值元素 `lang="en"`；文字列內不新增子元素；原始碼不得把辨識文字寫入 HTML 字串；分數、燈號與辨識文字在同一次更新繪製完成（AC-22-03 ≤ 100ms） | AC-60-05、AC-22-03 |
+| RT-4 | **禁用字樣**：分數區的固定文字（標題、標籤、提示、說明）不得出現「偵測到」「語言」「英文」「中文」「你說的是」；引擎回傳的值照原文顯示，不受此限 | AC-60-03 |
+| RT-5 | **不持久化**：`lastResult` 只在記憶體；清除時機依既有規則與 PR-4（換卡、切換模式、離開頁面、再按）；評分紀錄行為不變 | AC-60-07、AC-21-03、AC-24-02 |
+| RT-6 | **不做語言判斷**：契約不新增任何語言欄位或語言偵測（Q-101 A）；長文字全文換行、不截斷屬版面規則，由 SD 定、QA 依 AC-60-06 量測 | AC-60-03、AC-60-06 |
+
+### 14.4 窄視窗鍵盤焦點（KF；US-61、Q-100 A）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| KF-1 | 屬版面與捲動行為，不涉資料檔、型別、常數或持久化；由 SD 設計（DS-62），QA 依 AC-61-01、AC-61-02、AC-38-09 驗收 | AC-61-01、AC-61-02、AC-38-09 |
+
+### 14.5 驗證規則（V-STT；pg-frontend 單元測試、QA 以 V-STT-STUB 驗收）
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| V-STT-01 | 狀態與文字：按下後 ≤ 100ms `sttStatus = "preparing"`，按鈕文字與 `aria-label` 逐字等於 `STT_FLOW_TEXTS`；收音條 5 格全暗；`sttStatus ≠ "preparing"` 時 `preparingPhase = null` | AC-58-01、AC-58-02 |
+| V-STT-02 | 事件順序：記錄 `start()` 回傳 → `audiostart` →「聆聽中」；「聆聽中」時間點在 [`audiostart` + `T_BUFFER`, + 100ms] 內；收音條同時開始點亮 | AC-58-03 |
+| V-STT-03 | 直接事件與後備：準備中觸發 `soundstart`、`speechstart` → 立即聆聽中；`result` → 評分；`nomatch` → `heardNoWords`；替身無 `onaudiostart` → `T_FALLBACK` 後聆聽中、不套用 `T_READY` | AC-58-07、AC-58-09 |
+| V-STT-04 | 取消：(a) `getUserMedia` 擱置中、(b) 已 `start()` 未 `audiostart` 時再按 → ≤ 100ms 待機、無提示；遲到事件與遲到的取得完成不改畫面；取消後立刻再按 → 新準備中、辨識工作 1 個、`getUserMedia` 呼叫次數不增加 | AC-58-04、AC-58-05 |
+| V-STT-05 | 逾時：替身不觸發事件，自 `start()` 回傳起 `T_READY` ± 200ms 回待機並顯示 `noResponse`；`getUserMedia` 擱置超過 `T_READY` 仍為準備中；準備中無錯誤 `end` → `noResponse` | AC-58-06、AC-58-08 |
+| V-STT-06 | MS-1 判定表（單元）：`speechstart`→`end` = `heardNoWords`；`nomatch`→`end`（有無 `speechstart`）= `heardNoWords`；`result` 為 `""`／`"   "`／`"..."` = `heardNoWords`；`speechstart`→`no-speech`→`end` = `heardNoWords`；`audiostart`→`no-speech`→`end` = `noSpeech`；`audiostart`→`end` = `noSpeech`；`audiostart`→`soundstart`→`end` = `noSpeech`；準備中直接 `no-speech` = `noSpeech`；準備中只有 `end` = `noResponse`；後備時間已到後 `end` = `noSpeech`、未到 = `noResponse`；`speechstart`→`network` =「語音辨識需要網路連線」；`speechstart`→非空 `result` = 評分 | AC-59-01～AC-59-06、AC-58-08、FB-76 |
+| V-STT-07 | 次數：每次嘗試訊息恰 0 或 1 則；`end` 不覆蓋先前決定；新嘗試的旗標全部為初始值 | AC-59-02、AC-59-06 |
+| V-STT-08 | 分數區：目標 `latency`／`address`／`sitting` 對替身 `Latency.`／`adress`／`kitten` → 綠、黃、紅；綠、黃只有「辨識文字」1 列，紅燈 2 列；值逐字等於替身原文、`lang="en"`；含 `<img src=x onerror=alert(1)>`、`&lt;b&gt;` 時以字面顯示、列內無子元素、無腳本執行；分數區固定文字無 RT-4 字樣 | AC-60-01～AC-60-05 |
+| V-STT-09 | 常數：程式中的 3 則訊息、按鈕文字、`aria-label`、標籤逐字等於 `STT_FLOW_TEXTS`；`architecture.md` 定的 3 個時間值都在 `STT_TIMING` 範圍內 | AC-58-01、AC-58-06、AC-59-01、Q-99 A、PR-11 |
+| V-STT-10 | 不持久化：經過準備中（含取消、逾時）、分流訊息與分數後，localStorage 鍵名、欄位集合、`schemaVersion` 3 與匯出備份格式不變，值中無準備中、事件紀錄或辨識文字；重新載入為待機；今日已學、打卡、掌握數只在評分時依 LR-1 改變 | AC-58-12、AC-59-07、AC-60-07、AC-30-04 |
+
+---
+
+## 15. 變更紀錄
 
 | 版本 | 日期 | 作者 | 說明 |
 | :--- | :--- | :--- | :--- |
@@ -1784,6 +1911,7 @@ SC-2 渲染對照：
 | 0.17 | 2026-11-04 | sa-agent | 修訂已核准的 v0.16（主控代核），原因：PRD v0.17（approved，JimmyLin，2026-11-04）R-25 的文字修訂（新增 AC-23-08；修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10；E-121～E-123；Q-72～Q-76 已決議，以 PRD 為準）。本檔與 `data-schema.ts` 的 `status` 改為 `draft`、`version` 0.17、核准欄位清空，上游改為 PRD v0.17；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved（比照 v0.9 的三檔同步例外）。(1) §4.3 新增 L-8 與固定文字 LT-1～LT-6；L-7 (7) 改為「新增此行不連帶改動聲明」，現行聲明以 AC-23-02 與 L-8 為準；(2) §7.8 新增 V-LGL-01～V-LGL-06；(3) NM-3、NM-4 移除「聲明文字不變」；§8 品牌標識對照列移除舊的著作權人組字，新增 §8 v0.17 表；(4) §1、§7.4 標題的「題型對應多益 Part 5」改為「題型參考 TOEIC®（多益）Part 5」；§1 新增固定文字列與 v0.17 型別數；(5) 新增回饋上游 FB-63、FB-64，回饋下游 §9.10 DS-41、DS-42；(6) `data-schema.ts` 只改註解。歷史敘述與舊變更紀錄保留原文；N-3、FB-26 的「多益高頻字」是 v0.6 內容任務的契約內部說明，不屬 AC-23-08 範圍，不改。型別數 69、契約常數 42、localStorage 鍵數 2 皆不變；**持久化結構不變，`schemaVersion` 維持 3，不需遷移**；`src/data/` 格式不變，只有 `p5-009` 一個值要改（DS-42）。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 | 0.18 | 2026-11-04 | sa-agent | 修訂已核准的 v0.17（主控代核），原因：PRD v0.18（approved，JimmyLin，2026-11-04）R-26：新增 US-48、AC-48-01～AC-48-12、E-124～E-134；修改 AC-11-04、AC-11-05、AC-11-07、AC-42-02、AC-45-03、AC-45-04、AC-45-06、AC-46-01、AC-46-02、AC-46-04、AC-46-05、AC-46-06、AC-46-09；移除 AC-46-07；Q-77～Q-80 已決議。本檔與 `data-schema.ts` 的 `status` 改為 `draft`、`version` 0.18、核准欄位清空，上游改為 PRD v0.18；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved。(1) §5.11 新增 LV-1～LV-7、SM-1～SM-3、HN-1、CR-10、UO-10；修改 CR-2、CR-4、CR-5、CR-6、CR-7、UO-1、UO-2、UO-3、UO-5、UO-6、UO-7、UO-8；(2) 移除 `replayKeepRecords` 與 `replayPart5KeepRecords` 動作，理由見 UO-7，原效果由 UO-8 (a) 涵蓋；(3) §5.3 寫入列、WR-1、MT-1、§11.3、§12.1（版本 1.2.0）同步；(4) 修改 V-ST-19、V-ST-20，新增 V-ST-23～V-ST-27；(5) §1 新增 1 列與 v0.18 型別數；§8 新增 v0.18 表，AC-46-07 列標示移除；(6) 新增回饋上游 FB-65～FB-69，回饋下游 §9.11 DS-43～DS-46；FB-56、DS-34 補註；(7) `data-schema.ts` 新增 `Part5QuestionState`，`PART5_RECORD_TEXTS` 新增 4 鍵、移除 1 鍵，其餘只改註解。型別數 69 → 70、契約常數 42 不變、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，備份格式不變，不需遷移**；`src/data/` 不變。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 | 0.19 | 2026-11-05 | sa-agent | 修訂已核准的 v0.18（主控代核），原因：PRD v0.19（approved，JimmyLin，2026-11-05）R-27、R-28：新增 US-49～US-57、AC-49-01～AC-57-06、E-135～E-155，同版修訂既有 AC，Q-81～Q-93 已決議。本檔與 `data-schema.ts` 的 `status` 改為 `in-review`、`version` 0.19、核准欄位清空，上游改為 PRD v0.19；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved。(1) 新增 §13（AS-1～AS-7、AD-1～AD-15、SP-1～SP-9、SC-1～SC-6、SE-1～SE-9、ML-1～ML-5；V-ANS-01～03、V-AD-01～06、V-SITE-01～07、V-SEO-01～08、V-MAIL-01～02），原「§13 變更紀錄」改為 §14。(2) §10：部署目錄 8 → 13 檔，新增 DP-8～DP-10，修改 DP-1、DP-7、HD-1、HD-3、MF-4、SW-2、PV-3、PV-5、PV-6、V-PWA-01、V-PWA-04、V-PWA-06、V-PWA-12；`PWA_PRECACHE_URLS` 不變。(3) 已答對顯示：§5.4 末段、CR-4、CR-5、SM-2、DB-1、DB-5、V-ST-19 修改；`statAccuracyLabel` 移除。(4) 信箱改為新值：L-7、`SOURCES_CONTACT_TEXT`；LT-3、LT-5 位置擴及關於我；V-LGL-05 範圍擴大。(5) FS-2、NM-1、NM-2、NM-6、§11.3、§12.1（版本 1.3.0）、VR-1、VR-7、V-VER-03 同步。(6) §1 新增 4 列與 v0.19 型別數；§8 新增 v0.19 表；新增回饋上游 FB-70～FB-75，回饋下游 §9.12 DS-47～DS-56。(7) `data-schema.ts` 新增 §17。型別數 70 → 81、契約常數 42 → 60、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，備份格式不變，不需遷移**；`src/data/` 不變。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
+| 0.20 | 2026-11-05 | sa-agent | 修訂已核准的 v0.19（主控代核），原因：PRD v0.20（approved，JimmyLin，2026-11-05）R-29：新增 US-58～US-61、AC-58-01～AC-61-02、E-156～E-166；修改 AC-08-01、AC-08-06、AC-08-07、AC-08-08、AC-08-10、AC-08-13、AC-22-03、AC-30-04、AC-31-03、AC-33-01、AC-33-03、AC-33-06、AC-33-07、AC-33-08、AC-42-02；Q-94～Q-102 全採 PM 建議。本檔與 `data-schema.ts` 的 `status` 改為 `in-review`、`version` 0.20、核准欄位清空，上游改為 PRD v0.20；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved。(1) 新增 §14（PR-1～PR-12 與狀態轉移總表、MS-1～MS-6、RT-1～RT-6、KF-1、V-STT-01～V-STT-10），原「§14 變更紀錄」改為 §15。(2) `T_READY` 預設 5000（3000～10000）、`T_BUFFER` 預設 0（0～500）、`T_FALLBACK` 預設 1500（1000～2000）ms，主控實測後可在範圍內代核調整（PR-11）。(3) §1 新增 3 列與 v0.20 型別數；§8 新增 v0.20 表；§11.3 新增 3 列；§12.1 版本 1.3.1 註記（Q-102 A）。(4) 新增回饋上游 FB-76～FB-79，回饋下游 §9.13 DS-57～DS-63。(5) `data-schema.ts`：`SttStatus` +`"preparing"`、`RuntimeState.speech.preparingPhase`；新增 §18（4 個 type、2 個 interface、3 個常數）；`SttResult`、`APP_VERSION_META_NAME` 註解更新。型別數 81 → 87、契約常數 60 → 63、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，備份格式不變，不需遷移**；`src/data/` 不變。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 
 > **主控代核（2026-11-02）**：v0.9 依 PRD v0.9（JimmyLin 核准）增量修訂，未改 PRD、未改持久化結構（schemaVersion 維持 2、備份格式不變），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 內容無變動，維持 v0.8 approved，三檔版本不同步屬本版例外。FB-33～FB-35 接受 SA 處理方式，於下次 PRD 修訂時交 PM 確認。
 
@@ -1802,3 +1930,5 @@ SC-2 渲染對照：
 > **主控代核（2026-11-04，v0.18）**：依 PRD v0.18（JimmyLin 核准）R-26 新增 LV、SM、HN-1、CR-10、UO-10 等規則並移除 replay 動作；鎖定狀態由既有欄位推導，未改 PRD、未改持久化結構（schemaVersion 3、localStorage 2 鍵、備份格式不變、無遷移），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 無實質變動，維持 v0.16。FB-65～FB-69 接受 SA 定案。
 
 > **主控代核（2026-11-05，v0.19）**：依 PRD v0.19（JimmyLin 核准）R-27、R-28 新增 §13 與部署規則；未改 PRD、未改持久化結構（schemaVersion 3、localStorage 2 鍵、備份格式不變、無遷移），符合 CLAUDE.md 主控代核條件。`storage-schema.json` 維持 v0.16。FB-70、FB-72、FB-74、FB-75 接受 SA 定案；FB-71 的文案由人類於部署後檢視；FB-73 於第二階段填入單元 ID 前由主控核對。
+
+> 主控代核（2026-11-05）：依已核准 PRD v0.20 修訂；不改 PRD、不改 localStorage 持久化結構（schemaVersion 3，storage-schema.json 未改）；tsc --strict 通過。

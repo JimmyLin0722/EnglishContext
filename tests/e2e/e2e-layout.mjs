@@ -502,9 +502,11 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
       for (const [tab, sel] of [["dashboard", "#view-dashboard .dashboard"], ["part5", "#view-part5 .p5"]]) {
         await goTab(p, tab);
         const r = await p.ev(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); const r = e.getBoundingClientRect(); const par = e.parentElement; const ps = getComputedStyle(par); const pr = par.getBoundingClientRect();
-          const avail = pr.width - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight); const cw = document.documentElement.clientWidth;
+          // 第 11 輪（PG 回饋 (c)、architecture v0.16 §7.29.4）：根元素 scrollbar-gutter: stable 時，不可捲動頁面的 documentElement.clientWidth 仍含保留的 15 px，
+          // 右側留白改以 html 盒寬（不含捲軸與保留區，即內容可用的視窗寬）計算；保留區與可捲動時的捲軸同樣不算留白
+          const avail = pr.width - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight); const cw = document.documentElement.getBoundingClientRect().width;
           const clipped = [...e.querySelectorAll("*")].filter((x) => window.__qaL.shown(x) && !x.closest(".visually-hidden") && window.__qaL.ownText(x) && x.scrollWidth > x.clientWidth + 1 && getComputedStyle(x).overflowX !== "visible").length;
-          return { w: Math.round(r.width * 10) / 10, avail: Math.round(avail * 10) / 10, left: Math.round(r.left * 10) / 10, right: Math.round((cw - r.right) * 10) / 10, hs: document.documentElement.scrollWidth > cw, clipped }; })()`);
+          return { w: Math.round(r.width * 10) / 10, avail: Math.round(avail * 10) / 10, left: Math.round(r.left * 10) / 10, right: Math.round((cw - r.right) * 10) / 10, hs: document.documentElement.scrollWidth > document.documentElement.clientWidth, clipped }; })()`);
         // 模擬測驗另量作答後（含解析、下一題）的裁切與水平捲軸（AC-40-02）
         if (tab === "part5") { await p.click("[data-p5=option]", 0); await sleep(150); const r2 = await p.ev(`(() => { const e = document.querySelector("#view-part5 .p5"); const cw = document.documentElement.clientWidth; return { hs: document.documentElement.scrollWidth > cw, clipped: [...e.querySelectorAll("*")].filter((x) => window.__qaL.shown(x) && !x.closest(".visually-hidden") && window.__qaL.ownText(x) && x.scrollWidth > x.clientWidth + 1 && getComputedStyle(x).overflowX !== "visible").length, explain: !!document.querySelector("[data-p5=explanation]") }; })()`); r.hs = r.hs || r2.hs; r.clipped += r2.clipped; r.answered = r2.explain; await seed(p, stateRecord(725)); }
         const exp = Math.min(r.avail, 720);

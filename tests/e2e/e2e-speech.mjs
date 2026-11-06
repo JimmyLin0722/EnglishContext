@@ -3,7 +3,7 @@
 // 第 3 輪（PRD v0.9）：按麥克風會先以 getUserMedia 取得麥克風（收音條），以 fakeMic 替身提供測試音源；
 // 收音條與麥克風生命週期（US-33）另見 e2e-mic.mjs。
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
-import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic } from "./lib/inits.mjs";
+import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic, micOnStrict } from "./lib/inits.mjs";
 import { injectTpl } from "./lib/state.mjs"; // 第 6 輪：範本按鈕隱藏（AC-43-01），改以 store 注入前置資料
 
 const R = recorder("e2e-speech");
@@ -33,12 +33,8 @@ const panel = (p) => p.ev(`(() => { const b = document.querySelector(".fc-front 
   return { bars, status: b.dataset.status, listening: b.classList.contains("is-listening"), micText: b.innerText, micAria: b.getAttribute("aria-disabled"), micTitle: b.getAttribute("title"), micDisabled: b.hasAttribute("disabled"),
     msg: m && !m.hidden ? m.innerText : "", result: r && !r.hidden ? r.innerText : "", badge: r && !r.hidden && r.querySelector(".sp-result__badge") ? r.querySelector(".sp-result__badge").textContent : "",
     light: r && !r.hidden && r.querySelector(".sp-result__light") ? r.querySelector(".sp-result__light").textContent : "", lightColor: r && !r.hidden ? getComputedStyle(r.querySelector(".sp-result__badge")).backgroundColor : "" }; })()`);
-/** 按麥克風並等待進入聆聽中（v0.9：先取得麥克風，為非同步） */
-async function micOn(p) {
-  await p.click(".fc-front .sp-mic");
-  for (let i = 0; i < 40; i++) { if ((await p.ev(`document.querySelector(".fc-front .sp-mic").dataset.status`)) === "listening") break; await sleep(25); }
-  await sleep(20);
-}
+/** 按麥克風並等待進入聆聽中（v0.9：先取得麥克風，為非同步；第 10 輪 v0.20：先準備中，替身 audiostart 或 T_FALLBACK 後才聆聽中，未經準備中即拋出） */
+async function micOn(p) { return micOnStrict(p); }
 async function speakAndScore(p, recognized) {
   await micOn(p);
   await p.ev(`(() => { const r = window.__qaStt.last; r.emitResult(${JSON.stringify(recognized)}); r.emitEnd(); })()`); await sleep(60);
@@ -63,7 +59,11 @@ async function speakAndScore(p, recognized) {
     const a = await panel(p); const s1 = await p.ev(`window.__qaStt.starts`); const ack1 = await p.ev(`EMT.store.getState().data.sttNoticeAcknowledged`); const g1 = await p.ev(`window.__qaMic.calls`);
     await p.click(".fc-front .sp-mic"); await sleep(120);
     const dlg2 = await p.ev(`!!document.querySelector(".dialog")`);
-    await p.click('.dialog [data-action="ok"]'); await sleep(250);
+    // v0.20：說明顯示期間按鈕維持待機（architecture §7.26.7：data-status 為 notice，外觀與待機相同：文字「麥克風跟讀」、aria-label「開始語音辨識」、aria-pressed false）
+    const dd = await p.ev(`(() => { const b = document.querySelector(".fc-front .sp-mic"); return [b.dataset.status, b.querySelector(".sp-mic__text").textContent, b.getAttribute("aria-label"), b.getAttribute("aria-pressed"), b.classList.contains("is-preparing") || b.classList.contains("is-listening")].join("/"); })()`);
+    const duringDlg = /^(idle|notice)\/麥克風跟讀\/開始語音辨識\/false\/false$/.test(dd) ? "idle" : dd;
+    let seqOk = "";
+    try { const r = await micOnStrict(p, { click: () => p.click('.dialog [data-action="ok"]') }); seqOk = r.seq.join("→"); } catch (e) { seqOk = "失敗：" + e.message; }
     const b = await panel(p); const s2 = await p.ev(`window.__qaStt.starts`); const g2 = await p.ev(`window.__qaMic.calls`);
     const stored = await p.ev(`JSON.parse(localStorage.getItem(${JSON.stringify(KEY)})).data.sttNoticeAcknowledged`);
     await p.click(".fc-front .sp-mic"); await sleep(80); // 停止
@@ -71,8 +71,8 @@ async function speakAndScore(p, recognized) {
     const dlg3 = await p.ev(`!!document.querySelector(".dialog")`); const s3 = await p.ev(`window.__qaStt.starts`);
     await p.click(".fc-front .sp-mic"); await sleep(80);
     const expText = "語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統只即時讀取音量以顯示收音條，不錄音、不保存、不上傳錄音。停留在單字卡頁期間，瀏覽器可能持續顯示麥克風使用中圖示，離開單字卡頁即停止使用麥克風";
-    const ok = badge === "需要連網" && dlg1 && dlg1.text === expText && dlg1.ok === "我知道了" && dlg1.cancel === "取消" && s1 === s0 && g1 === 0 && a.status === "idle" && ack1 === false && dlg2 && s2 === s1 + 1 && g2 === 1 && b.status === "listening" && stored === true && !dlg3 && s3 === s2 + 1;
-    return { ok, note: `常駐標示「${badge}」；首次按下說明「${dlg1 && dlg1.text}」[${dlg1 && dlg1.ok}/${dlg1 && dlg1.cancel}]；取消後 starts ${s0}→${s1}、getUserMedia 呼叫 ${g1}、狀態 ${a.status}、已讀 ${ack1}；「我知道了」後 getUserMedia ${g2}；再按仍顯示說明=${dlg2}；我知道了 → starts ${s2}、狀態 ${b.status}、localStorage 已讀 ${stored}；之後再按顯示說明=${dlg3}` };
+    const ok = badge === "需要連網" && dlg1 && dlg1.text === expText && dlg1.ok === "我知道了" && dlg1.cancel === "取消" && s1 === s0 && g1 === 0 && a.status === "idle" && ack1 === false && dlg2 && duringDlg === "idle" && /^preparing→listening/.test(seqOk) && s2 === s1 + 1 && g2 === 1 && b.status === "listening" && stored === true && !dlg3 && s3 === s2 + 1;
+    return { ok, note: `常駐標示「${badge}」；首次按下說明「${dlg1 && dlg1.text}」[${dlg1 && dlg1.ok}/${dlg1 && dlg1.cancel}]；取消後 starts ${s0}→${s1}、getUserMedia 呼叫 ${g1}、狀態 ${a.status}、已讀 ${ack1}；說明顯示期間按鈕 ${duringDlg}；「我知道了」後狀態序列 ${seqOk}、getUserMedia ${g2}；再按仍顯示說明=${dlg2}；我知道了 → starts ${s2}、狀態 ${b.status}、localStorage 已讀 ${stored}；之後再按顯示說明=${dlg3}` };
   });
 
   await R.check("TC-07-01", "AC-07-01、AC-07-02", async () => {
@@ -120,7 +120,9 @@ async function speakAndScore(p, recognized) {
       await gotoWord(p, w); const r = await speakAndScore(p, rec);
       const tipShown = r.result.includes("放慢速度或重聽 0.75x 示範");
       const cmp = r.result.includes("辨識文字") && r.result.includes("目標文字") && r.result.includes(rec) && r.result.includes(w);
-      const good = new RegExp("\\b" + sc + "\\b").test(r.badge) && r.light === light && (light === "黃燈" ? tipShown : !tipShown) && (light === "紅燈" ? cmp : !r.result.includes("辨識文字"));
+      // 第 10 輪（v0.20 AC-08-06～08、AC-60-02）：三種燈號都有「辨識文字」；綠、黃燈不顯示「目標文字」，紅燈並列
+      const recRow = r.result.includes("辨識文字") && r.result.includes(rec);
+      const good = new RegExp("\\b" + sc + "\\b").test(r.badge) && r.light === light && (light === "黃燈" ? tipShown : !tipShown) && (light === "紅燈" ? cmp : recRow && !r.result.includes("目標文字"));
       colors[light] = r.lightColor; ok = ok && good; out.push(`${sc}→${r.badge}/${r.light}${tipShown ? "/提示" : ""}${cmp ? "/並列" : ""}`);
     }
     return { ok: ok && new Set(Object.values(colors)).size === 3, note: out.join("；") + `；徽章底色 ${JSON.stringify(colors)}` };
@@ -152,8 +154,9 @@ async function speakAndScore(p, recognized) {
     // (a) 空結果
     await micOn(p);
     await p.ev(`(() => { const r = window.__qaStt.last; r.emitResult("  "); r.emitEnd(); })()`); await sleep(60);
-    let r = await panel(p); ok = ok && r.msg === "未偵測到語音，請再試一次" && !r.result && r.status === "idle"; out.push(`空結果：「${r.msg}」${r.result ? "（顯示分數）" : ""}、${r.status}`);
-    // (b) 逾時：無結果直接結束
+    // 第 10 輪（v0.20 AC-08-10、AC-59-03）：清洗後為空 → 「有收到聲音，但沒聽出英文單字，請再說一次」
+    let r = await panel(p); ok = ok && r.msg === "有收到聲音，但沒聽出英文單字，請再說一次" && !r.result && r.status === "idle"; out.push(`空結果：「${r.msg}」${r.result ? "（顯示分數）" : ""}、${r.status}`);
+    // (b) 逾時：無結果直接結束（已確認開始收音 → 未偵測到語音，AC-59-05 (b)）
     await micOn(p);
     await p.ev(`window.__qaStt.last.emitEnd()`); await sleep(60);
     r = await panel(p); ok = ok && r.msg === "未偵測到語音，請再試一次" && !r.result && r.status === "idle"; out.push(`逾時：「${r.msg}」、${r.status}`);
@@ -170,7 +173,7 @@ async function speakAndScore(p, recognized) {
     for (let i = 0; i < 10; i++) {
       await micOn(p);
       times.push(await p.ev(`(async () => { const r = window.__qaStt.last; const t0 = performance.now(); r.emitResult(${JSON.stringify(i % 2 ? "latensy" : "Latency")});
-        await new Promise((res) => requestAnimationFrame(() => setTimeout(res, 0))); const ok = !!document.querySelector(".fc-front .sp-result:not([hidden]) .sp-result__badge"); r.emitEnd(); return ok ? +(performance.now() - t0).toFixed(1) : -1; })()`));
+        await new Promise((res) => requestAnimationFrame(() => setTimeout(res, 0))); const res = document.querySelector(".fc-front .sp-result:not([hidden])"); const ok = !!(res && res.querySelector(".sp-result__badge") && res.querySelector(".sp-compare__value")); r.emitEnd(); return ok ? +(performance.now() - t0).toFixed(1) : -1; })()`)); // v0.20：徽章、顏色與辨識文字
       await sleep(30);
     }
     const srt = [...times].sort((a, b) => a - b);

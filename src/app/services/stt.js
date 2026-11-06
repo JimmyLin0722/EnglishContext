@@ -1,7 +1,9 @@
 /*
  * services/stt.js — 語音辨識（FE-12）
  * 依據：architecture.md §7.6「STT」；PRD Q-04
- * 涵蓋：AC-08-01、AC-08-02、AC-08-09、AC-08-10、AC-08-14、AC-21-02、AC-21-03
+ *       v0.15（FE-90）：architecture.md §4.13、§7.26.2；契約 data-schema §18 SttEngineEventKind、SttEndInfo，README §14.1 PR-9、§14.3 RT-1、DS-57
+ * 涵蓋：AC-08-01、AC-08-02、AC-08-09、AC-08-10、AC-08-14、AC-21-02、AC-21-03、
+ *       AC-58-03、AC-58-07、AC-58-08、AC-58-09、AC-59-01～AC-59-06、AC-60-01
  *
  * 只使用瀏覽器原生 SpeechRecognition／webkitSpeechRecognition：
  * 不直接存取麥克風串流、不使用任何錄音 API，不取得、不保存任何音訊，也不使用第三方語音 SDK 或 API 金鑰。
@@ -9,12 +11,19 @@
  * 提供 EMT.services.stt：
  * - isSupported() → boolean
  * - isOnline() → boolean：navigator.onLine 明確為 false 時回 false
- * - start({ lang, onResult(text), onError(code), onEnd(info) }) → { ok: true } | { ok: false, reason }
+ * - start({ lang, onAudioStart(info), onSoundStart(info), onSpeechStart(info), onResult(text, info), onNomatch(info),
+ *          onError(code, info), onEnd(info) })
+ *     → { ok: true, audioStartSupported } | { ok: false, reason }（回呼全部選填）
  *     reason：「unsupported」不支援、「offline」離線（AC-08-14）、「error」建立或啟動失敗。
+ *     audioStartSupported：本次是否可依賴 audiostart；new 之後、rec.start() 之前以 "onaudiostart" in rec 判定（含原型鏈），
+ *       判定拋例外視為 false（AC-58-09，§7.26.2）。
  *     設定 lang = "en-US"、interimResults = false、maxAlternatives = 1、continuous = false。
- *     onResult(text)：辨識原文（可能為空字串）。
- *     onError(code)：SpeechRecognitionErrorEvent.error（not-allowed、network、no-speech…）；手動停止造成的 aborted 不通知。
- *     onEnd({ manual, hadResult, hadError })：本次聆聽結束。
+ *     onResult(text, info)：辨識原文（可能為空字串）。
+ *     onError(code, info)：SpeechRecognitionErrorEvent.error（not-allowed、network、no-speech…）；手動停止造成的 aborted 不通知。
+ *     onEnd(info)：本次聆聽結束。
+ *     info = SttEndInfo 8 欄的新複本，順序固定：manual, hadResult, hadError, audioStarted, soundStarted, speechDetected,
+ *       nomatch, errorCode（第一個非手動 aborted 的錯誤代碼，否則 null）。每次 start() 都重設為初始值。
+ *     服務只依引擎順序原樣轉送事件與旗標，不重排、不決定訊息（DS-57）。
  *     同時只有一個聆聽工作；再次 start 會先中止前一個（其回呼不再觸發）。
  * - stop() → boolean：停止聆聽並標記為手動停止（不提示）；之後仍可能收到已辨識的結果。
  * - abort()：立即中止且不再觸發任何回呼（換卡、離開頁面）。
@@ -61,11 +70,12 @@
     }
   }
 
-  /** 安全呼叫回呼 */
-  function call(fn, arg) {
+  /** 安全呼叫回呼（最多 2 個參數） */
+  function call(fn, a, b) {
     if (typeof fn !== "function") return;
     try {
-      fn(arg);
+      if (arguments.length > 2) fn(a, b);
+      else fn(a);
     } catch (e) {
       if (typeof console !== "undefined") console.error("[EMT.services.stt] 回呼執行失敗", e);
     }
@@ -76,7 +86,7 @@
    * @param {object} g 全域物件（瀏覽器為 window）
    */
   function create(g) {
-    // 目前聆聽工作 { rec, manual, hadResult, hadError }
+    // 目前聆聽工作 { rec, manual, hadResult, hadError, audioStarted, soundStarted, speechDetected, nomatch, errorCode }
     var session = null;
 
     /** 取得建構函式（不存在回 null） */
@@ -102,13 +112,16 @@
       }
     }
 
-    /** 解除事件處理，讓遲到的事件不再影響畫面 */
+    /** 解除 7 個事件處理器，讓遲到的事件不再影響畫面（DS-57） */
     function detach(rec) {
       try {
+        rec.onaudiostart = null;
+        rec.onsoundstart = null;
+        rec.onspeechstart = null;
         rec.onresult = null;
+        rec.onnomatch = null;
         rec.onerror = null;
         rec.onend = null;
-        rec.onnomatch = null;
       } catch (e) {
         /* 忽略 */
       }
@@ -130,9 +143,23 @@
     }
 
     /**
+     * 本次是否可依賴 audiostart（AC-58-09）：含原型鏈判定，拋例外視為 false。
+     * @param {object} rec
+     * @returns {boolean}
+     */
+    function audioStartSupportedOf(rec) {
+      try {
+        return "onaudiostart" in rec;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /**
      * 開始聆聽。
-     * @param {{lang?: string, onResult?: Function, onError?: Function, onEnd?: Function}} opts
-     * @returns {{ok: boolean, reason?: string}}
+     * @param {{lang?: string, onAudioStart?: Function, onSoundStart?: Function, onSpeechStart?: Function,
+     *          onResult?: Function, onNomatch?: Function, onError?: Function, onEnd?: Function}} opts
+     * @returns {{ok: boolean, audioStartSupported?: boolean, reason?: string}}
      */
     function start(opts) {
       try {
@@ -144,18 +171,57 @@
 
         var o = opts || {};
         var rec = new C();
-        var s = { rec: rec, manual: false, hadResult: false, hadError: false };
+        var s = {
+          rec: rec, manual: false, hadResult: false, hadError: false,
+          audioStarted: false, soundStarted: false, speechDetected: false, nomatch: false, errorCode: null
+        };
         var live = function () { return session === s; };
+        // 當下旗標的新複本（SttEndInfo 8 欄，順序固定）；呼叫端修改不影響服務
+        var snap = function () {
+          return {
+            manual: s.manual,
+            hadResult: s.hadResult,
+            hadError: s.hadError,
+            audioStarted: s.audioStarted,
+            soundStarted: s.soundStarted,
+            speechDetected: s.speechDetected,
+            nomatch: s.nomatch,
+            errorCode: s.errorCode
+          };
+        };
+        // 須在 rec.start() 之前判定
+        var audioStartSupported = audioStartSupportedOf(rec);
 
         rec.lang = typeof o.lang === "string" && o.lang ? o.lang : LANG;
         rec.interimResults = false;
         rec.maxAlternatives = 1;
         rec.continuous = false;
 
+        // 一律以屬性指派綁定（§7.26.2），依引擎順序原樣轉送
+        rec.onaudiostart = function () {
+          if (!live()) return;
+          s.audioStarted = true;
+          call(o.onAudioStart, snap());
+        };
+        rec.onsoundstart = function () {
+          if (!live()) return;
+          s.soundStarted = true;
+          call(o.onSoundStart, snap());
+        };
+        rec.onspeechstart = function () {
+          if (!live()) return;
+          s.speechDetected = true;
+          call(o.onSpeechStart, snap());
+        };
         rec.onresult = function (ev) {
           if (!live()) return;
           s.hadResult = true;
-          call(o.onResult, transcriptOf(ev));
+          call(o.onResult, transcriptOf(ev), snap());
+        };
+        rec.onnomatch = function () {
+          if (!live()) return;
+          s.nomatch = true;
+          call(o.onNomatch, snap());
         };
         rec.onerror = function (ev) {
           if (!live()) return;
@@ -163,13 +229,15 @@
           // 手動停止造成的 aborted 不提示（architecture.md §7.6）
           if (s.manual && code === "aborted") return;
           s.hadError = true;
-          call(o.onError, code);
+          // 只記第一個錯誤代碼
+          if (s.errorCode === null) s.errorCode = code;
+          call(o.onError, code, snap());
         };
         rec.onend = function () {
           if (!live()) return;
           session = null;
           detach(rec);
-          call(o.onEnd, { manual: s.manual, hadResult: s.hadResult, hadError: s.hadError });
+          call(o.onEnd, snap());
         };
 
         session = s;
@@ -180,7 +248,7 @@
           detach(rec);
           return { ok: false, reason: "error" };
         }
-        return { ok: true };
+        return { ok: true, audioStartSupported: audioStartSupported };
       } catch (e) {
         session = null;
         return { ok: false, reason: "error" };

@@ -1,9 +1,79 @@
 [
   {
     "suite": "e2e-focus",
-    "tc": "TC-38-09f",
-    "ac": "AC-38-09 (a)",
-    "result": "失敗",
-    "note": "375×667 真實 Tab：v1.3.0 被遮 8：主控台（有近 7 天資料、收合）：.db-backup__toggle「資料備份」（可見 0%）、主控台（有近 7 天資料、展開）：.db-backup__toggle「資料備份」（可見 0%）、難易度設定：.cz-level.cz-level--gold[gold]「金✓即將開放—」（可見 13%）、難易度設定：BUTTON「新增單字」（可見 49%）、單字卡：.fc-flip「翻面」（可見 94%）、單字卡：.fc-next「下一張」（可見 94%）、模擬測驗：.p5-option.p5-option--idle「C.reminded」（可見 57%）、模擬測驗：.p5-option.p5-option--idle「D.attended」（可見 0%）；v1.2.0 被遮 10：主控台（資料備份收合）：#footer-sources「資料來源與授權」（可見 0%）、主控台（有近 7 天資料、收合）：.db-backup__toggle「資料備份」（可見 0%）、主控台（有近 7 天資料、展開）：.db-backup__toggle「資料備份」（可見 0%）、難易度設定：.cz-level.cz-level--gold[gold]「金✓即將開放—」（可見 13%）、難易度設定：BUTTON「新增單字」（可見 49%）、單字卡：.fc-flip「翻面」（可見 94%）、單字卡：.fc-next「下一張」（可見 94%）、單字卡：#footer-sources「資料來源與授權」（可見 0%）、模擬測驗：.p5-option.p5-option--idle「C.reminded」（可見 57%）、模擬測驗：.p5-option.p5-option--idle「D.attended」（可見 0%）（BUG-005，舊有；390×844 見 tests/results/diag/r9-focus.json）"
+    "tc": "TC-61-01-375",
+    "ac": "AC-61-01（375×667，Tab 與 Shift+Tab，4 個功能區）、E-166",
+    "result": "通過",
+    "note": "主控台（收合） Tab：停點 7、被遮或不完整 0；主控台（收合） Shift+Tab：停點 7、被遮或不完整 0；主控台（展開） Tab：停點 9、被遮或不完整 0；主控台（展開） Shift+Tab：停點 9、被遮或不完整 0；難易度設定 Tab：停點 17、被遮或不完整 0；難易度設定 Shift+Tab：停點 17、被遮或不完整 0；單字卡 Tab：停點 10、被遮或不完整 0；單字卡 Shift+Tab：停點 10、被遮或不完整 0；模擬測驗 Tab：停點 10、被遮或不完整 0；模擬測驗 Shift+Tab：停點 10、被遮或不完整 0"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-61-01m-375",
+    "ac": "AC-61-01 必測 7 項（375×667）",
+    "result": "通過",
+    "note": "資料備份 Tab 100%/Shift+Tab 100%/Tab 100%/Shift+Tab 100%；金色級列 Tab 100%/Shift+Tab 100%；新增單字 Tab 100%/Shift+Tab 100%；翻面 Tab 100%/Shift+Tab 100%；下一張 Tab 100%/Shift+Tab 100%；選項C Tab 100%/Shift+Tab 100%；選項D Tab 100%/Shift+Tab 100%"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-38-09f-375",
+    "ac": "AC-38-09 (a)（BUG-005 複驗，375×667）",
+    "result": "通過",
+    "note": "AC-38-09 列舉控制項焦點框寬 < 2 或 none：0；資料備份 Tab 可見 100%、Shift+Tab 可見 100%、Tab 可見 100%、Shift+Tab 可見 100%"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-61-01-390",
+    "ac": "AC-61-01（390×844，Tab 與 Shift+Tab，4 個功能區）、E-166",
+    "result": "通過",
+    "note": "主控台（收合） Tab：停點 7、被遮或不完整 0；主控台（收合） Shift+Tab：停點 7、被遮或不完整 0；主控台（展開） Tab：停點 9、被遮或不完整 0；主控台（展開） Shift+Tab：停點 9、被遮或不完整 0；難易度設定 Tab：停點 17、被遮或不完整 0；難易度設定 Shift+Tab：停點 17、被遮或不完整 0；單字卡 Tab：停點 10、被遮或不完整 0；單字卡 Shift+Tab：停點 10、被遮或不完整 0；模擬測驗 Tab：停點 10、被遮或不完整 0；模擬測驗 Shift+Tab：停點 10、被遮或不完整 0"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-61-01m-390",
+    "ac": "AC-61-01 必測 7 項（390×844）",
+    "result": "通過",
+    "note": "資料備份 Tab 100%/Shift+Tab 100%/Tab 100%/Shift+Tab 100%；金色級列 Tab 100%/Shift+Tab 100%；新增單字 Tab 100%/Shift+Tab 100%；翻面 Tab 100%/Shift+Tab 100%；下一張 Tab 100%/Shift+Tab 100%；選項C Tab 100%/Shift+Tab 100%；選項D Tab 100%/Shift+Tab 100%"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-38-09f-390",
+    "ac": "AC-38-09 (a)（BUG-005 複驗，390×844）",
+    "result": "通過",
+    "note": "AC-38-09 列舉控制項焦點框寬 < 2 或 none：0；資料備份 Tab 可見 100%、Shift+Tab 可見 100%、Tab 可見 100%、Shift+Tab 可見 100%"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-61-02a",
+    "ac": "AC-61-02（> 640px 版面與捲動不變：1366×768 與 1.3.0 逐停點比對）",
+    "result": "通過",
+    "note": "4 個功能區 Tab＋Shift+Tab 共 146 個停點，名稱、scrollY、元素上緣全同=true；scroll-padding-bottom 1.3.1 auto、1.3.0 auto"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-61-02b",
+    "ac": "AC-61-02（點擊與觸控不額外捲動、減少動態捲動無動畫）",
+    "result": "通過",
+    "note": "375px：主控台 觸控 scrollY 87→87、滑鼠 87→87、難易度設定 觸控 scrollY 73→73、滑鼠 73→73、單字卡 觸控 scrollY 17→17、滑鼠 17→17、模擬測驗 觸控 scrollY 89→795、滑鼠 89→89；與 1.3.0 逐筆相同=true；scroll-behavior auto；375px 減少動態：主控台 觸控 scrollY 87→87、滑鼠 87→87、難易度設定 觸控 scrollY 73→73、滑鼠 73→73、單字卡 觸控 scrollY 17→17、滑鼠 17→17、模擬測驗 觸控 scrollY 89→795、滑鼠 89→89；與 1.3.0 逐筆相同=true；scroll-behavior auto；1366px：主控台 點擊 scrollY 39→39、滑鼠 39→39、難易度設定 點擊 scrollY 0→0、滑鼠 0→0、單字卡 點擊 scrollY 0→0、滑鼠 0→0、模擬測驗 點擊 scrollY 0→351、滑鼠 0→0；與 1.3.0 逐筆相同=true；scroll-behavior auto（模擬測驗第 1 次點選項為作答，作答後捲到回饋為既有行為，1.3.0 相同；第 2 次滑鼠點已鎖定的選項不捲動）"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-61-02c",
+    "ac": "AC-61-02（AC-41-04、AC-57-01 照常）、AC-38-09（首次「開始學習」焦點框）",
+    "result": "通過",
+    "note": "首次畫面 375×667：頁尾連結 Tab 完整/完整/完整/完整、Shift+Tab 完整/完整/完整/完整；「開始學習」焦點框 3px；5 個色級列可捲到不被底部列遮住 true/true/true/true/true"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-FR-OBS",
+    "ac": "（觀察，不屬 AC 字面）首次畫面色級列鍵盤焦點",
+    "result": "通過",
+    "note": "以 Tab 聚焦時色級列未被首次底部列遮住的比例：1.3.1 .cz-level.cz-level--orange[orange] 100%、.cz-level.cz-level--brown[brown] 100%、.cz-level.cz-level--green[green] 100%、.cz-level.cz-level--blue[blue] 100%、.cz-level.cz-level--gold[gold] 61%；1.3.0 .cz-level.cz-level--orange[orange] 100%、.cz-level.cz-level--brown[brown] 100%、.cz-level.cz-level--green[green] 100%、.cz-level.cz-level--blue[blue] 100%、.cz-level.cz-level--gold[gold] 61%（首次畫面不在 AC-61-01 範圍；AC-41-04 只要求可捲到不被遮，已符合）"
+  },
+  {
+    "suite": "e2e-focus",
+    "tc": "TC-61-02d",
+    "ac": "AC-61-02（AC-27-03 正在輸入的欄位不被遮，自動化部分）",
+    "result": "通過",
+    "note": "375×667：scroll-padding-bottom 64px；輸入時 is-typing=true、0px、輸入欄 559～603／導覽上緣 667；390×844：scroll-padding-bottom 64px；輸入時 is-typing=true、0px、輸入欄 736～780／導覽上緣 844（實機虛擬鍵盤仍列 TC-M09）"
   }
 ]

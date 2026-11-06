@@ -1,0 +1,16 @@
+e2e-goal（edge）：結束碼 0、59 秒、FAIL 0；03:09:58；可用記憶體 4587 MB
+e2e-hidden（edge）：結束碼 0、30 秒、FAIL 0；03:10:28；可用記憶體 4577 MB
+e2e-pwa（edge）：結束碼 3221226505、47 秒、FAIL 0；03:11:15；可用記憶體 4175 MB
+e2e-version（edge）：結束碼 0、112 秒、FAIL 0；03:13:07；可用記憶體 4510 MB
+e2e-track-p5（edge）：結束碼 0、83 秒、FAIL 0；03:14:30；可用記憶體 4290 MB
+e2e-lock（edge）：結束碼 0、211 秒、FAIL 0；03:18:01；可用記憶體 4009 MB
+e2e-answered（edge）：結束碼 0、48 秒、FAIL 0；03:18:48；可用記憶體 4388 MB
+e2e-site（edge）：結束碼 0、74 秒、FAIL 0；03:20:02；可用記憶體 4351 MB
+e2e-ad（edge）：結束碼 0、276 秒、FAIL 1：FAIL TC-52-02 AC-52-02、E-141、E-136 【替身驗證；03:24:38；可用記憶體 4851 MB
+e2e-ad-extra（edge）：結束碼 0、8 秒、FAIL 0；03:24:46；可用記憶體 4835 MB
+e2e-speech（edge）：結束碼 0、38 秒、FAIL 0；03:25:24；可用記憶體 4838 MB
+e2e-mic（edge）：結束碼 0、64 秒、FAIL 0；03:26:28；可用記憶體 5547 MB
+ALLDONE
+e2e-pwa（edge）：結束碼 0、76 秒、FAIL 0；03:39:24；可用記憶體 7592 MB
+e2e-ad（edge）：結束碼 0、277 秒、FAIL 1：FAIL TC-52-02 AC-52-02、E-141、E-136 【替身驗證；03:44:01；可用記憶體 7408 MB
+ALLDONE2

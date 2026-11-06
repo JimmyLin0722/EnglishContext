@@ -46,6 +46,10 @@
  *   initAd 只生效 1 次；adEvent 經 core/ad.transition，有改變才通知 ["ad"]；confirmApplyGoal 成功路徑與
  *   importBackup 成功後無學習紀錄時同步轉 dismissed（SD-FB-82），clearPart5CorrectIds 不動。
  *
+ * - （v0.20，FE-91）語音辨識準備中（契約 data-schema §10 SttStatus、RuntimeState.speech.preparingPhase、§18 SttPreparingPhase、
+ *   README §14.1 PR-1、PR-2、PR-9、DS-63；architecture §4.13）：sttStatus 新增 "preparing"，runtime.speech 新增
+ *   preparingPhase（啟動一律 null）。兩者只在記憶體，經 setSttStatus(status, phase) 更新（setItem 0 次、不進備份）。
+ *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
  */
@@ -110,7 +114,9 @@
   var FIRST_RUN_TABS = ["customizer", "sources", "about", "contact", "privacy"];
   /** （v0.19）有返回目標的 4 個頁面（SP-3） */
   var SITE_RETURN_TABS = ["sources", "about", "contact", "privacy"];
-  var STT_STATUSES = ["idle", "notice", "listening"];
+  var STT_STATUSES = ["idle", "notice", "preparing", "listening"];
+  /** （v0.20）準備中的子階段（data-schema §18 SttPreparingPhase） */
+  var STT_PREPARING_PHASES = ["acquiringMic", "awaitingAudioStart", "fallbackWait"];
   var PHRASE_CATEGORIES = ["all", "gap", "aim", "findings", "limitations"];
 
   /** 一次通知全部區塊時使用的 tags */
@@ -356,6 +362,8 @@
           ttsSupported: !!speech.ttsSupported,
           sttSupported: !!speech.sttSupported,
           sttStatus: "idle",
+          // （v0.20，FE-91）準備中的子階段；只在記憶體，啟動一律 null（AC-58-12）
+          preparingPhase: null,
           lastResult: null
         },
         decoder: { sentenceIndex: 0, isModifierDimmed: false },
@@ -1197,12 +1205,25 @@
       commitWrite(assign(d, { sttNoticeAcknowledged: true }), state.runtime, ["speech"]);
     }
 
-    /** @param {"idle"|"notice"|"listening"} s */
-    function setSttStatus(s) {
+    /**
+     * 設定語音辨識狀態（只在記憶體，setItem 0 次）。
+     * （v0.20，FE-91）status = "preparing" 時 phase 必須是 STT_PREPARING_PHASES 之一，否則整次忽略；
+     * 其他狀態 preparingPhase 一律為 null（忽略 phase）。狀態與子階段都沒變就不通知。
+     * @param {"idle"|"notice"|"preparing"|"listening"} s
+     * @param {"acquiringMic"|"awaitingAudioStart"|"fallbackWait"} [phase]
+     */
+    function setSttStatus(s, phase) {
       ensureInit();
       var rt = state.runtime;
-      if (STT_STATUSES.indexOf(s) === -1 || rt.speech.sttStatus === s) { return; }
-      commit(state.data, assign(rt, { speech: assign(rt.speech, { sttStatus: s }) }), ["speech"]);
+      if (STT_STATUSES.indexOf(s) === -1) { return; }
+      var p = null;
+      if (s === "preparing") {
+        if (STT_PREPARING_PHASES.indexOf(phase) === -1) { return; }
+        p = phase;
+      }
+      var cur = rt.speech.preparingPhase === undefined ? null : rt.speech.preparingPhase;
+      if (rt.speech.sttStatus === s && cur === p) { return; }
+      commit(state.data, assign(rt, { speech: assign(rt.speech, { sttStatus: s, preparingPhase: p }) }), ["speech"]);
     }
 
     /** @param {object|null} r SttResult 或 null */

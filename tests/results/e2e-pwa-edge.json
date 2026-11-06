@@ -25,7 +25,7 @@
     "tc": "TC-24-12a",
     "ac": "AC-24-12",
     "result": "通過",
-    "note": "file://：375px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、311×67；1366px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、688×22"
+    "note": "file://：375px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、296×67；1366px：收合時隱藏=true、展開後逐字=true、緊接匯出按鈕=true、同區塊=true、非彈窗=true、遮住點 0/5、裁切=false、688×22"
   },
   {
     "suite": "e2e-pwa",
@@ -39,7 +39,7 @@
     "tc": "TC-35-01",
     "ac": "AC-35-01、AC-21-03",
     "result": "通過",
-    "note": "啟用 199 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-2769ee9fc5c56941\"]（BUILD_ID 2769ee9fc5c56941）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
+    "note": "啟用 271 ms、註冊 1 個、scope http://localhost:8080/english-master-track/、腳本 http://localhost:8080/english-master-track/sw.js；快取 [\"english-master-track-pwa-5f0dc11a7433624d\"]（BUILD_ID 5f0dc11a7433624d）；項目 7：[\"/english-master-track/\",\"/english-master-track/icons/apple-touch-icon-180.png\",\"/english-master-track/icons/icon-192.png\",\"/english-master-track/icons/icon-512.png\",\"/english-master-track/icons/icon-maskable-512.png\",\"/english-master-track/index.html\",\"/english-master-track/manifest.webmanifest\"]；與預先快取清單相同=true；IndexedDB []"
   },
   {
     "suite": "e2e-pwa",

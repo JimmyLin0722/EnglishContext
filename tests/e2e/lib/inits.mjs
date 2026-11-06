@@ -50,32 +50,85 @@ export function fakeTts(mode = "ok") {
 }
 
 /**
- * 假的 SpeechRecognition。mode："ok" 或 "unsupported"。
- * 測試以 window.__qaStt.last 取得最近一個實例，呼叫 emitResult(text) / emitError(code) / emitEnd()。
+ * 假的 SpeechRecognition（第 10 輪改為 V-STT-STUB，architecture v0.15 §10.12 Q1）。mode："ok" 或 "unsupported"。
+ * 測試以 window.__qaStt.last 取得最近一個實例，呼叫 emitAudioStart() / emitSoundStart() / emitSpeechStart() /
+ * emitResult(text) / emitNomatch() / emitError(code) / emitEnd()。
+ *
+ * opts.audioStart：true = 模擬「支援 audiostart」（建構子設 onaudiostart、onsoundstart、onspeechstart、onnomatch = null，
+ *   產品以 "onaudiostart" in rec 判定）；false = 完全不定義這 4 個屬性（模擬不支援，產品走 T_FALLBACK 1500 ms 後備）。
+ *   省略時依環境變數 QA_STT_AUDIOSTART："0" 為不支援，其他（預設）為支援。
+ * opts.autoAudioStartMs：支援時，start() 後幾 ms 自動觸發 audiostart（模擬引擎開始收音；預設 200）；null 不自動。
+ *   執行中可改 window.__qaStt.autoMs（null 停用）。不支援時一律不自動觸發。
+ * window.__qaStt.throwOnStart = true：下一次 start() 拋出例外（AC-58-08）。
+ * window.__qaStt.log：替身事件時間軸 [{ ev, t, i }]（t = performance.now()，i = 實例序號），含 "start-return"。
+ * window.__qaMicSeq：頁面中任一 .sp-mic 的 data-status 變化 [{ s, t }]（MutationObserver，供「先準備中再聆聽中」斷言）。
  */
-export function fakeStt(mode = "ok") {
+export function fakeStt(mode = "ok", opts = {}) {
+  const audioStart = opts.audioStart !== undefined ? !!opts.audioStart : process.env.QA_STT_AUDIOSTART !== "0";
+  const autoMs = opts.autoAudioStartMs !== undefined ? opts.autoAudioStartMs : 200;
   return `
 (() => {
   const mode = ${JSON.stringify(mode)};
-  window.__qaStt = { instances: [], starts: 0, stops: 0, aborts: 0, last: null };
+  const AS = ${JSON.stringify(audioStart)};
+  const Q = window.__qaStt = { instances: [], starts: 0, stops: 0, aborts: 0, last: null, audioStart: AS, autoMs: AS ? ${JSON.stringify(autoMs)} : null, throwOnStart: false, log: [] };
+  window.__qaMicSeq = [];
+  try {
+    new MutationObserver((ms) => { for (const m of ms) { const t = m.target; if (t && t.classList && t.classList.contains("sp-mic")) { const s = t.getAttribute("data-status"); const last = window.__qaMicSeq[window.__qaMicSeq.length - 1]; if (!last || last.s !== s) window.__qaMicSeq.push({ s, t: performance.now() }); } } })
+      .observe(document, { attributes: true, attributeFilter: ["data-status"], subtree: true });
+  } catch (e) {}
   if (mode === "unsupported") {
     try { Object.defineProperty(window, "SpeechRecognition", { value: undefined, configurable: true, writable: true }); } catch (e) {}
     try { Object.defineProperty(window, "webkitSpeechRecognition", { value: undefined, configurable: true, writable: true }); } catch (e) {}
     return;
   }
+  const L = (ev, r) => Q.log.push({ ev, t: performance.now(), i: r ? r.__i : -1 });
   class R {
-    constructor() { this.lang = ""; this.interimResults = true; this.maxAlternatives = 5; this.continuous = true; this.onresult = null; this.onerror = null; this.onend = null; this.started = false; window.__qaStt.instances.push(this); window.__qaStt.last = this; }
-    start() { this.started = true; window.__qaStt.starts++; }
-    stop() { window.__qaStt.stops++; const self = this; setTimeout(() => self.emitEnd(), 10); }
-    abort() { window.__qaStt.aborts++; const self = this; setTimeout(() => { self.onerror && self.onerror({ error: "aborted" }); self.emitEnd(); }, 10); }
-    emitResult(text) { const alt = { transcript: text, confidence: 0.9 }; const res = [alt]; res.isFinal = true; const results = [res]; this.onresult && this.onresult({ results, resultIndex: 0 }); }
-    emitError(code) { this.onerror && this.onerror({ error: code }); }
-    emitEnd() { const f = this.onend; f && f({}); }
+    constructor() {
+      this.lang = ""; this.interimResults = true; this.maxAlternatives = 5; this.continuous = true; this.onresult = null; this.onerror = null; this.onend = null; this.started = false;
+      if (AS) { this.onaudiostart = null; this.onsoundstart = null; this.onspeechstart = null; this.onnomatch = null; }
+      this.__i = Q.instances.length; Q.instances.push(this); Q.last = this;
+    }
+    start() {
+      if (Q.throwOnStart) { Q.throwOnStart = false; L("start-throw", this); throw new DOMException("qa start failed", "InvalidStateError"); }
+      this.started = true; Q.starts++; L("start", this);
+      const self = this;
+      if (AS && typeof Q.autoMs === "number") setTimeout(() => { if (self.started && !self.__aborted && !self.__ended) self.emitAudioStart(); }, Q.autoMs);
+      // start() 回傳時刻：在呼叫端同步程式結束後的第一個微任務記錄
+      Promise.resolve().then(() => L("start-return", self));
+    }
+    stop() { Q.stops++; L("stop", this); const self = this; setTimeout(() => self.emitEnd(), 10); }
+    abort() { Q.aborts++; this.__aborted = true; L("abort", this); const self = this; setTimeout(() => { self.onerror && self.onerror({ error: "aborted" }); self.emitEnd(); }, 10); }
+    emitAudioStart() { L("audiostart", this); const f = this.onaudiostart; f && f({}); }
+    emitSoundStart() { L("soundstart", this); const f = this.onsoundstart; f && f({}); }
+    emitSpeechStart() { L("speechstart", this); const f = this.onspeechstart; f && f({}); }
+    emitNomatch() { L("nomatch", this); const f = this.onnomatch; f && f({ results: [] }); }
+    emitResult(text) { L("result", this); const alt = { transcript: text, confidence: 0.9 }; const res = [alt]; res.isFinal = true; const results = [res]; this.onresult && this.onresult({ results, resultIndex: 0 }); }
+    emitError(code) { L("error:" + code, this); this.onerror && this.onerror({ error: code }); }
+    emitEnd() { this.__ended = true; L("end", this); const f = this.onend; f && f({}); }
   }
   Object.defineProperty(window, "SpeechRecognition", { value: undefined, configurable: true, writable: true });
   Object.defineProperty(window, "webkitSpeechRecognition", { value: R, configurable: true, writable: true });
 })();
 `;
+}
+
+/**
+ * （第 10 輪）按麥克風並等待進入聆聽中；斷言「先準備中、後聆聽中」（architecture §10.12 Q2）。
+ * 支援 audiostart 時由替身自動觸發（預設 200 ms），不支援時等 T_FALLBACK（1500 ms）；最多等 maxMs。
+ * 回傳 { seq, ms }；沒有先經過準備中或逾時未進入聆聽中時拋出例外（呼叫端 TC 記失敗）。
+ */
+export async function micOnStrict(p, { sel = ".fc-front .sp-mic", maxMs = 3500, click } = {}) {
+  const n0 = await p.ev(`(window.__qaMicSeq || []).length`);
+  const t0 = Date.now();
+  if (click) await click(); else await p.click(sel);
+  let s = "";
+  while (Date.now() - t0 < maxMs) { s = await p.ev(`(() => { const b = document.querySelector(${JSON.stringify(sel)}); return b ? b.dataset.status : ""; })()`); if (s === "listening") break; await new Promise((r) => setTimeout(r, 25)); }
+  const seq = await p.ev(`(window.__qaMicSeq || []).slice(${n0}).map((x) => x.s)`);
+  if (s !== "listening") throw new Error(`micOnStrict：${maxMs} ms 內未進入聆聽中（狀態序列 ${seq.join("→")}）`);
+  const iP = seq.indexOf("preparing"), iL = seq.indexOf("listening");
+  if (iP < 0 || iL < iP) throw new Error(`micOnStrict：聆聽中之前沒有經過準備中（狀態序列 ${seq.join("→")}）`);
+  await new Promise((r) => setTimeout(r, 20));
+  return { seq, ms: Date.now() - t0 };
 }
 
 /** 剪貼簿：mode "ok"（記錄寫入內容）、"reject"、"missing" */

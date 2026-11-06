@@ -1,3 +1,4 @@
+// 第 11 輪：捲軸寬度改記 clientWidth 與 scrollbarGutter（PG 回饋 (c)：stable 時 innerWidth − clientWidth 恆為 15，不能判斷捲軸）。
 // 診斷（第 9 輪，AC-51-04、FE-89 回饋 2）：(1) 離線重新載入時 navigator.onLine 與廣告判定；(2) 廣告環境 header 位移的時序與捲軸寬度。不列入總表。
 import fs from "node:fs";
 import path from "node:path";
@@ -35,9 +36,9 @@ const rec = stateRecord(725, { sttNoticeAcknowledged: true, part5: { currentInde
 // header 位移：捲軸與 gutter 狀態
 for (const [name, dir] of [["廣告環境", built.site], ["第一階段", SITE]]) {
   server.setDir(dir);
-  const env = await newEnv(browser, { serviceWorkers: "block", width: 1366, height: 768, inits: [modeInit("filled"), seedInit(rec), LAYOUT_SHIFT_INIT, `window.__snap = []; const snap = (w) => { const de = document.documentElement; const h = document.querySelector(".app-header__inner"); window.__snap.push({ w, t: Math.round(performance.now()), env: de.getAttribute("data-ad-env"), gutter: de && getComputedStyle(de).scrollbarGutter, sbw: innerWidth - de.clientWidth, sh: de.scrollHeight, headerLeft: h ? h.getBoundingClientRect().left : null }); }; const tick = () => { snap("raf"); if (performance.now() < 900) requestAnimationFrame(tick); }; requestAnimationFrame(tick);`] });
+  const env = await newEnv(browser, { serviceWorkers: "block", width: 1366, height: 768, inits: [modeInit("filled"), seedInit(rec), LAYOUT_SHIFT_INIT, `window.__snap = []; const snap = (w) => { const de = document.documentElement; const h = document.querySelector(".app-header__inner"); window.__snap.push({ w, t: Math.round(performance.now()), env: de.getAttribute("data-ad-env"), gutter: de && getComputedStyle(de).scrollbarGutter, cw: de.clientWidth, sh: de.scrollHeight, headerLeft: h ? h.getBoundingClientRect().left : null }); }; const tick = () => { snap("raf"); if (performance.now() < 900) requestAnimationFrame(tick); }; requestAnimationFrame(tick);`] });
   await routeAd(env.ctx, "stub"); const page = await env.newPage(); await page.goto(PROD, { waitUntil: "load" }); await sleep(1000);
-  const snaps = await page.evaluate(() => window.__snap); const uniq = []; for (const s of snaps) { const k = `${s.env}|${s.sbw}|${s.headerLeft}`; if (!uniq.length || uniq[uniq.length - 1].k !== k) uniq.push({ ...s, k }); }
+  const snaps = await page.evaluate(() => window.__snap); const uniq = []; for (const s of snaps) { const k = `${s.env}|${s.gutter}|${s.cw}|${s.headerLeft}`; if (!uniq.length || uniq[uniq.length - 1].k !== k) uniq.push({ ...s, k }); }
   console.log(name, JSON.stringify(uniq.map(({ k, ...x }) => x))); console.log(name, "layout-shift", JSON.stringify(await page.evaluate(() => (window.__qaLS || []).map((e) => ({ t: e.t, v: +e.value.toFixed(4), s: e.sources.map((x) => x.name) })))));
   await env.ctx.close();
 }

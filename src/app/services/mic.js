@@ -1,5 +1,5 @@
 /*
- * services/mic.js — 麥克風服務（FE-36）
+ * services/mic.js — 麥克風服務（FE-36；v0.16 AudioContext suspended 補救 FE-95）
  * 依據：architecture.md v0.5 §7.14「隱私與 API 限制」「麥克風生命週期」「services/mic.js API」「錯誤對照（DS-03）」；
  *       契約 README §8 AC-21-03 列、§9.3 DS-02、DS-03；PRD US-33、Q-36
  * 涵蓋：AC-33-01～AC-33-07、AC-08-09、AC-21-03
@@ -22,6 +22,11 @@
  * - tracks() → 目前持有音軌陣列的複本（只供 V-MIC 在 DevTools 檢查，程式其他地方不得呼叫）
  * - create(globalObject)：以指定的全域物件建立獨立實例（Node 測試注入替身）
  * 載入時不操作 DOM、不呼叫任何瀏覽器 API（LD-2）；所有回呼例外都被攔下。
+ *
+ * v0.16（FE-95，architecture §7.28.4）：第 1 次按下時，speech-panel 等「準備中」畫出後才呼叫 acquire()，
+ * AudioContext 因此不在點按處理器內建立（仍在 acquire 同步階段、getUserMedia 之前建立）。
+ * 自動播放政策補救：建立後與 setupAnalyser 成功後，state 為 suspended 就 resume()（失敗吞掉），
+ * resume 不產生任何輸出；仍不連到喇叭輸出節點、不錄音。
  */
 (function (root, factory) {
   var api = factory(root);
@@ -273,7 +278,11 @@
       }
     }
 
-    /** 同步建立 AudioContext（仍在使用者點擊處理中，符合自動播放政策）；失敗回 null */
+    /**
+     * 同步建立 AudioContext（acquire 的同步階段、getUserMedia 之前）；失敗回 null。
+     * （v0.16，architecture §7.28.4）第 1 次按下時 acquire 改在「準備中」畫出後才呼叫，已不在點按處理器內；
+     * 依 sticky user activation 通常仍為 running，若為 suspended 由呼叫端 resumeIfSuspended 補救。
+     */
     function newContext() {
       try {
         var C = g && (g.AudioContext || g.webkitAudioContext);
@@ -281,6 +290,18 @@
         return new C();
       } catch (e) {
         return null;
+      }
+    }
+
+    /**
+     * （v0.16，§7.28.4）AudioContext 為 suspended 時呼叫 resume()；同步例外與 Promise 拒絕都吞掉、不記錄。
+     * resume 不產生任何輸出；仍失敗時只有收音條讀到靜音，辨識照常（AC-33-07 同一原則）。
+     */
+    function resumeIfSuspended(c) {
+      try {
+        if (c && c.state === "suspended" && typeof c.resume === "function") swallow(c.resume());
+      } catch (e) {
+        /* 忽略 */
       }
     }
 
@@ -331,6 +352,7 @@
 
         var myEpoch = epoch;
         ctx = newContext();
+        resumeIfSuspended(ctx); // v0.16 呼叫點 (1)：建立後立即
         var myCtx = ctx;
 
         var p = new Promise(function (resolve) {
@@ -363,6 +385,8 @@
               for (var j = 0; j < ts.length; j++) bindEnded(s, ts[j]);
               bindPagehide();
               var metering = setupAnalyser(s);
+              // v0.16 呼叫點 (2)：擷取音訊進行中再補救 1 次（Safari 等較可能允許）
+              if (metering) resumeIfSuspended(ctx);
               resolve({ ok: true, reused: false, metering: metering });
             },
             function (err) {

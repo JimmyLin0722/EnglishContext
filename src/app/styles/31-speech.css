@@ -7,6 +7,8 @@
  * 規則：燈號同時以文字（綠燈／黃燈／紅燈）表示，不只靠顏色辨識。
  *       收音條是狀態顯示不是動畫：.sp-meter__bar 一律無 transition、無 animation（A-6）。
  * （v0.12，FE-59；§7.19.7）只換配色：面板分隔線 --border → --line；收音條暗格維持 --border、亮格 --correct。
+ * （v0.15，FE-92；architecture §7.26.7）準備中 .sp-mic.is-preparing：只換顏色，不改尺寸、無動畫（AC-58-13）；
+ *       辨識文字值可在任意位置換行（AC-60-06）。
  */
 
 .sp-panel {
@@ -62,6 +64,21 @@
 
 .sp-mic.is-listening .sp-mic__dot {
   background: #ffffff;
+}
+
+/* 準備中（v0.15，AC-58-01、AC-58-13）：不用聆聽中的紅色與閃爍；只改顏色，
+ * 不改邊框粗細、內距與最小寬度（8.5em 可容納「準備中」），切換狀態時座標不變。
+ * 文字 --brand-deep（#0866ad）對白底 --surface 的對比 5.98:1（AC-38-04 一般文字 ≥ 4.5:1）。 */
+.sp-mic.is-preparing {
+  border-color: var(--brand);
+  background: var(--surface);
+  color: var(--brand-deep);
+  animation: none;
+  transition: none;
+}
+
+.sp-mic.is-preparing .sp-mic__dot {
+  background: var(--brand);
 }
 
 @keyframes sp-blink {
@@ -271,4 +288,6 @@
   margin: 0;
   font-weight: 600;
   min-width: 0;
+  /* 60 字元無空白的辨識文字也可換行，不產生水平捲軸（AC-60-06） */
+  overflow-wrap: anywhere;
 }

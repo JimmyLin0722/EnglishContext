@@ -1,0 +1,11 @@
+  PASS TC-33-01a AC-33-01（自動化代理：getUserMedia 呼叫次數） 5 次按下的狀態 listening、listening、listening、listening、listening；getUserMedia 呼叫：第 1 次後 1、5 次後 1；SpeechRecognition.start 5 次；說明視窗 0 次；仍持有麥克風=true（真實權限詢問次數列 V-MIC-1）
+  PASS TC-33-03 AC-33-03 待機 5 格、可見=true、00000；聆聽中 11100（亮格連續=true）；麥克風按鈕位置不變=true；音量讀取 13 次、間隔 ms 最大 51（中位數 50.1）；結束後回到全暗 結果 1.4ms/00000/idle、逾時 0.6ms/00000/idle、無結果 0.6ms/00000/idle、錯誤 1.1ms/00000/idle、再按停止 74.7ms/00000/idle
+  PASS TC-33-04 AC-33-04 門檻 T1～T5 = -50、-40、-30、-20、-10 dBFS（Q-37 預設）；測試音源 -55、-45、-35、-25、-15、-5 dBFS → 亮格 0、1、2、3、4、5；靜音 → 0
+  PASS TC-33-02a AC-33-02（自動化代理：音軌停止） 導覽→主控台：離開前 live 1 → 離開後 live 0、持有 0、171ms 內；導覽→難易度設定：離開前 live 1 → 離開後 live 0、持有 0、230ms 內；頁尾→資料來源與授權：離開前 live 1 → 離開後 live 0、持有 0、207ms 內；回單字卡頁再按：getUserMedia 3 → 4、listening；重新整理：pagehide 時音軌 ended,ended,ended,ended、持有 0（瀏覽器麥克風使用中圖示、關閉分頁列 V-MIC-2）
+  PASS TC-08-09b AC-08-09（getUserMedia 權限被拒） 「需要麥克風權限 開啟方式：點網址列左側的圖示（鎖頭或資訊圖示），將「麥克風」設為允許，再按一次麥克風按鈕。」、idle、收音條 00000、分數=false；SpeechRecognition.start 0→0；再按會重新嘗試 getUserMedia 1→2；例外 0（真實權限「封鎖」列 V-MIC-4）
+  PASS TC-33-05 AC-33-05 「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、idle、收音條 00000、分數=false、辨識開始 0 次、例外 0（實機拔除列 V-MIC-5）
+  PASS TC-33-06 AC-33-06 (a) 拔除後再按（仍有麥克風）：getUserMedia 1→2、listening；(a) 拔除後再按（無麥克風）：「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、idle、00000；(b) 聆聽中拔除（前 listening/11100）：2.4ms 回到 idle/00000、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、分數=false；例外 0（實機拔除列 V-MIC-5）
+  PASS TC-33-07 AC-33-07 missing：listening、收音條 00000、訊息「」、辨識開始 1、評分顯示=true；nogum：listening、收音條 00000、訊息「」、辨識開始 1、評分顯示=true；notreadable：listening、收音條 00000、訊息「」、辨識開始 1、評分顯示=true
+  PASS TC-33-08 AC-33-08、AC-31-03（聆聽中） prefers-reduced-motion=true；聆聽中按鈕 animation=none/0s、文字「聆聽中」；收音條 transition=0s、animation=none；音量 −25/−5/−45 dBFS → 11100/11111/10000（實機列 V-MIC-3）
+  PASS TC-21-03b AC-21-03（執行期，v0.9 收音條） localStorage 鍵 englishMasterTrack:state；data 欄位 customVocab,flashcardPosition,goal,learnedHistory,masteredWordKeys,part5,part5CorrectIds,part5UnansweredOnly,streak,sttNoticeAcknowledged,todayLearned,vocabQuiz；含音訊／音量樣式字串=false；IndexedDB []；Cache Storage []；下載 0 個；非 file: 網路請求 0
+  PASS TC-X-mic （全套件）無未處理例外 例外：[]

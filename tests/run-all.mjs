@@ -39,7 +39,7 @@ const rebuilt = path.join(TMP, "rebuilt.html");
 spawnSync(process.execPath, ["tools/build.mjs", "--out", rebuilt], { cwd: ROOT, stdio: "ignore" });
 run(["tests/static/static-check.mjs", path.join(RES, "static.json"), rebuilt]);
 run(["tests/static/boundary-check.mjs", path.join(RES, "boundary.json")]);
-run(["tests/static/boundary-r9.mjs", path.join(RES, "boundary-delta.json")]);
+run(["tests/static/boundary-r10.mjs", path.join(RES, "boundary-delta.json")]); // 第 10 輪：與 a358556 比對（FE-90～FE-94）
 run(["tests/static/mail-scan.mjs", path.join(RES, "mail-scan.json")]);
 run(["tests/static/site-check.mjs", path.join(RES, "site-check.json")]);
 run(["tests/static/legal-check.mjs", path.join(RES, "legal.json")]);
@@ -77,11 +77,15 @@ run(["tests/e2e/e2e-site.mjs"]);
 run(["tests/e2e/e2e-ad.mjs"]);
 run(["tests/e2e/e2e-ad-extra.mjs"]);
 run(["tests/e2e/e2e-ad-perf.mjs"]);
-run(["tests/e2e/diag-r9-focus.mjs"]);
+// 第 10 輪（PRD v0.20 R-29）：語音準備中、訊息分流、辨識文字（V-STT-STUB）；窄視窗鍵盤焦點（取代 diag-r9-focus）；1.3.0 舊資料相容；不支援 audiostart 替身重跑（-noas 結果另列）
+run(["tests/e2e/e2e-stt-flow.mjs"]);
+run(["tests/e2e/diag-r10-focus.mjs"]);
+run(["tests/e2e/e2e-compat-r10.mjs"]);
+for (const s of ["e2e-speech", "e2e-mic", "e2e-env", "e2e-progress", "e2e-reinit", "e2e-motion"]) run([`tests/e2e/${s}.mjs`], { QA_STT_AUDIOSTART: "0" });
 
 // 4. 彙整（-edge.json 為跨瀏覽器重跑，於報告以 TC-X-edge 一項計）
 const all = [];
-for (const f of fs.readdirSync(RES).filter((x) => x.endsWith(".json") && !x.endsWith("-edge.json") && !["summary.json", "records.json", "boundary.json", "boundary-delta.json"].includes(x))) {
+for (const f of fs.readdirSync(RES).filter((x) => x.endsWith(".json") && !x.endsWith("-edge.json") && !x.endsWith("-noas.json") && !["summary.json", "records.json", "boundary.json", "boundary-delta.json"].includes(x))) {
   const arr = JSON.parse(fs.readFileSync(path.join(RES, f), "utf8"));
   if (Array.isArray(arr)) for (const r of arr) all.push({ file: f, ...r });
 }

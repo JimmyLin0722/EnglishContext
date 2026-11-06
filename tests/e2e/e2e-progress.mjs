@@ -4,12 +4,13 @@
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
-import { TOAST_RECORDER, fakeTts, fakeStt, storageMode, controllableClock, fakeMic } from "./lib/inits.mjs";
+import { TOAST_RECORDER, fakeTts, fakeStt, storageMode, controllableClock, fakeMic, micOnStrict } from "./lib/inits.mjs";
 import { injectTpl } from "./lib/state.mjs"; // 第 6 輪：範本按鈕隱藏（AC-43-01）
 // 第 3 輪（PRD v0.9／v0.10）：主控台目標區 3 項（無目標分數）；改點卡片套用；按麥克風先取得麥克風（fakeMic）
 // 第 5 輪（PRD v0.13）：主控台改版（US-39）：主環形圖中央只顯示 X（SD-FB-40）、2 個小環形圖改為 3 格數據的數字（AC-30-01、AC-30-10）、
 // 近 7 天全 0 改顯示空狀態「開始學習後會顯示紀錄」（AC-30-12、AC-39-07）
-async function micOn(p) { await p.click(".fc-front .sp-mic"); for (let i = 0; i < 40; i++) { if ((await p.ev(`document.querySelector(".fc-front .sp-mic").dataset.status`)) === "listening") break; await sleep(25); } }
+// 第 10 輪（v0.20 US-58）：先準備中，替身 audiostart 或 T_FALLBACK 後才聆聽中；未經準備中即拋出（architecture §10.12 Q2）
+async function micOn(p) { return micOnStrict(p); }
 async function applyCard(p, c) { await p.go("customizer"); await p.click(`.cz-level[data-color="${c}"]`); await p.click("#cz-apply"); await sleep(80); }
 
 const R = recorder("e2e-progress");

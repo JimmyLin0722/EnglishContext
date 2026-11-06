@@ -4,7 +4,7 @@
     "tc": "TC-44-01-375",
     "ac": "AC-44-01、AC-39-03、AC-22-01、FP-3、FP-8",
     "result": "通過",
-    "note": "375px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 1.2 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」1.8 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
+    "note": "375px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 1.3 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」13.4 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
   },
   {
     "suite": "e2e-track",
@@ -18,7 +18,7 @@
     "tc": "TC-44-02",
     "ac": "AC-44-02、AC-28-03、FP-3",
     "result": "通過",
-    "note": "上一張 3 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it；向右滑動 15.7 ms →「第 8 / 5620 張」have（setItem 1 次、紀錄 {\"wordKey\":\"have\",\"ordinal\":8}）→ 重新載入「第 8 / 5620 張」have；下一張 2 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it"
+    "note": "上一張 1.7 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it；向右滑動 16.3 ms →「第 8 / 5620 張」have（setItem 1 次、紀錄 {\"wordKey\":\"have\",\"ordinal\":8}）→ 重新載入「第 8 / 5620 張」have；下一張 1.6 ms →「第 9 / 5620 張」it（setItem 1 次、紀錄 {\"wordKey\":\"it\",\"ordinal\":9}）→ 重新載入「第 9 / 5620 張」it"
   },
   {
     "suite": "e2e-track",
@@ -39,7 +39,7 @@
     "tc": "TC-44-01-1366",
     "ac": "AC-44-01、AC-39-03、AC-22-01、FP-3、FP-8",
     "result": "通過",
-    "note": "1366px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 1.3 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」2.4 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
+    "note": "1366px：按「下一張」9 次到第 10 張「you」，localStorage flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}；關閉重開後 (a) 導覽進入 1.2 ms →「第 10 / 5620 張」「you」正面=true、上一張停用=false、下一張停用=false、對話框=false、Toast []；(b)「開始今日學習」2.2 ms →「第 10 / 5620 張」「you」、對話框=false、Toast []"
   },
   {
     "suite": "e2e-track",
@@ -137,7 +137,7 @@
     "tc": "TC-47-02",
     "ac": "AC-47-02、AC-24-02（v0.15）、AC-46-10（備份）、AC-25-10、AC-24-03、AC-32-08、FP-6",
     "result": "通過",
-    "note": "匯出 english-master-track-backup-20261105.json：頂層 5 欄、schemaVersion 3、data 欄位 goal,customVocab,masteredWordKeys,vocabQuiz,part5,streak,sttNoticeAcknowledged,todayLearned,learnedHistory,flashcardPosition,part5CorrectIds,part5UnansweredOnly；flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}、part5CorrectIds [\"p5-001\",\"p5-005\",\"p5-010\"]、開關 true；(a) 首次畫面「從備份還原」：確認視窗「匯入將覆蓋目前所有進度」（非 US-32 初始化視窗=true）；12 欄與匯出前相同=true；重新載入後不變=true；「第 10 / 2810 張」you、「已答對 3 / 200 題」、開關 true；(b) 開始學習後主控台匯入：確認視窗「匯入將覆蓋目前所有進度」（非 US-32 初始化視窗=true）；12 欄與匯出前相同=true；重新載入後不變=true；「第 10 / 2810 張」you、「已答對 3 / 200 題」、開關 true"
+    "note": "匯出 english-master-track-backup-20261106.json：頂層 5 欄、schemaVersion 3、data 欄位 goal,customVocab,masteredWordKeys,vocabQuiz,part5,streak,sttNoticeAcknowledged,todayLearned,learnedHistory,flashcardPosition,part5CorrectIds,part5UnansweredOnly；flashcardPosition {\"wordKey\":\"you\",\"ordinal\":10}、part5CorrectIds [\"p5-001\",\"p5-005\",\"p5-010\"]、開關 true；(a) 首次畫面「從備份還原」：確認視窗「匯入將覆蓋目前所有進度」（非 US-32 初始化視窗=true）；12 欄與匯出前相同=true；重新載入後不變=true；「第 10 / 2810 張」you、「已答對 3 / 200 題」、開關 true；(b) 開始學習後主控台匯入：確認視窗「匯入將覆蓋目前所有進度」（非 US-32 初始化視窗=true）；12 欄與匯出前相同=true；重新載入後不變=true；「第 10 / 2810 張」you、「已答對 3 / 200 題」、開關 true"
   },
   {
     "suite": "e2e-track",

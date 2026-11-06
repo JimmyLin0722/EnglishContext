@@ -1,13 +1,19 @@
 ---
 doc: ARCH
-version: 0.14
+version: 0.16
 status: approved
 author: sd-agent
-approved_by: JimmyLin（對話中授權「核准 PRD v0.19，測完直接推」，主控代核）
-approved_at: 2026-11-05
+approved_by: JimmyLin（授權主控代核；修 BUG-006／007／008，不改 PRD、不改持久化結構）
+approved_at: 2026-11-06
 ---
 
 # English Master Track — 系統架構與設計
+
+> **v0.16 上游**：與 v0.15 相同（PRD v0.20、契約 v0.20，皆 approved，**本版不改**）；輸入另加 QA 缺陷 `docs/04-qa/bug-reports/BUG-006.md`（AC-52-05）、`BUG-007.md`（AC-58-01）、`BUG-008.md`（AC-60-06）。搭配 `docs/03-design/tasks.json` v0.15（共 123 個任務：既有 120 個全部 `done` 不變；v0.16 新增 FE-95～FE-97 共 3 個，見 §12.15；不新增 MC 項目）。
+> **v0.16 增量導讀**（只修 3 張 BUG，不改 PRD、契約、持久化結構，網站版本維持 1.3.1、尚未發布）：(1) BUG-007：第 1 次按麥克風時，`speech-panel.js` 先設「準備中」，等下一個畫格畫出後才呼叫 `mic.acquire()`（`AudioContext` 建構約 110 ms 不再擋住畫面）；`services/mic.js` 建立後若為 `suspended` 就 `resume()`（§7.28）。(2) BUG-006、BUG-008：根元素無條件 `html { scrollbar-gutter: stable; }`（`00-base.css`），移除 `85-ad.css` 的 `html[data-ad-env]` 規則（§7.29）。**改讀規則**：§7.25.3 DS-48 表的 `html[data-ad-env]` 列、T-108、SD-FB-80、§10.11「給 QA 的已知設計行為」(4)，現行一律以 §7.29 為準；§7.26.9 與 §12.14 的「`services/mic.js` 不改」只適用 v0.15 任務，FE-95 起以 §7.28 為準；§7.14「同步建立 AudioContext（仍在使用者點擊處理中）」現行以 §7.28.4 為準；`services/ad.js:8` 檔頭註解「SD-FB-80 的 scrollbar-gutter 依此生效」已過時，`ad.js` 本版不改，以本文件為準。同步修訂 §1、§3.3（D-21）、§4.14、§5.11、§7.28、§7.29、§10.13、§11（T-125～T-131）、§12.15、§13.13、§15（SD-FB-93～SD-FB-97）。
+
+> **v0.15 上游**：`docs/01-PRD.md` v0.20（approved，JimmyLin，2026-11-05；R-29，Q-94～Q-102 全採 PM 建議）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.20（approved，主控代核，2026-11-05；§14 PR／MS／RT／KF／V-STT、§9 DS-57～DS-63、FB-76～FB-79、data-schema §18，持久化結構不變）、`storage-schema.json` 維持 v0.16（無實質變動）。搭配 `docs/03-design/tasks.json` v0.14（共 120 個任務：既有 115 個全部 `done` 不變；v0.15 新增 FE-90～FE-94 共 5 個，主控手動項目 MC-09，見 §12.14）。
+> **v0.15 增量導讀**：麥克風「準備中」狀態機、無文字訊息分流、三種燈號都顯示辨識文字（§7.26）；窄視窗鍵盤焦點 BUG-005（§7.27）。時間常數定案 `T_READY` 5000 ms、`T_BUFFER` 0 ms、`T_FALLBACK` 1500 ms（§7.26.1）。`services/stt.js` 新增 4 種事件回呼與 8 欄 `SttEndInfo`（§4.13、§7.26.2）；`state/store.js` 的 `setSttStatus` 加子階段參數（§4.13）；狀態機、訊息判定與分數區文字列都在 `views/speech-panel.js`（§7.26.3～§7.26.8）；焦點修正用 `html` 的 `scroll-padding-bottom`（§7.27）。**不新增模組、不改建置程式**：部署目錄仍 13 檔、預先快取 7 項，`static.yml` 不改；**持久化結構不變**（`schemaVersion` 3、鍵數 2、備份格式不變）；`src/data/` 不變、不建 CT 任務（DS-63）。`package.json` 改為 1.3.1 由主控 MC-09 執行（Q-102 A）。**改讀規則**：§7.6 的 STT 流程、§7.14 生命週期圖中的「取得中（acquiring，按鈕再按忽略）」「按下後立即聆聽中」「無結果一律『未偵測到語音』」，以及 §7.14 speech-panel 表的「`SttStatus` 不變（`idle`／`notice`／`listening`）」，現行一律以 §7.26 為準；§7.25.6 與 `75-site-pages.css` 的 `scroll-margin-bottom` 說明，現行以 §7.27 為準。已完成任務的歷史敘述不逐字回改。同步修訂 §1、§3.2（D-20）、§4.13、§5.10、§7.26、§7.27、§10.12、§11（T-115～T-124）、§12.14、§13.12、§14、§15（SD-FB-85～SD-FB-92）。
 
 > **v0.14 上游**：`docs/01-PRD.md` v0.19（approved，JimmyLin，2026-11-05；R-27、R-28）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.19（approved，主控代核，2026-11-05；§13、§9.12 DS-47～DS-56、data-schema §17，持久化結構不變）、`storage-schema.json` 維持 v0.16（無實質變動）。搭配 `docs/03-design/tasks.json` v0.13（共 115 個任務：既有 108 個全部 `done` 不變；v0.14 新增 FE-83～FE-89 共 7 個，主控手動項目 MC-07、MC-08，見 §12.13）。
 > **v0.14 增量導讀**：已答對顯示（§7.25.1～§7.25.2）、廣告框架（§7.25.3～§7.25.4，第一階段 `adSlotId = null`，零廣告請求）、頁尾與應用內三頁（§7.25.5～§7.25.6）、單一文案來源與靜態頁（§7.25.7～§7.25.8）、SEO 與爬蟲檔的建置（§5.9）、信箱（§7.25.9）。新增模組 `core/site-content.js`、`core/ad.js`、`services/ad.js`、`ui/ad-slot.js`、`ui/site-return.js`、`views/site-pages.js`、`tools/site-pages.mjs`（§3.1、§4.12）。**持久化結構不變**（`schemaVersion` 3、鍵數 2、備份格式不變、無遷移）；`src/data/` 不變、不建 CT 任務（DS-56）。**改讀規則**：(1) v0.13 以前段落提到「部署目錄 8 檔」「`<title>EnglishContext</title>`」「`ALLOWED_STATIC_TAGS` 只有 1 項」，現行一律以 §5.9 為準；(2) 提到「模擬測驗正確率」「累計答對」「`statAccuracyLabel`」「`#footer-first-run-back`」，現行以 §7.25 為準；(3) 提到「`SOURCES_CONTACT_TEXT` 位於 `views/sources-page.js`」，現行以 §7.25.7 為準；已完成任務的歷史敘述不逐字回改。**待人類決定**：部署 workflow 的檔案數檢查寫死 8，須另行授權修改（SD-FB-77、MC-08）。同步修訂 §1、§3.1、§4.12、§5.9、§7.21.4、§7.22.2、§7.24.3、§7.25、§10.8、§10.11、§11（T-104～T-114）、§12.13、§13.11、§14、§15（SD-FB-77～SD-FB-84）。
@@ -83,6 +89,17 @@ approved_at: 2026-11-05
 | （v0.14）路由 | `TabId` 加 3 個值；`runtime.sitePageReturnTab` 由 `store.setTab` 維護；移除 `#footer-first-run-back`，4 個頁面共用返回按鈕；`#sources` 開啟後以 `replaceState` 移除片段 | SP-1～SP-6、DS-50 |
 | （v0.14）建置 | SEO 與 `<noscript>` 在計算 BUILD_ID 前寫入；`ALLOWED_STATIC_TAGS` 只加逐字的 canonical；部署目錄 13 檔；預先快取 7 項不變 | SE-1～SE-9、DP-1、DP-8～DP-10、DS-55 |
 | （v0.14）交付物 | MC-07 把 `package.json` 改為 1.3.0 後，FE-89 由原始碼重新建置 `dist/` | Q-85 A、DS-53、AC-42-02 |
+| （v0.15）準備中 | 按下即 `preparing`（子階段 `acquiringMic` → `awaitingAudioStart` 或 `fallbackWait`），收到 `audiostart`（+ `T_BUFFER`）、`soundstart`、`speechstart` 或後備時間到才 `listening` 並點亮收音條；準備中再按 = 取消（`abort`） | PR-1～PR-12、US-58 |
+| （v0.15）嘗試代號 | 沿用 `speech-panel.js` 的 `gen`：每次進入準備中先 `gen++`，代號 = 當時的 `gen`；取消、換卡、離開、逾時都以 `gen++` 讓遲到事件、計時器、取得麥克風完成一律失效；`acquiringGen` 只剩「取得中」的判斷用途，不再用來忽略再按 | PR-8、PR-9、DS-58、DS-59 |
+| （v0.15）時間常數 | `T_READY` 5000、`T_BUFFER` 0、`T_FALLBACK` 1500（ms，皆契約預設）；唯一來源 `speech-panel.js` `TIMING`；主控可在 `STT_TIMING` 範圍內代核調整 | PR-11、DS-60、Q-94～Q-96 |
+| （v0.15）訊息分流 | 純函式 `outcomeOf` 實作 MS-1，每次嘗試只在第一個終結點判定 1 次（MS-2）；服務只回報事件與旗標，訊息由畫面模組決定 | MS-1～MS-6、US-59 |
+| （v0.15）辨識文字 | `resultModel` 依 `STT_RESULT_ROWS` 產生文字列：綠、黃 1 列，紅燈 2 列；仍以 `textContent` 寫入 | RT-1～RT-6、US-60 |
+| （v0.15）鍵盤焦點 | ≤ 640px 時 `html { scroll-padding-bottom: 導覽高度 + 安全區 + 8px }`，一次涵蓋 4 個功能區；`75-site-pages.css` 改為只補首次畫面的差額，避免重複加總 | KF-1、US-61、BUG-005 |
+| （v0.15）交付物 | MC-09 把 `package.json` 改為 1.3.1 後，FE-94 由原始碼重新建置 `dist/`；13 檔、預先快取 7 項不變 | Q-102 A、DS-63、AC-42-02 |
+| （v0.16）準備中先畫出 | 尚未持有音軌時，`beginAttempt` 設「準備中」後以 `requestAnimationFrame` + `setTimeout(0)` 等到畫面畫出（後備 50 ms）才 `mic.acquire()`；已持有音軌時照舊同步。延後期間取消、換卡、離頁以既有 `gen`／`live(id)` 失效，`getUserMedia` 不會被呼叫 | BUG-007、AC-58-01、§7.28 |
+| （v0.16）AudioContext 補救 | `mic.js` 建立 `AudioContext` 後、取得音軌後，狀態為 `suspended` 就 `resume()`（失敗吞掉）；收音條無法動不影響辨識 | AC-33-03、AC-33-07、§7.28.4 |
+| （v0.16）捲軸寬度固定 | `html { scrollbar-gutter: stable; }` 無條件生效；傳統捲軸環境右側恆保留捲軸寬度，捲軸出現或消失都不改變內容寬度；覆蓋式捲軸（手機、macOS 預設）無影響 | BUG-006、BUG-008、AC-52-05、AC-60-06、§7.29 |
+| （v0.16）交付物 | 版本維持 1.3.1（尚未發布），FE-97 重新建置 `dist/`，BUILD_ID 隨內容改變 | AC-42-02、AC-36-07 |
 
 ---
 
@@ -434,6 +451,46 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | `.github/workflows/static.yml` | 主控 | MC-08 | **須人類授權**（SD-FB-77） |
 
 **D-19**：`index.html`、`__tests__/shell.test.js` 由 FE-85 → FE-86 依序修改；`styles/10-dashboard.css`、`styles/85-ad.css`、`styles/75-site-pages.css`、`site/static-page.css` 由原任務 → FE-89 依序修改，FE-89 只有實測不合格才可改版面規則；其他檔案各屬 1 個 v0.14 任務。`tests/`、`docs/04-qa/` 不派給 PG，`tests/static/legal-check.mjs` 歸 QA。
+
+### 3.2 v0.15 目錄增量（FE-90～FE-94）
+
+（`src/app/` 前綴省略，`dist/` 除外。「新」為新增檔案。**不新增任何執行期模組**，`index.html` 與建置不變。）
+
+| 檔案 | 層 | 任務 | 內容 |
+| :--- | :--- | :--- | :--- |
+| `services/stt.js` | L3 | FE-90 | 新增 `onAudioStart`、`onSoundStart`、`onSpeechStart`、`onNomatch` 回呼；`SttEndInfo` 8 欄；`start()` 回傳 `audioStartSupported`；`detach` 清 7 個處理器 |
+| `__tests__/speech.test.js` | 測試 | FE-90 → FE-92 | FE-90 只改服務部分（`:159` 起）；FE-92 改面板部分 |
+| `state/store.js`、`__tests__/store.test.js` | L2 | FE-91 | `STT_STATUSES` +`"preparing"`；`runtime.speech.preparingPhase`；`setSttStatus(status, phase)` |
+| `views/speech-panel.js` | L5 | FE-92 | 準備中狀態機、`TIMING`、`outcomeOf`、文字、`resultModel` 文字列 |
+| `styles/31-speech.css` | 樣式 | FE-92 → FE-94 | `.sp-mic.is-preparing`；`.sp-compare__value` 換行。FE-94 只在實測不合格時改 |
+| `__tests__/speech-flow.test.js`（新） | 測試 | FE-92 | V-STT-01～V-STT-10 的單元測試（假時鐘、事件順序） |
+| `__tests__/_speech-env.js`（新，選用） | 測試輔助 | FE-92 | 若兩個測試檔共用語音面板沙箱，抽到這裡；檔名以 `_` 開頭，不是測試檔 |
+| `styles/00-base.css`、`styles/75-site-pages.css` | 樣式 | FE-93 → FE-94 | `html` 的 `scroll-padding-bottom`；首次畫面改為差額。FE-94 只在實測不合格時改 |
+| `__tests__/focus-scroll.test.js`（新） | 測試 | FE-93 | 樣式規則靜態檢查 |
+| `ui/bottom-nav.js` | L4 | FE-93（條件） | **只在** CSS 實測不合格時加後備捲動（§7.27.3）；合格就不改 |
+| `dist/` 下 14 檔 | 產物 | FE-94 | 只由 `npm run build` 產生 |
+| `package.json` | 主控 | MC-09 | 只改 `version` 為 1.3.1 |
+
+**D-20**：`__tests__/speech.test.js` 由 FE-90 → FE-92 依序修改；`styles/31-speech.css` 由 FE-92 → FE-94、`styles/00-base.css` 與 `styles/75-site-pages.css` 由 FE-93 → FE-94 依序修改，FE-94 只有實測不合格才可改版面規則；其他檔案各屬 1 個 v0.15 任務。`views/flashcards.js` **不改**（翻面、換卡、切換模式已經呼叫 `speechPanel.reset()`，準備中的處理全在面板內）。`tests/`、`docs/04-qa/`、`.github/` 不派給 PG。
+
+### 3.3 v0.16 目錄增量（FE-95～FE-97；BUG-006、BUG-007、BUG-008）
+
+（`src/app/` 前綴省略，`dist/` 除外。「新」為新增檔案。不新增執行期模組，`index.html` 與建置程式不變。）
+
+| 檔案 | 層 | 任務 | 內容 |
+| :--- | :--- | :--- | :--- |
+| `views/speech-panel.js` | L5 | FE-95 | `beginAttempt` 延後取得（`afterPaint`）；`att.timers` 加 `frame`、`paint`；`logic` 匯出 `PAINT_FALLBACK_MS`（§7.28.3） |
+| `services/mic.js` | L3 | FE-95 | `resumeIfSuspended`：建立後與 `setupAnalyser` 成功後各呼叫 1 次；檔頭與 `newContext` 註解改寫（§7.28.4） |
+| `__tests__/_speech-env.js` | 測試輔助 | FE-95 | 新增選項 `raf`：注入假 `requestAnimationFrame`／`cancelAnimationFrame`，`env.frame()` 執行 1 個畫格；`fakeMic` 加 `active` 選項 |
+| `__tests__/speech-flow.test.js` | 測試 | FE-95 | 延後取得的案例（§10.13） |
+| `__tests__/mic.test.js` | 測試 | FE-95 | `suspended` → `resume` 的案例；既有「`AudioContext` 在 acquire 同步階段建立」**保留不改** |
+| `styles/00-base.css` | 樣式 | FE-96 | 既有媒體查詢外的 `html` 規則加 `scrollbar-gutter: stable` |
+| `styles/85-ad.css` | 樣式 | FE-96 | 刪除 `html[data-ad-env]` 規則與註解；改寫檔頭依據 |
+| `__tests__/ad-slot.test.js` | 測試 | FE-96 | `:1026` 案例改為「`85-ad.css` 不含 `scrollbar-gutter`、沒有 `html[data-ad-env]` 規則」 |
+| `__tests__/scrollbar-gutter.test.js`（新） | 測試 | FE-96 | 全部樣式檔只有 `00-base.css` 媒體查詢外的 `html` 規則有 `scrollbar-gutter: stable`；樣式檔沒有 `100vw` |
+| `dist/` 下 14 檔 | 產物 | FE-97 | 只由 `npm run build` 產生 |
+
+**D-21**：FE-95 與 FE-96 的 paths 不重疊，可平行；FE-97 在兩者之後，只寫 `dist/`。`services/ad.js`、`views/flashcards.js`、`package.json` 不改；`tests/`、`docs/04-qa/`、`.github/` 不派給 PG。
 
 ---
 
@@ -841,6 +898,47 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | `tools/site-pages.mjs` | `escapeHtml`、`renderHomeHead(site, ad)`、`renderNoscript(site)`、`renderStaticPage(page, site, css)`、`checkStaticPage(html, page, ad)` | 純函式；輸出換行一律 LF；不讀時間、亂數、環境變數 |
 | `tools/build.mjs` | `build({ adSlotIdOverride })`；`loadSiteContent(appDir)`、`loadAdCore(appDir)`：`appDir/core/` 有檔案就用，否則用專案檔；`ALLOWED_STATIC_TAGS` 2 項 | `parseArgs` **不接受**單元 ID 參數 |
 
+### 4.13 v0.15 修改的模組介面
+
+本節全部不持久化：不新增 localStorage 鍵與欄位、不新增 window 全域變數；`SpeechRecognition` 實例、計時器、事件物件、`SttEndInfo` 不得放進 store（契約 §10 RuntimeState 禁放規則）。
+
+**`EMT.services.stt`（FE-90）**
+
+| API | 約定 |
+| :--- | :--- |
+| `start(opts) → { ok: true, audioStartSupported: boolean } ｜ { ok: false, reason: "unsupported" ｜ "offline" ｜ "error" }` | `opts` = `{ lang, onAudioStart(info), onSoundStart(info), onSpeechStart(info), onResult(text, info), onNomatch(info), onError(code, info), onEnd(info) }`；全部選填。`info` 是當下 `SttEndInfo` 的**複本**（呼叫端改它不影響服務）。`audioStartSupported` 判定見 §7.26.2 |
+| `SttEndInfo`（8 欄） | `manual`、`hadResult`、`hadError`（語意同 v1.3.0）＋ `audioStarted`、`soundStarted`、`speechDetected`、`nomatch`、`errorCode`（第一個非手動 `aborted` 的錯誤代碼，否則 `null`）。每次 `start()` 都是新物件、全部初始值（`false`／`null`） |
+| `stop()`、`abort()`、`isListening()`、`isSupported()`、`isOnline()`、`transcriptOf(ev)`、`create(g)` | 不變。`abort()` 解除 7 個處理器後才呼叫 `rec.abort()`，之後任何事件都不回呼 |
+
+**`store.actions`（FE-91）**
+
+| API | 約定 |
+| :--- | :--- |
+| `setSttStatus(status, phase?)` | `status` 必須是 `STT_STATUSES`（`idle`、`notice`、`preparing`、`listening`）之一，否則忽略。`status = "preparing"` 時 `phase` 必須是 `acquiringMic`、`awaitingAudioStart`、`fallbackWait` 之一，否則忽略整次呼叫；其他狀態 `preparingPhase` 一律寫 `null`（忽略 `phase`）。狀態與子階段都沒變就不通知；有變就 `commit(..., ["speech"])`，`setItem` 0 次 |
+| `runtime.speech` | 新增 `preparingPhase: null`（啟動、重新載入一律 `null`）；欄位集合 = `ttsSupported`、`sttSupported`、`sttStatus`、`preparingPhase`、`lastResult` |
+
+**`EMT.components.speechPanelLogic`（FE-92；Node 以 `module.exports` 匯出）**
+
+| 匯出 | 約定 |
+| :--- | :--- |
+| `TEXT` | 新增 `micPreparing`、`micPreparingLabel`、`heardNoWords`、`noResponse`；其餘逐字不變（§7.26.8） |
+| `TIMING` | 凍結物件 `{ readyTimeoutMs: 5000, bufferMs: 0, fallbackMs: 1500 }`（§7.26.1） |
+| `outcomeOf(input)` | MS-1 純函式，見 §7.26.5 |
+| `resultModel(r)` | `compare` 改為依 `STT_RESULT_ROWS` 一律產生陣列（綠、黃 1 列，紅 2 列）；其他欄位不變 |
+| `messageForError`、`messageForAcquire`、`meterBarsOf`、`buildResult`、`targetOf` | 不變（`messageForError("no-speech")` 保留，流程改由 `outcomeOf` 決定是否用到） |
+
+`EMT.components.speechPanel` 的 `render`、`reset`、`release` 簽名不變；`reset()` 與 `release()` 的行為擴及準備中（§7.26.6）。
+
+### 4.14 v0.16 修改的模組介面（FE-95）
+
+全部不持久化，不新增 store 欄位、action、子階段或 window 全域變數。
+
+| 模組 | 變更 | 約定 |
+| :--- | :--- | :--- |
+| `EMT.components.speechPanelLogic` | 新增匯出 `PAINT_FALLBACK_MS`（數值 50） | 延後取得的後備時間；**不放進 `TIMING`**（`speech-flow.test.js:612` 要求 `TIMING` 的鍵與契約 `STT_TIMING` 相同） |
+| `EMT.components.speechPanel` | `render`、`reset`、`release` 簽名不變 | `reset()`／`release()` 也會取消尚未執行的延後取得（經既有 `stopAll` 的 `gen++` 與 `clearTimers`） |
+| `EMT.services.mic` | 簽名與回傳值全部不變 | `acquire()` 仍在同步階段建立 `AudioContext`（`getUserMedia` 之前）；新增內部函式 `resumeIfSuspended(ctx)`，不匯出 |
+
 ---
 
 ## 5. 建置與打包流程
@@ -1136,6 +1234,27 @@ jobs:
 **版本號**：MC-07 只把 `package.json` `version` 由 `1.2.0` 改為 `1.3.0`，必須在 FE-89 之前（原因同 §5.8）。本版不把版本值寫進單元測試。
 
 **部署 workflow（未解決）**：`.github/workflows/static.yml:42` 為 `test "$(find dist/site -type f | wc -l)" -eq 8`，:45 只列 8 檔。建置輸出 13 檔後這一步會失敗，**部署會中止**。Q-46 的修改授權已用完（SD-FB-38、tasks.json MC-03），因此列為 MC-08，須人類授權後才可執行（SD-FB-77）。
+
+### 5.10 v0.15 建置（不改建置程式；契約 DS-63、Q-102 A）
+
+| 項目 | 決定 |
+| :--- | :--- |
+| 建置程式 | `tools/build.mjs`、`tools/site-pages.mjs`、`core/pwa.js` 都不改。沒有新模組，`index.html` 的腳本與樣式清單不變 |
+| 部署目錄 | 仍為 13 檔、`dist/` 共 14 檔；`PWA_PRECACHE_URLS` 仍 7 項；`.github/workflows/static.yml` 不改（MC-08 的 13 檔檢查繼續適用） |
+| 版本號 | MC-09 只把 `package.json` `version` 由 `1.3.0` 改為 `1.3.1`，必須在 FE-94 執行 `npm run build` 之前完成，因為版本值會進入 BUILD_ID（原因同 §5.8）。`package-lock.json` 不動（SD-FB-75）。本版不把版本值寫進單元測試 |
+| 交付 | FE-94 以 `npm run build` 連續兩次產生 `dist/`，兩次 SHA-256 相同；頁尾版本行為「版本 1.3.1（建置 xxxxxxx）」 |
+| 大小 | 面板程式約 +6 KB、服務約 +1 KB、CSS 約 +0.5 KB，對 AC-19-04 影響可忽略 |
+
+### 5.11 v0.16 建置（不改建置程式；BUG-006～BUG-008）
+
+| 項目 | 決定 |
+| :--- | :--- |
+| 建置程式 | `tools/build.mjs`、`tools/site-pages.mjs` 不改；沒有新模組，`index.html` 的腳本與樣式清單不變 |
+| 版本號 | **維持 1.3.1**（尚未發布），`package.json` 不改、不新增 MC 項目；FE-97 開工時確認仍為 1.3.1 |
+| BUILD_ID | `speech-panel.js`、`mic.js`、`00-base.css`、`85-ad.css` 改變 → 注入前 HTML 改變 → BUILD_ID 必然與 FE-94 產物不同，屬預期；FE-97 回報新舊值 |
+| 部署目錄 | 仍 13 檔、`dist/` 共 14 檔、預先快取 7 項；`static.yml` 不改 |
+| 交付 | FE-97 以 `npm run build` 連續兩次產生 `dist/`，兩次 SHA-256 相同；頁尾版本行仍為「版本 1.3.1（建置 xxxxxxx）」，建置碼為新值 |
+| 大小 | 面板約 +1 KB、服務約 +0.3 KB、CSS 淨增約 0 |
 
 ---
 
@@ -1646,7 +1765,7 @@ QA 測試音源（AC-33-04）依目前門檻推算：RMS −55、−45、−35�
 | 釋放 | `flashcards.hide()` 改呼叫 `speechPanel.release()`（= `reset()` + `mic.release()`）；`mic` 第一次取得成功時登錄一次 `window` 的 `pagehide` → `release()`。`release()` 同步執行：停止計時器、每條 track `stop()`、source／analyser `disconnect()`、`AudioContext.close()`（Promise 例外吞掉）、清除參照。因此離開後同一個工作中音軌即為 `ended`，遠小於 1 秒 | AC-33-02、NFR-3 |
 | 取得中離開頁面 | `mic` 以遞增的 `epoch` 記錄每次 `release()`；`getUserMedia` 晚於 `release()` 才成功時，立刻停止新音軌並回 `{ ok: false, reason: "released" }`（speech-panel 不顯示任何訊息） | AC-33-02 |
 | 取得中換卡 | speech-panel 以既有 `gen` 判斷：取得完成時若 `gen` 已變，保留音軌（同頁仍可重用）但不開始辨識 | AC-33-01 |
-| AudioContext 與自動播放政策 | `acquire()` 的同步階段（仍在使用者點擊的處理中）建立 `AudioContext`，之後才 `await getUserMedia`；重用時呼叫 `ctx.resume()`（例外吞掉）。建構失敗或 `createAnalyser` 失敗 → 音軌照常保留（仍可達成只詢問一次），`metering = false`，收音條全暗、不提示 | AC-33-03、AC-33-07 |
+| AudioContext 與自動播放政策 | `acquire()` 的同步階段（仍在使用者點擊的處理中；**v0.16 起第 1 次改為畫出準備中之後才呼叫，並補 `resume`，見 §7.28.4**）建立 `AudioContext`，之後才 `await getUserMedia`；重用時呼叫 `ctx.resume()`（例外吞掉）。建構失敗或 `createAnalyser` 失敗 → 音軌照常保留（仍可達成只詢問一次），`metering = false`，收音條全暗、不提示 | AC-33-03、AC-33-07 |
 | 音量讀取 | `analyser.fftSize = meter.fftSizeFor(ctx.sampleRate)`；每 `UPDATE_INTERVAL_MS` 讀時域樣本 → `meter.levelOfSamples` → 只在格數改變時回呼 `onLevel(k)`；speech-panel 只切換 5 格的 `is-on` class | AC-33-03、AC-33-04 |
 | 歸暗 | 聆聽以任何方式結束時，speech-panel 在同一個工作中呼叫 `mic.stopMeter()` 並把 5 格設為暗（不等計時器），滿足 ≤ 100 ms | AC-33-03、AC-33-06 |
 
@@ -2861,7 +2980,7 @@ body
 | `collapsed`、`dismissed` | `display: none` | 高度 0、不佔位；iframe 若已存在也不移除 |
 | `filled` | `display: none` | 預設不可見 |
 | `body[data-tab="dashboard"]` 且 `filled` | `display: block; margin-block: 48px;` 高度隨內容 | AD-14；距資料備份控制項與頁尾連結皆 ≥ 48px（AC-52-03） |
-| `html[data-ad-env]` | `scrollbar-gutter: stable` | 非覆蓋式捲軸在廣告撐高頁面時出現，會讓置中內容左右移動，違反 AC-52-05。只在環境成立時套用，第一階段與 `file://` 無影響（SD-FB-80） |
+| ~~`html[data-ad-env]`~~（v0.16 移除） | ~~`scrollbar-gutter: stable`~~ | （v0.14 原設計：只在環境成立時套用，SD-FB-80。）**v0.16 起改為 `00-base.css` 的 `html` 無條件設定**：屬性要等 `services.ad.start` 才設，第一個畫格來不及，造成 BUG-006；見 §7.29 |
 
 標籤：`.ad-slot__label { margin: 0 0 4px; font-size: 0.75rem; color: var(--text-muted); }`（對 `--bg` 約 5.4:1），不用 `--accent`。不設 `position`、`transition`、`animation`；不用 `.card`，避免與學習內容同標題或同卡片（AC-52-04）。
 
@@ -3037,6 +3156,403 @@ section#view-about.view[aria-label=關於我][hidden]
 | 同上 | 切頁時 `loading` | 主控台載入中切到單字卡，`ins.getBoundingClientRect().width > 0` |
 
 **不合格時**：只能修改 `styles/85-ad.css`、`styles/75-site-pages.css`、`src/app/site/static-page.css`、`styles/10-dashboard.css` 的 `.db-stat` 系列版面規則；不得改文字、不得加 `nowrap`。原因在其他檔案時標 `blocked` 回報主控。
+
+### 7.26 麥克風準備中、訊息分流與辨識文字（v0.15；PRD R-29、US-58～US-60、Q-94～Q-99、Q-101；契約 v0.20 §14.1～§14.3、§14.5、data-schema §18、DS-57～DS-61）
+
+名詞沿用契約 §14：**嘗試** = 一次按下麥克風到回到待機；**已確認開始收音** = 本次收到 `audiostart`、`soundstart`、`speechstart`，或後備模式的 `T_FALLBACK` 已到。分工：`services/stt.js` 只轉送引擎事件與旗標，**不決定訊息**；`views/speech-panel.js` 負責狀態、計時器與訊息（DS-57、DS-58）。
+
+#### 7.26.1 時間常數定案（DS-60、PR-11、V-STT-09）
+
+| 常數 | 程式名稱（`speech-panel.js` `TIMING`） | 值（ms） | 契約範圍 | 依據 |
+| :--- | :--- | :--- | :--- | :--- |
+| `T_READY` | `readyTimeoutMs` | **5000** | 3000～10000 | 主控實測（假音訊裝置、電腦版 Chrome）：App 從 `rec.start()` 到 `audiostart` 約 1.2～1.4 秒；人類實測「按下後等 2 秒再念」成功。真人、藍牙麥克風、慢速機器都還沒量。5000 約為已知最大值的 3.5 倍、人類值的 2.5 倍；誤判「沒有回應」比多等幾秒更傷使用者，所以不往下調 |
+| `T_BUFFER` | `bufferMs` | **0** | 0～500 | Q-95 的「Chromium 開頭約 300 ms 用於估算環境噪音」是主控的記憶，SD 在本階段**無法查證**（沒有實機，也不引用未驗證來源），依 DS-60 維持 0。`speechstart` 約晚 `audiostart` 0.6 秒是假裝置數字，不當作依據（PRD 第 3 章 v0.20 註 2） |
+| `T_FALLBACK` | `fallbackMs` | **1500** | 1000～2000 | 已知 `audiostart` 落在 1.2～1.4 秒；1500 剛好晚於已知值。此時的「聆聽中」未經引擎確認（E-158） |
+
+**調整程序（主控代核）**：主控依 AC-58-14 人工結果，只改 `TIMING` 這 1 處與本表，在本文件變更紀錄註明「主控代核」與實測數字，不需改契約或 PRD；超出範圍要回 PM。建議的觸發條件：(a) AC-58-14 (a) 失敗多半是字首被切掉 → `T_BUFFER` 試 200～300；(b) 真人測試出現「語音辨識沒有回應」而引擎其實正常 → `T_READY` 往上調；(c) 後備瀏覽器常在「聆聽中」之前就有語音 → `T_FALLBACK` 往下調。單元測試只驗證 3 個值都在範圍內，不寫死數值（§10.12），調整時不必改測試。
+
+#### 7.26.2 服務：`services/stt.js`（FE-90；DS-57、RT-1）
+
+| 引擎處理器 | 服務動作（每個處理器第一行 `if (!live()) return;`，同 v1.3.0） |
+| :--- | :--- |
+| `rec.onaudiostart` | `s.audioStarted = true` → `onAudioStart(snap())` |
+| `rec.onsoundstart` | `s.soundStarted = true` → `onSoundStart(snap())` |
+| `rec.onspeechstart` | `s.speechDetected = true` → `onSpeechStart(snap())` |
+| `rec.onresult` | `s.hadResult = true` → `onResult(transcriptOf(ev), snap())`；`transcriptOf` 不改（FB-77：各段 trim 後以半形空白連接屬取得引擎輸出） |
+| `rec.onnomatch` | `s.nomatch = true` → `onNomatch(snap())` |
+| `rec.onerror` | 手動停止造成的 `aborted` 直接 `return`（既有）；否則 `s.hadError = true`，`s.errorCode` 為 `null` 時才記下代碼 → `onError(code, snap())` |
+| `rec.onend` | `session = null`、`detach(rec)` → `onEnd(snap())` |
+
+- `snap()` 回傳 8 欄 `SttEndInfo` 的新物件，欄位順序固定為 `manual, hadResult, hadError, audioStarted, soundStarted, speechDetected, nomatch, errorCode`。
+- `detach(rec)` 把 `onaudiostart`、`onsoundstart`、`onspeechstart`、`onresult`、`onnomatch`、`onerror`、`onend` 7 個屬性設為 `null`（修正 v1.3.0 只清 `onnomatch` 卻沒設定它的不一致，DS-57）。
+- 一律用屬性指派，不用 `addEventListener`：替身最容易模擬，`detach` 也能一次解除。服務**不重排**事件，依引擎順序原樣轉送。
+- **`audioStartSupported` 判定（AC-58-09）**：`new C()` 之後、`rec.start()` 之前計算 `"onaudiostart" in rec`（含原型鏈；Chrome、Edge、Safari 把事件處理屬性放在原型上）；判定時拋例外視為 `false`。替身要模擬「支援」就在建構子或原型設 `onaudiostart = null`，要模擬「不支援」就完全不定義這個屬性。現有的 `tests/e2e/lib/inits.mjs` `fakeStt` 與 `speech.test.js` `fakeSttGlobal` 都屬「不支援」。
+- `start()` 成功回 `{ ok: true, audioStartSupported }`；失敗的 3 種 `reason` 不變。回呼裡的例外照舊由 `call()` 攔下並 `console.error`。
+
+#### 7.26.3 嘗試代號：沿用 `gen`，整合 `acquiringGen`（PR-9、DS-58、DS-59）
+
+v1.3.0 的 `gen` 已在 `reset()`／`stopAll()` 時遞增，讓換卡後的非同步回呼失效；`acquiringGen` 記錄「取得麥克風中」屬於哪個 `gen`，並用來忽略再按。v0.15 的規則：
+
+| 項目 | 規則 |
+| :--- | :--- |
+| 代號 | 每次進入準備中（`beginAttempt`）先 `gen++`，代號 `id` = 遞增後的 `gen`。建立模組變數 `att = { id, confirmed: false, decided: false, timers: { ready: null, buffer: null, fallback: null } }` |
+| 有效 | `live(id)` = `id === gen && att !== null && att.id === id && !att.decided`。引擎回呼、3 個計時器、`mic.acquire()` 完成回呼的第一行都檢查它 |
+| 失效 | 取消（準備中再按）、`reset()`、`release()`、準備中或聆聽中按 TTS、準備中或聆聽中音軌結束，都經 `cancelAttempt()`：`gen++`、清 3 個計時器、`stt.abort()`（先解除處理器）、`att = null`。正常結束（`finish`）只設 `att.decided = true` 並清計時器，不必 `gen++` |
+| `acquiringGen` | 仍在呼叫 `mic.acquire()` 時記下 `id`、完成時清掉，只用來表示「本代號正在取得」；**不再用來忽略再按**（PR-7：取得中再按 = 取消）。準備中的子階段以 `preparingPhase` 為準；`isAcquiring()` 若已無呼叫者可移除 |
+| 不重複詢問權限 | 取消後立刻再按，新代號再呼叫 `mic.acquire()`，會拿到 `services/mic.js` 擱置中的同一個 Promise（`pending`，`mic.js:325`），`getUserMedia` 不會再被呼叫；舊代號的 `then` 因 `live` 不成立而略過，新代號的 `then` 繼續（DS-59、PR-8） |
+| 計時器 | 一律以 `root.setTimeout`／`root.clearTimeout`（呼叫時取用）設定，方便單元測試注入假時鐘。執行環境沒有 `setTimeout`（只有測試沙箱會發生）時：不設 `T_READY`；`fallbackWait` 直接進入聆聽中 |
+
+#### 7.26.4 狀態機（PR-1～PR-10；契約 §14.1 轉移總表）
+
+```
+ idle ──按下（支援、在線、已讀）── beginAttempt ──► preparing/acquiringMic ── mic.acquire() 完成 ──┐
+  │  └─按下（未讀）─► notice ─「我知道了」─ beginAttempt ─► preparing/acquiringMic                     │
+  │                     └「取消」─► idle（畫面不變，FB-78）                                          │
+  │                                  （permission／notfound → idle＋錯誤訊息；released → 無動作）     │
+  │                                                                  成功或 unavailable → stt.start()◄┘
+  │      start ok、audioStartSupported ──► preparing/awaitingAudioStart（自 start() 回傳起 T_READY）
+  │      start ok、不支援              ──► preparing/fallbackWait（自 start() 回傳起 T_FALLBACK）
+  │      start 失敗                    ──► idle（offline／unsupported／一般錯誤，既有訊息）
+  │  awaitingAudioStart ─audiostart─►（T_BUFFER；0 時在同一個處理器內）─► listening ＋ startMeter
+  │  awaitingAudioStart／fallbackWait ─soundstart／speechstart─► listening ＋ startMeter
+  │  fallbackWait ─T_FALLBACK 到（confirmed = true）─► listening ＋ startMeter
+  ├─ preparing 任一子階段 ─再按／換卡／切模式／按 TTS／離開頁面─► idle（cancelAttempt，不提示）
+  ├─ awaitingAudioStart ─T_READY 到、仍未確認─► idle（abort，noResponse）
+  ├─ preparing（已 start）或 listening ─result／nomatch／error／end─► idle（outcomeOf，每次嘗試只判定 1 次）
+  └─ listening ─再按─► idle（stt.stop()、att.decided = true、不提示）
+```
+
+**事件處理表**（每列先檢查 `live(id)`，不成立就忽略）
+
+| 事件 | `acquiringMic`（start 尚未回傳） | `awaitingAudioStart` | `fallbackWait` | `listening` |
+| :--- | :--- | :--- | :--- | :--- |
+| `onAudioStart` | 同 `awaitingAudioStart` 欄 | `confirmed = true`、清 `ready`；`bufferMs = 0` → 立即 `enterListening`；> 0 → 設 `buffer` 計時器 | `confirmed = true`，`enterListening` | 無動作 |
+| `onSoundStart`、`onSpeechStart` | `confirmed = true`，`enterListening` | 同左（清全部計時器） | 同左 | 無動作 |
+| `onResult`、`onNomatch`、`onError`、`onEnd` | `finish(id, outcomeOf(...))` | 同左 | 同左 | 同左 |
+| `ready` 計時器 | — | 仍未確認 → `stt.abort()`、`finish(id, noResponse)` | — | — |
+| `fallback` 計時器 | — | — | `confirmed = true`、`enterListening` | — |
+| `buffer` 計時器 | — | 仍為準備中 → `enterListening` | — | — |
+| 再按 | `cancelAttempt` | `cancelAttempt` | `cancelAttempt` | `stop()` 路徑 |
+
+- 「`acquiringMic`（start 尚未回傳）」列只會在替身於 `rec.start()` 內同步觸發事件時發生。`stt.start()` 回傳後，若 `live(id)` 不成立或狀態已不是準備中，就**不再**設定子階段與計時器。
+- `enterListening(id)`：清 3 個計時器 → `setSttStatus("listening")` → `startMeter(id)`。收音條只從這裡開始點亮（PR-3）。
+- `finish(id, out)`：`att.decided = true`、清計時器 → `setSttStatus("idle")`（內含同步 `stopMeterNow`）→ 依 `out` 顯示：`score` → `setMessage(null)`、`setSttResult(res)`、`recordSttScored()`；`error` → `messageForError(code)`；3 種分流 → `STT_FLOW_TEXTS` 對應訊息（`kind: "info"`）；`none` → 不提示。
+- **聆聽中再按**：`att.decided = true`、`stt.stop()`、回待機、不提示。之後到達的 `result` 一律忽略（MS-1 (1)、AC-08-10「不顯示分數」），與 v1.3.0「停止後仍可能評分」不同，見 SD-FB-85。
+
+#### 7.26.5 訊息判定：`outcomeOf`（MS-1、MS-2、MS-4、FB-76；V-STT-06、V-STT-07）
+
+`outcomeOf({ manual, hadText, info, confirmed })` 是純函式，回傳 `{ kind: "none" }`、`{ kind: "score" }`、`{ kind: "error", code }`、`{ kind: "heardNoWords" }`、`{ kind: "noSpeech" }`、`{ kind: "noResponse" }` 之一。
+
+- `hadText`：本次終結點是 `result`，且 `buildResult(text, target, similarity)` 不是 `null`（MS-4：沿用 `core/similarity` 的清洗；結果為 `null` 一律視為清洗後為空）。
+- `confirmed` 由面板計算：`att.confirmed || info.audioStarted || info.soundStarted || info.speechDetected`。
+- `T_READY` 逾時呼叫時傳 `confirmed: false` 且 `info` 為當下快照（沒有事件），依規則落到 (6)。
+
+| 順序 | 條件（第一個成立者為準） | 結果 |
+| :--- | :--- | :--- |
+| 1 | `manual` 或 `info.manual` | `none` |
+| 2 | `hadText` | `score` |
+| 3 | `info.errorCode` 不是 `null` 也不是 `"no-speech"` | `error`（訊息依 `messageForError`） |
+| 4 | `info.speechDetected` 或 `info.nomatch`，或 `info.hadResult` 但 `hadText` 為假 | `heardNoWords` |
+| 5 | `info.errorCode === "no-speech"`，或 `confirmed` | `noSpeech` |
+| 6 | 其他 | `noResponse` |
+
+`finish` 只會被呼叫 1 次（`live` 檢查 `decided`），所以 `nomatch` 後的 `end`、`error` 後的 `end` 都不會改寫訊息（MS-2）。每次 `beginAttempt` 建立新的 `att`，服務每次 `start()` 也建立新旗標，不沿用前一次的語音紀錄（MS-6）。
+
+#### 7.26.6 競態與中斷（PR-7～PR-10、AC-58-04～AC-58-06、AC-58-10、AC-58-11）
+
+| 情境 | 處理 | AC |
+| :--- | :--- | :--- |
+| `acquiringMic` 時再按 | `cancelAttempt`；`stt` 未啟動，不呼叫 `abort` 以外的方法；取得完成時代號已失效 → 不開始辨識，音軌由 `mic` 保留供同頁重用 | AC-58-04 (a) |
+| 取消後 ≤ 100 ms 再按，取得仍擱置 | 新代號、新準備中；`mic.acquire()` 回傳同一個 `pending`，`getUserMedia` 次數不增加；完成後只有新代號會 `stt.start()` | AC-58-05、PR-8 |
+| `awaitingAudioStart`、`fallbackWait` 時再按 | `cancelAttempt`：`stt.abort()` 先解除處理器再中止；不等結果、不提示 | AC-58-04 (b) |
+| 取消後替身仍觸發舊實例的 `audiostart`、`result`、`end` | 處理器已是 `null`；就算替身握有舊回呼，`live(id)` 也不成立 | AC-58-05 |
+| `T_READY` 之後才 `audiostart` | 逾時時已 `abort`；遲到事件不影響畫面；再按可重新開始 | AC-58-06 |
+| 權限詢問擱置超過 `T_READY` | `acquiringMic` 不計時，維持準備中 | AC-58-06、E-157 |
+| 換卡、切換測驗模式 | `reset()`：`stopAll()`（`gen++`、`tts.stop()`、`stt.abort()`）、清計時器、`att = null`、`stopMeterNow()`；狀態為 `preparing` 或 `listening` → `idle`，不提示 | AC-58-10 |
+| 按 TTS | 狀態為 `preparing` 或 `listening` → `cancelAttempt` 並回待機，再照常朗讀 | AC-58-10 |
+| 翻面 | `flashcards.js` 不呼叫 `reset()`（既有），準備中與聆聽中都繼續，與 v1.3.0 聆聽中相同 | AC-58-10 |
+| 離開單字卡頁 | `release()` = `reset()` + `mic.release()`（1 秒內釋放音軌）；取得中被釋放 → `acquire` 回 `released`，代號已失效、不顯示 | AC-58-10、AC-33-02 |
+| 準備中或聆聽中拔除麥克風 | `onTrackEnded`：狀態為 `preparing` 或 `listening` → `cancelAttempt`，回待機並顯示「找不到麥克風裝置」與說明；其他狀態只歸暗 | AC-58-11、AC-33-06 |
+| 重新整理、關閉分頁 | 執行期狀態消失；啟動時 `sttStatus = "idle"`、`preparingPhase = null` | AC-58-12 |
+| 已判定（例如評分完）但 `end` 還沒到時再按 | 新嘗試；`stt.start()` 內部先 `abort()` 舊工作（既有），同時只有 1 個辨識工作 | AC-58-05 |
+| 說明對話框顯示中按麥克風 | 忽略（既有） | AC-08-13 |
+| 對話框期間換卡後按「我知道了」 | 記錄已讀；`gen` 已變 → 回待機，不開始（既有） | AC-08-13 |
+
+#### 7.26.7 畫面與樣式（PR-3、PR-4、PR-12、MS-3、RT-2、RT-3；AC-58-13、AC-60-06）
+
+| `sttStatus` | 按鈕文字 | `aria-label` | `aria-pressed` | `data-status` | class |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `idle`、`notice` | 麥克風跟讀 | 開始語音辨識 | `false` | 同狀態 | — |
+| `preparing` | 準備中 | 準備中，再按一次取消 | `true` | `preparing` | `is-preparing` |
+| `listening` | 聆聽中 | 聆聽中，再按一次停止 | `true` | `listening` | `is-listening` |
+
+- **清除時機（PR-4、FB-78）**：只在 `beginAttempt` 清除前次分數與訊息。點按時若未讀，先開說明，**不清除**；按「取消」畫面不變。離線點按維持 v1.3.0：不經過準備中，直接清除分數並顯示「語音辨識需要網路連線」（PR-1 由 SD 決定，SD-FB-90）。
+- **TTS**：`beginAttempt` 時就 `tts.stop()`（v1.3.0 在 `start` 前才停），避免麥克風收到示範語音。
+- **`.sp-mic.is-preparing`（`31-speech.css`）**：文字 `var(--brand-deep)`、底色 `var(--surface)`、邊框色 `var(--brand)`；圓點 `var(--brand)`；`animation: none`、`transition: none`。**不改** `border-width`、`padding`、`min-width`（8.5em，可容納「準備中」3 字），所以兩種狀態切換時座標差 0；不得使用 `--light-red` 與 `sp-blink`。減少動態下規則相同。對比由 FE-92 以 AC-38-04 計算（`--brand-deep` 對白底）。
+- **收音條**：準備中 5 格全暗；`mic.startMeter` 只在 `enterListening` 呼叫。`renderMic` 的「不是聆聽中就歸暗」規則照舊。
+- **訊息**：3 則新訊息都放在既有 `.sp-msg`（`role="status"`），`kind: "info"`，不是 Toast（MS-3）。
+- **分數區**：`resultModel(r).compare` 依 `STT_RESULT_ROWS[light]` 產生 `{ label, value }` 陣列，`label` 取 `TEXT.labelRecognized`／`labelTarget`、`value` 取 `recognizedText`／`targetText`；DOM 沿用 `dl.sp-compare > div.sp-compare__row > dt + dd[lang=en]`，順序為標題 → 分數與燈號 → 提示（黃燈）→ 文字列 → 說明（RT-2）。全部經 `EMT.core.dom.el` 的 `text` 寫入（`textContent`），不得出現 `innerHTML`、`insertAdjacentHTML`、`outerHTML`（RT-3）。`.sp-compare__value` 加 `overflow-wrap: anywhere`，讓 60 字元無空白字串可換行（AC-60-06）。
+
+#### 7.26.8 文字定稿（V-STT-09；契約 `STT_FLOW_TEXTS`，逐字）
+
+| `TEXT` 鍵 | 文字 | 狀態 |
+| :--- | :--- | :--- |
+| `micPreparing` | 準備中 | 新增 |
+| `micPreparingLabel` | 準備中，再按一次取消（全形逗號） | 新增 |
+| `heardNoWords` | 有收到聲音，但沒聽出英文單字，請再說一次 | 新增 |
+| `noSpeech` | 未偵測到語音，請再試一次 | 不變 |
+| `noResponse` | 語音辨識沒有回應，請再試一次 | 新增 |
+| `labelRecognized`、`labelTarget` | 辨識文字、目標文字 | 不變 |
+| `mic`、`micListening`、`micIdleLabel`、`micListeningLabel`、`resultTitle`、`resultNote`、`tipYellow`、錯誤訊息、說明文字 | 同 v1.3.0 | 不變 |
+
+RT-4 自查：分數區固定文字（「辨識吻合度」、燈號文字、「放慢速度或重聽 0.75x 示範」、「辨識文字」、「目標文字」、AC-08-11 說明）都不含「偵測到」「語言」「英文」「中文」「你說的是」。`heardNoWords` 含「英文」，但它在訊息區、不在分數區，且只是引導文字（Q-99、Q-101）。
+
+#### 7.26.9 不改清單與隱私
+
+`views/flashcards.js`、`services/mic.js`（v0.15 範圍；v0.16 FE-95 依 §7.28.4 修改）、`core/similarity.js`、`core/meter.js`、持久化與備份模組都不改。`recordSttScored` 仍只在顯示分數後呼叫 1 次；3 則分流訊息、取消、逾時都不呼叫（MS-6、AC-30-04）。不新增錄音或音訊輸出，§7.14 的允許與禁止表不變。不做任何語言判斷（RT-6、Q-101 A）。
+
+#### 7.26.10 實測方法（FE-94；AC-58-03、AC-58-13、AC-60-06）
+
+腳本與替身都放 scratchpad，不寫入 `tests/`。替身參照 `tests/e2e/lib/inits.mjs` `fakeStt` 複製一份，加 `onaudiostart = null` 等 4 個屬性與 `emitAudioStart()`、`emitSoundStart()`、`emitSpeechStart()`、`emitNomatch()`。
+
+| 項目 | 方法 | 合格 |
+| :--- | :--- | :--- |
+| 事件順序與時間 | 頁面內以 `MutationObserver` 記錄 `.sp-mic` `data-status` 變化時間（`performance.now()`），替身記錄 `start()` 回傳與 `emitAudioStart()` 的時間 | `start` → `audiostart` →「聆聽中」；差值在 [`T_BUFFER`, `T_BUFFER` + 100] ms |
+| 按鈕與收音條 | 375×667、1366×768，一般與 `prefers-reduced-motion: reduce`；量待機、準備中、聆聽中的 `getBoundingClientRect` 與計算後樣式 | 準備中與聆聽中座標差 0；底色或文字色不同；`animation-name` 為 `none`；無水平捲軸 |
+| 辨識文字 | 375、768、1366；`comply with`、20 個單字的長句、60 字元無空白字串；3 種燈號 | `scrollWidth ≤ clientWidth`；TTS、麥克風、收音條座標在分數出現前後差 0；「翻面」「上一張」「下一張」可捲到完整顯示 |
+| 逾時 | 替身不觸發事件 | 5000 ± 200 ms 後回待機並顯示 `noResponse` |
+
+本機沒有 Chrome 與 Edge 時，回報實測未完成並交主控，不得視為通過。
+
+### 7.27 窄視窗鍵盤焦點（v0.15；PRD US-61、AC-61-01、AC-61-02、AC-38-09、Q-100 A；契約 KF-1、DS-62；修正 BUG-005）
+
+#### 7.27.1 原因
+
+≤ 640px 時 `#app-nav` 是 `position: fixed` 的底部列（§9.1）。以 Tab 移動焦點時，瀏覽器只保證元素進入**視窗**，不知道底部列蓋住了視窗下緣 56 px + 安全區。v1.3.0 只在 `75-site-pages.css` 對頁尾連結等 4 類元素設了 `scroll-margin-bottom`（FE-89），其他控制項沒有，所以 BUG-005 量到「資料備份」0%、金色級列 13%、「新增單字」49%、`.fc-flip`／`.fc-next` 94%、模擬測驗選項 C／D 57%／0%。
+
+#### 7.27.2 修法：根元素 `scroll-padding-bottom`（FE-93）
+
+```css
+/* 00-base.css：放在既有 @media (max-width: 640px) 區塊內（導覽固定底部的同一區） */
+html {
+  scroll-padding-bottom: calc(var(--emt-bottomnav-h) + env(safe-area-inset-bottom, 0px) + 8px);
+}
+html.is-typing {
+  scroll-padding-bottom: 0;   /* 虛擬鍵盤開啟時導覽已隱藏（AC-27-03），維持 v1.3.0 行為 */
+}
+```
+
+| 決定 | 理由 |
+| :--- | :--- |
+| 設在 `html`，不設在 `body` | 文件捲動的捲動容器是視窗，視窗的 `scroll-padding` 取自根元素；設在 `body` 無效 |
+| 用 `scroll-padding`，不在各控制項加 `scroll-margin` | 一條規則涵蓋 4 個功能區與日後新增的控制項，不會只修 AC-38-09 字面（Q-100 A）；數值與 `body` 底部留白相同（56 + 安全區 + 8） |
+| 只在 ≤ 640px | 放在既有媒體查詢內，> 640px 不受影響（AC-61-02） |
+| 點擊、觸控、捲動動畫 | `scroll-padding` 只影響「把元素捲進可見範圍」的操作（焦點移動、`scrollIntoView`、錨點），不影響滑鼠與觸控點擊已可見的元素，也不影響 `router.js` 的 `scrollTo(0, 0)`；全站沒有 `scroll-behavior: smooth`，減少動態下也沒有動畫（AC-61-02） |
+| 元素比可用高度高 | 瀏覽器會對齊元素上緣，上緣與至少 44 px 可見（AC-61-01 末句） |
+
+**`75-site-pages.css` 的調整（避免重複加總）**：`scroll-margin` 和根元素的 `scroll-padding` 會**相加**。保留原規則會讓頁尾連結多捲約 64 px，所以：
+
+| 原規則 | v0.15 |
+| :--- | :--- |
+| `.footer-links .btn, .site-return, .site-page a, .site-page__link { scroll-margin-bottom: 導覽 + 安全區 + 8px }` | **刪除**，改由 `html` 規則涵蓋，結果相同 |
+| `body[data-entry="firstRun"][data-tab="customizer"] .footer-links .btn { scroll-margin-bottom: 首次底部列 + 安全區 + 8px }` | 改為 `scroll-margin-bottom: calc(var(--emt-firstbar-h) - var(--emt-bottomnav-h))`；加上 `html` 的 padding 後，總和與 v1.3.0 完全相同（首次底部列 184 + 安全區 + 8），AC-41-04、AC-57-01 不受影響 |
+
+檔頭註解改寫為新的說明。不使用 `:has()`，避免依賴較新的選擇器。
+
+**4 個功能區與 AC-61-01 必測項目**：「資料備份」（主控台）、金色級列與「新增單字」（難易度設定）、`.fc-flip`、`.fc-next`（單字卡）、選項 C、D（模擬測驗）都在文件捲動範圍內，由同一條規則處理。FE-93 要確認這 4 區沒有 `overflow: auto` 或 `scroll` 的內層捲動容器；如果有，該容器也要加相同的 `scroll-padding-bottom`，並在回報中列出。
+
+#### 7.27.3 後備方案（只在 7.27.2 實測不合格時才做）
+
+如果在 Chrome 的 375×667 實測中，仍有控制項被遮住，FE-93 才在 `ui/bottom-nav.js` 加入以下後備，並在 `focus-scroll.test.js` 補測試：
+
+| 項目 | 規則 |
+| :--- | :--- |
+| 監聽 | `document` 的 `focusin`（capture），由既有的初始化函式登錄 1 次 |
+| 條件 | `matchMedia("(max-width: 640px)").matches`；`html` 沒有 `is-typing`；`#app-nav` 有顯示；目標不在 `#app-nav` 內；目標符合 `:focus-visible`（只處理鍵盤焦點，滑鼠與觸控不捲動，AC-61-02） |
+| 動作 | `navTop = nav.getBoundingClientRect().top`，`r = target.getBoundingClientRect()`；`r.bottom > navTop - 8` 時 `dy = min(r.bottom - (navTop - 8), r.top - 8)`，`dy > 0` 才 `window.scrollBy({ top: dy, behavior: "instant" })` |
+
+CSS 合格就不改 `bottom-nav.js`。這只是 CSS 規則在實測失效時的備案，不是預設設計。
+
+#### 7.27.4 實測方法（FE-93 自測、FE-94 交付前重測）
+
+以 `npm run build -- --out <scratchpad>/emt.html` 建置到 scratchpad，參照 `tests/e2e/diag-r9-focus.mjs` 的做法另寫腳本放 scratchpad（可以唯讀 import `tests/e2e/lib/cdp.mjs`，不得修改 `tests/`）。
+
+| 項目 | 條件 | 合格 |
+| :--- | :--- | :--- |
+| 掃描 | 375×667、390×844（`mobile: true`）；localStorage 有近 7 天資料；主控台、難易度設定、單字卡（單字卡模式）、模擬測驗；從頁首按 Tab 到繞回，再按 Shift+Tab 到繞回 | 每次焦點元素 `getBoundingClientRect().bottom ≤ #app-nav` 上緣，且完整在視窗內；導覽列自身的按鈕除外；元素高於可用高度時，上緣與 ≥ 44 px 可見 |
+| 必測 | AC-61-01 列出的 7 個控制項 | 未被遮住比例 100% |
+| 回歸 | 1366×768 同一流程；首次畫面 375×667 的頁尾連結；輸入自訂單字時 | 1366 捲動位置與 v1.3.0 相同；首次畫面頁尾連結在首次底部列上方（AC-41-04、AC-57-01）；輸入欄不被遮（AC-27-03） |
+
+本機沒有 Chrome 時，回報實測未完成並交主控，不得視為通過。
+
+### 7.28 第 1 次按麥克風：先畫出「準備中」再取得麥克風（v0.16；修正 BUG-007；AC-58-01、PR-1、AC-58-04、AC-58-05、AC-33-01、AC-33-03、AC-33-07）
+
+#### 7.28.1 原因
+
+| 項目 | 現況（v1.3.1 FE-94 產物） |
+| :--- | :--- |
+| 呼叫順序 | `onMicClick` → `beginAttempt` → `setStatus("preparing", "acquiringMic")`（屬性立即改變）→ **同步** `acquireThenListen` → `mic.acquire()` → `newContext()`（`new AudioContext()`）→ `getUserMedia` |
+| 耗時 | 本次載入第 1 次 `new AudioContext()` 108～121 ms（Chrome、Edge 無頭）；離開單字卡頁再回來後 32～37 ms；持有音軌時走重用路徑約 1 ms |
+| 結果 | 瀏覽器要等點按處理器結束才畫下一個畫格，「準備中」在按下後 110～131 ms 才出現，超過 AC-58-01 的 100 ms；4 倍 CPU 降速下「離開再回來後第 1 次」也有 2／16 次超過 |
+
+#### 7.28.2 方案比較
+
+| 方案 | 做法 | 優點 | 缺點 | 決定 |
+| :--- | :--- | :--- | :--- | :--- |
+| A | `speech-panel.js` 設「準備中」後，等畫面畫出才呼叫 `mic.acquire()` | 只改呼叫時機；`mic.js` 的取得流程、`pending` 共用、釋放規則都不變；延後期間取消時連 `getUserMedia` 都不會呼叫 | `AudioContext` 不再於點按處理器內建立，自動播放政策要靠 sticky activation 或 `resume()` 補救（§7.28.4） | **採用** |
+| B | `mic.js` 改在 `getUserMedia` 成功後才建立 `AudioContext` | Safari 取得音軌後建立音訊較寬鬆 | 110 ms 移到「取得音軌 → `stt.start()`」之間，**每次**第 1 次按下都多 110 ms 準備中；`mic.test.js` 4 個以上案例的前提（同步建立、`released` 時關閉預建的 context）要改寫 | 不採用 |
+| C | 頁面載入或進入單字卡頁時預先建立 `AudioContext` | 按下時 0 延遲 | 違反 LD-2（載入時不呼叫瀏覽器 API）；未經使用者操作就建立音訊，與 §7.14 隱私精神不符；離頁釋放後仍要重建 | 不採用 |
+| D | 請 PM 放寬 AC-58-01 | 不改程式 | 使用者確實等了 0.1 秒以上沒有回饋；程式可解，不必改需求 | 不採用 |
+
+#### 7.28.3 `views/speech-panel.js`（FE-95）
+
+**`beginAttempt` 的新順序**（其餘步驟與 §7.26 相同）：
+
+```
+beginAttempt():
+  清計時器 → gen++ → id = gen → att = { id, ..., stage: "acquiringMic",
+                                       timers: { ready, buffer, fallback, frame: null, paint: null } }
+  tts.stop() → setMessage(null) → clearResult() → setStatus("preparing", "acquiringMic")
+  m = micService()
+  if (m 存在 且 m.isActive 是函式 且 m.isActive() === true)   // 已持有音軌：重用約 1 ms
+      acquireThenListen(id)                                  // 照舊同步
+  else
+      afterPaint(id, function () { acquireThenListen(id); })
+```
+
+**`afterPaint(id, fn)`**：等「準備中」實際畫到畫面上之後才執行 `fn`，最多執行 1 次。
+
+| 步驟 | 規則 |
+| :--- | :--- |
+| 降級 | `root.requestAnimationFrame` 不是函式（只有 Node 測試沙箱會發生）→ **同步**執行 `fn`，與 v1.3.1 相同。呼叫 `requestAnimationFrame` 拋例外 → 同步執行 `fn` |
+| 為何要 rAF 再接 `setTimeout(0)` | `requestAnimationFrame` 的回呼在**該畫格繪製之前**執行；若在回呼內直接 `acquire()`，110 ms 仍會擋住這個畫格。所以 rAF 回呼內只設 `setTimeout(run, 0)`，讓 `run` 在繪製之後才執行 |
+| 畫格 | `att.timers.frame = root.requestAnimationFrame(function () { if (!live(id)) return; clearTimer(att.timers.paint); att.timers.paint = hasTimer() ? setTimer(run, 0) : null; if (att.timers.paint === null) run(); })` |
+| 後備 | `hasTimer()` 時同時設 `att.timers.paint = setTimer(run, PAINT_FALLBACK_MS)`（50 ms）。分頁在背景、rAF 被暫停或極慢時，最晚 50 ms 後仍會取得（畫面在背景本來就看不到）。rAF 回呼會先清掉這個後備再改設 0 ms |
+| `run()` | 第一行：`if (!live(id) \|\| !att \|\| att.stage !== "acquiringMic" \|\| !attached()) return;`；再把 `frame`、`paint` 清掉（`cancelAnimationFrame` 若存在、`clearTimer`），然後 `fn()`。`afterPaint` 內以區域變數 `done` 確保 `run` 只執行 1 次（rAF 路徑與後備路徑誰先到誰執行） |
+| 清除 | `clearTimers(a)` 擴充：`root.cancelAnimationFrame` 是函式時取消 `a.timers.frame`；`clearTimer(a.timers.paint)`；兩者設 `null`。`cancelAttempt`、`stopAll`（`reset`／`release`）、`enterListening`、`finish` 原本就會呼叫 `clearTimers` |
+| `acquiringGen` | 只在 `acquireThenListen` 真正呼叫 `mic.acquire()` 時設定（不變）；延後期間為 `-1` |
+| 子階段 | 延後期間仍是 `preparing`／`acquiringMic`，不新增子階段（契約 `SttPreparingPhase` 不變）；`acquiringMic` 不計時（AC-58-06、E-157）不變 |
+| 常數 | `PAINT_FALLBACK_MS = 50`，由 `logic` 匯出供測試讀取；不放進 `TIMING`（§4.14） |
+
+**延後期間的中斷**（全部沿用 §7.26.6，只多一列「尚未呼叫 `acquire`」）：
+
+| 情境 | 處理 | 結果 |
+| :--- | :--- | :--- |
+| 延後期間再按（取消） | `sttStatus` 為 `preparing` → `cancelAttempt()`：`gen++`、`clearTimers` 取消 rAF 與計時器 | `mic.acquire()`、`getUserMedia` **0 次**；不提示（AC-58-04 (a)） |
+| 取消後立即再按 | 新代號、新的延後；只有新代號會呼叫 `acquire()` | `getUserMedia` 1 次（AC-58-05） |
+| 換卡、切換模式、按 TTS | `reset()`／`cancelAttempt()` | 同上，0 次 |
+| 離開單字卡頁 | `release()` = `reset()` + `mic.release()` | 同上；`mic.release()` 時沒有取得中的 Promise |
+| 拔除麥克風 | 尚未取得，不會有 `ended` 事件 | — |
+| 瀏覽器在取消後仍執行 rAF 回呼或計時器 | `live(id)` 不成立 | 無動作 |
+| 「我知道了」後開始 | `showNotice` 的 Promise 回呼呼叫 `beginAttempt`，同樣延後 | 與點按相同 |
+
+**時間預算**：點按處理器只做狀態更新（約 1 ms）→ 下一個 vsync（≤ 16.7 ms，60 Hz）畫出「準備中」→ `setTimeout(0)` → `acquire()` 開始（約 110 ms 主執行緒忙碌，此時畫面已是準備中）。預期按下到畫出 ≤ 約 20 ms；FE-95 以 §7.28.6 實測。延後讓 `getUserMedia` 晚 1 個畫格開始，對 AC-58-03（`start` → `audiostart` → 聆聽中）無影響，因為該 AC 從 `stt.start()` 起算。
+
+#### 7.28.4 `services/mic.js`（FE-95）
+
+| 項目 | 規則 |
+| :--- | :--- |
+| 建立時機 | **不變**：`acquire()` 的同步階段、`getUserMedia` 之前呼叫 `newContext()`。改的是呼叫 `acquire()` 的時機（§7.28.3），所以 `mic.test.js:154`「`AudioContext` 在 acquire 同步階段建立」仍成立、不改 |
+| `resumeIfSuspended(c)` | `try { if (c && c.state === "suspended" && typeof c.resume === "function") swallow(c.resume()); } catch (e) {}`；同步例外與 Promise 拒絕都吞掉，不 `console.error` |
+| 呼叫點 | (1) `ctx = newContext()` 之後立即 1 次；(2) `setupAnalyser(s)` 回傳 `true` 之後 1 次（Safari 等瀏覽器在擷取音訊進行中時較可能允許）。兩處都在 `myEpoch === epoch` 的有效路徑內 |
+| 重用路徑 | 不變（`isActive()` 時照舊無條件 `ctx.resume()`；`mic.test.js:150` 期望 2 次不變，因替身 `state` 為 `running`，新呼叫點不觸發） |
+| 失敗時 | `resume()` 失敗或 `AudioContext` 一直 `suspended`：音軌照常保留、`metering` 照舊回 `true`（節點建立成功），收音條讀到靜音而全暗；辨識照常進行（與 AC-33-07「無法使用 → 照常辨識」同一原則）。不新增訊息 |
+| 隱私 | `resume()` 不產生輸出；仍不連到 `destination`、不錄音（§7.14 允許與禁止表不變，AC-21-03） |
+| 註解 | 檔頭與 `newContext` 註解「仍在使用者點擊處理中，符合自動播放政策」改為說明新時機與 `resume` 補救，引用本節 |
+
+**自動播放政策評估**（SD 無實機，下列為依公開行為的推定，由 FE-95 實測 Chrome、Edge，其餘交 QA／人類，SD-FB-93）：
+
+| 瀏覽器 | 推定 | 依據與補救 |
+| :--- | :--- | :--- |
+| Chrome、Edge（桌面、Android） | `running` | Web Audio 依文件的 sticky user activation 判定；使用者剛點過按鈕，延後 1 個畫格不影響。另有 `resume()` |
+| Safari（iOS、macOS） | 可能 `suspended` | 不在使用者手勢內建立時可能暫停；第 2 個呼叫點在擷取音訊進行中 `resume()`。仍失敗時只有收音條不動 |
+| Firefox | `running` | 同樣依 sticky activation；Firefox 本來就不支援 Web Speech 辨識，按下時顯示不支援（AC-08-02），走不到這裡 |
+
+#### 7.28.5 單元測試（FE-95）
+
+見 §10.13。重點：以注入的假 rAF 驗證「準備中」在 `acquire` 之前、延後期間取消 `acquire` 0 次、後備 50 ms、只執行 1 次、持有音軌時同步；`suspended` → `resume` 次數。既有案例不改期望（沙箱沒有 rAF → 同步，與現況相同）。
+
+#### 7.28.6 實測方法（FE-95 自測、FE-97 交付前重測）
+
+以 `npm run build -- --out <scratchpad>/emt.html` 建置到 scratchpad；腳本放 scratchpad，可唯讀 import `tests/e2e/lib/cdp.mjs`、參照 `tests/e2e/e2e-stt-flow.mjs` 第 8 段（TC-58-01f）的做法，不得修改 `tests/`。
+
+| 項目 | 條件 | 合格 |
+| :--- | :--- | :--- |
+| 準備中出現時間 | Chrome、Edge 無頭 1366×900；localStorage「STT 說明已讀」；init script 讓 `getUserMedia` 回傳永遠擱置的 Promise；`t0 = performance.now(); btn.click(); t1 = performance.now();` 後以 `requestAnimationFrame` → `setTimeout(0)` 取得畫出時間 `t2`；重新載入後第 1 次、第 2 次、離開單字卡頁再回來後第 1 次，各 3 輪 | 處理器時間 `t1 − t0` ≤ 16 ms；`t2 − t0` ≤ 100 ms 全部成立；`data-status` 在 `t1` 時已是 `preparing` |
+| 降速 | 同上，CDP `Emulation.setCPUThrottlingRate` 4 倍，「離開再回來後第 1 次」16 次 | 16／16 ≤ 100 ms |
+| 延後期間取消 | 按下後同一個任務內再按 | `getUserMedia` 呼叫次數 0；回待機、無訊息 |
+| AudioContext 狀態 | 加 `--use-fake-device-for-media-stream --use-fake-ui-for-media-stream`；init script 包裝 `AudioContext` 建構子記錄實例 | 取得完成時 `state === "running"`；聆聽中收音條至少 1 格亮（AC-33-03） |
+
+本機沒有 Chrome 與 Edge 時，回報實測未完成並交主控，不得視為通過。
+
+### 7.29 捲軸寬度固定：`html { scrollbar-gutter: stable; }`（v0.16；修正 BUG-006、BUG-008；AC-52-05、AC-60-06）
+
+#### 7.29.1 原因（同源）
+
+傳統捲軸（Windows、Linux 桌面瀏覽器，寬 15 px）出現或消失時，可用寬度改變 15 px，置中的內容左右移動 7.5 px；寬度改變也可能讓文字多折 1 行，下方元素上下移動。
+
+| BUG | 觸發 | 量到的位移 |
+| :--- | :--- | :--- |
+| BUG-006 | 廣告環境：首個畫格 `html[data-ad-env]` 尚未設定（`services.ad.start` 之後才設），`scrollbar-gutter` 晚 1 個畫格生效 | `.app-header__inner` dx −7.5（1920×1080、1366×768） |
+| BUG-008 | 單字卡頁出現分數區後頁面由不可捲動變為可捲動（1.3.0 起就有，與廣告無關） | 1366×768：TTS、麥克風、收音條 dx −7.5；768×1024 長句：多折 1 行，dy +48 |
+
+v0.14 只把 `scrollbar-gutter` 限定在廣告環境（SD-FB-80），所以第一階段完全不保護，廣告環境又晚 1 個畫格。
+
+#### 7.29.2 方案比較
+
+| 方案 | 做法 | 解決 BUG-006 | 解決 BUG-008 | 缺點 | 決定 |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| A | `00-base.css` 的 `html` 無條件 `scrollbar-gutter: stable` | 是（樣式內嵌在 `<head>`，第一個畫格前就生效） | 是（全站任何頁面捲軸出現都不改寬度） | 傳統捲軸環境、不可捲動的頁面右側也留 15 px 空白 | **採用** |
+| B | 保留條件規則，改在 `<head>` 內嵌腳本提早設 `data-ad-env` | 是 | **否** | 新增 head 內嵌腳本，牽動 B-7 靜態標籤白名單與建置 | 不採用 |
+| C | `html { overflow-y: scroll; }` | 是 | 是 | 不可捲動時仍顯示停用的捲軸軌道，外觀較差 | 不採用 |
+| D | 讓單字卡頁在常見高度下不溢出 | 否 | 部分（無法保證所有高度與 20 字長句） | 版面壓縮、易回歸 | 不採用 |
+| E | 請 PM 修改 AC-52-05、AC-60-06 字面 | — | — | 程式可解，不必改需求 | 不採用 |
+
+#### 7.29.3 樣式（FE-96）
+
+```css
+/* 00-base.css：既有「重設與防水平捲軸」段的 html 規則（媒體查詢外） */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* 傳統捲軸恆保留寬度，捲軸出現或消失時內容不左右移動（AC-52-05、AC-60-06；§7.29） */
+  scrollbar-gutter: stable;
+}
+```
+
+| 檔案 | 動作 |
+| :--- | :--- |
+| `00-base.css` | 只在上述既有規則加 1 個宣告；`@media (max-width: 640px)` 內的 `html` 規則（KF-1 `scroll-padding-bottom`）不動 |
+| `85-ad.css` | 刪除 `html[data-ad-env] { scrollbar-gutter: stable; }` 與上方註解；檔頭「依據」加 v0.16 §7.29。其他規則不動 |
+| `services/ad.js` | **不改**。`data-ad-env` 屬性照舊設定（e2e 以它判斷環境）；檔頭第 8 行的過時註解以本文件改讀規則處理 |
+
+設在 `html` 而不是 `body`：文件捲動的捲動容器是視窗，視窗的捲軸設定取自根元素（與 §7.27.2 的 `scroll-padding` 同理）。
+
+#### 7.29.4 影響與取捨
+
+| 環境 | v1.3.1 現況 | v0.16 之後 |
+| :--- | :--- | :--- |
+| 傳統捲軸（Windows、Linux 桌面），頁面可捲動 | 內容寬 = 視窗 − 15 | 相同 |
+| 傳統捲軸，頁面不可捲動 | 內容寬 = 視窗 | 內容寬 = 視窗 − 15；右側 15 px 為 `--bg` 底色空白，置中內容比 1.3.1 左移 7.5 px，但**不再隨捲軸出現而移動** |
+| 覆蓋式捲軸（Android、iOS、macOS 預設） | 捲軸不佔寬 | **無影響**（`stable` 對覆蓋式捲軸不保留空間）；375px 版面不變 |
+| 不支援 `scrollbar-gutter` 的舊瀏覽器 | — | 忽略此屬性，行為同 1.3.1 |
+| `position: fixed` 元素（底部導覽、首次底部列、toast、對話框背景） | 不可捲動時延伸到視窗右緣 | 不延伸到保留的 15 px（與可捲動頁面本來就不蓋住捲軸相同）。對話框背景在不可捲動頁面右側會留 15 px 未變暗，屬外觀差異，不影響操作 |
+| 水平捲軸 | 無 | 無（只保留垂直捲軸寬度）；樣式檔目前沒有 `100vw`（SD 已查 0 處），新增測試禁止，避免 `100vw` 超出可用寬度 |
+| 靜態頁 `dist/site/about.html` 等 | 自己的 `static-page.css` | 不在本次範圍（BUG 只涉及應用內），不改 |
+
+**連帶效果**：BUG-006 表中「1366×768 第一階段、v1.2.0 也有 dx −7.5（首屏內容撐出捲軸）」的舊有位移一併消失；BUG-008 的 768×1024 長句下移 48 px 因寬度固定、折行不變而消失。**QA 注意**：傳統捲軸環境下，不可捲動頁面的座標與 1.3.0／1.2.0 產物差 −7.5 px 是預期；位移比對一律在同一個建置內做「前後」比較，不跨版本比絕對座標（SD-FB-94）。
+
+#### 7.29.5 實測方法（FE-96 自測、FE-97 交付前重測）
+
+建置到 scratchpad；腳本放 scratchpad，參照 `tests/e2e/diag-r10-scrollbar.mjs`（本機 CDP 啟動、**不加** `--hide-scrollbars`、`mobile: false`）與 `tests/e2e/diag-r9-offline.mjs` 的逐畫格紀錄，可唯讀 import `tests/e2e/lib/cdp.mjs`，不得修改 `tests/`。
+
+| 項目 | 條件 | 合格 |
+| :--- | :--- | :--- |
+| AC-60-06 | 1366×768、768×1024；單字卡頁捲到頂；`comply with`、20 個單字的長句；綠、黃、紅 | 分數出現前後 `.sp-tts__btn`、`.sp-mic`、`.sp-meter` 的 `getBoundingClientRect()`（加 `scrollY`）差 = 0；`getComputedStyle(html).scrollbarGutter === "stable"`；無水平捲軸 |
+| AC-52-05（載入期 header） | 1920×1080、1366×768；Layout Instability API 記錄載入期間；以 `file://` 交付檔，並另以 init script 在 `DOMContentLoaded` 後設 `document.documentElement.setAttribute("data-ad-env", "")` 模擬廣告環境 | 兩種情況 `.app-header__inner` 位移 0；第一個畫格起 `scrollbarGutter` 即為 `stable` |
+| 回歸 | 375×667（`mobile: true`）主控台、單字卡、模擬測驗；1366 主控台開「資料備份」使頁面變長 | 375 版面與 1.3.1 FE-94 產物座標相同、無水平捲軸（AC-20-01、AC-40-02）；1366 展開前後主控台內容 dx = 0 |
+
+完整的廣告環境（本機 HTTPS、`tests/tools/build-ad-test.mjs`）由 QA 依 V-AD 重測，不派給 PG。
 
 ---
 
@@ -3941,7 +4457,98 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | D-10 | `tests/static/legal-check.mjs` 已無連續地址（V-MAIL-01 命中 0） | ML-5、AC-55-04 |
 | D-11 | 人類：讀過公開文案（FB-71）、AdSense 後台與 Privacy & messaging、Search Console | AC-50-10、R-28 |
 
-**給 QA 的已知設計行為**：(1) `#view-*` 外的 `#ad-slot` 在第一階段不存在，不是缺陷。(2) `collapsed` 後容器仍可能留在 DOM（`display: none`）。(3) 首次模式返回鈕文字為「返回難易度設定」，`#footer-first-run-back` 已移除。(4) `html[data-ad-env]` 的 `scrollbar-gutter` 只在環境成立時存在。(5) 頁尾 `#footer-links` 是 `div[role=group]`，不算導覽。
+**給 QA 的已知設計行為**：(1) `#view-*` 外的 `#ad-slot` 在第一階段不存在，不是缺陷。(2) `collapsed` 後容器仍可能留在 DOM（`display: none`）。(3) 首次模式返回鈕文字為「返回難易度設定」，`#footer-first-run-back` 已移除。(4) `html[data-ad-env]` 的 `scrollbar-gutter` 只在環境成立時存在（**v0.16 起改為無條件，見 §7.29**）。(5) 頁尾 `#footer-links` 是 `div[role=group]`，不算導覽。
+
+### 10.12 v0.15 測試範圍（PRD v0.20；契約 V-STT-01～V-STT-10、KF-1、DS-57～DS-63）
+
+驗證分 3 層（PRD 第 3 章 v0.20 註 2）：(1) 單元測試以替身與假時鐘驗證**事件順序**與畫面；(2) QA 以替身 `SpeechRecognition`（V-STT-STUB）在瀏覽器驗證；(3) 真人語音只能人工測。假音訊裝置曾量到「每次都有 `speechstart`、沒有文字也沒有錯誤」，**不得**當作真人行為的依據。
+
+**單元測試（PG，`npm test`）**
+
+| 檔案 | 任務 | 案例 |
+| :--- | :--- | :--- |
+| `__tests__/speech.test.js`（服務部分） | FE-90 | `onEnd` 8 欄且順序固定；4 個新回呼依引擎順序轉送、`info` 為複本；`errorCode` 只記第一個；手動停止的 `aborted` 不記；`detach` 後 7 個屬性皆 `null`；原型有 `onaudiostart` → `audioStartSupported: true`，沒有 → `false`，判定拋例外 → `false`；`abort()` 後替身再觸發任何事件都不回呼；`transcriptOf` 結果不變（含多段） |
+| `__tests__/store.test.js` | FE-91 | 啟動 `preparingPhase === null`；`setSttStatus("preparing", 3 種子階段)` 生效；缺少或錯誤子階段時整次忽略；其他狀態子階段一律 `null`；沒變不通知；`setItem` 0 次；寫入 localStorage 的資料與匯出備份都不含 `preparingPhase`、`sttStatus`（V-STT-10） |
+| `__tests__/speech-flow.test.js`（新） | FE-92 | 以注入 `setTimeout`／`clearTimeout` 的假時鐘與替身 `stt`（或真正 `stt.create(假全域)`）驗證：V-STT-01 按下同步進入準備中、文字與 `aria-label` 逐字、收音條全暗；V-STT-02 `start` → `audiostart` →「聆聽中」順序，`T_BUFFER` 0 時在同一處理器內；V-STT-03 `soundstart`、`speechstart` 立即聆聽，`result` 評分，`nomatch` → `heardNoWords`，不支援 → 推進 `T_FALLBACK` 後聆聽、推進 `T_READY` 不逾時；V-STT-04 取得中與已 `start` 時取消、遲到事件與遲到的取得完成不改畫面、立即再按時 `acquire` 共用 Promise 且 `getUserMedia` 計數不變；V-STT-05 推進 `T_READY` → `noResponse`、取得擱置超過 `T_READY` 仍準備中、準備中無錯誤 `end` → `noResponse`；V-STT-06 `outcomeOf` 判定表全部列（契約 §14.5 逐列）；V-STT-07 每次嘗試訊息 0 或 1 則、`end` 不覆蓋、新嘗試旗標重設；V-STT-08 `latency`／`address`／`sitting` 對 `Latency.`／`adress`／`kitten` → 綠／黃／紅，列數 1／1／2，值逐字、`lang="en"`、含 HTML 字元時列內無子元素；V-STT-09 `TEXT` 4 個新字串與 2 個標籤逐字等於 `data-schema.ts` §18 `STT_FLOW_TEXTS`（讀契約檔比對，比照 `layout.test.js`），`TIMING` 3 個值都在 `STT_TIMING` 範圍內（不寫死數值）；V-STT-10 3 種分流、取消、逾時都不呼叫 `recordSttScored`；換卡、TTS、拔除麥克風在準備中的處理（§7.26.6）；`speech-panel.js` 原始碼沒有 `innerHTML`、`insertAdjacentHTML`、`outerHTML`；RT-4 字樣不在分數區固定文字中 |
+| `__tests__/focus-scroll.test.js`（新） | FE-93 | 讀 `00-base.css`：`@media (max-width: 640px)` 內有 `html` 的 `scroll-padding-bottom`，值含 `--emt-bottomnav-h` 與 `safe-area-inset-bottom`；`html.is-typing` 為 0；媒體查詢外沒有 `scroll-padding`。讀 `75-site-pages.css`：一般頁尾連結不再有 `scroll-margin-bottom`；首次畫面規則為 `--emt-firstbar-h` 減 `--emt-bottomnav-h`。若做了 §7.27.3 後備，另測條件與 `dy` 計算 |
+
+**既有單元測試要改的地方（由 PG 在任務內修改）**
+
+| 位置 | 舊假設 | 新期望 | 任務 |
+| :--- | :--- | :--- | :--- |
+| `speech.test.js:159` | `onEnd` 3 欄 | 8 欄 | FE-90 |
+| `speech.test.js:252` | 綠燈 `compare === null` | 綠燈 1 列「辨識文字」 | FE-92 |
+| `speech.test.js:374`、`:397` | `runtime.speech` 無 `preparingPhase`；假 `setSttStatus` 只收 1 個參數 | 加 `preparingPhase`；接受並記錄子階段 | FE-92 |
+| `speech.test.js:485`、`:514`、`:537`、`:819`、`:870`、`:891`、`:999`、`:1080`、`:1097` | 按下後立即 `listening` | 先 `preparing`；觸發 `audiostart` 或推進 `T_FALLBACK` 後才 `listening` | FE-92 |
+| `speech.test.js:546`～`:558` | `onResult("...")` →「未偵測到語音」 | `heardNoWords`（AC-59-03）；無結果的 `end` 依是否已確認 → `noSpeech` 或 `noResponse` | FE-92 |
+| `speech.test.js:939` | 取得中再按忽略 | 取得中再按 = 取消（AC-58-04 (a)） | FE-92 |
+| `store.test.js:898`～`:906` | 狀態值 3 種 | 4 種與子階段規則 | FE-91 |
+
+中間狀態：FE-90、FE-91 各自完成後，舊的面板測試仍會通過（面板還沒用新欄位）；舊替身 `start()` 回傳 `{ ok: true }` 沒有 `audioStartSupported`，FE-92 之後會走 `fallbackWait`，測試沙箱沒有 `setTimeout` 時直接進入聆聽中（§7.26.3）。要驗證順序的案例一律注入假時鐘。
+
+**給 QA 的項目（`tests/`、`docs/04-qa/` 不派給 PG）**
+
+| # | 項目 | 位置 | 說明 |
+| :--- | :--- | :--- | :--- |
+| Q1 | 建立 V-STT-STUB | `tests/e2e/lib/inits.mjs:56`～`:77` `fakeStt` | 加選項：`audioStart`（建構子設 `onaudiostart = onsoundstart = onspeechstart = onnomatch = null`；省略則模擬不支援）、可選的「`start()` 後 N ms 自動 `audiostart`」；加 `emitAudioStart`、`emitSoundStart`、`emitSpeechStart`、`emitNomatch`；`emitEnd` 照舊。替身記錄 `start()` 回傳與每個事件的時間 |
+| Q2 | 「按下即聆聽中」假設 | `e2e-env.mjs:16`、`e2e-progress.mjs:12`、`e2e-speech.mjs:36`～`:39`（`micOn` 最多等 1000 ms） | 不支援 `audiostart` 的替身要 1500 ms 才聆聽，會逾時：改為觸發 `audiostart` 或等 ≥ `T_FALLBACK` |
+| Q2 | 同上 | `e2e-speech.mjs:74`、`:105`；`e2e-mic.mjs:32`、`:62`、`:97`、`:130`、`:191`、`:192`、`:206`、`:225`；`e2e-reinit.mjs:116`；`e2e-motion.mjs:55` | 斷言 `listening` 前先經過 `preparing` |
+| Q2 | 單一 `noSpeech` 訊息 | `e2e-speech.mjs:138`、`:155`、`:159` | 空結果改 `heardNoWords`；逾時依是否已確認收音 |
+| Q3 | 新 TC | AC-58-01～AC-58-13、AC-59-01～AC-59-07、AC-60-01～AC-60-07、AC-61-01、AC-61-02；修改的 15 條 AC | 依 §7.26.10、§7.27.4 量測方法 |
+| Q4 | 人工 | AC-58-14、AC-59-08 | Chrome、Edge 最新穩定版各 1 輪，Chrome 另在正式網站 1 輪；記錄瀏覽器版本、逐次狀態與結果，交人類判定；結果交主控決定是否在範圍內調整 `TIMING`（§7.26.1） |
+| Q5 | BUG-005 重測 | `tests/e2e/diag-r9-focus.mjs` | 加 390×844、Shift+Tab、AC-61-01 必測清單；依 AC-38-09、AC-61-01 判定；BUG-006 不重測 |
+| Q6 | 版本 1.3.1 | `e2e-version.mjs:186`、`tests/tools/qa-review-r9.mjs:65`～`:67` 的人工 TC 文字、`tests/static/boundary-r9.mjs:4`、`:32` | 1.3.0 → 1.3.1；新一輪邊界檢查列 MC-09 為授權例外 |
+| Q7 | TC 說明 | `tests/tools/tc-desc.json`、`docs/04-qa/test-plan.md` | AC-08-01、AC-08-06～AC-08-08、AC-08-10、AC-08-13、AC-22-03、AC-30-04、AC-31-03、AC-33-01、AC-33-03、AC-33-06～AC-33-08、AC-42-02 的期望文字改為 v0.20 |
+
+**主控檢查**
+
+| # | 項目 |
+| :--- | :--- |
+| M-1 | `git diff package.json` 只有 `version` 1 行（1.3.0 → 1.3.1） |
+| M-2 | `dist/site` 恰 13 檔、預先快取 7 項；`git diff .github/workflows/static.yml` 為 0 |
+| M-3 | PG 本機沒有 Chrome／Edge 時，代為執行 §7.26.10、§7.27.4 |
+| M-4 | localStorage 鍵名 2 個、`schemaVersion` 3、匯出備份頂層 5 欄不變 |
+| M-5 | 任何檔案都沒有連續形式的信箱地址（ML-3） |
+
+**部署後**：Actions 成功；正式網址版本行「版本 1.3.1（建置 xxxxxxx）」；AC-58-14 的正式網站輪次在此時執行。
+
+**給 QA 的已知設計行為**：(1) 聆聽中再按停止後，遲到的 `result` 不評分（SD-FB-85）。(2) 離線時按下不經過準備中，直接顯示既有訊息（SD-FB-90）。(3) 「可依賴 `audiostart`」以 `"onaudiostart" in rec` 判定；沒有這個屬性的替身會走 1500 ms 後備。(4) 準備中 `aria-pressed="true"`。(5) `T_BUFFER` 為 0，收到 `audiostart` 的同一個處理器內就變成「聆聽中」。
+
+### 10.13 v0.16 測試範圍（BUG-006、BUG-007、BUG-008；PRD、契約不變）
+
+**單元測試（PG，`npm test`）**
+
+| 檔案 | 任務 | 案例 |
+| :--- | :--- | :--- |
+| `__tests__/speech-flow.test.js`（新增案例） | FE-95 | 以 `makeEnv({ clock, raf: true })`：(a) 按下後同步 `data-status = preparing`、`mic.log.acquire === 0`、已要求 1 個畫格；`env.frame()` 後仍為 0（0 ms 計時器未到）；`clock.advance(0)` 後為 1，之後流程與現有案例相同。(b) 延後期間再按 → 回待機、`env.frame()` 與 `clock.advance(1000)` 後 `acquire` 仍 0、`clock.pending()` 為 `[]`。(c) 延後期間 `reset()`、`release()`、按 TTS → 同 (b)。(d) 不執行畫格、`clock.advance(PAINT_FALLBACK_MS)` → `acquire` 1；之後再 `env.frame()` 與推進時間 → 仍 1（只執行 1 次）。(e) `fakeMic({ active: true })` → 按下後同步 `acquire` 1、未要求畫格。(f) `raf` 拋例外 → 同步取得。(g) 「我知道了」路徑同樣延後。(h) 取消後立即再按（`fakeMic` 延後模式）→ 只有新代號呼叫 `acquire`，總計 1 次。(i) `PAINT_FALLBACK_MS === 50` 且 `TIMING` 鍵集合不變 |
+| `__tests__/_speech-env.js` | FE-95 | 新增 `raf` 選項（假 `requestAnimationFrame` 佇列、`cancelAnimationFrame`、`env.frame()`、`env.rafPending()`）與 `fakeMic` 的 `active` 選項；不給 `raf` 時沙箱**不定義** `requestAnimationFrame`，既有案例行為不變 |
+| `__tests__/mic.test.js`（新增案例） | FE-95 | 替身加選項 `ctxState`：(a) `suspended` → `acquire()` 同步階段 `resumeCalls === 1`，取得成功後 `=== 2`，結果 `{ ok: true, reused: false, metering: true }`；(b) `resume` 回傳 reject、同步拋例外、不存在 → 都不影響結果、不 reject；(c) `running` → 新呼叫點 0 次（既有 `:150` 期望 2 次不變）；(d) 取得中被 `release` → 不呼叫第 2 次 `resume` |
+| `__tests__/ad-slot.test.js:1026` | FE-96 | 標題改為「…；`85-ad.css` 不再設定 `scrollbar-gutter`（v0.16 §7.29）」；斷言 `rulesOf("html[data-ad-env]").length === 0`、`NO_COMMENT` 中 `scrollbar-gutter` 出現 0 次；寬度與標籤斷言不變 |
+| `__tests__/scrollbar-gutter.test.js`（新） | FE-96 | 讀 `styles/*.css` 並去除註解：`scrollbar-gutter` 宣告只出現在 `00-base.css`、且只在媒體查詢外 `selector === "html"` 的規則，值為 `stable`；`@media` 內的 `html` 規則不含它；任何樣式檔沒有 `100vw`；`85-ad.css` 沒有 `html[data-ad-env]` |
+
+**既有單元測試要改的地方**
+
+| 位置 | 舊假設 | 新期望 | 任務 |
+| :--- | :--- | :--- | :--- |
+| `ad-slot.test.js:1026`～`:1040` | `scrollbar-gutter` 只在 `html[data-ad-env]`，出現 1 次 | `85-ad.css` 0 次，無該規則 | FE-96 |
+| `mic.test.js:154` | `AudioContext` 在 acquire 同步階段建立 | **不改**（仍成立） | — |
+| `mic.test.js:150` | 重用時 `resumeCalls === 2` | **不改**（替身 `running`） | — |
+| `speech-flow.test.js`、`speech.test.js` 既有案例 | 按下後同步呼叫 `acquire` | **不改**：沙箱沒有 `requestAnimationFrame` → 同步（§7.28.3 降級） | — |
+| `focus-scroll.test.js:107`～`:114` | 媒體查詢外 `html` 不含 `scroll-padding` | **不改**：`scrollbar-gutter` 不符合 `/scroll-padding/` | — |
+
+**給 QA 的項目（`tests/`、`docs/04-qa/` 不派給 PG）**
+
+| # | 項目 | 位置 | 說明 |
+| :--- | :--- | :--- | :--- |
+| Q8 | BUG-007 重測 | `tests/e2e/e2e-stt-flow.mjs` 第 8 段（TC-58-01f）、`diag-r10-perf.mjs` | 依 §7.28.6；AC-58-01 判定 |
+| Q9 | 「按下後同步呼叫 `getUserMedia`」假設 | `e2e-mic.mjs`、`e2e-stt-flow.mjs` 等以 init script 計 `getUserMedia` 次數者 | 真實瀏覽器有 rAF：第 1 次按下後要等 1 個畫格（或 50 ms）才呼叫；按下後立即讀次數會得 0。改為等待後再讀 |
+| Q10 | BUG-006、BUG-008 重測 | `e2e-ad.mjs:147`（`gutter` 欄）、`diag-r9-offline.mjs`、`diag-r10-scrollbar.mjs`、`e2e-stt-flow.mjs` TC-60-06-1366／768 | 依 §7.29.5；`scrollbarGutter` 在第一階段也是 `stable`，不再以它判斷廣告環境（屬性 `data-ad-env` 仍可用） |
+| Q11 | 跨版本座標比對 | TC-52-03 等與 1.2.0／1.3.0 比較絕對座標者 | 傳統捲軸、不可捲動頁面會差 −7.5 px，屬預期（§7.29.4）；改為同一建置內前後比較 |
+| Q12 | 收音條實機 | AC-33-03 人工 | Chrome、Edge 實機確認第 1 次按下後收音條會動；iOS Safari 選測並記錄（SD-FB-93） |
+
+**主控檢查**：M-1 `package.json` 無 diff（仍 1.3.1）；M-2 `dist/site` 恰 13 檔、預先快取 7 項；M-3 PG 本機沒有 Chrome／Edge 時代為執行 §7.28.6、§7.29.5；M-4 localStorage 鍵名 2 個、`schemaVersion` 3、匯出備份頂層 5 欄不變；M-5 `services/ad.js`、`views/flashcards.js` diff 為 0。
+
+**給 QA 的已知設計行為**：(6) 第 1 次按麥克風時 `getUserMedia` 晚 1 個畫格才呼叫；延後期間取消不會詢問權限。(7) 傳統捲軸環境右側恆保留 15 px，對話框背景在不可捲動頁面右側不變暗。(8) `html[data-ad-env]` 屬性仍存在，但不再有任何樣式依賴它。
 
 ---
 
@@ -4056,13 +4663,30 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | T-105 | （v0.14）廣告框被重建或換父節點，等於請求新廣告 | 違反 AD-9、Google 規定 | 容器在 `#app-main` 之外；切頁只靠 CSS；`ad-slot.test.js` 與 §7.25.10 比對節點同一性 |
 | T-106 | （v0.14）真實 AdSense 可能對 `ins` 或祖先設 inline `height`，甚至帶 `!important`；替身無法重現 | `loading` 或非主控台時廣告短暫露出 | `max-height: 0` 與 `overflow: hidden` 雙重處理；學習區塊在版位之前，位移仍為 0。**只有第二階段真實廣告才能驗證**，列 FB-73 核對項（SD-FB-81） |
 | T-107 | （v0.14）AdSense 量寬度的時機晚於 `push`，使用者已切頁 | 寬度 0 導致失敗 | `loading` 不論頁面都不用 `display: none`；§7.25.10 量測。`collapsed`、`dismissed` 後的第三方錯誤訊息屬瀏覽器與腳本，不是本系統錯誤 |
-| T-108 | （v0.14）非覆蓋式捲軸在廣告撐高時出現，置中內容左右移動 | 違反 AC-52-05 | `html[data-ad-env] { scrollbar-gutter: stable }`（SD-FB-80）；QA 在 1366 量測 |
+| T-108 | （v0.14）非覆蓋式捲軸在廣告撐高時出現，置中內容左右移動 | 違反 AC-52-05 | `html[data-ad-env] { scrollbar-gutter: stable }`（SD-FB-80）；QA 在 1366 量測。**v0.16**：屬性晚 1 個畫格設定仍造成 BUG-006，改為無條件規則（§7.29、T-128） |
 | T-109 | （v0.14）測試注入值流入正式產物 | 第一階段就有廣告請求 | §7.25.4 的 5 層保護 |
 | T-110 | （v0.14）文案在應用內與靜態頁的渲染對照不一致 | 違反 AC-57-03 | SC-4 比對列入 `site-static.test.js` 與 §7.25.10 |
 | T-111 | （v0.14）375px 第 3 格 2～3 行，列高增加，可能影響 AC-39-09 首屏 | AC-39-09 不符 | FE-89 量測；只可調間距。若調整間距仍不符，標 `blocked` 由主控回 SA／PM |
 | T-112 | （v0.14）`<noscript>` 或 JSON-LD 使既有檢查誤判，放寬規則時順帶打開其他漏洞 | AC-19-01 防護變弱 | 逐字白名單，不改 `FORBIDDEN_PATTERNS` 既有項目（§5.9） |
 | T-113 | （v0.14）`tests/` 未更新就跑 QA，新 class、新標題、13 檔造成大量預期失敗 | QA 誤判 | §10.11 Q3 列出位置；QA 先更新再跑 |
 | T-114 | （v0.14）Windows checkout 的 CRLF 使靜態頁換行與 CI 不同 | 違反 DP-7 | 所有靜態頁輸入先正規化為 LF；`site-pages-render.test.js` 驗證無 `\r` |
+| T-115 | （v0.15）真人環境的 `audiostart` 遠晚於假裝置（藍牙耳機切換、慢速機器），5 秒內沒到 | 誤報「語音辨識沒有回應」 | `T_READY` 取預設 5000（已知值的 3.5 倍）；AC-58-14 人工記錄；主控可在 10000 以內代核調高（§7.26.1） |
+| T-116 | （v0.15）瀏覽器有 `onaudiostart` 屬性卻從不觸發 | 每次都逾時 | `soundstart`、`speechstart`、`result` 都會直接結束準備中；仍逾時則列已知限制，回報人類（SD-FB-87） |
+| T-117 | （v0.15）`T_BUFFER` 0 時，字首仍落在引擎尚未就緒的空窗 | AC-58-14 (a) 未達 9／10 | Q-95 記憶未查證不先加；依人工結果由主控在 0～500 內代核（SD-FB-86） |
+| T-118 | （v0.15）取消、換卡、逾時後，舊實例或舊計時器的事件改到新嘗試的畫面 | 狀態錯亂、出現 2 則訊息 | `gen` 代號 + `att.decided` + `detach` 三層；`speech-flow.test.js` 逐一驗證遲到事件 |
+| T-119 | （v0.15）取得麥克風中取消後再按，出現第 2 個權限詢問 | 違反 AC-58-05、AC-33-01 | 沿用 `mic.acquire()` 的 `pending` 共用；單元測試計 `getUserMedia` 次數 |
+| T-120 | （v0.15）`tests/` 的替身沒有 `onaudiostart`，`micOn` 只等 1000 ms，QA 未更新就跑 | 大量預期失敗被誤判為缺陷 | §10.12 Q1、Q2 列出檔案與行號；QA 先更新再跑；PG 不得代改 |
+| T-121 | （v0.15）面板改動大，`speech.test.js` 舊案例被大量改寫，漏掉原本的保護 | 回歸缺陷 | 舊案例只改「按下即聆聽」與訊息期望，不刪原本驗證的項目；新行為放新檔 `speech-flow.test.js` |
+| T-122 | （v0.15）`scroll-padding` 與 `75-site-pages.css` 的 `scroll-margin` 相加，頁尾連結多捲 | AC-61-02「不多捲」、首次畫面位置改變 | 刪除重複規則，首次畫面只留差額（§7.27.2）；`focus-scroll.test.js` 檢查 |
+| T-123 | （v0.15）某瀏覽器的焦點捲動不依 `scroll-padding`，或功能區有內層捲動容器 | BUG-005 未修好 | FE-93 實測；不合格才啟用 §7.27.3 後備；內層容器另加同規則 |
+| T-124 | （v0.15）首次畫面固定底部列（184 px）可能遮住頁尾連結以外的控制項 | 首次模式鍵盤使用不便 | 不在 AC-61-01 範圍（AC-61-01 為一般模式）；本版不擴大範圍，列 SD-FB-91 |
+| T-125 | （v0.16）`AudioContext` 不在點按處理器內建立，某些瀏覽器（Safari）維持 `suspended` | 第 1 次按下時收音條不動（AC-33-03）；辨識不受影響 | 建立後與取得音軌後各 `resume()` 1 次（§7.28.4）；FE-95 實測 Chrome、Edge 的 `state`；Safari 列人工選測（SD-FB-93） |
+| T-126 | （v0.16）延後取得與取消、換卡、離頁交錯，舊代號仍呼叫 `acquire()` 或呼叫 2 次 | 多 1 次權限詢問（AC-58-05、AC-33-01）或狀態錯亂 | `run()` 第一行 `live(id)` + 子階段 + `attached()`；`done` 旗標；`clearTimers` 取消 rAF 與計時器；`speech-flow.test.js` 逐列驗證（§10.13） |
+| T-127 | （v0.16）rAF 回呼內直接 `acquire()`，110 ms 仍擋在繪製之前 | BUG-007 未修好 | 規定 rAF 內只設 `setTimeout(0)`（§7.28.3）；§7.28.6 以實際畫出時間判定，不以屬性變更時間判定 |
+| T-128 | （v0.16）`scrollbar-gutter` 使傳統捲軸桌面版不可捲動的頁面右側留 15 px，被誤判為版面缺陷或對話框背景未全覆蓋 | QA 誤判 | §7.29.4 列為預期；§10.13 已知設計行為 (7)；跨版本不比絕對座標（Q11） |
+| T-129 | （v0.16）日後有人用 `100vw`，在保留捲軸寬度下超出 15 px 產生水平捲軸 | AC-20-01、AC-40-02 | `scrollbar-gutter.test.js` 禁止樣式檔出現 `100vw` |
+| T-130 | （v0.16）`tests/` 的 e2e 假設按下後立即呼叫 `getUserMedia`、或以 `scrollbarGutter` 判斷廣告環境，QA 未更新就跑 | 預期失敗被誤判為缺陷 | §10.13 Q9、Q10 列出；QA 先更新再跑；PG 不得代改 |
+| T-131 | （v0.16）延後 1 個畫格讓 `getUserMedia` 晚開始，與 AC-58-03 的時間要求混淆 | QA 誤判 | AC-58-03 自 `stt.start()` 起算，不受影響（§7.28.3 時間預算） |
 
 ---
 
@@ -4426,6 +5050,69 @@ FE-19 與 FE-18 的先後（v0.3）：**FE-19 在前**。理由：FE-18 的 done
 本次由主控或人類 commit，SD 與 PG 不 commit。
 
 任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 89（FE-01～FE-89），共 115 個；主控手動項目 MC-01～MC-08。
+
+### 12.14 v0.15 增量任務與執行批次（PRD v0.20、契約 v0.20）
+
+既有 115 個任務與 MC-01～MC-08 全部 `done`，內容與 status 不變。不需 CT 任務（DS-63）。
+
+| ID | 標題 | 批次 | dependsOn | paths |
+| :--- | :--- | :--- | :--- | :--- |
+| FE-90 | 語音辨識服務：4 種事件、8 欄結束資訊、`audiostart` 判定 | v0.15-1 | FE-89（已 done） | `services/stt.js`、`__tests__/speech.test.js`（服務部分） |
+| FE-91 | store：`preparing` 狀態與子階段 | v0.15-1 | FE-89（已 done） | `state/store.js`、`__tests__/store.test.js` |
+| FE-93 | 窄視窗鍵盤焦點（BUG-005） | v0.15-1 | FE-89（已 done） | `styles/00-base.css`、`styles/75-site-pages.css`、`__tests__/focus-scroll.test.js`（新）；只在實測不合格時：`ui/bottom-nav.js` |
+| FE-92 | 語音面板：準備中狀態機、訊息分流、辨識文字列 | v0.15-2 | FE-90、FE-91 | `views/speech-panel.js`、`styles/31-speech.css`、`__tests__/speech.test.js`（面板部分）、`__tests__/speech-flow.test.js`（新）、`__tests__/_speech-env.js`（新，選用） |
+| FE-94 | 交付關卡：全測試、實測、重新建置 | v0.15-3 | FE-92、FE-93；manualPrereqs MC-09 | 只在實測不合格時：`styles/31-speech.css`、`styles/00-base.css`、`styles/75-site-pages.css`；`dist/english-master-track.html`、`dist/site/` 下 13 檔 |
+
+（FE 任務的 paths 省略前綴 `src/app/`，`dist/` 除外。）
+
+| 順序 | 項目 | 執行者 | 前置 | 說明 |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | FE-90、FE-91、FE-93（可平行） | pg-frontend | 無 | paths 不重疊；完成後既有測試應全過 |
+| 2 | FE-92 | pg-frontend | FE-90、FE-91 | `speech.test.js` 接在 FE-90 之後 |
+| 3 | MC-09：`package.json` 改為 1.3.1 | 主控 | FE-92、FE-93 | Q-102 A 一次性授權；只改 `version` 1 行 |
+| 4 | FE-94 | pg-frontend | FE-92、FE-93、MC-09 | 必須最後執行 |
+| 5 | QA | qa | FE-94 | §10.12；先更新 `tests/` 再跑 |
+| 6 | 人工 | 人類／QA | FE-94；正式網站輪次在部署後 | AC-58-14、AC-59-08 |
+| 7 | 部署與部署後驗證 | 主控 | QA 通過 | §10.12 部署後；`static.yml` 不改 |
+
+**PG 不得越界的目錄**
+
+| 代理 | 可寫 | 不得寫入 |
+| :--- | :--- | :--- |
+| pg-frontend（FE-90～FE-94） | 只有上表 paths | `src/data/`、`tests/`、`docs/`、`tools/`、`package.json`、`package-lock.json`、`.github/`、`sources/`、`src/app/assets/`、`__tests__/_samples/`、`views/flashcards.js`、`services/mic.js`；只有 FE-94 可寫 `dist/` |
+
+本次由主控或人類 commit，SD 與 PG 不 commit。
+
+任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 94（FE-01～FE-94），共 120 個；主控手動項目 MC-01～MC-09。
+
+### 12.15 v0.16 增量任務與執行批次（修正 BUG-006、BUG-007、BUG-008；PRD v0.20、契約 v0.20 不變）
+
+既有 120 個任務與 MC-01～MC-09 全部 `done`，內容與 status 不變。不需 CT 任務、不新增 MC 項目（版本維持 1.3.1）。
+
+| ID | 標題 | 批次 | dependsOn | paths | BUG／AC |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| FE-95 | 第 1 次按麥克風先畫出準備中再取得；AudioContext `suspended` 補救 | v0.16-1 | FE-94（已 done） | `views/speech-panel.js`、`services/mic.js`、`__tests__/speech-flow.test.js`、`__tests__/_speech-env.js`、`__tests__/mic.test.js` | BUG-007；AC-58-01 |
+| FE-96 | 根元素 `scrollbar-gutter: stable`，移除廣告環境條件規則 | v0.16-1 | FE-94（已 done） | `styles/00-base.css`、`styles/85-ad.css`、`__tests__/ad-slot.test.js`、`__tests__/scrollbar-gutter.test.js`（新） | BUG-006、BUG-008；AC-52-05、AC-60-06 |
+| FE-97 | 交付關卡：全測試、3 張 BUG 實測、重新建置 `dist/`（1.3.1） | v0.16-2 | FE-95、FE-96 | `dist/english-master-track.html`、`dist/site/` 下 13 檔 | AC-58-01、AC-60-06、AC-52-05 |
+
+（FE 任務的 paths 省略前綴 `src/app/`，`dist/` 除外。）
+
+| 順序 | 項目 | 執行者 | 前置 | 說明 |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | FE-95、FE-96（可平行） | pg-frontend | 無 | paths 不重疊 |
+| 2 | FE-97 | pg-frontend | FE-95、FE-96 | 必須最後執行；不改 `src/`，實測不合格標 `blocked` |
+| 3 | QA | qa | FE-97 | §10.13 Q8～Q12；BUG-006～BUG-008 重測 |
+| 4 | 部署 | 主控 | QA 通過 | 1.3.1 首次發布；`static.yml` 不改 |
+
+**PG 不得越界的目錄**
+
+| 代理 | 可寫 | 不得寫入 |
+| :--- | :--- | :--- |
+| pg-frontend（FE-95～FE-97） | 只有上表 paths | `src/data/`、`tests/`、`docs/`、`tools/`、`package.json`、`package-lock.json`、`.github/`、`sources/`、`src/app/assets/`、`__tests__/_samples/`、`views/flashcards.js`、`services/ad.js`、`services/stt.js`、`state/store.js`、`styles/31-speech.css`；只有 FE-97 可寫 `dist/` |
+
+本次由主控或人類 commit，SD 與 PG 不 commit。
+
+任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 97（FE-01～FE-97），共 123 個；主控手動項目 MC-01～MC-09（本版不新增）。
 
 ---
 
@@ -5152,6 +5839,67 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 
 **回歸**：AC-20-01、AC-20-03、AC-20-04、AC-22-05、AC-25-07、AC-35-01、AC-35-02、AC-36-03、AC-37-01、AC-37-02、AC-39-09、AC-42-04（FE-86、FE-89）。其餘 264 個應驗收 AC 的對照與 §13～§13.10 相同（357 − 新增 57 − 修改 36）；**357 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。AC-50-10 的實機確認、AC-55-04 的全庫掃描與 AC-56-03、AC-56-08、AC-56-09 的網路回應不由 PG 完成，已分別列給人類、QA 與主控。
 
+### 13.12 v0.15 追加對照（PRD v0.20：415 個 AC，本版應驗收 388 個）
+
+**新增 31 條**
+
+| AC | 任務 | 備註 |
+| :--- | :--- | :--- |
+| AC-58-01 | FE-91、FE-92 | 狀態與子階段、文字、清除 |
+| AC-58-02 | FE-92 | 收音條只在聆聽中點亮 |
+| AC-58-03 | FE-90、FE-92、FE-94 | 事件轉送、`T_BUFFER`、實測時間 |
+| AC-58-04、AC-58-05 | FE-92 | 取消、遲到事件、共用取得 |
+| AC-58-06 | FE-92 | `T_READY`、取得期間不計時 |
+| AC-58-07、AC-58-08、AC-58-09 | FE-90、FE-92 | 直接事件、錯誤、後備判定 |
+| AC-58-10、AC-58-11 | FE-92 | 中斷與拔除 |
+| AC-58-12 | FE-91、FE-92、FE-94 | 不持久化；匯出備份比對 |
+| AC-58-13 | FE-92、FE-94 | 樣式與座標實測 |
+| AC-58-14 | FE-92（實作）、FE-94（交人工） | **人工**：QA／人類 |
+| AC-59-01～AC-59-06 | FE-90、FE-92 | 旗標由服務提供，`outcomeOf` 判定 |
+| AC-59-07 | FE-92 | 不計學習、不持久化 |
+| AC-59-08 | FE-92（實作）、FE-94（交人工） | **人工**：QA／人類 |
+| AC-60-01 | FE-90、FE-92 | 原文不清洗（RT-1、FB-77） |
+| AC-60-02～AC-60-05 | FE-92 | 文字列、禁用字樣、`textContent` |
+| AC-60-06 | FE-92、FE-94 | 換行規則與實測 |
+| AC-60-07 | FE-92 | 清除時機 |
+| AC-61-01、AC-61-02 | FE-93、FE-94 | 規則、自測、交付前重測 |
+
+**修改 15 條**
+
+| AC | 任務 |
+| :--- | :--- |
+| AC-08-01、AC-08-06、AC-08-07、AC-08-08、AC-08-10、AC-08-13 | FE-92 |
+| AC-22-03、AC-30-04、AC-31-03 | FE-92 |
+| AC-33-01、AC-33-03、AC-33-06、AC-33-07、AC-33-08 | FE-92（AC-33-01 的不重複詢問也依賴既有 `services/mic.js`） |
+| AC-42-02 | FE-94（前置 MC-09） |
+
+**本版必須通過的既有 AC**：AC-38-09（BUG-005，FE-93、FE-94）。**回歸**：AC-27-03、AC-39 首屏條件、AC-41-04、AC-44-01、AC-57-01（FE-93、FE-94）；AC-20-01、AC-19-01、AC-21-03、AC-36-07（FE-94）。
+
+| E | 任務 | 備註 |
+| :--- | :--- | :--- |
+| E-05、E-162、E-163 | FE-92 | 訊息分流；E-163 另由人工記錄 |
+| E-66 | FE-92 | 減少動態 |
+| E-156～E-161 | FE-92 | 逾時、權限擱置、後備、中斷、拔除、錯誤 |
+| E-164、E-165 | FE-92、FE-94 | 長文字、不做語言判斷 |
+| E-166 | FE-93 | 鍵盤焦點 |
+
+其餘 342 個應驗收 AC 的對照與 §13～§13.11 相同（388 − 新增 31 − 修改 15）；**388 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。AC-58-14、AC-59-08 需要真人語音，不由 PG 完成，已列給 QA 與人類（§10.12 Q4）。
+
+### 13.13 v0.16 追加對照（PRD v0.20 不變：415 個 AC，本版應驗收 388 個）
+
+PRD 沒有新增或修改 AC；本版只為 3 張 BUG 的 AC 加上修正任務，其餘對照與 §13.12 相同。
+
+| AC | BUG | 任務 | 備註 |
+| :--- | :--- | :--- | :--- |
+| AC-58-01 | BUG-007 | FE-91、FE-92（既有）、**FE-95**、**FE-97** | 延後取得、實測 ≤ 100 ms |
+| AC-60-06 | BUG-008 | FE-92、FE-94（既有）、**FE-96**、**FE-97** | 捲軸寬度固定、1366／768 座標差 0 |
+| AC-52-05 | BUG-006 | FE-88、FE-89（既有）、**FE-96**、**FE-97** | 第一個畫格前生效；完整廣告環境由 QA 依 V-AD 重測 |
+| 回歸：AC-58-04、AC-58-05、AC-58-06、AC-58-10、AC-33-01、AC-33-03、AC-33-07、AC-21-03 | — | FE-95 | 延後期間取消、共用取得、`resume` 補救、不錄音 |
+| 回歸：AC-20-01、AC-40-02、AC-61-01、AC-61-02 | — | FE-96 | 無水平捲軸；`html` 的 ≤ 640px 規則不動 |
+| 回歸：AC-42-02、AC-36-07、AC-19-01 | — | FE-97 | 1.3.1、13 檔、單一 HTML |
+
+**388 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個。**
+
 ---
 
 ## 14. 回應契約 §9 指名 SD 的回饋
@@ -5229,6 +5977,14 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | DS-54（v0.19） | 替身放 `tests/e2e/fixtures/ad-stub.js`（QA），單元測試用內建假物件；都不進部署目錄 | §7.25.4 |
 | DS-55（v0.19） | build 只加逐字 canonical；其他項目不命中既有樣式或改為逐字放行；不放寬既有規則 | §5.9、§10.11 Q3 |
 | DS-56（v0.19） | 同意：不需持久化；狀態全部在記憶體；不建 CT 任務；不需退回人類 | §4.12、§12.13 |
+| DS-57（v0.20） | 回呼名稱 `onAudioStart`、`onSoundStart`、`onSpeechStart`、`onNomatch`；每個回呼附 `SttEndInfo` 複本，`onEnd` 附 8 欄；`detach` 清 7 個處理器；以 `"onaudiostart" in rec` 判定可依賴 `audiostart`，替身以「有無這個屬性」模擬 | §4.13、§7.26.2 |
+| DS-58（v0.20） | 收音條只在 `enterListening` 點亮；準備中再按用 `abort()`；嘗試代號沿用 `gen`，加 `att.decided` 防止重複判定 | §7.26.3、§7.26.4 |
+| DS-59（v0.20） | 確認沿用 `mic.acquire()` 的 `pending`：取消後再按拿到同一個 Promise，`getUserMedia` 不會再呼叫；過期的完成結果由代號丟棄 | §7.26.3、§7.26.6 |
+| DS-60（v0.20） | `T_READY` 5000、`T_BUFFER` 0、`T_FALLBACK` 1500，都在範圍內；300 ms 記憶 SD 無法查證，`T_BUFFER` 維持 0 | §7.26.1、SD-FB-86 |
+| DS-61（v0.20） | `resultModel` 依 `STT_RESULT_ROWS` 產生列；文字定稿表已更新；準備中樣式不用紅色與閃爍、不改尺寸；`data-status` 用 `SttStatus` 字面值 | §7.26.7、§7.26.8 |
+| DS-62（v0.20） | `html` 的 `scroll-padding-bottom`（≤ 640px）一次涵蓋 4 個功能區；`75-site-pages.css` 刪除重複、首次畫面只留差額；CSS 不合格才啟用 `focusin` 後備 | §7.27 |
+| DS-63（v0.20） | 同意：準備中與事件紀錄都不需跨工作階段保存，不需回報人類；不建 CT 任務；`package.json` 列 MC-09；既有測試要改的位置已列出 | §10.12、§12.14 |
+| FB-76～FB-79（v0.20，知會） | FB-76 依 MS-1 以「是否已確認開始收音」判定（`outcomeOf` 第 5、6 列）；FB-77 `transcriptOf` 不改；FB-78 只在進入準備中時清除；FB-79 依核准紀錄按 PM 建議設計，PRD 文字同步屬 PM（SD-FB-89） | §7.26.5、§7.26.7 |
 | FB-70～FB-75（v0.19，知會） | FB-70 依 SP-6 實作；FB-71 列 D-11；FB-72 依 AD-10；FB-73 列第二階段核對與 T-106；FB-74 建置比對 V-AD-03；FB-75 文件不列舊地址 | §7.25、§10.11 |
 | FB-65～FB-69（v0.18，知會） | 依契約定案實作：FB-65 `inSummary` = `phase = "summary"` 且 y ≥ 1；FB-66 依 LV-6（§7.24.2 表）；FB-67 `canAnswer` 不看開關；FB-68 依 WR-2，列入給 QA 的已知設計行為；FB-69 使用 `filterHint` 定稿文字 | §4.11、§7.24、§10.10 |
 | FB-63（v0.17，知會） | 依 V-LGL-05 定案的分句符號實作 `legal-static.test.js`；現有 `scenarioZh`「入門：最高頻的生活基礎字彙」不算命中 | §10.9 |
@@ -5323,11 +6079,24 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | SD-FB-77 | （v0.14）**部署會失敗**：`.github/workflows/static.yml:42` 檢查 `dist/site` 恰 8 檔，`:45` 只列 8 檔。契約 DP-1、PRD AC-36-07 要求 13 檔，但都沒有授權修改 workflow；Q-46 是一次性授權，已由 MC-03 用完（SD-FB-38） | **人類** | **待決定（阻擋部署）** | 請人類授權主控修改一次（MC-08）：`:42` 改 `-eq 13`，`:45` 的清單加 5 檔，`:53` 註解改 13 檔；其餘不動。不授權就無法部署 v1.3.0；不影響 FE 任務與 QA |
 | SD-FB-78 | （v0.14）`docs/03-design/tasks.json` FE-77（`done`）的文字仍含舊信箱的空白形式。本次指示既有任務內容不動，所以保留；不違反 ML-3、AC-55-04（只掃連續形式），但 ML-1 寫「全站只有一種寫法」 | 主控、SA | 待決定 | 主控決定是否授權單獨改這 1 處；不影響實作 |
 | SD-FB-79 | （v0.14，DS-50）移除 `#footer-first-run-back`，取代 SD-FB-12、SD-FB-55。AC-25-07 的返回由內容區的「返回難易度設定」滿足，文字相同、位置不同 | QA | 待辦（知會） | QA 改定位 `.site-return` |
-| SD-FB-80 | （v0.14）契約未提到捲軸造成的位移。SD 加 `html[data-ad-env] { scrollbar-gutter: stable }`，只在環境成立時生效；第一階段的正式網址也不受影響（`ineligible`） | SA、QA | 待辦（知會） | 第二階段起 1366 版面右側會保留捲軸寬度，屬預期 |
+| SD-FB-80 | （v0.14）契約未提到捲軸造成的位移。SD 加 `html[data-ad-env] { scrollbar-gutter: stable }`，只在環境成立時生效；第一階段的正式網址也不受影響（`ineligible`） | SA、QA | **v0.16 由 SD-FB-94 取代** | 條件規則晚 1 個畫格生效（BUG-006），且不保護第一階段（BUG-008）；改為無條件規則（§7.29） |
 | SD-FB-81 | （v0.14）DS-48 的做法依 AdSense 公開行為推定，替身無法重現 inline 樣式與實際量測（T-106）。第一階段沒有真實廣告可驗 | 主控、人類 | 待辦（**第二階段啟用前**） | 併入 FB-73：填入單元 ID 後，第一次部署先以正式網址檢查 `loading`、切頁、`unfilled` 的版面 |
 | SD-FB-82 | （v0.14）AD-10 (b) 判定的時間點定為 `importBackup` 成功、資料已取代之後；AD-10 (a) 只在 `confirmApplyGoal` 成功路徑。寫入失敗時資料未改變，不隱藏 | SA、QA | 待辦（知會） | 不需改契約 |
 | SD-FB-83 | （v0.14）V-MAIL-01 的全庫掃描放 QA 的 `tests/static/mail-scan.mjs`，不放 `npm test`：`legal-check.mjs` 歸 QA，由 PG 跑一定失敗。FE-89 只掃自己範圍 | QA、主控 | 待辦（知會） | 主控以 D-10 驗證 |
 | SD-FB-84 | （v0.14）`SP-6` 的「正規化後恰為 `sources`」沿用既有 `normalizeHash`，因此 `#view-sources`、`#/sources` 也會開啟資料來源頁；隱藏頁片段行為不變 | QA | 待辦（知會） | 不需改契約 |
+| SD-FB-85 | （v0.15）v1.3.0 聆聽中再按停止後，若引擎仍送來 `result` 會照樣評分；v0.15 依 MS-1 (1) 與 AC-08-10「不顯示分數」改為忽略。屬行為修正，不是新需求 | PM、QA | 待辦（知會） | 不需改 PRD；QA 依 AC-08-10 判定 |
+| SD-FB-86 | （v0.15）Q-95 的「Chromium 開頭約 300 ms」SD 無法查證，`T_BUFFER` 維持 0 | 主控、QA | 待辦（AC-58-14 後） | 依 AC-58-14 (a) 結果，由主控在 0～500 內代核（§7.26.1） |
+| SD-FB-87 | （v0.15）以 `"onaudiostart" in rec` 判定可依賴 `audiostart`。若某瀏覽器有屬性但從不觸發，只能靠其他事件或逾時結束 | QA、人類 | 待辦（知會） | 列已知限制（T-116）；人工測試遇到時記錄瀏覽器與版本 |
+| SD-FB-88 | （v0.15）BUG-005 的自動驗證只在 Chrome 行動模擬；iPhone Safari 外接鍵盤的焦點捲動是否依 `scroll-padding` 未驗證 | QA、人類 | 待辦（知會） | 可列人工選測，不阻擋本版 |
+| SD-FB-89 | （v0.15）同契約 FB-79：PRD 第 6 章 Q-94～Q-102「人類決議」欄空白，多處仍寫「暫依」。本設計以 frontmatter 核准紀錄為準 | PM | 待辦（文字同步） | PM 下次修訂時補上；不影響本版 |
+| SD-FB-90 | （v0.15）PR-1 交 SD 決定的離線路徑：按下時不經過準備中，直接清除分數並顯示「語音辨識需要網路連線」，與 v1.3.0 相同 | QA | 待辦（知會） | 不需改契約 |
+| SD-FB-91 | （v0.15）首次畫面固定底部列（184 px）可能遮住頁尾連結以外、以 Tab 取得焦點的控制項；不在 AC-61-01 範圍（一般模式），本版不改 | PM、QA | 待辦（知會） | QA 若量到可另開 BUG，由人類決定是否納入 |
+| SD-FB-92 | （v0.15）準備中按鈕設 `aria-pressed="true"`（嘗試進行中），契約與 PRD 未規定 | QA | 待辦（知會） | 不需改契約 |
+| SD-FB-93 | （v0.16，BUG-007）`AudioContext` 改在畫出準備中之後才建立，不在點按處理器內。Chrome、Edge 依 sticky activation 推定為 `running`，Safari 可能 `suspended`；SD 無實機無法查證，已以 `resume()` 補救，失敗只影響收音條 | QA、人類 | 待辦（知會） | FE-95 實測 Chrome、Edge；QA 實機確認 AC-33-03，iOS Safari 選測並記錄（§10.13 Q12）。若 Safari 收音條確實不動，由人類決定是否接受或另開需求 |
+| SD-FB-94 | （v0.16，BUG-006、BUG-008）`html { scrollbar-gutter: stable }` 無條件生效，取代 SD-FB-80。傳統捲軸桌面版不可捲動的頁面右側保留 15 px，內容比 1.3.0 左移 7.5 px；不違反任何 AC（AC-52-05、AC-60-06 都是同一次載入的前後比較） | PM、QA | 待辦（知會） | 不需改 PRD；QA 跨版本不比絕對座標（§10.13 Q11） |
+| SD-FB-95 | （v0.16）BUG-006 原判「第二階段才發生」，修正後與廣告環境無關；`services/ad.js:8` 檔頭註解仍寫「SD-FB-80 的 scrollbar-gutter 依此生效」，本版依指示不改 `ad.js` | 主控 | 待辦（知會） | 日後改 `ad.js` 時順手更新註解；以本文件為準 |
+| SD-FB-96 | （v0.16）延後取得只在「尚未持有音軌」時發生；持有音軌時照舊同步，以免第 2 次以後的按下多等 1 個畫格 | QA | 待辦（知會） | 不需改契約 |
+| SD-FB-97 | （v0.16）e2e 中依賴「按下後同步呼叫 `getUserMedia`」或以 `scrollbarGutter` 判斷廣告環境的斷言需由 QA 更新（§10.13 Q9、Q10） | QA | 待辦 | QA 先更新再跑；PG 不代改 |
 
 ---
 
@@ -5351,3 +6120,9 @@ AC-01-02、AC-01-03、AC-01-06、AC-02-01、AC-02-02、AC-02-03、AC-02-04、AC-
 | 0.12 | 2026-11-04 | sd-agent | 修訂已核准的 v0.11（JimmyLin 授權、主控代填），原因：PRD v0.17（approved，JimmyLin，2026-11-04；R-25：權利與商標文字修訂；新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）與契約 v0.17（`README.md`、`data-schema.ts` approved，主控代核：L-8、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空，須人類核准，不代核。增量內容：(1) 文首上游、搭配文件、v0.12 導讀與舊文字改讀規則；§1 新增 3 列；§3 新增 D-17 並更新 2 個檔案註記；(2) 就地標註舊標題說明與品牌標識聲明段落（§4.7、§7.13、§7.19.6、§7.21.4、§10.1）；(3) 新增 §5.7（不改建置程式、版本 1.1.0）；(4) 新增 §7.23：畫面文字修改點、HTML 開頭註解結構、`p5-009`、375px 預期 2 行與實測方法；(5) 新增 §10.9：單元測試、`legal-static.test.js`、交付檢查、主控檢查 M-1～M-3、給 QA 的項目；(6) §11 新增 T-91～T-95；(7) 新增 §12.11 任務 CT-26、FE-78、FE-79、MC-05 與批次；(8) 新增 §13.9 對照（應驗收 289 個 AC 全部涵蓋）；(9) §14 回應 DS-41、DS-42、FB-63、FB-64；§15 新增 SD-FB-68～SD-FB-71。tasks.json 同步升為 v0.11（只新增任務，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3）、不改 `package.json`、`p5-103`、頁尾與 AC-23-07；不新增外部資源 |
 | 0.13 | 2026-11-04 | sd-agent | 修訂已核准的 v0.12（JimmyLin 授權、主控代填），原因：PRD v0.18（approved，JimmyLin，2026-11-04；R-26：模擬測驗已答對鎖定檢視、開關說明、常駐清除入口、結算 y = 0、移除「全部題目再練一次（保留紀錄）」；新增 US-48、AC-48-01～12，修改 13 條，移除 AC-46-07，E-124～E-134，Q-77～Q-80）與契約 v0.18（`README.md`、`data-schema.ts` approved，主控代核：LV-1～LV-7、SM-1～SM-3、HN-1、CR-10、UO-7、UO-8、UO-10、V-ST-23～27、DS-43～DS-46、FB-65～FB-69；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件、v0.13 導讀與改讀規則；§1 新增 4 列；§3 新增 D-18；§4.10、§7.21.3、§7.21.4 就地標註；(2) 新增 §4.11 模組介面；(3) 新增 §5.8（不改建置程式、MC-06 順序與理由）；(4) 新增 §7.24：狀態轉移與邊界驗算、DOM 與 3 種狀態對照、樣式、375px 估算、文字定稿與移除清單（全部答對說明句刪除）、實測方法；(5) 新增 §10.10：單元測試、`part5-static.test.js`、交付檢查、主控檢查、QA 範圍 Q1～Q5（AC-48-xx、R-26 修改的 AC、§10.9 與 v0.11 舊文字、版本假設、v0.17 TC）、v1.1.0 樣本；(6) §11 新增 T-96～T-103；(7) 新增 §12.12 任務 FE-80～FE-82、MC-06；(8) 新增 §13.10 對照（應驗收 300 個 AC 全部涵蓋）；(9) §14 回應 DS-43～DS-46、FB-65～FB-69；§15 新增 SD-FB-72～SD-FB-76。tasks.json 同步升為 v0.12（只新增任務，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`。主控代核（2026-11-04）：人類授權「調整好後完成測試直接推上去」；已驗證 tasks.json 可解析、任務編號不重複、相依皆存在 |
 | 0.14 | 2026-11-05 | sd-agent | 修訂已核准的 v0.13（主控代核），原因：PRD v0.19（approved，JimmyLin，2026-11-05；R-27、R-28：已答對顯示、廣告框架、隱私權政策、關於我、聯絡我們、SEO、爬蟲檔；新增 US-49～US-57、AC-49-01～AC-57-06，修改 36 條 AC，E-135～E-155，Q-81～Q-93）與契約 v0.19（`README.md`、`data-schema.ts` approved，主控代核：§13、DS-47～DS-56、FB-70～FB-75；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件、v0.14 導讀與改讀規則；§1 新增 7 列；新增 §3.1（D-19）；(2) 新增 §4.12 模組介面；(3) 新增 §5.9（B-20～B-25、DS-55 逐字放行、13 檔、MC-07 順序、workflow 風險）；(4) 新增 §7.25：已答對公式與畫面、文字定稿、廣告分工與狀態、DS-47、DS-48、測試注入與替身、路由、頁尾與應用內頁、單一文案來源、靜態頁、信箱分派、實測方法；(5) §7.21.4、§7.22.2、§7.24.3、§10.8 就地標註，**移除本文件中的舊信箱值**；(6) 新增 §10.11：單元測試、交付檢查、主控檢查、QA 範圍 Q1～Q6、舊值位置、部署後驗證 D-1～D-11；(7) §11 新增 T-104～T-114；(8) 新增 §12.13 任務 FE-83～FE-89、MC-07、MC-08；(9) 新增 §13.11 對照（應驗收 357 個 AC 全部涵蓋）；(10) §14 回應 DS-47～DS-56、FB-70～FB-75；§15 新增 SD-FB-77～SD-FB-84（SD-FB-77 須人類決定）。tasks.json 同步升為 v0.13（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/` |
+| 0.15 | 2026-11-05 | sd-agent | 修訂已核准的 v0.14（主控代核），原因：PRD v0.20（approved，JimmyLin，2026-11-05；R-29：麥克風準備中、無文字訊息分流、三種燈號顯示辨識文字、BUG-005 窄視窗鍵盤焦點；新增 US-58～US-61、AC-58-01～AC-61-02 共 31 條，修改 15 條，E-156～E-166，Q-94～Q-102）與契約 v0.20（`README.md`、`data-schema.ts` approved，主控代核：§14 PR／MS／RT／KF／V-STT、DS-57～DS-63、FB-76～FB-79、data-schema §18；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、v0.15 導讀與改讀規則；§1 新增 7 列；新增 §3.2（D-20）；(2) 新增 §4.13 模組介面；(3) 新增 §5.10（不改建置程式、13 檔、MC-09 順序）；(4) 新增 §7.26：時間常數定案（5000／0／1500 ms）與調整程序、服務事件與 `audiostart` 判定、嘗試代號與 `gen`／`acquiringGen` 整合、狀態機與事件處理表、`outcomeOf` 判定表、競態表、畫面與樣式、文字定稿、實測方法；(5) 新增 §7.27：`scroll-padding-bottom` 修法、與 `scroll-margin` 相加的處理、後備方案、實測方法；(6) 新增 §10.12：單元測試、既有測試修改位置、QA 項目 Q1～Q7、主控檢查 M-1～M-5；(7) §11 新增 T-115～T-124；(8) 新增 §12.14 任務 FE-90～FE-94、MC-09；(9) 新增 §13.12 對照（應驗收 388 個 AC 全部涵蓋）；(10) §14 回應 DS-57～DS-63、FB-76～FB-79；§15 新增 SD-FB-85～SD-FB-92。tasks.json 同步升為 v0.14（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`、不改建置與 `static.yml` |
+| 0.16 | 2026-11-06 | sd-agent | 修訂已核准的 v0.15（主控代核），原因：QA 開出 BUG-006（AC-52-05，廣告環境載入期 header 因 `scrollbar-gutter` 晚 1 個畫格左移 7.5 px）、BUG-007（AC-58-01，第 1 次按麥克風 110～131 ms 才畫出「準備中」，點按處理器內同步 `new AudioContext()` 約 110 ms）、BUG-008（AC-60-06，寬螢幕出現分數後頁面變可捲動，傳統捲軸使上方按鈕左移 7.5 px、768 長句下移 48 px），需由 SD 判定修法。status 改為 `in-review`、version 0.15 → 0.16、核准欄位清空。內容：(1) 文首 v0.16 上游、導讀與改讀規則；§1 新增 4 列；新增 §3.3（D-21）、§4.14、§5.11；(2) 新增 §7.28（BUG-007：方案比較 A～D，採「先畫出準備中、以 rAF + `setTimeout(0)` 延後 `mic.acquire()`，後備 50 ms，持有音軌時照舊同步」；`mic.js` 建立後與取得音軌後 `suspended` 就 `resume()`；延後期間中斷表；自動播放政策評估；實測方法）；(3) 新增 §7.29（BUG-006、BUG-008 同源：方案比較 A～E，採 `00-base.css` `html { scrollbar-gutter: stable; }` 無條件，移除 `85-ad.css` 條件規則；影響與取捨表；實測方法）；(4) 就地標註 §7.14、§7.25.3 DS-48、§7.26.9、T-108、SD-FB-80；(5) 新增 §10.13 單元測試、既有測試修改位置、QA 項目 Q8～Q12、主控檢查；(6) §11 新增 T-125～T-131；(7) 新增 §12.15 任務 FE-95～FE-97；(8) 新增 §13.13 對照（388 個應驗收 AC 全部涵蓋）；(9) §15 新增 SD-FB-93～SD-FB-97。tasks.json 同步升為 v0.15（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`、不改建置與 `static.yml`；版本維持 1.3.1、不新增 MC 項目 |
+
+> 主控代核（2026-11-05）：architecture v0.15、tasks v0.14 依已核准 PRD v0.20 與契約 v0.20；不改 PRD、不改 localStorage 持久化結構。
+
+> 主控代核（2026-11-06）：v0.16 依使用者「繼續做完」指示修正 BUG-006、BUG-007、BUG-008；不改 PRD、不改契約、不改 localStorage 持久化結構（schemaVersion 3）。

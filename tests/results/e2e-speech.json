@@ -4,7 +4,7 @@
     "tc": "TC-08-13",
     "ac": "AC-08-13",
     "result": "通過",
-    "note": "常駐標示「需要連網」；首次按下說明「語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統只即時讀取音量以顯示收音條，不錄音、不保存、不上傳錄音。停留在單字卡頁期間，瀏覽器可能持續顯示麥克風使用中圖示，離開單字卡頁即停止使用麥克風」[我知道了/取消]；取消後 starts 0→0、getUserMedia 呼叫 0、狀態 idle、已讀 false；「我知道了」後 getUserMedia 1；再按仍顯示說明=true；我知道了 → starts 1、狀態 listening、localStorage 已讀 true；之後再按顯示說明=false"
+    "note": "常駐標示「需要連網」；首次按下說明「語音辨識由瀏覽器提供，您的語音會傳送到瀏覽器廠商（如 Google、Microsoft）的伺服器處理；本系統只即時讀取音量以顯示收音條，不錄音、不保存、不上傳錄音。停留在單字卡頁期間，瀏覽器可能持續顯示麥克風使用中圖示，離開單字卡頁即停止使用麥克風」[我知道了/取消]；取消後 starts 0→0、getUserMedia 呼叫 0、狀態 idle、已讀 false；說明顯示期間按鈕 idle；「我知道了」後狀態序列 preparing→listening、getUserMedia 1；再按仍顯示說明=true；我知道了 → starts 1、狀態 listening、localStorage 已讀 true；之後再按顯示說明=false"
   },
   {
     "suite": "e2e-speech",
@@ -81,14 +81,14 @@
     "tc": "TC-08-10",
     "ac": "AC-08-10",
     "result": "通過",
-    "note": "空結果：「未偵測到語音，請再試一次」、idle；逾時：「未偵測到語音，請再試一次」、idle；再按停止：listening → idle、訊息「」"
+    "note": "空結果：「有收到聲音，但沒聽出英文單字，請再說一次」、idle；逾時：「未偵測到語音，請再試一次」、idle；再按停止：listening → idle、訊息「」"
   },
   {
     "suite": "e2e-speech",
     "tc": "TC-22-03",
     "ac": "AC-22-03",
     "result": "通過",
-    "note": "onresult → 徽章繪製 ms：10.6、5.1、18.7、16.7、12、8.1、2、14.5、10.4、5.6；中位數 10.4、p90 16.7、最大 18.7（無頭 Chrome、未降速）"
+    "note": "onresult → 徽章繪製 ms：9.8、16.4、8、11.3、14.3、17.9、7.4、13.8、4.4、10.1；中位數 10.1、p90 16.4、最大 17.9（無頭 Chrome、未降速）"
   },
   {
     "suite": "e2e-speech",

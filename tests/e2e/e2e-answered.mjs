@@ -12,6 +12,7 @@ import { KEY, stateRecord, dialogInfo, expandBackup, V3_KEYS } from "./lib/state
 const R = recorder("e2e-answered");
 const TMP = process.env.QA_TMP || path.join(ROOT, "tests", "results", "tmp"); fs.mkdirSync(TMP, { recursive: true });
 const J = (x) => JSON.stringify(x);
+const PKG_VER = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version; // 第 10 輪：版本行改讀 package.json（1.3.1），不寫死
 const id = (n) => "p5-" + String(n).padStart(3, "0");
 const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => id(a + i));
 const V12 = path.join(TMP, "v1.2.0.html");
@@ -194,11 +195,11 @@ if (process.env.QA_FIXTURE_NODATA && fs.existsSync(process.env.QA_FIXTURE_NODATA
     const acc = await p.ev(`document.querySelector(".db-stat--accuracy .db-stat__value") ? document.querySelector(".db-stat--accuracy .db-stat__value").textContent : null`);
     return { ok: /1\.2\.0/.test(ver || "") && st.schemaVersion === 3 && exp.a === 4 && exp.c === 3 && exp.ids.length === 3 && b.schemaVersion === 3, note: `v1.2.0「${ver}」實際作答 4 題（對 3）、翻卡 1 張；localStorage schemaVersion ${st.schemaVersion}、a=${exp.a}、c=${exp.c}、紀錄 ${J(exp.ids)}；舊版第 3 格「${acc}」；備份頂層 ${Object.keys(b).join("、")}（${bk12.length} 字元）` };
   });
-  await R.check("TC-49-06b", "AC-49-06、AC-47-04、AC-36-03（v1.3.0 開啟 v1.2.0 實際 localStorage，不改寫）", async () => {
+  await R.check("TC-49-06b", "AC-49-06、AC-47-04、AC-36-03（目前版本開啟 v1.2.0 實際 localStorage，不改寫）", async () => {
     await p.addInitScript(`(() => { window.__sets = 0; const o = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === ${J(KEY)}) window.__sets++; return o.call(this, k, v); }; })();`);
     await p.goto("about:blank", { waitReady: false }); await sleep(300); await p.goto(FILE_URL); await sleep(150);
     const raw13 = await lsRaw(p); const sets = await p.ev("window.__sets"); const t = await toasts(p); const entry = await p.entry(); const ver = await p.ev(`document.querySelector("#app-version").textContent`); const d = await dash(p); const st = JSON.parse(raw13); const keys = Object.keys(st.data);
-    const stays = raw13 === raw12; return { ok: /1\.3\.0/.test(ver) && stays && sets === 0 && entry === "main" && !t.some((x) => /錯誤|失敗/.test(x)) && d.text === line(exp.ids.length) && !d.all.includes("75%") && st.schemaVersion === 3 && J(keys.slice().sort()) === J([...V3_KEYS].sort()), note: `「${ver}」；入口 ${entry}；localStorage 位元組不變=${stays}、setItem ${sets}；Toast ${J(t)}；主控台「${d.text}」（舊正確率 75% 不顯示）；schemaVersion ${st.schemaVersion}、${keys.length} 欄` };
+    const stays = raw13 === raw12; return { ok: ver.includes("版本 " + PKG_VER + "（") && stays && sets === 0 && entry === "main" && !t.some((x) => /錯誤|失敗/.test(x)) && d.text === line(exp.ids.length) && !d.all.includes("75%") && st.schemaVersion === 3 && J(keys.slice().sort()) === J([...V3_KEYS].sort()), note: `「${ver}」；入口 ${entry}；localStorage 位元組不變=${stays}、setItem ${sets}；Toast ${J(t)}；主控台「${d.text}」（舊正確率 75% 不顯示）；schemaVersion ${st.schemaVersion}、${keys.length} 欄` };
   });
   await R.check("TC-49-06c", "AC-49-06、AC-11-03（作答仍更新累計）、AC-48-01", async () => {
     await p.ev(`EMT.router.go("part5")`); await sleep(50); const before = (await ls(p)).data.part5; const n = before.currentIndex; const c = await ci(p, n); await p.click(`#view-part5 [data-p5=option][data-index="${c}"]`); await sleep(60); const after = await ls(p); const d = await dash(p);

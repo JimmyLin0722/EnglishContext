@@ -2,7 +2,7 @@
 // 依據：architecture v0.6 §7.10～§7.12、§10.1「E2E 與人工」；觸控以 CDP Input.dispatchTouchEvent 模擬（實機手感列人工）。
 // 已知：FE-28 以 CDP 快速滑動後約 1.5 秒內的 click 會被吞（防誤觸），滑動後的點擊一律等待 1.6 秒。
 import { launch, recorder, sleep, resultPath } from "./lib/cdp.mjs";
-import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic, fakeVibrate } from "./lib/inits.mjs";
+import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic, fakeVibrate, micOnStrict } from "./lib/inits.mjs";
 import { stateRecord, seed } from "./lib/state.mjs";
 
 const R = recorder("e2e-motion");
@@ -49,7 +49,8 @@ async function clickCardArea(p) {
     const n0 = await p.ev(`window.__qaTts.spoken.length`);
     await p.click(".fc-front .sp-tts__btn", 0); await sleep(450); const a = await fc(p);
     await p.click(".fc-front .sp-tts__btn", 1); await sleep(450); const b = await fc(p);
-    await p.click(".fc-front .sp-mic"); await sleep(450); const c = await fc(p); const st = await p.ev(`document.querySelector(".fc-front .sp-mic").dataset.status`);
+    // 第 10 輪（v0.20 US-58）：先準備中再聆聽中（micOnStrict 未經準備中即拋出）
+    await micOnStrict(p); await sleep(200); const c = await fc(p); const st = await p.ev(`document.querySelector(".fc-front .sp-mic").dataset.status`);
     await p.click(".fc-front .sp-mic"); await sleep(450); const d = await fc(p);
     const n1 = await p.ev(`window.__qaTts.spoken.length`);
     const ok = [a, b, c, d].every((x) => x.flipped === "false" && x.front && !x.back) && n1 === n0 + 2 && st === "listening";

@@ -1,0 +1,31 @@
+  PASS TC-50-03 AC-50-03、AC-19-01、AC-36-07（V-AD-03、FB-74） 交付 HTML 與 dist/site/index.html 位元組相同=true（SHA-256 1be0719b67fb2f4c）；靜態廣告標籤 0；<script src> 0；逐字 var AD_SLOT_ID = null; 1 次（第一階段）
+  PASS TC-50-09 AC-50-09（V-AD-03、AD-15） meta 1 次（在 head=true）；ads.txt 逐字=true、與 sources/deploy 相同=true；pub ID 一致=true（file:// 請求 0 見 TC-56-10）
+  PASS TC-50-05 AC-50-05、AC-50-03（V-AD-03、§7.25.4 五層保護） 未設定 5f0dc11a7433624d、已設定 0c616ab5e6e53f8c（不同=true）；HTML 正規化後只差 adSlotId 與 BUILD_ID=true；13 檔中有差異：index.html、sw.js；sw.js 只差 BUILD_ID=true；測試建置兩份 HTML 相同=true；--ad-slot 參數結束碼 1；寫入專案 dist 的注入 → AD_OVERRIDE；dist 未被改動=true；QA 重建未設定版與 dist 相同=true
+  PASS TC-50-06s AC-50-06、AC-57-05、AC-35-01（V-AD-06 靜態、DP-9） sw.js 廣告字樣 0；預先快取清單 ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png", "./icons/apple-touch-icon-180.png"]；含靜態頁或爬蟲檔 0
+  PASS TC-56-01 AC-56-01、AC-34-01、AC-38-10（V-SEO-01） title「EnglishContext｜英文單字卡與模擬測驗」；description 1 個、81 字元；keywords=false
+  PASS TC-56-02 AC-56-02（V-SEO-02 首頁） lang zh-Hant-TW；canonical ["https://jimmyfantasyworld.com/"]；noindex=false
+  PASS TC-56-03 AC-56-03（V-SEO-03 首頁；og:image 回應 200 待 D-4） {"title":["EnglishContext｜英文單字卡與模擬測驗"],"description":["EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。"],"url":["https://jimmyfantasyworld.com/"],"type":["website"],"site_name":["EnglishContext"],"locale":["zh_TW"],"image":["https://jimmyfantasyworld.com/icons/icon-
+  PASS TC-56-05 AC-56-05（V-SEO-04） 1 段；鍵 @context、@type、name、url、description；@type WebSite
+  PASS TC-56-06 AC-56-06、E-150、E-151（V-SEO-05，靜態；不閃現見 e2e-site TC-56-06b） noscript 文字「EnglishContext EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。 單字卡與美式發音練習 模擬測驗（作答後顯示解析） 學習進度（連續打卡、今日已學、已答對題數） 關於我 聯絡我們 隱私權政策…」；一般連結 about.html、contact.html、privacy.html；隱藏手法=false
+  PASS TC-56-sp-about AC-56-01、AC-56-02、AC-56-03、AC-56-04（V-SEO-01～03、靜態頁） about.html：title「關於我｜EnglishContext」、description「EnglishContext 的網站用途、主要功能、使用方式與內容權利說明。」、canonical https://jimmyfantasyworld.com/about.html、og 一致；h1 1 個、標題層級 1,2,2,2,2,2、跳級=false
+  PASS TC-57-04-about AC-57-04、AC-57-03（V-SITE-04）、AC-53-04（靜態部分） about.html：<script> 0；外部資源 0；缺少的連結 無；CSS 內嵌且無 localStorage／serviceWorker=true
+  PASS TC-56-sp-contact AC-56-01、AC-56-02、AC-56-03、AC-56-04（V-SEO-01～03、靜態頁） contact.html：title「聯絡我們｜EnglishContext」、description「EnglishContext 的聯絡方式。」、canonical https://jimmyfantasyworld.com/contact.html、og 一致；h1 1 個、標題層級 1、跳級=false
+  PASS TC-57-04-contact AC-57-04、AC-57-03（V-SITE-04）、AC-53-04（靜態部分） contact.html：<script> 0；外部資源 0；缺少的連結 無；CSS 內嵌且無 localStorage／serviceWorker=true
+  PASS TC-56-sp-privacy AC-56-01、AC-56-02、AC-56-03、AC-56-04（V-SEO-01～03、靜態頁） privacy.html：title「隱私權政策｜EnglishContext」、description「EnglishContext 如何處理學習資料、廣告服務、Cookie 與識別碼、語音辨識，以及個人化廣告的退出方式。」、canonical https://jimmyfantasyworld.com/privacy.html、og 一致；h1 1 個、標題層級 1,2,2,2,2,2,2、跳級=false
+  PASS TC-57-04-privacy AC-57-04、AC-57-03（V-SITE-04）、AC-53-04（靜態部分） privacy.html：<script> 0；外部資源 0；缺少的連結 無；CSS 內嵌且無 localStorage／serviceWorker=true
+  PASS TC-55-01s AC-55-01、AC-55-02、AC-55-03（靜態頁 main） main 文字「聯絡我們 email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m」；元素 h1、p；description「EnglishContext 的聯絡方式。」；表單與 mailto 0
+  PASS TC-53-02 AC-53-02、AC-53-03（外部連結）、AC-53-06 依序 (1)～(6) 缺少或順序錯：無；禁用宣稱 0；外部連結 ["href=\"https://support.google.com/My-Ad-Center-Help/answer/12156161\" target=\"_blank\" rel=\"noopener\""]，rel noopener=true
+  MANUAL TC-53-02h AC-53-02 (4)（FB-71：公開文案與退出連結由人類讀過；連結由主控於實作前依 Google 現行頁面核對） D-11：人類讀過公開文案；退出連結是否仍有效需連網確認
+  PASS TC-54-01 AC-54-01 依序 (1)～(5) 缺少或順序錯：無
+  PASS TC-54-02 AC-54-02、V-SEO-06 禁用字詞 0 次；關於我不含信箱=true；QA 判讀：「提升英文能力」只作用途描述，無數字或結果
+  PASS TC-56-07 AC-56-07、AC-23-08（V-SEO-06） AC-23-08 字詞 0；「官方」「認可」非否定句 0；首頁 title 不含 TOEIC；description TOEIC 1 次、多益 1 次、帶 ®；出現 TOEIC 但缺商標聲明的靜態頁 0
+  PASS TC-56-08 AC-56-08、E-155（V-SEO-07；本機解析，正式網址 200 由主控 D-3） 含 Sitemap=true；3 個爬蟲 × 5 路徑遭拒 0；內容 "User-agent: *\nAllow: /\n\nSitemap: https://jimmyfantasyworld.com/sitemap.xml\n"
+  PASS TC-56-09 AC-56-09（V-SEO-07；本機解析，正式網址 200 由主控 D-3） XML 結構=true；<loc> ["https://jimmyfantasyworld.com/","https://jimmyfantasyworld.com/about.html","https://jimmyfantasyworld.com/contact.html","https://jimmyfantasyworld.com/privacy.html"]；lastmod 或 # =false
+  PASS TC-57-03s AC-57-03（V-SITE-03 單一來源） 隱私權政策 (1) 首句只出現於 src/app/core/site-content.js
+  PASS TC-23-07s AC-23-07 (2)(8)、AC-55-02、AC-55-04（V-MAIL-02、ML-4） 交付 HTML：連續 0、空白形式 1 處（不等於現行 0）、mailto 0；about.html：連續 0、空白形式 0 處（不等於現行 0）、mailto 0；contact.html：連續 0、空白形式 1 處（不等於現行 0）、mailto 0；privacy.html：連續 0、空白形式 1 處（不等於現行 0）、mailto 0；head 內 meta／JSON-LD 含地址=false；聯絡與隱私頁含信箱、關於我不含=true；提示字樣 0
+  PASS TC-57-06a AC-57-06、AC-36-01、AC-36-07（V-SITE-06） 連續建置 2 次差異 0 檔；QA 重建與 dist/site 差異 0 檔；部署目錄 13 檔＝契約=true；含 docs、src、sources 0
+  PASS TC-57-06b AC-57-06、AC-36-03、AC-57-03（改文案同步） 只改 1 處（暫存複本 core/site-content.js）：變更 index.html、privacy.html、sw.js；BUILD_ID 5f0dc11a7433624d → 5c1c3d9df55d0b83；HTML 與 privacy.html 同步
+  MANUAL TC-57-06h AC-57-06（部署網址新增檔案皆 200） 由主控部署後 D-2、D-3 驗證
+  PASS TC-50-10s AC-50-10（靜態部分：不自建同意、不保存）、AC-50-08（程式） 廣告 3 模組去註解後：儲存 API=false、同意相關=false、讀學習欄位=false
+  MANUAL TC-50-10h AC-50-10、E-146 第二階段待驗（不是通過）：歐洲經濟區、英國、瑞士網路環境下 Google 認證 CMP 的接受與拒絕，由人類於後台設定完成後實機確認
+site-check：通過 27、失敗 0、待人工 3
