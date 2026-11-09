@@ -8,6 +8,7 @@
  * - 固定文字逐字照契約 L-8 複製，不從被測模組取值，避免來源改錯時測試一併跟著錯。
  * - 資料檔以 vm 載入後遞迴走訪字串值，因此不含註解（V-LGL-05 範圍外）；不含 _tools/、_records/。
  * - （v0.19，FE-87）V-LGL-05 範圍 (c)：關於我、聯絡我們、隱私權政策與 SEO 文字（AC-23-08）；LEGAL_STATEMENTS 與 LT-3、LT-5 逐字相同（V-SITE-02）。
+ * - （v0.17，FE-100）LT-2 改為不含「Part 5」（契約 v0.21 V-LGL-02）；交付 HTML 與 3 個靜態頁「TOEIC®（多益）Part 5」0 次，LT-3 的「Part 5 題目」不變。
  */
 "use strict";
 
@@ -25,14 +26,17 @@ const PART5_CSS = path.join(ROOT, "src", "app", "styles", "40-part5.css");
 
 /** 契約 README §4.3 L-8 固定文字 */
 const LT_1 = "常用搭配詞";
-const LT_2 = "題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容";
+const LT_2 = "題型參考 TOEIC®（多益），非 ETS 官方或認可內容";
 const LT_3 = "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權";
 const LT_4 = "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0";
 const LT_5 = "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。";
 const LT_6 = "be interested in 表示「對……有興趣」，是常見的形容詞＋介系詞搭配。";
 
+/** （v0.17，FE-100；Q-108 A、R-31）LT-2 舊文字的特徵片段：商標說明不再指名「Part 5」 */
+const OLD_LT_2_PART = "TOEIC®（多益）Part 5";
+
 /** 交付 HTML 不得出現的舊文字（§10.9） */
-const OLD_TEXTS = ["多益常考", "多益最常見", "題型對應多益 Part 5", "著作權人 JimmyLin", "保留所有權利"];
+const OLD_TEXTS = ["多益常考", "多益最常見", "題型對應多益 Part 5", "著作權人 JimmyLin", "保留所有權利", OLD_LT_2_PART];
 
 /** V-LGL-05 判定字組 */
 const GROUP_A = ["多益", "TOEIC"];
@@ -118,6 +122,43 @@ describe("legal-static.test.js", () => {
 
     test("全文：LT-1、LT-2、LT-3、LT-5、LT-6 至少 1 次（§10.9）", () => {
       for (const s of [LT_1, LT_2, LT_3, LT_5, LT_6]) assert.ok(countOf(html, s) >= 1, s);
+    });
+  });
+
+  describe("（v0.17，FE-100）交付 HTML 與 3 個靜態頁的 LT-2（V-LGL-02 v0.21）", () => {
+    /** 3 個靜態頁的部署路徑（比照 site-static.test.js） */
+    const STATIC_PAGES = ["about.html", "contact.html", "privacy.html"];
+    /** { 名稱: 全文 }：交付 HTML 與 3 個靜態頁 */
+    const docs = {};
+    before(async () => {
+      const { build } = await import(pathToFileURL(BUILD).href);
+      const result = build({ write: false, log() {}, warn() {} });
+      docs["english-master-track.html"] = result.html;
+      for (const p of STATIC_PAGES) {
+        const f = result.site.files.find((x) => x.path === p);
+        assert.ok(f, "部署檔應存在：" + p);
+        docs[p] = Buffer.from(f.bytes).toString("utf8");
+      }
+    });
+
+    test("前提：新 LT-2 不含「Part 5」，LT-3 仍含「Part 5 題目」", () => {
+      assert.equal(LT_2.includes("Part 5"), false);
+      assert.ok(LT_3.includes("Part 5 題目"));
+    });
+
+    test("交付 HTML 與 3 個靜態頁：全文「TOEIC®（多益）Part 5」0 次（含程式註解）", () => {
+      assert.deepEqual(Object.keys(docs).sort(), ["about.html", "contact.html", "english-master-track.html", "privacy.html"]);
+      for (const [name, text] of Object.entries(docs)) {
+        assert.ok(text.length > 0, name + " 不得為空");
+        assert.equal(countOf(text, OLD_LT_2_PART), 0, name + "：" + OLD_LT_2_PART);
+      }
+    });
+
+    test("LT-2、LT-3 至少 1 次：交付 HTML 與 about.html（聯絡我們、隱私權政策本來就不含這兩段，不檢查）", () => {
+      for (const name of ["english-master-track.html", "about.html"]) {
+        assert.ok(countOf(docs[name], LT_2) >= 1, name + "：LT-2");
+        assert.ok(countOf(docs[name], LT_3) >= 1, name + "：LT-3");
+      }
     });
   });
 

@@ -6,6 +6,8 @@
  *       §7.11 A-5、A-6、§7.14（生命週期、決定表、錯誤對照、speech-panel 修改重點）、§10.2「speech.test.js」列
  * 涵蓋：AC-07-01～AC-07-05、AC-08-01、AC-08-02～AC-08-14、AC-33-01～AC-33-08、AC-21-03、AC-30-04、AC-31-03
  * （v0.15，FE-90）服務：8 欄 SttEndInfo、4 種新事件、audioStartSupported 判定（architecture §7.26.2、§10.12）
+ * （v0.17，FE-98）服務：onInterim 即時文字、9 欄 SttEndInfo（加 lastInterimText）、end 時不補發 onResult
+ *       （architecture §7.30.1、§10.14 S1～S10；契約 README §14.6 IT-1～IT-4、V-STT-14、V-STT-17）
  * （v0.15，FE-92）面板：按下先進入準備中再聆聽（本檔沙箱沒有 setTimeout → fallbackWait 直接聆聽，§7.26.3）；
  *       綠燈也顯示「辨識文字」1 列；空結果 → heardNoWords；取得中再按 = 取消。假時鐘與事件順序見 speech-flow.test.js。
  */
@@ -145,7 +147,7 @@ describe("speech.test.js", () => {
     assert.equal(stt.transcriptOf({ results: [[{}]] }), "");
   });
 
-  test("stt.start：設定 en-US、interimResults false、maxAlternatives 1；結果與結束回呼", () => {
+  test("stt.start：設定 en-US、未提供 onInterim 時 interimResults false、maxAlternatives 1；結果與結束回呼", () => {
     const { g, made } = fakeSttGlobal();
     const s = stt.create(g);
     const ev = [];
@@ -154,20 +156,22 @@ describe("speech.test.js", () => {
     assert.deepEqual(r, { ok: true, audioStartSupported: false });
     const rec = made[0];
     assert.equal(rec.lang, "en-US");
+    // v0.17（FE-98）：未提供 onInterim → interimResults === false（IT-1、V-STT-17）
     assert.equal(rec.interimResults, false);
     assert.equal(rec.maxAlternatives, 1);
     assert.equal(rec.started, 1);
     assert.equal(s.isListening(), true);
     rec.onresult(resultEv("Latency."));
     rec.onend();
-    // v0.15（FE-90）：onEnd 的 info 為 8 欄，順序固定
-    assert.deepEqual(ev, ["r:Latency.", 'end:{"manual":false,"hadResult":true,"hadError":false,"audioStarted":false,"soundStarted":false,"speechDetected":false,"nomatch":false,"errorCode":null}']);
+    // v0.15（FE-90）：onEnd 的 info 順序固定；v0.17（FE-98）：9 欄，最後為 lastInterimText
+    assert.deepEqual(ev, ["r:Latency.", 'end:{"manual":false,"hadResult":true,"hadError":false,"audioStarted":false,"soundStarted":false,"speechDetected":false,"nomatch":false,"errorCode":null,"lastInterimText":""}']);
     assert.equal(s.isListening(), false);
   });
 
   // ── v0.15（FE-90）：4 種新事件、8 欄 SttEndInfo、audiostart 可依賴判定（§7.26.2、§10.12） ──
 
-  const INFO_KEYS = ["manual", "hadResult", "hadError", "audioStarted", "soundStarted", "speechDetected", "nomatch", "errorCode"];
+  // v0.17（FE-98）：9 欄，加 lastInterimText（DS-66）
+  const INFO_KEYS = ["manual", "hadResult", "hadError", "audioStarted", "soundStarted", "speechDetected", "nomatch", "errorCode", "lastInterimText"];
 
   /** 記錄所有回呼；log 內每筆 [名稱, ...參數] */
   function recorder() {
@@ -184,7 +188,7 @@ describe("speech.test.js", () => {
     return { log, opts };
   }
 
-  test("stt（FE-90）：onEnd info 8 欄、順序固定、初始值 false／null", () => {
+  test("stt（FE-90）：onEnd info 9 欄（v0.17 加 lastInterimText）、順序固定、初始值 false／null／空字串", () => {
     const { g, made } = fakeSttGlobal();
     const s = stt.create(g);
     const { log, opts } = recorder();
@@ -195,7 +199,7 @@ describe("speech.test.js", () => {
     assert.deepEqual(Object.keys(info), INFO_KEYS);
     assert.deepEqual(info, {
       manual: false, hadResult: false, hadError: false, audioStarted: false,
-      soundStarted: false, speechDetected: false, nomatch: false, errorCode: null
+      soundStarted: false, speechDetected: false, nomatch: false, errorCode: null, lastInterimText: ""
     });
   });
 
@@ -225,7 +229,7 @@ describe("speech.test.js", () => {
     assert.equal(log[4][2].hadResult, true);
     assert.deepEqual(log[5][1], {
       manual: false, hadResult: true, hadError: false, audioStarted: true,
-      soundStarted: true, speechDetected: true, nomatch: true, errorCode: null
+      soundStarted: true, speechDetected: true, nomatch: true, errorCode: null, lastInterimText: ""
     });
     // 每次都是新物件
     const objs = [log[0][1], log[1][1], log[2][1], log[3][1], log[4][2], log[5][1]];
@@ -308,7 +312,7 @@ describe("speech.test.js", () => {
     made[1].onend({});
     assert.deepEqual(info, {
       manual: false, hadResult: false, hadError: false, audioStarted: false,
-      soundStarted: false, speechDetected: false, nomatch: false, errorCode: null
+      soundStarted: false, speechDetected: false, nomatch: false, errorCode: null, lastInterimText: ""
     });
   });
 
@@ -437,6 +441,299 @@ describe("speech.test.js", () => {
     } finally {
       console.error = orig;
     }
+  });
+
+
+  // ── v0.17（FE-98）：即時文字 onInterim、9 欄 SttEndInfo、服務不代替評分（§7.30.1、§10.14 S1～S10） ──
+
+  /** 暫時結果事件：每段 isFinal = false */
+  function interimEv(...texts) {
+    return { resultIndex: 0, results: texts.map((t) => { const r = [{ transcript: t }]; r.isFinal = false; return r; }) };
+  }
+  /** 最終結果事件：isFinal = true */
+  function finalEv(text) {
+    const r = [{ transcript: text }];
+    r.isFinal = true;
+    return { resultIndex: 0, results: [r] };
+  }
+  /** recorder 加上 onInterim */
+  function recorderI() {
+    const r = recorder();
+    r.opts.onInterim = (t, i) => r.log.push(["interim", t, i]);
+    return r;
+  }
+  const names = (log) => log.map((x) => x[0]);
+
+  test("S1（FE-98）：未提供 onInterim → interimResults false；isFinal false 的事件仍走 onResult 1 次（V-STT-17、AC-62-03 (b)）", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorder();
+    s.start(opts);
+    const rec = made[0];
+    assert.equal(rec.interimResults, false);
+    rec.onresult(interimEv("ad"));
+    rec.onend({});
+    assert.deepEqual(names(log), ["result", "end"]);
+    assert.equal(log[0][1], "ad");
+    assert.equal(log[0][2].hadResult, true);
+    assert.equal(log[1][1].hadResult, true);
+    assert.equal(log[1][1].lastInterimText, "");
+  });
+
+  test("S2（FE-98）：提供 onInterim → interimResults true；lang 預設 en-US、maxAlternatives 1、continuous false 不變（IT-1）", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { opts } = recorderI();
+    assert.deepEqual(s.start(opts), { ok: true, audioStartSupported: false });
+    const rec = made[0];
+    assert.equal(rec.interimResults, true);
+    assert.equal(rec.lang, "en-US");
+    assert.equal(rec.maxAlternatives, 1);
+    assert.equal(rec.continuous, false);
+    // onInterim 不是函式 → 視為未提供
+    s.start({ onInterim: "x" });
+    assert.equal(made[1].interimResults, false);
+  });
+
+  test("S3（FE-98）：la、late、latency → onInterim 依序 3 次、值逐字、info.lastInterimText 與 text 相同；不改 hadResult（AC-62-01、IT-2）", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorderI();
+    s.start(opts);
+    const rec = made[0];
+    for (const t of ["la", "late", "latency"]) rec.onresult(interimEv(t));
+    assert.deepEqual(names(log), ["interim", "interim", "interim"]);
+    assert.deepEqual(log.map((x) => x[1]), ["la", "late", "latency"]);
+    for (const x of log) {
+      assert.equal(x[2].lastInterimText, x[1]);
+      assert.equal(x[2].hadResult, false);
+      assert.deepEqual(Object.keys(x[2]), INFO_KEYS);
+    }
+    // 每次都是新物件
+    assert.equal(new Set(log.map((x) => x[2])).size, 3);
+    assert.equal(s.isListening(), true);
+  });
+
+  test("S4（FE-98）：同一事件 2 段以 1 個半形空白串接；自索引 0 取全部（含已確定部分）；標點與大小寫原樣（IT-3）", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorderI();
+    s.start(opts);
+    const rec = made[0];
+    rec.onresult(interimEv(" comply ", "with"));
+    assert.equal(log[0][1], "comply with");
+    // resultIndex 1：索引 0 已是最終、索引 1 仍是暫時 → 即時文字，取出含索引 0
+    const r0 = [{ transcript: "Comply," }];
+    r0.isFinal = true;
+    const r1 = [{ transcript: " WITH. " }];
+    r1.isFinal = false;
+    rec.onresult({ resultIndex: 1, results: [r0, r1] });
+    assert.equal(log.length, 2);
+    assert.equal(log[1][0], "interim");
+    assert.equal(log[1][1], "Comply, WITH.");
+    assert.equal(log[1][2].lastInterimText, "Comply, WITH.");
+  });
+
+  test("S5（FE-98）：空字串與只有空白的暫時結果 → onInterim 0 次、之後 onEnd 的 lastInterimText 維持上一段（IT-3、FB-80）", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorderI();
+    s.start(opts);
+    const rec = made[0];
+    rec.onresult(interimEv("ad"));
+    rec.onresult(interimEv(""));
+    rec.onresult(interimEv("   "));
+    rec.onresult(interimEv("", " "));
+    rec.onresult({ resultIndex: 0, results: [] });
+    rec.onend({});
+    assert.deepEqual(names(log), ["interim", "end"]);
+    assert.equal(log[1][1].lastInterimText, "ad");
+    assert.equal(log[1][1].hadResult, false);
+    // 一開始就只有空白 → onInterim 0 次、lastInterimText 為 ""
+    const r2 = recorderI();
+    s.start(r2.opts);
+    made[1].onresult(interimEv("   "));
+    made[1].onend({});
+    assert.deepEqual(names(r2.log), ["end"]);
+    assert.equal(r2.log[0][1].lastInterimText, "");
+  });
+
+  test("S6（FE-98）：interim adr → interim adress → end → onResult 0 次、onEnd 1 次、hadResult false、lastInterimText adress（V-STT-14、IT-4、DS-65）", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorderI();
+    s.start(opts);
+    const rec = made[0];
+    rec.onresult(interimEv("adr"));
+    rec.onresult(interimEv("adress"));
+    rec.onend({});
+    assert.deepEqual(names(log), ["interim", "interim", "end"]);
+    assert.equal(log.filter((x) => x[0] === "result").length, 0);
+    const info = log[2][1];
+    assert.equal(info.hadResult, false);
+    assert.equal(info.lastInterimText, "adress");
+    assert.equal(info.manual, false);
+    assert.equal(s.isListening(), false);
+    // error、nomatch 之後的 end 也不補發 onResult（DS-65 理由）
+    for (const after of [(r) => r.onerror({ error: "no-speech" }), (r) => r.onnomatch({})]) {
+      const rr = recorderI();
+      s.start(rr.opts);
+      const r = made[made.length - 1];
+      r.onresult(interimEv("adr"));
+      after(r);
+      r.onend({});
+      assert.equal(rr.log.filter((x) => x[0] === "result").length, 0);
+      assert.equal(rr.log[rr.log.length - 1][1].lastInterimText, "adr");
+      assert.equal(rr.log[rr.log.length - 1][1].hadResult, false);
+    }
+  });
+
+  test("S7（FE-98）：interim 後最終結果 address → onResult 1 次 address、hadResult true；onEnd 的 lastInterimText 仍為最後一段即時文字", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorderI();
+    s.start(opts);
+    const rec = made[0];
+    rec.onresult(interimEv("ad"));
+    rec.onresult(finalEv("address"));
+    rec.onend({});
+    assert.deepEqual(names(log), ["interim", "result", "end"]);
+    assert.equal(log[1][1], "address");
+    assert.equal(log[1][2].hadResult, true);
+    assert.equal(log[1][2].lastInterimText, "ad");
+    assert.equal(log[2][1].hadResult, true);
+    assert.equal(log[2][1].lastInterimText, "ad");
+    // 未提供 isFinal 的事件（既有替身）也視為最終
+    const r2 = recorderI();
+    s.start(r2.opts);
+    made[1].onresult(resultEv("address"));
+    assert.deepEqual(names(r2.log), ["result"]);
+    assert.equal(r2.log[0][1], "address");
+  });
+
+  test("S8（FE-98）：onEnd info 恰 9 欄且順序固定；下一次 start() 全部重設（DS-66、V-STT-17）", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorderI();
+    s.start(opts);
+    const rec = made[0];
+    rec.onaudiostart({});
+    rec.onsoundstart({});
+    rec.onspeechstart({});
+    rec.onresult(interimEv("adr"));
+    rec.onnomatch({});
+    rec.onerror({ error: "network" });
+    rec.onresult(finalEv("address"));
+    rec.onend({});
+    const info = log[log.length - 1][1];
+    assert.deepEqual(Object.keys(info), INFO_KEYS);
+    assert.equal(Object.keys(info).length, 9);
+    assert.deepEqual(info, {
+      manual: false, hadResult: true, hadError: true, audioStarted: true,
+      soundStarted: true, speechDetected: true, nomatch: true, errorCode: "network", lastInterimText: "adr"
+    });
+    const r2 = recorderI();
+    s.start(r2.opts);
+    made[1].onend({});
+    assert.deepEqual(Object.keys(r2.log[0][1]), INFO_KEYS);
+    assert.deepEqual(r2.log[0][1], {
+      manual: false, hadResult: false, hadError: false, audioStarted: false,
+      soundStarted: false, speechDetected: false, nomatch: false, errorCode: null, lastInterimText: ""
+    });
+  });
+
+  test("S9（FE-98）：stop() 後 end → onResult 0 次、manual true；abort() 後替身再觸發 onresult → 0 回呼", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const { log, opts } = recorderI();
+    s.start(opts);
+    const rec = made[0];
+    rec.onresult(interimEv("adr"));
+    assert.equal(s.stop(), true);
+    rec.onend({});
+    assert.deepEqual(names(log), ["interim", "end"]);
+    assert.equal(log[1][1].manual, true);
+    assert.equal(log[1][1].hadResult, false);
+    assert.equal(log[1][1].lastInterimText, "adr");
+    // abort：處理器已解除；握有舊處理器也不回呼
+    const r2 = recorderI();
+    s.start(r2.opts);
+    const rec2 = made[1];
+    const held = { onresult: rec2.onresult, onend: rec2.onend };
+    rec2.onresult(interimEv("ad"));
+    s.abort();
+    assert.equal(rec2.onresult, null);
+    held.onresult(interimEv("adr"));
+    held.onresult(finalEv("address"));
+    held.onend({});
+    assert.deepEqual(names(r2.log), ["interim"]);
+  });
+
+  test("S9（FE-98）：onInterim 拋例外不外洩，之後的最終結果照常回報", () => {
+    const { g, made } = fakeSttGlobal();
+    const s = stt.create(g);
+    const got = [];
+    s.start({ onInterim: () => { throw new Error("x"); }, onResult: (t) => got.push(t) });
+    const orig = console.error;
+    console.error = () => {};
+    try {
+      assert.doesNotThrow(() => made[0].onresult(interimEv("ad")));
+    } finally {
+      console.error = orig;
+    }
+    made[0].onresult(finalEv("address"));
+    assert.deepEqual(got, ["address"]);
+  });
+
+  test("S10（FE-98）：hasFinalOf 邊界（無 results、resultIndex 超出、未提供 isFinal、拋例外；§7.30.1、SD-FB-98）", () => {
+    const fin = (isFinal) => { const r = [{ transcript: "a" }]; if (isFinal !== undefined) r.isFinal = isFinal; return r; };
+    assert.equal(typeof stt.hasFinalOf, "function");
+    // results 不存在或不是類陣列 → 最終
+    assert.equal(stt.hasFinalOf(null), true);
+    assert.equal(stt.hasFinalOf(undefined), true);
+    assert.equal(stt.hasFinalOf({}), true);
+    assert.equal(stt.hasFinalOf({ results: null }), true);
+    assert.equal(stt.hasFinalOf({ results: 3 }), true);
+    assert.equal(stt.hasFinalOf({ results: {} }), true);
+    // 未提供 isFinal → 最終；isFinal true → 最終；全部 false → 即時
+    assert.equal(stt.hasFinalOf({ resultIndex: 0, results: [fin()] }), true);
+    assert.equal(stt.hasFinalOf({ resultIndex: 0, results: [fin(true)] }), true);
+    assert.equal(stt.hasFinalOf({ resultIndex: 0, results: [fin(false), fin(false)] }), false);
+    assert.equal(stt.hasFinalOf({ resultIndex: 0, results: [fin(false), fin(true)] }), true);
+    // isFinal 不是 false（例如 0、null）→ 最終
+    assert.equal(stt.hasFinalOf({ resultIndex: 0, results: [fin(0)] }), true);
+    assert.equal(stt.hasFinalOf({ resultIndex: 0, results: [fin(null)] }), true);
+    // 只看 resultIndex 起：索引 0 為最終、自索引 1 起全部 false → 即時
+    assert.equal(stt.hasFinalOf({ resultIndex: 1, results: [fin(true), fin(false)] }), false);
+    // resultIndex 超出 → 自 resultIndex 起沒有任何結果 → 即時
+    assert.equal(stt.hasFinalOf({ resultIndex: 5, results: [fin(true)] }), false);
+    assert.equal(stt.hasFinalOf({ resultIndex: 0, results: [] }), false);
+    // resultIndex 非數字或負數 → 視為 0
+    assert.equal(stt.hasFinalOf({ resultIndex: -1, results: [fin(true)] }), true);
+    assert.equal(stt.hasFinalOf({ resultIndex: "1", results: [fin(true), fin(false)] }), true);
+    assert.equal(stt.hasFinalOf({ results: [fin(false)] }), false);
+    // 判定時拋例外 → 最終
+    const boom = { get results() { throw new Error("boom"); } };
+    assert.equal(stt.hasFinalOf(boom), true);
+    const r = [{ transcript: "a" }];
+    Object.defineProperty(r, "isFinal", { get() { throw new Error("x"); } });
+    assert.equal(stt.hasFinalOf({ resultIndex: 0, results: [r] }), true);
+  });
+
+  test("S10（FE-98）：allTextOf 邊界（無 results、空候選、非字串 transcript、拋例外；不受 resultIndex 影響）", () => {
+    const seg = (t, isFinal = false) => { const r = [{ transcript: t }]; r.isFinal = isFinal; return r; };
+    assert.equal(typeof stt.allTextOf, "function");
+    assert.equal(stt.allTextOf(null), "");
+    assert.equal(stt.allTextOf({}), "");
+    assert.equal(stt.allTextOf({ results: 3 }), "");
+    assert.equal(stt.allTextOf({ results: [] }), "");
+    assert.equal(stt.allTextOf({ results: [[], [{}], [{ transcript: 5 }], null, seg("  ")] }), "");
+    assert.equal(stt.allTextOf({ resultIndex: 9, results: [seg(" a "), seg("b", true)] }), "a b");
+    assert.equal(stt.allTextOf({ results: [seg("Hello,"), seg(""), seg(" World. ")] }), "Hello, World.");
+    // 段內空白不改（只 trim 兩端），串接只用 1 個半形空白
+    assert.equal(stt.allTextOf({ results: [seg("comply  with"), seg("\tit\n")] }), "comply  with it");
+    const boom = { get results() { throw new Error("boom"); } };
+    assert.equal(stt.allTextOf(boom), "");
   });
 
   // ── STT 錯誤對照表（§7.6 v0.3） ──

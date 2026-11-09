@@ -1,0 +1,4 @@
+  PASS TC-55-04a 掃描 774 個文字檔（git ls-files 787、未追蹤 19、dist/site 13；二進位略過 45、已不存在 0）；ML-3 連續地址命中 0；含本檔自身
+  PASS TC-55-04b ML-4 空白形式：等於現行值 51 處；不等於現行值 0 處（上游 tasks.json FE-77 0 處，SD-FB-78 由主控決定；其他 0 處）
+  PASS TC-55-04c 本地部分連續形式命中 0 個檔案；其他網域的連續地址形式（資訊，不屬 ML-3）0 處
+  PASS TC-55-04h AC 明定不含 Git 歷史；回報：全部分支有 2 個 commit 異動過連續地址（a358556、25e3c3f），路徑 tests/static/legal-check.mjs。未改寫歷史（人類決定）；本工具不輸出地址

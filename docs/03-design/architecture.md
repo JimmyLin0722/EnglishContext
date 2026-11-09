@@ -1,13 +1,16 @@
 ---
 doc: ARCH
-version: 0.16
+version: 0.17
 status: approved
 author: sd-agent
-approved_by: JimmyLin（授權主控代核；修 BUG-006／007／008，不改 PRD、不改持久化結構）
-approved_at: 2026-11-06
+approved_by: JimmyLin（授權主控代核；PRD v0.21 US-62 即時文字、R-31 商標說明，不改 PRD、不改持久化結構）
+approved_at: 2026-11-09
 ---
 
 # English Master Track — 系統架構與設計
+
+> **v0.17 上游**：`docs/01-PRD.md` v0.21（approved，JimmyLin，2026-11-09；R-30 US-62 聆聽中即時文字、R-31 商標說明拿掉「Part 5」，Q-103～Q-108 皆 A）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.21（approved，主控代核，2026-11-09；§14.6 IT-1～IT-10、MS-1 (2b)／(4)、PR-5 (b)、V-STT-11～V-STT-17、L-8 LT-2、V-LGL-02、§9.14 DS-64～DS-71、FB-80～FB-82、data-schema §18 `SttStartOptions`、`SttEndInfo.lastInterimText`、`STT_FLOW_TEXTS.labelInterim`）、`storage-schema.json` 只改 meta（結構不變）。試作程式：分支 `feat/stt-interim-text` 未提交的 `services/stt.js`、`views/speech-panel.js`、`styles/31-speech.css`。搭配 `docs/03-design/tasks.json` v0.16（共 127 個任務：既有 123 個全部 `done` 不變；v0.17 新增 FE-98～FE-101 共 4 個，主控手動項目 MC-10，見 §12.16）。
+> **v0.17 增量導讀**：(1) 即時文字（US-62）：`services/stt.js` 以「是否提供 `onInterim`」決定 `interimResults`，區分暫時與最終結果，`SttEndInfo` 改 9 欄（加 `lastInterimText`），**服務不在 `end` 時補發 `onResult`**（§7.26.2 v0.17 修訂、§7.30.1）；`views/speech-panel.js` 負責即時文字列顯示與隱藏、準備中收到即時文字直接進入聆聽中、MS-1 (2b) 以最後一段即時文字評分、Q-107 的訊息判定（§7.26.4、§7.26.5 v0.17 修訂、§7.30.2～§7.30.7）。即時文字只在畫面模組變數與 DOM，**不進 `AppState`、不持久化**。(2) R-31：LT-2 改為「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」，交付物全文「TOEIC®（多益）Part 5」0 次（§7.31）。(3) 網站版本 1.3.2 由主控 MC-10 修改（Q-105 A，§5.12）。**不新增模組、不改建置程式、不改 store**；部署目錄仍 13 檔、預先快取 7 項；**持久化結構不變**（`schemaVersion` 3、鍵數 2、備份格式不變）；`src/data/` 不變、不建 CT 任務（DS-71）。**改讀規則**：§7.6 STT 列的 `interimResults = false`（FB-82）、§4.13 的 `start(opts)` 與 `SttEndInfo` 8 欄、§7.26.2 的 `snap()` 8 欄與 `onresult` 列、§7.26.5 的判定表，已就地改為 v0.17；§7.26.9「`services/stt.js` 不改」、§12.15 不得寫入 `services/stt.js`、`styles/31-speech.css` 只適用 v0.16 任務，FE-98 起以本版為準；§7.13、§7.23.1、§7.23.4、§10.9 提到的 LT-2 現行文字以 §7.31 為準，已完成任務的歷史敘述不逐字回改。同步修訂 §1、§3.4（D-22）、§4.13、§4.15、§5.12、§7.6、§7.26、§7.30、§7.31、§10.14、§11（T-132～T-140）、§12.16、§13.14、§14、§15（SD-FB-98～SD-FB-104）。
 
 > **v0.16 上游**：與 v0.15 相同（PRD v0.20、契約 v0.20，皆 approved，**本版不改**）；輸入另加 QA 缺陷 `docs/04-qa/bug-reports/BUG-006.md`（AC-52-05）、`BUG-007.md`（AC-58-01）、`BUG-008.md`（AC-60-06）。搭配 `docs/03-design/tasks.json` v0.15（共 123 個任務：既有 120 個全部 `done` 不變；v0.16 新增 FE-95～FE-97 共 3 個，見 §12.15；不新增 MC 項目）。
 > **v0.16 增量導讀**（只修 3 張 BUG，不改 PRD、契約、持久化結構，網站版本維持 1.3.1、尚未發布）：(1) BUG-007：第 1 次按麥克風時，`speech-panel.js` 先設「準備中」，等下一個畫格畫出後才呼叫 `mic.acquire()`（`AudioContext` 建構約 110 ms 不再擋住畫面）；`services/mic.js` 建立後若為 `suspended` 就 `resume()`（§7.28）。(2) BUG-006、BUG-008：根元素無條件 `html { scrollbar-gutter: stable; }`（`00-base.css`），移除 `85-ad.css` 的 `html[data-ad-env]` 規則（§7.29）。**改讀規則**：§7.25.3 DS-48 表的 `html[data-ad-env]` 列、T-108、SD-FB-80、§10.11「給 QA 的已知設計行為」(4)，現行一律以 §7.29 為準；§7.26.9 與 §12.14 的「`services/mic.js` 不改」只適用 v0.15 任務，FE-95 起以 §7.28 為準；§7.14「同步建立 AudioContext（仍在使用者點擊處理中）」現行以 §7.28.4 為準；`services/ad.js:8` 檔頭註解「SD-FB-80 的 scrollbar-gutter 依此生效」已過時，`ad.js` 本版不改，以本文件為準。同步修訂 §1、§3.3（D-21）、§4.14、§5.11、§7.28、§7.29、§10.13、§11（T-125～T-131）、§12.15、§13.13、§15（SD-FB-93～SD-FB-97）。
@@ -100,6 +103,11 @@ approved_at: 2026-11-06
 | （v0.16）AudioContext 補救 | `mic.js` 建立 `AudioContext` 後、取得音軌後，狀態為 `suspended` 就 `resume()`（失敗吞掉）；收音條無法動不影響辨識 | AC-33-03、AC-33-07、§7.28.4 |
 | （v0.16）捲軸寬度固定 | `html { scrollbar-gutter: stable; }` 無條件生效；傳統捲軸環境右側恆保留捲軸寬度，捲軸出現或消失都不改變內容寬度；覆蓋式捲軸（手機、macOS 預設）無影響 | BUG-006、BUG-008、AC-52-05、AC-60-06、§7.29 |
 | （v0.16）交付物 | 版本維持 1.3.1（尚未發布），FE-97 重新建置 `dist/`，BUILD_ID 隨內容改變 | AC-42-02、AC-36-07 |
+| （v0.17）即時文字服務 | `stt.start(opts)` 提供 `onInterim` → `interimResults = true`；最終與暫時結果依 `isFinal` 區分；空白暫時結果不回報；`SttEndInfo` 9 欄；`end` 時只回報 `lastInterimText`，**不補發** `onResult` | IT-1～IT-4、DS-65～DS-67、§7.30.1 |
+| （v0.17）即時文字列 | `p.sp-live`（`aria-live="off"`）位於麥克風列下方、訊息區之上，只在聆聽中且本次未判定時顯示；任何結束都在同一個同步工作中隱藏，與分數區出現同一次繪製；斜體、`--text-muted`、無動畫 | IT-5～IT-7、AC-62-01～AC-62-09、§7.30.2～§7.30.5 |
+| （v0.17）以即時文字評分 | `outcomeOf` 加步驟 (2b)：只在 `end`、無最終結果、無錯誤、無 `nomatch`、非手動、`lastInterimText` 清洗後非空時評分，走與最終結果相同的 `finish` 路徑；步驟 (4) 加「顯示過即時文字」→ `heardNoWords` | MS-1 (2b)／(4)、IT-9、IT-10、Q-103 A、Q-107 A、§7.30.6 |
+| （v0.17）商標說明 | LT-2 拿掉「Part 5」：模擬測驗頁說明、關於我、首頁 description 等 5 處；LT-3「Part 5 題目」不改 | R-31、Q-108 A、V-LGL-02、§7.31 |
+| （v0.17）交付物 | MC-10 把 `package.json` 改為 1.3.2 後，FE-101 由原始碼重新建置 `dist/`（覆蓋試作分支修改過的 `dist/`）；13 檔、預先快取 7 項不變 | Q-105 A、DS-71、AC-42-02 |
 
 ---
 
@@ -491,6 +499,26 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | `dist/` 下 14 檔 | 產物 | FE-97 | 只由 `npm run build` 產生 |
 
 **D-21**：FE-95 與 FE-96 的 paths 不重疊，可平行；FE-97 在兩者之後，只寫 `dist/`。`services/ad.js`、`views/flashcards.js`、`package.json` 不改；`tests/`、`docs/04-qa/`、`.github/` 不派給 PG。
+
+### 3.4 v0.17 目錄增量（FE-98～FE-101；PRD R-30、R-31）
+
+（`src/app/` 前綴省略，`dist/` 除外。不新增檔案、不新增執行期模組，`index.html` 與建置程式不變。）
+
+| 檔案 | 層 | 任務 | 內容 |
+| :--- | :--- | :--- | :--- |
+| `services/stt.js` | L3 | FE-98 | 以試作為基礎：`onInterim`、`hasFinalOf`、`allTextOf`、9 欄 `snap()`、空白不回報、刪除 `onend` 補發；匯出 `hasFinalOf`、`allTextOf`（§7.26.2、§7.30.1） |
+| `__tests__/speech.test.js` | 測試 | FE-98 → FE-99 | FE-98 改服務案例 3 處期望並新增 S1～S10；FE-99 只修正因 `TEXT` 改名或 9 欄而失敗的面板期望 |
+| `views/speech-panel.js` | L5 | FE-99 | 以試作為基礎：`TEXT.labelInterim`、9 欄 `blankInfo`、`showInterim`／`hideInterim`、`onInterim` 轉聆聽中、`outcomeOf` (2b)／(4)、`onEnd` 以即時文字評分（§7.30.2～§7.30.6） |
+| `styles/31-speech.css` | 樣式 | FE-99 | `.sp-live` 加 `transition: none`、`animation: none`、`min-width: 0`；不設 `display`（§7.30.5） |
+| `__tests__/_speech-env.js` | 測試輔助 | FE-99 | 新增 `interimEv(...texts)`、`finalEv(text)` |
+| `__tests__/speech-flow.test.js` | 測試 | FE-99 | 新增 P1～P18；`:599` 鍵集合加 `labelInterim` |
+| `core/site-content.js` | L1 | FE-100 | 第 84、158、169、175 行 LT-2 新文字（§7.31） |
+| `views/part5.js` | L5 | FE-100 | 第 77 行 `TEXT.headingNote` = LT-2 新文字 |
+| `__tests__/legal-static.test.js`、`__tests__/naming.test.js` | 測試 | FE-100 | `LT_2` 新文字；交付物「TOEIC®（多益）Part 5」0 次；`naming` 的 `Part 5` 允許清單改寫 |
+| `dist/` 下 14 檔 | 產物 | FE-101 | 只由 `npm run build` 產生；覆蓋試作分支修改過的 `dist/english-master-track.html` |
+| `package.json` | — | MC-10（主控） | `version` 1.3.1 → 1.3.2 |
+
+**D-22**：FE-98 與 FE-100 的 paths 不重疊，可平行；`__tests__/speech.test.js` 由 FE-98 → FE-99 依序修改（FE-99 `dependsOn` FE-98）；FE-101 在 FE-99、FE-100 與 MC-10 之後，只寫 `dist/`。`views/flashcards.js`、`state/store.js`、`services/mic.js`、`core/similarity.js`、`tools/`、`src/data/` 不改；`tests/`、`docs/04-qa/`、`.github/` 不派給 PG。
 
 ---
 
@@ -906,8 +934,8 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 
 | API | 約定 |
 | :--- | :--- |
-| `start(opts) → { ok: true, audioStartSupported: boolean } ｜ { ok: false, reason: "unsupported" ｜ "offline" ｜ "error" }` | `opts` = `{ lang, onAudioStart(info), onSoundStart(info), onSpeechStart(info), onResult(text, info), onNomatch(info), onError(code, info), onEnd(info) }`；全部選填。`info` 是當下 `SttEndInfo` 的**複本**（呼叫端改它不影響服務）。`audioStartSupported` 判定見 §7.26.2 |
-| `SttEndInfo`（8 欄） | `manual`、`hadResult`、`hadError`（語意同 v1.3.0）＋ `audioStarted`、`soundStarted`、`speechDetected`、`nomatch`、`errorCode`（第一個非手動 `aborted` 的錯誤代碼，否則 `null`）。每次 `start()` 都是新物件、全部初始值（`false`／`null`） |
+| `start(opts) → { ok: true, audioStartSupported: boolean } ｜ { ok: false, reason: "unsupported" ｜ "offline" ｜ "error" }` | `opts` = `{ lang, onAudioStart(info), onSoundStart(info), onSpeechStart(info), onResult(text, info), onNomatch(info), onError(code, info), onEnd(info) }`；全部選填。`info` 是當下 `SttEndInfo` 的**複本**（呼叫端改它不影響服務）。`audioStartSupported` 判定見 §7.26.2。**（v0.17，FE-98）** `opts` 再加選填 `onInterim(text, info)`（契約 `SttStartOptions`，共 9 項）；提供 → `interimResults = true`，否則 `false`（IT-1，§4.15） |
+| `SttEndInfo`（8 欄；**v0.17 起 9 欄**） | `manual`、`hadResult`、`hadError`（語意同 v1.3.0）＋ `audioStarted`、`soundStarted`、`speechDetected`、`nomatch`、`errorCode`（第一個非手動 `aborted` 的錯誤代碼，否則 `null`）＋（v0.17）`lastInterimText`（最後一段非空即時文字，否則 `""`）。每次 `start()` 都是新物件、全部初始值（`false`／`null`／`""`） |
 | `stop()`、`abort()`、`isListening()`、`isSupported()`、`isOnline()`、`transcriptOf(ev)`、`create(g)` | 不變。`abort()` 解除 7 個處理器後才呼叫 `rec.abort()`，之後任何事件都不回呼 |
 
 **`store.actions`（FE-91）**
@@ -938,6 +966,32 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | `EMT.components.speechPanelLogic` | 新增匯出 `PAINT_FALLBACK_MS`（數值 50） | 延後取得的後備時間；**不放進 `TIMING`**（`speech-flow.test.js:612` 要求 `TIMING` 的鍵與契約 `STT_TIMING` 相同） |
 | `EMT.components.speechPanel` | `render`、`reset`、`release` 簽名不變 | `reset()`／`release()` 也會取消尚未執行的延後取得（經既有 `stopAll` 的 `gen++` 與 `clearTimers`） |
 | `EMT.services.mic` | 簽名與回傳值全部不變 | `acquire()` 仍在同步階段建立 `AudioContext`（`getUserMedia` 之前）；新增內部函式 `resumeIfSuspended(ctx)`，不匯出 |
+
+### 4.15 v0.17 修改的模組介面（FE-98、FE-99、FE-100）
+
+全部不持久化：不新增 localStorage 鍵與欄位、不新增 store 欄位或 action、不新增 window 全域變數。即時文字、`lastInterimText`、即時文字列是否顯示，只放 `speech-panel.js` 模組變數（`interimText`、`att.info`）與 DOM（IT-8；契約 `RuntimeState` 註解）。
+
+**`EMT.services.stt`（FE-98）**
+
+| API | 約定 |
+| :--- | :--- |
+| `start(opts)` | 回傳值不變。`opts` 加 `onInterim(text, info)`：`text` 為非空字串（IT-3），呼叫前 `info.lastInterimText` 已是 `text`。提供 `onInterim` → `rec.interimResults = true`；不提供 → `false`，每個 `result` 事件都走 `onResult`（與 v0.20 相同，V-STT-17） |
+| `SttEndInfo`（9 欄） | 順序固定：`manual, hadResult, hadError, audioStarted, soundStarted, speechDetected, nomatch, errorCode, lastInterimText`。`hadResult` 只代表收到**最終結果**；即時文字不改它 |
+| `onEnd(info)` | 只回報；`info.lastInterimText` 供呼叫端依 MS-1 (2b) 判定。**服務不得在 `end` 時呼叫 `onResult`**（IT-4） |
+| `hasFinalOf(ev)`、`allTextOf(ev)`（新匯出，純函式） | 只供測試；規則見 §7.30.1 |
+| `transcriptOf`、`stop`、`abort`、`isListening`、`isSupported`、`isOnline`、`create` | 不變；`detach` 仍清 7 個處理器（即時文字走 `onresult`，不新增處理器） |
+
+**`EMT.components.speechPanelLogic`（FE-99）**
+
+| 匯出 | 約定 |
+| :--- | :--- |
+| `TEXT` | 新增 `labelInterim`「聽到：」（試作鍵 `liveLabel` **改名**，SD-FB-99）；其餘不變 |
+| `outcomeOf(input)` | 輸入加選填 `atEnd`（boolean）、`interimHasText`（boolean）；新增回傳 `{ kind: "score", source: "interim" }`（步驟 2b）；步驟 4 加 `lastInterimText` 條件（§7.30.6）。缺新欄位時結果與 v0.15 相同 |
+| `TIMING`、`PAINT_FALLBACK_MS`、`resultModel`、`buildResult`、`messageForError`、`messageForAcquire`、`meterBarsOf`、`targetOf` | 不變 |
+
+`EMT.components.speechPanel` 的 `render`、`reset`、`release` 簽名不變；三者都會隱藏即時文字列（經 `setStatus` 或 `build`）。
+
+**`EMT.core.siteContent`（FE-100）**：常數名稱與結構不變，只改 LT-2 所在的 4 個字串值（§7.31）。
 
 ---
 
@@ -1256,6 +1310,18 @@ jobs:
 | 交付 | FE-97 以 `npm run build` 連續兩次產生 `dist/`，兩次 SHA-256 相同；頁尾版本行仍為「版本 1.3.1（建置 xxxxxxx）」，建置碼為新值 |
 | 大小 | 面板約 +1 KB、服務約 +0.3 KB、CSS 淨增約 0 |
 
+### 5.12 v0.17 建置（不改建置程式；PRD R-30、R-31；契約 DS-71）
+
+| 項目 | 決定 |
+| :--- | :--- |
+| 建置程式 | `tools/build.mjs`、`tools/site-pages.mjs` 不改；沒有新模組，`index.html` 的腳本與樣式清單不變。靜態頁與 SEO 文字自 `core/site-content.js` 產生（SC-1），改 FE-100 的常數即同步（AC-57-03） |
+| 版本號 | **1.3.2**：MC-10 由主控一次性修改 `package.json`（Q-105 A），在 FE-99、FE-100 之後、FE-101 之前；R-31 併入同一版 |
+| BUILD_ID | `stt.js`、`speech-panel.js`、`31-speech.css`、`site-content.js`、`part5.js` 與版本值改變 → BUILD_ID 必然與 FE-97 產物不同，屬預期；FE-101 回報新舊值 |
+| 試作產物 | 分支 `feat/stt-interim-text` 已修改的 `dist/english-master-track.html` **不得**作為交付物；FE-101 以 `npm run build` 覆蓋（DS-71、PRD 6.6 主控列） |
+| 部署目錄 | 仍 13 檔、`dist/` 共 14 檔、預先快取 7 項；`static.yml` 不改 |
+| 交付 | FE-101 以 `npm run build` 連續兩次產生 `dist/`，兩次 SHA-256 相同；頁尾版本行為「版本 1.3.2（建置 xxxxxxx）」 |
+| 大小 | 服務約 +0.5 KB、面板約 +1 KB、CSS 約 +0.1 KB；文字變更淨減約 0.1 KB |
+
 ---
 
 ## 6. 檔案大小估算（回應 FB-17、R-02、AC-19-04）
@@ -1454,7 +1520,7 @@ v0.2 決議說明：`Number()` 會把 `1e2`、`0x64` 視為 100，使用者看�
 | 句型搜尋 | 啟動時對每則預先算 `haystack = (template + "\n" + descriptionZh).toLowerCase()`；每次 `input` 事件同步過濾（**不做 debounce**），100 則線性比對 < 1 ms | AC-16-01 |
 | 淡化修飾語 | 容器加 class `is-dimmed`；`.is-dimmed .seg--modifier { opacity: 0.3; filter: grayscale(1); }`；**不設 transition**（讓計算後樣式立即為 0.3，利於自動驗證） | AC-13-01～AC-13-03 |
 | TTS | `speechSynthesis.cancel()` 後再 `speak()`；語音挑選：`lang` 為 `en-US`（不分大小寫、`_` 視同 `-`），優先 `localService === true`（R-10）；`getVoices()` 為空時等 `voiceschanged` 最多 1 秒；仍無 en-US → 「此裝置未安裝美式英語語音」 | AC-07-01～AC-07-05 |
-| STT | `window.SpeechRecognition ‖ window.webkitSpeechRecognition`；`lang = "en-US"`、`interimResults = false`、`maxAlternatives = 1`；開始前 `navigator.onLine === false` → 「語音辨識需要網路連線」；`onerror` 依下方「STT 錯誤對照表」；使用者再按一次 → `stop()` 並標記手動停止（不提示）；`onend` 無結果且非手動 → 未偵測提示。~~不使用 `getUserMedia`／`MediaRecorder`~~ **（v0.5 修訂，PRD R-18 二）**：按麥克風時先經 `services/mic.js` 取得或重用麥克風音軌（`getUserMedia`，只接 `AnalyserNode` 讀音量），再啟動 `SpeechRecognition`；取得流程、錯誤處理與釋放時機見 §7.14。**仍禁止** `MediaRecorder` 與任何錄製、編碼、`Blob`／`URL.createObjectURL` 音訊輸出、網路傳送；`services/stt.js` 本身不改 | AC-08-01～AC-08-14、AC-21-03、AC-33-01～AC-33-08 |
+| STT | `window.SpeechRecognition ‖ window.webkitSpeechRecognition`；`lang = "en-US"`、~~`interimResults = false`~~ **（v0.17 修訂，FB-82、DS-64、契約 IT-1）`interimResults` = 呼叫端是否提供 `onInterim`：語音面板每次嘗試都提供，所以 v1.3.2 起實際一律為 `true`；未提供的呼叫端（測試）仍為 `false`，行為與 v0.20 相同。暫時與最終結果的區分、即時文字列與以即時文字評分見 §7.26.2、§7.30**、`maxAlternatives = 1`、`continuous = false`；開始前 `navigator.onLine === false` → 「語音辨識需要網路連線」；`onerror` 依下方「STT 錯誤對照表」；使用者再按一次 → `stop()` 並標記手動停止（不提示）；`onend` 無結果且非手動 → 未偵測提示。~~不使用 `getUserMedia`／`MediaRecorder`~~ **（v0.5 修訂，PRD R-18 二）**：按麥克風時先經 `services/mic.js` 取得或重用麥克風音軌（`getUserMedia`，只接 `AnalyserNode` 讀音量），再啟動 `SpeechRecognition`；取得流程、錯誤處理與釋放時機見 §7.14。**仍禁止** `MediaRecorder` 與任何錄製、編碼、`Blob`／`URL.createObjectURL` 音訊輸出、網路傳送；`services/stt.js` 本身不改 | AC-08-01～AC-08-14、AC-21-03、AC-33-01～AC-33-08 |
 | 資料來源頁列出辭典（v0.3） | 字表：依字庫實際出現的 `sources` 代碼列出（AC-23-02 末段「列出的字表數量與資料中出現的字表種類數一致」）。辭典（`DATA_SOURCE_REGISTRY` 中 `kind = "dictionary"`）：**只有當至少一筆內建單字的 `meaningSource` 等於該辭典代碼時才列出**；registry 有但無任何單字使用 → 不列出、`console.warn`。理由：AC-23-02 要求列出「本檔案實際使用的」外部資料，與字表的判定方式一致。字庫缺漏（C-6）時辭典與字表都不列出，頁面其餘聲明照常顯示。QA 判定：以正式資料建置後 ECDICT 必須列出（V-VOC-09 保證有 `meaningSource = "ECDICT"` 的單字） | AC-23-02 |
 | 剪貼簿 | 只用 `navigator.clipboard.writeText`；不存在或 Promise 失敗 → 「複製失敗，請手動選取」並以 `Selection`／`Range` 反白該句（**不**退回 `execCommand`，以符合 AC-16-04 的判定） | AC-16-03、AC-16-04 |
 | 效能 | 只渲染當前卡片／題目／句子；換頁只切換 `hidden` 並呼叫 `show()`；`subscribe` 依 tags 局部重繪；不渲染整份字庫清單 | AC-22-01～AC-22-04、R-03 |
@@ -2668,7 +2734,7 @@ LT 文字本身以契約 README §4.3 L-8 表為唯一來源；實作時從該�
 | LT | 檔案與位置（依現況確認） | 做法 | 對應 |
 | :--- | :--- | :--- | :--- |
 | LT-1 | `views/flashcards.js:210`，`push(front, "collocation", …)` 的標籤 | 只換標籤文字；欄位鍵、元素順序、按鈕不變；自訂單字表單的「搭配詞（選填）」不在範圍 | AC-06-01、AC-38-08、V-LGL-01 |
-| LT-2 | `views/part5.js:66`，`TEXT.headingNote`；節點為 `part5.js:836` 的 `p.p5-heading-note` | 只換常數；結算、全部答對畫面共用同一節點，不需另改；第 2 行註解同步改寫 | AC-10-02、V-LGL-02 |
+| LT-2（v0.17 起文字依 §7.31） | `views/part5.js:66`，`TEXT.headingNote`；節點為 `part5.js:836` 的 `p.p5-heading-note` | 只換常數；結算、全部答對畫面共用同一節點，不需另改；第 2 行註解同步改寫 | AC-10-02、V-LGL-02 |
 | LT-3 | `views/sources-page.js:53`，`TEXT.originalLicense` | 只換常數；`originalLicense` 仍為 `.src-statements` 第 3 項 | AC-23-02、V-LGL-03 |
 | LT-4 | `views/sources-page.js:205-208`，`brandStatement` | 改為 `brandStatement(appName)`，名稱取 `PWA_APP_NAME`，組字後須與 LT-4 逐字相同；呼叫處（`:332`）移除 `holder` 引數；`holder` 仍供 `derivedAttribution` 使用（`copyrightHolder` 用途見 data-schema `ProjectLicenseInfo`） | AC-23-02、NM-3、V-LGL-03 |
 | LT-5 | `views/sources-page.js`，新增 `TEXT.trademarkNotice` | `.src-statements` 新增第 5 個 `li`，排在品牌標識聲明之後，以 `textContent` 寫入；不加入 HTML 開頭註解 | AC-23-02、V-LGL-03、V-LGL-04 |
@@ -2708,7 +2774,7 @@ LT 文字本身以契約 README §4.3 L-8 表為唯一來源；實作時從該�
 
 #### 7.23.4 375px 版面與實測方法（FE-79；AC-10-02、AC-20-01、AC-40-02、E-123）
 
-**預期**：`.p5-heading-note` 字級 0.9rem（14.4px），LT-2 估計寬約 370～380 px，375px 可用寬度約 343 px，**預期換成 2 行**，內容下移約 23 px（PRD R-25 為靜態估算，尚未實測）。沒有 AC 限制此說明為 1 行，首屏免捲動條件也不含模擬測驗頁，2 行不是缺陷；**裁切或水平捲軸才是缺陷**。
+（v0.17 註：LT-2 拿掉「 Part 5」後估計寬約 320～335 px，375px 下可能變為 1 行；1 行或 2 行都不是缺陷，判定仍只看裁切與水平捲軸，見 §7.31。）**預期**：`.p5-heading-note` 字級 0.9rem（14.4px），LT-2 估計寬約 370～380 px，375px 可用寬度約 343 px，**預期換成 2 行**，內容下移約 23 px（PRD R-25 為靜態估算，尚未實測）。沒有 AC 限制此說明為 1 行，首屏免捲動條件也不含模擬測驗頁，2 行不是缺陷；**裁切或水平捲軸才是缺陷**。
 
 | 量測項 | 方法 | 判定 |
 | :--- | :--- | :--- |
@@ -3159,7 +3225,9 @@ section#view-about.view[aria-label=關於我][hidden]
 
 ### 7.26 麥克風準備中、訊息分流與辨識文字（v0.15；PRD R-29、US-58～US-60、Q-94～Q-99、Q-101；契約 v0.20 §14.1～§14.3、§14.5、data-schema §18、DS-57～DS-61）
 
-名詞沿用契約 §14：**嘗試** = 一次按下麥克風到回到待機；**已確認開始收音** = 本次收到 `audiostart`、`soundstart`、`speechstart`，或後備模式的 `T_FALLBACK` 已到。分工：`services/stt.js` 只轉送引擎事件與旗標，**不決定訊息**；`views/speech-panel.js` 負責狀態、計時器與訊息（DS-57、DS-58）。
+> **v0.17 修訂**（PRD R-30、契約 §14.6）：本節 §7.26.2、§7.26.4、§7.26.5、§7.26.8 的表格已就地加入即時文字（`onInterim`、`lastInterimText`、步驟 2b）；即時文字列的顯示、隱藏、樣式、測試與實測集中在 §7.30。
+
+名詞沿用契約 §14：**嘗試** = 一次按下麥克風到回到待機；**已確認開始收音** = 本次收到 `audiostart`、`soundstart`、`speechstart`，或後備模式的 `T_FALLBACK` 已到；（v0.17）或收到第一段非空即時文字（IT-5）。分工：`services/stt.js` 只轉送引擎事件與旗標，**不決定訊息**；`views/speech-panel.js` 負責狀態、計時器與訊息（DS-57、DS-58）。
 
 #### 7.26.1 時間常數定案（DS-60、PR-11、V-STT-09）
 
@@ -3178,12 +3246,13 @@ section#view-about.view[aria-label=關於我][hidden]
 | `rec.onaudiostart` | `s.audioStarted = true` → `onAudioStart(snap())` |
 | `rec.onsoundstart` | `s.soundStarted = true` → `onSoundStart(snap())` |
 | `rec.onspeechstart` | `s.speechDetected = true` → `onSpeechStart(snap())` |
-| `rec.onresult` | `s.hadResult = true` → `onResult(transcriptOf(ev), snap())`；`transcriptOf` 不改（FB-77：各段 trim 後以半形空白連接屬取得引擎輸出） |
+| `rec.onresult` | （v0.17，IT-2）**有 `onInterim` 且 `hasFinalOf(ev)` 為 false** → 即時文字：`t = allTextOf(ev)`；`t === ""` → `return`（不回報、不改 `lastInterimText`，IT-3、FB-80）；否則 `s.lastInterimText = t` → `onInterim(t, snap())`，**不改** `hadResult`、不呼叫 `onResult`。**其他情況**（含未提供 `onInterim`）→ 最終結果：`s.hadResult = true` → `onResult(transcriptOf(ev), snap())`；`transcriptOf` 不改（FB-77：各段 trim 後以半形空白連接屬取得引擎輸出） |
 | `rec.onnomatch` | `s.nomatch = true` → `onNomatch(snap())` |
 | `rec.onerror` | 手動停止造成的 `aborted` 直接 `return`（既有）；否則 `s.hadError = true`，`s.errorCode` 為 `null` 時才記下代碼 → `onError(code, snap())` |
-| `rec.onend` | `session = null`、`detach(rec)` → `onEnd(snap())` |
+| `rec.onend` | `session = null`、`detach(rec)` → `onEnd(snap())`。（v0.17，IT-4、DS-65）**不得**以 `lastInterimText` 呼叫 `onResult` 或改 `hadResult`；試作的補發段落刪除 |
 
-- `snap()` 回傳 8 欄 `SttEndInfo` 的新物件，欄位順序固定為 `manual, hadResult, hadError, audioStarted, soundStarted, speechDetected, nomatch, errorCode`。
+- `snap()` 回傳 8 欄 `SttEndInfo` 的新物件，欄位順序固定為 `manual, hadResult, hadError, audioStarted, soundStarted, speechDetected, nomatch, errorCode`。**（v0.17，DS-66）改為 9 欄**：最後加 `lastInterimText`（初始 `""`）。
+- （v0.17，IT-1）`rec.interimResults = (typeof opts.onInterim === "function")`；`lang`、`maxAlternatives = 1`、`continuous = false` 不變。
 - `detach(rec)` 把 `onaudiostart`、`onsoundstart`、`onspeechstart`、`onresult`、`onnomatch`、`onerror`、`onend` 7 個屬性設為 `null`（修正 v1.3.0 只清 `onnomatch` 卻沒設定它的不一致，DS-57）。
 - 一律用屬性指派，不用 `addEventListener`：替身最容易模擬，`detach` 也能一次解除。服務**不重排**事件，依引擎順序原樣轉送。
 - **`audioStartSupported` 判定（AC-58-09）**：`new C()` 之後、`rec.start()` 之前計算 `"onaudiostart" in rec`（含原型鏈；Chrome、Edge、Safari 把事件處理屬性放在原型上）；判定時拋例外視為 `false`。替身要模擬「支援」就在建構子或原型設 `onaudiostart = null`，要模擬「不支援」就完全不定義這個屬性。現有的 `tests/e2e/lib/inits.mjs` `fakeStt` 與 `speech.test.js` `fakeSttGlobal` 都屬「不支援」。
@@ -3228,7 +3297,9 @@ v1.3.0 的 `gen` 已在 `reset()`／`stopAll()` 時遞增，讓換卡後的非�
 | :--- | :--- | :--- | :--- | :--- |
 | `onAudioStart` | 同 `awaitingAudioStart` 欄 | `confirmed = true`、清 `ready`；`bufferMs = 0` → 立即 `enterListening`；> 0 → 設 `buffer` 計時器 | `confirmed = true`，`enterListening` | 無動作 |
 | `onSoundStart`、`onSpeechStart` | `confirmed = true`，`enterListening` | 同左（清全部計時器） | 同左 | 無動作 |
-| `onResult`、`onNomatch`、`onError`、`onEnd` | `finish(id, outcomeOf(...))` | 同左 | 同左 | 同左 |
+| `onInterim(text)`（v0.17，IT-5、PR-5 (b)） | 合併 `lastInterimText` → `confirmed = true`、`enterListening`（清全部計時器）→ `showInterim` | 同左 | 同左 | 合併 `lastInterimText` → `showInterim`（只改值元素） |
+| `onResult`、`onNomatch`、`onError` | `finish(id, outcomeOf(...))`（`atEnd: false`） | 同左 | 同左 | 同左 |
+| `onEnd`（v0.17） | `finish(id, outcomeOf({ ..., atEnd: true, interimHasText }), 即時文字評分結果)`（§7.30.6） | 同左 | 同左 | 同左 |
 | `ready` 計時器 | — | 仍未確認 → `stt.abort()`、`finish(id, noResponse)` | — | — |
 | `fallback` 計時器 | — | — | `confirmed = true`、`enterListening` | — |
 | `buffer` 計時器 | — | 仍為準備中 → `enterListening` | — | — |
@@ -3246,13 +3317,15 @@ v1.3.0 的 `gen` 已在 `reset()`／`stopAll()` 時遞增，讓換卡後的非�
 - `hadText`：本次終結點是 `result`，且 `buildResult(text, target, similarity)` 不是 `null`（MS-4：沿用 `core/similarity` 的清洗；結果為 `null` 一律視為清洗後為空）。
 - `confirmed` 由面板計算：`att.confirmed || info.audioStarted || info.soundStarted || info.speechDetected`。
 - `T_READY` 逾時呼叫時傳 `confirmed: false` 且 `info` 為當下快照（沒有事件），依規則落到 (6)。
+- （v0.17）`atEnd`：本次終結點是 `end`（只有 `onEnd` 回呼傳 `true`）。`interimHasText`：`buildResult(info.lastInterimText, target, similarity)` 不是 `null`（MS-4 同一套清洗）。`confirmed` 另加「`info.lastInterimText !== ""`」（IT-5）。缺少這些欄位時一律視為 `false`／`""`，既有呼叫的結果不變。
 
 | 順序 | 條件（第一個成立者為準） | 結果 |
 | :--- | :--- | :--- |
 | 1 | `manual` 或 `info.manual` | `none` |
 | 2 | `hadText` | `score` |
+| 2b（v0.17，MS-1 (2b)、Q-103 A） | `atEnd`，且 `info.hadResult` 不是 `true`、`info.errorCode` 為 `null`、`info.nomatch` 不是 `true`、`info.lastInterimText` 是非空字串、`interimHasText` | `score`（`source: "interim"`；評分文字 = `lastInterimText` 原樣） |
 | 3 | `info.errorCode` 不是 `null` 也不是 `"no-speech"` | `error`（訊息依 `messageForError`） |
-| 4 | `info.speechDetected` 或 `info.nomatch`，或 `info.hadResult` 但 `hadText` 為假 | `heardNoWords` |
+| 4 | `info.speechDetected` 或 `info.nomatch`，或 `info.hadResult` 但 `hadText` 為假，或（v0.17，Q-107 A）`info.lastInterimText` 是非空字串 | `heardNoWords` |
 | 5 | `info.errorCode === "no-speech"`，或 `confirmed` | `noSpeech` |
 | 6 | 其他 | `noResponse` |
 
@@ -3303,13 +3376,14 @@ v1.3.0 的 `gen` 已在 `reset()`／`stopAll()` 時遞增，讓換卡後的非�
 | `noSpeech` | 未偵測到語音，請再試一次 | 不變 |
 | `noResponse` | 語音辨識沒有回應，請再試一次 | 新增 |
 | `labelRecognized`、`labelTarget` | 辨識文字、目標文字 | 不變 |
+| `labelInterim`（v0.17） | 聽到：（全形冒號 U+FF1A） | 新增（試作鍵 `liveLabel` 改名，SD-FB-99） |
 | `mic`、`micListening`、`micIdleLabel`、`micListeningLabel`、`resultTitle`、`resultNote`、`tipYellow`、錯誤訊息、說明文字 | 同 v1.3.0 | 不變 |
 
 RT-4 自查：分數區固定文字（「辨識吻合度」、燈號文字、「放慢速度或重聽 0.75x 示範」、「辨識文字」、「目標文字」、AC-08-11 說明）都不含「偵測到」「語言」「英文」「中文」「你說的是」。`heardNoWords` 含「英文」，但它在訊息區、不在分數區，且只是引導文字（Q-99、Q-101）。
 
 #### 7.26.9 不改清單與隱私
 
-`views/flashcards.js`、`services/mic.js`（v0.15 範圍；v0.16 FE-95 依 §7.28.4 修改）、`core/similarity.js`、`core/meter.js`、持久化與備份模組都不改。`recordSttScored` 仍只在顯示分數後呼叫 1 次；3 則分流訊息、取消、逾時都不呼叫（MS-6、AC-30-04）。不新增錄音或音訊輸出，§7.14 的允許與禁止表不變。不做任何語言判斷（RT-6、Q-101 A）。
+（v0.17 註：`services/stt.js`、`views/speech-panel.js`、`styles/31-speech.css` 由 FE-98、FE-99 依 §7.30 修改；以下不改清單其餘仍適用。）`views/flashcards.js`、`services/mic.js`（v0.15 範圍；v0.16 FE-95 依 §7.28.4 修改）、`core/similarity.js`、`core/meter.js`、持久化與備份模組都不改。`recordSttScored` 仍只在顯示分數後呼叫 1 次；3 則分流訊息、取消、逾時都不呼叫（MS-6、AC-30-04）。不新增錄音或音訊輸出，§7.14 的允許與禁止表不變。不做任何語言判斷（RT-6、Q-101 A）。
 
 #### 7.26.10 實測方法（FE-94；AC-58-03、AC-58-13、AC-60-06）
 
@@ -3553,6 +3627,212 @@ html {
 | 回歸 | 375×667（`mobile: true`）主控台、單字卡、模擬測驗；1366 主控台開「資料備份」使頁面變長 | 375 版面與 1.3.1 FE-94 產物座標相同、無水平捲軸（AC-20-01、AC-40-02）；1366 展開前後主控台內容 dx = 0 |
 
 完整的廣告環境（本機 HTTPS、`tests/tools/build-ad-test.mjs`）由 QA 依 V-AD 重測，不派給 PG。
+
+### 7.30 聆聽中即時文字（v0.17；PRD R-30、US-62、AC-62-01～AC-62-12、Q-103～Q-107；契約 v0.21 §14.6 IT-1～IT-10、MS-1 (2b)／(4)、PR-5 (b)、V-STT-06、V-STT-11～V-STT-17、DS-64～DS-70）
+
+分工沿用 §7.26：`services/stt.js` 只區分並轉送即時文字（IT-1～IT-4），**不決定是否評分**；`views/speech-panel.js` 負責轉入聆聽中、顯示、隱藏與判定（IT-5～IT-10）。兩者都以分支 `feat/stt-interim-text` 的試作為基礎，只改契約 DS-65～DS-69 列出的差異；試作的 `hasFinalOf`、`allTextOf`、「`interimResults` 依 `onInterim` 決定」、「準備中收到即時文字即進入聆聽中」、「即時文字只放模組變數 `interimText`」保留。
+
+#### 7.30.1 服務（FE-98；IT-1～IT-4、DS-65～DS-67、V-STT-17）
+
+**最終或即時的判定 `hasFinalOf(ev)`**（只在提供 `onInterim` 時使用）
+
+| 情況 | 判定 |
+| :--- | :--- |
+| `ev.results` 不存在、不是類陣列，或判定時拋例外 | 最終（`transcriptOf` 得 `""`，畫面依 MS-1 為 `heardNoWords`；與 v0.20 處理不正常事件的方式相同） |
+| 自 `resultIndex`（非數字或負數視為 0）起任一結果的 `isFinal` 不是 `false`（含未提供 `isFinal`） | 最終 |
+| 自 `resultIndex` 起所有結果的 `isFinal` 都是 `false` | 即時文字 |
+| 自 `resultIndex` 起沒有任何結果 | 即時文字（IT-2「全部為 false」的字面；取出結果多半為空，依 IT-3 不回報；SD-FB-98） |
+
+**即時文字取出 `allTextOf(ev)`**（IT-3）：`results` 索引 0 到最後，各取第 1 候選 `transcript`、各自 `trim()`、捨棄空字串、以 1 個半形空白 U+0020 串接；不清洗標點、不改大小寫。取出為 `""` → **不呼叫** `onInterim`、`lastInterimText` 不變（DS-67、FB-80：畫面保留上一段）。
+
+**服務單獨的事件序列**（S 案例的期望，§10.14）
+
+| 引擎事件（提供 `onInterim`） | 服務回呼 |
+| :--- | :--- |
+| `interim(adr)` → `interim(adress)` → `end` | `onInterim("adr")`、`onInterim("adress")`、`onEnd({ hadResult: false, lastInterimText: "adress", … })`；`onResult` 0 次（IT-4、V-STT-14） |
+| `interim(ad)` → `result(address)` → `end` | `onInterim("ad")`、`onResult("address")`（`hadResult: true`）、`onEnd(…, lastInterimText: "ad")` |
+| `interim("   ")` → `end` | `onInterim` 0 次；`onEnd(…, lastInterimText: "")` |
+| `interim(ad)` → `interim("")` → `end` | `onInterim("ad")` 1 次；`onEnd(…, lastInterimText: "ad")` |
+| `interim(adr)` → `stop()` → `end` | `onInterim("adr")`、`onEnd(…, manual: true, lastInterimText: "adr")`；`onResult` 0 次 |
+| 未提供 `onInterim`：`isFinal: false` 的 `result(ad)` | `onResult("ad")`（v0.20 行為，AC-62-03 (b)） |
+
+**試作差異的改法**
+
+| 契約 | 試作現況 | 改法 |
+| :--- | :--- | :--- |
+| DS-65（IT-4） | `rec.onend` 在「`!hadResult && !manual && lastInterim`」時以 `lastInterim` 呼叫 `onResult` 並設 `hadResult = true` | 整段刪除；`onend` 只做 `session = null`、`detach(rec)`、`onEnd(snap())` |
+| DS-66 | `lastInterim` 只在服務內部 | 改名 `lastInterimText`，放進 `snap()` 第 9 欄；先設值再呼叫 `onInterim`（契約：呼叫前 `info.lastInterimText` 已是 `text`） |
+| DS-67（IT-3） | 取出為空時仍呼叫 `onInterim("")` | 取出為空直接 `return` |
+
+檔頭註解刪除「試作 v1.3.2」與「`interimResults = false`」「以最後一段暫時文字呼叫 `onResult`」的敘述。
+
+#### 7.30.2 面板的資料與生命週期（FE-99；IT-8、MS-6、DS-70）
+
+| 資料 | 位置 | 規則 |
+| :--- | :--- | :--- |
+| `interimText` | `speech-panel.js` 模組變數（試作既有） | 只供重建面板時還原；`hideInterim()` 清為 `""` |
+| `att.info.lastInterimText` | 模組變數 `att`（`blankInfo()` 第 9 欄，初始 `""`） | `mergeInfo` 以來源中的**非空字串覆蓋**（取最新）；其他欄位的「只會由 false 變 true」規則不變；每次 `beginAttempt` 建新 `att`，不沿用前次 |
+| 即時文字列 | DOM `p.sp-live` | 見 §7.30.3、§7.30.4 |
+| 以即時文字評分的 `SttResult` | `store` `runtime.speech.lastResult`（既有欄位，`recognizedText` = `lastInterimText` 原樣） | 依 RT-5；不新增欄位 |
+
+**不進 store**：不新增 `RuntimeState` 欄位、action、tag；即時文字不呼叫任何 store action（`onInterim` 內只有 `setStatus("listening")` 經 `enterListening`）。序列化 `AppState` 不含即時文字字串（V-STT-17）。
+
+#### 7.30.3 DOM、文字與無障礙（IT-6；AC-62-01、AC-62-07、AC-62-08、AC-62-11；DS-70、V-STT-15、V-STT-16）
+
+```
+div.sp-panel                                  （無 role、無 aria-live）
+ ├ div.sp-tts[role=group]                     朗讀列
+ ├ div.sp-stt                                 麥克風列：button.sp-mic、span.sp-meter[role=img]、span.sp-net
+ ├ p.sp-live[aria-live=off][hidden]           即時文字列（v0.17）
+ │   ├ span.sp-live__label                    textContent =「聽到：」（TEXT.labelInterim）
+ │   └ span.sp-live__text[lang=en]            textContent = 最新即時文字原樣
+ ├ div.sp-msg[role=status][aria-live=polite]  既有訊息區
+ └ div.sp-result[aria-live=polite]            既有分數區
+```
+
+- 同時間最多 1 列（只有 1 個 `p.sp-live`）；更新只改 `span.sp-live__text` 的 `textContent`，列內子元素固定 2 個，不新增子元素（C-7、AC-62-08）。標籤元素只含「聽到：」3 個字元，間距用 CSS `margin-right`，不加空白文字節點。
+- **祖先檢查（SD 已查原始碼）**：`.sp-panel` ← `div.fc-speech` ← `div.fc-face.fc-front` ← `div.card.fc-card` ← `div.fc-stage` ← 單字卡頁 `section` ← `#app-main` ← `body`，都沒有 `aria-live` 或 `role` status／alert／log。現有即時區域 `#pwa-update`、`#toast-root`、`.fc-position`、`.sp-msg`、`.sp-result` 都**不是**即時文字列的祖先。FE-99 單元測試檢查面板內祖先鏈，FE-101 在交付檔檢查到 `document`（V-STT-16）。
+- 固定文字只有「聽到：」，不含 RT-4 字樣與「發音」「分數」（AC-62-11）；引擎回傳的值照原文。
+
+#### 7.30.4 顯示與隱藏（IT-5、IT-7；AC-62-01～AC-62-06、E-169～E-172；V-STT-11～V-STT-13；DS-69）
+
+| 函式 | 規則 |
+| :--- | :--- |
+| `showInterim(id, text)` | 只在 `live(id)`、`att.stage === "listening"`、`text` 是字串且 `trim()` 後非空時：`interimText = text`、`setText(ui.liveText, text)`、`ui.live.hidden = false`。否則**不改畫面**（保留上一段） |
+| `hideInterim()` | `interimText = ""`、值元素 `textContent = ""`、`ui.live.hidden = true`；`ui` 不存在時只清變數 |
+| `setStatus(s, phase)` | `s !== "listening"` 時**先** `hideInterim()`，再 `stopMeterNow()` 與 store（取代試作「非 listening 且非 preparing」：準備中不可能有即時文字列，統一隱藏較單純） |
+| `beginAttempt()` | 開頭 `hideInterim()`（IT-7「新嘗試開始時沒有即時文字列」） |
+| `build()`（重建面板，如翻面） | `att` 存在、未判定、`att.stage === "listening"` 且 `interimText` 非空 → 還原顯示；否則 `hideInterim()` |
+
+**`onInterim(text, info)` 回呼**：`live(id)` → `mergeInfo(att, info, { lastInterimText: text })` → 若 `att.stage !== "listening"`：`att.confirmed = true`、`enterListening(id)`（清 `ready`、`buffer`、`fallback`、`frame`、`paint`，`setStatus("listening")`，開始讀音量）→ 再檢查 `live(id)` → `showInterim(id, text)`。準備中收到即時文字時，「聆聽中」與即時文字列在同一個同步工作內完成（AC-62-02）；之後的 `audiostart` 因 `stage === "listening"` 無動作。`acquiringMic`（替身在 `rec.start()` 內同步觸發）同樣處理，`stt.start()` 回傳後依 §7.26.4 不再設子階段與計時器。
+
+**每種結束的隱藏路徑**（全部在同一個同步工作內，瀏覽器在工作結束後才繪製，所以「即時文字列隱藏」與「分數區或訊息出現」是同一次繪製，任何時刻兩者不同時可見）
+
+| 結束 | 路徑 | AC |
+| :--- | :--- | :--- |
+| 最終結果評分 | `onResult` → `finish` → `setStatus("idle")`（`hideInterim`）→ `setMessage(null)` → `setSttResult`（store 同步通知 → `renderResult`）→ `recordSttScored` | AC-62-03 (a) |
+| 最終結果清洗後為空 | 同上，`finish` 顯示 `heardNoWords` | AC-62-04 |
+| `end`，以即時文字評分或訊息 | `onEnd` → `finish`（§7.30.6） | AC-62-05 |
+| `error`、`nomatch` | `onError`／`onNomatch` → `finish` | AC-62-06 (c)～(e) |
+| 再按（手動停止） | `onMicClick` 聆聽中分支：`att.decided = true`、清計時器、`stt.stop()`、`setStatus("idle")`；**按下當下隱藏，不等 `end`**（DS-69：試作已如此，以 P 案例固定） | AC-62-06 (a) |
+| 換卡、切換模式 | `reset()` → `stopAll()` → `setStatus("idle")` | AC-62-06 (b) |
+| 按 TTS | `onTtsClick` → `cancelAttempt()` → `setStatus("idle")` | AC-62-06 (b) |
+| 離開單字卡頁 | `release()` → `reset()` | AC-62-06 (b) |
+| 音軌結束（拔除） | `onTrackEnded` → `cancelAttempt()` → `endWith`（「找不到麥克風裝置」） | AC-62-06 (f) |
+| 遲到的 `interim`、`result`、`end` | `live(id)` 不成立（`decided` 或 `gen` 已變）→ 忽略；`abort()` 後服務也不再回呼 | IT-7、E-171 |
+
+#### 7.30.5 樣式（`31-speech.css`，FE-99；IT-6、AC-62-09、AC-38-04；DS-70）
+
+```css
+.sp-live {
+  margin: 0;
+  padding: 6px 12px;
+  border-left: 3px solid var(--line);
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  transition: none;
+  animation: none;
+}
+.sp-live__label { margin-right: 4px; font-size: 0.9rem; }
+.sp-live__text { font-style: italic; }
+```
+
+| 要求 | 做法 |
+| :--- | :--- |
+| 隱藏 | 靠 `hidden` 屬性與 `00-base.css` 的全域 `[hidden]` 規則；`.sp-live` **不得**設定 `display` |
+| 斜體、次要文字色 | 值 `font-style: italic`；標籤與值都是 `--text-muted`（`#5b6472`，對白底約 6.0:1，符合 AC-38-04 的 4.5:1）；分數區「辨識文字」值為 `--text`（`#1f2937`），兩者不同 |
+| 無動畫 | `transition: none`、`animation: none`；一般與 `prefers-reduced-motion: reduce` 相同 |
+| 長文字 | `overflow-wrap: anywhere` + `min-width: 0`，60 字元無空白字串可換行、不截斷 |
+| 麥克風列座標不變 | `.sp-live` 在 `.sp-stt` 之後（直向 flex），出現只往下推；v0.16 的 `scrollbar-gutter: stable` 讓頁面變長時寬度不變（§7.29） |
+| 不改 | `.sp-stt`、`.sp-mic`、`.sp-meter`、`.sp-tts`、`.sp-msg`、`.sp-result` 規則 |
+
+#### 7.30.6 訊息判定與以即時文字評分（MS-1 (2b)／(4)、MS-2、IT-9、IT-10；V-STT-06、V-STT-14；DS-68）
+
+**`onEnd(info)` 回呼**：
+
+```
+if (!live(id)) return;
+mergeInfo(att, info, null);
+var t = att.info.lastInterimText;
+var res = t !== "" ? buildResult(t, tgt, similarity()) : null;
+var out = outcomeOf({ manual: false, hadText: false, info: att.info, confirmed: confirmedOf(att),
+                      atEnd: true, interimHasText: res !== null });
+finish(id, out, out.kind === "score" ? res : null);
+```
+
+以即時文字評分與最終結果評分走**同一個** `finish` 路徑（`setMessage(null)`、`setSttResult(res)`、`recordSttScored()` 各 1 次），所以分數區 DOM、`lastResult`、今日已學、打卡、掌握數與 STT 評分紀錄和「直接收到 `result(adress)`」完全相同（AC-62-05、V-STT-14）；`res.recognizedText` 是 `lastInterimText` 原樣（RT-1）。
+
+**V-STT-06 v0.21 新增列**（`outcomeOf` 判定表見 §7.26.5）
+
+| 序列（目標 `address`） | 第一個終結點 | 成立步驟 | 結果 |
+| :--- | :--- | :--- | :--- |
+| `interim(adr)` → `interim(adress)` → `end` | `end` | 2b | 以 `adress` 評分：86、黃燈 |
+| `interim(...)` → `end` | `end` | 4（`interimHasText` 為假） | `heardNoWords` |
+| `interim(adress)` → `result(address)` | `result` | 2 | 以 `address` 評分：100、綠燈 |
+| `interim(ad)` → `result("")`／`result("...")` | `result` | 4（`hadResult` 但 `hadText` 為假） | `heardNoWords`，不以即時文字補評分 |
+| `interim(adr)` → `no-speech` → `end`（有無 `audiostart`／`soundstart` 皆同） | `error` | 4（`lastInterimText` 非空，先於步驟 5） | `heardNoWords`（Q-107 A） |
+| `interim(adr)` → `nomatch` → `end` | `nomatch` | 4 | `heardNoWords` |
+| `interim(adr)` → `network` → `end` | `error` | 3 | 「語音辨識需要網路連線」 |
+| `interim(adr)` → 再按 → `end` | 再按 | 手動（`att.decided`，`end` 被忽略） | 無提示、不評分 |
+| `interim("")` → `end`（已確認開始收音） | `end` | 5（服務未回報，`lastInterimText` 為 `""`） | `noSpeech` |
+
+`error`、`nomatch` 之後的 `end` 因 `att.decided` 不再判定，所以 (2b) 不會在錯誤後套用（MS-2、IT-10）。MS-6：分流訊息、取消、手動停止都不呼叫 `recordSttScored`；(2b) 屬評分，依 LR-1 計入（AC-30-04 的「不計入」不包含 AC-62-05）。
+
+#### 7.30.7 不改清單與隱私
+
+`views/flashcards.js`（換卡、切換模式、離頁照舊呼叫 `reset`／`release`）、`state/store.js`、`services/mic.js`、`core/similarity.js`、`core/meter.js`、持久化與備份模組都不改。不新增網路請求、不使用 `MediaRecorder`；AC-08-13 說明與隱私權政策第 (5) 項文字不改（AC-62-10、AC-53-06）。`TIMING` 與時間常數不變（§7.26.1）；即時文字不改 `T_READY` 的語意，只是「已確認開始收音」的另一種來源。
+
+#### 7.30.8 實測方法（FE-101；AC-62-01～AC-62-10）
+
+腳本與替身放 scratchpad，不寫入 `tests/`。替身參照 `tests/e2e/lib/inits.mjs` `fakeStt` 複製一份，加 `emitInterim(...texts)`（產生 `results`，每段 `isFinal = false`）；`emitResult` 的 `isFinal = true` 照舊；另做「有 `onaudiostart`」與「沒有」兩種建構子。可唯讀 import `tests/e2e/lib/cdp.mjs`。
+
+| # | 項目 | 方法 | 合格 |
+| :--- | :--- | :--- | :--- |
+| T1 | 顯示（AC-62-01） | 聆聽中依序 `emitInterim("la")`、`("late")`、`("latency")`、`(" comply ", "with")`；`MutationObserver` 記錄 `.sp-live__text` 變化時間 | 每次 ≤ 100 ms；值逐字（含 `comply with`）；`.sp-live` 恰 1 個；按鈕「聆聽中」；`.sp-result`、`.sp-msg` 隱藏 |
+| T2 | 準備中（AC-62-02） | 兩種替身在準備中 `emitInterim("ad")`；之後等待 6000 ms 再 `emitAudioStart()` | ≤ 100 ms 內「聆聽中」且顯示 `ad`；不出現 `noResponse`；`audiostart` 後畫面不變 |
+| T3 | 隱藏（AC-62-03～AC-62-06） | 即時文字顯示中分別觸發最終結果、`result("")`、`end`、再按、換卡、切換模式、TTS、離頁、5 種 `error`、`nomatch`、音軌結束；以 rAF 每畫格取樣 | 每項 ≤ 100 ms 隱藏；任何取樣畫格中 `.sp-live` 與 `.sp-result` 不同時可見；遲到事件不重新顯示 |
+| T4 | 以即時文字評分（AC-62-05） | `adr`、`adress` 後 `emitEnd()`；另一輪直接 `emitResult("adress")` 對照 | `end` 到分數區繪製 ≤ 100 ms；兩輪 `.sp-result` 的 `outerHTML` 相同；今日已學 +1 相同 |
+| T5 | 版面（AC-62-09） | 375×667（`mobile: true`）、768×1024、1366×768；`comply with`、20 個單字的長句、60 字元無空白字串；一般與 `prefers-reduced-motion: reduce`；量出現、更新、隱藏前後 | `.sp-tts__btn`、`.sp-mic`、`.sp-meter` 座標差 0；`scrollWidth ≤ clientWidth`；值 `font-style: italic`；標籤與值 `color` 為 `rgb(91, 100, 114)`，與 `.sp-compare__value` 不同；`animation-name: none`、`transition-duration: 0s`；「翻面」「上一張」「下一張」可捲到完整顯示、不被導覽列遮住 |
+| T6 | 無障礙（AC-62-07） | 自 `.sp-live` 走到 `document.documentElement` | `.sp-live` `aria-live="off"`；所有祖先無 `aria-live` polite／assertive、無 `role` status／alert／log。NVDA 播報交 QA 人工 |
+| T7 | 安全（AC-62-08） | `emitInterim("<img src=x onerror=alert(1)>")`、`("&lt;b&gt;")`；記錄 `dialog` 事件與 Network | 字面顯示；`.sp-live` 子元素 2 個、`.sp-live__text` 子元素 0 個；無對話框、無請求 |
+| T8 | 不持久化（AC-62-10） | 分別以 AC-62-03 (a)、AC-62-05、AC-62-06 (a) 結束；搜尋 localStorage、`indexedDB.databases()`、`caches.keys()` 內容、匯出備份；記錄 Network；重新載入 | 即時文字字串命中 0；因即時文字的請求 0；鍵 2 個、`schemaVersion` 3；重新載入為待機、`.sp-live` 隱藏 |
+| T9 | 回歸 | AC-58-03 `audiostart` 時間、AC-58-13 準備中樣式、AC-60-06 分數出現前後座標 | 與 FE-97 產物的判定相同 |
+
+本機沒有 Chrome 與 Edge 時，回報實測未完成並交主控，不得視為通過。真人語音（AC-62-12）與 NVDA 播報（AC-62-07 後半）不屬 PG 實測，交 QA 與人類（§10.14 Q17、Q18）。
+
+### 7.31 商標說明拿掉「Part 5」（v0.17；PRD R-31、Q-108 A、AC-10-02、AC-54-01、US-56；契約 v0.21 L-8 LT-2、V-LGL-02、DS-71）
+
+**LT-2 現行文字**：「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」（v0.17～v0.20 的「題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容」廢止）。本文件 §7.13、§7.19.6 樹狀圖、§7.21.4、§7.23.1、§7.23.4、§10.9、§13.9 提到的「LT-2」一律讀作現行文字。
+
+#### 7.31.1 修改點（FE-100）
+
+| 檔案:行 | 常數 | 修改 |
+| :--- | :--- | :--- |
+| `core/site-content.js:84` | `SITE_PAGES` 關於我「主要功能」的模擬測驗項 | `模擬測驗：` + LT-2 + `；作答後顯示解析。`（AC-54-01） |
+| `core/site-content.js:158` | `SITE_HOME_SEO.description` | 「…模擬測驗；」+ LT-2 +「。」 |
+| `core/site-content.js:169` | `SITE_HOME_JSON_LD` 的 `description` | 與 `SITE_HOME_SEO.description` 逐字相同（SE-5） |
+| `core/site-content.js:175` | `SITE_NOSCRIPT` 的說明 | 同上（AC-56-06） |
+| `views/part5.js:77` | `TEXT.headingNote` | LT-2（AC-10-02） |
+
+做法一律是把「）Part 5，」改成「），」，其他字元不動。`og:description`、`about.html`、首頁 `<noscript>` 由建置自上述常數產生（SC-1、AC-57-03），`tools/` 不改。V-SEO-06（「TOEIC」「多益」各 ≤ 1 次、TOEIC 帶 ®、與非官方聲明同句）在新文字下仍成立。
+
+#### 7.31.2 不改
+
+| 項目 | 理由 |
+| :--- | :--- |
+| LT-3「原創內容（例句、解析、Part 5 題目、長難句、句型）…」：`LEGAL_STATEMENTS.originalContent`、`license-header.txt`、`sources-page.js`、`src/data/NOTICE.md` | Q-108 A 只限 LT-2；V-LGL-02 明定 LT-3 不屬本條 |
+| `src/data/`（SD 已查）：只有 `part5.js` 第 1 行註解「Part 5 題庫」與 `NOTICE.md` 的 LT-3 同義句，**不含**「TOEIC®（多益）Part 5」 | 不需 CT 任務（DS-71） |
+| 識別字 `part5`、`Part5*`、CSS 檔名、`store.js`／`constants.js` 的「Part 5」註解 | 不是商標說明，不含「TOEIC®（多益）Part 5」（R-15 識別字不改） |
+
+#### 7.31.3 檢查
+
+| 層 | 任務 | 判定 |
+| :--- | :--- | :--- |
+| 單元 | FE-100 | `legal-static.test.js`：交付 HTML 與 3 個靜態頁全文「TOEIC®（多益）Part 5」0 次、LT-2 ≥ 1 次、LT-3 ≥ 1 次；`naming.test.js`：`views/*.js` 字串常值含「Part 5」者只在 `sources-page.js`，`part5.js` 另有逐字等於 LT-2 的常值 |
+| 交付 | FE-101 | `dist/` 下 5 個 HTML 與 `sw.js` 全文 0 次（V-LGL-02 v0.21：程式註解也算，SD 已查 `src/app/` 非測試原始碼只有上表 5 處）；首頁 4 處說明逐字相同 |
+| 375px | FE-101 | 依 §7.23.4 方法：`.p5-heading-note` `textContent.trim()` = LT-2、不裁切、`scrollWidth ≤ clientWidth`；拿掉「 Part 5」後估計約 320～335 px，可能變為 1 行，1 行或 2 行都合格 |
 
 ---
 
@@ -4550,6 +4830,52 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 
 **給 QA 的已知設計行為**：(6) 第 1 次按麥克風時 `getUserMedia` 晚 1 個畫格才呼叫；延後期間取消不會詢問權限。(7) 傳統捲軸環境右側恆保留 15 px，對話框背景在不可捲動頁面右側不變暗。(8) `html[data-ad-env]` 屬性仍存在，但不再有任何樣式依賴它。
 
+### 10.14 v0.17 測試範圍（PRD v0.21；契約 V-STT-06、V-STT-09～V-STT-17、V-LGL-02、DS-64～DS-71）
+
+驗證分 3 層（PRD v0.21 共通規則 2）：(1) 單元測試以真正的 `stt.create(假全域)` 與假時鐘驗證事件順序與畫面；(2) QA 以 V-STT-STUB（可分別回傳暫時結果與最終結果）在瀏覽器驗證；(3) 真人語音只能人工測（AC-62-12）。
+
+**單元測試（PG，`npm test`）**
+
+| 檔案 | 任務 | 案例 |
+| :--- | :--- | :--- |
+| `__tests__/speech.test.js`（服務部分，新增 S1～S10） | FE-98 | S1 未提供 `onInterim` → `interimResults === false`，`isFinal: false` 的事件仍 `onResult` 1 次（V-STT-17、AC-62-03 (b)）；S2 提供 → `true`，`lang`、`maxAlternatives`、`continuous` 不變；S3 `la`、`late`、`latency` → `onInterim` 3 次、值逐字、`info.lastInterimText` 同值；S4 同一事件 2 段（`" comply "`、`"with"`）→ `"comply with"`；S5 `""`、`"   "` → `onInterim` 0 次、`lastInterimText` 維持上一段（IT-3、FB-80）；S6 `adr`、`adress`、`end` → `onResult` 0 次、`onEnd` 1 次、`hadResult: false`、`lastInterimText: "adress"`（V-STT-14 服務部分、IT-4）；S7 `interim(ad)` 後最終 `address` → `onResult("address")`、`hadResult: true`；S8 `onEnd` info 恰 9 欄且順序固定，下一次 `start()` 全部重設；S9 `stop()` 後 `end` → `onResult` 0 次、`manual: true`；`abort()` 後替身觸發 `onresult` → 0 回呼；S10 `hasFinalOf`、`allTextOf` 邊界（無 `results`、`resultIndex` 超出、未提供 `isFinal`、拋例外） |
+| `__tests__/speech-flow.test.js`（新增 P1～P18） | FE-99 | 以 `makeEnv({ clock, sttGlobal: fakeSttGlobal(...) })` 與 `interimEv`／`finalEv`：P1 AC-62-01 聆聽中 3 段即時文字，每次同步顯示、`.sp-live` 恰 1 個、標籤與值逐字、`lang="en"`、按鈕「聆聽中」、`.sp-result`／`.sp-msg` 隱藏；P2 空白暫時結果不改畫面（保留上一段）；P3 AC-62-02 `awaitingAudioStart` 收到 `ad` → 同步聆聽中並顯示、`clock.pending()` 無 `ready`／`buffer`；推進 `T_READY` 無 `noResponse`；之後 `audiostart` 不變；P4 同上 `fallbackWait`（無 `fallback` 計時器）；P5 AC-62-03 (a) `adress` 顯示中收到最終 `address` → 100 綠燈、同一同步工作內 `live.hidden === true` 且 `result.hidden === false`；P6 AC-62-03 (b) 只有最終 `adress` → 86 黃燈、全程 `live.hidden`；P7 AC-62-04 `result("")`、`result("...")` → `heardNoWords`、隱藏、`recordSttScored` 0；P8 AC-62-05 `adr`、`adress`、`end` → 86 黃燈、辨識文字 `adress`、`recordSttScored` 1；分數區 DOM 文字與 `setSttResult` 參數和直接最終 `adress` 的對照組相同；P9 `...` 後 `end` → `heardNoWords`；P10 AC-62-06 (a) 再按 → 處理器內同步隱藏（不推進時間、不觸發 `end`）、之後 `interim`／`result`／`end` 不顯示、不評分（DS-69）；P11 (b) 換卡（`reset`）、切換模式、TTS、`release` 各自隱藏；P12 (c) `network`、`not-allowed`、`audio-capture`、其他代碼 → 既有錯誤訊息、隱藏；P13 (d) `no-speech`（有、無 `audiostart`）→ `heardNoWords`（Q-107 A）；P14 (e) `nomatch` → `heardNoWords`；P15 (f) 音軌結束 →「找不到麥克風裝置」、隱藏；P16 AC-62-08 HTML 字元以字面顯示、`.sp-live` 子元素 2 個；P17 AC-62-10 經過即時文字後 `setItem` 次數只有評分路徑的既有寫入、序列化 `AppState` 不含即時文字字串、新嘗試開始時 `.sp-live` 隱藏；P18 V-STT-16 `.sp-live` `aria-live="off"`、自它往上到 container 的祖先無即時區域屬性；V-STT-15 列內固定文字只有 `labelInterim`。另以 `outcomeOf` 純函式逐列驗證 §7.30.6 的 9 列（V-STT-06），既有判定表各列不變 |
+| `__tests__/legal-static.test.js` | FE-100 | `LT_2` 新文字；`OLD_TEXTS` 加「TOEIC®（多益）Part 5」；交付 HTML 與 3 個靜態頁全文 0 次、LT-2 ≥ 1、LT-3 ≥ 1（§7.31.3） |
+| `__tests__/naming.test.js` | FE-100 | `:6`、`:18` 改新文字；`:138` 改為「含『Part 5』的字串常值只在 `sources-page.js`；`part5.js` 另有逐字等於 LT-2 的常值」 |
+
+**既有單元測試要改的地方（由 PG 在任務內修改）**
+
+| 位置 | 舊假設 | 新期望 | 任務 |
+| :--- | :--- | :--- | :--- |
+| `speech.test.js:148`、`:157` | `interimResults === false` | 未提供 `onInterim` → `false`（標題同步改寫）；提供 → `true` 另列 S2 | FE-98 |
+| `speech.test.js:164` | `onEnd` JSON 8 欄 | 9 欄，最後 `"lastInterimText":""` | FE-98 |
+| `speech.test.js:170`、`:196`～`:199` | `INFO_KEYS` 8 個、初始值 8 欄 | 9 個，加 `lastInterimText: ""` | FE-98 |
+| `speech-flow.test.js:599` | `STT_FLOW_TEXTS` 鍵 7 個 | 8 個，加 `labelInterim`；`TEXT.labelInterim` 逐字相同 | FE-99 |
+| `legal-static.test.js:28`、`naming.test.js:18` | LT-2 含「Part 5」 | 新文字 | FE-100 |
+| `naming.test.js:138`～`:151` | `part5.js` 唯一含「Part 5」的常值 = LT-2 | 見上表 | FE-100 |
+| `speech.test.js` 面板案例、`speech-flow.test.js` 既有案例 | 替身的 `result` 事件沒有 `isFinal` | **不改**：未提供 `isFinal` 視為最終（§7.30.1），面板一律提供 `onInterim` 後行為不變 | — |
+
+中間狀態：**`speech-flow.test.js:599` 在契約 v0.21 核准後、FE-99 完成前一律失敗**（它讀契約檔 `STT_FLOW_TEXTS`，鍵已變 8 個），FE-98、FE-100 的 doneWhen 允許此 1 個已知失敗，FE-99 完成後必須全過。FE-98 完成、FE-99 未完成時，試作面板仍以 `liveLabel` 與 `onInterim("")` 隱藏的方式運作；服務不再回報空白、不再補發，面板舊程式只會少收到空白回呼與補發的 `onResult`，其他既有測試應照常通過。
+
+**給 QA 的項目（`tests/`、`docs/04-qa/` 不派給 PG）**
+
+| # | 項目 | 位置 | 說明 |
+| :--- | :--- | :--- | :--- |
+| Q13 | V-STT-STUB 加暫時結果 | `tests/e2e/lib/inits.mjs:87`～`:105` `fakeStt` | 加 `emitInterim(...texts)`（`isFinal = false`）；`emitResult` 維持 `isFinal = true`；記錄 `interimResults` 實際值 |
+| Q14 | `interimResults` 斷言 | `tests/e2e/e2e-speech.mjs:102`～`:106` | v1.3.2 起面板一律提供 `onInterim`，`interimResults` 為 `true` |
+| Q15 | LT-2 舊文字 | `tests/static/legal-check.mjs:22`、`tests/static/site-check.mjs:27`、`:129`、`:144`、`tests/e2e/e2e-legal.mjs:13`、`tests/e2e/e2e-lock.mjs:29` | 改為新文字；新增交付物全文「TOEIC®（多益）Part 5」0 次（PRD 6.6 QA 列）；LT-3 的「Part 5 題目」不變 |
+| Q16 | 新 TC 與重跑 | AC-62-01～AC-62-11；修改的 AC-08-10、AC-30-04、AC-58-07、AC-59-01、AC-59-05、AC-10-02、AC-54-01、AC-42-02；重跑 AC-56-03、AC-56-05～AC-56-07、AC-57-03 | 依 §7.30.8、§7.31.3；`tests/tools/tc-desc.json`、`docs/04-qa/test-plan.md` 的期望文字改為 v0.21 |
+| Q17 | **人工：AC-62-12 真人語音** | V-MIC | 電腦版 Chrome、Edge 最新穩定版各 1 輪，Chrome 另於正式網站 1 輪（部署後）；(a) 等「聆聽中」後念當前單字 10 次、(b) 念約 10 個單字的句子 3 次；逐次記錄是否出現即時文字列、最後一段即時文字、結果（分數與辨識文字或訊息）、瀏覽器版本；(a) ≥ 9 次出現分數，未達交人類判斷；(b) 未更新交人類判斷，不直接判缺陷；結果交人類判定是否解決「偵測不到」 |
+| Q18 | **人工：AC-62-07 螢幕報讀器** | Windows NVDA 最新穩定版 + Chrome | 即時文字更新時不播報；評分後由分數區播報、訊息由訊息區播報（同 v0.20）；DOM 屬性部分可自動化（T6） |
+| Q19 | 版本 1.3.2 | `e2e-version.mjs:186`、`tests/tools/qa-review-r*.mjs` 人工 TC 文字、新一輪 `boundary` 檢查 | 1.3.1 → 1.3.2；越界檢查列 MC-10 為授權例外；試作分支的 `dist/` 不作為受測物，以 FE-101 產物為準 |
+| Q20 | 既有人工項目重跑 | AC-58-14、AC-59-08 | 即時文字開啟後重跑，與 AC-62-12 同一輪記錄 |
+
+**主控檢查**：M-1 `git diff package.json` 只有 `version` 1 行（1.3.1 → 1.3.2）；M-2 `dist/site` 恰 13 檔、預先快取 7 項、`static.yml` diff 0；M-3 PG 本機沒有 Chrome／Edge 時代為執行 §7.30.8；M-4 localStorage 鍵名 2 個、`schemaVersion` 3、匯出備份頂層 5 欄不變；M-5 `views/flashcards.js`、`state/store.js`、`services/mic.js`、`src/data/` diff 0；M-6 提交前確認 `dist/` 是 FE-101 的建置產物，不是試作分支修改的版本。
+
+**部署後**：Actions 成功；正式網址版本行「版本 1.3.2（建置 xxxxxxx）」；`about.html` 與首頁原始碼 description 不含「Part 5」；AC-62-12 的正式網站輪次在此時執行。
+
+**給 QA 的已知設計行為**：(9) 以即時文字評分只在 `end` 且無錯誤、無 `nomatch`、非手動時發生；之前出現過的即時文字不會在錯誤或 `nomatch` 後補評分。(10) 空白暫時結果不回報，畫面保留上一段（FB-80）。(11) 準備中收到即時文字時，即時文字列與「聆聽中」同時出現，收音條從此時開始點亮。(12) 即時文字列不是即時區域，報讀器不播報。(13) 自 `resultIndex` 起沒有結果的 `result` 事件視為即時文字（SD-FB-98）。
+
 ---
 
 ## 11. 技術風險與對策
@@ -4687,6 +5013,15 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | T-129 | （v0.16）日後有人用 `100vw`，在保留捲軸寬度下超出 15 px 產生水平捲軸 | AC-20-01、AC-40-02 | `scrollbar-gutter.test.js` 禁止樣式檔出現 `100vw` |
 | T-130 | （v0.16）`tests/` 的 e2e 假設按下後立即呼叫 `getUserMedia`、或以 `scrollbarGutter` 判斷廣告環境，QA 未更新就跑 | 預期失敗被誤判為缺陷 | §10.13 Q9、Q10 列出；QA 先更新再跑；PG 不得代改 |
 | T-131 | （v0.16）延後 1 個畫格讓 `getUserMedia` 晚開始，與 AC-58-03 的時間要求混淆 | QA 誤判 | AC-58-03 自 `stt.start()` 起算，不受影響（§7.28.3 時間預算） |
+| T-132 | （v0.17）PG 直接沿用試作，保留 `onend` 補發 `onResult` | 錯誤或 `nomatch` 後的 `end` 補評分，違反 AC-62-06 (c)～(e)；服務單獨測試不符 V-STT-14 | FE-98 description 與 doneWhen 明列刪除；S6 案例檢查 `onResult` 0 次 |
+| T-133 | （v0.17）`interimResults = true` 後，某些引擎只給暫時結果就結束，或最終結果文字與即時文字不同 | 分數與使用者看到的即時文字不同（E-169） | 有最終結果一律用最終結果（IT-9）；只有即時文字才依 (2b) 評分；成效以 AC-62-12 真人紀錄交人類判定（PRD 共通規則 3） |
+| T-134 | （v0.17）即時文字列隱藏與分數區出現分在兩次繪製，或順序相反 | 兩者同時可見（AC-62-03 (a)） | 隱藏與評分都在同一個同步工作；`setStatus` 先隱藏再通知 store；store `notify` 為同步；P5 與 T3 逐畫格檢查 |
+| T-135 | （v0.17）即時文字頻繁更新造成重排或報讀器噪音 | 效能、無障礙 | 只改 1 個 `textContent`，不重建 DOM；`aria-live="off"`、不放在即時區域內（§7.30.3） |
+| T-136 | （v0.17）長即時文字把面板撐高，頁面變長觸發捲軸 | 座標位移（AC-62-09） | 即時文字列在麥克風列下方，只往下推；`scrollbar-gutter: stable`（§7.29）維持寬度；T5 量測 |
+| T-137 | （v0.17）手動停止後引擎仍送暫時結果，把即時文字列重新顯示 | 違反 IT-7 | `att.decided` 使 `live(id)` 不成立；`showInterim` 另檢查 `stage === "listening"`；P10 驗證 |
+| T-138 | （v0.17）`TEXT` 鍵沿用試作 `liveLabel`，V-STT-09 以契約鍵比對時找不到 | 測試失敗或漏驗 | 改名 `labelInterim`（SD-FB-99）；`speech-flow.test.js:599` 鍵集合同步 |
+| T-139 | （v0.17）試作分支修改過的 `dist/` 被提交為交付物 | 交付內容與原始碼不一致、版本行仍 1.3.1 | FE-101 由建置覆蓋；主控 M-6；QA Q19 |
+| T-140 | （v0.17）`tests/` 仍用舊 LT-2 與 `interimResults === false`，QA 未更新就跑 | 預期失敗被誤判為缺陷 | §10.14 Q13～Q15 列出檔案與行號；QA 先更新再跑；PG 不得代改 |
 
 ---
 
@@ -5113,6 +5448,39 @@ FE-19 與 FE-18 的先後（v0.3）：**FE-19 在前**。理由：FE-18 的 done
 本次由主控或人類 commit，SD 與 PG 不 commit。
 
 任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 97（FE-01～FE-97），共 123 個；主控手動項目 MC-01～MC-09（本版不新增）。
+
+### 12.16 v0.17 增量任務與執行批次（PRD v0.21、契約 v0.21）
+
+既有 123 個任務與 MC-01～MC-09 全部 `done`，內容與 status 不變。不需 CT 任務（DS-71；§7.31.2 已查 `src/data/` 不含 LT-2）。
+
+| ID | 標題 | 批次 | dependsOn | paths | AC |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| FE-98 | 語音辨識服務：`onInterim`、9 欄 `SttEndInfo`、刪除 `end` 補發 | v0.17-1 | FE-97（已 done） | `services/stt.js`、`__tests__/speech.test.js`（服務部分） | AC-62-01、AC-62-03、AC-62-05、AC-62-08、AC-62-10、AC-58-07、AC-08-01 |
+| FE-100 | 商標說明拿掉「Part 5」 | v0.17-1 | FE-97（已 done） | `core/site-content.js`、`views/part5.js`、`__tests__/legal-static.test.js`、`__tests__/naming.test.js` | AC-10-02、AC-54-01、AC-56-03、AC-56-05～AC-56-07、AC-57-03、AC-23-08 |
+| FE-99 | 語音面板：即時文字列、準備中轉聆聽中、(2b) 評分、Q-107 判定 | v0.17-2 | FE-98 | `views/speech-panel.js`、`styles/31-speech.css`、`__tests__/speech-flow.test.js`、`__tests__/_speech-env.js`、`__tests__/speech.test.js`（面板部分） | AC-62-01～AC-62-12、AC-08-10、AC-30-04、AC-58-07、AC-59-01、AC-59-05 |
+| FE-101 | 交付關卡：全測試、實測、重新建置 `dist/`（1.3.2） | v0.17-3 | FE-99、FE-100；manualPrereqs MC-10 | `dist/english-master-track.html`、`dist/site/` 下 13 檔 | AC-42-02 與上列實測項目 |
+
+（FE 任務的 paths 省略前綴 `src/app/`，`dist/` 除外。）
+
+| 順序 | 項目 | 執行者 | 前置 | 說明 |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | FE-98、FE-100（可平行） | pg-frontend | 無 | paths 不重疊；兩者都允許 `speech-flow.test.js:599` 1 個已知失敗（§10.14） |
+| 2 | FE-99 | pg-frontend | FE-98 | `speech.test.js` 接在 FE-98 之後；完成後 `npm test` 必須全過 |
+| 3 | MC-10：`package.json` 改為 1.3.2 | 主控 | FE-99、FE-100 | Q-105 A 一次性授權；只改 `version` 1 行 |
+| 4 | FE-101 | pg-frontend | FE-99、FE-100、MC-10 | 必須最後執行；不改 `src/`，實測不合格標 `blocked` |
+| 5 | QA | qa | FE-101 | §10.14 Q13～Q16、Q19；先更新 `tests/` 再跑 |
+| 6 | 人工 | QA／人類 | FE-101；正式網站輪次在部署後 | **AC-62-12**（Q17）、**AC-62-07 NVDA**（Q18）、AC-58-14、AC-59-08 重跑（Q20） |
+| 7 | 部署與部署後驗證 | 主控 | QA 通過 | §10.14 部署後；`static.yml` 不改；提交前確認 `dist/` 為 FE-101 產物（M-6） |
+
+**PG 不得越界的目錄**
+
+| 代理 | 可寫 | 不得寫入 |
+| :--- | :--- | :--- |
+| pg-frontend（FE-98～FE-101） | 只有上表 paths | `src/data/`、`tests/`、`docs/`、`tools/`、`package.json`、`package-lock.json`、`.github/`、`sources/`、`src/app/assets/`、`__tests__/_samples/`、`views/flashcards.js`、`state/store.js`、`services/mic.js`、`core/similarity.js`、`license-header.txt`、`views/sources-page.js`；只有 FE-101 可寫 `dist/` |
+
+本次由主控或人類 commit，SD 與 PG 不 commit。
+
+任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 101（FE-01～FE-101），共 127 個；主控手動項目 MC-01～MC-10。
 
 ---
 
@@ -5900,6 +6268,47 @@ PRD 沒有新增或修改 AC；本版只為 3 張 BUG 的 AC 加上修正任務�
 
 **388 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個。**
 
+### 13.14 v0.17 追加對照（PRD v0.21：427 個 AC，本版應驗收 400 個）
+
+**新增 12 條**
+
+| AC | 任務 | 備註 |
+| :--- | :--- | :--- |
+| AC-62-01 | FE-98、FE-99、FE-101 | 取出與空白不回報（服務）、顯示（面板）、≤ 100 ms 實測 |
+| AC-62-02 | FE-99、FE-101 | 準備中收到即時文字轉聆聽中、清計時器 |
+| AC-62-03 | FE-98、FE-99 | (a) 最終結果優先、同一次繪製隱藏；(b) 未提供 `onInterim` 時 v0.20 行為 |
+| AC-62-04 | FE-99 | 最終結果清洗後為空 → `heardNoWords`、不補評分 |
+| AC-62-05 | FE-98、FE-99、FE-101 | 服務只回報 `lastInterimText`；面板 (2b) 評分；`end` 到繪製 ≤ 100 ms |
+| AC-62-06 | FE-99、FE-101 | (a)～(f) 隱藏與訊息；Q-107 A |
+| AC-62-07 | FE-99、FE-101 | `aria-live="off"`、祖先無即時區域；NVDA 播報為**人工**（QA Q18） |
+| AC-62-08 | FE-98、FE-99 | `textContent`、子元素數不變 |
+| AC-62-09 | FE-99、FE-101 | 樣式與 3 種寬度量測 |
+| AC-62-10 | FE-98、FE-99、FE-101 | 不進 `AppState`、不持久化、無請求 |
+| AC-62-11 | FE-99 | 固定文字只有標籤 |
+| AC-62-12 | FE-99（實作）、FE-101（交人工） | **人工**：QA／人類（Q17） |
+
+**修改 8 條**
+
+| AC | 任務 |
+| :--- | :--- |
+| AC-08-10、AC-30-04、AC-59-01、AC-59-05 | FE-99 |
+| AC-58-07 | FE-98、FE-99 |
+| AC-42-02 | FE-101（前置 MC-10） |
+| AC-10-02、AC-54-01 | FE-100、FE-101 |
+
+**US-56 meta description 改寫（AC 條文未改，重跑）**：AC-56-03、AC-56-05、AC-56-06、AC-56-07、AC-57-03（FE-100、FE-101）。**回歸**：AC-20-01、AC-40-02（LT-2 375px，FE-101）；AC-23-08（FE-100）；AC-58-03、AC-58-13、AC-60-06（FE-101 T9）；AC-19-01、AC-21-03、AC-36-07（FE-101）。
+
+| E | 任務 | 備註 |
+| :--- | :--- | :--- |
+| E-167、E-169 | FE-98、FE-99 | 引擎不回報即時文字、最終結果不同 |
+| E-168 | FE-99 | 準備中收到即時文字 |
+| E-170 | FE-99 | 只有即時文字就結束 |
+| E-171、E-172 | FE-99 | 中斷、錯誤、`nomatch`、拔除 |
+| E-173 | FE-99、FE-101 | 長文字、HTML 字元 |
+| E-174 | FE-99（屬性）、QA 人工 | 報讀器不播報 |
+
+其餘 380 個應驗收 AC 的對照與 §13～§13.13 相同（400 − 新增 12 − 修改 8）；**400 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。AC-58-14、AC-59-08、AC-62-12 需要真人語音，不由 PG 完成，已列給 QA 與人類（§10.14 Q17、Q20）。
+
 ---
 
 ## 14. 回應契約 §9 指名 SD 的回饋
@@ -5984,6 +6393,15 @@ PRD 沒有新增或修改 AC；本版只為 3 張 BUG 的 AC 加上修正任務�
 | DS-61（v0.20） | `resultModel` 依 `STT_RESULT_ROWS` 產生列；文字定稿表已更新；準備中樣式不用紅色與閃爍、不改尺寸；`data-status` 用 `SttStatus` 字面值 | §7.26.7、§7.26.8 |
 | DS-62（v0.20） | `html` 的 `scroll-padding-bottom`（≤ 640px）一次涵蓋 4 個功能區；`75-site-pages.css` 刪除重複、首次畫面只留差額；CSS 不合格才啟用 `focusin` 後備 | §7.27 |
 | DS-63（v0.20） | 同意：準備中與事件紀錄都不需跨工作階段保存，不需回報人類；不建 CT 任務；`package.json` 列 MC-09；既有測試要改的位置已列出 | §10.12、§12.14 |
+| DS-64（v0.21） | §7.6 STT 列改為「`interimResults` = 是否提供 `onInterim`」（FB-82）；§4.13、§4.15 `start(opts)` 加 `onInterim`；§7.26.2 事件表、§7.26.4 事件處理表加即時文字與 `onEnd` 列；`SttEndInfo` 9 欄；`speech.test.js:148`～`:157` 的斷言改寫列入 FE-98 | §4.13、§4.15、§7.6、§7.26、§10.14 |
+| DS-65（v0.21） | 同意：刪除試作 `onend` 補發段落；以即時文字評分移到面板 `onEnd`，沿用同一個評分函式與 `finish` 路徑 | §7.30.1、§7.30.6、FE-98、FE-99 |
+| DS-66（v0.21） | `snap()` 第 9 欄 `lastInterimText`；先設值再呼叫 `onInterim`；面板 `blankInfo`、`mergeInfo` 同步（非空字串取最新） | §7.30.1、§7.30.2 |
+| DS-67（v0.21） | 取出為空直接 `return`；面板 `showInterim` 也忽略空白，雙重保護 | §7.30.1、§7.30.4 |
+| DS-68（v0.21） | `outcomeOf` 加步驟 2b 與步驟 4 的 `lastInterimText` 條件；輸入加 `atEnd`、`interimHasText`；V-STT-06 新增 9 列以純函式驗證 | §7.26.5、§7.30.6 |
+| DS-69（v0.21） | 已確認：聆聽中再按的處理器內同步 `setStatus("idle")`，即時文字列在按下當下隱藏，不等 `end`；改為「任何非聆聽中狀態都隱藏」並以 P10 固定 | §7.30.4 |
+| DS-70（v0.21） | 已確認 `.sp-panel` 以上祖先都不是即時區域（§7.30.3 列出祖先鏈）；`TEXT` 鍵改名 `labelInterim`（SD-FB-99）；樣式定稿 §7.30.5（`--text-muted`、斜體、`transition`／`animation: none`） | §7.30.3、§7.30.5 |
+| DS-71（v0.21） | 同意：即時文字不需跨工作階段保存，不需回報人類；不建 CT 任務；`package.json` 列 MC-10；R-31 列 FE-100，SD 已查 `src/app/` 非測試原始碼只有 5 處、`src/data/` 0 處；試作 `dist/` 由 FE-101 覆蓋 | §5.12、§7.31、§12.16 |
+| FB-80～FB-82（v0.21，知會） | FB-80 依 IT-3 保留上一段（服務不回報、面板也忽略）；FB-81 依 MS-1 (4) 與開始收音事件無關，列入 §7.30.6 表；FB-82 §7.6 已改 | §7.6、§7.30 |
 | FB-76～FB-79（v0.20，知會） | FB-76 依 MS-1 以「是否已確認開始收音」判定（`outcomeOf` 第 5、6 列）；FB-77 `transcriptOf` 不改；FB-78 只在進入準備中時清除；FB-79 依核准紀錄按 PM 建議設計，PRD 文字同步屬 PM（SD-FB-89） | §7.26.5、§7.26.7 |
 | FB-70～FB-75（v0.19，知會） | FB-70 依 SP-6 實作；FB-71 列 D-11；FB-72 依 AD-10；FB-73 列第二階段核對與 T-106；FB-74 建置比對 V-AD-03；FB-75 文件不列舊地址 | §7.25、§10.11 |
 | FB-65～FB-69（v0.18，知會） | 依契約定案實作：FB-65 `inSummary` = `phase = "summary"` 且 y ≥ 1；FB-66 依 LV-6（§7.24.2 表）；FB-67 `canAnswer` 不看開關；FB-68 依 WR-2，列入給 QA 的已知設計行為；FB-69 使用 `filterHint` 定稿文字 | §4.11、§7.24、§10.10 |
@@ -6097,6 +6515,13 @@ PRD 沒有新增或修改 AC；本版只為 3 張 BUG 的 AC 加上修正任務�
 | SD-FB-95 | （v0.16）BUG-006 原判「第二階段才發生」，修正後與廣告環境無關；`services/ad.js:8` 檔頭註解仍寫「SD-FB-80 的 scrollbar-gutter 依此生效」，本版依指示不改 `ad.js` | 主控 | 待辦（知會） | 日後改 `ad.js` 時順手更新註解；以本文件為準 |
 | SD-FB-96 | （v0.16）延後取得只在「尚未持有音軌」時發生；持有音軌時照舊同步，以免第 2 次以後的按下多等 1 個畫格 | QA | 待辦（知會） | 不需改契約 |
 | SD-FB-97 | （v0.16）e2e 中依賴「按下後同步呼叫 `getUserMedia`」或以 `scrollbarGutter` 判斷廣告環境的斷言需由 QA 更新（§10.13 Q9、Q10） | QA | 待辦 | QA 先更新再跑；PG 不代改 |
+| SD-FB-98 | （v0.17）IT-2 未規定兩種退化事件：`results` 不存在或不是類陣列 → SD 定為最終結果（與 v0.20 相同，畫面為 `heardNoWords`）；自 `resultIndex` 起沒有任何結果 → 依「全部為 false」字面視為即時文字（取出多半為空、不回報） | SA、QA | 待辦（知會） | 不需改契約；若 SA 認為應反過來，只改 `hasFinalOf` 1 處 |
+| SD-FB-99 | （v0.17）`TEXT` 鍵由試作 `liveLabel` 改名為契約鍵 `labelInterim`，讓 V-STT-09 以契約鍵逐一比對（契約允許自訂鍵名，此為 SD 選擇） | QA | 待辦（知會） | 不需改契約 |
+| SD-FB-100 | （v0.17）`speech-flow.test.js:599` 讀契約檔 `STT_FLOW_TEXTS`，契約 v0.21 核准後即失敗，到 FE-99 完成才恢復；FE-98、FE-100 的 doneWhen 允許此 1 個已知失敗 | 主控 | 待辦（知會） | 主控檢查 FE-98、FE-100 回報時，只接受這 1 個失敗 |
+| SD-FB-101 | （v0.17）PRD AC-30-04 列「顯示過即時文字，但以手動停止、換卡、錯誤或 `nomatch` 結束」不計，未列「最終結果清洗後為空」（AC-62-04）；依 LR-1 與 MS-6，該情況顯示 `heardNoWords`、不評分，同樣不計 | PM、QA | 待辦（知會） | 不需改 PRD；QA 以 LR-1 判定 |
+| SD-FB-102 | （v0.17）AC-62-07 的 NVDA 播報、AC-62-12 真人語音無法由 PG 或替身驗證；DOM 屬性部分已自動化（P18、T6） | QA、人類 | 待辦 | §10.14 Q17、Q18 |
+| SD-FB-103 | （v0.17）`tests/` 仍有舊 LT-2（6 個檔案）與 `interimResults` 斷言（`e2e-speech.mjs:102`），需由 QA 更新 | QA | 待辦 | §10.14 Q13～Q15；PG 不代改 |
+| SD-FB-104 | （v0.17）分支 `feat/stt-interim-text` 的 `dist/english-master-track.html` 是試作產物，版本行仍為 1.3.1；不得提交為交付物 | 主控 | 待辦 | FE-101 由建置覆蓋；主控提交前檢查 M-6 |
 
 ---
 
@@ -6122,7 +6547,10 @@ PRD 沒有新增或修改 AC；本版只為 3 張 BUG 的 AC 加上修正任務�
 | 0.14 | 2026-11-05 | sd-agent | 修訂已核准的 v0.13（主控代核），原因：PRD v0.19（approved，JimmyLin，2026-11-05；R-27、R-28：已答對顯示、廣告框架、隱私權政策、關於我、聯絡我們、SEO、爬蟲檔；新增 US-49～US-57、AC-49-01～AC-57-06，修改 36 條 AC，E-135～E-155，Q-81～Q-93）與契約 v0.19（`README.md`、`data-schema.ts` approved，主控代核：§13、DS-47～DS-56、FB-70～FB-75；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件、v0.14 導讀與改讀規則；§1 新增 7 列；新增 §3.1（D-19）；(2) 新增 §4.12 模組介面；(3) 新增 §5.9（B-20～B-25、DS-55 逐字放行、13 檔、MC-07 順序、workflow 風險）；(4) 新增 §7.25：已答對公式與畫面、文字定稿、廣告分工與狀態、DS-47、DS-48、測試注入與替身、路由、頁尾與應用內頁、單一文案來源、靜態頁、信箱分派、實測方法；(5) §7.21.4、§7.22.2、§7.24.3、§10.8 就地標註，**移除本文件中的舊信箱值**；(6) 新增 §10.11：單元測試、交付檢查、主控檢查、QA 範圍 Q1～Q6、舊值位置、部署後驗證 D-1～D-11；(7) §11 新增 T-104～T-114；(8) 新增 §12.13 任務 FE-83～FE-89、MC-07、MC-08；(9) 新增 §13.11 對照（應驗收 357 個 AC 全部涵蓋）；(10) §14 回應 DS-47～DS-56、FB-70～FB-75；§15 新增 SD-FB-77～SD-FB-84（SD-FB-77 須人類決定）。tasks.json 同步升為 v0.13（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/` |
 | 0.15 | 2026-11-05 | sd-agent | 修訂已核准的 v0.14（主控代核），原因：PRD v0.20（approved，JimmyLin，2026-11-05；R-29：麥克風準備中、無文字訊息分流、三種燈號顯示辨識文字、BUG-005 窄視窗鍵盤焦點；新增 US-58～US-61、AC-58-01～AC-61-02 共 31 條，修改 15 條，E-156～E-166，Q-94～Q-102）與契約 v0.20（`README.md`、`data-schema.ts` approved，主控代核：§14 PR／MS／RT／KF／V-STT、DS-57～DS-63、FB-76～FB-79、data-schema §18；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、v0.15 導讀與改讀規則；§1 新增 7 列；新增 §3.2（D-20）；(2) 新增 §4.13 模組介面；(3) 新增 §5.10（不改建置程式、13 檔、MC-09 順序）；(4) 新增 §7.26：時間常數定案（5000／0／1500 ms）與調整程序、服務事件與 `audiostart` 判定、嘗試代號與 `gen`／`acquiringGen` 整合、狀態機與事件處理表、`outcomeOf` 判定表、競態表、畫面與樣式、文字定稿、實測方法；(5) 新增 §7.27：`scroll-padding-bottom` 修法、與 `scroll-margin` 相加的處理、後備方案、實測方法；(6) 新增 §10.12：單元測試、既有測試修改位置、QA 項目 Q1～Q7、主控檢查 M-1～M-5；(7) §11 新增 T-115～T-124；(8) 新增 §12.14 任務 FE-90～FE-94、MC-09；(9) 新增 §13.12 對照（應驗收 388 個 AC 全部涵蓋）；(10) §14 回應 DS-57～DS-63、FB-76～FB-79；§15 新增 SD-FB-85～SD-FB-92。tasks.json 同步升為 v0.14（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`、不改建置與 `static.yml` |
 | 0.16 | 2026-11-06 | sd-agent | 修訂已核准的 v0.15（主控代核），原因：QA 開出 BUG-006（AC-52-05，廣告環境載入期 header 因 `scrollbar-gutter` 晚 1 個畫格左移 7.5 px）、BUG-007（AC-58-01，第 1 次按麥克風 110～131 ms 才畫出「準備中」，點按處理器內同步 `new AudioContext()` 約 110 ms）、BUG-008（AC-60-06，寬螢幕出現分數後頁面變可捲動，傳統捲軸使上方按鈕左移 7.5 px、768 長句下移 48 px），需由 SD 判定修法。status 改為 `in-review`、version 0.15 → 0.16、核准欄位清空。內容：(1) 文首 v0.16 上游、導讀與改讀規則；§1 新增 4 列；新增 §3.3（D-21）、§4.14、§5.11；(2) 新增 §7.28（BUG-007：方案比較 A～D，採「先畫出準備中、以 rAF + `setTimeout(0)` 延後 `mic.acquire()`，後備 50 ms，持有音軌時照舊同步」；`mic.js` 建立後與取得音軌後 `suspended` 就 `resume()`；延後期間中斷表；自動播放政策評估；實測方法）；(3) 新增 §7.29（BUG-006、BUG-008 同源：方案比較 A～E，採 `00-base.css` `html { scrollbar-gutter: stable; }` 無條件，移除 `85-ad.css` 條件規則；影響與取捨表；實測方法）；(4) 就地標註 §7.14、§7.25.3 DS-48、§7.26.9、T-108、SD-FB-80；(5) 新增 §10.13 單元測試、既有測試修改位置、QA 項目 Q8～Q12、主控檢查；(6) §11 新增 T-125～T-131；(7) 新增 §12.15 任務 FE-95～FE-97；(8) 新增 §13.13 對照（388 個應驗收 AC 全部涵蓋）；(9) §15 新增 SD-FB-93～SD-FB-97。tasks.json 同步升為 v0.15（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`、不改建置與 `static.yml`；版本維持 1.3.1、不新增 MC 項目 |
+| 0.17 | 2026-11-09 | sd-agent | 修訂已核准的 v0.16（主控代核），原因：PRD v0.21（R-30：US-62 聆聽中即時文字，新增 AC-62-01～AC-62-12，修改 AC-08-10、AC-30-04、AC-42-02、AC-58-07、AC-59-01、AC-59-05；R-31：商標說明拿掉「Part 5」，修改 AC-10-02、AC-54-01 與 US-56 meta description；Q-103～Q-108 皆 A）與契約 v0.21（§14.6 IT-1～IT-10、MS-1 (2b)／(4)、PR-5 (b)、V-STT-11～V-STT-17、LT-2、V-LGL-02、§9.14 DS-64～DS-71、FB-80～FB-82）皆已核准。status 改為 in-review、核准欄位清空。(1) 即時文字：§7.6 STT 列改為 `interimResults` 依是否提供 `onInterim`（回應 FB-82、DS-64）；§4.13 加註、新增 §4.15；§7.26.2 服務事件表（暫時與最終結果區分、9 欄 `snap()`、刪除 `onend` 補發）、§7.26.4 事件處理表（`onInterim`、`onEnd` 列）、§7.26.5 `outcomeOf`（步驟 2b、步驟 4 的 `lastInterimText`、`atEnd`、`interimHasText`）、§7.26.8 文字表（`labelInterim`）就地修訂；新增 §7.30（服務判定與取出規則、面板資料、DOM 與祖先檢查、顯示與隱藏路徑、樣式、以即時文字評分、實測 T1～T9），把契約 DS-65～DS-69 的試作差異落成 FE-98、FE-99。(2) R-31：新增 §7.31（5 處修改點、LT-3 與 `src/data/` 不改、檢查方式、375px 預估），§7.23.1、§7.23.4 加註。(3) 版本 1.3.2：新增 §5.12，主控 MC-10（Q-105 A）；試作 `dist/` 由 FE-101 覆蓋。(4) §1 加 5 列、§3.4 目錄增量（D-22）、§10.14 測試範圍（S1～S10、P1～P18、既有測試修改位置、QA Q13～Q20 含人工 AC-62-12、AC-62-07、主控 M-1～M-6）、§11 T-132～T-140、§12.16 批次（v0.17-1 FE-98、FE-100；v0.17-2 FE-99；v0.17-3 MC-10 → FE-101）、§13.14 AC 對照（應驗收 400 個 AC 全部涵蓋）、§14 DS-64～DS-71 與 FB-80～FB-82 回應、§15 SD-FB-98～SD-FB-104。tasks.json 同步升為 v0.16（只新增 FE-98～FE-101 與 MC-10，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`、不改建置與 `static.yml`；不新增 store 欄位 |
 
 > 主控代核（2026-11-05）：architecture v0.15、tasks v0.14 依已核准 PRD v0.20 與契約 v0.20；不改 PRD、不改 localStorage 持久化結構。
 
 > 主控代核（2026-11-06）：v0.16 依使用者「繼續做完」指示修正 BUG-006、BUG-007、BUG-008；不改 PRD、不改契約、不改 localStorage 持久化結構（schemaVersion 3）。
+
+> 主控代核（2026-11-09，v0.17；tasks.json v0.16）：依已核准 PRD v0.21 與契約 v0.21 修訂；不改 PRD、不改 localStorage 持久化結構（schemaVersion 3）；tasks.json 經 JSON 解析驗證。SD-FB-98、SD-FB-99 接受 SD 定案。

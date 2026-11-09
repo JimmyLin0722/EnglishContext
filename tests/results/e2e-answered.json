@@ -102,7 +102,7 @@
     "tc": "TC-49-06b",
     "ac": "AC-49-06、AC-47-04、AC-36-03（目前版本開啟 v1.2.0 實際 localStorage，不改寫）",
     "result": "通過",
-    "note": "「版本 1.3.1（建置 5f0dc11）」；入口 main；localStorage 位元組不變=true、setItem 0；Toast []；主控台「已答對 3 / 200 題（2%）」（舊正確率 75% 不顯示）；schemaVersion 3、12 欄"
+    "note": "「版本 1.3.2（建置 981b0d2）」；入口 main；localStorage 位元組不變=true、setItem 0；Toast []；主控台「已答對 3 / 200 題（2%）」（舊正確率 75% 不顯示）；schemaVersion 3、12 欄"
   },
   {
     "suite": "e2e-answered",

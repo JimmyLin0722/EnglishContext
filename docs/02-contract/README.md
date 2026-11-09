@@ -1,15 +1,15 @@
 ---
 doc: CONTRACT
-version: 0.20
+version: 0.21
 status: approved
 author: sa-agent
 approved_by: JimmyLin（授權主控代核）
-approved_at: 2026-11-05
+approved_at: 2026-11-09
 ---
 
 # English Master Track — 資料契約總覽
 
-> 上游：`docs/01-PRD.md` v0.20（approved，JimmyLin，2026-11-05；Q-94～Q-102 全採 PM 建議），以第 6 章「人類決議」與 R-15～R-29 為準（v0.20 見 §14、§8 v0.20 表、§9.13 與 0.20 列；v0.12 修訂內容見 §15 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列；v0.15 見 §5.3、§5.10～§5.12、§6、§8 v0.15 表與 0.15 列；v0.16 見 §4.3 L-7、§10.7 UP-6、§8 v0.16 表與 0.16 列；v0.17 見 §4.3 L-8、§7.8、§8 v0.17 表與 0.17 列；v0.18 見 §5.11、§7.7 V-ST-23～V-ST-27、§8 v0.18 表、§9.11 與 0.18 列；v0.19 見 §13、§4.3 L-7、§8 末表、§9.12 與 0.19 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
+> 上游：`docs/01-PRD.md` v0.21（approved，JimmyLin，2026-11-09；Q-103～Q-108 全部決議 A），以第 6 章「人類決議」與 R-15～R-31 為準（v0.21 見 §14.6、MS-1 修訂、§4.3 LT-2、§8 v0.21 表、§9.14 與 0.21 列；v0.20 見 §14、§8 v0.20 表、§9.13 與 0.20 列；v0.12 修訂內容見 §15 變更紀錄 0.12 列與 §11；v0.13 只改強調橘用途例外，見 0.13 列；v0.14 見 §12 與 0.14 列；v0.15 見 §5.3、§5.10～§5.12、§6、§8 v0.15 表與 0.15 列；v0.16 見 §4.3 L-7、§10.7 UP-6、§8 v0.16 表與 0.16 列；v0.17 見 §4.3 L-8、§7.8、§8 v0.17 表與 0.17 列；v0.18 見 §5.11、§7.7 V-ST-23～V-ST-27、§8 v0.18 表、§9.11 與 0.18 列；v0.19 見 §13、§4.3 L-7、§8 末表、§9.12 與 0.19 列）；`english_master_track.md` 2.2 僅供參考（`tier`、`tierLabel`、`options`、`correctIndex` 依 Q-01、Q-03、Q-09、R-07 廢除）。
 > 本契約共 3 個檔案，視為一組審核：本檔、`data-schema.ts`（型別）、`storage-schema.json`（localStorage 與備份檔的 JSON Schema）。核准方式：把本檔 frontmatter 改為 `status: approved`，並同步填寫 `data-schema.ts` 開頭註解與 `storage-schema.json` `meta` 的 `status`、`approved_by`、`approved_at`（v0.5 起三檔狀態一律一致，SD-FB-04）。
 > 欄位的必填、值域、範例以 `data-schema.ts` 註解為準；本檔放總覽、規則、驗證與待辦。
 > v0.2：依主控 2026-10-29 連網查證結果，四份字表與 ECDICT 授權改為已確認、可收錄；原始字表已置於 `sources/wordlists/`；`N_B`、`N_G` 改為實際值（§4.2）。
@@ -28,6 +28,7 @@ approved_at: 2026-11-05
 > **v0.18：依 PRD v0.18（R-26，新增 US-48、AC-48-01～AC-48-12，修改 13 條 AC，移除 AC-46-07，E-124～E-134，Q-77～Q-80）修訂行為規則，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：(1) §5.11 新增已答對鎖定檢視 LV-1～LV-7，由 `lockedSelection`、`part5UnansweredOnly`、`currentIndex`、`part5CorrectIds` 推導，本次作答結果優先；(2) 新增 UO-10（開關關閉的「下一題」）、SM-1～SM-3（結算與 y = 0）、CR-10（K ≥ 1 常駐清除入口）、HN-1（開關說明文字）；(3) 修改 CR-2、CR-4～CR-7、UO-1～UO-3、UO-5～UO-8，開關在 allCorrect 畫面關閉時本輪歸 0（AC-48-10）；(4) **移除** `PART5_RECORD_TEXTS.replayKeepRecords` 與 `replayPart5KeepRecords` 動作（Q-77 A，理由見 UO-7）；(5) 新增型別 `Part5QuestionState` 與 4 段固定文字；(6) 網站版本 1.2.0（Q-79 A）。**三檔同步的例外**（比照 v0.9、v0.17）：`storage-schema.json` 本版未修改，維持 v0.16 approved；本版契約組合 = 本檔 v0.18 + `data-schema.ts` v0.18 + `storage-schema.json` v0.16。其中 `lockedSelection` 描述的「未作答為 null」，v0.18 起讀作「沒有本次作答結果為 null」（LV-1），不影響驗證結果。
 > **v0.19：依 PRD v0.19（R-27、R-28，新增 US-49～US-57、AC-49-01～AC-57-06，同版修訂既有 AC，E-135～E-155，Q-81～Q-93）修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：新增 **§13**——(1) 已答對顯示 AS-1～AS-7；(2) 廣告設定、載入條件與版位狀態 AD-1～AD-15（單元 ID 未設定＝零廣告請求，狀態只在 `RuntimeState.ad`）；(3) 頁尾與應用內三頁 SP-1～SP-9；(4) 單一文案來源 SC-1～SC-6；(5) SEO、`robots.txt`、`sitemap.xml` SE-1～SE-9；(6) 信箱與掃描 ML-1～ML-5；(7) 驗證 V-ANS、V-AD、V-SITE、V-SEO、V-MAIL。部署目錄 8 → 13 檔（DP-8～DP-10），**預先快取清單 7 項不變**。信箱全面改用新值（L-7、`SOURCES_CONTACT_TEXT`）。**三檔同步的例外**（比照 v0.9、v0.17、v0.18）：`storage-schema.json` 本版未修改，維持 v0.16 approved；本版契約組合 = 本檔 v0.19 + `data-schema.ts` v0.19 + `storage-schema.json` v0.16（其結構與說明對 v0.19 仍正確）。
 > **v0.20：依 PRD v0.20（R-29，新增 US-58～US-61、AC-58-01～AC-61-02，修改 15 條 AC，E-156～E-166，Q-94～Q-102 全採 PM 建議）修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移）。** 重點：新增 **§14**——(1) 準備中狀態與轉移 PR-1～PR-12（`SttStatus` 新增 `"preparing"`、`RuntimeState.speech.preparingPhase`，只在記憶體；`T_READY`、`T_BUFFER`、`T_FALLBACK` 的預設與可調範圍）；(2) 無文字訊息分流 MS-1～MS-6；(3) 辨識文字顯示 RT-1～RT-6（綠、黃燈只顯示辨識文字，紅燈維持對照）；(4) 窄視窗鍵盤焦點 KF-1（不涉資料）；(5) 驗證 V-STT-01～V-STT-10。原「§14 變更紀錄」改為 §15。網站版本 1.3.1（Q-102 A，§12.1）。**三檔同步的例外**（比照 v0.9、v0.17～v0.19）：`storage-schema.json` 本版未修改，維持 v0.16 approved；其 `PersistedData` 說明已寫明「不含語音實例、音訊、畫面暫態」，對 v0.20 仍正確。本版契約組合 = 本檔 v0.20 + `data-schema.ts` v0.20 + `storage-schema.json` v0.16。
+> **v0.21：依 PRD v0.21（R-30：新增 US-62、AC-62-01～AC-62-12，修改 AC-08-10、AC-30-04、AC-42-02、AC-58-07、AC-59-01、AC-59-05，E-167～E-174，Q-103～Q-107；R-31：修改 AC-10-02、AC-54-01 與 US-56 `meta description`，Q-108；皆決議 A）修訂，不改持久化結構（`schemaVersion` 維持 3，localStorage 鍵數 2，`PersistedData` 12 欄、`StorageRecord`、`BackupFile` 不變，不需遷移；Q-106 A）。** 重點：(1) 新增 **§14.6 即時文字** IT-1～IT-10：語音辨識服務 `start()` 新增選填回呼 `onInterim(text, info)`（新型別 `SttStartOptions`），提供即要求暫時結果；`SttEngineEventKind` +`"interim"`；`SttEndInfo` +`lastInterimText`（9 欄）；**服務不在 `end` 時以即時文字補發 `result`**，由呼叫端依 MS-1 (2b) 判定；即時文字**不進 AppState**（IT-8）；(2) MS-1 新增步驟 (2b)（只有即時文字就結束 → 以最後一段即時文字評分，Q-103 A），步驟 (4) 加入「收到過即時文字」（Q-107 A）；PR-5、PR-6、狀態轉移表、MS-2、MS-6、RT-1、LR-1 同步；新增 V-STT-11～V-STT-17，修改 V-STT-06、V-STT-09、V-STT-10；(3) `STT_FLOW_TEXTS.labelInterim`「聽到：」（Q-104 A）；(4) R-31：LT-2 改為「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」，`SITE_PAGES`（關於我）、`SITE_HOME_SEO`、`SITE_HOME_JSON_LD`、`SITE_NOSCRIPT` 改值，V-LGL-02 補檢查；LT-3 的「Part 5 題目」不改（Q-108 A）；(5) 網站版本 1.3.2（Q-105 A，§12.1）；(6) 回饋下游列於 §9.14 DS-64～DS-71，其中與試作分支 `feat/stt-interim-text` 的差異為 DS-65～DS-69；回饋上游 FB-80～FB-82。三檔同步升為 v0.21（`storage-schema.json` 只改 meta）。
 > 專案代號、文件標題與識別字仍為 English Master Track；App 顯示名稱自 v0.12 起為「EnglishContext」（§11.1）。
 
 ---
@@ -41,7 +42,7 @@ approved_at: 2026-11-05
 | `VocabManifest`、`RankSegment` | 內建字庫摘要（`N_B`、`N_G`、排名區段） | pg-content | pg-content 自驗、QA | AC-03-06、AC-03-08、AC-03-09 |
 | `BuiltinVocabItem`、`PartOfSpeech`、`POS_LABELS` | 內建單字 | pg-content | pg-frontend | FR-1.3、FR-2.1、AC-03-01～AC-03-09、AC-06-01～AC-06-08、AC-23-01、AC-23-03、AC-23-04 |
 | `DomainTemplate`、`TemplateWord` | 資工／商管／生醫統計範本（v0.14 畫面入口隱藏，資料照常交付，HT-6～HT-9） | pg-content | pg-frontend（v0.14 只保留程式，不渲染） | FR-1.4、AC-43-01、AC-43-03；AC-05-01～AC-05-05（v0.14 暫停） |
-| `Part5Question`、`Part5Explanation`、`PART5_TYPE_LABELS`、`PART5_BLANK` | 模擬測驗題庫（題型參考 TOEIC®（多益）Part 5；識別字沿用 `Part5*`，R-15） | pg-content | pg-frontend | FR-3.1、FR-3.2、AC-10-01、AC-10-02、AC-11-01、AC-11-02 |
+| `Part5Question`、`Part5Explanation`、`PART5_TYPE_LABELS`、`PART5_BLANK` | 模擬測驗題庫（題型參考 TOEIC®（多益）；v0.21 依 R-31 拿掉「Part 5」；識別字沿用 `Part5*`，R-15） | pg-content | pg-frontend | FR-3.1、FR-3.2、AC-10-01、AC-10-02、AC-11-01、AC-11-02 |
 | `DecoderSentence`、`DecoderSegment`、`SyntaxRole` | 長難句與語法標籤 | pg-content | pg-frontend | FR-4.1、FR-4.2、AC-12-01～AC-12-03、AC-13-01、AC-13-03 |
 | `ReadingStrategy` | 閱讀策略 3 主題 | pg-content | pg-frontend | FR-4.3、AC-14-01、AC-14-02 |
 | `PhraseTemplate`、`PhraseCategory`、`PHRASE_CATEGORY_LABELS` | 學術句型庫 | pg-content | pg-frontend | FR-5.1、FR-5.2、AC-15-01～AC-16-03 |
@@ -75,6 +76,9 @@ approved_at: 2026-11-05
 | `SttStatus`（v0.20 +`"preparing"`）、`SttPreparingPhase`、`RuntimeState.speech.preparingPhase`、`STT_TIMING`、`SttTimingRange`（v0.20） | 麥克風準備中狀態與子階段（只在記憶體）；`T_READY`、`T_BUFFER`、`T_FALLBACK` 預設與可調範圍 | pg-frontend（數值實測與定案由 SD，主控代核） | pg-frontend、QA | FR-2.3、US-58、AC-08-01、AC-08-13、AC-31-03、AC-33-01、AC-33-03、AC-33-06～AC-33-08、AC-58-01～AC-58-14、§14.1 |
 | `SttEngineEventKind`、`SttEndInfo`、`SttNoTextOutcome`、`STT_FLOW_TEXTS`（v0.20） | 語音辨識服務須回報的引擎事件、結束資訊旗標、無文字訊息分流與逐字文案 | pg-frontend（`services/stt.js` 提供事件，畫面模組決定訊息；分工由 SD 定） | pg-frontend、QA | FR-2.3、US-58、US-59、AC-08-10、AC-30-04、AC-58-06～AC-58-08、AC-59-01～AC-59-08、§14.1、§14.2 |
 | `SttResult`（v0.20 註解）、`SttResultRowKind`、`STT_RESULT_ROWS`（v0.20） | 分數區各燈號的文字列（綠、黃只顯示辨識文字；紅燈對照） | pg-frontend | pg-frontend、QA | FR-2.3、US-60、AC-08-06～AC-08-08、AC-22-03、AC-60-01～AC-60-07、§14.3 |
+| `SttStartOptions`（v0.21 新增）、`SttEngineEventKind`（+`"interim"`）、`SttEndInfo.lastInterimText`、`STT_FLOW_TEXTS.labelInterim`（v0.21） | 語音辨識服務 `start()` 選項（含 `onInterim`）、即時文字事件、最後一段即時文字、即時文字列標籤「聽到：」；即時文字只在畫面模組內部變數，不進 AppState、不持久化 | pg-frontend（`services/stt.js` 區分並回報即時文字，畫面模組顯示與判定；分工由 SD 定） | pg-frontend、QA | FR-2.3、US-62、AC-08-10、AC-30-04、AC-58-07、AC-59-01、AC-59-05、AC-62-01～AC-62-12、§14.6 |
+
+型別數（v0.21）：87 → **88** 個（43 個 `interface`、45 個 `type`）；新增 `SttStartOptions`（interface）。契約常數 **63** 個不變；`STT_FLOW_TEXTS` 新增 1 鍵 `labelInterim`；改值：`SITE_PAGES`（about「模擬測驗」項）、`SITE_HOME_SEO.description`、`SITE_HOME_JSON_LD.description`、`SITE_NOSCRIPT.description`（R-31）。型別修改：`SttEngineEventKind`（+`"interim"`）、`SttEndInfo`（+`lastInterimText`，8 → 9 欄）；`SttResult`、`SttNoTextOutcome`、`LearningEventKind`、`RuntimeState`、`TAB_LABELS` 只改註解（`RuntimeState` 不新增欄位）。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變；localStorage 鍵數維持 2。
 
 型別數（v0.20）：81 → **87** 個（42 個 `interface`、45 個 `type`）；新增 `SttEndInfo`、`SttTimingRange`（interface）與 `SttEngineEventKind`、`SttPreparingPhase`、`SttNoTextOutcome`、`SttResultRowKind`（type）。契約常數 60 → **63**（新增 `STT_FLOW_TEXTS`、`STT_TIMING`、`STT_RESULT_ROWS`，見 `data-schema.ts` §18）。型別修改：`SttStatus`（+`"preparing"`）、`RuntimeState.speech`（+`preparingPhase`，不持久化）；`SttResult`、`APP_VERSION_META_NAME` 只改註解。`PersistedData`、`StorageRecord`、`BackupFile`、內容資料檔型別皆不變；localStorage 鍵數維持 2。
 
@@ -295,7 +299,7 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 | 代號 | 提供者 | 位置 | 文字 | 對應 |
 | :--- | :--- | :--- | :--- | :--- |
 | LT-1 | pg-frontend | 單字卡的搭配詞欄位標籤 | 常用搭配詞 | AC-06-01、AC-38-08 |
-| LT-2 | pg-frontend | 模擬測驗頁標題說明（必須顯示；標題仍為 `TAB_LABELS.part5`；375px 可換行，不裁切、無水平捲軸，E-123） | 題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容 | AC-10-02、AC-20-01、AC-40-02 |
+| LT-2 | pg-frontend | 模擬測驗頁標題說明（必須顯示；標題仍為 `TAB_LABELS.part5`；375px 可換行，不裁切、無水平捲軸，E-123）；（v0.21，R-31）同一句也出現在關於我「主要功能」的模擬測驗項（`SITE_PAGES` about，AC-54-01）與首頁 `meta description`（`SITE_HOME_SEO`、`SITE_HOME_JSON_LD`、`SITE_NOSCRIPT`，US-56），三處逐字一致 | 題型參考 TOEIC®（多益），非 ETS 官方或認可內容（v0.21，R-31，Q-108 A；v0.17～v0.20 為「題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容」） | AC-10-02、AC-20-01、AC-40-02、AC-54-01、AC-56-03、AC-56-05、AC-56-06 |
 | LT-3 | pg-frontend | 「資料來源與授權」頁、HTML 開頭註解區（開頭註解區須與「單字資料以 CC BY-SA 4.0 授權」分成兩句，並附條款網址）；（v0.19）關於我（AC-54-01 (4)，取 `LEGAL_STATEMENTS.originalContent`） | 原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權 | AC-23-02、AC-23-06、AC-38-10 (3)、Q-31、Q-72 |
 | LT-4 | pg-frontend | 「資料來源與授權」頁、HTML 開頭註解區（名稱「EnglishContext」可取 `PWA_APP_NAME`，組字結果須逐字相同，NM-3） | PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0 | AC-23-02、AC-23-06、AC-38-10 (3)、Q-48 |
 | LT-5 | pg-frontend | 「資料來源與授權」頁，（v0.19）及關於我（AC-54-01 (4)、AC-56-07，取 `LEGAL_STATEMENTS.trademark`）；不加入 HTML 開頭註解區（R-25 PM 判斷 (c)） | TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。 | AC-23-02 |
@@ -415,7 +419,7 @@ M-3 補充：`s2twp` **過度轉換**清單（v0.6，CT-03 FB-02、CT-09；pg-co
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| LR-1 | 學習行為（`LearningEventKind`）與觸發點：`"flip"` = 單字卡模式中 `flashcard.isFlipped` 由 false 變 true（翻回正面、換卡、滑動不算）；`"vocabQuiz"` = 四選一 `selectedIndex` 由 null 變非 null（對錯皆算；鎖定後再點不算）；`"stt"` = 產生 `SttResult` 並顯示分數（逾時、空結果、權限拒絕、離線、錯誤不算）。模擬測驗作答**不算**（但仍會打卡，`StreakState`） | AC-30-03、AC-30-04 |
+| LR-1 | 學習行為（`LearningEventKind`）與觸發點：`"flip"` = 單字卡模式中 `flashcard.isFlipped` 由 false 變 true（翻回正面、換卡、滑動不算）；`"vocabQuiz"` = 四選一 `selectedIndex` 由 null 變非 null（對錯皆算；鎖定後再點不算）；`"stt"` = 產生 `SttResult` 並顯示分數（逾時、空結果、權限拒絕、離線、錯誤不算；（v0.21）以最後一段即時文字評分（IT-9）算，顯示過即時文字但以手動停止、換卡、錯誤或 `nomatch` 結束不算，AC-62-06）。模擬測驗作答**不算**（但仍會打卡，`StreakState`） | AC-30-03、AC-30-04 |
 | LR-2 | 記錄的鍵 = 該卡的 wordKey（`StudyCard.wordKey`／`VocabQuizQuestion.wordKey`，C-2），內建與自訂一視同仁 | AC-30-03 |
 | LR-3 | 記錄步驟（每次學習行為，同步執行）：(1) 取 today；(2) `todayLearned.date ≠ today` → 換日：`todayLearned = { date: today, wordKeys: [] }`（前一天的字數已在 `learnedHistory`，不動）；(3) wordKey 已在 `wordKeys` → 結束，不改資料；(4) 否則附加到 `wordKeys` 末尾，`learnedHistory[today] = wordKeys.length`；(5) 依 V-ST-10 修剪 `learnedHistory`（刪除早於 today − 29 天與晚於 today 的鍵）；(6) 整筆 `StorageRecord` 一次 `setItem`（可與同一事件造成的打卡、`vocabQuiz`、`masteredWordKeys` 變更合併為一次寫入） | AC-30-03、AC-30-07、AC-30-09、AC-30-11、AC-18-01 |
 | LR-4 | 刪除自訂單字、未觸發初始化的「套用」（含切換色級）等任何操作都**不**從 `wordKeys` 移除項目，`learnedHistory` 不回扣（AC-30-06）。只有下列三種操作會整欄取代：重設（AC-18-05）、匯入（§6.2）、（v0.9）切換難易度確認初始化（§5.7 CI-4，兩欄回到預設值） | AC-30-06、AC-32-02 |
@@ -740,7 +744,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 
 （v0.14）US-05 暫停，但 V-TPL-01～04 **照常適用**（資料保留且仍打包，HT-8；AC-43-01 要求交付檔仍含 3 個範本資料）。對應 AC 欄的 AC-05-xx 本版不驗收，改由 AC-43-01 驗證資料存在。
 
-### 7.4 模擬測驗題庫（`part5.js`，題型參考 TOEIC®（多益）Part 5）
+### 7.4 模擬測驗題庫（`part5.js`，題型參考 TOEIC®（多益）；v0.21 依 R-31 拿掉「Part 5」）
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
@@ -813,7 +817,7 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
 | V-LGL-01 | 單字卡搭配詞標籤 = LT-1；畫面不出現「多益常考搭配詞」；元素順序、按鈕數量與卡片內容不因本條改變 | AC-06-01、AC-38-08 |
-| V-LGL-02 | 模擬測驗頁標題 = `TAB_LABELS.part5`，標題說明 `textContent`（trim 後）= LT-2；畫面不出現「題型對應多益 Part 5」；375px 下可換行，說明不裁切，`scrollWidth` ≤ `clientWidth` | AC-10-02、AC-20-01、AC-40-02、E-123 |
+| V-LGL-02 | 模擬測驗頁標題 = `TAB_LABELS.part5`，標題說明 `textContent`（trim 後）= LT-2；畫面不出現「題型對應多益 Part 5」；375px 下可換行，說明不裁切，`scrollWidth` ≤ `clientWidth`。（v0.21，R-31）標題說明不含「Part 5」；關於我（應用內與 `about.html`）的模擬測驗項 = `模擬測驗：` + LT-2 + `；作答後顯示解析。`；首頁 `meta description`、`og:description`、結構化資料 `description`、`<noscript>` 段落皆 = `SITE_HOME_SEO.description`；交付物（`dist/` 下全部 HTML，含靜態頁與內嵌程式）**全文**搜尋「TOEIC®（多益）Part 5」命中數 = 0（PRD 6.6 QA 列；本條比 FB-64 嚴格，程式註解也算，pg-frontend 須一併修改會進入交付物的程式註解；測試檔不進交付物，不在此限；LT-3 的「Part 5 題目」不屬本條，Q-108 A） | AC-10-02、AC-20-01、AC-40-02、E-123、AC-54-01、AC-56-03、AC-56-05、AC-56-06、AC-57-03 |
 | V-LGL-03 | 「資料來源與授權」頁含 LT-3、LT-4、LT-5 各 1 次且逐字相同；「程式碼以 MIT 授權（Copyright JimmyLin）」「單字資料以 CC BY-SA 4.0 授權」與 `SOURCES_CONTACT_TEXT` 不變；頁面不出現「著作權人 JimmyLin」「保留所有權利」；375px 可完整閱讀 | AC-23-02、AC-23-07 |
 | V-LGL-04 | HTML 開頭註解區：第一行 = 「EnglishContext」；含 MIT 聲明與條款全文、「單字資料以 CC BY-SA 4.0 授權」、LT-3、LT-4、CC BY-SA 條款網址；不出現「原創內容著作權人 JimmyLin」「保留所有權利」；不含 LT-5 | AC-23-06、AC-38-10 (1)(3) |
 | V-LGL-05 | **無佐證說法檢查**。範圍：(a) `src/data/` 下進入交付 HTML 的資料檔（含 `decoder.js`、`phrasebank.js`）的字串值，逐一字串欄位搜尋；(b) 首次畫面、4 個功能區、「資料來源與授權」頁、對話框與 Toast 的畫面文字，逐一元素搜尋；(c)（v0.19，AC-23-08）關於我、聯絡我們、隱私權政策（應用內與靜態頁）、`title`、meta description、Open Graph、結構化資料與 `SITE_NOSCRIPT`。不在範圍：程式與資料的註解、`src/data/_records/`、`src/data/_tools/`、NOTICE 檔、使用者輸入的自訂單字與匯入的備份內容（E-122）。判定：逐字搜尋「多益常考」「多益最常見」= 0；任一句同時含 A 組（「多益」「TOEIC」）與 B 組（「常考」「必考」「最常考」「最常見」「最常用」「高頻」）= 0；單獨出現的「常考」「必考」人工判讀，只能是與考試頻率無關的一般語意。**分句符號**（SA 定案，FB-63）：全形「。」「；」「？」「！」、半形 `;`、`?`、`!`、後接空白或位於字串結尾的半形 `.`，以及換行。維持不變且不算違反：一般描述的 TOEIC 字樣、字表名稱「TOEIC Service List」、LT-2、LT-5 | AC-23-08 (1)(3)、E-122 |
@@ -1080,6 +1084,25 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | AC-61-01、AC-61-02、AC-38-09、Q-100、E-166 | KF-1：不需契約欄位 |
 | AC-42-02（修改）、Q-102 | §12.1 v0.20 註記（1.3.1） |
 
+**v0.21 新增與修改（PRD R-30、R-31）**
+
+| PRD 項目 | 契約對應 |
+| :--- | :--- |
+| AC-62-01、Q-104、E-173 | `SttStartOptions.onInterim`、`SttEngineEventKind` `"interim"`、`STT_FLOW_TEXTS.labelInterim`、IT-1～IT-3、IT-6、V-STT-11 |
+| AC-62-02、AC-58-07（修改）、E-168 | IT-5、PR-5 (b)、PR-6、§14 名詞「已確認開始收音」、狀態轉移表、V-STT-12 |
+| AC-62-03、E-167、E-169 | IT-2、IT-7、MS-1 (2)、`SttEndInfo.hadResult`、`SttResult.recognizedText` 註解、V-STT-13 |
+| AC-62-04 | MS-1 (4)、IT-7、V-STT-06 |
+| AC-62-05、AC-08-10（修改）、AC-59-01（修改）、Q-103、E-170 | `SttEndInfo.lastInterimText`、IT-4、IT-9、MS-1 (2b)、RT-1、LR-1、V-STT-06、V-STT-14 |
+| AC-62-06、AC-59-05（修改）、AC-30-04（修改）、Q-107、E-171、E-172 | MS-1 (1)、(3)、(4)、IT-7、IT-10、LR-1、V-STT-06、V-STT-13 |
+| AC-62-07、E-174 | IT-6（`aria-live="off"`、非即時區域）、V-STT-16 |
+| AC-62-08 | IT-6、C-7、V-STT-11 |
+| AC-62-09 | IT-6（樣式屬設計層，建議 `COLOR_TOKENS.textMuted`）；版面量測屬 SD 與 QA |
+| AC-62-10、Q-106 | IT-8、`RuntimeState` 註解（不新增欄位）、MS-6、V-STT-10、V-STT-17；`storage-schema.json` 結構不變 |
+| AC-62-11 | IT-6、RT-4 同類禁用字樣、V-STT-15 |
+| AC-62-12 | 人工測試，不需契約欄位；結果只能是分數或既有訊息（MS-5） |
+| AC-42-02（修改）、Q-105 | §12.1 v0.21 註記（1.3.2） |
+| AC-10-02（修改）、AC-54-01（修改）、US-56 `meta description`、AC-56-03、AC-56-05～AC-56-07、AC-57-03、Q-108 | LT-2、`SITE_PAGES`（about）、`SITE_HOME_SEO`、`SITE_HOME_JSON_LD`、`SITE_NOSCRIPT`、V-LGL-02、V-SEO-06（限制仍符合） |
+
 ---
 
 ## 9. 回饋上游
@@ -1166,7 +1189,10 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | FB-76 | （v0.20 新增）AC-58-09 後備模式（不可依賴 `audiostart`）顯示「聆聽中」後，引擎無錯誤就 `end`、也沒有任何語音事件：AC-58-08 的「未經開始收音、無錯誤就結束 → 沒有回應」與 AC-59-05 (b)「聆聽中無錯誤 `end` → 未偵測到語音」兩條都可套用 | PM、QA | 待辦（知會，SA 定案） | 契約以「是否已確認開始收音」判定（MS-1 步驟 5、6）：後備時間 `T_FALLBACK` 已到視同已確認 →「未偵測到語音」；後備時間未到就結束 →「沒有回應」。與 v1.3.0 在後備瀏覽器上的訊息一致。不涉持久化 |
 | FB-77 | （v0.20 新增）AC-60-01 要求辨識文字「引擎原文，不清洗」，但現行 `services/stt.js` 取文字時會把各段 trim 後以空白串接（多段結果才有差異）；PRD 未說明此串接是否算清洗 | PM、QA | 待辦（知會，SA 定案） | 契約定為：服務取出文字的既有串接屬「取得引擎輸出」，不算清洗（RT-1）；之後不得再改大小寫、去標點或去空白。替身只回傳 1 段結果時兩者相同，AC-60-01 的 3 個例子不受影響 |
 | FB-78 | （v0.20 新增）AC-58-01 規定按下時清除前次分數與訊息，但前提是「STT 說明已讀」；首次按下顯示說明（AC-08-13）時是否清除未規定 | PM | 待辦（知會，SA 定案） | 契約定為進入 `"preparing"` 時清除（PR-4）：首次是在按「我知道了」時；說明顯示中或按「取消」時畫面上的前次分數與訊息不變。不涉持久化 |
-| FB-79 | （v0.20 新增）PRD v0.20 frontmatter 已記錄 Q-94～Q-102 全採 PM 建議，但第 6 章 Q-94～Q-102 的「人類決議」欄仍空白，開頭說明、US-58 前言、§6 註、覆蓋說明與多條 AC 仍寫「待人類決議」「暫依 Q-xx 建議」 | PM | 待辦（文字同步，不影響行為） | 契約以 frontmatter 的核准紀錄為準，一律按 PM 建議撰寫。請 PM 下次修訂時補填人類決議欄並移除「暫依」字樣；不需本版重新核准 |
+| FB-79 | （v0.20 新增）PRD v0.20 frontmatter 已記錄 Q-94～Q-102 全採 PM 建議，但第 6 章 Q-94～Q-102 的「人類決議」欄仍空白，開頭說明、US-58 前言、§6 註、覆蓋說明與多條 AC 仍寫「待人類決議」「暫依 Q-xx 建議」（v0.21：PRD v0.21 已補填決議欄，本項已解除） | PM | 已解除（v0.21） | — |
+| FB-80 | （v0.21 新增）AC-62-01 只規定「畫面沒有即時文字列」時收到空白暫時結果不顯示；已顯示 `ad` 之後才收到空白暫時結果（引擎撤回文字）時，應隱藏、清空或保留未規定 | PM、QA | 待辦（知會，SA 定案） | 契約定為**保留上一段**：取出為空的暫時結果服務不回報、`lastInterimText` 不變，畫面不變（IT-3）。理由：已顯示的文字仍是本次最後一段聽到的內容，Q-103 評分也用它；不閃爍。不涉持久化 |
+| FB-81 | （v0.21 新增）AC-62-06 (d) 的前提「未曾觸發 `speechstart`」：若已觸發 `speechstart`，依 v0.20 MS-1 原本就是 `heardNoWords`，結果相同；但 (d) 未說明收到 `no-speech` 時若**同時**已觸發 `soundstart`／`audiostart` 是否也一樣 | QA | 待辦（知會，SA 定案） | MS-1 (4) 只看「`lastInterimText` 非空」，與開始收音事件無關，結果一律為 `heardNoWords`。V-STT-06 已列組合。不需改 PRD |
+| FB-82 | （v0.21 新增）PRD 6.6 SA 列寫「契約目前未提及暫時結果（`docs/02-contract/` 搜尋 `interimResults` 無命中）」；v0.20 契約確實未規定 `interimResults`，但 architecture.md §7.6 與既有測試寫死 `false` | SD | 待辦（知會） | 契約 v0.21 以 `SttStartOptions.onInterim` 是否提供決定 `interimResults`（IT-1），語音畫面每次都提供，等同 v1.3.2 起一律開啟。請 SD 修訂 architecture.md 第 1457 行附近與 §7.26 的設定說明（DS-64） |
 
 ### 9.1 下游回饋處理紀錄（v0.5，/pg-run 階段）
 
@@ -1307,6 +1333,21 @@ pg-content 必須以 Node 執行資料檔逐條自驗（V-IN、V-SRC、V-VOC、V
 | DS-61 | 分數區與文案（US-60、Q-98 A、Q-99 A） | `STT_RESULT_ROWS`、`STT_FLOW_TEXTS`、RT-1～RT-6 | `resultModel` 的 `compare` 目前只在紅燈產生；改為依 `STT_RESULT_ROWS` 產生列。更新文字定稿表（3 段新訊息、按鈕文字與 `aria-label`）；準備中的樣式（底色或文字色與聆聽中不同、不用紅色與閃爍、與聆聽中座標差 0，AC-58-13）。若畫面以 `data-status` 屬性反映狀態，值用 `SttStatus` 字面值 |
 | DS-62 | 窄視窗鍵盤焦點（US-61、BUG-005、Q-100 A） | KF-1：不涉資料契約 | 分配 FE 任務與樣式歸屬（例：`scroll-padding-bottom` 或焦點時捲動）；4 個功能區都要涵蓋，不得只修 AC-38-09 字面的控制項；> 640px 不變（AC-61-02） |
 | DS-63 | 工作範圍 | **持久化結構不變**（`schemaVersion` 3、鍵數 2、備份不變）；`src/data/` 不變 | 不需 CT 任務。`package.json` 改為 `1.3.1` 由主控一次性修改，不列 PG 任務（Q-102 A）。既有測試中假設「按下即聆聽中」與單一 `noSpeech` 訊息的案例須更新（PRD 6.5 QA 列）。若設計認為準備中或事件紀錄必須跨工作階段保存，**停止並回報**，須由人類決定 |
+
+### 9.14 回饋下游（v0.21，給 SD 與 pg-frontend；PRD R-30、R-31、Q-103～Q-108）
+
+試作程式：分支 `feat/stt-interim-text` 的 `src/app/services/stt.js`、`src/app/views/speech-panel.js`、`src/app/styles/31-speech.css`（未提交）。下表 DS-65～DS-69 為**契約與試作不同之處**（共 5 項），pg-frontend 依契約修改；DS-70 為確認項；其餘試作行為（`hasFinalOf` 判定、`allTextOf` 取出、`interimResults` 依 `onInterim` 是否提供、準備中收到即時文字即進入聆聽中、即時文字只放畫面模組變數 `interimText`）與契約一致，可保留。
+
+| 編號 | 事項 | 契約的立場 | 請 SD／pg-frontend 處理 |
+| :--- | :--- | :--- | :--- |
+| DS-64 | 服務介面與設計文件（IT-1～IT-4） | `SttStartOptions`（既有 8 項 + `onInterim`）；`interimResults` = 是否提供 `onInterim` | SD：修訂 architecture.md §7.6（約第 1457 行）與 §7.26 的 `start(opts)` 表、事件處理表，加入 `onInterim`、`"interim"` 判定與 `SttEndInfo` 9 欄；更新 FE 任務。既有測試 `speech.test.js` 第 148～157 行斷言 `interimResults === false`，改為「未提供 `onInterim` 為 false、提供為 true」 |
+| DS-65 | **差異 1：服務不得在 `end` 時以即時文字補發 `onResult`**（IT-4） | 試作 `rec.onend` 在「`!hadResult && !manual && lastInterim`」時以 `lastInterim` 呼叫 `onResult` 並把 `hadResult` 設為 true。契約改為：服務只回報（`onEnd` 的 `info.lastInterimText`），是否評分由畫面模組依 MS-1 (2b) 判定；`hadResult` 只代表收到最終結果 | 刪除 `onend` 中的補發段落；畫面模組 `onEnd` 回呼依 MS-1 (2b) 以 `info.lastInterimText` 建立評分結果（沿用同一個評分函式）。理由：服務只轉送、不決定（DS-57）；試作在 `error`、`nomatch` 之後的 `end` 也會補發（目前靠畫面模組的「已判定」旗標擋下，服務單獨測試時行為不符 AC-62-06 (c)～(e)） |
+| DS-66 | **差異 2：`SttEndInfo` 新增 `lastInterimText`**（9 欄） | 試作只在服務內部變數 `lastInterim`，未放進 `snap()`；畫面模組因此無法依 Q-107 判定 | `snap()` 加入 `lastInterimText`（初始 `""`），欄位順序：既有 8 欄 + `lastInterimText`；畫面模組 `mergeInfo` 一併合併 |
+| DS-67 | **差異 3：空白即時文字不回報**（IT-3、FB-80） | 試作在取出文字為空時仍呼叫 `onInterim("")`，畫面因而隱藏即時文字列 | 取出為空時不呼叫 `onInterim`、不改 `lastInterimText`；畫面保留上一段 |
+| DS-68 | **差異 4：Q-107 訊息判定**（MS-1 (4)） | 試作 `outcomeOf` 未考慮即時文字：顯示過即時文字後 `no-speech` 得到 `noSpeech` | `outcomeOf` 步驟 4 加入「`info.lastInterimText !== ""`」→ `heardNoWords`；新增步驟 (2b)（只在 `end`、無最終結果、`errorCode` 為 null、`nomatch` 為 false、非手動、`lastInterimText` 清洗後非空 → 評分）。補 V-STT-06 新增列的單元測試 |
+| DS-69 | **差異 5：手動停止時立即隱藏即時文字列**（IT-7、AC-62-06 (a)） | 契約：任何嘗試結束（含再按麥克風停止）≤ 100ms 隱藏；不等 `end` | 確認試作「狀態不是 `listening`／`preparing` 即隱藏」在手動停止的那次繪製就生效；若停止後狀態仍維持到 `end` 才回待機，須改為按下即隱藏 |
+| DS-70 | 確認項（非差異）：文字常數與無障礙屬性（IT-6） | 標籤值 = `STT_FLOW_TEXTS.labelInterim`「聽到：」（試作鍵名 `liveLabel` 可保留，值須逐字相同）；即時文字列 `aria-live="off"`，列與所有祖先都不得是 `aria-live` polite／assertive 或 `role` status／alert／log | 試作 `p.sp-live`（`aria-live="off"`、標籤 `span` + 值 `span[lang=en]`）為 `.sp-panel` 子元素，與 `role="status"` 的 `.sp-msg`、`aria-live="polite"` 的 `.sp-result` 同層，符合契約；請 SD 確認 `.sp-panel` 以上的容器都不是即時區域，並把樣式（斜體、次要文字色，建議 `COLOR_TOKENS.textMuted`、無 `transition`／`animation`）寫入設計 |
+| DS-71 | 工作範圍與 R-31 | **持久化結構不變**（`schemaVersion` 3、鍵數 2、備份不變）；`src/data/` 不變（pg-content 無工作） | `package.json` 1.3.1 → 1.3.2 由主控一次性修改（Q-105 A）。R-31：pg-frontend 修改主控提供的位置（`src/app/core/site-content.js` 第 84、158、169、175 行、`src/app/views/part5.js` 第 77 行，含該檔第 2 行等進入交付物的註解）與測試 `legal-static.test.js`、`naming.test.js` 的 `LT_2`；SD 同步 architecture.md 引用該句的段落。試作分支已修改的 `dist/english-master-track.html` 不得作為交付物，須由原始碼重新建置（PRD 6.6 主控列）。若設計認為即時文字必須跨工作階段保存，**停止並回報**，須由人類決定 |
 
 ---
 
@@ -1557,6 +1598,8 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 | 麥克風準備中與子階段（v0.20） | `RuntimeState.speech.sttStatus = "preparing"`、`speech.preparingPhase` | 否 | PR-2；重新載入一律待機（AC-58-12） |
 | 本次辨識的事件紀錄、`T_READY`／`T_BUFFER`／`T_FALLBACK` 計時器、嘗試代號（v0.20） | 模組內部變數（`SttEndInfo` 只經回呼傳遞） | 否 | MS-6、PR-9 |
 | 分數區辨識文字（v0.20 三種燈號） | `RuntimeState.speech.lastResult.recognizedText`（既有欄位） | 否 | RT-5 |
+| 聆聽中即時文字、即時文字列顯示與否（v0.21） | 語音畫面模組內部變數與 DOM（**不進 AppState**）；`SttEndInfo.lastInterimText` 只經回呼傳遞 | 否 | IT-8；重新載入後為待機、無即時文字列（AC-62-10） |
+| 以即時文字評分後的辨識文字（v0.21） | `RuntimeState.speech.lastResult.recognizedText`（既有欄位，值 = `lastInterimText`） | 否 | IT-9、RT-5 |
 | Google 同意狀態（v0.19） | 由 CMP 自行管理 | 本系統不保存 | AD-13 |
 
 ### 11.4 主控台（DB；US-39、Q-50、Q-52、Q-56）
@@ -1616,6 +1659,8 @@ v0.12 沒有任何 PRD 要求跨工作階段記住的新介面狀態，因此 `s
 （v0.19 註記，Q-85 A、AC-42-02 修改）**v0.19 第一階段的版本號為 `1.3.0`**，由主控一次性修改 `package.json`；第二階段填入廣告單元 ID 時的版本號由人類決定。契約仍沒有版本值常數；頁尾顯示「版本 1.3.0（建置 xxxxxxx）」。此時 `schemaVersion` 仍為 3，契約文件版本為 0.19。
 
 （v0.20 註記，Q-102 A、AC-42-02 修改）**v0.20 發布的版本號為 `1.3.1`**（修正既有語音流程與 BUG-005，相容舊資料，屬修訂號），由主控一次性修改 `package.json`；廣告第二階段的版本號屆時由人類決定。契約仍沒有版本值常數，本節規則全部不變；頁尾顯示「版本 1.3.1（建置 xxxxxxx）」。此時 `schemaVersion` 仍為 3，契約文件版本為 0.20。
+
+（v0.21 註記，Q-105 A、AC-42-02 修改）**v0.21 發布的版本號為 `1.3.2`**（修正既有語音流程並加入聆聽中即時文字，R-31 商標文字併入同一版；相容舊資料，屬修訂號），由主控一次性修改 `package.json`。契約仍沒有版本值常數，本節規則全部不變；頁尾顯示「版本 1.3.2（建置 xxxxxxx）」。此時 `schemaVersion` 仍為 3，契約文件版本為 0.21。
 
 名詞：**版本號** X.Y.Z = 建置時專案根目錄 `package.json` 的 `version`（人類發布時手動維護，v0.14 發布 1.0.0，v0.15 發布 1.1.0，v0.18 發布 1.2.0）；**建置碼** = BUILD_ID（`<meta name="emt-build-id">` 的 `content`，SW-2）前 `BUILD_CODE_LENGTH`（7）個字元；**版本行** = 頁尾的「版本 X.Y.Z（建置 xxxxxxx）」。
 
@@ -1809,7 +1854,7 @@ SC-2 渲染對照：
 
 ## 14. 語音辨識準備中、訊息分流與辨識文字契約（v0.20，PRD R-29、US-58～US-61、Q-94～Q-102；**不改持久化結構**）
 
-型別與常數見 `data-schema.ts` §18（`SttEngineEventKind`、`SttPreparingPhase`、`SttEndInfo`、`SttNoTextOutcome`、`SttTimingRange`、`SttResultRowKind`、`STT_FLOW_TEXTS`、`STT_TIMING`、`STT_RESULT_ROWS`）與 §10（`SttStatus`、`RuntimeState.speech.preparingPhase`、`SttResult`）。**持久化結構不變**：`schemaVersion` 3、鍵數 2、`PersistedData` 12 欄、備份格式都不變；本節所有狀態只在記憶體。名詞：**嘗試** = 一次按下麥克風到回到待機；**已確認開始收音** = 本次收到 `audiostart`、`soundstart` 或 `speechstart`，或後備模式的 `T_FALLBACK` 已到。
+型別與常數見 `data-schema.ts` §18（`SttEngineEventKind`、`SttPreparingPhase`、`SttEndInfo`、`SttNoTextOutcome`、`SttTimingRange`、`SttResultRowKind`、`STT_FLOW_TEXTS`、`STT_TIMING`、`STT_RESULT_ROWS`）與 §10（`SttStatus`、`RuntimeState.speech.preparingPhase`、`SttResult`）。**持久化結構不變**：`schemaVersion` 3、鍵數 2、`PersistedData` 12 欄、備份格式都不變；本節所有狀態只在記憶體。名詞：**嘗試** = 一次按下麥克風到回到待機；**已確認開始收音** = 本次收到 `audiostart`、`soundstart` 或 `speechstart`，或後備模式的 `T_FALLBACK` 已到；（v0.21）或收到第一段非空即時文字（AC-62-02，IT-5）。（v0.21）**即時文字**、**最終結果**、**即時文字列**依 PRD US-62 名詞；v0.21 新增規則見 §14.6。
 
 ### 14.1 準備中狀態與轉移（PR；US-58、Q-94～Q-97）
 
@@ -1819,8 +1864,8 @@ SC-2 渲染對照：
 | PR-2 | **子階段**：`acquiringMic` →（取得麥克風完成：成功；或依 AC-33-07 因其他原因失敗，收音條全暗照常辨識）呼叫 `start()`；`start()` 回傳成功 → 可依賴 `audiostart` 時為 `"awaitingAudioStart"`，否則為 `"fallbackWait"`。權限拒絕 → AC-08-09、找不到裝置 → AC-33-05、`start()` 失敗或拋例外 → 既有一般錯誤，皆回待機。同頁已持有音軌時 `acquiringMic` 立即完成，不再詢問權限（AC-33-01）。`sttStatus ≠ "preparing"` 時 `preparingPhase` 必為 `null` | AC-58-01、AC-58-08、AC-58-09、AC-33-01、AC-33-07 |
 | PR-3 | **畫面**：準備中按鈕文字 `STT_FLOW_TEXTS.micPreparing`、`aria-label` `micPreparingLabel`；收音條 5 格全暗，不因音量點亮；畫面不出現「聆聽中」。進入聆聽中的同時收音條才開始依音量點亮 | AC-58-01～AC-58-03、AC-33-03 |
 | PR-4 | **清除**：進入 `"preparing"` 時 `lastResult = null`，並清除前次訊息。說明對話框顯示中或按「取消」時畫面不變（FB-78） | AC-58-01 |
-| PR-5 | **轉入聆聽中**：(a) `awaitingAudioStart` 收到 `audiostart` → 等 `T_BUFFER` 後 `"listening"`，時間點不早於 `audiostart` + `T_BUFFER`、不晚於其後 100ms；(b) 收到 `soundstart` 或 `speechstart` → 立即 `"listening"`，不再套用 `T_BUFFER`；(c) `fallbackWait` 自 `start()` 回傳起經 `T_FALLBACK` → `"listening"`（此「聆聽中」未經引擎確認，E-158）；期間收到任何收音事件 → 立即 `"listening"`。任一收音事件、`result`、`nomatch`、`error`、`end` 到達時清除 `T_READY` 計時器 | AC-58-03、AC-58-07、AC-58-09 |
-| PR-6 | **準備中直接結束**：`result` → 清洗後非空依 AC-08-03～AC-08-08 評分，否則 `heardNoWords`；`nomatch` → `heardNoWords`；`error` 與 `end` 依 MS-1；`awaitingAudioStart` 自 `start()` 回傳起 `T_READY` 內未收到任何事件 → 誤差 ≤ 200ms 內中止（`abort`）、`noResponse`。`acquiringMic` 期間不計時 | AC-58-06～AC-58-08 |
+| PR-5 | **轉入聆聽中**：(a) `awaitingAudioStart` 收到 `audiostart` → 等 `T_BUFFER` 後 `"listening"`，時間點不早於 `audiostart` + `T_BUFFER`、不晚於其後 100ms；(b) 收到 `soundstart` 或 `speechstart`，或（v0.21）第一段非空即時文字（`onInterim`）→ 立即 `"listening"`，不再套用 `T_BUFFER`（收到即時文字時同時顯示即時文字列，IT-5）；(c) `fallbackWait` 自 `start()` 回傳起經 `T_FALLBACK` → `"listening"`（此「聆聽中」未經引擎確認，E-158）；期間收到任何收音事件或即時文字 → 立即 `"listening"`。任一收音事件、即時文字、`result`、`nomatch`、`error`、`end` 到達時清除 `T_READY` 計時器（即時文字同時清除 `T_BUFFER`、`T_FALLBACK`） | AC-58-03、AC-58-07、AC-58-09、AC-62-02 |
+| PR-6 | **準備中直接結束**：`result` → 清洗後非空依 AC-08-03～AC-08-08 評分，否則 `heardNoWords`；`nomatch` → `heardNoWords`；`error` 與 `end` 依 MS-1；（v0.21）即時文字不是結束，依 PR-5 (b) 進入聆聽中；`awaitingAudioStart` 自 `start()` 回傳起 `T_READY` 內未收到任何事件 → 誤差 ≤ 200ms 內中止（`abort`）、`noResponse`。`acquiringMic` 期間不計時 | AC-58-06～AC-58-08 |
 | PR-7 | **準備中再按 = 取消**：≤ 100ms 回 `"idle"`，不顯示提示、Toast 或分數，收音條全暗。`awaitingAudioStart`、`fallbackWait` → 中止辨識（`abort`，不是停止後等待結果）；`acquiringMic` → 取得完成後不開始辨識，音軌保留供同頁重用。聆聽中再按維持既有「停止」（AC-08-10） | AC-58-04、AC-08-10 |
 | PR-8 | **取消後立即再按**：開始新的嘗試與新的準備中；同時間只有 1 個辨識工作；`acquiringMic` 擱置中再按不得再呼叫 `getUserMedia`，不得出現第 2 個權限詢問（DS-59）；Console 無未處理錯誤 | AC-58-05 |
 | PR-9 | **嘗試代號**：每次進入準備中產生新代號；引擎事件、計時器、取得麥克風完成的回呼只在代號相符時生效；取消、逾時或新嘗試後解除事件處理器。代號、計時器、`SpeechRecognition` 實例只放模組內部變數 | AC-58-04～AC-58-06、AC-58-10 |
@@ -1828,7 +1873,7 @@ SC-2 渲染對照：
 | PR-11 | **時間常數**：`T_READY`、`T_BUFFER`、`T_FALLBACK` 的實際值由 SD 定並寫在 `architecture.md`，必須落在 `STT_TIMING` 的 [minMs, maxMs] 內（`T_READY` 3000～10000、`T_BUFFER` 0～500、`T_FALLBACK` 1000～2000，單位 ms）。**主控實測後可在上述範圍內代核調整**，不需改契約或 PRD；超出範圍須回 PM | AC-58-03、AC-58-06、AC-58-09、Q-94～Q-96 |
 | PR-12 | **樣式**：準備中按鈕的計算後底色或文字色與聆聽中不同，不使用聆聽中的紅色與閃爍，也沒有動畫（一般與 `prefers-reduced-motion: reduce` 皆同）；準備中與聆聽中切換時按鈕與收音條座標差 = 0；文字不裁切、對比符合 AC-38-04；鍵盤與觸控操作結果相同 | AC-58-13、AC-31-03、AC-33-08 |
 
-狀態轉移總表（只列 v0.20 新增；其餘同 v1.3.0）：
+狀態轉移總表（只列 v0.20、v0.21 新增；其餘同 v1.3.0）：
 
 | 起點 | 事件 | 終點 | 畫面 |
 | :--- | :--- | :--- | :--- |
@@ -1837,6 +1882,9 @@ SC-2 渲染對照：
 | `preparing` / `acquiringMic` | 取得完成、`start()` 成功 | `preparing` / `awaitingAudioStart` 或 `fallbackWait` | 「準備中」 |
 | `preparing` / `awaitingAudioStart` | `audiostart` + `T_BUFFER`；`soundstart`；`speechstart` | `listening` | 「聆聽中」，收音條點亮 |
 | `preparing` / `fallbackWait` | `T_FALLBACK` 到；任何收音事件 | `listening` | 同上 |
+| `preparing` / `awaitingAudioStart` 或 `fallbackWait`（v0.21） | 第一段非空即時文字 | `listening` | 「聆聽中」，收音條點亮，同時顯示即時文字列（IT-5） |
+| `listening`（v0.21） | 非空即時文字 | `listening` | 即時文字列更新為新值（IT-6） |
+| `listening`（v0.21，即時文字列顯示中） | 最終結果、`nomatch`、`error`、`end`、再按、換卡、切換模式、按 TTS、離開頁面、音軌結束 | `idle` | 即時文字列隱藏；結果依 MS-1（含 (2b)）或無提示（IT-7） |
 | `preparing`（任一子階段） | 再按、換卡、切換模式、按 TTS、離開頁面 | `idle` | 無提示 |
 | `preparing` / `awaitingAudioStart` | `T_READY` 逾時 | `idle` | `noResponse` |
 | `preparing`（已呼叫 `start()`） | `result`、`nomatch`、`error`、`end` | `idle` | 分數或 MS-1 |
@@ -1845,18 +1893,18 @@ SC-2 渲染對照：
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| MS-1 | **判定順序**（第一個成立者為準）：(1) 手動停止或取消 → 不提示；(2) 收到清洗後非空的 `result` → 評分，不顯示分流訊息；(3) `errorCode` 不是 `null` 也不是 `"no-speech"` → 既有錯誤訊息（`not-allowed`、`service-not-allowed` →「需要麥克風權限」；`audio-capture` →「找不到麥克風裝置」；`network` →「語音辨識需要網路連線」；其他 → 一般錯誤）；(4) `speechDetected` 或 `nomatch`，或收到 `result` 但清洗後為空 → `heardNoWords`（`speechstart` 後的 `no-speech` 屬此項）；(5) `errorCode = "no-speech"`，或已確認開始收音 → `noSpeech`（`soundstart` 不算偵測到語音）；(6) 其他（未確認開始收音就 `end`、`T_READY` 逾時）→ `noResponse` | AC-08-10、AC-58-06、AC-58-08、AC-59-01～AC-59-06、FB-76 |
-| MS-2 | **只決定 1 次**：結果在本次嘗試第一個終結點（`result`、`nomatch`、`error`、`end`、`T_READY` 逾時）依當時累積的旗標決定，之後的事件（如 `nomatch` 後的 `end`）不改變；每次嘗試最多 1 則訊息 | AC-59-02、AC-59-06 |
+| MS-1 | **判定順序**（第一個成立者為準）：(1) 手動停止或取消 → 不提示；(2) 收到清洗後非空的 `result`（最終結果）→ 評分，不顯示分流訊息；**(2b)**（v0.21，Q-103 A）終結點為 `end`，且本次沒有收到最終結果（`hadResult = false`）、`errorCode = null`、`nomatch = false`，`lastInterimText` 不是 `""` 且清洗後非空 → 以 `lastInterimText` 作為辨識文字評分（IT-9）；(3) `errorCode` 不是 `null` 也不是 `"no-speech"` → 既有錯誤訊息（`not-allowed`、`service-not-allowed` →「需要麥克風權限」；`audio-capture` →「找不到麥克風裝置」；`network` →「語音辨識需要網路連線」；其他 → 一般錯誤）；(4) `speechDetected` 或 `nomatch`，或收到 `result` 但清洗後為空，或（v0.21，Q-107 A）`lastInterimText` 不是 `""`（含其清洗後為空）→ `heardNoWords`（`speechstart` 後或顯示過即時文字後的 `no-speech` 屬此項）；(5) `errorCode = "no-speech"`，或已確認開始收音 → `noSpeech`（`soundstart` 不算偵測到語音）；(6) 其他（未確認開始收音就 `end`、`T_READY` 逾時）→ `noResponse`。編號 (2b) 為 v0.21 插入，既有 (3)～(6) 編號不變 | AC-08-10、AC-58-06、AC-58-08、AC-59-01～AC-59-06、AC-62-04～AC-62-06、FB-76 |
+| MS-2 | **只決定 1 次**：結果在本次嘗試第一個終結點（`result`、`nomatch`、`error`、`end`、`T_READY` 逾時）依當時累積的旗標決定，之後的事件（如 `nomatch` 後的 `end`）不改變；每次嘗試最多 1 則訊息。（v0.21）即時文字（`"interim"`）**不是**終結點；`error` 或 `nomatch` 之後的 `end` 不會再套用 (2b)（AC-62-06 (c)～(e)） | AC-59-02、AC-59-06、AC-62-06 |
 | MS-3 | **顯示**：回待機、收音條全暗、不顯示分數區；3 則訊息的顯示位置與層級同既有「未偵測到語音」（訊息區提示，非錯誤 Toast）；文字逐字取自 `STT_FLOW_TEXTS` | AC-59-01、AC-59-05、AC-58-06、AC-60-04 |
 | MS-4 | **清洗**：沿用既有評分前的文字正規化（`core/similarity`）；結果為空字串即視為「清洗後為空」，例 `""`、`"   "`、`"..."` | AC-59-03 |
 | MS-5 | **結果集合**：每次嘗試的結果恰為下列之一：分數、`STT_FLOW_TEXTS` 的 3 則訊息之一、既有錯誤訊息、無提示 | AC-58-14、AC-59-08 |
-| MS-6 | **不計學習、不持久化**：3 則訊息都不呼叫評分紀錄，不改 `todayLearned`、`learnedHistory`、`streak`、`masteredWordKeys`；`SttEndInfo` 與旗標不寫入 localStorage 或備份；再按或換卡時訊息清除；每次新嘗試重設全部旗標，不沿用前一次的語音紀錄 | AC-59-06、AC-59-07、AC-30-04 |
+| MS-6 | **不計學習、不持久化**：3 則訊息都不呼叫評分紀錄，不改 `todayLearned`、`learnedHistory`、`streak`、`masteredWordKeys`；`SttEndInfo` 與旗標不寫入 localStorage 或備份；再按或換卡時訊息清除；每次新嘗試重設全部旗標，不沿用前一次的語音紀錄。（v0.21）`lastInterimText` 同此：只經回呼傳遞、不寫入任何儲存，新嘗試重設為 `""`；以即時文字評分（(2b)）屬評分，依 LR-1 計入 | AC-59-06、AC-59-07、AC-30-04、AC-62-10 |
 
 ### 14.3 辨識文字（RT；US-60、Q-98 A、Q-101 A）
 
 | 編號 | 規則 | 對應 AC |
 | :--- | :--- | :--- |
-| RT-1 | **值**：顯示值 = `SttResult.recognizedText` = 語音辨識服務回傳的字串原樣；服務取出文字時「各結果第 1 候選、各段 trim 後以 1 個半形空白連接」屬取得引擎輸出，不算清洗（FB-77）；之後不得改大小寫、去標點或去空白；評分用的清洗結果不得回寫本欄 | AC-60-01 |
+| RT-1 | **值**：顯示值 = `SttResult.recognizedText` = 語音辨識服務回傳的字串原樣；服務取出文字時「各結果第 1 候選、各段 trim 後以 1 個半形空白連接」屬取得引擎輸出，不算清洗（FB-77）；之後不得改大小寫、去標點或去空白；評分用的清洗結果不得回寫本欄。（v0.21）依 MS-1 (2b) 以即時文字評分時，本欄 = `SttEndInfo.lastInterimText` 原樣（IT-3 的串接同樣屬取得引擎輸出）；有最終結果時一律用最終結果 | AC-60-01、AC-62-03、AC-62-05 |
 | RT-2 | **列與順序**：依 `STT_RESULT_ROWS`：綠、黃燈 1 列「辨識文字」；紅燈「辨識文字」「目標文字」2 列。分數區順序：分數與燈號 → 提示（只有黃燈）→ 文字列 → AC-08-11 說明；標題與說明文字不變 | AC-08-06～AC-08-08、AC-60-01、AC-60-02 |
 | RT-3 | **寫入**：標籤與值一律以 `textContent` 寫入，值元素 `lang="en"`；文字列內不新增子元素；原始碼不得把辨識文字寫入 HTML 字串；分數、燈號與辨識文字在同一次更新繪製完成（AC-22-03 ≤ 100ms） | AC-60-05、AC-22-03 |
 | RT-4 | **禁用字樣**：分數區的固定文字（標題、標籤、提示、說明）不得出現「偵測到」「語言」「英文」「中文」「你說的是」；引擎回傳的值照原文顯示，不受此限 | AC-60-03 |
@@ -1878,11 +1926,35 @@ SC-2 渲染對照：
 | V-STT-03 | 直接事件與後備：準備中觸發 `soundstart`、`speechstart` → 立即聆聽中；`result` → 評分；`nomatch` → `heardNoWords`；替身無 `onaudiostart` → `T_FALLBACK` 後聆聽中、不套用 `T_READY` | AC-58-07、AC-58-09 |
 | V-STT-04 | 取消：(a) `getUserMedia` 擱置中、(b) 已 `start()` 未 `audiostart` 時再按 → ≤ 100ms 待機、無提示；遲到事件與遲到的取得完成不改畫面；取消後立刻再按 → 新準備中、辨識工作 1 個、`getUserMedia` 呼叫次數不增加 | AC-58-04、AC-58-05 |
 | V-STT-05 | 逾時：替身不觸發事件，自 `start()` 回傳起 `T_READY` ± 200ms 回待機並顯示 `noResponse`；`getUserMedia` 擱置超過 `T_READY` 仍為準備中；準備中無錯誤 `end` → `noResponse` | AC-58-06、AC-58-08 |
-| V-STT-06 | MS-1 判定表（單元）：`speechstart`→`end` = `heardNoWords`；`nomatch`→`end`（有無 `speechstart`）= `heardNoWords`；`result` 為 `""`／`"   "`／`"..."` = `heardNoWords`；`speechstart`→`no-speech`→`end` = `heardNoWords`；`audiostart`→`no-speech`→`end` = `noSpeech`；`audiostart`→`end` = `noSpeech`；`audiostart`→`soundstart`→`end` = `noSpeech`；準備中直接 `no-speech` = `noSpeech`；準備中只有 `end` = `noResponse`；後備時間已到後 `end` = `noSpeech`、未到 = `noResponse`；`speechstart`→`network` =「語音辨識需要網路連線」；`speechstart`→非空 `result` = 評分 | AC-59-01～AC-59-06、AC-58-08、FB-76 |
+| V-STT-06 | MS-1 判定表（單元）：`speechstart`→`end` = `heardNoWords`；`nomatch`→`end`（有無 `speechstart`）= `heardNoWords`；`result` 為 `""`／`"   "`／`"..."` = `heardNoWords`；`speechstart`→`no-speech`→`end` = `heardNoWords`；`audiostart`→`no-speech`→`end` = `noSpeech`；`audiostart`→`end` = `noSpeech`；`audiostart`→`soundstart`→`end` = `noSpeech`；準備中直接 `no-speech` = `noSpeech`；準備中只有 `end` = `noResponse`；後備時間已到後 `end` = `noSpeech`、未到 = `noResponse`；`speechstart`→`network` =「語音辨識需要網路連線」；`speechstart`→非空 `result` = 評分。（v0.21，即時文字以 `interim(x)` 表示）`interim(adr)`→`interim(adress)`→`end` = 以 `adress` 評分（MS-1 (2b)）；`interim(...)`→`end` = `heardNoWords`；`interim(adress)`→`result(address)` = 以 `address` 評分；`interim(ad)`→`result("")`／`result("...")` = `heardNoWords`；`interim(adr)`→`no-speech`→`end` = `heardNoWords`（Q-107 A，有無 `audiostart`／`soundstart` 皆同）；`interim(adr)`→`nomatch`→`end` = `heardNoWords`；`interim(adr)`→`network`→`end` =「語音辨識需要網路連線」；`interim(adr)`→手動停止→`end` = 無提示、不評分；`interim("")`→`end`（無其他事件、已確認開始收音）= `noSpeech`（空白即時文字不算） | AC-59-01～AC-59-06、AC-58-08、AC-62-04～AC-62-06、FB-76 |
 | V-STT-07 | 次數：每次嘗試訊息恰 0 或 1 則；`end` 不覆蓋先前決定；新嘗試的旗標全部為初始值 | AC-59-02、AC-59-06 |
 | V-STT-08 | 分數區：目標 `latency`／`address`／`sitting` 對替身 `Latency.`／`adress`／`kitten` → 綠、黃、紅；綠、黃只有「辨識文字」1 列，紅燈 2 列；值逐字等於替身原文、`lang="en"`；含 `<img src=x onerror=alert(1)>`、`&lt;b&gt;` 時以字面顯示、列內無子元素、無腳本執行；分數區固定文字無 RT-4 字樣 | AC-60-01～AC-60-05 |
-| V-STT-09 | 常數：程式中的 3 則訊息、按鈕文字、`aria-label`、標籤逐字等於 `STT_FLOW_TEXTS`；`architecture.md` 定的 3 個時間值都在 `STT_TIMING` 範圍內 | AC-58-01、AC-58-06、AC-59-01、Q-99 A、PR-11 |
-| V-STT-10 | 不持久化：經過準備中（含取消、逾時）、分流訊息與分數後，localStorage 鍵名、欄位集合、`schemaVersion` 3 與匯出備份格式不變，值中無準備中、事件紀錄或辨識文字；重新載入為待機；今日已學、打卡、掌握數只在評分時依 LR-1 改變 | AC-58-12、AC-59-07、AC-60-07、AC-30-04 |
+| V-STT-09 | 常數：程式中的 3 則訊息、按鈕文字、`aria-label`、標籤（v0.21 含 `labelInterim`）逐字等於 `STT_FLOW_TEXTS`；`architecture.md` 定的 3 個時間值都在 `STT_TIMING` 範圍內 | AC-58-01、AC-58-06、AC-59-01、AC-62-01、Q-99 A、Q-104 A、PR-11 |
+| V-STT-10 | 不持久化：經過準備中（含取消、逾時）、分流訊息與分數後，localStorage 鍵名、欄位集合、`schemaVersion` 3 與匯出備份格式不變，值中無準備中、事件紀錄或辨識文字；（v0.21）經過即時文字（以 AC-62-03 (a)、AC-62-05、AC-62-06 (a) 結束）後同樣不變，localStorage、IndexedDB、Cache Storage 與備份中搜尋即時文字字串命中 = 0；重新載入為待機；今日已學、打卡、掌握數只在評分時依 LR-1 改變 | AC-58-12、AC-59-07、AC-60-07、AC-30-04、AC-62-10 |
+| V-STT-11 | （v0.21）即時文字顯示：聆聽中替身依序回傳暫時結果 `la`、`late`、`latency` → 每次 ≤ 100ms 內即時文字列恰 1 列、標籤 `textContent` = `labelInterim`、值 `textContent` 依序逐字相同、值元素 `lang="en"`；多段暫時結果以 1 個半形空白串接；空字串或只有空白的暫時結果不呼叫 `onInterim`、畫面不變；值含 `<img src=x onerror=alert(1)>`、`&lt;b&gt;` 時以字面顯示，列內子元素數不變、無腳本執行；按鈕維持「聆聽中」、無分數區與 US-59 訊息 | AC-62-01、AC-62-08 |
+| V-STT-12 | （v0.21）準備中收到即時文字：`awaitingAudioStart` 與 `fallbackWait` 各觸發 `interim(ad)` → ≤ 100ms 內「聆聽中」且顯示 `ad`；之後等待超過 `T_READY` 不出現 `noResponse`；再觸發 `audiostart` 畫面不變 | AC-62-02、AC-58-07 |
+| V-STT-13 | （v0.21）隱藏：即時文字列顯示中，分別發生最終結果、`result("")`、`end`（(2b) 評分）、再按麥克風、換卡、切換模式、按 TTS、離開單字卡頁、`error`（`network`、`not-allowed`、`audio-capture`、`no-speech`、其他）、`nomatch`、音軌結束 → 每項 ≤ 100ms 內隱藏；評分時分數區出現與即時文字列隱藏在同一次繪製（任何時刻兩者不同時可見）；之後遲到的暫時結果、最終結果或 `end` 不重新顯示、不評分 | AC-62-03～AC-62-06、E-171、E-172 |
+| V-STT-14 | （v0.21）以即時文字評分：目標 `address`，`interim(adr)`→`interim(adress)`→`end` → 分數 86、黃燈、「辨識文字」= `adress`；分數區 DOM、`SttResult`、今日已學、打卡、掌握數與 STT 評分紀錄和直接 `result(adress)` 的對照組逐一相同；`end` 到分數區繪製完成 ≤ 100ms。服務單獨測試：上述序列 `onResult` 呼叫次數 = 0、`onEnd` 的 `info.hadResult = false`、`info.lastInterimText = "adress"`（IT-4） | AC-62-05、Q-103 A |
+| V-STT-15 | （v0.21）文字：即時文字列的固定文字只有 `labelInterim`；替身回傳英文、中文、數字時，列內不出現「偵測到」「語言」「英文」「中文」「你說的是」「發音」「分數」（引擎回傳的值除外） | AC-62-11 |
+| V-STT-16 | （v0.21）無障礙：即時文字列 `aria-live = "off"`；列與所有祖先元素的 `aria-live` 不是 `polite`／`assertive`、`role` 不是 `status`／`alert`／`log` | AC-62-07 |
+| V-STT-17 | （v0.21）服務介面：未提供 `onInterim` 時 `interimResults = false` 且每個 result 事件都走 `onResult`（v0.20 行為不變，AC-62-03 (b)）；提供時 `interimResults = true`；`lang`、`maxAlternatives = 1`、`continuous = false` 不變；`SttEndInfo` 恰 9 欄且每次 `start()` 重設；即時文字不出現在 `AppState`（序列化 `AppState` 搜尋即時文字字串命中 = 0） | AC-62-03、AC-62-10、IT-1～IT-4、IT-8 |
+
+### 14.6 聆聽中即時文字（IT；v0.21，PRD R-30、US-62、Q-103～Q-107；**不改持久化結構**）
+
+型別與常數見 `data-schema.ts` §18（`SttStartOptions`、`SttEngineEventKind` `"interim"`、`SttEndInfo.lastInterimText`、`STT_FLOW_TEXTS.labelInterim`）。**持久化結構不變**（Q-106 A）：`schemaVersion` 3、鍵數 2、`PersistedData` 12 欄、備份格式都不變。分工：`services/stt.js` 區分並回報即時文字（IT-1～IT-4），語音畫面模組負責轉入聆聽中、顯示、隱藏與判定（IT-5～IT-10）；實際模組名稱與函式分工由 SD 定。
+
+| 編號 | 規則 | 對應 AC |
+| :--- | :--- | :--- |
+| IT-1 | **要求暫時結果**：`start(opts)` 的 `opts.onInterim` 是函式 → 引擎 `interimResults = true`；否則 `false`（與 v0.20 相同）。`lang`（預設 `"en-US"`）、`maxAlternatives = 1`、`continuous = false` 不變。語音畫面每次嘗試都必須提供 `onInterim`（US-62）；不提供的呼叫端（例：測試）行為與 v0.20 完全相同 | AC-62-01、AC-62-03 (b)、AC-08-01、E-167 |
+| IT-2 | **區分暫時與最終**：要求暫時結果時，每個引擎 `result` 事件中，自 `resultIndex` 起任一結果的 `isFinal` 不是 `false`（含未提供 `isFinal`）→ **最終結果**：依 RT-1 取文字，呼叫 `onResult(text, info)`、`hadResult = true`；全部為 `false` → **即時文字**（`"interim"`）：依 IT-3 處理，**不**改 `hadResult`、不呼叫 `onResult`。未要求暫時結果時，每個 `result` 事件都是最終結果 | AC-62-01、AC-62-03 |
+| IT-3 | **即時文字取出**：`results` 由索引 0 到最後，每個結果取第 1 候選 `transcript`，各自 trim，捨棄空字串，以 1 個半形空白 U+0020 串接；不做其他處理（不清洗標點、不改大小寫，屬取得引擎輸出，同 RT-1、FB-77）。結果非空 → `lastInterimText` = 結果，再以新複本呼叫 `onInterim(text, info)`；結果為空 → 不呼叫 `onInterim`、`lastInterimText` 不變（畫面保留上一段，FB-80） | AC-62-01、AC-62-08 |
+| IT-4 | **服務不代替評分**：服務**不得**在 `end` 時以 `lastInterimText` 呼叫 `onResult` 或改 `hadResult`；只在 `onEnd(info)` 的 `info.lastInterimText` 回報。是否以即時文字評分由呼叫端依 MS-1 (2b) 判定（DS-57「服務只轉送、不決定」） | AC-62-05、AC-62-06 |
+| IT-5 | **準備中轉入聆聽中**：已呼叫 `start()` 的準備中（`awaitingAudioStart`、`fallbackWait`）收到 `onInterim` → ≤ 100ms 內 `sttStatus = "listening"`、`preparingPhase = null`，同一次繪製顯示即時文字列；視同已確認開始收音（§14 名詞），清除 `T_READY`、`T_BUFFER`、`T_FALLBACK` 計時器；收音條開始依音量點亮；之後的 `audiostart` 不改畫面（PR-5 (b)） | AC-62-02、AC-58-07、E-168 |
+| IT-6 | **顯示**：即時文字列位於麥克風列（麥克風按鈕、收音條）下方，同時間最多 1 列。結構固定為標籤元素（`textContent` = `STT_FLOW_TEXTS.labelInterim`）＋值元素（`textContent` = 最新 `onInterim` 的 `text` 原樣，`lang="en"`）；更新只改值元素的 `textContent`，不新增子元素，原始碼不得把即時文字寫入 HTML 字串（C-7）。只在 `sttStatus = "listening"` 且本次嘗試尚未判定時顯示。列的 `aria-live = "off"`，列與所有祖先都不得是 `aria-live` polite／assertive 或 `role` status／alert／log 的區域（即時文字列不可放在既有訊息區、分數區內）。固定文字只有標籤，不得出現 RT-4 字樣與「發音」「分數」。樣式（斜體、次要文字色，建議 `COLOR_TOKENS.textMuted`；無動畫與過渡；換行不截斷；麥克風列座標不變）屬設計層 | AC-62-01、AC-62-07～AC-62-09、AC-62-11 |
+| IT-7 | **隱藏**：嘗試結束（PRD US-62 名詞：評分、顯示訊息、錯誤、取消、手動停止、換卡、切換模式、按 TTS、離開單字卡頁，含音軌結束）≤ 100ms 內隱藏並清空值；手動停止在按下當下隱藏，不等 `end`。評分時，即時文字列隱藏與分數區出現在**同一次**繪製，任何時刻兩者不同時可見；顯示訊息時同理。嘗試結束後，該嘗試遲到的暫時結果、最終結果、`end` 不重新顯示即時文字列（PR-9 嘗試代號）；新嘗試開始時沒有即時文字列（PR-4） | AC-62-03～AC-62-06、E-169、E-171、E-172 |
+| IT-8 | **不保存**：即時文字與「即時文字列是否顯示」只放語音畫面模組內部變數與 DOM，**不進 `AppState`**（`RuntimeState` 不新增欄位，理由見 `data-schema.ts` `RuntimeState` 註解）；`SttEndInfo.lastInterimText` 只經回呼傳遞。不得寫入 `PersistedData`、localStorage、IndexedDB、Cache Storage、備份檔；不因即時文字發出網路請求；重新載入後為待機、無即時文字列；不使用 `MediaRecorder`（AC-08-13 說明與隱私權政策文字不變） | AC-62-10、AC-21-03、NFR-3 |
+| IT-9 | **只有即時文字就結束時評分**（Q-103 A）：MS-1 (2b) 成立時，以 `lastInterimText` 經既有清洗（MS-4）與吻合度計算產生 `SttResult`（`recognizedText` = `lastInterimText` 原樣、`targetText` = 卡片 word），之後的分數區、燈號、提示、說明、`lastResult`、學習行為 `"stt"`（LR-1）、打卡、掌握數與 STT 評分紀錄，與收到同文字的最終結果**完全相同**；`end` 到分數區繪製完成 ≤ 100ms；不顯示 US-59 訊息。清洗後為空 → MS-1 (4) `heardNoWords`、不評分。有最終結果時一律用最終結果（AC-62-03 (a)、AC-62-04 不以即時文字補評分） | AC-62-05、AC-62-03、AC-62-04、AC-30-04 |
+| IT-10 | **即時文字優先順序**（PRD R-30 PM 判斷 (c)）：手動停止與取消（MS-1 (1)）、錯誤（(3)）、`nomatch`（(4)）都先於即時文字，一律不以即時文字評分；顯示過即時文字後的 `no-speech` 為 `heardNoWords`，不是 `noSpeech`（Q-107 A，MS-1 (4)）；拔除麥克風依 AC-33-06 (b) | AC-62-06、AC-59-05、E-172 |
 
 ---
 
@@ -1912,6 +1984,7 @@ SC-2 渲染對照：
 | 0.18 | 2026-11-04 | sa-agent | 修訂已核准的 v0.17（主控代核），原因：PRD v0.18（approved，JimmyLin，2026-11-04）R-26：新增 US-48、AC-48-01～AC-48-12、E-124～E-134；修改 AC-11-04、AC-11-05、AC-11-07、AC-42-02、AC-45-03、AC-45-04、AC-45-06、AC-46-01、AC-46-02、AC-46-04、AC-46-05、AC-46-06、AC-46-09；移除 AC-46-07；Q-77～Q-80 已決議。本檔與 `data-schema.ts` 的 `status` 改為 `draft`、`version` 0.18、核准欄位清空，上游改為 PRD v0.18；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved。(1) §5.11 新增 LV-1～LV-7、SM-1～SM-3、HN-1、CR-10、UO-10；修改 CR-2、CR-4、CR-5、CR-6、CR-7、UO-1、UO-2、UO-3、UO-5、UO-6、UO-7、UO-8；(2) 移除 `replayKeepRecords` 與 `replayPart5KeepRecords` 動作，理由見 UO-7，原效果由 UO-8 (a) 涵蓋；(3) §5.3 寫入列、WR-1、MT-1、§11.3、§12.1（版本 1.2.0）同步；(4) 修改 V-ST-19、V-ST-20，新增 V-ST-23～V-ST-27；(5) §1 新增 1 列與 v0.18 型別數；§8 新增 v0.18 表，AC-46-07 列標示移除；(6) 新增回饋上游 FB-65～FB-69，回饋下游 §9.11 DS-43～DS-46；FB-56、DS-34 補註；(7) `data-schema.ts` 新增 `Part5QuestionState`，`PART5_RECORD_TEXTS` 新增 4 鍵、移除 1 鍵，其餘只改註解。型別數 69 → 70、契約常數 42 不變、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，備份格式不變，不需遷移**；`src/data/` 不變。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 | 0.19 | 2026-11-05 | sa-agent | 修訂已核准的 v0.18（主控代核），原因：PRD v0.19（approved，JimmyLin，2026-11-05）R-27、R-28：新增 US-49～US-57、AC-49-01～AC-57-06、E-135～E-155，同版修訂既有 AC，Q-81～Q-93 已決議。本檔與 `data-schema.ts` 的 `status` 改為 `in-review`、`version` 0.19、核准欄位清空，上游改為 PRD v0.19；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved。(1) 新增 §13（AS-1～AS-7、AD-1～AD-15、SP-1～SP-9、SC-1～SC-6、SE-1～SE-9、ML-1～ML-5；V-ANS-01～03、V-AD-01～06、V-SITE-01～07、V-SEO-01～08、V-MAIL-01～02），原「§13 變更紀錄」改為 §14。(2) §10：部署目錄 8 → 13 檔，新增 DP-8～DP-10，修改 DP-1、DP-7、HD-1、HD-3、MF-4、SW-2、PV-3、PV-5、PV-6、V-PWA-01、V-PWA-04、V-PWA-06、V-PWA-12；`PWA_PRECACHE_URLS` 不變。(3) 已答對顯示：§5.4 末段、CR-4、CR-5、SM-2、DB-1、DB-5、V-ST-19 修改；`statAccuracyLabel` 移除。(4) 信箱改為新值：L-7、`SOURCES_CONTACT_TEXT`；LT-3、LT-5 位置擴及關於我；V-LGL-05 範圍擴大。(5) FS-2、NM-1、NM-2、NM-6、§11.3、§12.1（版本 1.3.0）、VR-1、VR-7、V-VER-03 同步。(6) §1 新增 4 列與 v0.19 型別數；§8 新增 v0.19 表；新增回饋上游 FB-70～FB-75，回饋下游 §9.12 DS-47～DS-56。(7) `data-schema.ts` 新增 §17。型別數 70 → 81、契約常數 42 → 60、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，備份格式不變，不需遷移**；`src/data/` 不變。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 | 0.20 | 2026-11-05 | sa-agent | 修訂已核准的 v0.19（主控代核），原因：PRD v0.20（approved，JimmyLin，2026-11-05）R-29：新增 US-58～US-61、AC-58-01～AC-61-02、E-156～E-166；修改 AC-08-01、AC-08-06、AC-08-07、AC-08-08、AC-08-10、AC-08-13、AC-22-03、AC-30-04、AC-31-03、AC-33-01、AC-33-03、AC-33-06、AC-33-07、AC-33-08、AC-42-02；Q-94～Q-102 全採 PM 建議。本檔與 `data-schema.ts` 的 `status` 改為 `in-review`、`version` 0.20、核准欄位清空，上游改為 PRD v0.20；`storage-schema.json` 無實質變動，未修改，維持 v0.16 approved。(1) 新增 §14（PR-1～PR-12 與狀態轉移總表、MS-1～MS-6、RT-1～RT-6、KF-1、V-STT-01～V-STT-10），原「§14 變更紀錄」改為 §15。(2) `T_READY` 預設 5000（3000～10000）、`T_BUFFER` 預設 0（0～500）、`T_FALLBACK` 預設 1500（1000～2000）ms，主控實測後可在範圍內代核調整（PR-11）。(3) §1 新增 3 列與 v0.20 型別數；§8 新增 v0.20 表；§11.3 新增 3 列；§12.1 版本 1.3.1 註記（Q-102 A）。(4) 新增回饋上游 FB-76～FB-79，回饋下游 §9.13 DS-57～DS-63。(5) `data-schema.ts`：`SttStatus` +`"preparing"`、`RuntimeState.speech.preparingPhase`；新增 §18（4 個 type、2 個 interface、3 個常數）；`SttResult`、`APP_VERSION_META_NAME` 註解更新。型別數 81 → 87、契約常數 60 → 63、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，備份格式不變，不需遷移**；`src/data/` 不變。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
+| 0.21 | 2026-11-09 | sa-agent | 修訂已核准的 v0.20（主控代核），原因：PRD v0.21（approved，JimmyLin，2026-11-09）R-30（新增 US-62、AC-62-01～AC-62-12、E-167～E-174；修改 AC-08-10、AC-30-04、AC-42-02、AC-58-07、AC-59-01、AC-59-05；Q-103～Q-107 皆 A）與 R-31（修改 AC-10-02、AC-54-01、US-56 `meta description`；Q-108 A）。三檔 `status` 改為 `in-review`、`version` 0.21、核准欄位清空並同步（`storage-schema.json` 由 v0.16 直接升為 v0.21，恢復三檔同步），上游改為 PRD v0.21。(1) 新增 §14.6 IT-1～IT-10：服務 `start()` 新增 `onInterim`、提供即 `interimResults = true`；暫時與最終結果的區分（`isFinal`）與即時文字取出規則；**服務不在 `end` 時以即時文字補發 `result`**（與試作不同）；準備中收到即時文字即進入聆聽中；顯示、無障礙、隱藏時機；即時文字不進 AppState、不保存；只有即時文字就結束時評分；優先順序。(2) MS-1 插入步驟 (2b)（Q-103 A），步驟 (4) 加入「收到過即時文字」（Q-107 A）；§14 名詞、PR-5、PR-6、狀態轉移表、MS-2、MS-6、RT-1、LR-1 同步。(3) 修改 V-STT-06、V-STT-09、V-STT-10，新增 V-STT-11～V-STT-17。(4) R-31：LT-2 改為「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」，位置欄補關於我與首頁 description；V-LGL-02 補檢查（交付物全文搜尋「TOEIC®（多益）Part 5」= 0）；§1、§7.4 標題同步；LT-3「Part 5 題目」不改（Q-108 A）。(5) §1 新增 1 列與 v0.21 型別數；§8 新增 v0.21 表；§11.3 新增 2 列；§12.1 版本 1.3.2 註記（Q-105 A）。(6) FB-79 解除；新增回饋上游 FB-80～FB-82，回饋下游 §9.14 DS-64～DS-71（DS-65～DS-69 為與試作分支 `feat/stt-interim-text` 的差異）。(7) `data-schema.ts`：新增 interface `SttStartOptions`；`SttEngineEventKind` +`"interim"`；`SttEndInfo` +`lastInterimText`（9 欄）；`STT_FLOW_TEXTS` +`labelInterim`；`SITE_PAGES`（about）、`SITE_HOME_SEO`、`SITE_HOME_JSON_LD`、`SITE_NOSCRIPT` 改值；註解更新。(8) `storage-schema.json` 只改 meta（版本、狀態、上游、covers、`browserStoragePolicy.localStorage.speechInterim`、changelog）。型別數 87 → 88、契約常數 63 不變、localStorage 鍵數 2 不變；**持久化結構不變，`schemaVersion` 維持 3，備份格式不變，不需遷移**；`src/data/` 不變（pg-content 無工作）。未改 PRD、未改持久化結構，符合 CLAUDE.md 主控代核條件 |
 
 > **主控代核（2026-11-02）**：v0.9 依 PRD v0.9（JimmyLin 核准）增量修訂，未改 PRD、未改持久化結構（schemaVersion 維持 2、備份格式不變），符合 CLAUDE.md 主控代核範圍。`storage-schema.json` 內容無變動，維持 v0.8 approved，三檔版本不同步屬本版例外。FB-33～FB-35 接受 SA 處理方式，於下次 PRD 修訂時交 PM 確認。
 
@@ -1932,3 +2005,5 @@ SC-2 渲染對照：
 > **主控代核（2026-11-05，v0.19）**：依 PRD v0.19（JimmyLin 核准）R-27、R-28 新增 §13 與部署規則；未改 PRD、未改持久化結構（schemaVersion 3、localStorage 2 鍵、備份格式不變、無遷移），符合 CLAUDE.md 主控代核條件。`storage-schema.json` 維持 v0.16。FB-70、FB-72、FB-74、FB-75 接受 SA 定案；FB-71 的文案由人類於部署後檢視；FB-73 於第二階段填入單元 ID 前由主控核對。
 
 > 主控代核（2026-11-05）：依已核准 PRD v0.20 修訂；不改 PRD、不改 localStorage 持久化結構（schemaVersion 3，storage-schema.json 未改）；tsc --strict 通過。
+
+> 主控代核（2026-11-09，v0.21）：依已核准 PRD v0.21（JimmyLin，2026-11-09）新增 US-62 即時文字規則 IT-1～IT-10、V-STT-11～V-STT-17，並依 Q-108／R-31 修改 LT-2 等商標說明常數；不改 PRD、不改 localStorage 持久化結構（schemaVersion 3、localStorage 2 鍵、備份格式不變，storage-schema.json 只改 meta）；tsc --strict 通過。FB-80～FB-82 接受 SA 定案。

@@ -35,7 +35,9 @@ const HUMAN_ESSENTIAL = { "AC-33-01": "V-MIC-1", "AC-33-02": "V-MIC-2", "AC-23-0
   "AC-50-10": "TC-50-10h（第二階段，人類實機）", "AC-56-08": "部署後 D-3（正式網址回應）", "AC-56-09": "部署後 D-3（正式網址回應）",
   "AC-51-03": "TC-M07（4 倍降速本次載入首次作答 > 100 ms，同條件無廣告也一樣，§20.5）",
   // 第 10 輪（PRD v0.20）：真人語音，自動化不可判定（architecture §10.12 Q4）
-  "AC-58-14": "TC-58-14h（真人語音，Chrome、Edge、正式網站）", "AC-59-08": "TC-59-08h（真人語音，Chrome、Edge）" };
+  "AC-58-14": "TC-58-14h（真人語音，Chrome、Edge、正式網站）", "AC-59-08": "TC-59-08h（真人語音，Chrome、Edge）",
+  // 第 12 輪（PRD v0.21）：真人語音，自動化不可判定（architecture §10.14 Q17）
+  "AC-62-12": "TC-62-12h（真人語音，Chrome、Edge、正式網站）" };
 const rows = [];
 for (const a of acs) {
   const rs = map.get(a.id);

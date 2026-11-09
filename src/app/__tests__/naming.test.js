@@ -3,7 +3,8 @@
  * 依據：architecture.md v0.4 §7.13（功能更名）、§10.1（naming.test.js 列）；契約 TAB_LABELS、NAV_TAB_ORDER；PRD R-15
  * 做法：讀 src/app/index.html（去除 HTML 註解）與 src/app/views/*.js 的字串常值（去除註解），
  *       - 不得含舊名稱「抽認卡」「自訂器」；
- *       - 「Part 5」只允許出現在 sources-page.js 的授權／來源文字，以及 part5.js 的標題說明（v0.12，FE-78：契約 L-8 LT-2）；
+ *       - 「Part 5」只允許出現在 sources-page.js 的授權／來源文字（v0.17，FE-100：LT-2 已不含「Part 5」）；
+ *         part5.js 另須有逐字等於 LT-2 的標題說明字串常值（v0.12，FE-78：契約 L-8 LT-2）；
  *       - 導覽 4 個按鈕文字依序 = TAB_LABELS[NAV_TAB_ORDER[i]]，data-tab 依序 = NAV_TAB_ORDER（v0.5，FE-38）；
  *       - 各 section 的 aria-label = TAB_LABELS[id 去掉 "view-"]；隱藏頁 section 保留、hidden、無 aria-label。
  *       - （v0.5，FE-38；AC-20-04、HT-2～HT-5）index.html 與主控台入口不含指向隱藏頁的 data-tab／data-go，
@@ -14,8 +15,8 @@
 
 const { describe, test } = require("node:test");
 
-/** （v0.12，FE-78）模擬測驗標題說明：逐字照契約 README §4.3 L-8 LT-2 */
-const LT_2 = "題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容";
+/** （v0.12，FE-78；v0.17，FE-100 拿掉「Part 5」）模擬測驗標題說明：逐字照契約 README §4.3 L-8 LT-2 */
+const LT_2 = "題型參考 TOEIC®（多益），非 ETS 官方或認可內容";
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -135,19 +136,22 @@ describe("naming.test.js", () => {
     assert.deepEqual(hits, []);
   });
 
-  test("views/*.js 的字串常值「Part 5」只出現在 sources-page.js 授權文字與 part5.js 標題說明（LT-2）", () => {
+  test("views/*.js 的字串常值含「Part 5」者只在 sources-page.js 授權文字（v0.17，FE-100）", () => {
     const hits = [];
-    let noteFound = false;
     for (const f of viewFiles()) {
       for (const s of stringLiterals(read(path.join(VIEWS_DIR, f)))) {
         if (!s.includes("Part 5")) continue;
-        if (f === "sources-page.js") continue;               // 授權與資料來源文字（R-15 不改）
-        if (f === "part5.js" && s === LT_2) { noteFound = true; continue; }
+        if (f === "sources-page.js") continue;               // 授權與資料來源文字（R-15 不改；LT-3 的「Part 5 題目」）
         hits.push(f + "：" + s);
       }
     }
     assert.deepEqual(hits, []);
-    assert.ok(noteFound, "part5.js 應有標題說明 LT-2");
+  });
+
+  test("（v0.17，FE-100）part5.js 有逐字等於 LT-2 的標題說明字串常值，且 LT-2 不含「Part 5」", () => {
+    assert.equal(LT_2.includes("Part 5"), false);
+    const lits = stringLiterals(read(path.join(VIEWS_DIR, "part5.js")));
+    assert.ok(lits.includes(LT_2), "part5.js 應有標題說明 LT-2");
   });
 
   test("（v0.12，FE-78）views/*.js 字串常值不含已廢止的標題說明與搭配詞標籤（V-LGL-01、V-LGL-02）", () => {

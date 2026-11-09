@@ -26,7 +26,7 @@ const NONE = "本輪沒有新作答的題目";
 const HINT = "關閉時顯示全部題目，答對過的題目會以綠色鎖定。";
 const HINT_ALL = "要檢視全部題目，請關閉上方的「只練沒答對的題目」。";
 const CLEAR = "清除答對紀錄，重新來過";
-const NOTE = "題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容";
+const NOTE = "題型參考 TOEIC®（多益），非 ETS 官方或認可內容";
 const countText = (k, q = 200) => `已答對 ${k} / ${q} 題`;
 
 // 計 setItem（只計主鍵）與未處理錯誤；以 sessionStorage 無關，每次載入歸 0

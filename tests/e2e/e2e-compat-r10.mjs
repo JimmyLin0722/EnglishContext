@@ -8,6 +8,7 @@ import { pathToFileURL } from "node:url";
 import { launch, recorder, sleep, FILE_URL, ROOT, resultPath } from "./lib/cdp.mjs";
 import { TOAST_RECORDER, fakeTts, fakeStt, fakeMic } from "./lib/inits.mjs";
 import { KEY, expandBackup, dialogInfo } from "./lib/state.mjs";
+const PKG_VER = JSON.parse(fs.readFileSync(path.join(ROOT, "package.json"), "utf8")).version; // 第 12 輪
 
 const J = JSON.stringify;
 const R = recorder("e2e-compat-r10");
@@ -45,7 +46,7 @@ await R.check("TC-R10-C1", "共通規則 1（1.3.0 的 localStorage 以 1.3.1 �
   await p.go("flashcards"); await sleep(200); await p.go("part5"); await sleep(200); await p.go("dashboard"); await sleep(200);
   const sets1b = await p.ev(`window.__sets`); const a1b = await lsAll(p);
   await p.reload(); const sets2 = await p.ev(`window.__sets`); const a2 = await lsAll(p);
-  const ok = oldVer === "1.3.0" && ver === "1.3.1" && entry === "main" && sets1 === 0 && sets1b === 0 && sets2 === 0 && J(a1) === J(old) && J(a1b) === J(old) && J(a2) === J(old) && Object.keys(a2).length === 1 && JSON.parse(a2[KEY]).schemaVersion === 3 && p.log.exceptions.length === 0;
+  const ok = oldVer === "1.3.0" && ver === PKG_VER /* 第 12 輪：改讀 package.json（1.3.2；第 10、11 輪寫死 1.3.1） */ && entry === "main" && sets1 === 0 && sets1b === 0 && sets2 === 0 && J(a1) === J(old) && J(a1b) === J(old) && J(a2) === J(old) && Object.keys(a2).length === 1 && JSON.parse(a2[KEY]).schemaVersion === 3 && p.log.exceptions.length === 0;
   return { ok, note: `1.3.0（${oldVer}）學習後 localStorage 鍵 ${J(Object.keys(old))}、schemaVersion ${oldState.schemaVersion}、data ${Object.keys(oldState.data).length} 欄（今日已學 ${oldState.data.todayLearned.wordKeys.length}、自訂 ${oldState.data.customVocab.length}、模擬測驗累計 ${oldState.data.part5.totalAnswered}）；以 ${ver} 開啟 → ${entry}、開啟時 setItem ${sets1} 次、切換 3 頁後 ${sets1b} 次、重新載入 ${sets2} 次；localStorage 逐位元組與 1.3.0 相同=${J(a2) === J(old)}` };
 });
 

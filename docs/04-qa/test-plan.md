@@ -1,6 +1,6 @@
 ---
 doc: TEST-PLAN
-version: 0.12
+version: 0.13
 status: in-review
 author: qa-agent
 approved_by:
@@ -9,6 +9,8 @@ approved_at:
 
 # English Master Track — 測試計畫（第 5 階段驗收）
 
+> **v0.13（第 12 輪，2026-11-09）**：1.3.2，範圍依 architecture v0.17 §10.14（Q13～Q20）：PRD v0.21（R-30：新增 US-62 共 12 個 AC，修改 AC-08-10、AC-30-04、AC-42-02、AC-58-07、AC-59-01、AC-59-05；R-31：修改 AC-10-02、AC-54-01，連帶重跑 AC-56-03、AC-56-05～AC-56-07、AC-57-03、AC-23-08），應驗收 400 個 AC；回歸 AC-58、AC-59、AC-60、AC-33 與全套。新增 §1.9、§2.12、§4.9、§6.9，§5、§7 依第 12 輪結果重新產生。第 11 輪以前的內容保留。
+>
 > **v0.12（第 11 輪，2026-11-06）**：1.3.1 修正輪，範圍依 architecture v0.16 §10.13（Q8～Q12）：複驗 BUG-006、BUG-007、BUG-008，回歸第 10 輪涉及項目；PRD v0.20、契約 v0.20 不變（應驗收 388 個 AC）。新增 §1.8、§2.11、§4.8、§6.8，§5、§7 依第 11 輪結果重新產生。第 10 輪以前的內容保留。
 >
 > **v0.11（第 10 輪，2026-11-05）**：範圍依 architecture v0.15 §10.12、§13.12：PRD v0.20（R-29：新增 US-58～US-61 共 31 個 AC，修改 15 個 AC，E-156～E-166），應驗收 388 個 AC；驗證 BUG-005 修正。新增 §1.7、§2.10、§4.7、§6.7，§5、§7 依第 10 輪結果重新產生。第 9 輪以前的內容保留。
@@ -148,6 +150,20 @@ approved_at:
 | 對照組 | 1.3.0（git `a358556`）；**第 10 輪樣式對照組**：目前原始碼、只把 `00-base.css`、`85-ad.css` 還原為 FE-96 之前，由 QA 建置到 scratchpad（第 10 輪產物未保留；版面只受樣式影響） |
 | 越界基準 | 第 10 輪變更未提交（HEAD 仍 `a358556`），改以「第 10 輪驗收結束 2026-11-05 19:15 之後修改的檔案」判定：須在 FE-95～FE-97 paths 內；PG 只可另改 `tasks.json` 的 status 欄；`package.json`、`src/data/`、`tools/`、`.github/`、`docs/01-PRD.md`、`docs/02-contract/`、`services/ad.js`、`views/flashcards.js`（M-1、M-5）須無變動 |
 | 瀏覽器 | 本機 CDP 啟動的無頭 Chrome 與 Edge（`lib/cdp.mjs`），**不加** `--hide-scrollbars`；廣告套件沿用 Playwright（本機 Chrome／Edge），一般捲軸以 `ignoreDefaultArgs: ["--hide-scrollbars"]` |
+
+### 1.9 第 12 輪範圍（PRD v0.21：聆聽中即時文字、商標說明拿掉「Part 5」，版本 1.3.2）
+
+| 項目 | 內容 |
+| :--- | :--- |
+| 驗收範圍 | architecture v0.17 §7.30、§7.31、§10.14（Q13～Q20、M-1～M-6）、§12.16；PRD v0.21（應驗收 400 個 AC，暫停 27、AC-46-07 移除）、契約 v0.21（§14.6 IT-1～IT-10、MS-1 (2b)／(4)、V-STT-06、V-STT-09～V-STT-17、L-8 LT-2、V-LGL-02、DS-64～DS-71）、tasks.json v0.16（FE-98～FE-101 done；主控 MC-10） |
+| 新增 AC（12） | AC-62-01～AC-62-12（US-62）；E-167～E-174 併入 |
+| 修改 AC | R-30：AC-08-10、AC-30-04、AC-42-02、AC-58-07、AC-59-01、AC-59-05；R-31：AC-10-02、AC-54-01（US-56 `meta description`） |
+| 連帶重跑 | AC-56-03、AC-56-05～AC-56-07、AC-57-03、AC-23-08（V-LGL-02 v0.21：交付物「TOEIC®（多益）Part 5」0 次） |
+| 回歸 | §10.14 T9：AC-58-03、AC-58-13、AC-60-06；AC-58 全部、AC-59、AC-60、AC-33；FE-101 未跑完的 TC-58-01f、TC-58-01g、TC-58-04c、TC-33-03r（e2e-stt-flow 第 8 段）；其餘全套照常 |
+| 人工 | AC-62-12（TC-62-12h，真人語音 Chrome／Edge／正式網站）、AC-62-07 後半（TC-62-07h，NVDA）、AC-58-14、AC-59-08（與 TC-62-12h 同一輪）、部署後版本行（TC-VER-H2）；列待人工，不算失敗 |
+| 受測物 | `dist/english-master-track.html`＝`dist/site/index.html` 3,486,160 bytes（SHA-256 `9b081604199d…`）＋`dist/site/` 13 檔；版本 1.3.2、BUILD_ID `981b0d2ab45de9d6`；QA 以目前原始碼重建 2 次與 `dist/` 14 檔逐檔相同（M-6：是 FE-101 產物，不是試作分支的 `dist/`） |
+| 越界基準 | 第 11 輪變更已提交（HEAD `2cb2ca2`），本輪以 `git diff HEAD`＋未追蹤檔＋`dist/site/`（.gitignore 排除，以修改時間晚於 HEAD 判定）：須在 FE-98～FE-101 paths 內；`package.json` 只可改 version 1 行（MC-10）；`src/data/`、`tools/`、`.github/`、`package-lock.json`、`views/flashcards.js`、`state/store.js`、`services/mic.js` 須無變動（M-5）；`storage-schema.json` 只可改 meta |
+| 瀏覽器 | 本機 CDP 無頭 Chrome、Edge（`lib/cdp.mjs`，不加 `--hide-scrollbars`）；Service Worker 段（TC-62-10b、e2e-pwa）用 Playwright（本機 8080），因 CDP 開的無頭 Chrome 裝不起 Service Worker（FE-97、FE-101 回報，環境問題） |
 
 ## 2. 測試方式
 
@@ -350,13 +366,30 @@ approved_at:
 | 載入期 header（AC-52-05） | Layout Instability API ＋ 逐畫格紀錄（`data-ad-env`、`scrollbarGutter`、`.app-header__inner` 左緣）：(1) `file://` 一般、(2) `DOMContentLoaded` 設 `data-ad-env` 模擬、(3) `build-ad-test.mjs` 測試建置經本機 HTTPS（CDP）、(4) `e2e-ad` 替身 filled（Playwright 一般與隱藏捲軸）。header 位移 0、首畫格起 `stable` |
 | 對照組 | 第 10 輪樣式對照組（§1.8）用於：375／390 版面座標相同（AC-20-01、AC-40-02）；重現 BUG-006、BUG-008 以確認量測敏感度 |
 
+### 2.12 第 12 輪量測方式與判定規則
+
+| 項目 | 方式／判定 |
+| :--- | :--- |
+| V-STT-STUB 暫時結果 | `inits.mjs` `fakeStt` 加 `emitInterim(...texts)`：每段 1 個 result、`isFinal = false`、`resultIndex 0`；`emitResult` 維持 `isFinal = true`；`emitRaw(ev)` 送自訂事件。`__qaStt.config` 記錄每次 `start()` 當下的 `lang`、`interimResults`、`maxAlternatives`、`continuous`；建構子 `interimResults` 初值改為 `null`（第 11 輪以前為 `true`，無法分辨產品是否明確設定）（§10.14 Q13） |
+| `interimResults` 斷言 | TC-08-01：`start()` 當下 `interimResults === true`、`maxAlternatives 1`、`continuous false`（§10.14 Q14；第 11 輪以前只記在說明、未判定） |
+| ≤ 100 ms | 同 §2.10：頁面內觸發事件到「條件成立後的下一個畫格」；另記錄事件處理器結束當下（同步）的狀態，用來判定「同一次畫面更新」 |
+| 不同時可見 | AC-62-03 (a)、AC-62-05：rAF 逐畫格取樣即時文字列與分數區、訊息區是否同時可見，同時可見畫格數須為 0；並要求事件處理器結束當下即時列已隱藏、分數區已出現 |
+| AC-62-05 對照組 | 同一份初始狀態開 2 個獨立頁面：A 以 `adr`、`adress`、`end` 評分，B 直接 `result(adress)`；比較分數區 `outerHTML`、`runtime.speech.lastResult`、評分後 localStorage `data` 12 欄、主控台文字。自訂單字 `id`（含時間與亂數）與 `createdAt` 由兩頁注入範本時各自產生，比較時去除這 2 欄 |
+| 遲到事件 | 每種結束後對**舊**替身實例再送 `interim`、`result`、`end`：即時文字列不重新出現、不評分、今日已學不變 |
+| 收音條 | 自進入聆聽中到第 1 格亮約 60～75 ms，本頁第 1 次取得麥克風時約 450～850 ms（`diag-r12-meter.mjs`：audiostart、soundstart 與即時文字路徑相同，屬既有行為）；AC-62-01、AC-62-02 的「收音條照常點亮」改為等待 ≤ 1000 ms 後判定，不套用 ≤ 100 ms |
+| AC-62-09 版面 | 375×667（`mobile: true`）、768×1024、1366×768 × 一般與減少動態；`comply with`、20 個單字長句、60 字元無空白；`.sp-tts__btn`、`.sp-mic`、`.sp-meter` 文件座標在待機、聆聽中、出現、更新、隱藏 5 個時點相同；`.sp-live` `scrollWidth ≤ clientWidth`、在面板內、無水平捲軸；值 `italic`；標籤與值 `rgb(91, 100, 114)`，與 `.sp-compare__value` 不同；對比 ≥ 4.5；`animation-name: none`、`transition-duration: 0s`；翻面、上一張、下一張可捲到完整可見且不被底部導覽列遮住 |
+| AC-62-10 | `file://`：3 種結束後搜尋 localStorage、sessionStorage、`AppState.data`、`indexedDB.databases()`、Cache Storage 內容、`exportBackup()`；CDP Network 非本機請求；重新載入。部署目錄：Playwright 本機 8080，等 Service Worker 啟用並控制頁面後同樣搜尋 Cache Storage 7 筆內容與請求 |
+| AC-62-07 | 自動化只判 DOM（`.sp-live` `aria-live="off"`、祖先到 `html` 無即時區域）；NVDA 實際不播報列人工 TC-62-07h |
+| V-LGL-02 v0.21 | `legal-check.mjs` TC-LGL-S03：`dist/` 下 5 個 HTML 與 `sw.js` 全文（含內嵌程式註解）「TOEIC®（多益）Part 5」0 次；TC-LGL-S01 舊文字清單加入此字串；LT-3「Part 5 題目」不屬本條 |
+| 真人語音 | AC-62-12、AC-58-14、AC-59-08 只列人工（TC-62-12h、TC-58-14h、TC-59-08h，同一輪記錄）；替身結果不得當作真人行為依據（PRD v0.21 共通規則 2） |
+
 ## 3. 環境
 
 | 項目 | 版本 |
 | :--- | :--- |
 | 作業系統 | Windows 11 Pro 10.0.26200 |
 | Node.js | v24.15.0 |
-| 瀏覽器 | Google Chrome（主要，無頭）、Microsoft Edge（跨瀏覽器冒煙：重跑 e2e-goal、e2e-hidden、e2e-pwa；第 6 輪加 e2e-version 畫面類） |
+| 瀏覽器 | Google Chrome（主要，無頭）、Microsoft Edge（跨瀏覽器冒煙：重跑 e2e-goal、e2e-hidden、e2e-pwa；第 6 輪加 e2e-version 畫面類）。第 12 輪：Chrome 157.0.8103.38、Edge 157.0.4341.42（Chrome 157 預設把 http 導覽升級為 https，e2e-ad 以 `--disable-features=HttpsUpgrades,HttpsFirstModeV2,…` 關閉，test-report §23.4） |
 | 新增相依 | （第 3 輪）無。**第 4 輪**：`devDependencies.playwright-core` 1.64.1（`npm install --save-dev --save-exact`，新增 `package-lock.json`、`node_modules/`；只供 E2E，不下載瀏覽器、使用本機 Chrome／Edge；建置與部署 workflow 不需要） |
 
 ## 4. 測試套件
@@ -473,11 +506,28 @@ approved_at:
 | QA 檢視、逐一執行（新） | `tests/tools/qa-review-r11.mjs`、`run-r11.mjs` | TC-B01～B03、TC-X-edge（TC-52-05b 不再例外）、TC-X-noas、人工 TC（新增 TC-33-03h） |
 | 說明 | `tc-desc.json`、`tc-list.mjs` | 新 TC 說明；越界與 noas 腳本名稱 |
 
+### 4.9 第 12 輪新增與更新的套件
+
+| 套件 | 檔案 | 涵蓋 |
+| :--- | :--- | :--- |
+| V-STT-STUB（更新） | `tests/e2e/lib/inits.mjs` | `emitInterim`、`emitRaw`、`__qaStt.config`；`interimResults` 初值 `null`（§10.14 Q13） |
+| 即時文字（新） | `tests/e2e/e2e-interim.mjs`（結果 `e2e-interim.json`；`QA_BROWSER=edge` 另存 `-edge`） | US-62（AC-62-01～AC-62-11）、AC-58-07、AC-59-01、AC-59-05、AC-08-10、AC-30-04（v0.21）、V-STT-11～V-STT-17；TC-62-10b 用 Playwright 部署目錄＋Service Worker |
+| 收音條診斷（新） | `tests/e2e/diag-r12-meter.mjs` | 進入聆聽中到收音條第 1 格亮的時間（audiostart／soundstart／即時文字／後備），供 §2.12 判讀 |
+| 商標文字（更新） | `tests/static/legal-check.mjs`（LT-2 新文字、TC-LGL-S03）、`site-check.mjs`（:27、:129、:144）、`e2e-legal.mjs`:13、`e2e-lock.mjs`:29 | §10.14 Q15；AC-10-02、AC-54-01、AC-56-03、AC-56-05～AC-56-07、AC-57-03、AC-23-08 |
+| 語音（更新） | `tests/e2e/e2e-speech.mjs` TC-08-01 | `interimResults === true` 斷言（§10.14 Q14） |
+| 版本（更新） | `tests/e2e/e2e-version.mjs`:186 | 1.3.1 → 1.3.2（§10.14 Q19） |
+| 越界（新） | `tests/static/boundary-r12.mjs`（結果 `boundary-r12.json`） | TC-B02、TC-B03（§1.9 越界基準） |
+| QA 檢視、逐一執行（新） | `tests/tools/qa-review-r12.mjs`、`run-r12.mjs` | TC-B01～B03、TC-X-edge、TC-X-noas、人工 TC（新增 TC-62-12h、TC-62-07h） |
+| 說明與對照 | `tc-desc.json`、`tc-list.mjs`、`ac-matrix.mjs`（AC-62-12 列必要人工） | 新 TC 說明；越界與 noas 腳本名稱 |
+| 375 版面對照（新） | `tests/e2e/diag-r12-375.mjs`（結果 `diag-r12-375.json`） | TC-R12-375：375／390 與 1.3.1（HEAD `2cb2ca2`）比較，取代第 11 輪專用的 TC-R11-375（`diag-r11-gutter.mjs` 未設 `QA_R10CSS` 時不再記待人工） |
+| HTTPS-First 診斷（新） | `tests/e2e/diag-r12-httpupgrade.mjs` | TC-50-01 第一次失敗的原因（Chrome／Edge 157 把 http 導覽升級為 https） |
+| 執行中修正 | `e2e-ad.mjs`（主瀏覽器加 `--disable-features=HttpsUpgrades,HttpsFirstModeV2,…`）、`diag-r10-focus.mjs` TC-61-02b（375px 模擬測驗改比捲動量）、`e2e-compat-r10.mjs` TC-R10-C1（版本讀 `package.json`） | test-report §23.4 |
+
 ## 5. TC 清單
 
-由 `node tests/tools/tc-list.mjs` 依第 11 輪執行結果產生。第 11 輪新增：TC-58-01g、TC-58-04c、TC-33-03r（`e2e-stt-flow.mjs` 第 8 段）；TC-52-05f、TC-52-05g、TC-R11-375、TC-R11-1366b（`diag-r11-gutter.mjs`）；TC-33-03h（人工，§6.8）。修改：TC-58-01f（量法，§2.11）、TC-52-05b（判定改為目前建置 header 位移 0）、TC-60-06-*（加 `scrollbarGutter`）、TC-39-10（右側留白改以 html 盒寬計算）。
+由 `node tests/tools/tc-list.mjs` 依第 12 輪執行結果產生。第 12 輪新增：`e2e-interim.mjs` 28 個（TC-62-01、TC-62-01b、TC-62-01f、TC-62-02a、TC-62-02b、TC-58-07i、TC-62-03a、TC-62-03b、TC-62-04、TC-62-05、TC-62-05b、TC-62-06、TC-62-07a、TC-62-08、TC-62-09-375／768／1366、TC-62-09m-375／768／1366、TC-62-10、TC-62-10b、TC-62-11、TC-59-01i、TC-59-05i、TC-08-10i、TC-30-04i、TC-X-interim）；TC-LGL-S03（`legal-check.mjs`）；TC-R12-375（`diag-r12-375.mjs`，取代第 11 輪專用的 TC-R11-375）；人工 TC-62-12h、TC-62-07h（§6.9）。修改：TC-08-01（`interimResults === true`）、TC-42-02（1.3.2）、TC-LGL-S01、TC-54-01、TC-56-07、TC-10-02-*（LT-2 新文字）、TC-61-02b（375px 模擬測驗改比捲動量）、TC-R10-C1（版本讀 `package.json`）、TC-50-01（關閉瀏覽器 HTTPS-First，見 test-report §23.4）。
 
-共 655 個 TC：自動化 606、QA 檢視 8、人工 41（其中記「不適用（暫停）」23 個）。「TC-X-*」為各套件的「無未處理例外」檢查。
+共 686 個 TC：自動化 635、QA 檢視 8、人工 43（其中記「不適用（暫停）」23 個）。「TC-X-*」為各套件的「無未處理例外」檢查。
 
 | TC | 對應 AC | 方式 | 腳本 | 驗證重點 |
 | :--- | :--- | :--- | :--- | :--- |
@@ -525,7 +575,7 @@ approved_at:
 | TC-07-03 | AC-07-03 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | 先停止目前朗讀再播放新的，不累積排隊播放 |
 | TC-07-04 | AC-07-04 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | TTS 按鈕呈停用狀態，點擊或滑過時提示不支援；其他功能正常 |
 | TC-07-05 | AC-07-05 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | 顯示提示「此裝置未安裝美式英語語音」，不拋出未處理錯誤 |
-| TC-08-01 | AC-08-01 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | （v0.20 改寫）lang en-US；按下先「準備中」、收音條全暗，替身 audiostart（或 T_FALLBACK）後才「聆聽中」、收音條依音量點亮（micOnStrict 斷言先準備中） |
+| TC-08-01 | AC-08-01 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | （v0.20 改寫）lang en-US；按下先「準備中」、收音條全暗，替身 audiostart（或 T_FALLBACK）後才「聆聽中」、收音條依音量點亮（micOnStrict 斷言先準備中）；（v0.21）start() 當下 interimResults=true、maxAlternatives 1、continuous false（替身初值 null） |
 | TC-08-02 | AC-08-02 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | 不支援 STT：toast「建議使用 Google Chrome / Edge」、不呼叫 getUserMedia、收音條全暗 |
 | TC-08-03 | AC-08-03 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | 比對前兩字串皆轉小寫、去除標點與空白，分數為 100 |
 | TC-08-04 | AC-08-04 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | 編輯距離 1、長度最大值 7，分數 = round((1 − 1/7) × 100) = 86 |
@@ -534,6 +584,7 @@ approved_at:
 | TC-08-09 | AC-08-09（含 §7.6 錯誤對照表） | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | STT 錯誤碼對照（含 v0.9 audio-capture →「找不到麥克風裝置」），結束後收音條全暗 |
 | TC-08-09b | AC-08-09（getUserMedia 權限被拒） | 自動化 E2E | `tests/e2e/e2e-mic.mjs` | getUserMedia 權限被拒：「需要麥克風權限」與開啟方式、不開始辨識、收音條全暗；再按重新嘗試 |
 | TC-08-10 | AC-08-10 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | （v0.20 改寫）聆聽中空結果 →「有收到聲音，但沒聽出英文單字，請再說一次」；無結果 end →「未偵測到語音，請再試一次」；再按停止不提示 |
+| TC-08-10i | AC-08-10（v0.21：沒有辨識結果 = 最終與即時文字都沒有；再按不評分）、AC-62-05、AC-62-06 (a) | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪，AC-08-10 v0.21）無結果 end →「未偵測到語音…」；只有即時文字 end → 評分 86；即時文字後再按 → 待機、不評分、不提示 |
 | TC-08-11 | AC-08-11 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | 分數標題為「辨識吻合度」，畫面不出現「發音評分」字樣；分數區附一行說明「此分數比對的是語音辨識出的文字，不代表音素層級的發音準確度」 |
 | TC-08-12 | AC-08-12 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | 清洗後為 complywith 對 complywith、compliedwith，分數分別為 100 與 round((1 − 3/12) × 100) = 75（黃燈） |
 | TC-08-13 | AC-08-13 | 自動化 E2E | `tests/e2e/e2e-speech.mjs` | （v0.20 改寫）首次說明逐字；取消不呼叫 getUserMedia；說明顯示期間按鈕外觀為待機；「我知道了」後先準備中再聆聽中；已讀後不再顯示 |
@@ -548,7 +599,7 @@ approved_at:
 | TC-09-07 | AC-09-07 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | 正解出現的位置（A～D）不是 20 次都相同（選項每次隨機排序） |
 | TC-10-02 | AC-10-02 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 顯示含空格的句子、A～D 共 4 個選項、題型標籤 |
 | TC-10-02-1366 | AC-10-02、AC-20-01、AC-40-02、E-123、V-LGL-02 | 自動化 E2E | `tests/e2e/e2e-legal.mjs` | 同 TC-10-02-375（1366×768） |
-| TC-10-02-375 | AC-10-02、AC-20-01、AC-40-02、E-123、V-LGL-02 | 自動化 E2E | `tests/e2e/e2e-legal.mjs` | LT-2 逐字；375×667 依 §7.23.4 量測（Range 行數、不裁切、無水平捲軸、不與 .p5-record 重疊）× 題目、K ≥ 1、鎖定檢視、作答後；無舊文字；含空格句子、4 選項、題型標籤 |
+| TC-10-02-375 | AC-10-02、AC-20-01、AC-40-02、E-123、V-LGL-02 | 自動化 E2E | `tests/e2e/e2e-legal.mjs` | LT-2（v0.21 新文字「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」）逐字；375×667 依 §7.23.4 量測（Range 行數、不裁切、無水平捲軸、不與 .p5-record 重疊）× 題目、K ≥ 1、鎖定檢視、作答後；無舊文字；含空格句子、4 選項、題型標籤 |
 | TC-10-02-768 | AC-10-02、AC-20-01、AC-40-02、E-123、V-LGL-02 | 自動化 E2E | `tests/e2e/e2e-legal.mjs` | 同 TC-10-02-375（768×1024） |
 | TC-10-02z | AC-10-02、E-123（375px，html font-size 150%） | 自動化 E2E | `tests/e2e/e2e-legal.mjs` | 375px 字級 150%（E-123）：說明不裁切；文件溢出依 §7.23.4 只回報 |
 | TC-11-01 | AC-11-01、AC-11-02、AC-11-03、AC-11-06 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | 所有選項立即鎖定；所選錯誤標紅、正確選項標綠；選對時只標綠 |
@@ -670,6 +721,7 @@ approved_at:
 | TC-30-02 | AC-30-02 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 套用橘、綠、藍：D 為 10、15、15 |
 | TC-30-03 | AC-30-03、AC-17-02（學習行為） | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | X 依序 1、1、1、2、3、4（A=he、B=for、C=they、E=not；測驗題目 he/not）；localStorage todayLearned |
 | TC-30-04 | AC-30-04 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 瀏覽 5 次換卡未翻面、STT 逾時 no-speech:無分數、空結果:無分數、權限 not-allowed:無分數、結束無結果:無分數、離線:undefin |
+| TC-30-04i | AC-30-04（v0.21：顯示過即時文字但以手動停止、換卡、錯誤、nomatch 結束）、AC-62-06、MS-6 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪，AC-30-04 v0.21）今日 X = 0：顯示即時文字後以手動停止、換卡、TTS、network、no-speech、nomatch 結束 → X 仍 0、localStorage（除 flashcardPosition）不變；以即時文字評分後 X = 1（不屬本條） |
 | TC-30-05 | AC-30-05 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | X=14：「今日已學 14 / 15 字」比例 93.3%、色 rgb(47, 111, 214)；X=15：「今日已學 15 / 15 字」滿圈 100%、金 |
 | TC-30-06 | AC-30-06 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 學過 2 個內建 + 自訂 Y → X=3；刪除 Y（已刪除=true）→ X=3；重新載入 → X=3 |
 | TC-30-07 | AC-30-07、E-49 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | 第 T 天「今日已學 5 / 15 字」；(a) 過午夜學 1 字 →「今日已學 1 / 15 字」、長條末兩根 10/30:5 10/31:1、寫出 toda |
@@ -915,7 +967,7 @@ approved_at:
 | TC-53-02h | AC-53-02 (4)（FB-71：公開文案與退出連結由人類讀過；連結由主控於實作前依 Google 現行頁面核對） | 人工 | `tests/static/site-check.mjs` | 文案可接受；連結有效 |
 | TC-53-04a | AC-53-04、AC-57-04、V-SITE-04（無本系統狀態與有本系統狀態；重新載入；停用 JS 可讀；全部尺寸） | 自動化 E2E | `tests/e2e/e2e-site.mjs` | 靜態頁無狀態直接開啟與重新載入、停用 JS 可讀、全部尺寸 |
 | TC-53-06 | AC-53-06、AC-24-12、AC-08-13、AC-23-02（畫面文字無矛盾） | 自動化 E2E | `tests/e2e/e2e-site.mjs` | 全部頁面無「零請求」等矛盾文字；AC-24-12、AC-08-13 與隱私權政策一致 |
-| TC-54-01 | AC-54-01 | 自動化（靜態檢查） | `tests/static/site-check.mjs` | 關於我依序 (1)～(5) |
+| TC-54-01 | AC-54-01 | 自動化（靜態檢查） | `tests/static/site-check.mjs` | 關於我依序 (1)～(5)；（v0.21）模擬測驗項為「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」，不含「Part 5」 |
 | TC-54-02 | AC-54-02、V-SEO-06 | 自動化（靜態檢查） | `tests/static/site-check.mjs` | 禁用字詞 0 次 |
 | TC-55-01a | AC-55-01、AC-55-02、AC-55-03、AC-53-05（聯絡我們內容區） | 自動化 E2E | `tests/e2e/e2e-site.mjs` | 聯絡我們內容區恰標題與 1 行信箱、無表單（應用內） |
 | TC-55-01s | AC-55-01、AC-55-02、AC-55-03（靜態頁 main） | 自動化（靜態檢查） | `tests/static/site-check.mjs` | 同上（靜態頁 main） |
@@ -971,6 +1023,7 @@ approved_at:
 | TC-58-06 | AC-58-06、E-156 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | 替身不觸發事件：start 回傳到回待機 5000 ± 200 ms、中止辨識、「語音辨識沒有回應，請再試一次」；遲到事件不改畫面；再按可重新開始 |
 | TC-58-06b | AC-58-06（權限詢問不計入 T_READY）、E-157 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | getUserMedia 擱置 6.2 秒（> T_READY）仍準備中；再按回待機；之後才允許不開始辨識 |
 | TC-58-07 | AC-58-07 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | 準備中直接 soundstart、speechstart → 同一處理器內聆聽中、之後不套用 T_READY；result → 評分；nomatch →「有收到聲音」 |
+| TC-58-07i | AC-58-07（v0.21：準備中暫時結果視同已開始收音，不評分） | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪，AC-58-07 v0.21）準備中收到暫時結果 adres → 聆聽中、不評分；之後最終結果 address → 100 綠燈（以最終結果為準） |
 | TC-58-08 | AC-58-08、E-161 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | 準備中 error（not-allowed、service-not-allowed、audio-capture、network、其他、no-speech）、無錯誤 end、start() 例外 → 對應訊息、待機、全暗、無分數 |
 | TC-58-09 | AC-58-09、E-158 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | 替身無 onaudiostart：準備中，start 回傳後 1500 ms（−20～+120）聆聽中並點亮；不套用 T_READY；期間再按取消；提前 speechstart、result、error、end 依 AC-58-07、08 |
 | TC-58-10a | AC-58-10 (a) 取得麥克風期間、E-159 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | 取得麥克風期間換卡、切換模式、按 TTS（照常朗讀）→ 待機不提示，取得完成不開始；翻面繼續；離開單字卡頁 1 秒內釋放音軌 |
@@ -983,10 +1036,12 @@ approved_at:
 | TC-58-13m-375 | AC-58-13 (b)、AC-31-03、AC-33-08（v0.20）、E-66（375px） | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | （375px 減少動態）375／1366（一般、減少動態）：準備中與聆聽中按鈕、收音條座標差 0；底色或文字色不同、不用 --light-red；無動畫與轉場；不裁切、無水平捲軸；對比 ≥ 4.5；Enter、空白鍵、觸控結果相同 |
 | TC-58-14h | AC-58-14、AC-33-01、E-163 | 人工 | `§6` | （人工）V-MIC 真人語音：Chrome、Edge 最新穩定版各 1 輪＋正式網站 Chrome 1 輪；(a) 等「聆聽中」再念 10 次 ≥ 9 次出分數；(b) 一按就念 10 次；逐次記錄狀態與結果、瀏覽器版本 |
 | TC-59-01 | AC-59-01、AC-08-10（v0.20）、E-05 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | 聆聽中 speechstart → end：「有收到聲音，但沒聽出英文單字，請再說一次」、全暗、無分數、只 1 則 |
+| TC-59-01i | AC-59-01（v0.21：最終與暫時結果都沒有）、AC-62-05 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪，AC-59-01 v0.21）speechstart → end：無最終也無暫時結果 →「有收到聲音…」；有暫時結果 adress → 依 AC-62-05 評分 86 |
 | TC-59-02 | AC-59-02 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | nomatch（有無 speechstart）→ end：同上，end 不改寫訊息 |
 | TC-59-03 | AC-59-03、AC-60-04 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | result 為 ""、"   "、"..."（有無 speechstart）→「有收到聲音」、無分數區、無「辨識文字」標籤 |
 | TC-59-04 | AC-59-04 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | speechstart → error no-speech → end：「有收到聲音」（語音紀錄優先） |
 | TC-59-05 | AC-59-05、E-162 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | (a) no-speech → end、(b) 無錯誤 end、(c) soundstart → end：「未偵測到語音，請再試一次」 |
+| TC-59-05i | AC-59-05（v0.21：含即時文字）、AC-62-06 (d)、Q-107 A | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪，AC-59-05 v0.21）(a) no-speech、(b) 無錯誤 end、(c) soundstart → end：無即時文字 →「未偵測到語音…」；有即時 adr → (a)「有收到聲音…」（Q-107 A）、(b)(c) 以即時文字評分 |
 | TC-59-06 | AC-59-06、MS-6 | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | 已 speechstart：非空文字評分無分流訊息；再按停止、換卡不提示；not-allowed、network、audio-capture 顯示既有錯誤；下一次按下重新判定 |
 | TC-59-07 | AC-59-07、AC-30-04（v0.20 分流提示） | 自動化 E2E | `tests/e2e/e2e-stt-flow.mjs` | 分流訊息不改 localStorage 與匯出備份、不計今日已學、打卡、掌握；再按或換卡清除訊息 |
 | TC-59-08h | AC-59-08、E-162、E-163 | 人工 | `§6` | （人工）V-MIC 真人語音：Chrome、Edge；(a) 聆聽中不說話等結束，預期「未偵測到語音」；(b) 念不清楚或非英文，記錄實際訊息 |
@@ -1005,9 +1060,33 @@ approved_at:
 | TC-61-01m-375 | AC-61-01 必測 7 項（375×667） | 自動化 E2E | `tests/e2e/diag-r10-focus.mjs` | AC-61-01 必測 7 項（資料備份、金色級列、新增單字、翻面、下一張、選項 C、D）Tab 與 Shift+Tab 皆 100% 未被遮住（375×667） |
 | TC-61-01m-390 | AC-61-01 必測 7 項（390×844） | 自動化 E2E | `tests/e2e/diag-r10-focus.mjs` | 同 TC-61-01m-375（390×844） |
 | TC-61-02a | AC-61-02（> 640px 版面與捲動不變：1366×768 與 1.3.0 逐停點比對） | 自動化 E2E | `tests/e2e/diag-r10-focus.mjs` | 1366×768 4 個功能區 Tab＋Shift+Tab 每個停點名稱、scrollY、元素上緣與 1.3.0 完全相同；scroll-padding-bottom 為 auto |
-| TC-61-02b | AC-61-02（點擊與觸控不額外捲動、減少動態捲動無動畫） | 自動化 E2E | `tests/e2e/diag-r10-focus.mjs` | 375（一般、減少動態）與 1366：觸控與滑鼠點擊部分被導覽遮住的控制項，scrollY 不變；scroll-behavior auto |
+| TC-61-02b | AC-61-02（點擊與觸控不額外捲動、減少動態捲動無動畫） | 自動化 E2E | `tests/e2e/diag-r10-focus.mjs` | 375（一般、減少動態）與 1366：觸控與滑鼠點擊部分被導覽遮住的控制項，scrollY 不變；scroll-behavior auto；（第 12 輪）375px 模擬測驗改比捲動量（R-31 標題說明變 1 行使起始 scrollY 不同） |
 | TC-61-02c | AC-61-02（AC-41-04、AC-57-01 照常）、AC-38-09（首次「開始學習」焦點框） | 自動化 E2E | `tests/e2e/diag-r10-focus.mjs` | 首次畫面 375×667 Tab／Shift+Tab：頁尾 4 連結完整位於首次底部列上方；「開始學習」焦點框 ≥ 2 px；5 個色級列可捲到不被底部列遮住 |
 | TC-61-02d | AC-61-02（AC-27-03 正在輸入的欄位不被遮，自動化部分） | 自動化 E2E | `tests/e2e/diag-r10-focus.mjs` | 375、390 輸入自訂單字：scroll-padding-bottom 64px，輸入時 is-typing 為 0，輸入欄不被導覽遮住 |
+| TC-62-01 | AC-62-01、AC-33-03、V-STT-11、V-STT-15、IT-3、IT-6 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）聆聽中依序 emitInterim la、late、latency、(" comply ","with")、Hello, World?：每次 ≤ 100 ms、同步顯示；.sp-live 恰 1 列、標籤「聽到：」、值逐字（多段以 1 個空白串接、不清洗標點與大小寫）、lang=en；按鈕「聆聽中」、收音條亮；無分數區與訊息；start() 當下 interimResults=true |
+| TC-62-01b | AC-62-01（空白暫時結果不顯示；保留上一段，FB-80、IT-3）、E-169 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）聆聽中只收到空字串／空白 → 不顯示即時列；顯示 adr 後再收到空白 → 保留 adr（IT-3、FB-80） |
+| TC-62-01f | AC-62-01、IT-6、IT-7（翻面重建面板：聆聽中還原即時文字，architecture §7.30.4 build()） | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）聆聽中顯示 adr 時按「翻面」再翻回：仍聆聽中則即時列還原為 adr、恰 1 列；已結束則隱藏 |
+| TC-62-02a | AC-62-02 (a)、AC-58-07（v0.21 暫時結果）、AC-33-03、IT-5、PR-5 (b) | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）支援 audiostart：準備中（awaitingAudioStart）收到 ad → ≤ 100 ms 聆聽中並顯示 ad；超過 T_READY 無「沒有回應」、不評分；收音條亮；之後 audiostart 畫面不變（AC-58-07 v0.21） |
+| TC-62-02b | AC-62-02 (b)、AC-58-07（v0.21 暫時結果）、AC-33-03、IT-5、PR-5 (b)、AC-58-09 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）不支援 audiostart：準備中（fallbackWait）收到 ad → ≤ 100 ms 聆聽中並顯示 ad；超過 T_FALLBACK、T_READY 仍聆聽中、無訊息、不評分 |
+| TC-62-03a | AC-62-03 (a)、AC-60-01、V-STT-12 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）即時 adress 顯示中收到最終 address → ≤ 100 ms 100 綠燈、辨識文字 address；同一同步工作內即時列隱藏、分數區出現；rAF 逐畫格取樣同時可見 0 |
+| TC-62-03b | AC-62-03 (b)、AC-08-04、V-STT-17 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）無暫時結果直接最終 adress → 86 黃燈；MutationObserver 全程即時列可見 0 次 |
+| TC-62-04 | AC-62-04、AC-59-03、V-STT-06（hadResult 但 hadText 假） | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）即時 ad 顯示中收到最終 ""、"..." → ≤ 100 ms 隱藏、「有收到聲音…」、無分數區、今日已學不變 |
+| TC-62-05 | AC-62-05、AC-08-04、AC-30-01、AC-17-02、MS-1 (2b)、IT-9、V-STT-14、LR-1 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）adr、adress 後 end → ≤ 100 ms 86 黃燈、辨識文字 adress；與另一頁直接最終 adress 對照：分數區 outerHTML、lastResult、localStorage data 12 欄（去自訂單字隨機 id）、主控台文字逐一相同；今日已學 +1；rAF 取樣同時可見 0 |
+| TC-62-05b | AC-62-05（最後一段即時文字清洗後為空 → AC-59-03）、V-STT-06 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）最後一段即時文字為 "..." 時 end → 「有收到聲音…」、不評分、今日已學不變 |
+| TC-62-06 | AC-62-06 (a)～(f)、AC-08-10（v0.21 再按）、AC-58-10、AC-60-07、AC-08-09、AC-08-14、AC-33-05、AC-33-06 (b)、AC-59-02、IT-7、E-171 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）即時 adr 顯示中：(a) 再按、(b) 換卡／切換測驗模式／TTS／離開單字卡頁、(c) network／not-allowed／audio-capture／其他代碼、(d) no-speech、(e) nomatch、(f) 拔除 → 每項 ≤ 100 ms 隱藏（同步）、訊息依 MS-1（(d)(e) 為「有收到聲音…」）；舊實例遲到的 interim／result／end 不重新顯示、不評分；今日已學不變 |
+| TC-62-07a | AC-62-07（DOM 屬性部分）、V-STT-16 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）.sp-live aria-live=off、無 role；自 .sp-live 到 html 的 11 層祖先無 aria-live polite／assertive、無 role status／alert／log；訊息區與分數區不是祖先 |
+| TC-62-07h | AC-62-07（螢幕報讀器部分；§10.14 Q18） | 人工 | `§6` | （人工）NVDA＋Chrome：即時文字更新不播報；評分後由分數區、訊息由訊息區播報 |
+| TC-62-08 | AC-62-08、AC-60-05、C-7、RT-3、規格書 2.6、Q-22 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）emitInterim <img src=x onerror=alert(1)>、&lt;b&gt;、<script>…<b>：textContent 逐字、.sp-live 子元素 2、值子元素 0、無 img／script／b；對話框 0、非本機請求 0；speech-panel.js 無 HTML 寫入 API |
+| TC-62-09-1366 | AC-62-09 (a)、AC-20-01、AC-38-04、AC-27-03（1366px） | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）1366px 一般設定：comply with、20 字長句、60 字元無空白；TTS／麥克風／收音條座標在待機、聆聽、出現、更新、隱藏 5 個時點相同；全文、無水平捲軸、不裁切；值 italic、標籤與值 rgb(91, 100, 114) 與辨識文字值不同、對比 ≥ 4.5；無 animation／transition；翻面、上一張、下一張可見 |
+| TC-62-09-375 | AC-62-09 (a)、AC-20-01、AC-38-04、AC-27-03（375px） | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）375px 一般設定：comply with、20 字長句、60 字元無空白；TTS／麥克風／收音條座標在待機、聆聽、出現、更新、隱藏 5 個時點相同；全文、無水平捲軸、不裁切；值 italic、標籤與值 rgb(91, 100, 114) 與辨識文字值不同、對比 ≥ 4.5；無 animation／transition；翻面、上一張、下一張可見 |
+| TC-62-09-768 | AC-62-09 (a)、AC-20-01、AC-38-04、AC-27-03（768px） | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）768px 一般設定：comply with、20 字長句、60 字元無空白；TTS／麥克風／收音條座標在待機、聆聽、出現、更新、隱藏 5 個時點相同；全文、無水平捲軸、不裁切；值 italic、標籤與值 rgb(91, 100, 114) 與辨識文字值不同、對比 ≥ 4.5；無 animation／transition；翻面、上一張、下一張可見 |
+| TC-62-09m-1366 | AC-62-09 (b)、AC-20-01、AC-38-04、AC-27-03（1366px） | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）1366px 減少動態：同 TC-62-09-1366 |
+| TC-62-09m-375 | AC-62-09 (b)、AC-20-01、AC-38-04、AC-27-03（375px） | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）375px 減少動態：同 TC-62-09-375 |
+| TC-62-09m-768 | AC-62-09 (b)、AC-20-01、AC-38-04、AC-27-03（768px） | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）768px 減少動態：同 TC-62-09-768 |
+| TC-62-10 | AC-62-10、AC-21-03、AC-53-06、AC-08-13、V-STT-17、IT-8、Q-106 A | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪，file://）以 AC-62-03 (a)、AC-62-05、AC-62-06 (a) 結束後：即時文字命中 localStorage、sessionStorage、AppState.data、IndexedDB、Cache Storage、匯出備份皆 0；鍵、schemaVersion 3、data 12 欄、備份頂層 5 欄不變；非本機請求 0；重新載入待機、即時列隱藏；交付檔 MediaRecorder 0；AC-08-13 說明與隱私權政策 (5) 與 HEAD 交付檔逐字相同 |
+| TC-62-10b | AC-62-10（部署目錄、Service Worker 與 Cache Storage）、AC-37-05 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪，Playwright 本機 8080 部署目錄）Service Worker 啟用並控制頁面、預先快取 7 筆；3 種結束後 Cache Storage、localStorage、IndexedDB 即時文字命中 0；期間請求 0、跨來源 0；重新載入待機、即時列隱藏 |
+| TC-62-11 | AC-62-11、AC-60-03、V-STT-15、RT-4 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | （第 12 輪）英文、中文、數字、混合即時文字：列全文 =「聽到：」+ 引擎文字；固定文字無「偵測到」「語言」「英文」「中文」「你說的是」「發音」「分數」 |
+| TC-62-12h | AC-62-12、AC-58-14、AC-59-08（architecture v0.17 §10.14 Q17、Q20） | 人工 | `§6` | （人工）AC-62-12 真人語音：Chrome、Edge 各 1 輪＋正式網站 Chrome 1 輪；(a) 念單字 10 次 ≥ 9 次分數；(b) 念句子 3 次即時文字至少更新 1 次；逐次紀錄交人類判定 |
 | TC-AD-H1 | AC-50-04、AC-52-01、AC-52-05（T-106） | 人工 | `§6` | loading 與非主控台不露出；只有 1 個版位 |
 | TC-AD-H2 | AC-51-01、AC-52-05（T-107、FB-73） | 人工 | `§6` | 與 AD-7、AD-8 相符 |
 | TC-AD-H3 | AC-52-03、AC-52-04、AC-52-06 | 人工 | `§6` | 依 AC |
@@ -1015,7 +1094,7 @@ approved_at:
 | TC-AD-H5 | AC-50-01、AC-50-05、AC-50-06、AC-51-02、AC-51-03、AC-51-04、AC-52-02、AC-52-07 | 人工 | `§6` | 依 AC |
 | TC-B01 | （越界檢查：檔案歸屬） | QA 檢視 | `tests/static/boundary-check.mjs` | 每個檔案是否屬於某任務 paths；人類自放檔（dist/ads.txt、LICENSE、.github/）另列 |
 | TC-B02 | （越界檢查：原始需求、sources/、docs/、tests/） | QA 檢視 | `人工判讀（檔案時間、docs 變更紀錄）` | sources/、english_master_track.md 未被修改；docs/ 的修改皆為上游角色或 QA |
-| TC-B03 | （越界檢查：第 11 輪增量 FE-95～FE-97） | QA 檢視 | `tests/static/boundary-r11.mjs` | （第 5 輪）與 git HEAD 比對的變動檔案皆在 CT-24、FE-54～FE-62 paths 或授權例外內 |
+| TC-B03 | （越界檢查：第 12 輪增量 FE-98～FE-101、MC-10） | QA 檢視 | `tests/static/boundary-r12.mjs` | （第 5 輪）與 git HEAD 比對的變動檔案皆在 CT-24、FE-54～FE-62 paths 或授權例外內 |
 | TC-D01 | AC-03-06 | 自動化（資料檢查） | `tests/data/data-check.mjs` | 「共 N 張」依序為 N_O（1,000，Q-29）、N_B、N_G，與契約文件記錄的字表實際字數一致（功能詞不扣除，Q-30） |
 | TC-D02 | AC-03-07 | 自動化（資料檢查） | `tests/data/data-check.mjs` | 不存在兩筆單字字串相同（不分大小寫）的項目 |
 | TC-D03 | AC-03-08 | 自動化（資料檢查） | `tests/data/data-check.mjs` | 每筆皆有排名，且排名為 1～N_G 連續不重複的整數；排名 1～N_B 的順序與 NGSL 原表頻率順序一致；排名 N_B+1～N_G 的單字皆來自 TSL、BSL 或 NAWL |
@@ -1047,6 +1126,7 @@ approved_at:
 | TC-LAY-H3 | AC-38-02、AC-34-04 | 人工 | `§6` | （第 5 輪人工）實機狀態列顏色 #1e9bf0 |
 | TC-LGL-S01 | AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-07、AC-23-08（V-LGL-01～04、交付檔字串） | 自動化（靜態檢查） | `tests/static/legal-check.mjs` | 交付 HTML：舊文字 0 次；LT-1、LT-2、LT-3、LT-5、LT-6 至少 1 次；聯絡行 1 次；mailto 0、無空格位址 0 |
 | TC-LGL-S02 | AC-10-02、AC-48-12（V-LGL-02、E-123、HN-1、E-134） | 自動化（靜態檢查） | `tests/static/legal-check.mjs` | .p5-heading-note、.p5-record__hint 無 nowrap、text-overflow、overflow: hidden 等禁用規則 |
+| TC-LGL-S03 | AC-10-02、AC-54-01、AC-56-03、AC-56-05、AC-56-06、AC-56-07、AC-57-03、AC-23-08（V-LGL-02 v0.21：交付物「TOEIC®（多益）Part 5」0 次） | 自動化（靜態檢查） | `tests/static/legal-check.mjs` | （第 12 輪，V-LGL-02 v0.21）dist/ 下 5 個 HTML 與 sw.js 全文「TOEIC®（多益）Part 5」0 次；主 HTML、index、about LT-2 新文字 ≥ 1、LT-3 ≥ 1 |
 | TC-M01 | AC-08-01、AC-08-09、AC-08-13、AC-08-14、AC-21-01、AC-21-03 | 人工 | `§6` | 畫面文字與 AC 一致；Network 除 `file://` 主檔外無頁面請求；localStorage 只有 `englishMasterTrack:state`、無音訊或音量資料；IndexedDB、Cache Storage 無本系統資料；無下載 |
 | TC-M02 | AC-07-01～AC-07-05 | 人工 | `§6` | 語音為美式、速度正確、無排隊；提示逐字相符 |
 | TC-M03 | AC-19-02、AC-37-01、AC-38-05 | 人工 | `§6` | 除 STT（依 AC-08-14）外皆可用；收音條斷網時不影響其他功能；Console 無資源載入失敗 |
@@ -1077,7 +1157,7 @@ approved_at:
 | TC-R10-C2 | 共通規則 1（1.3.0 匯出備份以 1.3.1 匯入）、AC-24-02、AC-24-03 | 自動化 E2E | `tests/e2e/e2e-compat-r10.mjs` | 1.3.0 匯出的備份以 1.3.1「從備份還原」匯入：data 逐欄相同；重新載入 localStorage 不變 |
 | TC-R10-C3 | §10.12 M-4（備份格式不變：頂層 5 欄、data 欄位）、AC-60-07 | 自動化 E2E | `tests/e2e/e2e-compat-r10.mjs` | 1.3.1 匯出備份頂層 5 欄、format、schemaVersion、data 欄位與 1.3.0 相同；無執行期欄位 |
 | TC-R11-1366b | AC-52-05、AC-39（v0.16 §7.29.5 回歸：頁面變可捲動時內容不左右移動） | 自動化 E2E | `tests/e2e/diag-r11-gutter.mjs` | 1366×768、1366×900、1920×1080 主控台展開「資料備份」前後 header、各區塊、頁尾 dx = 0（頁面由不可捲動變可捲動時不左右移動） |
-| TC-R11-375 | AC-20-01、AC-40-02（v0.16 §7.29.4：覆蓋式捲軸無影響；375／390 版面與第 10 輪樣式相同） | 自動化 E2E | `tests/e2e/diag-r11-gutter.mjs` | 375×667、390×844（mobile，覆蓋式捲軸）主控台、單字卡、模擬測驗主要元素座標與第 10 輪樣式對照組相同、無水平捲軸（v0.16 §7.29.4） |
+| TC-R12-375 | AC-20-01、AC-40-02、AC-10-02（375／390 版面與 1.3.1 相比：只因 R-31 標題說明行數改變） | 自動化 E2E | `tests/e2e/diag-r12-375.mjs` | （第 12 輪）375×667、390×844（Chrome、Edge）與 1.3.1（HEAD 2cb2ca2）比較：主控台、單字卡座標逐一相同；模擬測驗只因 R-31 標題說明 2 行 → 1 行，說明以下元素一律上移同一量，水平與寬高不變；無水平捲軸 |
 | TC-S01 | AC-19-01 | 自動化（靜態檢查） | `tests/static/static-check.mjs` | （v0.19）無外部資源；白名單 icon data:、逐字 canonical 各 1 次 |
 | TC-S02 | AC-19-04 | 自動化（靜態檢查） | `tests/static/static-check.mjs` | ≤ 5 MB（5,242,880 bytes） |
 | TC-S03 | AC-04-09 | 自動化（靜態檢查） | `tests/static/static-check.mjs` | 皆以 textContent 或等效的純文字方式寫入 DOM；不使用 innerHTML、outerHTML、insertAdjacentHTML、document.write 插… |
@@ -1105,11 +1185,12 @@ approved_at:
 | TC-X-cards | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | 例外：[] |
 | TC-X-clock | （時鐘套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-progress.mjs` | [] |
 | TC-X-content | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-content.mjs` | [] |
-| TC-X-edge | AC-19-02（Chrome／Edge）跨瀏覽器冒煙、AC-34-01、AC-35-01、AC-35-02、AC-37-01、AC-42-01、AC-43-01、AC-44-01、AC-45-01、AC-46-01、AC-48-01、AC-49-01、AC-50-02、AC-53-01、AC-57-01 | QA 檢視 | `e2e-goal、e2e-hidden、e2e-pwa、e2e-version、e2e-track-p5、e2e-lock、e2e-answered、e2e-site、e2e-ad、e2e-ad-extra、e2e-speech（QA_BROWSER=edge）；e2e-stt-flow 第 8 段、diag-r11-gutter 本身含 Edge` | 以 Microsoft Edge 重跑 e2e-goal 與 e2e-hidden |
+| TC-X-edge | AC-19-02（Chrome／Edge）跨瀏覽器冒煙、AC-34-01、AC-35-01、AC-35-02、AC-37-01、AC-42-01、AC-43-01、AC-44-01、AC-45-01、AC-46-01、AC-48-01、AC-49-01、AC-50-02、AC-53-01、AC-57-01 | QA 檢視 | `e2e-goal、e2e-hidden、e2e-pwa、e2e-version、e2e-track-p5、e2e-lock、e2e-answered、e2e-site、e2e-ad、e2e-ad-extra、e2e-speech、e2e-mic、e2e-stt-flow、e2e-interim（QA_BROWSER=edge）；e2e-stt-flow 第 8 段、diag-r11-gutter 本身含 Edge` | 以 Microsoft Edge 重跑 e2e-goal 與 e2e-hidden |
 | TC-X-firstrun | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-firstrun.mjs` | 例外 []；console.error [] |
 | TC-X-fixture | （fixture）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-cards.mjs` | [] |
 | TC-X-goal | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-goal.mjs` | 例外：[]；console.error：[] |
 | TC-X-hidden | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-hidden.mjs` | [] |
+| TC-X-interim | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-interim.mjs` | e2e-interim 全套件無未處理例外、無 console.error |
 | TC-X-layout | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-layout.mjs` | 例外 []；console.error [] |
 | TC-X-legal-1366 | Console 無未處理錯誤、無網路請求 | 自動化 E2E | `tests/e2e/e2e-legal.mjs` | 錯誤 []；非 file 請求 0 |
 | TC-X-legal-375 | Console 無未處理錯誤、無網路請求 | 自動化 E2E | `tests/e2e/e2e-legal.mjs` | 錯誤 []；非 file 請求 0 |
@@ -1122,7 +1203,7 @@ approved_at:
 | TC-X-lock-v110 | Console 無未處理錯誤、無網路請求（v1.1.0 → 1.2.0） | 自動化 E2E | `tests/e2e/e2e-lock.mjs` | 錯誤 []；非 file 請求 0 |
 | TC-X-mic | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-mic.mjs` | 例外：[] |
 | TC-X-motion | （全套件）無未處理例外 | 自動化 E2E | `tests/e2e/e2e-motion.mjs` | 例外 [] |
-| TC-X-noas | AC-58-09、AC-08-01、AC-33-01、AC-33-03、AC-33-07、AC-33-08（不支援 audiostart 替身下的回歸） | QA 檢視 | `tests/tools/run-r11.mjs（:noas 變體）` | 不支援 audiostart 替身（QA_STT_AUDIOSTART=0）重跑 e2e-speech、e2e-mic、e2e-env、e2e-progress、e2e-reinit、e2e-motion，失敗 0（效能 TC 依 §2.3） |
+| TC-X-noas | AC-58-09、AC-08-01、AC-33-01、AC-33-03、AC-33-07、AC-33-08（不支援 audiostart 替身下的回歸） | QA 檢視 | `tests/tools/run-r12.mjs（:noas 變體）` | 不支援 audiostart 替身（QA_STT_AUDIOSTART=0）重跑 e2e-speech、e2e-mic、e2e-env、e2e-progress、e2e-reinit、e2e-motion，失敗 0（效能 TC 依 §2.3） |
 | TC-X-p5-1366 | Console 無未處理錯誤、無網路請求 | 自動化 E2E | `tests/e2e/e2e-track-p5.mjs` | 錯誤 []；非 file 請求 0 |
 | TC-X-p5-375 | Console 無未處理錯誤、無網路請求 | 自動化 E2E | `tests/e2e/e2e-track-p5.mjs` | 錯誤 []；非 file 請求 0 |
 | TC-X-p5-us45 | Console 無未處理錯誤、無網路請求（AC-47-08 (a)） | 自動化 E2E | `tests/e2e/e2e-track-p5.mjs` | 錯誤 []；非 file 請求 0 |
@@ -1239,9 +1320,19 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | TC-58-01h | AC-58-01（BUG-007 實機） | 同 TC-58-14h | 每次重新整理後第 1 次按麥克風，目視「準備中」是否立即出現 | 第 11 輪自動化已通過；實機感受仍請記錄 |
 | （傳統捲軸外觀） | AC-52-05、AC-60-06（§7.29.4 已知取捨） | Windows 桌面 Chrome、Edge（一般捲軸設定） | 開不可捲動的頁面（例如 1920×1080 主控台）、開啟任一確認視窗 | 右側恆留約 15 px 底色空白；對話框背景右側 15 px 不變暗屬設計取捨（architecture §10.13 已知設計行為 (7)），請人類確認可接受 |
 
+### 6.9 第 12 輪人工驗收（人類執行，QA 整理紀錄）
+
+| TC | 對應 AC | 環境 | 步驟 | 預期與紀錄 |
+| :--- | :--- | :--- | :--- | :--- |
+| TC-62-12h | AC-62-12、AC-58-14、AC-59-08（§10.14 Q17、Q20） | 電腦版 Chrome、Edge 最新穩定版各 1 輪（`file://` 或本機 `npm run serve`）；Chrome 另於正式網站 1 輪（部署後） | (a) 等畫面顯示「聆聽中」才清楚念出當前單字，10 次；(b) 念 1 句約 10 個單字的英文句子，3 次 | (a) ≥ 9 次出現分數（未達交人類判斷）；(b) 說話期間即時文字至少更新 1 次（未更新交人類判斷，不直接判缺陷）；每次結束後即時文字列都已隱藏，結果只能是分數或 PRD 定義的訊息。逐次記錄：是否出現即時文字列、最後一段即時文字、結果（分數與辨識文字或訊息）、瀏覽器版本；紀錄交人類判定是否解決「偵測不到」。TC-58-14h、TC-59-08h 同一輪記錄 |
+| TC-62-07h | AC-62-07（§10.14 Q18） | Windows NVDA 最新穩定版＋Chrome | 聆聽中說話使即時文字更新，之後得到分數；另做一次得到訊息 | 即時文字更新時不播報；評分後由分數區播報結果、訊息由訊息區播報（同 v0.20），不另外播報即時文字 |
+| TC-VER-H2（部署後） | AC-42-02、AC-36-07 | 正式網址 | 檢視頁尾與原始碼 | 「版本 1.3.2（建置 xxxxxxx）」；`emt-build-id` 前 7 碼＝頁尾建置碼＝`sw.js` BUILD_ID 前 7 碼（CI 為 LF 建置，與本機 `981b0d2` 不同屬正常）；`about.html` 與首頁原始碼 description 不含「Part 5」 |
+
+TC-VER-H1、TC-VER-H3、TC-TRK-H1 版本改為 1.3.2；TC-58-14h、TC-59-08h 註明與 TC-62-12h 同一輪。
+
 ## 7. AC 對照（AC → TC）
 
-由 `node tests/tools/ac-matrix.mjs` 產生。PRD v0.20 的 AC 全部列出：應驗收的 388 個 AC 皆至少對應 1 個 TC（未涵蓋 0）；暫停 27 個記「不適用（暫停）」；AC-46-07 記「不適用（v0.18 移除）」。判定欄為第 11 輪結果。
+由 `node tests/tools/ac-matrix.mjs` 產生。PRD v0.21 的 AC 全部列出（428 個）：應驗收的 400 個 AC 皆至少對應 1 個 TC（未涵蓋 0）；暫停 27 個記「不適用（暫停）」；AC-46-07 記「不適用（v0.18 移除）」。判定欄為第 12 輪結果。
 
 | AC | 判定 | 對應 TC |
 | :--- | :--- | :--- |
@@ -1302,17 +1393,17 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-08-01 | 通過（另待人工確認） | TC-08-01、TC-58-01、TC-58-03、TC-X-noas、TC-M01 |
 | AC-08-02 | 通過 | TC-08-02 |
 | AC-08-03 | 通過 | TC-08-03 |
-| AC-08-04 | 通過 | TC-08-04 |
+| AC-08-04 | 通過 | TC-62-03b、TC-62-05、TC-08-04 |
 | AC-08-05 | 通過 | TC-08-05 |
 | AC-08-06 | 通過 | TC-08-06、TC-60-01 |
 | AC-08-07 | 通過 | TC-08-06、TC-60-01 |
 | AC-08-08 | 通過 | TC-08-06、TC-60-01 |
-| AC-08-09 | 通過（另待人工確認） | TC-08-09b、TC-08-09、TC-M01、TC-MIC-4 |
-| AC-08-10 | 通過 | TC-08-10、TC-FB85、TC-59-01 |
+| AC-08-09 | 通過（另待人工確認） | TC-62-06、TC-08-09b、TC-08-09、TC-M01、TC-MIC-4 |
+| AC-08-10 | 通過 | TC-62-06、TC-08-10i、TC-08-10、TC-FB85、TC-59-01 |
 | AC-08-11 | 通過 | TC-08-11 |
 | AC-08-12 | 通過 | TC-08-12 |
-| AC-08-13 | 通過（另待人工確認） | TC-53-06、TC-08-13、TC-M01 |
-| AC-08-14 | 通過（另待人工確認） | TC-08-14、TC-08-14b、TC-M01 |
+| AC-08-13 | 通過（另待人工確認） | TC-62-10、TC-53-06、TC-08-13、TC-M01 |
+| AC-08-14 | 通過（另待人工確認） | TC-62-06、TC-08-14、TC-08-14b、TC-M01 |
 | AC-09-01 | 通過 | TC-09-01 |
 | AC-09-02 | 通過 | TC-D17、TC-09-02 |
 | AC-09-03 | 通過 | TC-09-03 |
@@ -1321,7 +1412,7 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-09-06 | 通過 | TC-09-06 |
 | AC-09-07 | 通過 | TC-09-07 |
 | AC-10-01 | 通過 | TC-D12 |
-| AC-10-02 | 通過 | TC-D12、TC-10-02、TC-10-02-375、TC-10-02z、TC-10-02-768、TC-10-02-1366、TC-48-12-375、TC-48-12-1366、TC-LGL-S01、TC-LGL-S02 |
+| AC-10-02 | 通過 | TC-D12、TC-R12-375、TC-10-02、TC-10-02-375、TC-10-02z、TC-10-02-768、TC-10-02-1366、TC-48-12-375、TC-48-12-1366、TC-LGL-S01、TC-LGL-S03、TC-LGL-S02 |
 | AC-11-01 | 通過 | TC-11-01、TC-45-04-375、TC-45-04-1366、TC-46-02、TC-D20 |
 | AC-11-02 | 通過 | TC-D12、TC-11-01、TC-46-02 |
 | AC-11-03 | 通過 | TC-49-06c、TC-11-01、TC-45-01、TC-46-02 |
@@ -1346,7 +1437,7 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-16-03 | 不適用（暫停） | TC-16-03 |
 | AC-16-04 | 不適用（暫停） | TC-16-04a、TC-16-04b |
 | AC-17-01 | 通過 | TC-49-01、TC-17-01、TC-39-05 |
-| AC-17-02 | 通過 | TC-17-02、TC-30-03、TC-58-12、TC-45-06、TC-44-03-375、TC-44-03-1366 |
+| AC-17-02 | 通過 | TC-17-02、TC-62-05、TC-30-03、TC-58-12、TC-45-06、TC-44-03-375、TC-44-03-1366 |
 | AC-17-03 | 通過 | TC-09-03 |
 | AC-17-04 | 通過 | TC-49-01、TC-17-04c、TC-17-04a、TC-17-04b、TC-48-11c-375、TC-48-11c-1366、TC-45-06、TC-46-08 |
 | AC-17-05 | 通過 | TC-17-05 |
@@ -1376,18 +1467,18 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-23-05 | 通過 | TC-D09 |
 | AC-23-06 | 通過 | TC-LGL-S01、TC-S06 |
 | AC-23-07 | 通過 | TC-23-07-375、TC-23-07x-375、TC-23-07-1366、TC-23-07x-1366、TC-23-07f、TC-23-07h、TC-23-07t、TC-23-07c、TC-LGL-S01、TC-55-04b、TC-23-07s |
-| AC-23-08 | 通過 | TC-23-08s、TC-23-08a、TC-23-08b、TC-LGL-S01、TC-56-07 |
+| AC-23-08 | 通過 | TC-23-08s、TC-23-08a、TC-23-08b、TC-LGL-S01、TC-LGL-S03、TC-56-07 |
 | AC-19-01 | 通過 | TC-27-05、TC-PS-01、TC-PS-04、TC-PS-06、TC-50-03、TC-S01、TC-S08、TC-L-S01、TC-S09 |
 | AC-19-02 | 通過（另待人工確認） | TC-19-02a、TC-35-02、TC-X-edge、TC-M03 |
 | AC-19-03 | 通過（另待人工確認） | TC-21-01、TC-M04 |
 | AC-19-04 | 通過 | TC-56-10a、TC-56-10b、TC-S02 |
-| AC-20-01 | 通過（另待人工確認） | TC-R11-375、TC-49-08、TC-20-01、TC-27-01、TC-39-10、TC-10-02-375、TC-10-02-768、TC-10-02-1366、TC-57-07、TC-M05 |
+| AC-20-01 | 通過（另待人工確認） | TC-R12-375、TC-49-08、TC-20-01、TC-27-01、TC-62-09-375、TC-62-09-768、TC-62-09-1366、TC-62-09m-375、TC-62-09m-768、TC-62-09m-1366、TC-39-10、TC-10-02-375、TC-10-02-768、TC-10-02-1366、TC-57-07、TC-M05 |
 | AC-20-02 | 通過（另待人工確認） | TC-20-02、TC-M05 |
 | AC-20-03 | 通過（另待人工確認） | TC-20-03、TC-25-01、TC-27-04、TC-20-04a、TC-57-01a、TC-M05 |
 | AC-20-04 | 通過 | TC-20-04a、TC-20-04b、TC-20-04c、TC-20-04d、TC-57-sources |
 | AC-21-01 | 通過（另待人工確認） | TC-21-01、TC-38-05、TC-37-05b、TC-37-01a、TC-37-01b、TC-37-05a、TC-57-02a、TC-56-10a、TC-56-10b、TC-50-02、TC-42-03a、TC-M01 |
 | AC-21-02 | 通過 | TC-S04 |
-| AC-21-03 | 通過（另待人工確認） | TC-50-07、TC-21-03b、TC-37-01a、TC-35-01、TC-37-05a、TC-50-02、TC-21-03、TC-60-07、TC-M01、TC-S05 |
+| AC-21-03 | 通過（另待人工確認） | TC-50-07、TC-62-10、TC-21-03b、TC-37-01a、TC-35-01、TC-37-05a、TC-50-02、TC-21-03、TC-60-07、TC-M01、TC-S05 |
 | AC-22-01 | 通過（另待人工確認） | TC-22-01、TC-22-01m、TC-22-01r、TC-39-03、TC-44-01-375、TC-44-01-1366、TC-M07 |
 | AC-22-02 | 通過（另待人工確認） | TC-22-02b、TC-22-02、TC-M07 |
 | AC-22-03 | 通過（另待人工確認） | TC-22-03b、TC-22-03、TC-M07 |
@@ -1412,7 +1503,7 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-26-06 | 通過 | TC-26-06 |
 | AC-27-01 | 通過（另待人工確認） | TC-27-01、TC-M05 |
 | AC-27-02 | 通過（另待人工確認） | TC-27-02、TC-M05 |
-| AC-27-03 | 待人工（TC-M09（虛擬鍵盤）） | TC-27-03、TC-61-02d、TC-23-07-375、TC-23-07-1366、TC-36-03b、TC-57-01a、TC-42-01a、TC-42-01b、TC-M09、TC-VER-H1 |
+| AC-27-03 | 待人工（TC-M09（虛擬鍵盤）） | TC-27-03、TC-61-02d、TC-62-09-375、TC-62-09-768、TC-62-09-1366、TC-62-09m-375、TC-62-09m-768、TC-62-09m-1366、TC-23-07-375、TC-23-07-1366、TC-36-03b、TC-57-01a、TC-42-01a、TC-42-01b、TC-M09、TC-VER-H1 |
 | AC-27-04 | 通過 | TC-27-04 |
 | AC-27-05 | 通過 | TC-27-05 |
 | AC-28-01 | 通過 | TC-28-01 |
@@ -1426,10 +1517,10 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-29-01 | 通過 | TC-29-01 |
 | AC-29-02 | 通過（另待人工確認） | TC-29-02、TC-M10 |
 | AC-29-03 | 通過（另待人工確認） | TC-29-03、TC-M10 |
-| AC-30-01 | 通過 | TC-49-01、TC-30-01 |
+| AC-30-01 | 通過 | TC-49-01、TC-62-05、TC-30-01 |
 | AC-30-02 | 通過 | TC-30-02 |
 | AC-30-03 | 通過 | TC-30-03 |
-| AC-30-04 | 通過 | TC-30-04、TC-58-12、TC-59-07、TC-45-06、TC-44-03-375、TC-44-03-1366 |
+| AC-30-04 | 通過 | TC-30-04i、TC-30-04、TC-58-12、TC-59-07、TC-45-06、TC-44-03-375、TC-44-03-1366 |
 | AC-30-05 | 通過 | TC-30-05 |
 | AC-30-06 | 通過 | TC-30-06 |
 | AC-30-07 | 通過 | TC-30-07、TC-30-07c |
@@ -1457,10 +1548,10 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-32-11 | 通過 | TC-32-11a、TC-32-11b |
 | AC-33-01 | 待人工（V-MIC-1） | TC-33-01a、TC-X-noas、TC-MIC-1、TC-58-14h |
 | AC-33-02 | 待人工（V-MIC-2） | TC-33-02a、TC-MIC-2 |
-| AC-33-03 | 通過（另待人工確認） | TC-33-03、TC-58-02、TC-58-03、TC-33-03r、TC-X-noas、TC-MIC-3、TC-33-03h |
+| AC-33-03 | 通過（另待人工確認） | TC-62-01、TC-62-02a、TC-62-02b、TC-33-03、TC-58-02、TC-58-03、TC-33-03r、TC-X-noas、TC-MIC-3、TC-33-03h |
 | AC-33-04 | 通過 | TC-33-04 |
-| AC-33-05 | 通過（另待人工確認） | TC-33-05、TC-MIC-5 |
-| AC-33-06 | 通過（另待人工確認） | TC-33-06、TC-58-11、TC-MIC-5 |
+| AC-33-05 | 通過（另待人工確認） | TC-62-06、TC-33-05、TC-MIC-5 |
+| AC-33-06 | 通過（另待人工確認） | TC-62-06、TC-33-06、TC-58-11、TC-MIC-5 |
 | AC-33-07 | 通過 | TC-33-07、TC-X-noas |
 | AC-33-08 | 通過（另待人工確認） | TC-33-08、TC-58-13m-375、TC-58-13m-1366、TC-X-noas、TC-MIC-3 |
 | AC-34-01 | 通過（另待人工確認） | TC-34-01、TC-PS-02、TC-PS-03、TC-X-edge、TC-PWA-H1、TC-56-01、TC-L-S02 |
@@ -1489,12 +1580,12 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-37-02 | 通過 | TC-37-02、TC-56-10a、TC-56-10b、TC-56-06c |
 | AC-37-03 | 通過 | TC-37-03 |
 | AC-37-04 | 通過 | TC-37-04 |
-| AC-37-05 | 通過 | TC-50-07、TC-50-06、TC-23-07h、TC-37-05b、TC-37-05a、TC-50-02、TC-47-08b、TC-42-01b、TC-PS-05 |
+| AC-37-05 | 通過 | TC-50-07、TC-50-06、TC-62-10b、TC-23-07h、TC-37-05b、TC-37-05a、TC-50-02、TC-47-08b、TC-42-01b、TC-PS-05 |
 | AC-37-06 | 通過 | TC-37-06 |
 | AC-38-01 | 通過 | TC-52-04、TC-38-01、TC-23-07-375、TC-23-07-1366、TC-48-11a-375、TC-48-12-375、TC-48-11a-1366、TC-48-12-1366、TC-57-07、TC-23-07c、TC-45-04-375、TC-45-04-1366、TC-39-04v |
 | AC-38-02 | 通過（另待人工確認） | TC-38-02、TC-PWA-H2、TC-LAY-H3 |
 | AC-38-03 | 通過 | TC-38-03、TC-48-01-375、TC-48-01-1366 |
-| AC-38-04 | 通過 | TC-52-04、TC-49-08、TC-38-04、TC-23-07-375、TC-23-07-1366、TC-48-01-375、TC-48-01-1366、TC-48-12-375、TC-48-12-1366、TC-57-07、TC-23-07c、TC-45-04-375、TC-45-04-1366、TC-39-04v |
+| AC-38-04 | 通過 | TC-52-04、TC-49-08、TC-62-09-375、TC-62-09-768、TC-62-09-1366、TC-62-09m-375、TC-62-09m-768、TC-62-09m-1366、TC-38-04、TC-23-07-375、TC-23-07-1366、TC-48-01-375、TC-48-01-1366、TC-48-12-375、TC-48-12-1366、TC-57-07、TC-23-07c、TC-45-04-375、TC-45-04-1366、TC-39-04v |
 | AC-38-05 | 通過（另待人工確認） | TC-38-05、TC-M03、TC-LAY-H2、TC-L-S04 |
 | AC-38-06 | 通過 | TC-38-06、TC-39-04v |
 | AC-38-07 | 通過 | TC-49-01、TC-49-08、TC-38-07、TC-45-05-375、TC-45-05-1366、TC-L-S01 |
@@ -1512,7 +1603,7 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-39-09 | 通過 | TC-52-03、TC-49-08、TC-39-09r、TC-39-09 |
 | AC-39-10 | 通過 | TC-39-10 |
 | AC-40-01 | 通過 | TC-40-01、TC-48-03、TC-45-05-375、TC-45-05-1366、TC-46-05 |
-| AC-40-02 | 通過 | TC-R11-375、TC-39-10、TC-10-02-375、TC-10-02-768、TC-10-02-1366、TC-48-01-375、TC-48-01-1366、TC-48-06-375、TC-48-12-375、TC-48-12-1366 |
+| AC-40-02 | 通過 | TC-R12-375、TC-39-10、TC-10-02-375、TC-10-02-768、TC-10-02-1366、TC-48-01-375、TC-48-01-1366、TC-48-06-375、TC-48-12-375、TC-48-12-1366 |
 | AC-40-03 | 通過 | TC-38-03、TC-40-03 |
 | AC-41-01 | 通過 | TC-41-01、TC-56-06b |
 | AC-41-02 | 通過 | TC-41-02 |
@@ -1607,8 +1698,8 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-53-03 | 通過 | TC-57-02a、TC-56-10a、TC-56-10b、TC-53-02 |
 | AC-53-04 | 通過 | TC-57-05a、TC-53-04a、TC-57-04-about、TC-57-04-contact、TC-57-04-privacy |
 | AC-53-05 | 通過 | TC-52-01、TC-55-01a、TC-57-07 |
-| AC-53-06 | 通過 | TC-53-06、TC-53-02 |
-| AC-54-01 | 通過（另待人工確認） | TC-57-03、TC-SITE-H1、TC-54-01 |
+| AC-53-06 | 通過 | TC-62-10、TC-53-06、TC-53-02 |
+| AC-54-01 | 通過（另待人工確認） | TC-57-03、TC-LGL-S03、TC-SITE-H1、TC-54-01 |
 | AC-54-02 | 通過 | TC-54-02 |
 | AC-55-01 | 通過 | TC-55-01a、TC-57-03、TC-55-01s |
 | AC-55-02 | 通過 | TC-55-01a、TC-23-07t、TC-23-07c、TC-55-01s、TC-23-07s |
@@ -1616,17 +1707,17 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-55-04 | 通過 | TC-55-04a、TC-55-04b、TC-55-04c、TC-55-04h、TC-23-07s |
 | AC-56-01 | 通過 | TC-56-01、TC-56-sp-about、TC-56-sp-contact、TC-56-sp-privacy |
 | AC-56-02 | 通過 | TC-56-02、TC-56-sp-about、TC-56-sp-contact、TC-56-sp-privacy |
-| AC-56-03 | 通過（另待人工確認） | TC-SITE-H1、TC-56-03、TC-56-sp-about、TC-56-sp-contact、TC-56-sp-privacy |
+| AC-56-03 | 通過（另待人工確認） | TC-LGL-S03、TC-SITE-H1、TC-56-03、TC-56-sp-about、TC-56-sp-contact、TC-56-sp-privacy |
 | AC-56-04 | 通過 | TC-56-04a、TC-56-04b、TC-56-sp-about、TC-56-sp-contact、TC-56-sp-privacy |
-| AC-56-05 | 通過 | TC-56-05 |
-| AC-56-06 | 通過 | TC-57-04b、TC-56-06b、TC-56-06c、TC-56-06 |
-| AC-56-07 | 通過 | TC-56-07 |
+| AC-56-05 | 通過 | TC-LGL-S03、TC-56-05 |
+| AC-56-06 | 通過 | TC-57-04b、TC-56-06b、TC-56-06c、TC-LGL-S03、TC-56-06 |
+| AC-56-07 | 通過 | TC-LGL-S03、TC-56-07 |
 | AC-56-08 | 待人工（部署後 D-3（正式網址回應）） | TC-SITE-H1、TC-56-08 |
 | AC-56-09 | 待人工（部署後 D-3（正式網址回應）） | TC-SITE-H1、TC-56-09 |
 | AC-56-10 | 通過 | TC-56-10a、TC-56-10b |
 | AC-57-01 | 通過 | TC-61-02c、TC-57-01a、TC-57-01b、TC-57-01c、TC-X-edge |
 | AC-57-02 | 通過 | TC-57-02a、TC-56-10a、TC-56-10b、TC-57-05b |
-| AC-57-03 | 通過 | TC-57-03、TC-57-04-about、TC-57-04-contact、TC-57-04-privacy、TC-57-03s、TC-57-06b |
+| AC-57-03 | 通過 | TC-57-03、TC-LGL-S03、TC-57-04-about、TC-57-04-contact、TC-57-04-privacy、TC-57-03s、TC-57-06b |
 | AC-57-04 | 通過 | TC-57-sources、TC-53-04a、TC-57-04b、TC-57-04-about、TC-57-04-contact、TC-57-04-privacy |
 | AC-57-05 | 通過（另待人工確認） | TC-57-05a、TC-57-05b、TC-SITE-H1、TC-50-06s |
 | AC-57-06 | 通過（另待人工確認） | TC-SITE-H1、TC-57-06a、TC-57-06b、TC-57-06h |
@@ -1636,31 +1727,43 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | AC-58-04 | 通過 | TC-58-04b、TC-58-04a、TC-58-04c |
 | AC-58-05 | 通過 | TC-58-05、TC-58-05b、TC-58-04c |
 | AC-58-06 | 通過 | TC-58-06、TC-58-06b |
-| AC-58-07 | 通過 | TC-58-07 |
+| AC-58-07 | 通過 | TC-62-02a、TC-58-07i、TC-62-02b、TC-58-07 |
 | AC-58-08 | 通過 | TC-58-08 |
-| AC-58-09 | 通過 | TC-58-09、TC-X-noas |
-| AC-58-10 | 通過 | TC-58-10a、TC-58-10b |
+| AC-58-09 | 通過 | TC-62-02b、TC-58-09、TC-X-noas |
+| AC-58-10 | 通過 | TC-62-06、TC-58-10a、TC-58-10b |
 | AC-58-11 | 通過 | TC-58-11 |
 | AC-58-12 | 通過 | TC-R10-C1、TC-58-12 |
 | AC-58-13 | 通過 | TC-58-13-375、TC-58-13-1366、TC-58-13m-375、TC-58-13m-1366 |
-| AC-58-14 | 待人工（TC-58-14h（真人語音，Chrome、Edge、正式網站）） | TC-58-14h |
-| AC-59-01 | 通過 | TC-59-01 |
-| AC-59-02 | 通過 | TC-59-02 |
-| AC-59-03 | 通過 | TC-59-03 |
+| AC-58-14 | 待人工（TC-58-14h（真人語音，Chrome、Edge、正式網站）） | TC-58-14h、TC-62-12h |
+| AC-59-01 | 通過 | TC-59-01i、TC-59-01 |
+| AC-59-02 | 通過 | TC-62-06、TC-59-02 |
+| AC-59-03 | 通過 | TC-62-04、TC-62-05b、TC-59-03 |
 | AC-59-04 | 通過 | TC-59-04 |
-| AC-59-05 | 通過 | TC-59-05 |
+| AC-59-05 | 通過 | TC-59-05i、TC-59-05 |
 | AC-59-06 | 通過 | TC-59-06 |
 | AC-59-07 | 通過 | TC-59-07 |
-| AC-59-08 | 待人工（TC-59-08h（真人語音，Chrome、Edge）） | TC-59-08h |
-| AC-60-01 | 通過 | TC-60-01、TC-60-01o |
+| AC-59-08 | 待人工（TC-59-08h（真人語音，Chrome、Edge）） | TC-62-12h、TC-59-08h |
+| AC-60-01 | 通過 | TC-62-03a、TC-60-01、TC-60-01o |
 | AC-60-02 | 通過 | TC-60-01 |
-| AC-60-03 | 通過 | TC-60-03 |
+| AC-60-03 | 通過 | TC-62-11、TC-60-03 |
 | AC-60-04 | 通過 | TC-59-03、TC-60-04 |
-| AC-60-05 | 通過 | TC-60-05 |
+| AC-60-05 | 通過 | TC-62-08、TC-60-05 |
 | AC-60-06 | 通過 | TC-60-06-375、TC-60-06-768、TC-60-06-1366、TC-60-06m-375 |
-| AC-60-07 | 通過 | TC-R10-C3、TC-60-07 |
+| AC-60-07 | 通過 | TC-R10-C3、TC-62-06、TC-60-07 |
 | AC-61-01 | 通過 | TC-61-01-375、TC-61-01m-375、TC-61-01-390、TC-61-01m-390 |
 | AC-61-02 | 通過 | TC-61-02a、TC-61-02b、TC-61-02c、TC-61-02d |
+| AC-62-01 | 通過 | TC-62-01、TC-62-01b、TC-62-01f |
+| AC-62-02 | 通過 | TC-62-02a、TC-62-02b |
+| AC-62-03 | 通過 | TC-62-03a、TC-62-03b |
+| AC-62-04 | 通過 | TC-62-04 |
+| AC-62-05 | 通過 | TC-62-05b、TC-62-05、TC-59-01i、TC-08-10i |
+| AC-62-06 | 通過 | TC-62-06、TC-59-05i、TC-08-10i、TC-30-04i |
+| AC-62-07 | 通過（另待人工確認） | TC-62-07a、TC-62-07h |
+| AC-62-08 | 通過 | TC-62-08 |
+| AC-62-09 | 通過 | TC-62-09-375、TC-62-09-768、TC-62-09-1366、TC-62-09m-375、TC-62-09m-768、TC-62-09m-1366 |
+| AC-62-10 | 通過 | TC-62-10、TC-62-10b |
+| AC-62-11 | 通過 | TC-62-11 |
+| AC-62-12 | 待人工（TC-62-12h（真人語音，Chrome、Edge、正式網站）） | TC-62-12h |
 
 ## 8. 變更紀錄
 
@@ -1678,3 +1781,4 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | 0.10 | 2026-11-05 | qa-agent | 第 9 輪（PRD v0.19，R-27、R-28；architecture §10.11 Q1～Q6）：新增 §1.6、§2.9、§4.6、§6.6；§1.6 Q3 列出的 TC 期望改為現行 AC；§5、§7 依第 9 輪結果重新產生 |
 | 0.11 | 2026-11-05 | qa-agent | 第 10 輪（PRD v0.20，R-29；architecture §10.12 Q1～Q7）：新增 §1.7、§2.10（V-STT-STUB 兩種替身、`micOnStrict`、≤ 100 ms 量法、時間常數、鍵盤、AC-61 量法、AC-60-07 既有規則、舊資料相容、效能 A/B）、§4.7、§6.7（TC-58-14h、TC-59-08h、TC-58-01h）；§10.12 Q2、Q7 列出的 TC 期望改為 v0.20；§5、§7 依第 10 輪結果重新產生 |
 | 0.12 | 2026-11-06 | qa-agent | 第 11 輪（1.3.1 修正輪；architecture v0.16 §10.13 Q8～Q12）：新增 §1.8（範圍、對照組、以修改時間判定的越界基準）、§2.11（click 前登錄 rAF 的畫出量法、不用 Event Timing、`getUserMedia` 次數晚 1 個畫格、AudioContext 狀態、不用 `innerWidth − clientWidth`、以 `data-ad-env` 判斷環境、同一建置內比較）、§4.8、§6.8（TC-33-03h、TC-58-01h、傳統捲軸外觀）；§5、§7 依第 11 輪結果重新產生（655 個 TC） |
+| 0.13 | 2026-11-09 | qa-agent | 第 12 輪（PRD v0.21，R-30、R-31；architecture v0.17 §10.14 Q13～Q20）：新增 §1.9（範圍、受測物 BUILD_ID `981b0d2ab45de9d6`、git 越界基準）、§2.12（V-STT-STUB 暫時結果、`interimResults` 斷言、同一次畫面更新與逐畫格取樣、AC-62-05 雙頁對照、遲到事件、收音條等待、AC-62-09 版面、AC-62-10 file:// 與 Service Worker、V-LGL-02 v0.21）、§4.9（e2e-interim、diag-r12-meter、diag-r12-375、boundary-r12、qa-review-r12、run-r12）、§6.9（TC-62-12h、TC-62-07h、部署後 TC-VER-H2）；§3 記錄瀏覽器版本；§5、§7 依第 12 輪結果重新產生（686 個 TC；400 個應驗收 AC 未涵蓋 0） |

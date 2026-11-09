@@ -1,17 +1,24 @@
 /**
  * ---
  * doc: CONTRACT-SCHEMA
- * version: 0.20
+ * version: 0.21
  * status: approved
  * author: sa-agent
  * approved_by: JimmyLin（授權主控代核）
- * approved_at: 2026-11-05
+ * approved_at: 2026-11-09
  * ---
  *
  * English Master Track — 資料契約（型別定義）
  *（專案代號仍為 English Master Track；v0.12 起 App 內顯示名稱為「EnglishContext」，見 §13 APP_DISPLAY_NAME 與 FROZEN_IDENTIFIERS。）
  *
- * 上游：docs/01-PRD.md v0.20（approved，JimmyLin，2026-11-05；Q-94～Q-102 全部採 PM 建議），以第 6 章「人類決議」與 R-15～R-29 為準。
+ * 上游：docs/01-PRD.md v0.21（approved，JimmyLin，2026-11-09；Q-103～Q-108 全部決議 A），以第 6 章「人類決議」與 R-15～R-31 為準。
+ * v0.21（PRD R-30：US-62 聆聽中即時顯示引擎聽到的文字，Q-103～Q-107；R-31：商標說明拿掉「Part 5」，Q-108）
+ *   **不改持久化結構**（schemaVersion 維持 3，PersistedData 12 欄、StorageRecord、BackupFile 不變，localStorage 鍵數 2，不需遷移，Q-106 A）：
+ *   §18 新增 interface SttStartOptions（語音辨識服務 start() 選項，含新增的 onInterim）；SttEngineEventKind 新增 "interim"；
+ *   SttEndInfo 新增 lastInterimText；STT_FLOW_TEXTS 新增 labelInterim「聽到：」。即時文字**不進 AppState**（只在畫面模組內部變數，
+ *   理由見 §10 RuntimeState 註解）。商標說明句改為「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」：SITE_PAGES（about）、
+ *   SITE_HOME_SEO、SITE_HOME_JSON_LD、SITE_NOSCRIPT 的值與相關註解同步（README L-8 LT-2）。規則見 README §14.6（IT）、MS-1 修訂、V-STT-11～V-STT-17。
+ *   storage-schema.json 只改 meta。
  * v0.20（PRD R-29：US-58 麥克風準備中、US-59 無文字訊息分流、US-60 三種燈號都顯示辨識文字、US-61 窄視窗鍵盤焦點（BUG-005），Q-94～Q-102）
  *   **不改持久化結構**（schemaVersion 維持 3，PersistedData 12 欄、StorageRecord、BackupFile 不變，localStorage 鍵數 2，不需遷移）：
  *   SttStatus 新增 "preparing"；RuntimeState.speech 新增 preparingPhase（皆只在記憶體）。新增 §18（辨識事件、結束資訊、訊息分流、
@@ -61,7 +68,7 @@
  * 本檔是「規格」不是實作：
  * - pg-content 依 §2～§7 產出 src/data/ 的資料檔；pg-frontend 依 §1、§8～§15 實作 src/app/（v0.11 §12 PWA 含建置輸出；v0.12 §13 版面與視覺；
  *   v0.14 §14 版本號；v0.15 §15 模擬測驗答對紀錄；v0.16 §16 聯絡資訊；v0.19 §17 已答對顯示、廣告、對外頁面與 SEO；
- *   v0.20 §18 語音辨識準備中、訊息分流與辨識文字）。
+ *   v0.20 §18 語音辨識準備中、訊息分流與辨識文字；v0.21 §18 加入聆聽中即時文字）。
  * - 兩方都不得自創欄位；欄位變更必須先改本契約（版本遞增）。
  * - 下方的 export const 是契約常數（值本身就是規格），pg-frontend 實作時須使用相同數值。
  *
@@ -219,6 +226,19 @@
  * |      |            |          | (3) 註解：SttResult（recognizedText 三種燈號都顯示、不清洗）、APP_VERSION_META_NAME（1.3.0、本次 1.3.1，Q-102 A）。
  * |      |            |          | 型別數 81 → 87（interface 42、type 45）；契約常數 60 → 63；localStorage 鍵數 2 不變；
  * |      |            |          | schemaVersion 維持 3，備份格式不變，不需遷移；內容資料檔格式與值不變（pg-content 無工作）。 |
+ * | 0.21 | 2026-11-09 | sa-agent | 修訂已核准的 v0.20（主控代核），原因：PRD v0.21 R-30、R-31（JimmyLin 2026-11-09 核准，Q-103～Q-108 皆 A）：
+ * |      |            |          | 新增 US-62（AC-62-01～AC-62-12）；修改 AC-08-10、AC-30-04、AC-42-02、AC-58-07、AC-59-01、AC-59-05、AC-10-02、AC-54-01。
+ * |      |            |          | status 改為 in-review、核准欄位清空，三檔同步。
+ * |      |            |          | (1) 新增 interface SttStartOptions（start() 選項：既有 8 項 + onInterim(text, info)）。
+ * |      |            |          | (2) SttEngineEventKind 新增 "interim"（result 事件中沒有最終結果的部分，由服務區分）。
+ * |      |            |          | (3) SttEndInfo 新增 lastInterimText（8 → 9 欄）；服務**不**在 end 時以即時文字代替最終結果，由呼叫端依 README MS-1 判定。
+ * |      |            |          | (4) STT_FLOW_TEXTS 新增 labelInterim「聽到：」（Q-104 A）；SttNoTextOutcome、SttResult、LearningEventKind、RuntimeState、
+ * |      |            |          |     APP_VERSION_META_NAME（本次 1.3.2，Q-105 A）註解更新；
+ * |      |            |          |     RuntimeState 不新增欄位（即時文字只在畫面模組內部變數）。
+ * |      |            |          | (5) R-31：SITE_PAGES（about「模擬測驗」項）、SITE_HOME_SEO.description（81 → 75 字元）、SITE_HOME_JSON_LD.description、
+ * |      |            |          |     SITE_NOSCRIPT.description 改值；§5 標題、PART5_QUESTION_BANK、TAB_LABELS 註解同步。LEGAL_STATEMENTS（LT-3 的「Part 5 題目」）不改（Q-108 A）。
+ * |      |            |          | 型別數 87 → 88（interface 43、type 45）；契約常數 63 不變（STT_FLOW_TEXTS 新增 1 鍵；4 個常數改值）；
+ * |      |            |          | localStorage 鍵數 2 不變；schemaVersion 維持 3，備份格式不變，不需遷移；內容資料檔格式與值不變（pg-content 無工作）。 |
  */
 
 // ════════════════════════════════════════════════════════════════════
@@ -645,7 +665,7 @@ export interface DomainTemplate {
 }
 
 // ════════════════════════════════════════════════════════════════════
-// §5 模擬測驗題庫（題型參考 TOEIC®（多益）Part 5；識別字沿用 part5／Part5*，R-15）— 提供者：pg-content（src/data/part5.js）
+// §5 模擬測驗題庫（題型參考 TOEIC®（多益）；v0.21 依 R-31 拿掉「Part 5」；識別字沿用 part5／Part5*，R-15）— 提供者：pg-content（src/data/part5.js）
 //    全域變數：window.PART5_QUESTION_BANK（Part5Question[]）
 // ════════════════════════════════════════════════════════════════════
 
@@ -1247,7 +1267,8 @@ export type TabId = "dashboard" | "customizer" | "flashcards" | "part5" | "decod
 /**
  * 頁面畫面名稱（契約常數，v0.8 依 PRD R-15、AC-20-03、AC-10-02、AC-23-02）。
  * 導覽、頁面標題一律使用此文字。
- * （v0.17，R-25 一）模擬測驗頁必須顯示標題說明，逐字為「題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容」（AC-10-02、README LT-2）。
+ * （v0.17，R-25 一）模擬測驗頁必須顯示標題說明（AC-10-02、README LT-2）。（v0.21，R-31，Q-108 A）逐字為
+ *   「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」，說明中不得出現「Part 5」（v0.17～v0.20 為「…（多益）Part 5，非 ETS…」）。
  * （v0.12，Q-50 決議 A）主控台不再有模組入口；主控台頁面標題為 LAYOUT_TEXTS.dashboardTitle「學習主控台」（AC-39-01），
  *   導覽項文字仍為 dashboard「主控台」。
  * （v0.9）decoder、phrasebank 的文字保留供未來開放使用；本版畫面任何導覽、入口、標題都不得顯示這兩項（AC-20-04、HT-4）。
@@ -1295,7 +1316,8 @@ export type EntryMode = "firstRun" | "main";
  * 「學過一個字」的學習行為（執行期，v0.8 新增，US-30 名詞定義、R-17 (2)）。不持久化。
  * - "flip"：單字卡模式中卡片由正面翻到背面（翻回正面不算，AC-30-03）
  * - "vocabQuiz"：四選一作答（對錯皆算；只在 selectedIndex 由 null 變為非 null 時算一次）
- * - "stt"：STT 評分完成並顯示分數（逾時、空結果、錯誤不算，AC-30-04）
+ * - "stt"：STT 評分完成並顯示分數（逾時、空結果、錯誤不算，AC-30-04）。（v0.21，Q-103 A）只有即時文字就結束、以最後一段
+ *   即時文字評分（README IT-9）同樣算；顯示過即時文字但以手動停止、換卡、錯誤或 nomatch 結束不算（AC-62-06）。
  * 模擬測驗作答、滑動或按鈕換卡、未翻面瀏覽皆不算（AC-30-04）。記錄規則見 README §5.4 LR-1～LR-8。
  */
 export type LearningEventKind = "flip" | "vocabQuiz" | "stt";
@@ -1340,6 +1362,8 @@ export interface SttResult {
   /**
    * 必填。辨識原文（未清洗）：語音辨識服務回傳的字串原樣保存，不改大小寫、不去標點（AC-60-01，例 "Latency."、"adress"、"kitten"）。
    * 唯一允許的處理是服務取出文字時的既有串接（各結果第 1 候選、各段 trim 後以 1 個半形空白連接，README RT-1）。
+   * （v0.21，Q-103 A）只有即時文字就結束時，本欄 = 該次嘗試的 SttEndInfo.lastInterimText 原樣（README IT-9），
+   *   分數區與計分和收到同文字的最終結果完全相同（AC-62-05）；有最終結果時一律用最終結果，不採用即時文字（AC-62-03 (a)）。
    * 畫面一律以 textContent 寫入，值元素 lang="en"（AC-60-05）；不得寫入 localStorage 或備份（AC-60-07）。
    * 這是引擎輸出，不代表使用者實際發音，也不是語言判斷結果（AC-60-03、Q-101 A）。
    */
@@ -1380,6 +1404,11 @@ export type StorageStatus = "ok" | "unavailable";
  * （v0.20，US-58、US-59）T_READY、T_BUFFER、T_FALLBACK 的計時器 ID、嘗試代號（用來忽略遲到事件）、
  *   本次辨識的事件紀錄（§18 SttEndInfo 的旗標）只能放在 src/app 模組內部變數；不得寫入 PersistedData、localStorage、
  *   備份檔或任何其他儲存（AC-58-12、AC-59-07）。AppState 只多 speech.sttStatus 的 "preparing" 值與 speech.preparingPhase。
+ * （v0.21，US-62、Q-106 A）**即時文字不進 AppState**：目前顯示的即時文字、即時文字列是否顯示，只放在語音畫面模組的內部變數
+ *   （與 DOM），本介面**不新增欄位**；SttEndInfo.lastInterimText 只經回呼傳遞。理由：(1) 只供顯示、說話期間每秒可能更新多次，
+ *   不應觸發全域狀態更新與重繪；(2) 不在 AppState 就不可能經由狀態快照被寫入 localStorage 或匯出備份（AC-62-10）；
+ *   (3) 「即時文字列與分數區不同時出現」（AC-62-03）由同一個畫面模組在同一次更新內處理即可；(4) QA 以 DOM 驗證（V-STT-11～V-STT-17），
+ *   不需讀狀態。即時文字不得寫入 PersistedData、localStorage、IndexedDB、Cache Storage、備份檔或任何其他儲存（README IT-8）。
  */
 export interface RuntimeState {
   /** （v0.8）進入模式；啟動時依 README §5.5 FS-1 判定。 */
@@ -1506,7 +1535,7 @@ declare global {
     PROJECT_LICENSE?: ProjectLicenseInfo;
     /** src/data/templates.js，領域範本，恰好 3 筆。（v0.14）畫面入口隱藏，但照常載入、打包，不得刪除此全域變數（README HT-8）。 */
     DOMAIN_TEMPLATES?: DomainTemplate[];
-    /** src/data/part5.js，模擬測驗題庫（題型參考 TOEIC®（多益）Part 5），至少 200 題（每題型至少 50）。 */
+    /** src/data/part5.js，模擬測驗題庫（題型參考 TOEIC®（多益）；v0.21 R-31），至少 200 題（每題型至少 50）。 */
     PART5_QUESTION_BANK?: Part5Question[];
     /** src/data/decoder.js，長難句，至少 50 句。 */
     DECODER_SENTENCES?: DecoderSentence[];
@@ -2027,7 +2056,8 @@ export interface DashboardRuntimeState {
  *   v0.15 發布 1.1.0，Q-70 A：授權主控本次實作時一次性修改 package.json，之後仍由人類維護；
  *   v0.18 發布 1.2.0，Q-79 A：同樣授權主控本次一次性修改，版本行為「版本 1.2.0（建置 xxxxxxx）」，AC-42-02；
  *   v0.19 第一階段發布 1.3.0，Q-85 A：同樣授權主控本次一次性修改，版本行為「版本 1.3.0（建置 xxxxxxx）」；
- *   v0.20 發布 1.3.1，Q-102 A：同樣授權主控本次一次性修改，版本行為「版本 1.3.1（建置 xxxxxxx）」；第二階段版本號屆時由人類決定）。
+ *   v0.20 發布 1.3.1，Q-102 A：同樣授權主控本次一次性修改，版本行為「版本 1.3.1（建置 xxxxxxx）」；第二階段版本號屆時由人類決定；
+ *   v0.21 發布 1.3.2，Q-105 A：同樣授權主控本次一次性修改，版本行為「版本 1.3.2（建置 xxxxxxx）」）。
  *   契約不寫死版本值。
  * - 原始模板中 content 為**固定佔位字串**（比照 emt-build-id 的佔位規則：以 "@@" 前後包夾、模板中恰出現 1 次且位於本 meta 內；
  *   佔位字串的實際值由 SD 定，建議 "@@APP_VERSION@@"）。建置以 package.json 的 version 取代後，產物不得殘留佔位字串。
@@ -2392,7 +2422,8 @@ export const SITE_PAGES: readonly SitePage[] = [
         kind: "list",
         items: [
           [{ kind: "text", text: "單字卡：翻卡、美式語音示範、語音辨識吻合度、四選一。" }],
-          [{ kind: "text", text: "模擬測驗：題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容；作答後顯示解析。" }],
+          // （v0.21，R-31，AC-54-01）「：」與「；」之間 = README LT-2 逐字；拿掉「Part 5」。
+          [{ kind: "text", text: "模擬測驗：題型參考 TOEIC®（多益），非 ETS 官方或認可內容；作答後顯示解析。" }],
           [{ kind: "text", text: "學習進度：連續打卡、今日已學、已答對題數。" }],
         ],
       },
@@ -2465,10 +2496,13 @@ export const SITE_PAGES: readonly SitePage[] = [
 
 // ── SEO 與爬蟲檔（US-56）────────────────────────────────────────────
 
-/** 首頁 SEO 標記值（AC-56-01～AC-56-03；Q-90 決議 B）。description 逐字同 PRD US-56，長度 81 字元。 */
+/**
+ * 首頁 SEO 標記值（AC-56-01～AC-56-03；Q-90 決議 B）。description 逐字同 PRD US-56，長度 75 字元
+ * （v0.21，R-31，Q-108 A：拿掉「Part 5」，v0.19～v0.20 為 81 字元；「；」之後到「。」之前 = README LT-2；AC-56-07 限制仍符合）。
+ */
 export const SITE_HOME_SEO: SiteSeoMeta = {
   documentTitle: "EnglishContext｜英文單字卡與模擬測驗",
-  description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+  description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益），非 ETS 官方或認可內容。",
   canonicalUrl: "https://jimmyfantasyworld.com/",
   ogImageUrl: "https://jimmyfantasyworld.com/icons/icon-512.png",
 };
@@ -2482,7 +2516,7 @@ export const SITE_HOME_JSON_LD = {
   "@type": "WebSite",
   name: "EnglishContext",
   url: "https://jimmyfantasyworld.com/",
-  description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+  description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益），非 ETS 官方或認可內容。",
 } as const;
 
 /**
@@ -2492,8 +2526,8 @@ export const SITE_HOME_JSON_LD = {
 export const SITE_NOSCRIPT = {
   /** h2。 */
   title: "EnglishContext",
-  /** 段落，= SITE_HOME_SEO.description。 */
-  description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+  /** 段落，= SITE_HOME_SEO.description（v0.21 同步拿掉「Part 5」）。 */
+  description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益），非 ETS 官方或認可內容。",
   /** 主要功能清單；學習功能須啟用 JavaScript（E-150）。 */
   features: ["單字卡與美式發音練習", "模擬測驗（作答後顯示解析）", "學習進度（連續打卡、今日已學、已答對題數）"],
   /** 一般連結，順序固定。 */
@@ -2519,8 +2553,10 @@ export const SITEMAP_XML =
 
 // ════════════════════════════════════════════════════════════════════
 // §18 語音辨識準備中、訊息分流與辨識文字（v0.20，PRD R-29、US-58～US-60、Q-94～Q-99、Q-101）
+//     （v0.21，PRD R-30、US-62、Q-103～Q-107）聆聽中即時文字：SttStartOptions、"interim"、SttEndInfo.lastInterimText、
+//     STT_FLOW_TEXTS.labelInterim；規則見 README §14.6 IT-1～IT-10。
 //     提供者：契約常數（pg-frontend 實作；services/stt.js 提供事件，views/speech-panel.js 決定狀態與訊息，模組分工由 SD 定）
-//     使用者：pg-frontend、QA（V-STT-STUB 替身，README §14.5 V-STT-01～V-STT-10）
+//     使用者：pg-frontend、QA（V-STT-STUB 替身，README §14.5 V-STT-01～V-STT-17）
 //     本節全部「不持久化」：不寫入 localStorage、備份檔或任何儲存；不新增 window 全域變數；pg-content 無工作。
 //     SpeechRecognition 實例、計時器、事件物件不得放入 AppState（§10 RuntimeState 禁放規則）。
 // ════════════════════════════════════════════════════════════════════
@@ -2531,7 +2567,11 @@ export const SITEMAP_XML =
  * - "audiostart"：開始收音事件（PRD US-58 名詞）。準備中收到 → 經 T_BUFFER 後進入聆聽中（AC-58-03）。
  * - "soundstart"：偵測到聲音。準備中收到 → 立即聆聽中（AC-58-07）。**不算偵測到語音**（AC-59-05 (c)）。
  * - "speechstart"：偵測到語音。準備中收到 → 立即聆聽中（AC-58-07）；記錄 speechDetected（US-59 分流依據）。
- * - "result"：辨識結果（文字可能為空，AC-59-03）。
+ * - "result"：辨識結果（文字可能為空，AC-59-03）。（v0.21）指**最終結果**：引擎 result 事件自 resultIndex 起任一結果的
+ *   isFinal 不是 false（未提供 isFinal 的引擎視為最終）；呼叫端未提供 onInterim 時，每個 result 事件都屬本值（與 v0.20 相同）。
+ * - "interim"：（v0.21，US-62）**即時文字**（暫時結果）：呼叫端提供 onInterim 時，引擎 result 事件自 resultIndex 起所有結果的
+ *   isFinal 都是 false。不是瀏覽器的獨立事件名稱，由服務從 result 事件區分（README IT-2）。取出的文字為空時服務不回報（IT-3）。
+ *   準備中收到 → 立即聆聽中（同 soundstart、speechstart，AC-62-02、README PR-5 (b)）。不是終結點，不評分（MS-2、IT-9）。
  * - "nomatch"：引擎有結果但無可用文字（AC-59-02）。
  * - "error"：錯誤，附 SpeechRecognitionErrorEvent.error 字串（not-allowed、audio-capture、network、no-speech、aborted 等）。
  * - "end"：本次辨識結束（附 SttEndInfo）。
@@ -2539,7 +2579,7 @@ export const SITEMAP_XML =
  * 本次嘗試已取消、逾時中止或被新嘗試取代後，任何事件都不得再影響畫面（AC-58-04 (b)、AC-58-05、AC-58-06，README PR-9）。
  * 「瀏覽器不支援 audiostart」的判定方式由 SD 訂定（AC-58-09），契約只要求服務能告知呼叫端「本次是否可依賴 audiostart」。
  */
-export type SttEngineEventKind = "audiostart" | "soundstart" | "speechstart" | "result" | "nomatch" | "error" | "end";
+export type SttEngineEventKind = "audiostart" | "soundstart" | "speechstart" | "interim" | "result" | "nomatch" | "error" | "end";
 
 /**
  * 準備中的子階段（RuntimeState.speech.preparingPhase；只在記憶體）。對應：AC-58-01、AC-58-04、AC-58-06、AC-58-09、Q-96、Q-97。
@@ -2553,13 +2593,18 @@ export type SttPreparingPhase = "acquiringMic" | "awaitingAudioStart" | "fallbac
 
 /**
  * 本次辨識結束資訊（服務 → 呼叫端，"end" 事件附帶；執行期，不持久化，AC-59-07）。
- * 擴充既有 onEnd({ manual, hadResult, hadError }) 的 3 欄，新增 5 欄；所有旗標在每次新的 start() 都重設為初始值（AC-59-06 末句）。
- * 欄位全部必填。對應：AC-58-07、AC-58-08、AC-59-01～AC-59-06、README MS-1～MS-6。
+ * 擴充既有 onEnd({ manual, hadResult, hadError }) 的 3 欄，新增 5 欄；（v0.21）再新增 lastInterimText，共 9 欄。
+ * 所有欄位在每次新的 start() 都重設為初始值（布林 false、errorCode null、lastInterimText ""；AC-59-06 末句）。
+ * 每個回呼附的是**當下值的新複本**（呼叫端修改不影響服務）。
+ * 欄位全部必填。對應：AC-58-07、AC-58-08、AC-59-01～AC-59-06、AC-62-02、AC-62-05、AC-62-06、README MS-1～MS-6、IT-3、IT-9。
  */
 export interface SttEndInfo {
   /** 必填。使用者主動停止或取消（再按一次、換卡、切換模式、按 TTS、離開頁面）。true 時不提示（AC-08-10、AC-58-04、AC-58-10）。 */
   manual: boolean;
-  /** 必填。本次是否收到過 "result"（不論文字是否為空）。 */
+  /**
+   * 必填。本次是否收到過最終結果 "result"（不論文字是否為空）。
+   * （v0.21）即時文字（"interim"）**不**使本欄變 true；服務也不得在 end 時以即時文字「補發」result（README IT-4）。
+   */
   hadResult: boolean;
   /** 必填。本次是否收到過 "error"（手動停止造成的 aborted 不算）。 */
   hadError: boolean;
@@ -2573,11 +2618,56 @@ export interface SttEndInfo {
   nomatch: boolean;
   /** 必填。（v0.20）第一個 error 代碼；沒有錯誤為 null。例："no-speech"、"network"。 */
   errorCode: string | null;
+  /**
+   * 必填。（v0.21，US-62）本次最後一段**非空**即時文字（README IT-3 取出規則的結果，原樣，不清洗）；本次沒有收到過非空即時文字為 ""。
+   * 「本次收到過即時文字」一律以 lastInterimText !== "" 判定（不另設布林旗標，避免兩欄不一致）。
+   * 用途：(1) README MS-1 步驟 (2b) 只有即時文字就結束時評分的文字（Q-103 A、AC-62-05）；(2) MS-1 步驟 (4) 視同偵測到語音（Q-107 A、AC-62-06 (d)）。
+   * 只在記憶體、只經回呼傳遞；不得寫入 AppState、localStorage、備份檔或任何儲存（AC-62-10）。例："adress"、"comply with"。
+   */
+  lastInterimText: string;
+}
+
+/**
+ * （v0.21 新增）語音辨識服務 start() 的選項（services/stt.js 的呼叫介面；pg-frontend 內部的模組契約）。
+ * 回呼名稱沿用 architecture.md §7.26（DS-57 由 SD 定案），本版新增 onInterim。所有欄位選填；未提供的回呼不呼叫。
+ * 所有回呼的 info 皆為當下 SttEndInfo 的新複本。回呼內丟出的例外由服務攔下，不得成為未處理例外。
+ * 本次嘗試已被 abort()、新的 start() 取代或已觸發 onEnd 後，任何回呼都不再呼叫（README PR-9、IT-7）。
+ * start() 回傳值不變：{ ok: true, audioStartSupported: boolean } ｜ { ok: false, reason: "unsupported" ｜ "offline" ｜ "error" }。
+ * 引擎設定：lang（預設 "en-US"，AC-08-01）、maxAlternatives = 1、continuous = false 不變；interimResults = 是否提供 onInterim（IT-1）。
+ * 函式型別只用於模組之間呼叫，**不屬** AppState，不可序列化、不持久化。
+ * 對應：FR-2.3、US-58、US-59、US-62、AC-58-03、AC-58-07、AC-62-01～AC-62-06、README IT-1～IT-4、DS-57、DS-64。
+ */
+export interface SttStartOptions {
+  /** 選填。辨識語言；未提供或空字串時用 "en-US"（AC-08-01）。 */
+  lang?: string;
+  /** 選填。引擎 audiostart（SttEngineEventKind "audiostart"）。 */
+  onAudioStart?: (info: SttEndInfo) => void;
+  /** 選填。引擎 soundstart。 */
+  onSoundStart?: (info: SttEndInfo) => void;
+  /** 選填。引擎 speechstart。 */
+  onSpeechStart?: (info: SttEndInfo) => void;
+  /**
+   * 選填。（v0.21，US-62）即時文字。**提供本回呼 = 要求暫時結果**（interimResults = true）；語音畫面每次嘗試都必須提供（US-62）。
+   * text：README IT-3 取出的非空字串（只去除各段前後空白、以 1 個半形空白串接；不清洗標點、不改大小寫，AC-62-01）；
+   *   取出為空時服務不呼叫本回呼、不改 lastInterimText（AC-62-01 末句）。
+   * 呼叫前服務已把 info.lastInterimText 設為 text。本回呼只供顯示，呼叫端不得據此評分（IT-9 例外由呼叫端在 end 處理）。
+   */
+  onInterim?: (text: string, info: SttEndInfo) => void;
+  /** 選填。最終結果（"result"）；text 依 README RT-1 取出，可能為空字串（AC-59-03）。 */
+  onResult?: (text: string, info: SttEndInfo) => void;
+  /** 選填。引擎 nomatch。 */
+  onNomatch?: (info: SttEndInfo) => void;
+  /** 選填。引擎 error；code = SpeechRecognitionErrorEvent.error（取不到時 "unknown"）。手動停止造成的 "aborted" 不通知。 */
+  onError?: (code: string, info: SttEndInfo) => void;
+  /** 選填。本次辨識結束；info.lastInterimText 為本次最後一段非空即時文字（是否以它評分由呼叫端依 MS-1 (2b)、IT-9 判定）。 */
+  onEnd?: (info: SttEndInfo) => void;
 }
 
 /**
  * 沒有分數時的訊息種類（US-59、AC-58-06、AC-58-08）。判定順序見 README §14.2 MS-1。
  * - "heardNoWords"：偵測到語音但沒有文字、nomatch、或辨識文字清洗後為空 → STT_FLOW_TEXTS.heardNoWords。
+ *   （v0.21）本次收到過即時文字（SttEndInfo.lastInterimText !== ""）也視同偵測到語音：之後的 no-speech 錯誤（Q-107 A、AC-62-06 (d)）、
+ *   最終結果清洗後為空（AC-62-04）、只有即時文字但清洗後為空（AC-62-05 末句）皆為本值。
  * - "noSpeech"：已開始收音（或後備時間已到）但完全沒偵測到語音 → STT_FLOW_TEXTS.noSpeech（沿用 v1.3.0 原文）。
  * - "noResponse"：未經開始收音就結束，或 T_READY 逾時 → STT_FLOW_TEXTS.noResponse。
  * 錯誤代碼 not-allowed、audio-capture、network 等仍用既有訊息，不屬本型別（AC-58-08、AC-59-06 (c)）。
@@ -2606,8 +2696,11 @@ export type SttResultRowKind = "recognized" | "target";
  * - noSpeech：US-59「未偵測到語音」訊息（AC-59-05）；與 v1.3.0 原文相同，不改。
  * - noResponse：未經開始收音就結束或逾時（AC-58-06、AC-58-08）。
  * - labelRecognized、labelTarget：分數區文字列標籤（AC-08-08、AC-60-01），與 v1.3.0 相同，不改。
+ * - labelInterim：（v0.21，US-62、Q-104 A）即時文字列標籤（AC-62-01、AC-62-11）。冒號為全形「：」U+FF1A，標籤元素只含這 3 個字元；
+ *   即時文字放在另一個值元素（lang="en"），兩者都以 textContent 寫入（README IT-6）。
  * 既有的「麥克風跟讀」「聆聽中」「聆聽中，再按一次停止」、錯誤訊息與 AC-08-11 說明文字不變，由 SD 文字定稿表維持。
  * 本節訊息全部是 info 層級提示，不算評分，不改今日已學、打卡、掌握數（AC-30-04、AC-59-07）。
+ * 實作端的常數鍵名可自訂（例：試作的 liveLabel），但值必須逐字等於本常數（V-STT-09、V-STT-15）。
  */
 export const STT_FLOW_TEXTS = {
   micPreparing: "準備中",
@@ -2617,6 +2710,7 @@ export const STT_FLOW_TEXTS = {
   noResponse: "語音辨識沒有回應，請再試一次",
   labelRecognized: "辨識文字",
   labelTarget: "目標文字",
+  labelInterim: "聽到：",
 } as const;
 
 /**
@@ -2652,3 +2746,4 @@ export const STT_RESULT_ROWS: Readonly<Record<SttLight, readonly SttResultRowKin
 
 export {};
 // 主控代核（2026-11-05）：依已核准 PRD v0.20 修訂；不改 PRD、不改 localStorage 持久化結構（schemaVersion 3，storage-schema.json 未改）；tsc --strict 通過。
+// （v0.21，2026-11-09）sa-agent 依已核准 PRD v0.21 修訂，待主控代核；不改 localStorage 持久化結構（schemaVersion 3）。

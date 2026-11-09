@@ -151,14 +151,14 @@
     "tc": "TC-57-03",
     "ac": "AC-57-03、AC-53-02、AC-54-01、AC-55-01（應用內與靜態 main 正規化文字完全相同，SC-4）",
     "result": "通過",
-    "note": "about：innerText 相同=true（359 字元）；textContent 相同=false；contact：innerText 相同=true（55 字元）；textContent 相同=false；privacy：innerText 相同=true（371 字元）；textContent 相同=false"
+    "note": "about：innerText 相同=true（353 字元）；textContent 相同=false；contact：innerText 相同=true（55 字元）；textContent 相同=false；privacy：innerText 相同=true（371 字元）；textContent 相同=false"
   },
   {
     "suite": "e2e-site",
     "tc": "TC-57-05b",
     "ac": "AC-57-05（離線直接開靜態頁屬預期）、AC-57-02（V-PWA 離線應用內可讀）、AC-35-02、E-152",
     "result": "通過",
-    "note": "離線應用內 3 頁字元 {\"about\":364,\"contact\":56,\"privacy\":382}；localStorage 不變=true；離線直接開靜態頁 → page.goto: net::ERR_INTERNET_DISCONNECTED at https://jimmyfantasyworld.com/privacy.html（模擬；E-152 預期瀏覽器離線頁，部署後 D-8 複驗）"
+    "note": "離線應用內 3 頁字元 {\"about\":358,\"contact\":56,\"privacy\":382}；localStorage 不變=true；離線直接開靜態頁 → page.goto: net::ERR_INTERNET_DISCONNECTED at https://jimmyfantasyworld.com/privacy.html（模擬；E-152 預期瀏覽器離線頁，部署後 D-8 複驗）"
   },
   {
     "suite": "e2e-site",
@@ -172,6 +172,6 @@
     "tc": "TC-56-06c",
     "ac": "AC-56-06、E-150、AC-37-02（停用 JS）",
     "result": "通過",
-    "note": "可見文字 200 字元「EnglishContext EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。 單字卡與美式發音練習 模擬測驗（作答後顯示解析…」；連結 [[\"https://jimmyfantasyworld.com/about.html\",20],[\"https://jimmyfantasyworld.com/contact.html\",20],[\"https://jimmyfantasyworld.com/privacy.html\",20]]；停用 JS 不顯示學習入口"
+    "note": "可見文字 194 字元「EnglishContext EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益），非 ETS 官方或認可內容。 單字卡與美式發音練習 模擬測驗（作答後顯示解析） 學習進度…」；連結 [[\"https://jimmyfantasyworld.com/about.html\",20],[\"https://jimmyfantasyworld.com/contact.html\",20],[\"https://jimmyfantasyworld.com/privacy.html\",20]]；停用 JS 不顯示學習入口"
   }
 ]

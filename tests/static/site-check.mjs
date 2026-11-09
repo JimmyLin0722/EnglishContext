@@ -24,7 +24,7 @@ const sha = (b) => crypto.createHash("sha256").update(b).digest("hex");
 const PUB = "ca-pub-4051803210893105";
 const CONTACT = "email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m";
 const HOME_TITLE = "EnglishContext｜英文單字卡與模擬測驗";
-const HOME_DESC = "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。";
+const HOME_DESC = "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益），非 ETS 官方或認可內容。";
 const PROD = "https://jimmyfantasyworld.com";
 const PAGES = { about: { title: "關於我" }, contact: { title: "聯絡我們" }, privacy: { title: "隱私權政策" } };
 const ML3 = new RegExp("[A-Za-z0-9._%+-]*" + String.fromCharCode(64) + "gm" + "ail" + "\\." + "c" + "om", "i");
@@ -126,7 +126,7 @@ for (const [id, pg] of Object.entries(PAGES)) {
   rec("TC-53-02", "AC-53-02、AC-53-03（外部連結）、AC-53-06", missOrder.length === 0 && bad.length === 0 && noopener && ext.some((x) => /support\.google\.com/.test(x)), `依序 (1)～(6) 缺少或順序錯：${missOrder.join("、") || "無"}；禁用宣稱 ${bad.join("、") || "0"}；外部連結 ${J(ext).slice(0, 240)}，rel noopener=${noopener}`);
   manual("TC-53-02h", "AC-53-02 (4)（FB-71：公開文案與退出連結由人類讀過；連結由主控於實作前依 Google 現行頁面核對）", "D-11：人類讀過公開文案；退出連結是否仍有效需連網確認");
   const a = textOf(mainOf(rd("about.html")));
-  const seqA = ["關於我", "網站用途", "EnglishContext 的用途是提升英文能力、自我學習。", "主要功能", "單字卡", "翻卡", "美式語音示範", "語音辨識吻合度", "四選一", "模擬測驗", "題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容", "作答後顯示解析", "學習進度", "連續打卡", "今日已學", "已答對題數", "使用方式", "可離線使用", "語音辨識需要連網", "網站版須先連網開啟過一次", "學習紀錄存在你使用的瀏覽器", "備份匯出與匯入", "內容與權利", "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製", "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。", "資料來源與授權", "隱私權政策", "聯絡我們"];
+  const seqA = ["關於我", "網站用途", "EnglishContext 的用途是提升英文能力、自我學習。", "主要功能", "單字卡", "翻卡", "美式語音示範", "語音辨識吻合度", "四選一", "模擬測驗", "題型參考 TOEIC®（多益），非 ETS 官方或認可內容", "作答後顯示解析", "學習進度", "連續打卡", "今日已學", "已答對題數", "使用方式", "可離線使用", "語音辨識需要連網", "網站版須先連網開啟過一次", "學習紀錄存在你使用的瀏覽器", "備份匯出與匯入", "內容與權利", "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製", "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。", "資料來源與授權", "隱私權政策", "聯絡我們"];
   pos = -1; const missA = seqA.filter((w) => { const i = a.indexOf(w, pos + 1); if (i < 0) return true; pos = i; return false; });
   rec("TC-54-01", "AC-54-01", missA.length === 0, `依序 (1)～(5) 缺少或順序錯：${missA.join("、") || "無"}`);
   const BAN = ["學歷", "畢業", "碩士", "博士", "多益分數", "滿分", "團隊", "成員", "保證", "成效", "進步", "見證", "使用者人數"]; const hit = BAN.filter((w) => a.includes(w));
@@ -141,7 +141,7 @@ for (const [id, pg] of Object.entries(PAGES)) {
   const hits = []; const splitSent = (s) => s.split(/[。；？！;?!\n\r]/);
   for (const [k, v] of Object.entries(srcs)) { for (const w of AC2308) if (v.includes(w)) hits.push(k + ":" + w); for (const s of splitSent(v)) if (A.some((a) => s.includes(a)) && B.some((b) => s.includes(b))) hits.push(k + ":同句"); }
   const offi = []; for (const [k, v] of Object.entries(srcs)) for (const s of splitSent(v)) for (const w of ["官方", "認可", "認證", "授權機構"]) if (s.includes(w) && !/非 ETS 官方或認可|亦未經其認可或核准/.test(s)) offi.push(k + ":" + w + ":" + s.slice(0, 40));
-  const cnt = (s, w) => s.split(w).length - 1; const dOk = cnt(HOME_DESC, "TOEIC") <= 1 && cnt(HOME_DESC, "多益") <= 1 && HOME_DESC.includes("TOEIC®") && /TOEIC®（多益）Part 5，非 ETS 官方或認可內容/.test(HOME_DESC);
+  const cnt = (s, w) => s.split(w).length - 1; const dOk = cnt(HOME_DESC, "TOEIC") <= 1 && cnt(HOME_DESC, "多益") <= 1 && HOME_DESC.includes("TOEIC®") && /TOEIC®（多益），非 ETS 官方或認可內容/.test(HOME_DESC);
   const tm = ["about", "contact", "privacy"].filter((f) => rd(f + ".html").includes("TOEIC") && !rd(f + ".html").includes("TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。"));
   rec("TC-56-07", "AC-56-07、AC-23-08（V-SEO-06）", hits.length === 0 && offi.length === 0 && dOk && !HOME_TITLE.includes("TOEIC") && tm.length === 0, `AC-23-08 字詞 ${hits.join("、") || "0"}；「官方」「認可」非否定句 ${offi.join("、") || "0"}；首頁 title 不含 TOEIC；description TOEIC ${cnt(HOME_DESC, "TOEIC")} 次、多益 ${cnt(HOME_DESC, "多益")} 次、帶 ®；出現 TOEIC 但缺商標聲明的靜態頁 ${tm.join("、") || "0"}`);
 }

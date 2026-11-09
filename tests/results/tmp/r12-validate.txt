@@ -1,0 +1,169 @@
+
+> english-master-track@1.3.2 validate:data
+> node src/data/_tools/validate.mjs --all --stage final
+
+validate.mjs　模式：--all　階段：final　sources：D:\Demo\Clude\我的多益攻略\sources
+H-1 簡體專用字集：導出 1067 字；扣除繁簡同形白名單後 1061 字（H-1 錯誤）；降為警告 H-1W 的白名單字元 6 字「后几余范云丑」（白名單共 23 字，其餘不在導出字集、無作用）；本次命中 H-1W：無
+
+✓ FILE 資料檔存在：通過 20／錯誤 0／警告 0
+✓ LOAD 資料檔可執行且為 JSON 相容字面值（C-4）：通過 20／錯誤 0／警告 0
+✓ V-IN-01 讀檔編碼：通過 4／錯誤 0／警告 0／資訊 4
+    資訊：NGSL（sources/wordlists/NGSL_12_stats.csv）以 utf-8 解碼
+    資訊：TSL（sources/wordlists/TSL_12_stats.csv）以 latin1 解碼
+    資訊：BSL（sources/wordlists/BSL_120_stats.csv）以 utf-8 解碼
+    資訊：NAWL（sources/wordlists/NAWL_12_lemmatized_for_teaching.csv）以 latin1 解碼
+✓ V-IN-02 換行與欄位 trim：通過 4／錯誤 0／警告 0
+✓ V-IN-03 略過空行與 ## 註解：通過 4／錯誤 0／警告 0
+✓ V-IN-04 表頭欄名定位：通過 4／錯誤 0／警告 0
+✓ V-IN-05 排名欄整數：通過 4／錯誤 0／警告 0
+✓ V-IN-06 字表報告：通過 4／錯誤 0／警告 0／資訊 4
+    資訊：NGSL：資料列 2809、有效 2809、不重複 wordKey 2809、表內重複 0、非 ASCII 詞頭 0
+    資訊：TSL：資料列 1250、有效 1250、不重複 wordKey 1250、表內重複 0、非 ASCII 詞頭 3（résumé、café、entrée）
+    資訊：BSL：資料列 1744、有效 1744、不重複 wordKey 1744、表內重複 0、非 ASCII 詞頭 0
+    資訊：NAWL：資料列 959、有效 959、不重複 wordKey 959、表內重複 0、非 ASCII 詞頭 0
+✓ V-IN-07 N_B、N_G、區段與 §4.2 一致：通過 3／錯誤 0／警告 0／資訊 1
+    資訊：重算結果 N_B=2809、N_G=5620、區段 NGSL 1～2809、TSL 2810～4059、BSL 4060～5228、NAWL 5229～5620
+✓ V-SRC-01 來源代碼集合：通過 2／錯誤 0／警告 0
+✓ V-SRC-02 來源登錄內容與確認紀錄：通過 126／錯誤 0／警告 0
+✓ V-SRC-03 引用筆數：通過 12／錯誤 0／警告 0
+✓ V-SRC-04 PROJECT_LICENSE：通過 7／錯誤 0／警告 0
+✓ V-SRC-05 MIT 聲明原文：通過 8／錯誤 0／警告 0
+✓ V-VOC-01 12 個鍵與型別：通過 5620／錯誤 0／警告 0
+✓ V-VOC-02 rank 連續不重複：通過 5／錯誤 0／警告 0
+✓ V-VOC-03 wordKey 不重複：通過 1／錯誤 0／警告 0
+✓ V-VOC-04 1～N_B = NGSL 序列：通過 2820／錯誤 0／警告 0
+✓ V-VOC-05 N_B 之後的區段順序：通過 5622／錯誤 0／警告 0
+✓ V-VOC-06 sources 合法與排序：通過 5620／錯誤 0／警告 0
+✓ V-VOC-07 必填欄位與音標斜線、pos、字首字（M-8）：通過 50599／錯誤 0／警告 0
+✓ V-VOC-08 academicContext：通過 5620／錯誤 0／警告 0
+! V-VOC-09 來源標記：通過 22440／錯誤 0／警告 40
+    警告：vocab-2001.js rank 2040 gay：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2001.js rank 2181 album：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2001.js rank 2245 vice：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2401.js rank 2629 pro：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2810.js rank 2878 cellphone：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2810.js rank 2905 laptop：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2810.js rank 2916 mall：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2810.js rank 2998 download：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2810.js rank 3005 cart：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2810.js rank 3027 affordable：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2810.js rank 3040 complimentary：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-2810.js rank 3154 internship：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-3160.js rank 3230 mandatory：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-3160.js rank 3233 promotional：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-3160.js rank 3328 disruption：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-3160.js rank 3397 tech：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-3160.js rank 3467 alternatively：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-3510.js rank 3687 teen：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-3510.js rank 3774 condominium：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    警告：vocab-3860.js rank 3935 donut：meaningSource = ORIGINAL 且不在 missing 清單，須在交付紀錄列出原因（M-6）
+    …另有 20 筆
+✓ V-VOC-10 禁用值（等於 undefined／null）與角括號：通過 64813／錯誤 0／警告 0
+✓ V-VOC-11 VOCAB_MANIFEST：通過 9／錯誤 0／警告 0
+✓ V-VOC-13 分檔區間與檔名：通過 75／錯誤 0／警告 0
+! V-VOC-14 meaning 重複（只報告）：通過 0／錯誤 0／警告 13
+    警告：meaning "最後；終於" 重複於 rank 499, 1140
+    警告：meaning "危險；冒險；冒…的危險" 重複於 rank 545, 3726
+    警告：meaning "每個人；人人" 重複於 rank 650, 933
+    警告：meaning "儘管；雖然" 重複於 rank 771, 4413
+    警告：meaning "無論如何；至少" 重複於 rank 893, 3908
+    警告：meaning "衣服" 重複於 rank 956, 2535
+    警告：meaning "計程車" 重複於 rank 1148, 3092
+    警告：meaning "腳踏車" 重複於 rank 1979, 2858
+    警告：meaning "實驗室；研究室" 重複於 rank 2442, 2965
+    警告：meaning "小冊子" 重複於 rank 2829, 3160, 3875
+    警告：meaning "汽車" 重複於 rank 3050, 3170
+    警告：meaning "汽油" 重複於 rank 3384, 4283
+    警告：meaning "相似；類似" 重複於 rank 4055, 5244
+✓ V-VOC-15 對照表殘留、領域標記與「例項」：通過 16860／錯誤 0／警告 0
+✓ V-VOC-16 ECDICT 舊式音標字元：通過 5620／錯誤 0／警告 0
+! V-VOC-17 上下文用詞清單：通過 0／錯誤 0／警告 8／資訊 179
+    資訊：vocab-0001.js rank 43 get：簡體原檔含「文件」；meaning = "得到；獲得；到達；變得"
+    資訊：vocab-0001.js rank 77 give：簡體原檔含「支持」；meaning = "給；授予；發表"
+    資訊：vocab-0001.js rank 81 find：簡體原檔含「文件」；meaning = "發現；找到；認為"
+    資訊：vocab-0001.js rank 94 back：簡體原檔含「支持」；meaning = "向後；背部；後面的"
+    資訊：vocab-0001.js rank 101 last：簡體原檔含「支持」；meaning = "最後的；最近的；持續"
+    資訊：vocab-0001.js rank 105 call：簡體原檔含「文件」；meaning = "呼叫；打電話；召集；訪問"
+    資訊：vocab-0001.js rank 117 feel：簡體原檔含「触摸」；meaning = "感覺；覺得；以為"
+    資訊：vocab-0001.js rank 130 part：簡體原檔含「局部」；meaning = "部分；零件；角色；分開"
+    資訊：vocab-0001.js rank 133 help：簡體原檔含「程序、文件」；meaning = "幫助；幫忙；有用；幫助者"
+    資訊：vocab-0001.js rank 139 put：簡體原檔含「文件」；meaning = "放；擺；寫上；表達"
+    資訊：vocab-0001.js rank 163 include：簡體原檔含「文件」；meaning = "包括；把…算入"
+    資訊：vocab-0001.js rank 177 keep：簡體原檔含「保存」；meaning = "保持；遵守；維持；經營"
+    資訊：vocab-0001.js rank 198 hand：簡體原檔含「支持」；meaning = "手；人手；協助；交給"
+    資訊：vocab-0001.js rank 200 move：簡體原檔含「文件」；meaning = "移動；搬家；感動；步驟"
+    資訊：vocab-0001.js rank 206 name：簡體原檔含「文件」；meaning = "名字；名稱；名譽；命名；任命"
+    資訊：vocab-0001.js rank 208 friend：簡體原檔含「支持」；meaning = "朋友；支持者；贊助者"
+    資訊：vocab-0001.js rank 222 hold：簡體原檔含「支持、保存」；meaning = "握住；持有；佔據；掌握"
+    資訊：vocab-0001.js rank 226 second：簡體原檔含「支持」；meaning = "第二的；其次的；秒；助手；支持"
+    資訊：vocab-0001.js rank 232 plan：簡體原檔含「程序」；meaning = "計劃；方案；策略；平面圖"
+    資訊：vocab-0001.js rank 235 example：簡體原檔含「实例」；meaning = "例子；樣本；實例"
+    …另有 167 筆
+✓ S-2 骨架欄位未改動：通過 5620／錯誤 0／警告 0／資訊 40
+    資訊：vocab-2001.js rank 2040 gay：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2001.js rank 2181 album：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2001.js rank 2245 vice：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2401.js rank 2629 pro：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2810.js rank 2878 cellphone：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2810.js rank 2905 laptop：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2810.js rank 2916 mall：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2810.js rank 2998 download：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2810.js rank 3005 cart：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2810.js rank 3027 affordable：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2810.js rank 3040 complimentary：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-2810.js rank 3154 internship：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-3160.js rank 3230 mandatory：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-3160.js rank 3233 promotional：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-3160.js rank 3328 disruption：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-3160.js rank 3397 tech：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-3160.js rank 3467 alternatively：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-3510.js rank 3687 teen：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-3510.js rank 3774 condominium：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    資訊：vocab-3860.js rank 3935 donut：meaningSource 由骨架值 ECDICT 改為 ORIGINAL（允許，須有紀錄）
+    …另有 20 筆
+✓ H-1 簡體專用字：通過 5620／錯誤 0／警告 0
+✓ H-1W 繁簡同形字（白名單，警告）：通過 5620／錯誤 0／警告 0
+✓ H-2 音標字元集與英式符號：通過 5620／錯誤 0／警告 0
+✓ H-3 長度上限：通過 21221／錯誤 0／警告 0
+✓ H-4 大寫開頭、句尾標點、含詞形：通過 31202／錯誤 0／警告 0
+✓ H-5 分檔內 example／meaning 重複：通過 30／錯誤 0／警告 0
+✓ H-7 平均每筆 bytes：通過 15／錯誤 0／警告 0／資訊 15
+    資訊：vocab-0001.js：壓縮後平均每筆 366.3 bytes
+    資訊：vocab-0401.js：壓縮後平均每筆 406.3 bytes
+    資訊：vocab-0801.js：壓縮後平均每筆 403.5 bytes
+    資訊：vocab-1201.js：壓縮後平均每筆 419.0 bytes
+    資訊：vocab-1601.js：壓縮後平均每筆 381.9 bytes
+    資訊：vocab-2001.js：壓縮後平均每筆 428.6 bytes
+    資訊：vocab-2401.js：壓縮後平均每筆 404.2 bytes
+    資訊：vocab-2810.js：壓縮後平均每筆 459.0 bytes
+    資訊：vocab-3160.js：壓縮後平均每筆 465.9 bytes
+    資訊：vocab-3510.js：壓縮後平均每筆 439.4 bytes
+    資訊：vocab-3860.js：壓縮後平均每筆 472.2 bytes
+    資訊：vocab-4210.js：壓縮後平均每筆 447.6 bytes
+    資訊：vocab-4560.js：壓縮後平均每筆 453.3 bytes
+    資訊：vocab-4910.js：壓縮後平均每筆 470.4 bytes
+    資訊：vocab-5260.js：壓縮後平均每筆 466.3 bytes
+✓ V-TPL-01 3 範本 × 10 字：通過 73／錯誤 0／警告 0
+✓ V-TPL-02 必含代表字：通過 4／錯誤 0／警告 0
+✓ V-TPL-03 不在內建字庫：通過 30／錯誤 0／警告 0
+✓ V-TPL-04 30 字不重複：通過 2／錯誤 0／警告 0
+✓ V-P5-01 題型與筆數：通過 205／錯誤 0／警告 0
+✓ V-P5-02 id：通過 401／錯誤 0／警告 0
+✓ V-P5-03 空格：通過 200／錯誤 0／警告 0
+✓ V-P5-04 選項：通過 600／錯誤 0／警告 0
+✓ V-P5-05 正解索引與位置分布：通過 204／錯誤 0／警告 0／資訊 1
+    資訊：正解唯一性需人工判斷；位置分布 A 50、B 50、C 50、D 50
+✓ V-P5-06 解析：通過 200／錯誤 0／警告 0
+✓ V-P5-07 source：通過 200／錯誤 0／警告 0
+✓ V-P5-08 id 穩定（快照比對：改指另一題為錯誤、刪題為資訊）：通過 200／錯誤 0／警告 0／資訊 1
+    資訊：快照 200 筆（meta.createdAt 2026-11-04T02:05:18.732Z）、題庫 200 個 id
+✓ V-DEC-01 筆數與 id：通過 52／錯誤 0／警告 0
+✓ V-DEC-02 segments 串接：通過 250／錯誤 0／警告 0
+✓ V-DEC-03 subject／verb／modifier：通過 150／錯誤 0／警告 0
+✓ V-DEC-04 role、翻譯、section、source：通過 1328／錯誤 0／警告 0
+✓ V-RS-01 閱讀策略：通過 10／錯誤 0／警告 0
+✓ V-PH-01 類別與筆數：通過 105／錯誤 0／警告 0
+✓ V-PH-02 id、template、說明：通過 402／錯誤 0／警告 0
+✓ V-PH-03 source、exampleEn：通過 200／錯誤 0／警告 0
+
+總計：錯誤 0、警告 61；結果：通過

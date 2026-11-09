@@ -25,7 +25,7 @@
     "tc": "TC-08-01",
     "ac": "AC-08-01",
     "result": "通過",
-    "note": "lang=en-US、interimResults=false；按鈕狀態 listening、文字「聆聽中」；收音條 待機 00000 → 聆聽中（替身 −25 dBFS）11100"
+    "note": "lang=en-US、start() 當下 interimResults=true、maxAlternatives=1、continuous=false；按鈕狀態 listening、文字「聆聽中」；收音條 待機 00000 → 聆聽中（替身 −25 dBFS）11100"
   },
   {
     "suite": "e2e-speech",
@@ -88,7 +88,7 @@
     "tc": "TC-22-03",
     "ac": "AC-22-03",
     "result": "通過",
-    "note": "onresult → 徽章繪製 ms：9.8、16.4、8、11.3、14.3、17.9、7.4、13.8、4.4、10.1；中位數 10.1、p90 16.4、最大 17.9（無頭 Chrome、未降速）"
+    "note": "onresult → 徽章繪製 ms：10.9、17.4、6.4、14.3、4.4、7、10.9、17.1、6.8、8.7；中位數 8.7、p90 17.1、最大 17.4（無頭 Chrome、未降速）"
   },
   {
     "suite": "e2e-speech",

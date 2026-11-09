@@ -74,7 +74,7 @@
   var TEXT = {
     empty: "題庫尚未載入",
     heading: "模擬測驗",
-    headingNote: "題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容",
+    headingNote: "題型參考 TOEIC®（多益），非 ETS 官方或認可內容",
     progressLabel: "作答進度", // （v0.12，FE-61）進度條 aria-label（architecture.md §7.19.6）
     blank: "空格",
     next: "下一題",

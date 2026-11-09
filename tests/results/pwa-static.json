@@ -25,14 +25,14 @@
     "tc": "TC-PS-04",
     "ac": "AC-34-04、AC-34-05、AC-36-02、AC-37-01、AC-19-01（V-PWA-04）",
     "result": "通過",
-    "note": "HD-1 各元素（全檔／head 內）次數 1/1、1/1、1/1、1/1、1/1、1/1；emt-build-id=5f0dc11a7433624d；禁止元素命中 0；<link> 標籤 [\"<link rel=\\\"canonical\\\" href=\\\"https://jimmyfantasyworld.com/\\\">\",\"<link rel=\\\"icon\\\" href=\\\"data:,\\\">\"]；<title>EnglishContext｜英文單字卡與模擬測驗</title>；殘留佔位 @@=false"
+    "note": "HD-1 各元素（全檔／head 內）次數 1/1、1/1、1/1、1/1、1/1、1/1；emt-build-id=981b0d2ab45de9d6；禁止元素命中 0；<link> 標籤 [\"<link rel=\\\"canonical\\\" href=\\\"https://jimmyfantasyworld.com/\\\">\",\"<link rel=\\\"icon\\\" href=\\\"data:,\\\">\"]；<title>EnglishContext｜英文單字卡與模擬測驗</title>；殘留佔位 @@=false"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-PS-05",
     "ac": "AC-36-02、AC-37-05、AC-35-01（V-PWA-05）",
     "result": "通過",
-    "note": "sw.js BUILD_ID=5f0dc11a7433624d（HTML 5f0dc11a7433624d）；CACHE_NAME = 前綴 + BUILD_ID；PRECACHE_URLS [\"./\",\"./index.html\",\"./manifest.webmanifest\",\"./icons/icon-192.png\",\"./icons/icon-512.png\",\"./icons/icon-maskable-512.png\",\"./icons/apple-touch-icon-180.png\"]；禁用字串命中 無；監聽 install、activate、fetch、message；無 self.onX 指派；UTF-8 無 BOM"
+    "note": "sw.js BUILD_ID=981b0d2ab45de9d6（HTML 981b0d2ab45de9d6）；CACHE_NAME = 前綴 + BUILD_ID；PRECACHE_URLS [\"./\",\"./index.html\",\"./manifest.webmanifest\",\"./icons/icon-192.png\",\"./icons/icon-512.png\",\"./icons/icon-maskable-512.png\",\"./icons/apple-touch-icon-180.png\"]；禁用字串命中 無；監聽 install、activate、fetch、message；無 self.onX 指派；UTF-8 無 BOM"
   },
   {
     "suite": "pwa-static",
@@ -46,28 +46,28 @@
     "tc": "TC-36-01a",
     "ac": "AC-36-01 (a)（V-PWA-06）",
     "result": "通過",
-    "note": "連續建置 2 次：HTML／index.html／manifest／sw.js 逐位元組相同 [true,true,true,true]、部署目錄全部相同=true（sha 1be0719b67fb）；與 dist/ 現有產物相同=true；BUILD_ID 5f0dc11a7433624d"
+    "note": "連續建置 2 次：HTML／index.html／manifest／sw.js 逐位元組相同 [true,true,true,true]、部署目錄全部相同=true（sha 9b081604199d）；與 dist/ 現有產物相同=true；BUILD_ID 981b0d2ab45de9d6"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-36-01b",
     "ac": "AC-36-01 (b)、AC-36-02",
     "result": "通過",
-    "note": "src/app/main.js 改 1 字（註解「。」→「，」）：BUILD_ID 009307c4baf03508（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；src/data/templates.js 改 1 字（內容「延遲」→「延時」）：BUILD_ID 39ceca15e7004cf1（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；全程未手動修改版本號、快取名稱或 sw 範本"
+    "note": "src/app/main.js 改 1 字（註解「。」→「，」）：BUILD_ID 89354603bb783062（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；src/data/templates.js 改 1 字（內容「延遲」→「延時」）：BUILD_ID dcb0ef0e54bd327e（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true；全程未手動修改版本號、快取名稱或 sw 範本"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-36-01c",
     "ac": "AC-36-01 (c)",
     "result": "通過",
-    "note": "換 icons/icon-192.png（單色 192×192 RGB）：BUILD_ID 5a72a46d1b09b603（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true"
+    "note": "換 icons/icon-192.png（單色 192×192 RGB）：BUILD_ID 337eb04231e7a1e9（不同=true）、sw.js 不同=true、HTML 與 sw 識別碼一致=true"
   },
   {
     "suite": "pwa-static",
     "tc": "TC-36-02",
     "ac": "AC-36-02",
     "result": "通過",
-    "note": "HTML <meta name=\"emt-build-id\"> = sw.js BUILD_ID = 5f0dc11a7433624d（畫面不顯示，meta 標籤）；(b) 兩版識別碼 5f0dc11a7433624d ≠ 009307c4baf03508；只改 ads.txt：建置失敗 [建置中止] AD_PUBLISHER_MISMATCH：ads.txt 必須為「google.com, pub-4051803210893105, DIRECT, f08c47fec0942fa0」（AD-15）\n（ads.txt 不納入，SW-2）"
+    "note": "HTML <meta name=\"emt-build-id\"> = sw.js BUILD_ID = 981b0d2ab45de9d6（畫面不顯示，meta 標籤）；(b) 兩版識別碼 981b0d2ab45de9d6 ≠ 89354603bb783062；只改 ads.txt：建置失敗 [建置中止] AD_PUBLISHER_MISMATCH：ads.txt 必須為「google.com, pub-4051803210893105, DIRECT, f08c47fec0942fa0」（AD-15）\n（ads.txt 不納入，SW-2）"
   },
   {
     "suite": "pwa-static",
@@ -81,7 +81,7 @@
     "tc": "TC-36-07a",
     "ac": "AC-36-07（本機模擬 MC-03 新 workflow）",
     "result": "通過",
-    "note": "取 .github/workflows/static.yml（MC-08）：Build「npm run build」、上傳 path「dist/site」、不執行 npm ci=true；以不含 .git／node_modules／dist 的複本（32 個文字檔轉 LF，模擬 .gitattributes eol=lf 的 CI checkout）執行 npm run build → 結束碼 0；Verify 步驟（逐字取自 static.yml，以 Git Bash 執行）結束碼 0；dist/site 恰 13 個檔案 [\"about.html\",\"ads.txt\",\"contact.html\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"privacy.html\",\"robots.txt\",\"sitemap.xml\",\"sw.js\"]；CI 模擬 BUILD_ID 885a4b4a19b31824（本機 CRLF 工作目錄 5f0dc11a7433624d；不同，屬 SD-FB-37 已知事項）；CI 建置所需但尚未被 git 追蹤的檔案 0 個"
+    "note": "取 .github/workflows/static.yml（MC-08）：Build「npm run build」、上傳 path「dist/site」、不執行 npm ci=true；以不含 .git／node_modules／dist 的複本（31 個文字檔轉 LF，模擬 .gitattributes eol=lf 的 CI checkout）執行 npm run build → 結束碼 0；Verify 步驟（逐字取自 static.yml，以 Git Bash 執行）結束碼 0；dist/site 恰 13 個檔案 [\"about.html\",\"ads.txt\",\"contact.html\",\"icons/apple-touch-icon-180.png\",\"icons/icon-192.png\",\"icons/icon-512.png\",\"icons/icon-maskable-512.png\",\"index.html\",\"manifest.webmanifest\",\"privacy.html\",\"robots.txt\",\"sitemap.xml\",\"sw.js\"]；CI 模擬 BUILD_ID ff74b52f0605c465（本機 CRLF 工作目錄 981b0d2ab45de9d6；不同，屬 SD-FB-37 已知事項）；CI 建置所需但尚未被 git 追蹤的檔案 0 個"
   },
   {
     "suite": "pwa-static",

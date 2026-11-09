@@ -1,0 +1,14 @@
+e2e-interim（edge）：結束碼 0、105 秒、FAIL 0；10:28:09；可用記憶體 14070 MB
+e2e-speech（edge）：結束碼 0、33 秒、FAIL 0；10:28:42；可用記憶體 14166 MB
+e2e-mic（edge）：結束碼 0、52 秒、FAIL 0；10:29:34；可用記憶體 14140 MB
+e2e-goal（edge）：結束碼 0、43 秒、FAIL 0；10:30:18；可用記憶體 14045 MB
+e2e-hidden（edge）：結束碼 0、24 秒、FAIL 0；10:30:41；可用記憶體 13718 MB
+e2e-pwa（edge）：結束碼 0、61 秒、FAIL 0；10:31:43；可用記憶體 13898 MB
+e2e-version（edge）：結束碼 0、86 秒、FAIL 0；10:33:08；可用記憶體 14406 MB
+e2e-track-p5（edge）：結束碼 0、61 秒、FAIL 0；10:34:09；可用記憶體 14395 MB
+e2e-lock（edge）：結束碼 0、150 秒、FAIL 0；10:36:39；可用記憶體 14393 MB
+e2e-answered（edge）：結束碼 0、34 秒、FAIL 0；10:37:13；可用記憶體 14357 MB
+e2e-site（edge）：結束碼 0、49 秒、FAIL 0；10:38:02；可用記憶體 14372 MB
+e2e-ad（edge）：結束碼 0、188 秒、FAIL 0；10:41:09；可用記憶體 14564 MB
+e2e-ad-extra（edge）：結束碼 0、5 秒、FAIL 0；10:41:14；可用記憶體 14524 MB
+done

@@ -156,11 +156,14 @@ for (const [ver, url] of [["1.3.1", FILE_URL], ["1.3.0", OLD]]) for (const [w, h
     // 判定在 1.3.0 跑完後：模擬測驗第 1 次點選項是作答，作答後捲到回饋屬既有行為（1.3.0 相同），所以以「與 1.3.0 逐筆相同」判定，另列非作答控制項 scrollY 不變
     if (ver === "1.3.0") {
       const cur = RAW[`click-1.3.1@${w}${reduced ? "-reduced" : ""}`];
-      const same = J(cur.map((r) => [r.touchOrClick, r.mouse])) === J(res.map((r) => [r.touchOrClick, r.mouse]));
+      // 第 12 輪：R-31 拿掉「 Part 5」後 375px 的模擬測驗標題說明由 2 行變 1 行（architecture v0.17 §7.31.3 允許 1 或 2 行），題目區上移約 24 px，
+      // 起始 scrollY 因此與 1.3.0 不同；模擬測驗改比「是否捲動」與捲動量（差 ≤ 2 px），其餘 3 區仍逐筆相同
+      const quizSame = (a, b) => (a[1] > a[0]) === (b[1] > b[0]) && Math.abs((a[1] - a[0]) - (b[1] - b[0])) <= 2;
+      const same = cur.every((r, i) => r.area === "模擬測驗" ? quizSame(r.touchOrClick, res[i].touchOrClick) && quizSame(r.mouse, res[i].mouse) : J([r.touchOrClick, r.mouse]) === J([res[i].touchOrClick, res[i].mouse]));
       const nonAction = cur.filter((r) => r.area !== "模擬測驗").every((r) => r.touchOrClick[0] === r.touchOrClick[1] && r.mouse[0] === r.mouse[1]) && cur.find((r) => r.area === "模擬測驗").mouse[0] === cur.find((r) => r.area === "模擬測驗").mouse[1];
       const good = same && nonAction && cur.every((r) => r.behavior === "auto");
       ok = ok && good;
-      out.push(`${w}px${reduced ? " 減少動態" : ""}：${cur.map((r) => `${r.area} ${w <= 640 ? "觸控" : "點擊"} scrollY ${r.touchOrClick.join("→")}、滑鼠 ${r.mouse.join("→")}`).join("、")}；與 1.3.0 逐筆相同=${same}；scroll-behavior ${cur[0].behavior}`);
+      out.push(`${w}px${reduced ? " 減少動態" : ""}：${cur.map((r) => `${r.area} ${w <= 640 ? "觸控" : "點擊"} scrollY ${r.touchOrClick.join("→")}、滑鼠 ${r.mouse.join("→")}`).join("、")}；與 1.3.0 相同（模擬測驗比捲動量）=${same}（1.3.0：${res.map((r) => `${r.area} ${r.touchOrClick.join("→")}`).join("、")}）；scroll-behavior ${cur[0].behavior}`);
     }
   }
   R[ok ? "pass" : "fail"]("TC-61-02b", "AC-61-02（點擊與觸控不額外捲動、減少動態捲動無動畫）", out.join("；") + "（模擬測驗第 1 次點選項為作答，作答後捲到回饋為既有行為，1.3.0 相同；第 2 次滑鼠點已鎖定的選項不捲動）");

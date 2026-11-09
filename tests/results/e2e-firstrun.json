@@ -95,14 +95,14 @@
     "tc": "TC-24-11",
     "ac": "AC-24-11、AC-24-05",
     "result": "通過",
-    "note": "無效項目：提示 [\"已匯入，略過 0 筆\"]、匯入後歷史 {\"2026-10-08\":7,\"2026-11-01\":5}、todayLearned {\"date\":null,\"wordKeys\":[]}、今日已學 0 / 10 字；型別錯誤：learnedHistory 為陣列：[\"備份檔格式錯誤，未匯入\"]；todayLearned 為字串：[\"備份檔格式錯誤，未匯入\"]；wordKeys 不是清單：[\"備份檔格式錯誤，未匯入\"]；learnedHistory 缺少：[\"備份檔格式錯誤，未匯入\"]"
+    "note": "無效項目：提示 [\"已匯入，略過 0 筆\"]、匯入後歷史 {\"2026-10-11\":7,\"2026-11-04\":5}、todayLearned {\"date\":null,\"wordKeys\":[]}、今日已學 0 / 10 字；型別錯誤：learnedHistory 為陣列：[\"備份檔格式錯誤，未匯入\"]；todayLearned 為字串：[\"備份檔格式錯誤，未匯入\"]；wordKeys 不是清單：[\"備份檔格式錯誤，未匯入\"]；learnedHistory 缺少：[\"備份檔格式錯誤，未匯入\"]"
   },
   {
     "suite": "e2e-firstrun",
     "tc": "TC-24-02b",
     "ac": "AC-24-02",
     "result": "通過",
-    "note": "v0.8 匯出：schemaVersion 3、todayLearned {\"date\":\"2026-11-06\",\"wordKeys\":[\"the\",\"be\"]}、learnedHistory {\"2026-11-06\":2}（翻 2 張卡；模擬測驗作答不計）"
+    "note": "v0.8 匯出：schemaVersion 3、todayLearned {\"date\":\"2026-11-09\",\"wordKeys\":[\"the\",\"be\"]}、learnedHistory {\"2026-11-09\":2}（翻 2 張卡；模擬測驗作答不計）"
   },
   {
     "suite": "e2e-firstrun",

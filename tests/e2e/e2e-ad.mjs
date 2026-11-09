@@ -25,7 +25,10 @@ const INITS = [TOAST_RECORDER, fakeTts("ok"), fakeStt("ok"), fakeMic("ok")];
 const withRecord = (over = {}) => stateRecord(725, { sttNoticeAcknowledged: true, part5: { currentIndex: 5, lockedSelection: null, phase: "question", roundAnswered: 0, roundCorrect: 0, totalAnswered: 3, totalCorrect: 2 }, part5CorrectIds: ["p5-001", "p5-002"], ...over });
 const noRecord = (over = {}) => stateRecord(725, { sttNoticeAcknowledged: true, ...over });
 const server = await startProdServer(TMP, AD_SITE);
-const browser = await launchBrowser(prodBrowserArgs(server.port));
+// 第 12 輪：Chrome 157 預設把 http 導覽自動升級為 https（HTTPS-First），TC-50-01 的 http://jimmyfantasyworld.com 會被升級到本機 HTTPS 正式建置而載入廣告（diag-r12-httpupgrade.mjs）；
+// 關閉 HTTPS-First 相關功能，讓 http 來源真的以 http 開啟（localhost 不受影響；其餘案例都是 https）
+const NO_HTTPS_FIRST = "--disable-features=HttpsUpgrades,HttpsFirstModeV2,HttpsFirstBalancedModeAutoEnable,HttpsFirstModeV2ForTypicallySecureUsers,HttpsFirstModeIncognito,HttpsFirstBalancedMode";
+const browser = await launchBrowser([...prodBrowserArgs(server.port), NO_HTTPS_FIRST]);
 // 非覆蓋式捲軸（Windows 桌面一般設定）：Playwright 無頭預設 --hide-scrollbars，T-108 必須在實際佔寬的捲軸下量
 const browserSB = await chromium.launch({ channel: process.env.QA_BROWSER === "edge" ? "msedge" : "chrome", headless: true, ignoreDefaultArgs: ["--hide-scrollbars"], args: prodBrowserArgs(server.port) });
 

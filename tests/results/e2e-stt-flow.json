@@ -4,7 +4,7 @@
     "tc": "TC-58-01",
     "ac": "AC-58-01、AC-08-01（v0.20）",
     "result": "通過",
-    "note": "前次分數 100綠燈 → 按下 1.5 ms 內 preparing/awaitingAudioStart「準備中」00000、aria-label「準備中，再按一次取消」、aria-pressed true、畫面含「聆聽中」=false；前次訊息「未偵測到語音，請再試一次」→ 按下 1.4 ms 內清除=true"
+    "note": "前次分數 100綠燈 → 按下 2.3 ms 內 preparing/awaitingAudioStart「準備中」00000、aria-label「準備中，再按一次取消」、aria-pressed true、畫面含「聆聽中」=false；前次訊息「未偵測到語音，請再試一次」→ 按下 1.6 ms 內清除=true"
   },
   {
     "suite": "e2e-stt-flow",
@@ -18,35 +18,35 @@
     "tc": "TC-58-03",
     "ac": "AC-58-03、AC-08-01、AC-33-03",
     "result": "通過",
-    "note": "T_BUFFER = 0：#1 start 回傳 → audiostart 226 ms → 聆聽中 +0.3 ms、收音條 55.6 ms 後點亮；#2 start 回傳 → audiostart 267 ms → 聆聽中 +0.4 ms、收音條 55 ms 後點亮；#3 start 回傳 → audiostart 331 ms → 聆聽中 +0.2 ms、收音條 54.4 ms 後點亮；#4 start 回傳 → audiostart 380 ms → 聆聽中 +0.2 ms、收音條 56.7 ms 後點亮；#5 start 回傳 → audiostart 424 ms → 聆聽中 +0.3 ms、收音條 54.3 ms 後點亮"
+    "note": "T_BUFFER = 0：#1 start 回傳 → audiostart 229 ms → 聆聽中 +0.3 ms、收音條 55.5 ms 後點亮；#2 start 回傳 → audiostart 281 ms → 聆聽中 +0.4 ms、收音條 57.3 ms 後點亮；#3 start 回傳 → audiostart 334 ms → 聆聽中 +0.3 ms、收音條 56.5 ms 後點亮；#4 start 回傳 → audiostart 383 ms → 聆聽中 +0.2 ms、收音條 57.1 ms 後點亮；#5 start 回傳 → audiostart 427 ms → 聆聽中 +0.1 ms、收音條 57.4 ms 後點亮"
   },
   {
     "suite": "e2e-stt-flow",
     "tc": "TC-58-04b",
     "ac": "AC-58-04 (b)",
     "result": "通過",
-    "note": "已 start（awaitingAudioStart）再按：0.9 ms 回 idle「麥克風跟讀」00000、abort 2→3、Toast 增 0；之後替身對舊實例觸發 audiostart、soundstart、speechstart、result、nomatch、error、end → idle「麥克風跟讀」00000"
+    "note": "已 start（awaitingAudioStart）再按：1 ms 回 idle「麥克風跟讀」00000、abort 2→3、Toast 增 0；之後替身對舊實例觸發 audiostart、soundstart、speechstart、result、nomatch、error、end → idle「麥克風跟讀」00000"
   },
   {
     "suite": "e2e-stt-flow",
     "tc": "TC-58-05",
     "ac": "AC-58-05（已開始辨識後取消再按）",
     "result": "通過",
-    "note": "取消後 32.9 ms 再按 → preparing/awaitingAudioStart「準備中」00000；舊實例遲到 audiostart、result、end → preparing/awaitingAudioStart「準備中」00000；同時進行中的辨識工作 1 個；新實例 audiostart → listening、result → 100綠燈；未處理例外 0"
+    "note": "取消後 33.3 ms 再按 → preparing/awaitingAudioStart「準備中」00000；舊實例遲到 audiostart、result、end → preparing/awaitingAudioStart「準備中」00000；同時進行中的辨識工作 1 個；新實例 audiostart → listening、result → 100綠燈；未處理例外 0"
   },
   {
     "suite": "e2e-stt-flow",
     "tc": "TC-58-06",
     "ac": "AC-58-06、E-156",
     "result": "通過",
-    "note": "start() 回傳到回待機 5007 ms（T_READY 5000 ± 200）、中止辨識=true；idle「麥克風跟讀」00000、訊息「語音辨識沒有回應，請再試一次」；遲到 audiostart、result、end → idle「麥克風跟讀」00000、訊息「語音辨識沒有回應，請再試一次」；再按 → preparing → audiostart → listening"
+    "note": "start() 回傳到回待機 5005 ms（T_READY 5000 ± 200）、中止辨識=true；idle「麥克風跟讀」00000、訊息「語音辨識沒有回應，請再試一次」；遲到 audiostart、result、end → idle「麥克風跟讀」00000、訊息「語音辨識沒有回應，請再試一次」；再按 → preparing → audiostart → listening"
   },
   {
     "suite": "e2e-stt-flow",
     "tc": "TC-58-07",
     "ac": "AC-58-07",
     "result": "通過",
-    "note": "SoundStart：同一處理器內進入聆聽中（0.3 ms）、5.4 秒後仍 listening（不套用 T_READY）；SpeechStart：同一處理器內進入聆聽中（0.4 ms）、5.4 秒後仍 listening（不套用 T_READY）；準備中直接 result「adress」→ 86 黃燈；準備中 nomatch → 「有收到聲音，但沒聽出英文單字，請再說一次」"
+    "note": "SoundStart：同一處理器內進入聆聽中（0.2 ms）、5.4 秒後仍 listening（不套用 T_READY）；SpeechStart：同一處理器內進入聆聽中（0.4 ms）、5.4 秒後仍 listening（不套用 T_READY）；準備中直接 result「adress」→ 86 黃燈；準備中 nomatch → 「有收到聲音，但沒聽出英文單字，請再說一次」"
   },
   {
     "suite": "e2e-stt-flow",
@@ -60,7 +60,7 @@
     "tc": "TC-58-11",
     "ac": "AC-58-11、AC-33-06 (b)（v0.20 準備中）、E-160",
     "result": "通過",
-    "note": "準備中（awaitingAudioStart、持有音軌 1）拔除 → 1.2 ms 回 idle「麥克風跟讀」00000、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、abort 5→6"
+    "note": "準備中（awaitingAudioStart、持有音軌 1）拔除 → 1.4 ms 回 idle「麥克風跟讀」00000、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」、abort 5→6"
   },
   {
     "suite": "e2e-stt-flow",
@@ -74,35 +74,35 @@
     "tc": "TC-58-04a",
     "ac": "AC-58-04 (a)、AC-58-01（含取得麥克風期間）、E-157",
     "result": "通過",
-    "note": "按下 8.3 ms 內 preparing/acquiringMic「準備中」00000；取得中再按 9.3 ms 回 idle「麥克風跟讀」00000、Toast 增 0；放行擱置的 getUserMedia（1 個）後：辨識開始 0→0（不開始）、idle「麥克風跟讀」00000、保留音軌 1（live 1）；再按 getUserMedia 1→1（重用）、start 0→1"
+    "note": "按下 9.8 ms 內 preparing/acquiringMic「準備中」00000；取得中再按 2.4 ms 回 idle「麥克風跟讀」00000、Toast 增 0；放行擱置的 getUserMedia（1 個）後：辨識開始 0→0（不開始）、idle「麥克風跟讀」00000、保留音軌 1（live 1）；再按 getUserMedia 1→1（重用）、start 0→1"
   },
   {
     "suite": "e2e-stt-flow",
     "tc": "TC-58-06b",
     "ac": "AC-58-06（權限詢問不計入 T_READY）、E-157",
     "result": "通過",
-    "note": "getUserMedia 擱置 6.2 秒（> T_READY）後仍 preparing/acquiringMic「準備中」00000；再按 1 ms 回 idle「麥克風跟讀」00000；之後才允許 → 不開始辨識（start 1→1）、idle「麥克風跟讀」00000"
+    "note": "getUserMedia 擱置 6.2 秒（> T_READY）後仍 preparing/acquiringMic「準備中」00000；再按 1.4 ms 回 idle「麥克風跟讀」00000；之後才允許 → 不開始辨識（start 1→1）、idle「麥克風跟讀」00000"
   },
   {
     "suite": "e2e-stt-flow",
     "tc": "TC-58-05b",
     "ac": "AC-58-05（取得中取消後立即再按：共用取得、不出現第 2 個權限詢問）、PR-8",
     "result": "通過",
-    "note": "取得中：按下 → 取消 → 22.1 ms 內再按 → preparing/acquiringMic「準備中」00000；getUserMedia 呼叫 2→3（第 2 次按下沿用擱置中的取得，不出現第 2 個權限詢問）；放行後只有新嘗試開始辨識（start 1→2、實例 1→2）→ listening → 14紅燈"
+    "note": "取得中：按下 → 取消 → 21.2 ms 內再按 → preparing/acquiringMic「準備中」00000；getUserMedia 呼叫 2→3（第 2 次按下沿用擱置中的取得，不出現第 2 個權限詢問）；放行後只有新嘗試開始辨識（start 1→2、實例 1→2）→ listening → 14紅燈"
   },
   {
     "suite": "e2e-stt-flow",
     "tc": "TC-58-10a",
     "ac": "AC-58-10 (a) 取得麥克風期間、E-159",
     "result": "通過",
-    "note": "換卡：acquiringMic → idle，取得完成後不開始（start 2→2）；切換測驗模式：acquiringMic → idle，取得完成後不開始（start 2→2）；按 TTS：acquiringMic → idle，取得完成後不開始（start 2→2）、照常朗讀 1 次；翻面（往返）：仍 preparing/acquiringMic，取得完成後 preparing/awaitingAudioStart（同聆聽中：翻面不中止）；離開單字卡頁（取得中）：3 ms 內音軌 live 0、回單字卡頁 idle「麥克風跟讀」00000、未開始辨識"
+    "note": "換卡：acquiringMic → idle，取得完成後不開始（start 2→2）；切換測驗模式：acquiringMic → idle，取得完成後不開始（start 2→2）；按 TTS：acquiringMic → idle，取得完成後不開始（start 2→2）、照常朗讀 1 次；翻面（往返）：仍 preparing/acquiringMic，取得完成後 preparing/awaitingAudioStart（同聆聽中：翻面不中止）；離開單字卡頁（取得中）：2 ms 內音軌 live 0、回單字卡頁 idle「麥克風跟讀」00000、未開始辨識"
   },
   {
     "suite": "e2e-stt-flow",
     "tc": "TC-58-10b",
     "ac": "AC-58-10 (b) 已開始辨識期間、E-159",
     "result": "通過",
-    "note": "換卡：awaitingAudioStart → idle、abort +1；遲到事件 → idle「麥克風跟讀」00000；切換測驗模式：awaitingAudioStart → idle、abort +1；遲到事件 → idle「麥克風跟讀」00000；按 TTS：awaitingAudioStart → idle、abort +1、朗讀 1 次；遲到事件 → idle「麥克風跟讀」00000；翻面：準備中 → preparing；聆聽中 → listening（行為相同）；離開單字卡頁：137 ms 內音軌 live 0；遲到事件後回單字卡頁 idle「麥克風跟讀」00000"
+    "note": "換卡：awaitingAudioStart → idle、abort +1；遲到事件 → idle「麥克風跟讀」00000；切換測驗模式：awaitingAudioStart → idle、abort +1；遲到事件 → idle「麥克風跟讀」00000；按 TTS：awaitingAudioStart → idle、abort +1、朗讀 1 次；遲到事件 → idle「麥克風跟讀」00000；翻面：準備中 → preparing；聆聽中 → listening（行為相同）；離開單字卡頁：140 ms 內音軌 live 0；遲到事件後回單字卡頁 idle「麥克風跟讀」00000"
   },
   {
     "suite": "e2e-stt-flow",
@@ -116,7 +116,7 @@
     "tc": "TC-58-09",
     "ac": "AC-58-09、E-158",
     "result": "通過",
-    "note": "替身沒有 onaudiostart 屬性（\"onaudiostart\" in rec 為 false）：#1 fallbackWait「準備中」00000 → start 回傳後 1509 ms 聆聽中、收音條 11111；再等 5.3 秒仍 listening（不套用 T_READY）；#2 fallbackWait「準備中」00000 → start 回傳後 1511 ms 聆聽中、收音條 11111；#3 fallbackWait「準備中」00000 → start 回傳後 1513 ms 聆聽中、收音條 11111；後備等待中再按 1.2 ms 回待機、1700 ms 後仍 idle；提前 speechstart → listening「聆聽中」11111；提前 result → idle「麥克風跟讀」00000、分數 100綠燈；提前 error network → idle「麥克風跟讀」00000、訊息「語音辨識需要網路連線」；提前 無錯誤 end → idle「麥克風跟讀」00000、訊息「語音辨識沒有回應，請再試一次」"
+    "note": "替身沒有 onaudiostart 屬性（\"onaudiostart\" in rec 為 false）：#1 fallbackWait「準備中」00000 → start 回傳後 1502 ms 聆聽中、收音條 11111；再等 5.3 秒仍 listening（不套用 T_READY）；#2 fallbackWait「準備中」00000 → start 回傳後 1502 ms 聆聽中、收音條 11111；#3 fallbackWait「準備中」00000 → start 回傳後 1505 ms 聆聽中、收音條 11111；後備等待中再按 1.6 ms 回待機、1700 ms 後仍 idle；提前 speechstart → listening「聆聽中」11111；提前 result → idle「麥克風跟讀」00000、分數 100綠燈；提前 error network → idle「麥克風跟讀」00000、訊息「語音辨識需要網路連線」；提前 無錯誤 end → idle「麥克風跟讀」00000、訊息「語音辨識沒有回應，請再試一次」"
   },
   {
     "suite": "e2e-stt-flow",
@@ -270,14 +270,14 @@
     "tc": "TC-58-01f",
     "ac": "AC-58-01（本次載入第 1 次按下 ≤ 100 ms；BUG-007）",
     "result": "通過",
-    "note": "chrome#1：第 1 次 0.9／0.9／2.5（t1 preparing、gUM 0/0/1）；第 2 次 0.6／0.6／2（t1 preparing、gUM 0/0/0）；離開再回來 0.4／0.5／1.8（t1 preparing、gUM 0/0/1）；chrome#2：第 1 次 1.3／1.3／2.7（t1 preparing、gUM 0/0/1）；第 2 次 0.5／0.6／2.1（t1 preparing、gUM 0/0/0）；離開再回來 0.5／0.5／1.5（t1 preparing、gUM 0/0/1）；chrome#3：第 1 次 1.1／1.1／2.7（t1 preparing、gUM 0/0/1）；第 2 次 0.4／0.4／1.8（t1 preparing、gUM 0/0/0）；離開再回來 0.5／0.6／2（t1 preparing、gUM 0/0/1）；edge#1：第 1 次 1／1.1／2.5（t1 preparing、gUM 0/0/1）；第 2 次 0.3／0.3／1.3（t1 preparing、gUM 0/0/0）；離開再回來 0.4／0.4／1.3（t1 preparing、gUM 0/0/1）；edge#2：第 1 次 0.8／0.8／2.3（t1 preparing、gUM 0/0/1）；第 2 次 0.3／0.4／1.2（t1 preparing、gUM 0/0/0）；離開再回來 0.5／0.6／1.5（t1 preparing、gUM 0/0/1）；edge#3：第 1 次 0.9／1／2.4（t1 preparing、gUM 0/0/1）；第 2 次 0.4／0.4／1.2（t1 preparing、gUM 0/0/0）；離開再回來 0.4／0.4／1.5（t1 preparing、gUM 0/0/1）（ms：處理器 t1−t0／狀態屬性／畫出 t2−t0；gUM = getUserMedia 呼叫數於 t1／t2／t2+250 ms。第 2 次沿用擱置中的取得，故 0。產品 new AudioContext 耗時（第 1 次／離開再回來）chrome#1 108.5/33.9、chrome#2 111.4/36.4、chrome#3 110.6/32.8、edge#1 118.5/36、edge#2 157.2/38.5、edge#3 150.4/35 ms，發生在畫出之後）"
+    "note": "chrome#1：第 1 次 0.9／1／2.5（t1 preparing、gUM 0/0/1）；第 2 次 0.4／0.4／1.6（t1 preparing、gUM 0/0/0）；離開再回來 0.7／0.7／1.7（t1 preparing、gUM 0/0/1）；chrome#2：第 1 次 1.1／1.1／2.9（t1 preparing、gUM 0/0/1）；第 2 次 0.5／0.6／1.6（t1 preparing、gUM 0/0/0）；離開再回來 0.7／0.7／2.1（t1 preparing、gUM 0/0/1）；chrome#3：第 1 次 1.3／1.3／3.1（t1 preparing、gUM 0/0/1）；第 2 次 0.4／0.4／1.4（t1 preparing、gUM 0/0/0）；離開再回來 0.6／0.6／2（t1 preparing、gUM 0/0/1）；edge#1：第 1 次 0.9／0.9／2.7（t1 preparing、gUM 0/0/1）；第 2 次 0.3／0.3／2.5（t1 preparing、gUM 0/0/0）；離開再回來 0.5／0.6／1.9（t1 preparing、gUM 0/0/1）；edge#2：第 1 次 0.9／1／2.4（t1 preparing、gUM 0/0/1）；第 2 次 0.4／0.4／1.6（t1 preparing、gUM 0/0/0）；離開再回來 0.4／0.5／1.8（t1 preparing、gUM 0/0/1）；edge#3：第 1 次 1.2／1.3／2.8（t1 preparing、gUM 0/0/1）；第 2 次 0.6／0.7／2（t1 preparing、gUM 0/0/0）；離開再回來 0.6／0.6／2（t1 preparing、gUM 0/0/1）（ms：處理器 t1−t0／狀態屬性／畫出 t2−t0；gUM = getUserMedia 呼叫數於 t1／t2／t2+250 ms。第 2 次沿用擱置中的取得，故 0。產品 new AudioContext 耗時（第 1 次／離開再回來）chrome#1 107.1/36.6、chrome#2 110.1/34.2、chrome#3 118.1/34.9、edge#1 124.8/34.9、edge#2 148.8/38、edge#3 116.9/35.4 ms，發生在畫出之後）"
   },
   {
     "suite": "e2e-stt-flow",
     "tc": "TC-58-01g",
     "ac": "AC-58-01（4 倍 CPU 降速；BUG-007 §21.5 的 2/16 超過）",
     "result": "通過",
-    "note": "chrome：離開再回來後第 1 次 16/16 ≤ 100 ms（畫出 8,6.4,6.9,12.6,8.1,6.3,11.1,7.5,7.9,7,5.6,9.2,5.8,5.9,7.4,10.6；最大 12.6；處理器最大 3.1）；本次載入第 1 次（參考）畫出 22.1,10,7.7、處理器 8.8,2.8,1.8；edge：離開再回來後第 1 次 16/16 ≤ 100 ms（畫出 5.1,4,6.5,5.2,12.5,3.5,3.4,6.2,4.3,4.2,6.7,6.3,3.7,3.1,3.9,6.5；最大 12.5；處理器最大 3.5）；本次載入第 1 次（參考）畫出 15.2,8.9,5.6、處理器 3.5,1.5,0.4（ms；本機無頭、非基準環境）"
+    "note": "chrome：離開再回來後第 1 次 16/16 ≤ 100 ms（畫出 13.8,7.2,7.7,15.6,7.8,14.2,6.4,12.4,20,15.2,14.7,11.1,7,11.3,12.1,2.1；最大 20；處理器最大 5.6）；本次載入第 1 次（參考）畫出 19.9,7.6,12.1、處理器 10,2,3.7；edge：離開再回來後第 1 次 16/16 ≤ 100 ms（畫出 5.1,5.5,3.2,5.1,17.2,3.3,3.6,10.9,13.3,5.4,7.2,5.2,11.8,6.4,5.5,5.3；最大 17.2；處理器最大 3）；本次載入第 1 次（參考）畫出 16,9.2,11.6、處理器 8.1,2.4,0.6（ms；本機無頭、非基準環境）"
   },
   {
     "suite": "e2e-stt-flow",
@@ -291,7 +291,7 @@
     "tc": "TC-33-03r",
     "ac": "AC-33-03、AC-58-01（§7.28.4：AudioContext 不在點按處理器內建立後仍為 running；收音條會亮）",
     "result": "通過",
-    "note": "chrome 本次載入第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 141.2 ms）、音軌 1、收音條 2 秒內最多亮 4 格（取樣 0000000000442000004220000043200000442100）；chrome 離開再回來後第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 32.9 ms）、音軌 1、收音條 2 秒內最多亮 5 格（取樣 0000000000521000005210000052100000421000）；edge 本次載入第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 121 ms）、音軌 1、收音條 2 秒內最多亮 5 格（取樣 0000000000520000014200000042000000420000）；edge 離開再回來後第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 34.9 ms）、音軌 1、收音條 2 秒內最多亮 5 格（取樣 0000000000210000015100000051000000410000）（瀏覽器假音源；實機麥克風見 Q12 人工項）"
+    "note": "chrome 本次載入第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 108.1 ms）、音軌 1、收音條 2 秒內最多亮 5 格（取樣 0000000000531000005100000053100000531000）；chrome 離開再回來後第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 38.3 ms）、音軌 1、收音條 2 秒內最多亮 5 格（取樣 0000000000410000005100000051000000520000）；edge 本次載入第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 116.9 ms）、音軌 1、收音條 2 秒內最多亮 4 格（取樣 0000000004410000044200000442000000420000）；edge 離開再回來後第 1 次：listening、新 AudioContext 1 個（建立時 running → 聆聽中 running，建構 33.5 ms）、音軌 1、收音條 2 秒內最多亮 5 格（取樣 0000000004321000043210000432100005320000）（瀏覽器假音源；實機麥克風見 Q12 人工項）"
   },
   {
     "suite": "e2e-stt-flow",

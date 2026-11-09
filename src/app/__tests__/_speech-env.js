@@ -2,7 +2,8 @@
  * _speech-env.js — 語音面板測試共用沙箱（FE-92；不是測試檔，不符合 *.test.js，npm test 不會直接執行）
  * 供 speech-flow.test.js 使用：最小假 DOM、假時鐘（注入 setTimeout／clearTimeout）、替身 store／tts／stt／mic、
  * 假 SpeechRecognition 全域（可選「支援 audiostart」）。依據：architecture.md v0.15 §7.26.3、§10.12；
- * v0.16 §7.28.3、§10.13（FE-95：假 requestAnimationFrame 與 fakeMic active 選項）。
+ * v0.16 §7.28.3、§10.13（FE-95：假 requestAnimationFrame 與 fakeMic active 選項）；
+ * v0.17 §7.30、§10.14（FE-99：暫時結果 interimEv 與最終結果 finalEv 事件輔助）。
  * 每次 makeEnv 都是新的 vm 沙箱，模組內狀態（gen、att）不互相影響。
  */
 "use strict";
@@ -126,6 +127,25 @@ function fakeSttGlobal(o = {}) {
 
 /** 辨識結果事件 */
 const resultEv = (t) => ({ resultIndex: 0, results: [[{ transcript: t }]] });
+
+/** （v0.17）暫時結果事件：每段一個結果、isFinal = false（服務提供 onInterim 時視為即時文字） */
+function interimEv(...texts) {
+  return {
+    resultIndex: 0,
+    results: texts.map((t) => {
+      const r = [{ transcript: t }];
+      r.isFinal = false;
+      return r;
+    })
+  };
+}
+
+/** （v0.17）最終結果事件：isFinal = true */
+function finalEv(text) {
+  const r = [{ transcript: text }];
+  r.isFinal = true;
+  return { resultIndex: 0, results: [r] };
+}
 
 /**
  * 替身 EMT.services.mic。
@@ -310,6 +330,6 @@ function callsOf(env, name) {
 }
 
 module.exports = {
-  APP_DIR, FakeEl, fakeDocument, fakeClock, flush, fakeSttGlobal, resultEv, fakeMic,
+  APP_DIR, FakeEl, fakeDocument, fakeClock, flush, fakeSttGlobal, resultEv, interimEv, finalEv, fakeMic,
   makeEnv, bindDom, messageOf, barsOf, resultBoxOf, callsOf
 };

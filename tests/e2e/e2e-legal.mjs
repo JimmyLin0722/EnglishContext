@@ -10,7 +10,7 @@ import { KEY, stateRecord, dialogInfo, expandBackup } from "./lib/state.mjs";
 const R = recorder("e2e-legal");
 const J = (x) => JSON.stringify(x);
 const TMP = process.env.QA_TMP || path.join(ROOT, "tests", "results", "tmp"); fs.mkdirSync(TMP, { recursive: true });
-const LT2 = "題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容";
+const LT2 = "題型參考 TOEIC®（多益），非 ETS 官方或認可內容";
 const LT3 = "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權";
 const LT4 = "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0";
 const LT5 = "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。";

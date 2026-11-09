@@ -91,7 +91,7 @@ if (process.env.QA_R10CSS) {
     }
   }
   R[ok ? "pass" : "fail"]("TC-R11-375", "AC-20-01、AC-40-02（v0.16 §7.29.4：覆蓋式捲軸無影響；375／390 版面與第 10 輪樣式相同）", out.join("；") + "（對照組 = 目前原始碼、只把 00-base.css、85-ad.css 還原為 FE-96 之前，QA 建置）");
-} else R.manual("TC-R11-375", "AC-20-01、AC-40-02", "未設定 QA_R10CSS，未比對");
+} else console.log("  （TC-R11-375 未設定 QA_R10CSS，不執行；第 12 輪由 diag-r12-375.mjs TC-R12-375 與 1.3.1 比較取代）");
 // ═════ TC-R11-1366b：1366 主控台展開資料備份（不可捲動 → 可捲動）dx = 0 ═════
 {
   const out = []; let ok = true;

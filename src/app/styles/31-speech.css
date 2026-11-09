@@ -9,6 +9,9 @@
  * （v0.12，FE-59；§7.19.7）只換配色：面板分隔線 --border → --line；收音條暗格維持 --border、亮格 --correct。
  * （v0.15，FE-92；architecture §7.26.7）準備中 .sp-mic.is-preparing：只換顏色，不改尺寸、無動畫（AC-58-13）；
  *       辨識文字值可在任意位置換行（AC-60-06）。
+ * （v0.17，FE-99；architecture §7.30.5、契約 README §14.6 IT-6）聆聽中即時文字列 .sp-live：次要文字色 --text-muted、
+ *       值斜體、無 transition／animation（一般與減少動態相同）；不設定 display，隱藏靠 [hidden]；長文字可換行不截斷
+ *       （AC-62-01、AC-62-09、AC-38-04）。
  */
 
 .sp-panel {
@@ -290,4 +293,26 @@
   min-width: 0;
   /* 60 字元無空白的辨識文字也可換行，不產生水平捲軸（AC-60-06） */
   overflow-wrap: anywhere;
+}
+
+/* ─── 即時文字列（v0.17，§7.30.5）：聆聽中顯示目前聽到的文字；標籤與值都繼承 --text-muted ─── */
+.sp-live {
+  margin: 0;
+  padding: 6px 12px;
+  border-left: 3px solid var(--line);
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  transition: none;
+  animation: none;
+}
+
+.sp-live__label {
+  margin-right: 4px;
+  font-size: 0.9rem;
+}
+
+.sp-live__text {
+  font-style: italic;
 }

@@ -1,0 +1,56 @@
+warning: in the working copy of 'dist/english-master-track.html', CRLF will be replaced by LF the next time Git touches it
+warning: in the working copy of 'tests/e2e/lib/inits.mjs', CRLF will be replaced by LF the next time Git touches it
+  OK dist/english-master-track.html FE-101
+  OK dist/site/about.html FE-101
+  OK dist/site/ads.txt FE-101
+  OK dist/site/contact.html FE-101
+  OK dist/site/icons/apple-touch-icon-180.png FE-101
+  OK dist/site/icons/icon-192.png FE-101
+  OK dist/site/icons/icon-512.png FE-101
+  OK dist/site/icons/icon-maskable-512.png FE-101
+  OK dist/site/index.html FE-101
+  OK dist/site/manifest.webmanifest FE-101
+  OK dist/site/privacy.html FE-101
+  OK dist/site/robots.txt FE-101
+  OK dist/site/sitemap.xml FE-101
+  OK dist/site/sw.js FE-101
+  OK docs/01-PRD.md （上游：PM／SA／SD 產出，人類核准或主控代核；PG 只改 tasks.json status）
+  OK docs/02-contract/README.md （上游：PM／SA／SD 產出，人類核准或主控代核；PG 只改 tasks.json status）
+  OK docs/02-contract/data-schema.ts （上游：PM／SA／SD 產出，人類核准或主控代核；PG 只改 tasks.json status）
+  OK docs/02-contract/storage-schema.json （上游：SA 產出，只改 meta、結構不變）
+  OK docs/03-design/architecture.md （上游：PM／SA／SD 產出，人類核准或主控代核；PG 只改 tasks.json status）
+  OK docs/03-design/tasks.json （上游：PM／SA／SD 產出，人類核准或主控代核；PG 只改 tasks.json status）
+  OK docs/04-qa/test-plan.md （QA 自有）
+  OK package.json （MC-10：主控修改 version 1.3.1 → 1.3.2，git diff 只有此 1 行）
+  OK src/app/__tests__/_speech-env.js FE-99
+  OK src/app/__tests__/legal-static.test.js FE-100
+  OK src/app/__tests__/naming.test.js FE-100
+  OK src/app/__tests__/speech-flow.test.js FE-99
+  OK src/app/__tests__/speech.test.js FE-98、FE-99
+  OK src/app/core/site-content.js FE-100
+  OK src/app/services/stt.js FE-98
+  OK src/app/styles/31-speech.css FE-99
+  OK src/app/views/part5.js FE-100
+  OK src/app/views/speech-panel.js FE-99
+  OK tests/e2e/diag-r10-focus.mjs （QA 自有）
+  OK tests/e2e/diag-r11-gutter.mjs （QA 自有）
+  OK tests/e2e/diag-r12-375.mjs （QA 自有）
+  OK tests/e2e/diag-r12-httpupgrade.mjs （QA 自有）
+  OK tests/e2e/diag-r12-meter.mjs （QA 自有）
+  OK tests/e2e/e2e-ad.mjs （QA 自有）
+  OK tests/e2e/e2e-compat-r10.mjs （QA 自有）
+  OK tests/e2e/e2e-interim.mjs （QA 自有）
+  OK tests/e2e/e2e-legal.mjs （QA 自有）
+  OK tests/e2e/e2e-lock.mjs （QA 自有）
+  OK tests/e2e/e2e-speech.mjs （QA 自有）
+  OK tests/e2e/e2e-version.mjs （QA 自有）
+  OK tests/e2e/lib/inits.mjs （QA 自有）
+  OK tests/static/boundary-r12.mjs （QA 自有）
+  OK tests/static/legal-check.mjs （QA 自有）
+  OK tests/static/site-check.mjs （QA 自有）
+  OK tests/tools/ac-matrix.mjs （QA 自有）
+  OK tests/tools/qa-review-r12.mjs （QA 自有）
+  OK tests/tools/run-r12.mjs （QA 自有）
+  OK tests/tools/tc-desc.json （QA 自有）
+  OK tests/tools/tc-list.mjs （QA 自有）
+HEAD 2cb2ca2：變動 193 個（已追蹤 104、未追蹤 76、dist/site 晚於 HEAD 13／13）；超出任務 paths 0 個；必須無變動路徑命中 0 個（）；src/data git status「」；static.yml diff 0；package.json 只改 version=true；storage-schema 只改 meta=true；tasks.json 既有任務（除 status）變動 0 個；QA 開始前已變動的 tests/ 檔 0 個；任務未 done 0 個；任務 paths 中未變動 0 個（）

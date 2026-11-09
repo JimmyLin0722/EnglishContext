@@ -81,7 +81,7 @@
           kind: "list",
           items: [
             [{ kind: "text", text: "單字卡：翻卡、美式語音示範、語音辨識吻合度、四選一。" }],
-            [{ kind: "text", text: "模擬測驗：題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容；作答後顯示解析。" }],
+            [{ kind: "text", text: "模擬測驗：題型參考 TOEIC®（多益），非 ETS 官方或認可內容；作答後顯示解析。" }],
             [{ kind: "text", text: "學習進度：連續打卡、今日已學、已答對題數。" }]
           ]
         },
@@ -155,7 +155,7 @@
   /** 首頁 SEO 標記值（AC-56-01～AC-56-03；Q-90 決議 B） */
   var SITE_HOME_SEO = {
     documentTitle: "EnglishContext｜英文單字卡與模擬測驗",
-    description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+    description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益），非 ETS 官方或認可內容。",
     canonicalUrl: "https://jimmyfantasyworld.com/",
     ogImageUrl: "https://jimmyfantasyworld.com/icons/icon-512.png"
   };
@@ -166,13 +166,13 @@
     "@type": "WebSite",
     name: "EnglishContext",
     url: "https://jimmyfantasyworld.com/",
-    description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。"
+    description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益），非 ETS 官方或認可內容。"
   };
 
   /** 未執行 JavaScript 時的網站說明（AC-56-06、SE-6）；不含信箱，連結為正式網址（E-151） */
   var SITE_NOSCRIPT = {
     title: "EnglishContext",
-    description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容。",
+    description: "EnglishContext 是自我學習用的英文工具，提供單字卡、美式發音練習與模擬測驗；題型參考 TOEIC®（多益），非 ETS 官方或認可內容。",
     features: ["單字卡與美式發音練習", "模擬測驗（作答後顯示解析）", "學習進度（連續打卡、今日已學、已答對題數）"],
     links: [
       { text: "關於我", href: "https://jimmyfantasyworld.com/about.html" },

@@ -1,0 +1,18 @@
+  PASS TC-D01 AC-03-06 N_O=1000、N_B=2809、N_G=5620；VOCAB_MANIFEST nB=2809 nG=5620；依字表重算=5620
+  PASS TC-D02 AC-03-07 重複 0 筆
+  PASS TC-D03 AC-03-08 排名連續=true；1～N_B 與 NGSL SFI Rank 順序一致=true；> N_B 皆來自 TSL/BSL/NAWL=true；全序列符合 R-1～R-4=true
+  PASS TC-D04 AC-03-09 集合相同=true（2809 vs 2809）；缺少功能詞=無；功能詞具完整卡片欄位 10/10
+  PASS TC-D05 AC-06-08 > N_B 空白 0 筆；≤ N_B 型別錯誤 0 筆；≤ N_B 空白 1259 筆（允許）
+  PASS TC-D06 AC-06-01、AC-06-02、AC-06-07 欄位問題 0 筆；pos 值：art. v. conj. prep. adv. aux. pron. adj. n. num. int. pref.
+  PASS TC-D07 AC-06-02（契約 V-VOC-07 M-8） 字首字 6 筆（non、pre、ex、multi、semi、neo）；不符 0
+  PASS TC-D08 AC-23-03 問題 0；missing 4 筆（résumé、café、entrée、unauthorize）皆原創=true；ECDICT 釋義 5576 筆、原創 44 筆；音標標 ECDICT 0 筆=true；ECDICT 子集鍵 5616
+  PASS TC-D09 AC-23-05 登錄 NGSL、TSL、BSL、NAWL、ECDICT、ORIGINAL；缺漏 無；以未確認字表為唯一來源 0 筆
+  PASS TC-D10 AC-23-02 資料中字表種類 4（NGSL、NAWL、TSL、BSL）、登錄字表 4；includedItemCount 相符=true；ECDICT 筆數登錄 5576 / 實際 5576；MIT 全文與 sources/ecdict/LICENSE 一致=true
+  PASS TC-D11 AC-05-01、AC-05-02、AC-05-03 範本 資工、商管、生醫統計；每範本字數 10/10/10；與內建重複 0；30 字互不重複=true
+  PASS TC-D12 AC-10-01、AC-10-02、AC-11-02 共 200 題；preposition_collocation 50、part_of_speech 50、context_vocabulary 50、connector 50；結構問題 0；正解位置 A～D 50/50/50/50
+  PASS TC-D13 AC-12-02、AC-12-03 共 50 句；缺主詞或動詞或非原創 0 句
+  PASS TC-D14 AC-14-01 主題：Abstract 摘要(5)、方法論(5)、文獻回顧（Research Gap）(5)
+  PASS TC-D15 AC-15-02 共 100 則；gap 25、aim 25、findings 25、limitations 25
+  PASS TC-D16 AC-23-04（標記） 來源標記非原創 0 筆（共 5970）；精確片語搜尋比對列入人工驗收 TC-M09
+  PASS TC-D17 AC-09-02 釋義非空 5620/5620；相異釋義 5606；同一釋義最多重複 3 次
+資料驗收：通過 17、失敗 0

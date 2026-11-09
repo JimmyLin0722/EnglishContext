@@ -6,13 +6,17 @@
  *       v0.15（FE-92）：architecture.md §4.13、§7.26.1～§7.26.9；契約 data-schema §18 STT_FLOW_TEXTS、STT_TIMING、
  *       STT_RESULT_ROWS、SttNoTextOutcome，README §14.1 PR-1～PR-12、§14.2 MS-1～MS-6、§14.3 RT-1～RT-6、DS-58～DS-61
  *       v0.16（FE-95）：architecture.md §4.14、§7.28.3（第 1 次按下先畫出準備中再取得麥克風，修正 BUG-007）
+ *       v0.17（FE-99）：architecture.md §4.15、§7.26.4～§7.26.8（v0.17 修訂）、§7.30.2～§7.30.7；契約 v0.21 README §14.6
+ *         IT-5～IT-10、MS-1 (2b)／(4)、PR-5 (b)、DS-64、DS-68～DS-70，data-schema §18 STT_FLOW_TEXTS.labelInterim、
+ *         SttEndInfo.lastInterimText（聆聽中即時文字列）
  * 涵蓋：AC-07-01～AC-07-05、AC-08-01～AC-08-03、AC-08-06～AC-08-11、AC-08-13、AC-08-14、
- *       AC-21-02、AC-21-03、AC-22-03、AC-33-01～AC-33-08、AC-58-01～AC-58-13、AC-59-01～AC-59-07、AC-60-01～AC-60-07
+ *       AC-21-02、AC-21-03、AC-22-03、AC-33-01～AC-33-08、AC-58-01～AC-58-13、AC-59-01～AC-59-07、AC-60-01～AC-60-07、
+ *       AC-62-01～AC-62-11
  *
  * 提供 EMT.components.speechPanel（由 FE-11 抽認卡頁呼叫）：
  *   render(containerEl, card, state)
  *     - containerEl：卡片正面的 .fc-speech（每次都是新的空容器）；card：StudyCard；state：AppState。
- *     - 產生：「朗讀」1.0x、0.75x 按鈕；麥克風按鈕、5 格收音條與常駐「需要連網」標示；訊息列；分數區。
+ *     - 產生：「朗讀」1.0x、0.75x 按鈕；麥克風按鈕、5 格收音條與常駐「需要連網」標示；即時文字列（v0.17）；訊息列；分數區。
  *     - 首次 render 時訂閱 store；之後 "speech" tag 的變更（麥克風狀態、評分結果）由本元件自行更新，
  *       抽認卡頁不會為此重繪。
  *   reset()
@@ -38,13 +42,18 @@
  *       unavailable → 照常辨識、收音條全暗（AC-33-07）；成功 → stt.start()
  *   stt.start() 回傳 audioStartSupported：true → awaitingAudioStart（T_READY 逾時）；false → fallbackWait（T_FALLBACK 後聆聽中）
  *   audiostart（經 T_BUFFER）、soundstart、speechstart → 聆聽中＋ mic.startMeter（收音條只從這裡點亮，PR-3）
- *   result／nomatch／error／end → outcomeOf 判定（每次嘗試只判定 1 次）：評分、錯誤訊息或 3 種分流訊息之一
+ *   （v0.17）即時文字 onInterim：準備中收到 → 立即聆聽中（IT-5、PR-5 (b)）；聆聽中在即時文字列顯示最新一段（IT-6），
+ *       只供顯示、不評分、不寫入 store（IT-8）；空白不回報、畫面保留上一段（FB-80）
+ *   result／nomatch／error／end → outcomeOf 判定（每次嘗試只判定 1 次）：評分、錯誤訊息或 3 種分流訊息之一；
+ *       （v0.17）end 時沒有最終結果、無錯誤、無 nomatch 而有即時文字 → 以最後一段即時文字評分（MS-1 (2b)、IT-9）
+ *   （v0.17）狀態離開聆聽中（評分、訊息、錯誤、取消、再按、換卡、TTS、離頁、音軌結束）→ 同一個工作中隱藏即時文字列（IT-7）
  *   聆聽以任何方式結束 → 同一個工作中 mic.stopMeter() 並把 5 格設暗（AC-33-03）
  *   準備中或聆聽中音軌結束（拔除、被停用）→ 取消、回待機、「找不到麥克風裝置」（AC-33-06、AC-58-11）
  *
  * 隱私：不保存任何音訊；音量值只存在本元件的區域變數（只用來切換收音條 class），從不傳給 store action；
  *       評分結果只放執行期狀態（契約 RuntimeState.speech.lastResult，不持久化，AC-21-03）；
- *       辨識事件旗標只放模組變數 att，不進 store（AC-59-07）。本檔不直接存取麥克風，一律經 services/mic.js。
+ *       辨識事件旗標只放模組變數 att，不進 store（AC-59-07）；（v0.17）即時文字只放模組變數 interimText、att.info 與 DOM，
+ *       不進 store、不寫入任何儲存（IT-8、AC-62-10）。本檔不直接存取麥克風，一律經 services/mic.js。
  * 安全：所有文字（含辨識結果與自訂單字）一律經 EMT.core.dom.el 以 textContent 寫入（C-7、RT-3）。
  * 純邏輯（錯誤訊息對照、評分結果、分數區模型、訊息判定 outcomeOf）於 Node 下以 module.exports 匯出供單元測試；
  * 瀏覽器下只登錄元件，載入時不操作 DOM。
@@ -68,6 +77,7 @@
     mic: "麥克風跟讀",
     micPreparing: "準備中",                               // AC-58-01（v0.15）
     micListening: "聆聽中",                               // AC-08-01
+    labelInterim: "聽到：",                               // AC-62-01（v0.17；全形冒號 U+FF1A，STT_FLOW_TEXTS.labelInterim）
     micIdleLabel: "開始語音辨識",
     micPreparingLabel: "準備中，再按一次取消",            // AC-58-01（v0.15；全形逗號）
     micListeningLabel: "聆聽中，再按一次停止",
@@ -249,22 +259,31 @@
   }
 
   /**
-   * 訊息判定（MS-1，architecture §7.26.5；純函式）。第一個成立的條件為準：
+   * 訊息判定（MS-1，architecture §7.26.5、§7.30.6；純函式）。第一個成立的條件為準：
    *   1 manual 或 info.manual → none；2 hadText → score；
+   *   2b（v0.17）atEnd、info.hadResult 不是 true、errorCode 為 null、info.nomatch 不是 true、
+   *      info.lastInterimText 為非空字串且 interimHasText → { kind: "score", source: "interim" }（以即時文字評分，IT-9）；
    *   3 errorCode 不是 null 也不是 "no-speech" → error；
-   *   4 speechDetected 或 nomatch，或 hadResult 但 hadText 為假 → heardNoWords；
+   *   4 speechDetected 或 nomatch，或 hadResult 但 hadText 為假，或（v0.17，Q-107 A）lastInterimText 為非空字串 → heardNoWords；
    *   5 errorCode === "no-speech" 或 confirmed → noSpeech；6 其他 → noResponse。
-   * @param {{manual?: boolean, hadText?: boolean, info?: object, confirmed?: boolean}} input
-   * @returns {{kind: string, code?: string}}
+   * 缺少 atEnd、interimHasText、lastInterimText 時一律視為 false／""，結果與 v0.15 相同。
+   * @param {{manual?: boolean, hadText?: boolean, info?: object, confirmed?: boolean,
+   *          atEnd?: boolean, interimHasText?: boolean}} input
+   * @returns {{kind: string, code?: string, source?: string}}
    */
   function outcomeOf(input) {
     var o = input && typeof input === "object" ? input : {};
     var i = o.info && typeof o.info === "object" ? o.info : {};
     var code = typeof i.errorCode === "string" && i.errorCode ? i.errorCode : null;
+    var interim = typeof i.lastInterimText === "string" && i.lastInterimText !== "";
     if (o.manual === true || i.manual === true) return { kind: "none" };
     if (o.hadText === true) return { kind: "score" };
+    if (o.atEnd === true && i.hadResult !== true && code === null && i.nomatch !== true &&
+        interim && o.interimHasText === true) {
+      return { kind: "score", source: "interim" };
+    }
     if (code !== null && code !== "no-speech") return { kind: "error", code: code };
-    if (i.speechDetected === true || i.nomatch === true || i.hadResult === true) return { kind: "heardNoWords" };
+    if (i.speechDetected === true || i.nomatch === true || i.hadResult === true || interim) return { kind: "heardNoWords" };
     if (code === "no-speech" || o.confirmed === true) return { kind: "noSpeech" };
     return { kind: "noResponse" };
   }
@@ -313,6 +332,7 @@
   var meterActive = false; // 音量分析是否進行中（聆聽中才為 true）
   var shownLevel = 0;     // 收音條目前亮格數（只供重建 DOM 時還原顯示；不寫入任何狀態）
   var trackEndedBound = false; // 是否已向 mic 登錄音軌結束回呼
+  var interimText = "";   // （v0.17）即時文字列目前顯示的文字（只供重建面板時還原；不評分、不進 store，IT-8）
   /**
    * 目前嘗試（§7.26.3；只在模組內，不進 store）：
    * { id, confirmed, decided, stage, info, timers: { ready, buffer, fallback, frame, paint } }
@@ -444,17 +464,17 @@
     return id === gen && att !== null && att.id === id && !att.decided;
   }
 
-  /** 空白的辨識事件旗標（SttEndInfo 8 欄初始值） */
+  /** 空白的辨識事件旗標（SttEndInfo 9 欄初始值；v0.17 加 lastInterimText） */
   function blankInfo() {
     return {
       manual: false, hadResult: false, hadError: false, audioStarted: false,
-      soundStarted: false, speechDetected: false, nomatch: false, errorCode: null
+      soundStarted: false, speechDetected: false, nomatch: false, errorCode: null, lastInterimText: ""
     };
   }
 
   /**
    * 合併服務送來的旗標到本次嘗試（服務未提供 info 時以事件本身補上）。
-   * 布林旗標只會由 false 變 true；errorCode 只記第一個。
+   * 布林旗標只會由 false 變 true；errorCode 只記第一個；（v0.17）lastInterimText 以來源中的非空字串覆蓋（取最新）。
    */
   function mergeInfo(a, info, patch) {
     var cur = a.info;
@@ -466,6 +486,8 @@
         if (!Object.prototype.hasOwnProperty.call(cur, k)) continue;
         if (k === "errorCode") {
           if (cur.errorCode === null && typeof src.errorCode === "string" && src.errorCode) cur.errorCode = src.errorCode;
+        } else if (k === "lastInterimText") {
+          if (typeof src.lastInterimText === "string" && src.lastInterimText !== "") cur.lastInterimText = src.lastInterimText;
         } else if (src[k] === true) {
           cur[k] = true;
         }
@@ -473,9 +495,10 @@
     }
   }
 
-  /** 本次嘗試是否已確認開始收音（§7.26.5） */
+  /** 本次嘗試是否已確認開始收音（§7.26.5；v0.17 收到過非空即時文字也算，IT-5） */
   function confirmedOf(a) {
-    return !!(a && (a.confirmed || a.info.audioStarted || a.info.soundStarted || a.info.speechDetected));
+    return !!(a && (a.confirmed || a.info.audioStarted || a.info.soundStarted || a.info.speechDetected ||
+      (typeof a.info.lastInterimText === "string" && a.info.lastInterimText !== "")));
   }
 
   // ── 收音條（§7.14、§7.11 A-6：只切換 is-on class，無漸變） ──
@@ -550,6 +573,34 @@
   /** 面板是否仍在畫面上 */
   function attached() {
     return !!(ui && ui.container && ui.container.isConnected !== false && ui.container.firstChild === ui.root);
+  }
+
+  // ── 即時文字列（v0.17，architecture §7.30.3、§7.30.4；IT-6、IT-7） ──
+
+  /** 把 interimText 寫入即時文字列並顯示（只改值元素的 textContent，不新增子元素，C-7） */
+  function paintInterim() {
+    if (!ui || !ui.live) return;
+    dom().setText(ui.liveText, interimText);
+    ui.live.hidden = false;
+  }
+
+  /**
+   * 顯示最新一段即時文字：只在 live(id)、聆聽中、text 為字串且 trim 後非空時更新；
+   * 否則不改畫面（保留上一段，FB-80）。
+   */
+  function showInterim(id, text) {
+    if (!live(id) || att.stage !== "listening") return;
+    if (typeof text !== "string" || !text.trim()) return;
+    interimText = text;
+    paintInterim();
+  }
+
+  /** 隱藏並清空即時文字列（ui 不存在時只清變數） */
+  function hideInterim() {
+    interimText = "";
+    if (!ui || !ui.live) return;
+    dom().setText(ui.liveText, "");
+    ui.live.hidden = true;
   }
 
   // ── 訊息列 ──
@@ -656,12 +707,15 @@
 
   /**
    * 設定語音狀態。離開聆聽（結果、逾時、無結果、錯誤、再按、取消、start 失敗）都經過這裡：
-   * 先在同一個工作中停止音量分析並歸暗（AC-33-03）。
+   * 先在同一個工作中隱藏即時文字列（v0.17，IT-7）、停止音量分析並歸暗（AC-33-03）。
    * @param {string} s idle | notice | preparing | listening
    * @param {string} [phase] s 為 preparing 時的子階段
    */
   function setStatus(s, phase) {
-    if (s !== "listening") stopMeterNow();
+    if (s !== "listening") {
+      hideInterim();
+      stopMeterNow();
+    }
     if (s === "preparing") act("setSttStatus", s, phase);
     else act("setSttStatus", s);
   }
@@ -812,6 +866,18 @@
         mergeInfo(att, info, { speechDetected: true });
         onSoundOrSpeechEvent(id);
       },
+      onInterim: function (text, info) {
+        // 只供顯示：不評分、不呼叫 setSttResult／recordSttScored 或任何寫入 store 的 action（IT-8、IT-9）
+        if (!live(id)) return;
+        mergeInfo(att, info, { lastInterimText: text });
+        // 準備中收到即時文字 = 已確認開始收音：立即聆聽中並清 ready、buffer、fallback 計時器（IT-5、PR-5 (b)）
+        if (att.stage !== "listening") {
+          att.confirmed = true;
+          enterListening(id);
+        }
+        if (!live(id)) return;
+        showInterim(id, text);
+      },
       onResult: function (text, info) {
         if (!live(id)) return;
         mergeInfo(att, info, { hadResult: true });
@@ -833,7 +899,14 @@
       onEnd: function (info) {
         if (!live(id)) return;
         mergeInfo(att, info, null);
-        onTerminal(id, false, null);
+        // （v0.17，MS-1 (2b)、IT-9）沒有最終結果就結束：以最後一段即時文字評分，走與最終結果相同的 finish 路徑
+        var t = att.info.lastInterimText;
+        var res = t !== "" ? buildResult(t, tgt, similarity()) : null;
+        var out = outcomeOf({
+          manual: false, hadText: false, info: att.info, confirmed: confirmedOf(att),
+          atEnd: true, interimHasText: res !== null
+        });
+        finish(id, out, out.kind === "score" ? res : null);
       }
     });
 
@@ -977,6 +1050,8 @@
    * （v0.16）已持有音軌時照舊同步取得（重用約 1 ms）；否則等「準備中」畫出後才取得（afterPaint，BUG-007）。
    */
   function beginAttempt() {
+    // 新嘗試開始時沒有即時文字列（IT-7、PR-4）
+    hideInterim();
     if (att) clearTimers(att);
     gen++;
     var id = gen;
@@ -1060,6 +1135,7 @@
       if (sp.sttStatus === "notice") return;                 // 說明對話框開啟中
       if (sp.sttStatus === "listening") {
         // 再次按下：停止並回待機，不提示（AC-08-10）；之後遲到的結果不評分（SD-FB-85）
+        // （v0.17，DS-69）setStatus("idle") 在本處理器內同步隱藏即時文字列，不等 end
         if (att) {
           att.decided = true;
           clearTimers(att);
@@ -1165,10 +1241,16 @@
     var meterEl = el("span", { className: "sp-meter", attrs: { role: "img", "aria-label": TEXT.meterLabel } }, bars);
 
     var sttRow = el("div", { className: "sp-stt" }, [micBtn, meterEl, badge]);
+    // 即時文字列（v0.17，IT-6）：非即時區域（aria-live off、無 role），位置在麥克風列之後、訊息區之前
+    var liveText = el("span", { className: "sp-live__text", attrs: { lang: "en" } });
+    var liveEl = el("p", { className: "sp-live", attrs: { "aria-live": "off", hidden: true } }, [
+      el("span", { className: "sp-live__label", text: TEXT.labelInterim }),
+      liveText
+    ]);
     var msg = el("div", { className: "sp-msg", attrs: { role: "status", "aria-live": "polite", hidden: true } });
     var result = el("div", { className: "sp-result", attrs: { "aria-live": "polite", hidden: true } });
 
-    var rootEl = el("div", { className: "sp-panel" }, [ttsRow, sttRow, msg, result]);
+    var rootEl = el("div", { className: "sp-panel" }, [ttsRow, sttRow, liveEl, msg, result]);
     dom().clear(container);
     container.appendChild(rootEl);
 
@@ -1178,10 +1260,15 @@
       micBtn: micBtn,
       micText: micText,
       bars: bars,
+      live: liveEl,
+      liveText: liveText,
       msg: msg,
       result: result
     };
     shownResult = undefined;
+    // 聆聽中重建面板（如翻面）時還原即時文字列；其他情況隱藏並清空（§7.30.4）
+    if (att && !att.decided && att.stage === "listening" && interimText !== "") paintInterim();
+    else hideInterim();
     // 聆聽中重建面板（同一張卡重繪）時還原收音條；其他情況一律全暗
     renderBars(meterActive ? shownLevel : 0);
   }
@@ -1234,6 +1321,7 @@
       try {
         stopAll();
         stopMeterNow();
+        hideInterim();
         cardKey = null;
         message = null;
         renderMessage();

@@ -62,6 +62,10 @@ export function fakeTts(mode = "ok") {
  * window.__qaStt.throwOnStart = true：下一次 start() 拋出例外（AC-58-08）。
  * window.__qaStt.log：替身事件時間軸 [{ ev, t, i }]（t = performance.now()，i = 實例序號），含 "start-return"。
  * window.__qaMicSeq：頁面中任一 .sp-mic 的 data-status 變化 [{ s, t }]（MutationObserver，供「先準備中再聆聽中」斷言）。
+ * 第 12 輪（architecture v0.17 §10.14 Q13、Q14）：emitInterim(...texts) 回傳暫時結果（每段 1 個 result、isFinal = false、resultIndex 0）；
+ *   emitResult 維持 isFinal = true；emitRaw(ev) 直接送出自訂 result 事件（邊界測試）。
+ *   window.__qaStt.config：每次 start() 當下產品設定的 { i, lang, interimResults, maxAlternatives, continuous }（記錄 interimResults 實際值）。
+ *   建構子的 interimResults 初值改為 null（第 11 輪以前為 true，無法分辨產品是否明確設定）。
  */
 export function fakeStt(mode = "ok", opts = {}) {
   const audioStart = opts.audioStart !== undefined ? !!opts.audioStart : process.env.QA_STT_AUDIOSTART !== "0";
@@ -70,7 +74,7 @@ export function fakeStt(mode = "ok", opts = {}) {
 (() => {
   const mode = ${JSON.stringify(mode)};
   const AS = ${JSON.stringify(audioStart)};
-  const Q = window.__qaStt = { instances: [], starts: 0, stops: 0, aborts: 0, last: null, audioStart: AS, autoMs: AS ? ${JSON.stringify(autoMs)} : null, throwOnStart: false, log: [] };
+  const Q = window.__qaStt = { instances: [], starts: 0, stops: 0, aborts: 0, last: null, audioStart: AS, autoMs: AS ? ${JSON.stringify(autoMs)} : null, throwOnStart: false, log: [], config: [] };
   window.__qaMicSeq = [];
   try {
     new MutationObserver((ms) => { for (const m of ms) { const t = m.target; if (t && t.classList && t.classList.contains("sp-mic")) { const s = t.getAttribute("data-status"); const last = window.__qaMicSeq[window.__qaMicSeq.length - 1]; if (!last || last.s !== s) window.__qaMicSeq.push({ s, t: performance.now() }); } } })
@@ -84,13 +88,14 @@ export function fakeStt(mode = "ok", opts = {}) {
   const L = (ev, r) => Q.log.push({ ev, t: performance.now(), i: r ? r.__i : -1 });
   class R {
     constructor() {
-      this.lang = ""; this.interimResults = true; this.maxAlternatives = 5; this.continuous = true; this.onresult = null; this.onerror = null; this.onend = null; this.started = false;
+      this.lang = ""; this.interimResults = null; this.maxAlternatives = 5; this.continuous = true; this.onresult = null; this.onerror = null; this.onend = null; this.started = false;
       if (AS) { this.onaudiostart = null; this.onsoundstart = null; this.onspeechstart = null; this.onnomatch = null; }
       this.__i = Q.instances.length; Q.instances.push(this); Q.last = this;
     }
     start() {
       if (Q.throwOnStart) { Q.throwOnStart = false; L("start-throw", this); throw new DOMException("qa start failed", "InvalidStateError"); }
       this.started = true; Q.starts++; L("start", this);
+      Q.config.push({ i: this.__i, lang: this.lang, interimResults: this.interimResults, maxAlternatives: this.maxAlternatives, continuous: this.continuous });
       const self = this;
       if (AS && typeof Q.autoMs === "number") setTimeout(() => { if (self.started && !self.__aborted && !self.__ended) self.emitAudioStart(); }, Q.autoMs);
       // start() 回傳時刻：在呼叫端同步程式結束後的第一個微任務記錄
@@ -103,6 +108,8 @@ export function fakeStt(mode = "ok", opts = {}) {
     emitSpeechStart() { L("speechstart", this); const f = this.onspeechstart; f && f({}); }
     emitNomatch() { L("nomatch", this); const f = this.onnomatch; f && f({ results: [] }); }
     emitResult(text) { L("result", this); const alt = { transcript: text, confidence: 0.9 }; const res = [alt]; res.isFinal = true; const results = [res]; this.onresult && this.onresult({ results, resultIndex: 0 }); }
+    emitInterim(...texts) { L("interim:" + JSON.stringify(texts), this); const results = texts.map((t) => { const r = [{ transcript: t, confidence: 0.5 }]; r.isFinal = false; return r; }); this.onresult && this.onresult({ results, resultIndex: 0 }); }
+    emitRaw(ev) { L("raw", this); this.onresult && this.onresult(ev); }
     emitError(code) { L("error:" + code, this); this.onerror && this.onerror({ error: code }); }
     emitEnd() { this.__ended = true; L("end", this); const f = this.onend; f && f({}); }
   }

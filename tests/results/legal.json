@@ -22,6 +22,13 @@
   },
   {
     "suite": "legal",
+    "tc": "TC-LGL-S03",
+    "ac": "AC-10-02、AC-54-01、AC-56-03、AC-56-05、AC-56-06、AC-56-07、AC-57-03、AC-23-08（V-LGL-02 v0.21：交付物「TOEIC®（多益）Part 5」0 次）",
+    "result": "通過",
+    "note": "english-master-track.html：舊 0、LT-2 9、LT-3 2；site/index.html：舊 0、LT-2 9、LT-3 2；site/about.html：舊 0、LT-2 1、LT-3 1；site/contact.html：舊 0、LT-2 0、LT-3 0；site/privacy.html：舊 0、LT-2 0、LT-3 0；site/sw.js：舊 0、LT-2 0、LT-3 0"
+  },
+  {
+    "suite": "legal",
     "tc": "TC-LGL-S02",
     "ac": "AC-10-02、AC-48-12（V-LGL-02、E-123、HN-1、E-134）",
     "result": "通過",

@@ -99,11 +99,12 @@ async function speakAndScore(p, recognized) {
     await gotoWord(p, "Latency");
     const idle = await panel(p);
     await micOn(p); await sleep(300);
-    const a = await panel(p); const r = await p.ev(`({ lang: window.__qaStt.last.lang, interim: window.__qaStt.last.interimResults, started: window.__qaStt.last.started })`);
+    const a = await panel(p); const r = await p.ev(`({ lang: window.__qaStt.last.lang, interim: window.__qaStt.last.interimResults, started: window.__qaStt.last.started, cfg: window.__qaStt.config.slice(-1)[0] })`);
     await p.click(".fc-front .sp-mic"); await sleep(80);
     const lit = (a.bars.match(/1/g) || []).length;
-    return { ok: r.lang === "en-US" && r.started && a.status === "listening" && a.listening && a.micText.includes("聆聽中") && idle.bars === "00000" && lit > 0,
-      note: `lang=${r.lang}、interimResults=${r.interim}；按鈕狀態 ${a.status}、文字「${a.micText}」；收音條 待機 ${idle.bars} → 聆聽中（替身 −25 dBFS）${a.bars}` };
+    // 第 12 輪（architecture v0.17 §10.14 Q14、V-STT-17）：1.3.2 起面板一律提供 onInterim，start() 當下 interimResults 必須為 true（替身初值 null）
+    return { ok: r.lang === "en-US" && r.started && r.cfg && r.cfg.interimResults === true && r.cfg.maxAlternatives === 1 && r.cfg.continuous === false && a.status === "listening" && a.listening && a.micText.includes("聆聽中") && idle.bars === "00000" && lit > 0,
+      note: `lang=${r.lang}、start() 當下 interimResults=${r.cfg && r.cfg.interimResults}、maxAlternatives=${r.cfg && r.cfg.maxAlternatives}、continuous=${r.cfg && r.cfg.continuous}；按鈕狀態 ${a.status}、文字「${a.micText}」；收音條 待機 ${idle.bars} → 聆聽中（替身 −25 dBFS）${a.bars}` };
   });
   await R.check("TC-08-03", "AC-08-03", async () => { await gotoWord(p, "Latency"); const r = await speakAndScore(p, "Latency."); return { ok: r.badge.includes("100") && r.light === "綠燈", note: `Latency. → ${r.badge}、${r.light}` }; });
   await R.check("TC-08-04", "AC-08-04", async () => { await gotoWord(p, "address"); const r = await speakAndScore(p, "adress"); return { ok: /\b86\b/.test(r.badge), note: `address ← adress → ${r.badge}、${r.light}` }; });

@@ -19,7 +19,7 @@ const MAIL_RE = new RegExp("[A-Za-z0-9._%+-]*" + String.fromCharCode(64) + "gm" 
 const html = fs.readFileSync(path.join(ROOT, "dist/english-master-track.html"), "utf8");
 const LT = {
   1: "常用搭配詞",
-  2: "題型參考 TOEIC®（多益）Part 5，非 ETS 官方或認可內容",
+  2: "題型參考 TOEIC®（多益），非 ETS 官方或認可內容",
   3: "原創內容（例句、解析、Part 5 題目、長難句、句型）由 JimmyLin 以 AI 輔助編製，JimmyLin 就其享有的權利以 CC BY-SA 4.0 授權",
   4: "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0",
   5: "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。",
@@ -73,11 +73,23 @@ rec("TC-23-08a", "AC-23-08 (1)(3)、E-122（V-LGL-05 (a)）", lit.length === 0 &
 
 // V-LGL-01～04：交付 HTML
 {
-  const gone = ["多益常考", "多益最常見", "題型對應多益 Part 5", "著作權人 JimmyLin", "保留所有權利"].filter((w) => html.includes(w));
+  const gone = ["多益常考", "多益最常見", "題型對應多益 Part 5", "TOEIC®（多益）Part 5", "著作權人 JimmyLin", "保留所有權利"].filter((w) => html.includes(w));
   const count = (s) => html.split(s).length - 1;
   const ok = gone.length === 0 && [1, 2, 3, 5, 6].every((k) => count(LT[k]) >= 1) && count(CONTACT) >= 1 && count("mailto:") === 0 && (html.match(MAIL_RE) || []).length === 0;
   rec("TC-LGL-S01", "AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-23-07、AC-23-08（V-LGL-01～04、交付檔字串）", ok,
     `舊文字 ${gone.join("、") || "0 次"}；LT-1 ${count(LT[1])} 次、LT-2 ${count(LT[2])} 次、LT-3 ${count(LT[3])} 次、LT-5 ${count(LT[5])} 次、LT-6 ${count(LT[6])} 次；聯絡行字串 ${count(CONTACT)} 次（常數 1 處；v0.19 來源為 core/site-content.js）、mailto ${count("mailto:")}、無空格位址（ML-3 規則）${(html.match(MAIL_RE) || []).length}`);
+}
+// 第 12 輪（PRD v0.21 R-31、Q-108 A；契約 v0.21 V-LGL-02、DS-71；architecture v0.17 §7.31.3、§10.14 Q15）：
+// dist/ 下 5 個 HTML 與 sw.js 全文（含內嵌程式註解）「TOEIC®（多益）Part 5」0 次；LT-2 新文字 ≥ 1（主 HTML、index、about）；LT-3「Part 5 題目」不屬本條、仍 ≥ 1
+{
+  const OLD2 = "TOEIC®（多益）Part 5";
+  const files = ["dist/english-master-track.html", "dist/site/index.html", "dist/site/about.html", "dist/site/contact.html", "dist/site/privacy.html", "dist/site/sw.js"];
+  const cnt = (s, w) => s.split(w).length - 1;
+  const rows = files.map((f) => { const t = fs.existsSync(path.join(ROOT, f)) ? fs.readFileSync(path.join(ROOT, f), "utf8") : null; return { f, exists: t !== null, old: t ? cnt(t, OLD2) : -1, lt2: t ? cnt(t, LT[2]) : -1, lt3: t ? cnt(t, LT[3]) : -1 }; });
+  const need2 = ["dist/english-master-track.html", "dist/site/index.html", "dist/site/about.html"];
+  const ok = rows.every((r) => r.exists && r.old === 0) && rows.filter((r) => need2.includes(r.f)).every((r) => r.lt2 >= 1 && r.lt3 >= 1);
+  rec("TC-LGL-S03", "AC-10-02、AC-54-01、AC-56-03、AC-56-05、AC-56-06、AC-56-07、AC-57-03、AC-23-08（V-LGL-02 v0.21：交付物「TOEIC®（多益）Part 5」0 次）", ok,
+    rows.map((r) => `${r.f.replace("dist/", "")}：舊 ${r.old}、LT-2 ${r.lt2}、LT-3 ${r.lt3}`).join("；"));
 }
 // CSS（V-LGL-02、E-123、HN-1、E-134）
 {

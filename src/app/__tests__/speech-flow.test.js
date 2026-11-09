@@ -5,6 +5,8 @@
  *       契約 README §14.1 PR-1～PR-12、§14.2 MS-1～MS-6、§14.3 RT-1～RT-6、§14.5 V-STT-01～V-STT-10；data-schema §18
  * 涵蓋：AC-58-01～AC-58-13、AC-59-01～AC-59-07、AC-60-01～AC-60-05、AC-08-01、AC-08-06～AC-08-08、AC-08-10、AC-08-13、
  *       AC-30-04、AC-33-01、AC-33-03、AC-33-06、AC-33-07
+ * （v0.17，FE-99）聆聽中即時文字列：architecture.md v0.17 §7.30.2～§7.30.6、§10.14 P1～P18 與 V-STT-06 新增列；
+ *       契約 README §14.6 IT-5～IT-10、MS-1 (2b)／(4)、V-STT-09、V-STT-11～V-STT-16。涵蓋 AC-62-01～AC-62-11
  *
  * 時間值一律取自面板 TIMING（不寫死），範圍由契約檔驗證（V-STT-09）。
  */
@@ -592,13 +594,18 @@ describe("V-STT-09 TEXT 與 TIMING 對 data-schema.ts §18", () => {
     throw new Error("無法解析 " + name);
   }
 
-  test("STT_FLOW_TEXTS 7 個字串逐字相同（含 4 段新字串與 2 個標籤）", () => {
+  test("STT_FLOW_TEXTS 8 個字串逐字相同（含 4 段新字串、2 個標籤與 v0.21 labelInterim）", () => {
     const body = constBody("STT_FLOW_TEXTS");
     const pairs = {};
     for (const m of body.matchAll(/(\w+)\s*:\s*"([^"]*)"/g)) pairs[m[1]] = m[2];
-    assert.deepEqual(Object.keys(pairs).sort(), ["heardNoWords", "labelRecognized", "labelTarget", "micPreparing", "micPreparingLabel", "noResponse", "noSpeech"]);
+    assert.deepEqual(Object.keys(pairs).sort(), ["heardNoWords", "labelInterim", "labelRecognized", "labelTarget", "micPreparing", "micPreparingLabel", "noResponse", "noSpeech"]);
     for (const [k, v] of Object.entries(pairs)) assert.equal(TEXT[k], v, k);
     assert.ok(TEXT.micPreparingLabel.includes("，"), "全形逗號 U+FF0C");
+    // （v0.17，V-STT-09）即時文字列標籤：全形冒號 U+FF1A，只有 3 個字元；試作鍵名已改名
+    assert.equal(TEXT.labelInterim, "聽到：");
+    assert.equal(TEXT.labelInterim.length, 3);
+    assert.equal(TEXT.labelInterim.charCodeAt(2), 0xff1a);
+    assert.equal(Object.prototype.hasOwnProperty.call(TEXT, "liveLabel"), false);
   });
 
   test("TIMING 3 個值都在 STT_TIMING 範圍內（整數、凍結；不寫死數值）", () => {
@@ -987,5 +994,593 @@ describe("v0.16 §10.13 第 1 次按下：準備中畫出後才取得麥克風�
     assert.equal(PAINT_FALLBACK_MS, 50);
     assert.deepEqual(Object.keys(TIMING).sort(), ["bufferMs", "fallbackMs", "readyTimeoutMs"]);
     assert.equal(Object.prototype.hasOwnProperty.call(TIMING, "PAINT_FALLBACK_MS"), false);
+  });
+});
+
+// ════════════════════════════ v0.17 §10.14 聆聽中即時文字（FE-99；US-62、IT-5～IT-10） ════════════════════════════
+
+describe("v0.17 V-STT-06 新增列：outcomeOf 與即時文字（MS-1 (2b)／(4)、architecture §7.30.6）", () => {
+  const info = (over) => Object.assign({
+    manual: false, hadResult: false, hadError: false, audioStarted: false,
+    soundStarted: false, speechDetected: false, nomatch: false, errorCode: null, lastInterimText: ""
+  }, over);
+  const rows = [
+    ["interim(adr)→interim(adress)→end = (2b) 以即時文字評分",
+      { hadText: false, info: info({ lastInterimText: "adress", audioStarted: true }), confirmed: true, atEnd: true, interimHasText: true },
+      { kind: "score", source: "interim" }],
+    ["interim(...)→end = (4) heardNoWords（interimHasText 為假）",
+      { hadText: false, info: info({ lastInterimText: "..." }), confirmed: true, atEnd: true, interimHasText: false },
+      { kind: "heardNoWords" }],
+    ["interim(adress)→result(address) = (2) 以最終結果評分",
+      { hadText: true, info: info({ hadResult: true, lastInterimText: "adress" }), confirmed: true, atEnd: false },
+      { kind: "score" }],
+    ["interim(ad)→result(\"\") = (4) heardNoWords，不以即時文字補評分",
+      { hadText: false, info: info({ hadResult: true, lastInterimText: "ad" }), confirmed: true, atEnd: false, interimHasText: true },
+      { kind: "heardNoWords" }],
+    ["hadResult 後的 end 也不套用 (2b)",
+      { hadText: false, info: info({ hadResult: true, lastInterimText: "ad" }), confirmed: true, atEnd: true, interimHasText: true },
+      { kind: "heardNoWords" }],
+    ["interim(adr)→no-speech（無 audiostart）= (4) heardNoWords（Q-107 A）",
+      { hadText: false, info: info({ errorCode: "no-speech", hadError: true, lastInterimText: "adr" }), confirmed: true, atEnd: false },
+      { kind: "heardNoWords" }],
+    ["interim(adr)→no-speech（有 audiostart、soundstart）= (4) heardNoWords",
+      { hadText: false, info: info({ errorCode: "no-speech", hadError: true, audioStarted: true, soundStarted: true, lastInterimText: "adr" }), confirmed: true },
+      { kind: "heardNoWords" }],
+    ["no-speech 後即使以 end 判定也不評分（errorCode 不是 null）",
+      { hadText: false, info: info({ errorCode: "no-speech", lastInterimText: "adr" }), confirmed: true, atEnd: true, interimHasText: true },
+      { kind: "heardNoWords" }],
+    ["interim(adr)→nomatch = (4) heardNoWords",
+      { hadText: false, info: info({ nomatch: true, lastInterimText: "adr" }), confirmed: true, atEnd: false },
+      { kind: "heardNoWords" }],
+    ["nomatch 後即使以 end 判定也不評分",
+      { hadText: false, info: info({ nomatch: true, lastInterimText: "adr" }), confirmed: true, atEnd: true, interimHasText: true },
+      { kind: "heardNoWords" }],
+    ["interim(adr)→network = (3) 錯誤",
+      { hadText: false, info: info({ errorCode: "network", lastInterimText: "adr" }), confirmed: true, atEnd: true, interimHasText: true },
+      { kind: "error", code: "network" }],
+    ["interim(adr)→手動停止 = (1) 無提示",
+      { manual: true, hadText: false, info: info({ lastInterimText: "adr" }), confirmed: true, atEnd: true, interimHasText: true },
+      { kind: "none" }],
+    ["info.manual 也優先於 (2b)",
+      { hadText: false, info: info({ manual: true, lastInterimText: "adr" }), confirmed: true, atEnd: true, interimHasText: true },
+      { kind: "none" }],
+    ["interim(\"\")→end（已確認開始收音）= (5) noSpeech",
+      { hadText: false, info: info({ audioStarted: true }), confirmed: true, atEnd: true, interimHasText: false },
+      { kind: "noSpeech" }],
+    ["缺 atEnd → 不套用 (2b)（落到 (4)）",
+      { hadText: false, info: info({ lastInterimText: "adress" }), confirmed: true, interimHasText: true },
+      { kind: "heardNoWords" }],
+    ["缺 interimHasText → 不套用 (2b)",
+      { hadText: false, info: info({ lastInterimText: "adress" }), confirmed: true, atEnd: true },
+      { kind: "heardNoWords" }],
+    ["lastInterimText 為空但 interimHasText 誤傳 true → 不套用 (2b)",
+      { hadText: false, info: info({ audioStarted: true }), confirmed: true, atEnd: true, interimHasText: true },
+      { kind: "noSpeech" }],
+    ["lastInterimText 非字串視同空字串",
+      { hadText: false, info: info({ lastInterimText: 5 }), confirmed: false, atEnd: true, interimHasText: true },
+      { kind: "noResponse" }],
+    ["8 欄 info（沒有 lastInterimText）+ atEnd：結果與 v0.15 相同",
+      { hadText: false, info: { manual: false, hadResult: false, hadError: false, audioStarted: true, soundStarted: false, speechDetected: false, nomatch: false, errorCode: null }, confirmed: true, atEnd: true, interimHasText: true },
+      { kind: "noSpeech" }]
+  ];
+  for (const [name, input, want] of rows) {
+    test(name, () => assert.deepEqual(outcomeOf(input), want));
+  }
+});
+
+describe("v0.17 §10.14 P1～P18 即時文字列（AC-62-01～AC-62-11）", () => {
+  const { interimEv, finalEv } = E;
+  const sim = require("../core/similarity.js");
+  const ADDRESS = { kind: "builtin", wordKey: "address", item: { word: "address" } };
+
+  /** 面板內所有 .sp-live（必須恰 1 個） */
+  function liveEl(env) {
+    const all = env.container.findAll((n) => n.className === "sp-live");
+    assert.equal(all.length, 1, "即時文字列恰 1 列");
+    return all[0];
+  }
+  /** 即時文字列快照 */
+  function liveOf(env) {
+    const l = liveEl(env);
+    const label = l.findAll((n) => n.className === "sp-live__label");
+    const val = l.findAll((n) => n.className === "sp-live__text");
+    assert.equal(label.length, 1);
+    assert.equal(val.length, 1);
+    return { hidden: l.hidden, label: label[0].textContent, text: val[0].textContent, kids: l.childNodes.length, valKids: val[0].childNodes.length, lang: val[0].getAttribute("lang") };
+  }
+  /** 以真正 stt.js 進入聆聽中（audiostart 確認） */
+  async function listeningEnv(o = {}) {
+    const env = realEnv(Object.assign({ audioStart: true, mic: fakeMic() }, o));
+    await press(env);
+    env.rec().onaudiostart({});
+    assert.equal(env.state.runtime.speech.sttStatus, "listening");
+    return env;
+  }
+  /**
+   * 記錄 setSttResult 呼叫與訊息出現「當下」即時文字列是否已隱藏（同一同步工作內的順序，IT-7）。
+   * 回傳 seen：[{ what, liveHidden }]
+   */
+  function watchOrder(env) {
+    const seen = [];
+    const acts = env.sandbox.EMT.store.actions;
+    const orig = acts.setSttResult;
+    acts.setSttResult = (r) => {
+      if (r) seen.push({ what: "result", liveHidden: liveEl(env).hidden });
+      return orig(r);
+    };
+    const origAppend = env.msgBox.appendChild;
+    env.msgBox.appendChild = (n) => {
+      seen.push({ what: "message", liveHidden: liveEl(env).hidden });
+      return origAppend(n);
+    };
+    return seen;
+  }
+  /** 假 DOM 序列化（比對分數區結構） */
+  function ser(n) {
+    if (n.nodeType !== 1) return { text: n.textContent };
+    return { tag: n.tagName, cls: n.className, attrs: [...n.attrs.entries()].sort(), hidden: n.hidden, text: n._text, kids: n.childNodes.map(ser) };
+  }
+  const plain = (v) => JSON.parse(JSON.stringify(v));
+  const resultArgs = (env) => plain(env.log.actions.filter((c) => c.name === "setSttResult" && c.args[0]).map((c) => c.args[0]));
+
+  test("P1 AC-62-01：聆聽中 la、late、latency 每次同步顯示；恰 1 列、標籤與值逐字、值 lang en；按鈕仍聆聽中、無分數區與訊息", async () => {
+    const env = await listeningEnv();
+    assert.equal(env.rec().interimResults, true, "面板一律提供 onInterim（IT-1）");
+    assert.equal(liveOf(env).hidden, true, "收到即時文字前隱藏");
+    for (const t of ["la", "late", "latency"]) {
+      env.rec().onresult(interimEv(t));
+      assert.deepEqual(liveOf(env), { hidden: false, label: "聽到：", text: t, kids: 2, valKids: 0, lang: "en" }, t);
+      assert.equal(liveOf(env).label, TEXT.labelInterim);
+      assert.deepEqual(micState(env), { text: "聆聽中", label: "聆聽中，再按一次停止", pressed: "true", status: "listening", preparing: false, listening: true });
+      assert.equal(resultBoxOf(env).hidden, true);
+      assert.equal(messageOf(env).hidden, true);
+    }
+    // 多段暫時結果以 1 個半形空白串接（IT-3）
+    env.rec().onresult(interimEv(" comply ", "with"));
+    assert.equal(liveOf(env).text, "comply with");
+    assert.equal(callsOf(env, "recordSttScored"), 0);
+    assert.equal(env.state.runtime.speech.lastResult, null);
+  });
+
+  test("P1 重建面板（翻面）：聆聽中還原即時文字；判定後重建則隱藏", async () => {
+    const env = await listeningEnv();
+    env.rec().onresult(interimEv("lat"));
+    env.sp.render(env.container, env.card, env.state);
+    E.bindDom(env);
+    assert.deepEqual(liveOf(env), { hidden: false, label: "聽到：", text: "lat", kids: 2, valKids: 0, lang: "en" });
+    env.rec().onresult(interimEv("late"));
+    assert.equal(liveOf(env).text, "late", "重建後照常更新");
+    env.rec().onresult(finalEv("latency"));
+    env.sp.render(env.container, env.card, env.state);
+    E.bindDom(env);
+    assert.equal(liveOf(env).hidden, true);
+    assert.equal(liveOf(env).text, "");
+  });
+
+  test("P2 空白暫時結果不改畫面：未顯示時維持隱藏；已顯示 ad 時保留上一段（IT-3、FB-80）", async () => {
+    const env = await listeningEnv();
+    env.rec().onresult(interimEv(""));
+    env.rec().onresult(interimEv("   "));
+    assert.equal(liveOf(env).hidden, true);
+    env.rec().onresult(interimEv("ad"));
+    env.rec().onresult(interimEv("   "));
+    env.rec().onresult(interimEv("", " "));
+    env.rec().onresult({ resultIndex: 0, results: [] });
+    assert.deepEqual(liveOf(env), { hidden: false, label: "聽到：", text: "ad", kids: 2, valKids: 0, lang: "en" });
+    assert.equal(env.state.runtime.speech.sttStatus, "listening");
+  });
+
+  test("P3 AC-62-02：awaitingAudioStart 收到 ad → 同步聆聽中並顯示；無 ready／buffer 計時器；推進 T_READY 無 noResponse；之後 audiostart 不變", async () => {
+    const mic = fakeMic();
+    const env = realEnv({ audioStart: true, mic });
+    await press(env);
+    assert.equal(env.state.runtime.speech.preparingPhase, "awaitingAudioStart");
+    assert.deepEqual(env.clock.pending(), [TIMING.readyTimeoutMs]);
+    env.rec().onresult(interimEv("ad"));
+    // 同一個同步工作內
+    assert.equal(env.state.runtime.speech.sttStatus, "listening");
+    assert.equal(env.state.runtime.speech.preparingPhase, null);
+    assert.equal(liveOf(env).hidden, false);
+    assert.equal(liveOf(env).text, "ad");
+    assert.equal(micState(env).text, "聆聽中");
+    assert.deepEqual(env.clock.pending(), [], "T_READY、T_BUFFER 皆已清除");
+    assert.equal(mic.log.startMeter, 1, "收音條從此時開始讀音量");
+    env.clock.advance(TIMING.readyTimeoutMs * 2);
+    assert.equal(env.state.runtime.speech.sttStatus, "listening");
+    assert.equal(messageOf(env).hidden, true);
+    assert.ok(!env.log.messages.includes(TEXT.noResponse));
+    const phases = env.log.phases.slice();
+    env.rec().onaudiostart({});
+    assert.deepEqual(env.log.phases, phases, "audiostart 不改狀態");
+    assert.equal(liveOf(env).text, "ad");
+    assert.equal(mic.log.startMeter, 1);
+  });
+
+  test("P4 AC-62-02：fallbackWait 收到 ad → 同步聆聽中並顯示、無 fallback 計時器；start() 內同步收到也直接聆聽", async () => {
+    const env = realEnv({ audioStart: false, mic: fakeMic() });
+    await press(env);
+    assert.equal(env.state.runtime.speech.preparingPhase, "fallbackWait");
+    assert.deepEqual(env.clock.pending(), [TIMING.fallbackMs]);
+    env.rec().onresult(interimEv("ad"));
+    assert.equal(env.state.runtime.speech.sttStatus, "listening");
+    assert.deepEqual(liveOf(env), { hidden: false, label: "聽到：", text: "ad", kids: 2, valKids: 0, lang: "en" });
+    assert.deepEqual(env.clock.pending(), []);
+    env.clock.advance(TIMING.fallbackMs + TIMING.readyTimeoutMs);
+    assert.equal(env.state.runtime.speech.sttStatus, "listening");
+    assert.equal(messageOf(env).hidden, true);
+    // acquiringMic（替身在 rec.start() 內同步觸發即時文字）
+    const env2 = realEnv({ audioStart: true, mic: fakeMic(), onStart: (rec) => rec.onresult(interimEv("ad")) });
+    await press(env2);
+    assert.equal(env2.state.runtime.speech.sttStatus, "listening");
+    assert.deepEqual(env2.log.phases, ["preparing:acquiringMic", "listening"]);
+    assert.deepEqual(env2.clock.pending(), []);
+    assert.equal(liveOf(env2).text, "ad");
+  });
+
+  test("P5 AC-62-03 (a)：顯示 adress 時收到最終結果 address → 100 綠燈；同一同步工作內即時文字列隱藏、分數區出現", async () => {
+    const env = await listeningEnv({ card: ADDRESS });
+    env.rec().onresult(interimEv("adress"));
+    assert.equal(liveOf(env).hidden, false);
+    const seen = watchOrder(env);
+    env.rec().onresult(finalEv("address"));
+    assert.equal(liveOf(env).hidden, true);
+    assert.equal(liveOf(env).text, "");
+    assert.equal(resultBoxOf(env).hidden, false);
+    assert.equal(env.state.runtime.speech.lastResult.score, 100);
+    assert.equal(env.state.runtime.speech.lastResult.light, "green");
+    assert.equal(env.state.runtime.speech.lastResult.recognizedText, "address", "有最終結果一律用最終結果");
+    assert.deepEqual(seen, [{ what: "result", liveHidden: true }], "setSttResult 時即時文字列已隱藏");
+    assert.equal(callsOf(env, "recordSttScored"), 1);
+    // 遲到的 end 不改畫面
+    env.rec().onend({});
+    assert.equal(callsOf(env, "recordSttScored"), 1);
+    assert.equal(liveOf(env).hidden, true);
+  });
+
+  test("P6 AC-62-03 (b)：只有最終結果 adress → 86 黃燈、全程不顯示即時文字列", async () => {
+    const env = realEnv({ audioStart: true, mic: fakeMic(), card: ADDRESS });
+    assert.equal(liveOf(env).hidden, true);
+    await press(env);
+    assert.equal(liveOf(env).hidden, true);
+    env.rec().onaudiostart({});
+    assert.equal(liveOf(env).hidden, true);
+    env.rec().onresult(finalEv("adress"));
+    assert.equal(liveOf(env).hidden, true);
+    assert.equal(env.state.runtime.speech.lastResult.score, 86);
+    assert.equal(env.state.runtime.speech.lastResult.light, "yellow");
+    env.rec().onend({});
+    assert.equal(liveOf(env).hidden, true);
+  });
+
+  test("P7 AC-62-04：顯示即時文字後最終結果為 \"\" 或 \"...\" → heardNoWords、隱藏、不評分", async () => {
+    for (const fin of ["", "..."]) {
+      const env = await listeningEnv({ card: ADDRESS });
+      env.rec().onresult(interimEv("ad"));
+      const seen = watchOrder(env);
+      env.rec().onresult(finalEv(fin));
+      assert.equal(liveOf(env).hidden, true, JSON.stringify(fin));
+      assert.deepEqual(messageOf(env), { hidden: false, text: TEXT.heardNoWords, help: "", kind: "info" });
+      assert.deepEqual(seen, [{ what: "message", liveHidden: true }]);
+      assert.equal(callsOf(env, "recordSttScored"), 0);
+      assert.equal(env.state.runtime.speech.lastResult, null);
+      env.rec().onend({});
+      assert.equal(callsOf(env, "recordSttScored"), 0, "end 不以即時文字補評分");
+      assert.deepEqual(env.log.messages, [TEXT.heardNoWords]);
+    }
+  });
+
+  test("P8 AC-62-05：adr、adress、end → 86 黃燈、辨識文字 adress、recordSttScored 1；分數區與 SttResult 和直接最終 adress 的對照組相同（V-STT-14）", async () => {
+    const env = await listeningEnv({ card: ADDRESS });
+    env.rec().onresult(interimEv("adr"));
+    env.rec().onresult(interimEv("adress"));
+    assert.equal(liveOf(env).text, "adress");
+    const seen = watchOrder(env);
+    env.rec().onend({});
+    assert.deepEqual(seen, [{ what: "result", liveHidden: true }]);
+    assert.equal(liveOf(env).hidden, true);
+    // 沙箱物件屬另一個 realm：以 JSON 比對值
+    const r = plain(env.state.runtime.speech.lastResult);
+    assert.deepEqual(r, { recognizedText: "adress", targetText: "address", score: 86, light: "yellow" });
+    assert.deepEqual(r, plain(panel.buildResult("adress", "address", sim)));
+    assert.equal(callsOf(env, "recordSttScored"), 1);
+    assert.equal(env.state.runtime.speech.sttStatus, "idle");
+    assert.equal(messageOf(env).hidden, true);
+    assert.deepEqual(env.log.messages, []);
+    // 對照組：直接收到最終結果 adress
+    const ctl = await listeningEnv({ card: ADDRESS });
+    ctl.rec().onresult(finalEv("adress"));
+    ctl.rec().onend({});
+    assert.deepEqual(resultArgs(env), resultArgs(ctl));
+    assert.deepEqual(ser(resultBoxOf(env)), ser(resultBoxOf(ctl)));
+    assert.equal(resultBoxOf(env).textContent, resultBoxOf(ctl).textContent);
+    assert.ok(resultBoxOf(env).textContent.includes("adress"));
+    assert.equal(callsOf(ctl, "recordSttScored"), 1);
+    // 評分路徑的 action 順序相同（setSttStatus idle → setSttResult → recordSttScored）
+    const tail = (e) => e.log.actions.slice(-3).map((c) => c.name);
+    assert.deepEqual(tail(env), tail(ctl));
+  });
+
+  test("P9 「...」即時文字後 end → heardNoWords、不評分（interimHasText 為假）", async () => {
+    const env = await listeningEnv({ card: ADDRESS });
+    env.rec().onresult(interimEv("..."));
+    assert.equal(liveOf(env).text, "...", "取出非空即顯示");
+    env.rec().onend({});
+    assert.equal(liveOf(env).hidden, true);
+    assert.deepEqual(messageOf(env), { hidden: false, text: TEXT.heardNoWords, help: "", kind: "info" });
+    assert.equal(callsOf(env, "recordSttScored"), 0);
+    assert.equal(env.state.runtime.speech.lastResult, null);
+  });
+
+  test("P9 即時文字皆為空白就 end（已確認開始收音）→ noSpeech；未確認 → noResponse", async () => {
+    const env = await listeningEnv();
+    env.rec().onresult(interimEv("   "));
+    env.rec().onend({});
+    assert.equal(messageOf(env).text, TEXT.noSpeech);
+    const env2 = realEnv({ audioStart: true, mic: fakeMic() });
+    await press(env2);
+    env2.rec().onresult(interimEv(""));
+    assert.equal(env2.state.runtime.speech.sttStatus, "preparing", "空白不算已確認開始收音");
+    env2.rec().onend({});
+    assert.equal(messageOf(env2).text, TEXT.noResponse);
+  });
+
+  test("P10 AC-62-06 (a)：再按 → 處理器內同步隱藏（不推進時間、不觸發 end）；之後 interim、result、end 不顯示、不評分（DS-69）", async () => {
+    const env = await listeningEnv({ card: ADDRESS });
+    const rec = env.rec();
+    rec.onresult(interimEv("adr"));
+    assert.equal(liveOf(env).hidden, false);
+    env.mic.click();
+    assert.equal(liveOf(env).hidden, true, "按下當下隱藏");
+    assert.equal(liveOf(env).text, "");
+    assert.equal(rec.stopped, 1);
+    assert.equal(env.state.runtime.speech.sttStatus, "idle");
+    rec.onresult(interimEv("adress"));
+    assert.equal(liveOf(env).hidden, true, "遲到的即時文字不重新顯示");
+    rec.onresult(finalEv("address"));
+    rec.onend({});
+    assert.equal(liveOf(env).hidden, true);
+    assert.equal(env.state.runtime.speech.lastResult, null);
+    assert.equal(callsOf(env, "recordSttScored"), 0);
+    assert.deepEqual(env.log.messages, []);
+    assert.equal(messageOf(env).hidden, true);
+  });
+
+  test("P11 AC-62-06 (b)：換卡／切換模式（reset）、按 TTS、離開頁面（release）各自隱藏；遲到事件不重新顯示", async () => {
+    const cases = {
+      reset: (env) => env.sp.reset(),
+      tts: (env) => env.tts[0].click(),
+      release: (env) => env.sp.release()
+    };
+    for (const [name, run] of Object.entries(cases)) {
+      const env = await listeningEnv({ card: ADDRESS });
+      const rec = env.rec();
+      const held = { onresult: rec.onresult, onend: rec.onend };
+      rec.onresult(interimEv("adr"));
+      assert.equal(liveOf(env).hidden, false, name);
+      run(env);
+      assert.equal(liveOf(env).hidden, true, name);
+      assert.equal(liveOf(env).text, "", name);
+      assert.equal(env.state.runtime.speech.sttStatus, "idle", name);
+      assert.equal(rec.aborted, 1, name);
+      held.onresult(interimEv("adress"));
+      held.onresult(finalEv("address"));
+      held.onend({});
+      assert.equal(liveOf(env).hidden, true, name);
+      assert.equal(callsOf(env, "recordSttScored"), 0, name);
+      assert.equal(messageOf(env).hidden, true, name);
+    }
+    // 換卡：render 另一張卡（未先 reset 的保險路徑）也隱藏
+    const env = await listeningEnv();
+    env.rec().onresult(interimEv("lat"));
+    env.sp.render(env.container, ADDRESS, env.state);
+    E.bindDom(env);
+    assert.equal(liveOf(env).hidden, true);
+  });
+
+  test("P12 AC-62-06 (c)：network、not-allowed、service-not-allowed、audio-capture、其他、非手動 aborted → 既有錯誤訊息、隱藏、不評分", async () => {
+    for (const code of ["network", "not-allowed", "service-not-allowed", "audio-capture", "bad-grammar", "aborted"]) {
+      const env = await listeningEnv({ card: ADDRESS });
+      env.rec().onresult(interimEv("adr"));
+      const seen = watchOrder(env);
+      env.rec().onerror({ error: code });
+      env.rec().onend({});
+      const want = panel.messageForError(code);
+      assert.deepEqual(messageOf(env), { hidden: false, text: want.text, help: want.help, kind: want.kind }, code);
+      assert.equal(seen[0].liveHidden, true, code);
+      assert.equal(liveOf(env).hidden, true, code);
+      assert.equal(callsOf(env, "recordSttScored"), 0, code);
+      assert.equal(env.log.messages.length, 1, code);
+    }
+  });
+
+  test("P13 AC-62-06 (d)：即時文字後 no-speech（有、無 audiostart；含後備）→ heardNoWords（Q-107 A）", async () => {
+    const runs = {
+      "無 audiostart": async () => { const e = realEnv({ audioStart: true, mic: fakeMic(), card: ADDRESS }); await press(e); return e; },
+      "有 audiostart": async () => listeningEnv({ card: ADDRESS }),
+      "audiostart＋soundstart": async () => { const e = await listeningEnv({ card: ADDRESS }); e.rec().onsoundstart({}); return e; },
+      "後備模式": async () => { const e = realEnv({ audioStart: false, mic: fakeMic(), card: ADDRESS }); await press(e); return e; }
+    };
+    for (const [name, mk] of Object.entries(runs)) {
+      const env = await mk();
+      env.rec().onresult(interimEv("adr"));
+      assert.equal(env.state.runtime.speech.sttStatus, "listening", name);
+      env.rec().onerror({ error: "no-speech" });
+      env.rec().onend({});
+      assert.deepEqual(messageOf(env), { hidden: false, text: TEXT.heardNoWords, help: "", kind: "info" }, name);
+      assert.equal(liveOf(env).hidden, true, name);
+      assert.equal(callsOf(env, "recordSttScored"), 0, name);
+    }
+  });
+
+  test("P14 AC-62-06 (e)：即時文字後 nomatch → heardNoWords、隱藏；之後的 end 不以即時文字評分", async () => {
+    const env = await listeningEnv({ card: ADDRESS });
+    env.rec().onresult(interimEv("adress"));
+    env.rec().onnomatch({});
+    assert.equal(liveOf(env).hidden, true);
+    assert.equal(messageOf(env).text, TEXT.heardNoWords);
+    env.rec().onend({});
+    assert.equal(callsOf(env, "recordSttScored"), 0);
+    assert.equal(env.state.runtime.speech.lastResult, null);
+    assert.deepEqual(env.log.messages, [TEXT.heardNoWords]);
+  });
+
+  test("P15 AC-62-06 (f)：即時文字顯示中音軌結束 →「找不到麥克風裝置」、隱藏；遲到事件不重新顯示", async () => {
+    const mic = fakeMic();
+    const env = await listeningEnv({ mic, card: ADDRESS });
+    const rec = env.rec();
+    const held = rec.onresult;
+    rec.onresult(interimEv("adr"));
+    mic.endedCb();
+    assert.equal(liveOf(env).hidden, true);
+    assert.deepEqual(messageOf(env), { hidden: false, text: "找不到麥克風裝置", help: "請確認裝置已連接麥克風後再按一次", kind: "error" });
+    assert.equal(rec.aborted, 1);
+    held(interimEv("adress"));
+    assert.equal(liveOf(env).hidden, true);
+  });
+
+  test("P16 AC-62-08：HTML 字元以字面顯示；列內子元素固定 2 個、值元素沒有子元素", async () => {
+    const env = await listeningEnv();
+    for (const t of ["<img src=x onerror=alert(1)>", "&lt;b&gt;", "<b>bold</b> & \"q\""]) {
+      env.rec().onresult(interimEv(t));
+      const s = liveOf(env);
+      assert.equal(s.text, t);
+      assert.equal(s.kids, 2);
+      assert.equal(s.valKids, 0);
+      assert.equal(liveEl(env).findAll(() => true).length, 2, "沒有新增任何子孫元素");
+    }
+  });
+
+  test("P17 AC-62-10：即時文字不呼叫 store action；重播到真正 store 後 setItem 次數與無即時文字的對照組相同、儲存內容不含即時文字", async () => {
+    const S = require("../state/store.js");
+    const VOCAB = require("../core/vocab.js");
+    const P = require("../core/persist.js");
+    const C = require("../core/constants.js");
+    const KEY = C.STORAGE_KEYS.state;
+    /** 以面板記錄的 action 依序重播到真正的 store（假 localStorage），回傳寫入次數與內容 */
+    function replay(env) {
+      const map = new Map([[KEY, JSON.stringify(P.buildRecord(P.defaultData(), new Date("2026-10-29T00:00:00Z")))]]);
+      const setCalls = [];
+      const storage = {
+        getItem: (k) => (map.has(k) ? map.get(k) : null),
+        setItem: (k, v) => { setCalls.push(k); map.set(k, String(v)); }
+      };
+      const prepared = VOCAB.prepareBuiltin([{ rank: 1, word: "latency", meaning: "延遲", sources: ["NGSL"] }], null);
+      const store = S.createStore({
+        storage,
+        content: { builtin: prepared.sorted, builtinMap: prepared.map, nB: prepared.nB, nG: prepared.nG, part5: [], templates: [], decoderSentences: [], manifest: { dataVersion: "x" } },
+        now: () => new Date("2026-10-30T10:00:00"),
+        speechSupport: { ttsSupported: true, sttSupported: true }
+      });
+      store.init();
+      const before = setCalls.length;
+      for (const c of env.log.actions) {
+        if (typeof store.actions[c.name] === "function") store.actions[c.name](...c.args);
+      }
+      return { writes: setCalls.length - before, stored: [...map.values()].join("\n"), state: store.getState() };
+    }
+    const WORDS = ["lay ten see", "lay tense"];
+    const flows = {
+      "AC-62-03 (a) 最終結果": [(env) => { for (const w of WORDS) env.rec().onresult(interimEv(w)); }, (env) => { env.rec().onresult(finalEv("latency")); env.rec().onend({}); }],
+      "AC-62-05 以即時文字評分": [(env) => { for (const w of WORDS) env.rec().onresult(interimEv(w)); }, (env) => env.rec().onend({})],
+      "AC-62-06 (a) 手動停止": [(env) => { for (const w of WORDS) env.rec().onresult(interimEv(w)); }, (env) => { env.mic.click(); env.rec().onend({}); }]
+    };
+    const control = {
+      "AC-62-03 (a) 最終結果": (env) => { env.rec().onresult(finalEv("latency")); env.rec().onend({}); },
+      "AC-62-05 以即時文字評分": (env) => { env.rec().onresult(finalEv("lay tense")); env.rec().onend({}); },
+      "AC-62-06 (a) 手動停止": (env) => { env.mic.click(); env.rec().onend({}); }
+    };
+    for (const [name, [during, end]] of Object.entries(flows)) {
+      const env = await listeningEnv();
+      const n = env.log.actions.length;
+      during(env);
+      assert.equal(env.log.actions.length, n, name + "：聆聽中的即時文字不呼叫任何 store action");
+      assert.equal(liveOf(env).text, "lay tense", name);
+      end(env);
+      const r = replay(env);
+      const ctl = await listeningEnv();
+      control[name](ctl);
+      const rc = replay(ctl);
+      assert.equal(r.writes, rc.writes, name + "：setItem 次數只有評分路徑的既有寫入");
+      // 評分路徑確實寫入（打卡與今日已學，LR-1）；手動停止 0 次（MS-6）
+      assert.equal(r.writes, name === "AC-62-06 (a) 手動停止" ? 0 : 1, name);
+      for (const w of WORDS) {
+        assert.ok(!r.stored.includes(w), name + "：localStorage 含即時文字 " + w);
+        assert.ok(!JSON.stringify(r.state.data).includes(w), name + "：PersistedData 含即時文字 " + w);
+      }
+      if (name !== "AC-62-05 以即時文字評分") {
+        for (const w of WORDS) assert.ok(!JSON.stringify(r.state).includes(w), name + "：AppState 含即時文字 " + w);
+      } else {
+        // 以即時文字評分：只有執行期 lastResult.recognizedText（RT-1、IT-9）
+        assert.equal(r.state.runtime.speech.lastResult.recognizedText, "lay tense");
+        assert.ok(!JSON.stringify(r.state.data).includes("lay"));
+      }
+      // 新嘗試開始時即時文字列隱藏（IT-7）
+      await press(env);
+      assert.equal(liveOf(env).hidden, true, name);
+      assert.equal(liveOf(env).text, "", name);
+    }
+  });
+
+  test("P18 V-STT-16、V-STT-15：.sp-live aria-live off；往上到 container 無即時區域屬性；位置在 .sp-stt 之後、.sp-msg 之前；固定文字只有 labelInterim", async () => {
+    const env = await listeningEnv();
+    env.rec().onresult(interimEv("中文 偵測到 語言 英文 你說的是 發音 分數 123"));
+    const l = liveEl(env);
+    assert.equal(l.tagName, "P");
+    assert.equal(l.getAttribute("aria-live"), "off");
+    assert.equal(l.getAttribute("role"), null);
+    for (let n = l; n && n !== env.container.parentNode; n = n.parentNode) {
+      const al = n.getAttribute("aria-live");
+      assert.ok(al !== "polite" && al !== "assertive", (n.className || n.tagName) + " aria-live=" + al);
+      assert.ok(!["status", "alert", "log"].includes(n.getAttribute("role")), (n.className || n.tagName) + " role");
+      if (n === env.container) break;
+    }
+    const panelEl = env.container.childNodes[0];
+    assert.equal(panelEl.className, "sp-panel");
+    assert.equal(l.parentNode, panelEl, ".sp-live 為 .sp-panel 的子元素");
+    const order = panelEl.childNodes.map((c) => c.className);
+    assert.deepEqual(order, ["sp-tts", "sp-stt", "sp-live", "sp-msg", "sp-result"]);
+    // 不在訊息區、分數區內
+    assert.equal(env.msgBox.findAll((n) => n.className === "sp-live").length, 0);
+    assert.equal(resultBoxOf(env).findAll((n) => n.className === "sp-live").length, 0);
+    // 固定文字只有 labelInterim（值為引擎原文，不檢查）
+    const label = l.findAll((n) => n.className === "sp-live__label")[0];
+    assert.equal(label.textContent, TEXT.labelInterim);
+    assert.equal(label.childNodes.length, 0);
+    const fixed = l.textContent.slice(0, l.textContent.length - liveOf(env).text.length);
+    assert.equal(fixed, TEXT.labelInterim);
+    for (const w of ["偵測到", "語言", "英文", "中文", "你說的是", "發音", "分數"]) assert.ok(!TEXT.labelInterim.includes(w), w);
+  });
+
+  test("31-speech.css：.sp-live 無 transition／animation、不設定 display、次要文字色、可換行；值斜體（§7.30.5、AC-62-09）", () => {
+    const css = fs.readFileSync(path.join(E.APP_DIR, "styles", "31-speech.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    const blocks = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)].map((m) => ({ sel: m[1].trim(), body: m[2] }));
+    const liveRules = blocks.filter((b) => b.sel.includes(".sp-live"));
+    const main = blocks.find((b) => b.sel === ".sp-live");
+    assert.ok(main, "有 .sp-live 規則");
+    assert.match(main.body, /transition:\s*none/);
+    assert.match(main.body, /animation:\s*none/);
+    assert.match(main.body, /color:\s*var\(--text-muted\)/);
+    assert.match(main.body, /overflow-wrap:\s*anywhere/);
+    assert.match(main.body, /min-width:\s*0/);
+    for (const b of liveRules) {
+      assert.doesNotMatch(b.body, /(^|[;\s])display\s*:/, b.sel + " 不得設定 display（讓 [hidden] 生效）");
+      const anim = b.body.match(/animation\s*:\s*([^;]+)/);
+      if (anim) assert.equal(anim[1].trim(), "none", b.sel);
+      const tr = b.body.match(/transition\s*:\s*([^;]+)/);
+      if (tr) assert.equal(tr[1].trim(), "none", b.sel);
+      assert.doesNotMatch(b.body, /(^|[;\s])color\s*:\s*var\(--text\)/, b.sel + " 與分數區辨識文字不同色");
+    }
+    const val = blocks.find((b) => b.sel === ".sp-live__text");
+    assert.match(val.body, /font-style:\s*italic/);
+  });
+
+  test("原始碼：stt.js、speech-panel.js、31-speech.css 不含「試作」；speech-panel.js 無 liveLabel、MediaRecorder", () => {
+    for (const rel of ["services/stt.js", "views/speech-panel.js", "styles/31-speech.css"]) {
+      const src = fs.readFileSync(path.join(E.APP_DIR, rel), "utf8");
+      assert.ok(!src.includes("試作"), rel);
+      assert.ok(!src.includes("Media" + "Recorder"), rel);
+    }
+    const js = fs.readFileSync(path.join(E.APP_DIR, "views", "speech-panel.js"), "utf8");
+    assert.ok(!js.includes("liveLabel"));
   });
 });

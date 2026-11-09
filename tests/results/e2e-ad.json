@@ -11,7 +11,7 @@
     "tc": "TC-50-04",
     "ac": "AC-50-04、AC-52-01、AC-52-02 (c)、AC-39-01、E-141、E-142（V-AD-05）",
     "result": "通過",
-    "note": "【替身驗證】腳本請求 1、push 1（參數 {}）、ins 同一節點且父節點不變=true、框 1 個；可見：{\"customizer\":false,\"flashcards\":false,\"part5\":false,\"dashboard\":true}；順序 main < 版位 < 頁尾=true；主控台區塊 db-today、db-stats、db-chart、db-backup；filled 用時 63 ms"
+    "note": "【替身驗證】腳本請求 1、push 1（參數 {}）、ins 同一節點且父節點不變=true、框 1 個；可見：{\"customizer\":false,\"flashcards\":false,\"part5\":false,\"dashboard\":true}；順序 main < 版位 < 頁尾=true；主控台區塊 db-today、db-stats、db-chart、db-backup；filled 用時 65 ms"
   },
   {
     "suite": "e2e-ad",
@@ -46,14 +46,14 @@
     "tc": "TC-52-02",
     "ac": "AC-52-02、E-141、E-136",
     "result": "通過",
-    "note": "【替身驗證】(a) 首次：firstRun 廣告請求 0、框 0；(b) 完成首次、無紀錄：waiting 請求 0、框 0；作答後未回主控台請求 0；回主控台請求 1、filled；(b') 構造無紀錄：請求 0、框 0；(e) 清除：filled、可見=true、請求 1、push 1；(d) 初始化：{\"ms\":4,\"st\":\"dismissed\",\"state\":\"dismissed\",\"disp\":\"none\"}、之後主控台可見=false、頁內請求 1、push 1；重新載入（無紀錄）waiting、框 0、請求 1"
+    "note": "【替身驗證】(a) 首次：firstRun 廣告請求 0、框 0；(b) 完成首次、無紀錄：waiting 請求 0、框 0；作答後未回主控台請求 0；回主控台請求 1、filled；(b') 構造無紀錄：請求 0、框 0；(e) 清除：filled、可見=true、請求 1、push 1；(d) 初始化：{\"ms\":5.5,\"st\":\"dismissed\",\"state\":\"dismissed\",\"disp\":\"none\"}、之後主控台可見=false、頁內請求 1、push 1；重新載入（無紀錄）waiting、框 0、請求 1"
   },
   {
     "suite": "e2e-ad",
     "tc": "TC-51-01",
     "ac": "AC-51-01、E-140、E-146（部分）（V-AD-04）",
     "result": "通過",
-    "note": "【替身驗證】(a) 離線（onLine false）：collapsed（1 ms）、版位高度 0（（無））、標籤 0、區塊位移 0、請求 0、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(b) 阻擋（abort）：collapsed（1 ms）、版位高度 0（none）、標籤 0、區塊位移 0、請求 1、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(c) 腳本 500：collapsed（2 ms）、版位高度 0（none）、標籤 0、區塊位移 0、請求 1、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(d) 無廣告回傳（unfilled）：collapsed（62 ms）、版位高度 0（none）、標籤 0、區塊位移 0、請求 1、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(e) 永不回應（實等 10 秒）：collapsed（10030 ms）、版位高度 0（none）、標籤 0、區塊位移 0、請求 1、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(e) 等待期間 {\"state\":\"loading\",\"h\":0,\"w\":720,\"label\":0}，10554 ms 收合；(e') 腳本載入但不回結果：10038 ms 收合；逾時後才到的 filled：狀態 collapsed、ins 屬性 filled、高度 0、標籤可見 false（忽略）；本系統呼叫 push 當下拋例外：1 ms 收合、本系統錯誤 0；替身腳本稍後處理佇列時拋例外（第三方錯誤）：10034 ms 逾時收合"
+    "note": "【替身驗證】(a) 離線（onLine false）：collapsed（3 ms）、版位高度 0（（無））、標籤 0、區塊位移 0、請求 0、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(b) 阻擋（abort）：collapsed（2 ms）、版位高度 0（none）、標籤 0、區塊位移 0、請求 1、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(c) 腳本 500：collapsed（2 ms）、版位高度 0（none）、標籤 0、區塊位移 0、請求 1、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(d) 無廣告回傳（unfilled）：collapsed（53 ms）、版位高度 0（none）、標籤 0、區塊位移 0、請求 1、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(e) 永不回應（實等 10 秒）：collapsed（10035 ms）、版位高度 0（none）、標籤 0、區塊位移 0、請求 1、提示 0、畫面含廣告字樣=false、學習照常=true、Console 0；(e) 等待期間 {\"state\":\"loading\",\"h\":0,\"w\":720,\"label\":0}，10577 ms 收合；(e') 腳本載入但不回結果：9994 ms 收合；逾時後才到的 filled：狀態 collapsed、ins 屬性 filled、高度 0、標籤可見 false（忽略）；本系統呼叫 push 當下拋例外：2 ms 收合、本系統錯誤 0；替身腳本稍後處理佇列時拋例外（第三方錯誤）：10010 ms 逾時收合"
   },
   {
     "suite": "e2e-ad",
@@ -67,7 +67,7 @@
     "tc": "TC-52-05b",
     "ac": "AC-52-05（受影響元素只可為頁尾與版面底部；BUG-006：app-header__inner）",
     "result": "通過",
-    "note": "【替身驗證】一般捲軸｜廣告環境成立（有紀錄，filled） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [true]；逐畫格 gutter [\"stable\"]、header 左緣 [195.5]（首畫格 [221,106,113] ms）；廣告框建立 [238,244,244] ms；一般捲軸｜第一階段（dist，無廣告環境） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"stable\"]、header 左緣 [195.5]（首畫格 [107,112,41] ms）；廣告框建立 [null,null,null] ms；一般捲軸｜v1.2.0（舊版） 1366px：header 位移 dx [-7.5]；時間 [629,220,233] ms；CLS 值 [0.0835,0.0835,0.0835]；data-ad-env [false]；逐畫格 gutter [\"auto\"]、header 左緣 [203,195.5]（首畫格 [518,44,115] ms）；廣告框建立 [null,null,null] ms；一般捲軸｜廣告環境成立（有紀錄，filled） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [true]；逐畫格 gutter [\"stable\"]、header 左緣 [472.5]（首畫格 [107,105,121] ms）；廣告框建立 [242,243,257] ms；一般捲軸｜第一階段（dist，無廣告環境） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"stable\"]、header 左緣 [472.5]（首畫格 [105,44,117] ms）；廣告框建立 [null,null,null] ms；一般捲軸｜v1.2.0（舊版） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"auto\"]、header 左緣 [480]（首畫格 [107,106,114] ms）；廣告框建立 [null,null,null] ms；隱藏捲軸｜廣告環境成立（有紀錄，filled） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [true]；逐畫格 gutter [\"stable\"]、header 左緣 [195.5]（首畫格 [106,106,36] ms）；廣告框建立 [244,242,240] ms；隱藏捲軸｜第一階段（dist，無廣告環境） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"stable\"]、header 左緣 [195.5]（首畫格 [134,105,107] ms）；廣告框建立 [null,null,null] ms；隱藏捲軸｜v1.2.0（舊版） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"auto\"]、header 左緣 [203]（首畫格 [115,169,142] ms）；廣告框建立 [null,null,null] ms；隱藏捲軸｜廣告環境成立（有紀錄，filled） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [true]；逐畫格 gutter [\"stable\"]、header 左緣 [472.5]（首畫格 [115,113,52] ms）；廣告框建立 [258,248,251] ms；隱藏捲軸｜第一階段（dist，無廣告環境） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"stable\"]、header 左緣 [472.5]（首畫格 [116,105,83] ms）；廣告框建立 [null,null,null] ms；隱藏捲軸｜v1.2.0（舊版） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"auto\"]、header 左緣 [480]（首畫格 [45,33,107] ms）；廣告框建立 [null,null,null] ms；廣告框建立後非頁尾元素位移 0 筆；目前建置（廣告環境、第一階段）header 位移 0 組；每個畫格 gutter 皆 stable=true；data-ad-env 只在廣告環境=true（v1.2.0 列為參考，不判定；跨版本絕對座標差屬預期，SD-FB-94）"
+    "note": "【替身驗證】一般捲軸｜廣告環境成立（有紀錄，filled） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [true]；逐畫格 gutter [\"stable\"]、header 左緣 [195.5]（首畫格 [156,114,112] ms）；廣告框建立 [245,246,243] ms；一般捲軸｜第一階段（dist，無廣告環境） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"stable\"]、header 左緣 [195.5]（首畫格 [108,114,140] ms）；廣告框建立 [null,null,null] ms；一般捲軸｜v1.2.0（舊版） 1366px：header 位移 dx [-7.5]；時間 [609,223,220] ms；CLS 值 [0.0835,0.0835,0.0835]；data-ad-env [false]；逐畫格 gutter [\"auto\"]、header 左緣 [203,195.5]（首畫格 [430,113,134] ms）；廣告框建立 [null,null,null] ms；一般捲軸｜廣告環境成立（有紀錄，filled） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [true]；逐畫格 gutter [\"stable\"]、header 左緣 [472.5]（首畫格 [117,112,112] ms）；廣告框建立 [249,238,246] ms；一般捲軸｜第一階段（dist，無廣告環境） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"stable\"]、header 左緣 [472.5]（首畫格 [114,120,112] ms）；廣告框建立 [null,null,null] ms；一般捲軸｜v1.2.0（舊版） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"auto\"]、header 左緣 [480]（首畫格 [114,115,114] ms）；廣告框建立 [null,null,null] ms；隱藏捲軸｜廣告環境成立（有紀錄，filled） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [true]；逐畫格 gutter [\"stable\"]、header 左緣 [195.5]（首畫格 [115,115,120] ms）；廣告框建立 [247,248,251] ms；隱藏捲軸｜第一階段（dist，無廣告環境） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"stable\"]、header 左緣 [195.5]（首畫格 [117,142,113] ms）；廣告框建立 [null,null,null] ms；隱藏捲軸｜v1.2.0（舊版） 1366px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"auto\"]、header 左緣 [203]（首畫格 [113,146,105] ms）；廣告框建立 [null,null,null] ms；隱藏捲軸｜廣告環境成立（有紀錄，filled） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [true]；逐畫格 gutter [\"stable\"]、header 左緣 [472.5]（首畫格 [109,116,113] ms）；廣告框建立 [238,250,251] ms；隱藏捲軸｜第一階段（dist，無廣告環境） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"stable\"]、header 左緣 [472.5]（首畫格 [105,110,150] ms）；廣告框建立 [null,null,null] ms；隱藏捲軸｜v1.2.0（舊版） 1920px：header 位移 dx []；時間 [] ms；CLS 值 []；data-ad-env [false]；逐畫格 gutter [\"auto\"]、header 左緣 [480]（首畫格 [110,111,107] ms）；廣告框建立 [null,null,null] ms；廣告框建立後非頁尾元素位移 0 筆；目前建置（廣告環境、第一階段）header 位移 0 組；每個畫格 gutter 皆 stable=true；data-ad-env 只在廣告環境=true（v1.2.0 列為參考，不判定；跨版本絕對座標差屬預期，SD-FB-94）"
   },
   {
     "suite": "e2e-ad",
@@ -95,7 +95,7 @@
     "tc": "TC-50-06",
     "ac": "AC-50-06、AC-37-05、AC-35-01（Cache Storage 無廣告）",
     "result": "通過",
-    "note": "【替身驗證】快取 english-master-track-pwa-0c616ab5e6e53f8c、項目 7、廣告資源 0；與清單相同=true"
+    "note": "【替身驗證】快取 english-master-track-pwa-f44ebdcd9b55179a、項目 7、廣告資源 0；與清單相同=true"
   },
   {
     "suite": "e2e-ad",
@@ -109,14 +109,14 @@
     "tc": "TC-50-06u",
     "ac": "AC-50-06、AC-36-03、AC-50-05（廣告已啟用環境經過 1 次更新）",
     "result": "通過",
-    "note": "【替身驗證】V1 0c616ab5e6e53f8c → V2 2126ea331160e0e6；提示「有新版本，請更新版本\n更新版本」；快取 [\"english-master-track-pwa-2126ea331160e0e6\"]、廣告資源 0；廣告請求由 SW 回應 0；sw.js 含廣告字樣 false；更新後 filled、框 1；本機測試建置，非正式部署"
+    "note": "【替身驗證】V1 f44ebdcd9b55179a → V2 dce6b51d3d9b4029；提示「有新版本，請更新版本\n更新版本」；快取 [\"english-master-track-pwa-dce6b51d3d9b4029\"]、廣告資源 0；廣告請求由 SW 回應 0；sw.js 含廣告字樣 false；更新後 filled、框 1；本機測試建置，非正式部署"
   },
   {
     "suite": "e2e-ad",
     "tc": "TC-51-02",
     "ac": "AC-51-02（本機參考值，非基準環境；最終 TC-M07）",
     "result": "通過",
-    "note": "【替身驗證】1 倍 正常：236、249、239、256、251 ms（門檻 3000）、按鈕可點前未請求廣告=true；1 倍 永不回應：236、240、236、237、236 ms（門檻 3000）、按鈕可點前未請求廣告=true；4 倍 正常：1200、1299、1215、1256、1485 ms（門檻 6000）、按鈕可點前未請求廣告=true；4 倍 永不回應：1304、1308、1207、1232、1252 ms（門檻 6000）、按鈕可點前未請求廣告=true"
+    "note": "【替身驗證】1 倍 正常：260、245、247、236、241 ms（門檻 3000）、按鈕可點前未請求廣告=true；1 倍 永不回應：268、249、252、243、236 ms（門檻 3000）、按鈕可點前未請求廣告=true；4 倍 正常：1165、1136、1146、1228、1167 ms（門檻 6000）、按鈕可點前未請求廣告=true；4 倍 永不回應：1137、1163、1143、1219、1270 ms（門檻 6000）、按鈕可點前未請求廣告=true"
   },
   {
     "suite": "e2e-ad",

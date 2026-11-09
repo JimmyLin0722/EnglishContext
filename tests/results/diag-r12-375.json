@@ -1,0 +1,9 @@
+[
+  {
+    "suite": "diag-r12-375",
+    "tc": "TC-R12-375",
+    "ac": "AC-20-01、AC-40-02、AC-10-02（375／390 版面與 1.3.1 相比：只因 R-31 標題說明行數改變）",
+    "result": "通過",
+    "note": "chrome 375×667 dashboard：元素 12／12、座標相同=true、水平捲軸 false；chrome 375×667 flashcards：元素 11／11、座標相同=true、水平捲軸 false；chrome 375×667 part5：標題說明高 46.1 → 23（差 23.1 px）、說明以下元素一律上移 23.1 px、水平與寬高不變；不符 0、水平捲軸 false；chrome 390×844 dashboard：元素 12／12、座標相同=true、水平捲軸 false；chrome 390×844 flashcards：元素 11／11、座標相同=true、水平捲軸 false；chrome 390×844 part5：標題說明高 46.1 → 23（差 23.1 px）、說明以下元素一律上移 23.1 px、水平與寬高不變；不符 0、水平捲軸 false；edge 375×667 dashboard：元素 12／12、座標相同=true、水平捲軸 false；edge 375×667 flashcards：元素 11／11、座標相同=true、水平捲軸 false；edge 375×667 part5：標題說明高 46.1 → 23（差 23.1 px）、說明以下元素一律上移 23.1 px、水平與寬高不變；不符 0、水平捲軸 false；edge 390×844 dashboard：元素 12／12、座標相同=true、水平捲軸 false；edge 390×844 flashcards：元素 11／11、座標相同=true、水平捲軸 false；edge 390×844 part5：標題說明高 46.1 → 23（差 23.1 px）、說明以下元素一律上移 23.1 px、水平與寬高不變；不符 0、水平捲軸 false"
+  }
+]

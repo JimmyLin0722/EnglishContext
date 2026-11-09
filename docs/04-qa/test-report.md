@@ -1,6 +1,6 @@
 ---
 doc: TEST-REPORT
-version: 0.12
+version: 0.13
 status: in-review
 author: qa-agent
 approved_by:
@@ -9,6 +9,8 @@ approved_at:
 
 # English Master Track — 測試報告（第 5 階段驗收）
 
+> **第 12 輪（v0.13）依據**：`docs/04-qa/test-plan.md` v0.13；PRD v0.21、契約 v0.21、architecture v0.17、tasks.json v0.16（FE-98～FE-101 done；主控 MC-10）；受測物 `dist/english-master-track.html` 3,486,160 bytes＋`dist/site/` 13 檔（BUILD_ID `981b0d2ab45de9d6`，版本 1.3.2）；逐一執行各套件；結論見 §0、詳情見 §23。
+>
 > **第 11 輪（v0.12）依據**：`docs/04-qa/test-plan.md` v0.12；PRD v0.20、契約 v0.20（不變）、architecture v0.16、tasks.json v0.15（FE-95～FE-97 done）；受測物 `dist/english-master-track.html` 3,476,024 bytes＋`dist/site/` 13 檔（BUILD_ID `5f0dc11a7433624d`，版本行「版本 1.3.1（建置 5f0dc11）」）；逐一執行各套件；結論見 §0、詳情見 §22。
 >
 > **第 10 輪（v0.11）依據**：`docs/04-qa/test-plan.md` v0.11；PRD v0.20、契約 v0.20、architecture v0.15、tasks.json v0.14（FE-90～FE-94 done；主控 MC-09）；受測物 `dist/english-master-track.html` 3,471,008 bytes＋`dist/site/` 13 檔（BUILD_ID `3d149370fe32c550`，版本行「版本 1.3.1（建置 3d14937）」）；逐一執行各套件；結論見 §0、詳情見 §21。
@@ -29,9 +31,29 @@ approved_at:
 >
 > （第 1～2 輪）依據：`docs/04-qa/test-plan.md` v0.3；PRD v0.7、契約 v0.7、architecture v0.3、tasks.json v0.2。受測物（v0.2，退回修正第 1 輪）`dist/english-master-track.html` 3,030,574 bytes（QA 以 `tools/build.mjs --out` 重建後與 `dist/` 位元組相同）；初版受測物 3,022,217 bytes。（v0.3，退回修正第 2 輪）受測物 3,047,158 bytes，只驗證 BUG-002 並回歸 AC-01-*、AC-02-*、AC-04-*、AC-05-*、AC-16-*、AC-20-02、AC-22-*，詳見 §12。執行日期 2026-10-30。v0.2 範圍只驗證 BUG-001、BUG-002，並回歸 AC-08-*、AC-15-*、AC-16-*、AC-20-02、AC-22-*、靜態與越界檢查，詳見 §11；其餘 TC 沿用 v0.1 結果（本輪 `npm run test:e2e` 全套重跑，其餘 TC 結果不變）。
 
-## 0. 目前有效結論（第 11 輪，1.3.1 修正輪，BUILD_ID `5f0dc11a7433624d`，2026-11-06）
+## 0. 目前有效結論（第 12 輪，1.3.2，BUILD_ID `981b0d2ab45de9d6`，2026-11-09）
 
-> 本節與 §22 為第 11 輪的結論，取代第 10 輪結論（保留於 §0.000000、§21）。範圍為 architecture v0.16 §10.13（BUG-006、BUG-007、BUG-008 複驗與回歸）；PRD v0.20、契約 v0.20 不變。語音結果仍是替身驗證，AC-58-14、AC-59-08 需真人語音（待人工）。
+> 本節與 §23 為第 12 輪的結論，取代第 11 輪結論（保留於 §0.0000000、§22）。範圍為 architecture v0.17 §10.14（PRD v0.21：R-30 US-62 聆聽中即時文字、R-31 商標說明拿掉「Part 5」）。語音結果是替身驗證（V-STT-STUB），真人語音 AC-62-12、AC-58-14、AC-59-08 待人工。
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 受測物 | `dist/english-master-track.html`＝`dist/site/index.html` 3,486,160 bytes（SHA-256 `9b081604199d…`）＋`dist/site/` 13 檔；版本 1.3.2、BUILD_ID `981b0d2ab45de9d6`；QA 以目前原始碼重建 2 次與 `dist/` 14 檔逐檔相同（M-6：是 FE-101 產物） |
+| 單元測試 | `npm test` 1,965／1,965 通過（166 個 suite；第 11 輪 1,908），含 S1～S10、P1～P18、V-STT-06 新增 9 列、V-LGL-02 v0.21 |
+| TC 總數 | 686（通過 617、**失敗 0**、待人工 45、不適用 24）；第 11 輪 655 + 本輪新增 31（e2e-interim 28、TC-LGL-S03、TC-R12-375、人工 TC-62-12h、TC-62-07h），TC-R11-375（第 11 輪專用比較）由 TC-R12-375 取代 |
+| Edge 冒煙 | 13 個套件 249 項（含 e2e-interim 28）：通過 233、失敗 0、待人工 5、不適用 11 |
+| 不支援 audiostart 替身 | 6 個套件 100 項：通過 97、失敗 0、不適用（暫停）3 |
+| AC 覆蓋率 | 應驗收 400，未涵蓋 0（400 / 400 = 100%）；暫停 27、AC-46-07 移除 1 |
+| AC 判定 | 通過 297、通過（另待人工確認）87、待人工 16、**失敗 0** |
+| 本輪範圍 | AC-62-01～AC-62-06、AC-62-08～AC-62-11 通過；AC-62-07 通過（DOM 部分；NVDA 待人工 TC-62-07h）；AC-62-12 待人工（TC-62-12h）。修改的 AC-08-10、AC-30-04、AC-58-07、AC-59-01、AC-59-05、AC-10-02、AC-56-05、AC-56-06、AC-56-07、AC-57-03、AC-23-08 通過；AC-42-02、AC-54-01、AC-56-03 通過（另待人工：部署後 TC-VER-H2、TC-SITE-H1） |
+| 回歸 | T9（AC-58-03、AC-58-13、AC-60-06）通過；FE-101 未跑完的 TC-58-01f、TC-58-01g、TC-58-04c、TC-33-03r 在 Chrome、Edge 全部通過；US-58～US-61、AC-33 全部自動化項目通過；375／390 版面與 1.3.1 相比只因 R-31 標題說明 2 行 → 1 行（TC-R12-375） |
+| 越界檢查 | **通過**：與 HEAD `2cb2ca2` 相比 PG 檔 24 個（`src/app/` 10、`dist/` 14）全部在 FE-98～FE-101 paths 內，超出 0；`package.json` 只改 version 1 行（MC-10）；`src/data/`、`tools/`、`.github/`、`package-lock.json`、`views/flashcards.js`、`state/store.js`、`services/mic.js` 變動 0；`storage-schema.json` 只改 meta；PG 未動 `tests/` |
+| 安全檢查 | **通過**：即時文字 XSS 字面顯示、對話框 0、請求 0（TC-62-08）；`speech-panel.js` 無 HTML 寫入 API；交付檔無外部資源（TC-S01）、`MediaRecorder` 0；即時文字不進 localStorage、IndexedDB、Cache Storage、備份（TC-62-10、TC-62-10b） |
+| 缺陷 | 本輪新開 **0**；BUG-001～BUG-008 維持 verified |
+| 部署判斷 | **建議可提交並發布 1.3.2**（條件與部署後驗證見 §23.11）。AC-62-12 真人語音是判定「偵測不到」是否解決的依據，需人類在部署前後執行，不阻擋提交 |
+
+### 0.0000000 第 11 輪結論（歷史，1.3.1 修正輪，BUILD_ID `5f0dc11a7433624d`，2026-11-06）
+
+> 第 11 輪結論（§22），已由第 12 輪 §0 取代。範圍為 architecture v0.16 §10.13（BUG-006、BUG-007、BUG-008 複驗與回歸）；PRD v0.20、契約 v0.20 不變。語音結果仍是替身驗證，AC-58-14、AC-59-08 需真人語音（待人工）。
 
 | 項目 | 結果 |
 | :--- | :--- |
@@ -3003,7 +3025,201 @@ Edge（`*-edge.json`）：e2e-goal 22＋暫停 5、e2e-hidden 5、e2e-pwa 8、e2
 | QA-FB-19 | SD | §7.28.6「t2 以 rAF → setTimeout(0) 取得」需註明 rAF 要在 click 之前登錄（PG 回饋 (a)），否則量測會把延後的 `acquire()` 算進去 |
 | QA-FB-15 | SD、PM | 維持（首次畫面色級列焦點被首次底部列遮住，1.3.0 已有，不違反現行 AC） |
 
-## 23. 變更紀錄
+## 23. 第 12 輪驗收（PRD v0.21：聆聽中即時文字、商標說明拿掉「Part 5」，版本 1.3.2）
+
+範圍：architecture v0.17 §7.30、§7.31、§10.14（Q13～Q20、M-1～M-6）、§12.16；tasks.json v0.16（FE-98、FE-99、FE-100、FE-101 done；主控 MC-10）；PRD v0.21、契約 v0.21（應驗收 400 個 AC）。分支 `feat/stt-interim-text`，HEAD `2cb2ca2`，變更未提交。
+
+### 23.1 執行紀錄
+
+| 項目 | 指令 | 結果 |
+| :--- | :--- | :--- |
+| PG 單元測試 | `npm test` | 1,965 / 1,965 通過、fail 0（166 個 suite）；含 S1～S10（服務）、P1～P18（面板）、V-STT-06 新增 9 列、`legal-static.test.js` V-LGL-02 v0.21、`naming.test.js`（`tests/results/tmp/r12-npmtest.txt`） |
+| 資料自驗 | `npm run validate:data` | 錯誤 0、警告 61、通過 |
+| 建置可追溯 | `tools/build.mjs --out <scratchpad>` 2 次 | 與 `dist/` 14 檔逐檔 SHA-256 相同；`dist/english-master-track.html`＝`dist/site/index.html`（`9b081604199d…`）；`emt-app-version` 1.3.2、`emt-build-id`＝`sw.js` BUILD_ID＝`981b0d2ab45de9d6` |
+| 靜態與越界 | data、records、static、legal（含新 TC-LGL-S03）、boundary、boundary-r12（新）、mail-scan、site-check、pwa-static | 全部結束碼 0；越界超出 0 |
+| E2E（Chrome 157.0.8103.38） | `tests/tools/run-r12.mjs` 逐套件，同時 1 個瀏覽器 | 見下表；輸出 `tests/results/tmp/r12-<套件>.txt` |
+| 重跑 | e2e-track（Node 中止）、e2e-ad（HTTPS-First）、e2e-interim、diag-r10-focus、e2e-compat-r10（測試程式修正後）、diag-r11-gutter | 全部失敗 0（§23.4） |
+| 不支援 audiostart 替身 | `run-r12.mjs <套件>:noas` | 6 個套件 100 項：通過 97、失敗 0、暫停 3 |
+| Edge 冒煙（157.0.4341.42） | 第 11 輪 12 個套件＋e2e-interim；e2e-stt-flow 第 8 段、diag-r11-gutter、diag-r12-375 本身含 Edge | 249 項：通過 233、失敗 0、待人工 5、不適用 11 |
+| 新診斷 | `diag-r12-meter.mjs`（收音條點亮時間，1.3.2 與 1.3.1 對照）、`diag-r12-httpupgrade.mjs`（TC-50-01 原因）、`diag-r12-375.mjs`（列入結果） | §23.4、§23.10 |
+
+各套件最終結果（Chrome，一般替身）：
+
+| 套件 | 通過 | 失敗 | 待人工 | 不適用 |
+| :--- | :--- | :--- | :--- | :--- |
+| data | 17 | 0 | 0 | 0 |
+| diag-r11-gutter | 3 | 0 | 0 | 0 |
+| diag-r12-375（新） | 1 | 0 | 0 | 0 |
+| e2e-ad-extra | 2 | 0 | 0 | 0 |
+| e2e-ad-perf | 1 | 0 | 1 | 0 |
+| e2e-ad | 17 | 0 | 5 | 0 |
+| e2e-answered | 20 | 0 | 0 | 0 |
+| e2e-cards | 33 | 0 | 0 | 4 |
+| e2e-compat-r10 | 3 | 0 | 0 | 0 |
+| e2e-content | 9 | 0 | 0 | 10 |
+| e2e-env | 17 | 0 | 1（TC-22-01m） | 3 |
+| e2e-firstrun | 25 | 0 | 0 | 1 |
+| e2e-focus（diag-r10-focus） | 11 | 0 | 0 | 0 |
+| e2e-goal | 22 | 0 | 0 | 5 |
+| e2e-hidden | 5 | 0 | 0 | 0 |
+| e2e-interim（新） | 28 | 0 | 0 | 0 |
+| e2e-layout | 28 | 0 | 0 | 0 |
+| e2e-legal | 16 | 0 | 0 | 0 |
+| e2e-lock | 40 | 0 | 0 | 0 |
+| e2e-mic | 11 | 0 | 0 | 0 |
+| e2e-motion | 15 | 0 | 0 | 0 |
+| e2e-persist | 1 | 0 | 0 | 0 |
+| e2e-progress | 18 | 0 | 0 | 0 |
+| e2e-pwa-update | 7 | 0 | 1 | 0 |
+| e2e-pwa | 23 | 0 | 0 | 0 |
+| e2e-reinit | 15 | 0 | 0 | 0 |
+| e2e-site | 25 | 0 | 0 | 0 |
+| e2e-speech | 20 | 0 | 0 | 0 |
+| e2e-stt-flow | 43 | 0 | 0 | 0 |
+| e2e-track-p5 | 27 | 0 | 0 | 1 |
+| e2e-track | 25 | 0 | 0 | 0 |
+| e2e-version | 14 | 0 | 0 | 0 |
+| legal | 5 | 0 | 0 | 0 |
+| mail-scan | 4 | 0 | 0 | 0 |
+| pwa-static | 12 | 0 | 1 | 0 |
+| qa-review | 8 | 0 | 33 | 0 |
+| site-check | 27 | 0 | 3 | 0 |
+| static | 19 | 0 | 0 | 0 |
+
+Edge（`*-edge.json`）：e2e-interim 28、e2e-speech 20、e2e-mic 11、e2e-goal 22＋暫停 5、e2e-hidden 5、e2e-pwa 8、e2e-version 9＋不適用 5、e2e-track-p5 26＋1、e2e-lock 40、e2e-answered 20、e2e-site 25、e2e-ad 17＋待人工 5、e2e-ad-extra 2，全部失敗 0。
+
+### 23.2 新增 AC（US-62）結果
+
+| AC | TC | Chrome 主要數字 | Edge | 判定 |
+| :--- | :--- | :--- | :--- | :--- |
+| AC-62-01 | TC-62-01、TC-62-01b、TC-62-01f | `la`、`late`、`latency`、`comply with`、`Hello, World?` 每段 7.7～16.6 ms 畫出、事件處理器結束時已顯示；恰 1 列、標籤「聽到：」、值逐字、`lang="en"`、按鈕「聆聽中」、收音條亮、無分數區與訊息；空白不顯示、保留上一段；翻面再翻回仍聆聽中並還原 `adr`；`start()` 當下 `interimResults === true` | 12.9～15.8 ms，同 | 通過 |
+| AC-62-02 | TC-62-02a、TC-62-02b | 準備中（awaitingAudioStart 9.3 ms／fallbackWait 8.9 ms）收到 `ad` → 處理器內即為聆聽中並顯示 `ad`；再等 6 秒（> T_READY、T_FALLBACK）仍聆聽中、無「沒有回應」、未評分；之後 audiostart 畫面不變；收音條亮起 | 12.9／11.8 ms，同 | 通過 |
+| AC-62-03 | TC-62-03a、TC-62-03b | (a) `adress` 顯示中收到 `address` → 8.5 ms 100 綠燈、辨識文字 `address`；處理器結束時即時列已隱藏且分數區已出現，rAF 12 格同時可見 0；(b) 只有最終 `adress` → 86 黃燈、全程即時列可見 0 次 | 16.7 ms，同 | 通過 |
+| AC-62-04 | TC-62-04 | `""`、`"..."` → ≤ 17 ms 隱藏、「有收到聲音，但沒聽出英文單字，請再說一次」、無分數區、今日已學不變 | 同 | 通過 |
+| AC-62-05 | TC-62-05、TC-62-05b | `adr`、`adress`、`end` → 8.7 ms 分數區繪製、86 黃燈、辨識文字 `adress`；與另一頁直接最終 `adress` 對照：分數區 `outerHTML`（476 字元）、`lastResult`、localStorage `data` 12 欄（今日已學、打卡、掌握、learnedHistory 等）、主控台文字逐一相同；今日已學 0 → 1；最後一段為 `...` → 訊息、不評分 | 13.5 ms，同 | 通過 |
+| AC-62-06 | TC-62-06、TC-59-05i、TC-08-10i、TC-30-04i | (a) 再按、(b) 換卡／切換測驗模式／TTS／離開單字卡頁、(c) network／not-allowed／audio-capture／bad-grammar、(d) no-speech、(e) nomatch、(f) 拔除，共 12 種：6.3～11.5 ms 隱藏（皆在處理器內），訊息依 MS-1（(d)(e) 為「有收到聲音…」，不是「未偵測到語音」）；舊實例遲到的 interim／result／end 不重新顯示、不評分；今日已學不變 | 2.4～12.6 ms，同 | 通過 |
+| AC-62-07 | TC-62-07a、TC-62-07h | `.sp-live` `aria-live="off"`、無 role；到 `html` 的 11 層祖先無即時區域；訊息區（status／polite）、分數區（polite）不是祖先 | 同 | 通過（NVDA 待人工） |
+| AC-62-08 | TC-62-08 | `<img src=x onerror=alert(1)>`、`&lt;b&gt;`、`<script>…<b>x</b>` 字面顯示；`.sp-live` 子元素 2、值子元素 0；對話框 0、非本機請求 0；`speech-panel.js` 無 HTML 寫入 API | 同 | 通過 |
+| AC-62-09 | TC-62-09-375／768／1366、TC-62-09m-*（6 組 × 3 種文字） | TTS、麥克風、收音條在待機／聆聽／出現／更新／隱藏 5 個時點座標相同；全文、無水平捲軸、`.sp-live` `scrollWidth ≤ clientWidth`；值 italic；標籤與值 `rgb(91, 100, 114)`（辨識文字值 `rgb(31, 41, 55)`），對比 5.98；`animation none`、`transition 0s`（一般與減少動態）；翻面、上一張、下一張可見 | — | 通過 |
+| AC-62-10 | TC-62-10、TC-62-10b | `file://`：3 種結束後即時文字命中 localStorage、sessionStorage、`AppState.data`、IndexedDB、Cache Storage、匯出備份皆 0；鍵 1 個、`schemaVersion` 3、data 12 欄、備份頂層 5 欄不變；非本機請求 0；重新載入待機；`MediaRecorder` 0；AC-08-13 說明與隱私權政策 (5) 與 HEAD 交付檔逐字相同。部署目錄（Playwright 8080）：Service Worker 啟用並控制頁面、快取 `english-master-track-pwa-981b0d2ab45de9d6` 7 筆，即時文字命中 0、請求 0 | 同（含 Service Worker） | 通過 |
+| AC-62-11 | TC-62-11 | 英文、中文、數字、混合：列全文 =「聽到：」+ 引擎文字，固定文字無禁用字 | 同 | 通過 |
+| AC-62-12 | TC-62-12h | — | — | 待人工 |
+
+### 23.3 修改的 AC、連帶重跑與回歸
+
+| 類別 | 判定 |
+| :--- | :--- |
+| 應驗收 | 400：通過 297、通過（另待人工確認）87、待人工 16、**失敗 0**、未涵蓋 0 |
+| R-30 修改 | AC-08-10（TC-08-10i：無結果 →「未偵測到語音」；只有即時文字 → 評分；即時文字後再按 → 不評分不提示）、AC-30-04（TC-30-04i：顯示即時文字後以手動停止、換卡、TTS、network、no-speech、nomatch 結束 X 仍 0；以即時文字評分 X = 1）、AC-58-07（TC-58-07i、TC-62-02a／b）、AC-59-01（TC-59-01i）、AC-59-05（TC-59-05i：無即時文字 3 種皆「未偵測到語音」；有即時文字時 (a) 為「有收到聲音」、(b)(c) 評分）通過；AC-42-02（TC-42-02：版本 1.3.2、BUILD_ID 一致）通過，部署後 TC-VER-H2 待人工 |
+| R-31 修改與連帶 | TC-LGL-S03：`dist/` 5 個 HTML 與 `sw.js` 全文「TOEIC®（多益）Part 5」0 次、LT-2 新文字主 HTML 9 次、about 1 次、LT-3 仍在；TC-LGL-S01 舊文字清單加入此字串仍 0 次；TC-10-02-*（375／768／1366、150% 字級）、TC-54-01、TC-56-03、TC-56-05、TC-56-06*、TC-56-07（description「TOEIC」「多益」各 1 次、帶 ®、同句否定）、TC-57-03（應用內與靜態頁 `<main>` 相同）、TC-23-08a／b 通過 |
+| T9 回歸 | AC-58-03（TC-58-03：audiostart → 聆聽中 +0.3 ms）、AC-58-13（TC-58-13-375／1366、m）、AC-60-06（TC-60-06-375／768／1366、m：上方座標不變、`scrollbarGutter` stable）通過 |
+| FE-101 未跑完 | TC-58-01f（Chrome、Edge 各 3 次新載入，第 1 次畫出最大 3.1 ms）、TC-58-01g（4 倍降速 Chrome 16／16 最大 20 ms、Edge 16／16 最大 17.2 ms）、TC-58-04c（延後期間取消 `getUserMedia` 0、`AudioContext` 0）、TC-33-03r（`AudioContext` running、收音條 2 秒內亮 5 格）通過 |
+| AC-58、AC-59、AC-60、AC-33 | e2e-stt-flow 43／43、e2e-speech 20／20、e2e-mic 11／11（Edge 同）、`:noas` 6 套件；AC-33-01、AC-33-02 維持待人工（V-MIC-1、V-MIC-2） |
+| 版面 | TC-R12-375：375×667、390×844 × Chrome、Edge：主控台、單字卡與 1.3.1 座標逐一相同；模擬測驗只因標題說明 46.1 → 23 px（2 行 → 1 行），以下元素一律上移 23.1 px |
+| 待人工（16） | 第 11 輪 15 個＋AC-62-12 |
+
+完整 AC → TC 對照見 test-plan §7。
+
+### 23.4 測試程式更新與執行中的失敗判讀
+
+| 檔案 | 更新 | 依據 |
+| :--- | :--- | :--- |
+| `lib/inits.mjs` | `emitInterim`、`emitRaw`、`__qaStt.config`；`interimResults` 初值 `null` | §10.14 Q13 |
+| `e2e-speech.mjs` TC-08-01 | `interimResults === true`、`maxAlternatives 1`、`continuous false` 列入判定 | Q14 |
+| `legal-check.mjs`、`site-check.mjs`（3 處）、`e2e-legal.mjs`、`e2e-lock.mjs` | LT-2 新文字；新增 TC-LGL-S03；舊文字清單加「TOEIC®（多益）Part 5」 | Q15 |
+| `e2e-version.mjs`:186 | 1.3.1 → 1.3.2 | Q19 |
+| `e2e-ad.mjs`、`diag-r10-focus.mjs`、`e2e-compat-r10.mjs`、`diag-r11-gutter.mjs` | 見下表判讀 | — |
+| 新增 | `e2e-interim.mjs`、`diag-r12-meter.mjs`、`diag-r12-httpupgrade.mjs`、`diag-r12-375.mjs`、`boundary-r12.mjs`、`qa-review-r12.mjs`、`run-r12.mjs`；`tc-desc.json`、`tc-list.mjs`、`ac-matrix.mjs`（AC-62-12 列必要人工） | Q16～Q20 |
+
+| TC | 第一次結果 | 判讀 | 處理 |
+| :--- | :--- | :--- | :--- |
+| TC-62-01、TC-62-02a／b | 即時文字出現當下收音條 `00000` | **測試程式**：收音條自進入聆聽中到第 1 格亮 57～61 ms，本頁第 1 次取得麥克風約 750 ms；`diag-r12-meter.mjs` 以 1.3.1 對照，audiostart 路徑第 1 次 756.4 ms（1.3.2 為 756.7 ms），屬既有行為，不在「即時文字 ≤ 100 ms」範圍 | 改為等收音條亮（≤ 1000 ms）再判定，Chrome、Edge 通過 |
+| TC-62-05 | localStorage `data` 不同 | **測試程式**：差異只在自訂單字 `id`、`createdAt`（兩頁注入範本時各自產生） | 比較時去除這 2 欄後 12 欄相同 |
+| TC-50-01 | `http://jimmyfantasyworld.com` 載入廣告（filled） | **環境**：Chrome 157 預設把 http 導覽升級為 https（HTTPS-First），被升級到本機 HTTPS 正式測試建置。`diag-r12-httpupgrade.mjs`：不加參數時最終網址為 https，加 `--disable-features=HttpsUpgrades,HttpsFirstModeV2,…` 後維持 http。`services/ad.js` 自 `a358556` 未改、本輪 diff 0 | e2e-ad 關閉 HTTPS-First 後 Chrome、Edge 重跑：http 來源 ineligible、廣告請求 0 |
+| TC-61-02b | 375 模擬測驗起始 scrollY 65（1.3.0 為 89），「逐筆相同」不成立 | **預期變更**：R-31 標題說明 2 行 → 1 行（§7.31.3 允許），題目區上移 23～24 px；作答後捲到回饋的捲動量 707（1.3.0 706），第 2 次滑鼠點不捲動 | 模擬測驗改比「是否捲動」與捲動量（±2 px），其餘 3 區仍逐筆相同；重跑通過 |
+| TC-R10-C1 | 版本「1.3.2」不等於寫死的「1.3.1」 | **測試程式** | 改讀 `package.json`；重跑通過 |
+| e2e-track | Node 程序以結束碼 3221226505 中止 | 環境（O-11-6 同一現象） | 重跑 25／25 |
+| TC-22-01m | 最大位置中位數 66 ms、p90 116.2（> 100 ms 8／70） | 環境：同第 11 輪；`:noas` 重跑最大中位數 53.4 通過；本輪未改切頁流程 | 依 §2.3 記待人工（TC-M07），不算缺陷 |
+| TC-R11-375 | 未設定 `QA_R10CSS` 記待人工 | 第 11 輪專用（`scrollbar-gutter` 對照組） | 不再執行，改以 TC-R12-375 與 1.3.1 比較 |
+
+### 23.5 效能
+
+本輪未改切頁、主控台與單字卡流程程式；e2e-env 一般與 4 倍降速 TC-22-01、TC-22-02b～TC-22-05 通過，TC-22-01m 依 §2.3 記待人工（§23.4）。即時文字相關時間（Chrome／Edge）：顯示 7.7～16.6／12.9～15.8 ms、準備中轉聆聽中 8.9～9.3／11.8～12.9 ms、隱藏 6.3～11.5／2.4～12.6 ms、以即時文字評分 8.7／13.5 ms，皆 ≤ 100 ms。
+
+### 23.6 越界與安全
+
+| 項目 | 結果 |
+| :--- | :--- |
+| 判定基準 | 第 11 輪已提交（HEAD `2cb2ca2`，2026-11-06 12:04），本輪以 `git diff HEAD`＋未追蹤檔＋`dist/site/`（被 .gitignore 排除，13 檔修改時間皆晚於 HEAD）判定（`boundary-r12.mjs`） |
+| 任務範圍（TC-B03） | PG 檔 24 個：`src/app/` 10（`services/stt.js`、`views/speech-panel.js`、`styles/31-speech.css`、`views/part5.js`、`core/site-content.js`、`__tests__/` 5 檔）、`dist/` 14，全部在 FE-98～FE-101 paths 內，**超出 0**；任務 paths 中未變動 0 |
+| 授權例外 | `package.json`：git diff 只有 version 1.3.1 → 1.3.2 一行（MC-10）；`docs/01-PRD.md`、`docs/02-contract/` 3 檔、`docs/03-design/architecture.md`、`tasks.json`（上游，人類核准或主控代核）；`storage-schema.json` 去除 meta 後與 HEAD 相同；`tasks.json` 既有任務（FE-97 以前）除 status 外 0 變動、FE-98～FE-101 為 done |
+| 必須無變動（M-5） | `src/data/`（git status 空）、`tools/`、`.github/`（`static.yml` diff 0）、`package-lock.json`、`views/flashcards.js`、`state/store.js`、`services/mic.js`、`english_master_track.md`、`CLAUDE.md`：0 個 |
+| PG 是否動 `tests/` | 0 個（QA 開始前 `git status` 無 `tests/` 變動） |
+| QA 本輪 | 只寫 `tests/`、`docs/04-qa/`；未動 `src/`、`dist/`、`tools/`、`package.json`、上游文件；重建、對照檔、暫存都在 scratchpad；未 commit、未 push |
+| XSS | TC-62-08（即時文字）、TC-60-05（辨識文字）、TC-04-04、TC-24-07 通過；`speech-panel.js` 去註解後無 `innerHTML`、`insertAdjacentHTML`、`outerHTML`、`document.write`、`eval(` |
+| 外部資源 | TC-S01（交付檔無外部資源、無網路 API）、TC-50-02（第一階段跨來源 0）、TC-62-10 非本機請求 0、TC-62-10b 跨來源 0；變更檔無新外部網址 |
+| 隱私 | 即時文字只在模組變數與 DOM（IT-8）；TC-62-10／10b 各儲存區命中 0；`MediaRecorder` 0；AC-08-13 說明與隱私權政策 (5) 文字不變 |
+| 持久化（M-4） | localStorage 鍵 1 個（`englishMasterTrack:state`）、`schemaVersion` 3、data 12 欄、備份頂層 5 欄（TC-62-10、TC-R10-C1～C3） |
+
+### 23.7 信箱掃描（`tests/static/mail-scan.mjs`，輸出不含地址）
+
+本輪文件與測試全部寫完後最後一次掃描：833 個文字檔（git ls-files 787、未追蹤 78、dist/site 13；二進位略過 45）；**ML-3 連續地址 0**；ML-4 空白形式等於現行值 56 處（第 11 輪 51；增加的 5 處是本輪紀錄檔 `tests/results/tmp/r12-e2e-site.txt`、`r12-e2e-site-edge.txt`、`r12-site-check.txt` 印出的允許格式）、不等於現行值 0；本地部分連續形式 0、其他網域 0。Git 歷史同第 10 輪（2 個 commit，人類決定不改寫）；本輪新增檔案未寫入任何信箱地址。
+
+### 23.8 已知設計行為的確認（§10.14 末段）
+
+| # | 行為 | 實測 |
+| :--- | :--- | :--- |
+| (9) | 以即時文字評分只在 `end` 且無錯誤、無 `nomatch`、非手動；錯誤或 `nomatch` 後不補評分 | TC-62-06 (c)～(e)、TC-59-05i (a)、TC-08-10i |
+| (10) | 空白暫時結果不回報，畫面保留上一段 | TC-62-01b |
+| (11) | 準備中收到即時文字時，即時文字列與「聆聽中」同時出現，收音條從此時開始點亮 | TC-62-02a／b（處理器結束時已聆聽中並顯示；收音條點亮時間與 audiostart 路徑相同，§23.4） |
+| (12) | 即時文字列不是即時區域 | TC-62-07a；NVDA 待人工 TC-62-07h |
+| (13) | 自 `resultIndex` 起沒有結果的 `result` 視為即時文字 | 只在單元測試 S10 驗證（替身不會送出這種事件），E2E 未另測 |
+
+### 23.9 缺陷
+
+本輪新開缺陷 **0**。BUG-001～BUG-008 維持 verified；最大編號仍為 BUG-008。
+
+### 23.10 觀察事項（不構成缺陷）
+
+| 編號 | 內容 |
+| :--- | :--- |
+| O-12-1 | 收音條自進入聆聽中到第 1 格亮約 57～61 ms；本頁第 1 次取得麥克風約 750 ms（替身音源與 `AudioContext` 啟動），1.3.1 同條件 756 ms，非本版退化。真實麥克風仍以 TC-33-03h 人工確認 |
+| O-12-2 | Chrome 157（Edge 157 同）預設把 http 導覽升級為 https。正式網站在 GitHub Pages 本就強制 https，對使用者無影響；但凡以 http 網址驗證「不載入」的測試都需關閉 HTTPS-First，否則會被升級而失真（TC-50-01） |
+| O-12-3 | 375px 模擬測驗標題說明由 2 行變 1 行（46.1 → 23 px），題目以下上移 23.1 px；屬 R-31 預期，§7.31.3 允許 1 或 2 行 |
+| O-12-4 | FE-101 回報 CDP 無頭 Chrome 裝不起 Service Worker：本輪以 Playwright（本機 8080）重測，Chrome、Edge 都能啟用並快取 7 筆（TC-62-10b、e2e-pwa），確認是 CDP 啟動方式的環境限制，不是產品問題 |
+| O-12-5 | `tasks.json` 新任務內容由 SD 產出、PG 只改 status，但未提交前無法以 diff 分辨欄位修改者；本輪只確認既有任務除 status 外無變動、FE-98～FE-101 為 done、paths 與 architecture §12.16 一致 |
+| O-12-6 | Node 程序偶發以結束碼 3221226505 中止（e2e-track 1 次），重跑正常，同第 8、11 輪 |
+
+### 23.11 部署判斷與後續
+
+| 項目 | 內容 |
+| :--- | :--- |
+| 結論 | **建議可提交並發布 1.3.2（BUILD_ID `981b0d2ab45de9d6`）**。應驗收 400 個 AC 失敗 0、未涵蓋 0；本輪新缺陷 0；越界與安全檢查通過；`dist/` 為 FE-101 建置產物（M-6） |
+| 條件 1 | commit 時一併納入 `tests/`、`docs/04-qa/` 本輪變更（含 `tests/results/`），已掃描無連續信箱地址 |
+| 條件 2 | 交付物以目前 `dist/` 為準，不要再以試作分支的 `dist/` 覆蓋 |
+| 人工（部署前後皆可） | TC-62-12h（AC-62-12 真人語音；判定「偵測不到」是否解決的依據，Chrome 正式網站輪次需部署後）、TC-58-14h、TC-59-08h（同一輪）、TC-62-07h（NVDA）、TC-33-03h、TC-58-01h、TC-MIC-1～5、TC-M07 |
+
+部署後由主控驗證（不算本輪通過）：
+
+| # | 項目 | 依據 |
+| :--- | :--- | :--- |
+| D-1 | GitHub Actions 成功；`static.yml` Verify 13 檔 | AC-36-07 |
+| D-2 | 正式網址版本行「版本 1.3.2（建置 xxxxxxx）」；`emt-build-id` 前 7 碼＝頁尾建置碼＝`sw.js` BUILD_ID 前 7 碼（CI 為 LF 建置，與本機 `981b0d2` 不同屬正常） | AC-42-02、TC-VER-H2 |
+| D-3 | `about.html` 與首頁原始碼 description、`og:description`、結構化資料、`<noscript>` 不含「Part 5」；13 檔與 `/robots.txt`、`/sitemap.xml`、`/ads.txt` 200 | AC-54-01、AC-56-03、AC-56-06、AC-56-08、AC-56-09 |
+| D-4 | 主控台跨來源請求 0、無版位（第一階段） | AC-50-02 |
+| D-5 | 已安裝 App 出現更新提示，更新後版本行 1.3.2、舊資料不變 | AC-36-03、TC-VER-H3、TC-TRK-H1 |
+| D-6 | AC-62-12、AC-58-14 正式網站 Chrome 1 輪 | TC-62-12h、TC-58-14h |
+
+### 23.12 回饋上游
+
+| 編號 | 對象 | 內容 |
+| :--- | :--- | :--- |
+| QA-FB-20 | SD | §7.30.8 T1、T2 的「收音條照常依音量點亮」未給時間；實測進入聆聽中到第 1 格亮 57～61 ms、本頁第 1 次約 750 ms（與 audiostart 路徑相同）。建議日後實測方法註明「收音條在 ≤ 1 秒內亮起」，不要與 ≤ 100 ms 的文字顯示放在同一判定 |
+| QA-FB-21 | SD | 以 http 網址驗證不載入廣告（V-AD、AC-50-01）時，Chrome／Edge 157 會自動升級為 https；建議 §7.25 的實測方法註明需關閉 HTTPS-First（`--disable-features=HttpsUpgrades,HttpsFirstModeV2,…`） |
+| QA-FB-22 | SD | Service Worker 相關實測若沿用 `tests/e2e/lib/cdp.mjs` 會裝不起來（FE-97、FE-101）；建議實測方法改指定 Playwright（`tests/e2e/lib/pwa-env.mjs`） |
+| QA-FB-15 | SD、PM | 維持（首次畫面色級列焦點被首次底部列遮住，1.3.0 已有，不違反現行 AC） |
+
+## 24. 變更紀錄
 
 | 版本 | 日期 | 作者 | 說明 |
 | :--- | :--- | :--- | :--- |
@@ -3019,3 +3235,4 @@ Edge（`*-edge.json`）：e2e-goal 22＋暫停 5、e2e-hidden 5、e2e-pwa 8、e2
 | 0.10 | 2026-11-05 | qa-agent | 第 9 輪驗收（§0、§20）：PRD v0.19（R-27、R-28），應驗收 357 個 AC。590 個 TC：通過 526、失敗 2、待人工 38、不適用 24；AC 通過 342（82 個另待）、待人工 13、失敗 2（AC-38-09、AC-52-05）；開立 BUG-005、BUG-006；BUG-004 的舊地址遮蔽 |
 | 0.11 | 2026-11-05 | qa-agent | 第 10 輪驗收（§0、§21）：PRD v0.20（R-29），應驗收 388 個 AC。647 個 TC：通過 578、失敗 4、待人工 41、不適用 24；AC 通過 370（83 個另待）、待人工 15、失敗 3（AC-52-05、AC-58-01、AC-60-06）；BUG-005 verified；開立 BUG-007、BUG-008；V-STT-STUB 兩種替身、`micOnStrict`、新增 e2e-stt-flow、diag-r10-focus、e2e-compat-r10、diag-r10-perf、diag-r10-scrollbar、boundary-r10、qa-review-r10、run-r10；第 9 輪結論移至 §0.00000；原 §21 變更紀錄改為 §22 |
 | 0.12 | 2026-11-06 | qa-agent | 第 11 輪驗收（§0、§22）：1.3.1 修正輪（architecture v0.16 §10.13），BUILD_ID `5f0dc11a7433624d`。655 個 TC：通過 588、失敗 0、待人工 43、不適用 24；AC 通過 373（86 個另待）、待人工 15、失敗 0；BUG-006、BUG-007、BUG-008 verified（retries 0）；新開缺陷 0。依 PG 回饋更新量法（click 前登錄 rAF、不用 Event Timing、不用 `innerWidth − clientWidth`、`getUserMedia` 次數晚 1 個畫格、以 `data-ad-env` 判斷環境）；新增 diag-r11-gutter、diag-r11-navab、boundary-r11、qa-review-r11、run-r11；第 10 輪結論移至 §0.000000；原 §22 變更紀錄改為 §23 |
+| 0.13 | 2026-11-09 | qa-agent | 第 12 輪驗收（§0、§23）：PRD v0.21（R-30 US-62 聆聽中即時文字、R-31 商標說明拿掉「Part 5」；architecture v0.17 §10.14），版本 1.3.2、BUILD_ID `981b0d2ab45de9d6`。686 個 TC：通過 617、失敗 0、待人工 45、不適用 24；應驗收 400 個 AC：通過 297（87 個另待）、待人工 16、失敗 0、未涵蓋 0；新開缺陷 0。V-STT-STUB 加暫時結果、`interimResults` 斷言、LT-2 新文字與 TC-LGL-S03、版本 1.3.2；新增 e2e-interim、diag-r12-meter、diag-r12-httpupgrade、diag-r12-375、boundary-r12、qa-review-r12、run-r12；執行中失敗 8 項判讀為測試程式或環境（§23.4）；第 11 輪結論移至 §0.0000000；原 §23 變更紀錄改為 §24 |

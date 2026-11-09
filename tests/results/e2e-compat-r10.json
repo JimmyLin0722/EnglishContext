@@ -4,7 +4,7 @@
     "tc": "TC-R10-C1",
     "ac": "共通規則 1（1.3.0 的 localStorage 以 1.3.1 開啟）、AC-58-12、AC-47-04",
     "result": "通過",
-    "note": "1.3.0（1.3.0）學習後 localStorage 鍵 [\"englishMasterTrack:state\"]、schemaVersion 3、data 12 欄（今日已學 2、自訂 11、模擬測驗累計 3）；以 1.3.1 開啟 → main、開啟時 setItem 0 次、切換 3 頁後 0 次、重新載入 0 次；localStorage 逐位元組與 1.3.0 相同=true"
+    "note": "1.3.0（1.3.0）學習後 localStorage 鍵 [\"englishMasterTrack:state\"]、schemaVersion 3、data 12 欄（今日已學 2、自訂 11、模擬測驗累計 3）；以 1.3.2 開啟 → main、開啟時 setItem 0 次、切換 3 頁後 0 次、重新載入 0 次；localStorage 逐位元組與 1.3.0 相同=true"
   },
   {
     "suite": "e2e-compat-r10",

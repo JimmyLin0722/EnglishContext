@@ -2,8 +2,11 @@
  * services/stt.js — 語音辨識（FE-12）
  * 依據：architecture.md §7.6「STT」；PRD Q-04
  *       v0.15（FE-90）：architecture.md §4.13、§7.26.2；契約 data-schema §18 SttEngineEventKind、SttEndInfo，README §14.1 PR-9、§14.3 RT-1、DS-57
+ *       v0.17（FE-98）：architecture.md §4.15、§7.26.2（v0.17 修訂）、§7.30.1；契約 v0.21 README §14.6 IT-1～IT-4、DS-64～DS-67，
+ *         data-schema §18 SttStartOptions、SttEngineEventKind "interim"、SttEndInfo.lastInterimText
  * 涵蓋：AC-08-01、AC-08-02、AC-08-09、AC-08-10、AC-08-14、AC-21-02、AC-21-03、
- *       AC-58-03、AC-58-07、AC-58-08、AC-58-09、AC-59-01～AC-59-06、AC-60-01
+ *       AC-58-03、AC-58-07、AC-58-08、AC-58-09、AC-59-01～AC-59-06、AC-60-01、
+ *       AC-62-01、AC-62-03、AC-62-05、AC-62-08、AC-62-10
  *
  * 只使用瀏覽器原生 SpeechRecognition／webkitSpeechRecognition：
  * 不直接存取麥克風串流、不使用任何錄音 API，不取得、不保存任何音訊，也不使用第三方語音 SDK 或 API 金鑰。
@@ -11,24 +14,29 @@
  * 提供 EMT.services.stt：
  * - isSupported() → boolean
  * - isOnline() → boolean：navigator.onLine 明確為 false 時回 false
- * - start({ lang, onAudioStart(info), onSoundStart(info), onSpeechStart(info), onResult(text, info), onNomatch(info),
- *          onError(code, info), onEnd(info) })
+ * - start({ lang, onAudioStart(info), onSoundStart(info), onSpeechStart(info), onInterim(text, info), onResult(text, info),
+ *          onNomatch(info), onError(code, info), onEnd(info) })
  *     → { ok: true, audioStartSupported } | { ok: false, reason }（回呼全部選填）
  *     reason：「unsupported」不支援、「offline」離線（AC-08-14）、「error」建立或啟動失敗。
  *     audioStartSupported：本次是否可依賴 audiostart；new 之後、rec.start() 之前以 "onaudiostart" in rec 判定（含原型鏈），
  *       判定拋例外視為 false（AC-58-09，§7.26.2）。
- *     設定 lang = "en-US"、interimResults = false、maxAlternatives = 1、continuous = false。
- *     onResult(text, info)：辨識原文（可能為空字串）。
+ *     設定 lang = "en-US"、maxAlternatives = 1、continuous = false；interimResults = 是否提供 onInterim（IT-1）。
+ *     onInterim(text, info)：（v0.17）即時文字（暫時結果）。提供 onInterim 且事件自 resultIndex 起所有結果的 isFinal 都是 false
+ *       時屬即時文字（hasFinalOf，IT-2）：以 allTextOf 取出（IT-3），非空才先設 lastInterimText 再呼叫；取出為空不呼叫、
+ *       lastInterimText 不變（DS-67、FB-80）。即時文字不改 hadResult、不呼叫 onResult，只供顯示。
+ *     onResult(text, info)：最終結果的辨識原文（可能為空字串）；未提供 onInterim 時每個 result 事件都屬最終結果（V-STT-17）。
  *     onError(code, info)：SpeechRecognitionErrorEvent.error（not-allowed、network、no-speech…）；手動停止造成的 aborted 不通知。
- *     onEnd(info)：本次聆聽結束。
- *     info = SttEndInfo 8 欄的新複本，順序固定：manual, hadResult, hadError, audioStarted, soundStarted, speechDetected,
- *       nomatch, errorCode（第一個非手動 aborted 的錯誤代碼，否則 null）。每次 start() 都重設為初始值。
+ *     onEnd(info)：本次聆聽結束；只回報，不以即時文字代替最終結果呼叫 onResult（IT-4、DS-65），由呼叫端依 MS-1 (2b) 判定。
+ *     info = SttEndInfo 9 欄的新複本，順序固定：manual, hadResult, hadError, audioStarted, soundStarted, speechDetected,
+ *       nomatch, errorCode（第一個非手動 aborted 的錯誤代碼，否則 null）, lastInterimText（本次最後一段非空即時文字，否則 ""）。
+ *       hadResult 只代表收到最終結果。每次 start() 都重設為初始值。
  *     服務只依引擎順序原樣轉送事件與旗標，不重排、不決定訊息（DS-57）。
  *     同時只有一個聆聽工作；再次 start 會先中止前一個（其回呼不再觸發）。
  * - stop() → boolean：停止聆聽並標記為手動停止（不提示）；之後仍可能收到已辨識的結果。
  * - abort()：立即中止且不再觸發任何回呼（換卡、離開頁面）。
  * - isListening() → boolean
  * - transcriptOf(event)：純函式，取出辨識文字（供測試）。
+ * - hasFinalOf(event)、allTextOf(event)：（v0.17）純函式，判定是否含最終結果、取出即時文字（只供測試，§7.30.1）。
  * - create(globalObject)：以指定的全域物件建立獨立實例（Node 測試注入假的 SpeechRecognition）。
  * 所有回呼的例外都被攔下，不拋出未處理例外。載入時不操作 DOM。
  */
@@ -70,6 +78,49 @@
     }
   }
 
+  /**
+   * 本次事件自 resultIndex 起是否含最終結果（§7.30.1、IT-2）：
+   * results 不是類陣列或判定拋例外 → 最終；自 resultIndex 起任一結果的 isFinal 不是 false（含未提供）→ 最終；
+   * 自 resultIndex 起全部為 false 或沒有任何結果 → 即時文字（SD-FB-98）。
+   * @param {object} ev
+   * @returns {boolean}
+   */
+  function hasFinalOf(ev) {
+    try {
+      var results = ev && ev.results;
+      if (!results || typeof results.length !== "number") return true;
+      var start = typeof ev.resultIndex === "number" && ev.resultIndex >= 0 ? ev.resultIndex : 0;
+      for (var i = start; i < results.length; i++) {
+        if (results[i] && results[i].isFinal !== false) return true;
+      }
+      return false;
+    } catch (e) {
+      return true;
+    }
+  }
+
+  /**
+   * 即時文字取出（IT-3）：results 索引 0 到最後，各取第 1 候選 transcript、各自 trim、捨棄空字串、
+   * 以 1 個半形空白串接；不清洗標點、不改大小寫。
+   * @param {object} ev
+   * @returns {string} 取不到時回 ""
+   */
+  function allTextOf(ev) {
+    try {
+      var results = ev && ev.results;
+      if (!results || typeof results.length !== "number") return "";
+      var parts = [];
+      for (var i = 0; i < results.length; i++) {
+        var alt = results[i] && results[i][0];
+        var t = alt && typeof alt.transcript === "string" ? alt.transcript.trim() : "";
+        if (t) parts.push(t);
+      }
+      return parts.join(" ");
+    } catch (e) {
+      return "";
+    }
+  }
+
   /** 安全呼叫回呼（最多 2 個參數） */
   function call(fn, a, b) {
     if (typeof fn !== "function") return;
@@ -86,7 +137,8 @@
    * @param {object} g 全域物件（瀏覽器為 window）
    */
   function create(g) {
-    // 目前聆聽工作 { rec, manual, hadResult, hadError, audioStarted, soundStarted, speechDetected, nomatch, errorCode }
+    // 目前聆聽工作 { rec, manual, hadResult, hadError, audioStarted, soundStarted, speechDetected, nomatch, errorCode,
+    //               lastInterimText }
     var session = null;
 
     /** 取得建構函式（不存在回 null） */
@@ -158,7 +210,7 @@
     /**
      * 開始聆聽。
      * @param {{lang?: string, onAudioStart?: Function, onSoundStart?: Function, onSpeechStart?: Function,
-     *          onResult?: Function, onNomatch?: Function, onError?: Function, onEnd?: Function}} opts
+     *          onInterim?: Function, onResult?: Function, onNomatch?: Function, onError?: Function, onEnd?: Function}} opts
      * @returns {{ok: boolean, audioStartSupported?: boolean, reason?: string}}
      */
     function start(opts) {
@@ -173,10 +225,11 @@
         var rec = new C();
         var s = {
           rec: rec, manual: false, hadResult: false, hadError: false,
-          audioStarted: false, soundStarted: false, speechDetected: false, nomatch: false, errorCode: null
+          audioStarted: false, soundStarted: false, speechDetected: false, nomatch: false, errorCode: null,
+          lastInterimText: ""
         };
         var live = function () { return session === s; };
-        // 當下旗標的新複本（SttEndInfo 8 欄，順序固定）；呼叫端修改不影響服務
+        // 當下旗標的新複本（SttEndInfo 9 欄，順序固定，DS-66）；呼叫端修改不影響服務
         var snap = function () {
           return {
             manual: s.manual,
@@ -186,14 +239,17 @@
             soundStarted: s.soundStarted,
             speechDetected: s.speechDetected,
             nomatch: s.nomatch,
-            errorCode: s.errorCode
+            errorCode: s.errorCode,
+            lastInterimText: s.lastInterimText
           };
         };
         // 須在 rec.start() 之前判定
         var audioStartSupported = audioStartSupportedOf(rec);
 
+        // 有 onInterim 才要求暫時結果（IT-1）；是否以即時文字評分由呼叫端決定（IT-4）
+        var wantInterim = typeof o.onInterim === "function";
         rec.lang = typeof o.lang === "string" && o.lang ? o.lang : LANG;
-        rec.interimResults = false;
+        rec.interimResults = wantInterim;
         rec.maxAlternatives = 1;
         rec.continuous = false;
 
@@ -215,6 +271,14 @@
         };
         rec.onresult = function (ev) {
           if (!live()) return;
+          // 即時文字（IT-2、IT-3）：只轉送給畫面，不改 hadResult、不呼叫 onResult；取出為空不回報（DS-67）
+          if (wantInterim && !hasFinalOf(ev)) {
+            var t = allTextOf(ev);
+            if (!t) return;
+            s.lastInterimText = t;
+            call(o.onInterim, t, snap());
+            return;
+          }
           s.hadResult = true;
           call(o.onResult, transcriptOf(ev), snap());
         };
@@ -235,6 +299,7 @@
         };
         rec.onend = function () {
           if (!live()) return;
+          // 只回報；即時文字是否評分由呼叫端依 MS-1 (2b) 以 info.lastInterimText 判定（IT-4、DS-65）
           session = null;
           detach(rec);
           call(o.onEnd, snap());
@@ -297,6 +362,8 @@
     abort: instance.abort,
     isListening: instance.isListening,
     transcriptOf: transcriptOf,
+    hasFinalOf: hasFinalOf,
+    allTextOf: allTextOf,
     create: create
   };
 });

@@ -18,7 +18,7 @@
     "tc": "TC-10-02-375",
     "ac": "AC-10-02、AC-20-01、AC-40-02、E-123、V-LGL-02",
     "result": "通過",
-    "note": "375×667：題目 K=0：2 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false；題目 K≥1：2 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false；鎖定檢視：2 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false；作答後：2 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false"
+    "note": "375×667：題目 K=0：1 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false；題目 K≥1：1 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false；鎖定檢視：1 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false；作答後：1 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false"
   },
   {
     "suite": "e2e-legal",
@@ -109,6 +109,6 @@
     "tc": "TC-23-07h",
     "ac": "AC-23-07 (4)(5)（V-PWA (b)）、AC-37-05",
     "result": "通過",
-    "note": "http 版聯絡行逐字=true、版本行「版本 1.3.1（建置 5f0dc11）」；開啟資料來源頁新增請求 0 筆；全程跨來源或非 GET 0"
+    "note": "http 版聯絡行逐字=true、版本行「版本 1.3.2（建置 981b0d2）」；開啟資料來源頁新增請求 0 筆；全程跨來源或非 GET 0"
   }
 ]
