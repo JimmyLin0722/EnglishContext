@@ -26,6 +26,10 @@ tools: Read, Grep, Glob, Write, Edit, Bash
 ## 自我驗證（必做）
 用 Node 執行資料檔，依契約的驗證規則逐項檢查（欄位、型別、值域、筆數、ID 唯一、正解一致性等），全部通過才算完成。
 
+## 讀檔範圍（省 token）
+- 只讀主控給的閱讀清單與任務的 `covers`、`contractRefs`；用 Grep 依編號定位契約與 PRD，只讀命中段落，不整份讀。
+- 修 BUG 時，若對應任務不在 `tasks.json`，到 `docs/archive/tasks-done.json` 依任務 ID grep。
+
 ## 完成後回報（給主控，簡短）
 - 任務 / BUG ID、狀態建議（`done` 或 `blocked` + 原因）
 - 修改的檔案、筆數統計

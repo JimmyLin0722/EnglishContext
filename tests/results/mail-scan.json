@@ -4,14 +4,14 @@
     "tc": "TC-55-04a",
     "ac": "AC-55-04（V-MAIL-01、ML-3）",
     "result": "通過",
-    "note": "掃描 833 個文字檔（git ls-files 787、未追蹤 78、dist/site 13；二進位略過 45、已不存在 0）；ML-3 連續地址命中 0；含本檔自身"
+    "note": "掃描 891 個文字檔（git ls-files 865、未追蹤 58、dist/site 13；二進位略過 45、已不存在 0）；ML-3 連續地址命中 0；含本檔自身"
   },
   {
     "suite": "mail-scan",
     "tc": "TC-55-04b",
     "ac": "AC-23-07 (8)、AC-55-04（ML-4）",
     "result": "通過",
-    "note": "ML-4 空白形式：等於現行值 56 處；不等於現行值 0 處（上游 tasks.json FE-77 0 處，SD-FB-78 由主控決定；其他 0 處）"
+    "note": "ML-4 空白形式：等於現行值 59 處；不等於現行值 0 處（上游 tasks.json FE-77 0 處，SD-FB-78 由主控決定；其他 0 處）"
   },
   {
     "suite": "mail-scan",

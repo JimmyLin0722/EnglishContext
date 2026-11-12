@@ -57,7 +57,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   await p.goto();
   // AC-38-01 色彩掃描、AC-38-02 背景、AC-38-04 對比、AC-38-06 卡片、AC-38-07 字級（兩種寬度、首次畫面與 4 功能區、資料來源頁）
   const scan = { orange: [], brandText: [], whiteOnBrand: [], ring: [], p5: [], bodyBg: [], cards: [], contrast: [], titles: [], tab: [], statSize: [], btnBorder: [], statBorder: [] };
-  const bad = { orange: [], contrast: [], cards: [], titles: [], tab: [], btnBorder: [], statBorder: [], statSize: [] };
+  const bad = { cardBg: [], orange: [], contrast: [], cards: [], titles: [], tab: [], btnBorder: [], statBorder: [], statSize: [] };
   const ALLOWED_ORANGE = (h) => (h.ctx === "db-start" && h.prop === "background-color" && /db-start/.test(h.sel)) || (h.ctx === "cz-start" && h.prop === "background-color" && /#cz-start/.test(h.sel)) || (h.ctx === "db-stat__icon" && (h.prop === "fill" || h.prop === "color"));
   for (const [w, h] of TWO) {
     await p.viewport(w, h);
@@ -70,8 +70,8 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
         const text = [...document.querySelectorAll("body *")].filter((e) => L.shown(e) && L.ownText(e) && !e.closest(".app-logo"));
         const brandText = text.filter((e) => ["${ACCENT}", "${BRAND}"].includes(L.hex(getComputedStyle(e).color))).map((e) => e.className + ":" + L.ownText(e).slice(0, 10));
         const whiteOn = [...document.querySelectorAll("body *")].filter((e) => L.shown(e) && !e.closest(".app-logo") && L.hex(getComputedStyle(e).color) === "#ffffff" && (L.ownText(e) || e.tagName === "BUTTON") && ["${ACCENT}", "${BRAND}"].includes(L.hex(L.effective(e).bg ? "rgb(" + [L.effective(e).bg.r, L.effective(e).bg.g, L.effective(e).bg.b].join(",") + ")" : ""))).map((e) => e.className);
-        const ring = document.querySelector("#view-dashboard:not([hidden]) .db-ring:not(.db-ring--done) .db-ring__bar"); const fill = document.querySelector("#view-part5:not([hidden]) .p5-progress__fill");
-        return { hits, brandText, whiteOn, ring: ring && L.shown(ring) ? L.hex(getComputedStyle(ring).stroke) : null, fill: fill && L.shown(fill) ? L.hex(getComputedStyle(fill).backgroundColor) : null, body: getComputedStyle(document.body).backgroundColor, contrast: L.contrast(document.body) }; })()`);
+        const ring = document.querySelector("#view-dashboard:not([hidden]) .db-today__fill:not(.db-today__fill--done)") /* 第 13 輪：主環形圖改為今日進度條（R-32、Q-116 A） */; const fill = document.querySelector("#view-part5:not([hidden]) .p5-progress__fill");
+        return { hits, brandText, whiteOn, ring: ring && L.shown(ring) ? L.hex(getComputedStyle(ring).backgroundColor) : null, fill: fill && L.shown(fill) ? L.hex(getComputedStyle(fill).backgroundColor) : null, body: getComputedStyle(document.body).backgroundColor, contrast: L.contrast(document.body) }; })()`);
       const orangeHits = r.hits.filter((x) => x.color === ACCENT);
       const disallowed = orangeHits.filter((x) => !ALLOWED_ORANGE(x));
       scan.orange.push(`${w}px ${label}：橘 ${orangeHits.length} 處（${[...new Set(orangeHits.map((x) => (x.ctx || x.sel) + "." + x.prop))].join("、") || "無"}）`);
@@ -94,7 +94,9 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
         const nums = [...document.querySelectorAll(".db-today__text, .db-stat__value, .db-bars__count, .cz-est-target, .cz-est-daily, .cz-est-weeks, .cz-est-mastered, .cz-firstbar__summary, .cz-level__vocab, .cz-level__daily, .fc-position, .p5-number")].filter(L.shown).map((e) => ({ c: e.className.split(" ")[0], tab: getComputedStyle(e).fontVariantNumeric.includes("tabular-nums") }));
         const statSize = [...document.querySelectorAll(".db-stat__value:not(.db-stat__value--answered)")].filter(L.shown).map((e) => parseFloat(getComputedStyle(e).fontSize));
         return { cards, btns, stats, titles, nums, statSize }; })()`);
-      for (const k of c.cards) { const good = k.bg === "#ffffff" && k.rad === "16px/16px/16px/16px" && k.shadow !== "none" && (k.bw === "0px/0px/0px/0px" || k.bs === "none"); if (!good) bad.cards.push(`${w}px ${label} ${k.sel}：${k.bg}、${k.rad}、陰影 ${k.shadow === "none" ? "none" : "有"}、邊框 ${k.bw}`); }
+      // 第 13 輪：AC-38-06 由 AC-68-02 取代（PRD v0.22），本迴圈只保留 AC-38-02 的「區塊卡片白底」（群島地圖框 .db-map 底色為海面色，屬 AC-68-02 例外）；外框、圓角、陰影改由 e2e-island TC-68-02 判定
+      for (const k of c.cards) if (k.bg !== "#ffffff" && !/(^| )db-map( |$)/.test(k.sel)) bad.cardBg.push(`${w}px ${label} ${k.sel}：${k.bg}`);
+      if (false) for (const k of c.cards) { const good = k.bg === "#ffffff" && k.rad === "16px/16px/16px/16px" && k.shadow !== "none" && (k.bw === "0px/0px/0px/0px" || k.bs === "none"); if (!good) bad.cards.push(`${w}px ${label} ${k.sel}：${k.bg}、${k.rad}、陰影 ${k.shadow === "none" ? "none" : "有"}、邊框 ${k.bw}`); }
       scan.cards.push(`${w}px ${label} ${c.cards.length} 張`);
       if (c.btns.length) bad.btnBorder.push(`${w}px ${label}：${c.btns.join("、")}`);
       if (c.stats.some((x) => !x)) bad.statBorder.push(`${w}px ${label}`);
@@ -109,14 +111,15 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
   }
   const ringOk = scan.ring.every((x) => x.endsWith(BRAND)), fillOk = scan.p5.every((x) => x.endsWith(BRAND));
   R[bad.orange.length === 0 && ringOk && fillOk ? "pass" : "fail"]("TC-38-01", "AC-38-01", `標題列圖示（.app-logo）依 v0.13 例外不列入。${scan.orange.join("；")}；不允許位置：${bad.orange.join("｜") || "無"}；主環形圖未達成進度色 ${scan.ring.join("、")}；模擬測驗進度條填色 ${scan.p5.join("、")}`);
-  const bgOk = scan.bodyBg.every((x) => x.endsWith("rgb(238, 244, 250)"));
-  // HSL 檢查 #eef4fa
-  const hsl = (() => { const [r, g, b] = [0xee, 0xf4, 0xfa].map((v) => v / 255); const mx = Math.max(r, g, b), mn = Math.min(r, g, b); const l = (mx + mn) / 2; const d = mx - mn; const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1)); let hh = 0; if (d) { if (mx === r) hh = ((g - b) / d) % 6; else if (mx === g) hh = (b - r) / d + 2; else hh = (r - g) / d + 4; } return [Math.round(hh * 60 < 0 ? hh * 60 + 360 : hh * 60), Math.round(s * 100), Math.round(l * 1000) / 10]; })();
+  const bgOk = scan.bodyBg.every((x) => x.endsWith("rgb(234, 247, 251)")) /* 第 13 輪：AC-68-01 背景 #eaf7fb */;
+  // HSL 檢查 #eaf7fb（第 13 輪；第 5～12 輪 #eef4fa）
+  const hsl = (() => { const [r, g, b] = [0xea, 0xf7, 0xfb].map((v) => v / 255); const mx = Math.max(r, g, b), mn = Math.min(r, g, b); const l = (mx + mn) / 2; const d = mx - mn; const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1)); let hh = 0; if (d) { if (mx === r) hh = ((g - b) / d) % 6; else if (mx === g) hh = (b - r) / d + 2; else hh = (r - g) / d + 4; } return [Math.round(hh * 60 < 0 ? hh * 60 + 360 : hh * 60), Math.round(s * 100), Math.round(l * 1000) / 10]; })();
   const meta = await p.ev(`(document.querySelector('meta[name="theme-color"]') || {}).content`);
-  R[bgOk && bad.cards.length === 0 && hsl[0] >= 190 && hsl[0] <= 220 && hsl[1] >= 15 && hsl[2] >= 94 && hsl[2] <= 98 && MANIFEST.background_color === "#eef4fa" && MANIFEST.theme_color === BRAND && meta === BRAND ? "pass" : "fail"]("TC-38-02", "AC-38-02、AC-34-04",
-    `body 背景 ${[...new Set(scan.bodyBg.map((x) => x.split(" ").slice(-3).join(" ")))].join("、")}（#eef4fa，HSL ${hsl[0]}°、${hsl[1]}%、${hsl[2]}%）；區塊卡片 ${scan.cards.join("、")}，不符 ${bad.cards.length}；manifest background_color ${MANIFEST.background_color}、theme_color ${MANIFEST.theme_color}；<meta name="theme-color"> ${meta}`);
+  R[bgOk && bad.cardBg.length === 0 && hsl[0] >= 190 && hsl[0] <= 220 && hsl[1] >= 15 && hsl[2] >= 94 && hsl[2] <= 98 && MANIFEST.background_color === "#eaf7fb" && MANIFEST.theme_color === BRAND && meta === BRAND ? "pass" : "fail"]("TC-38-02", "AC-38-02、AC-34-04",
+    `body 背景 ${[...new Set(scan.bodyBg.map((x) => x.split(" ").slice(-3).join(" ")))].join("、")}（#eaf7fb，HSL ${hsl[0]}°、${hsl[1]}%、${hsl[2]}%）；區塊卡片 ${scan.cards.join("、")}，白底不符 ${bad.cardBg.join("｜") || "0"}；manifest background_color ${MANIFEST.background_color}、theme_color ${MANIFEST.theme_color}；<meta name="theme-color"> ${meta}`);
   R[bad.contrast.length === 0 ? "pass" : "fail"]("TC-38-04", "AC-38-04", `WCAG 公式量測可見文字（不含停用按鈕、Q-55 語意色、標題列圖示；鎖定列以 opacity 合成）：${scan.contrast.join("；")}；未達標 ${bad.contrast.join("｜") || "無"}`);
-  R[bad.cards.length === 0 && bad.btnBorder.length === 0 && bad.statBorder.length === 0 ? "pass" : "fail"]("TC-38-06", "AC-38-06", `區塊卡片 ${scan.cards.join("、")}：白底、四角 16px、有陰影、無邊框，不符 ${bad.cards.join("｜") || "無"}；按鈕以 #d5d9e0 為邊框 ${bad.btnBorder.join("｜") || "無"}；統計格有邊框 ${bad.statBorder.join("｜") || "無"}（單字卡頁卡片、表單欄、色級列選中、作答選項、對話框不在範圍）`);
+  // 第 13 輪：PRD v0.22 移除 AC-38-06（由 AC-68-02 取代；architecture §10.15 Q22），不驗收；卡片與按鈕外框、圓角、陰影見 e2e-island TC-68-02
+  R.results.push({ suite: "e2e-layout", tc: "TC-38-06", ac: "AC-38-06", result: "不適用（v0.22 移除）", note: "PRD v0.22 R-32 以 AC-68-02 取代 AC-38-06（卡片無邊框、16px、有陰影的舊規則不再適用）；本版不驗收，改由 e2e-island TC-68-02 判定" });
   R[bad.titles.length === 0 && bad.tab.length === 0 && bad.statSize.length === 0 ? "pass" : "fail"]("TC-38-07", "AC-38-07", `區塊標題 ${scan.titles.join("；")}；不符 ${bad.titles.join("、") || "無"}；tabular-nums 檢查 ${scan.tab.join("、")}，缺 ${bad.tab.join("、") || "無"}；3 格數據數值字級 ${scan.statSize.join("、")}，< 24px ${bad.statSize.join("、") || "無"}（@font-face 與外部字型見 TC-S01、TC-L-S01）`);
   await p.close();
 }
@@ -137,7 +140,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
       for (const c of ["orange", "brown", "green", "blue", "gold"]) { await goTab(p, "customizer"); await clickCard(p, c); await apply(p, "leave"); await goTab(p, "dashboard"); dots.push(await p.ev(`window.__qaL.hex(getComputedStyle(document.querySelector(".db-goal__dot")).backgroundColor)`)); }
       elems.dots = dots.join(",");
       await seedAt(p, stateRecord(725, { todayLearned: { date: TODAY, wordKeys: Array.from({ length: 15 }, (_, i) => "w" + i) }, learnedHistory: { [TODAY]: 15 } }), url);
-      await goTab(p, "dashboard"); elems.gold = await p.ev(`window.__qaL.hex(getComputedStyle(document.querySelector(".db-ring--done .db-ring__bar")).stroke)`);
+      await goTab(p, "dashboard"); elems.gold = await p.ev(`window.__qaL.hex(getComputedStyle(document.querySelector(".db-today__fill--done")).backgroundColor)`) /* 第 13 輪：今日進度條達成填色 */;
     }
     // 模擬測驗對錯色（兩版同一題）
     await seedAt(p, stateRecord(725), url); await goTab(p, "part5");
@@ -184,7 +187,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
 
 // AC-38-08：單字卡頁結構與 v0.11 相同（單字卡模式、測驗模式；兩種寬度；固定 Math.random）
 {
-  const dump = (root) => { const out = []; const walk = (e, d) => { const s = getComputedStyle(e); if (e.hidden || s.display === "none") return; const r = e.getBoundingClientRect();
+  const dump = (root) => { const out = []; const walk = (e, d) => { const s = getComputedStyle(e); if (e.hidden || s.display === "none") return; if (e.matches && e.matches(".fc-deco, .fc-feedback-live")) return; /* 第 13 輪：AC-38-08 v0.22 卡片角落裝飾與學完回饋列不視為差異 */ const r = e.getBoundingClientRect();
     const own = [...e.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent.trim()).join(" ");
     out.push({ d, k: e.tagName.toLowerCase() + "." + String(e.className && e.className.baseVal !== undefined ? e.className.baseVal : e.className).trim(), t: own.slice(0, 40), x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) });
     for (const c of e.children) walk(c, d + 1); }; walk(document.querySelector(root), 0); return out; };
@@ -213,8 +216,13 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
     const movedEl = same ? ra.map((x, i) => [x, rb[i]]).filter(([x, y]) => Math.abs(x.x - y.x) > 1 || Math.abs(x.y - y.y) > 1 || Math.abs(x.w - y.w) > 1 || Math.abs(x.h - y.h) > 1) : [];
     const moved = movedEl.map(([x, y]) => `${x.k}「${x.t.slice(0, 6)}」(${x.x},${x.y},${x.w}×${x.h})→(${y.x},${y.y},${y.w}×${y.h})`);
     const meterA = ra.find((x) => /sp-meter|sp-level/.test(x.k)), meterB = same ? rb.find((x) => /sp-meter|sp-level/.test(x.k)) : null;
-    const meterSame = !meterA || (meterB && Math.abs(meterA.x - meterB.x) <= 1 && Math.abs(meterA.y - meterB.y) <= 1);
-    ok = ok && meterSame; if (meterA) geo.push(`${k} 收音條相對位置 v0.11 (${meterA.x},${meterA.y}) v0.12 (${meterB && meterB.x},${meterB && meterB.y})`);
+    // 第 13 輪（PRD v0.22 AC-38-08 修改）：島嶼外觀（2 px 外框、卡片上 padding 加大以放角落裝飾，architecture §7.32.9）使卡片內元素整體下移，不視為差異；
+    // 收音條位置改以「相對麥克風按鈕」判定（收音條緊接在麥克風按鈕右側、垂直置中，誤差 ≤ 2 px），頁面絕對座標列參考
+    const micA = ra.find((x) => /(^|\s|\.)sp-mic( |$)/.test(x.k)), micB = same ? rb.find((x) => /(^|\s|\.)sp-mic( |$)/.test(x.k)) : null;
+    const relM = (m, c) => (m && c ? [m.x - (c.x + c.w), (m.y + m.h / 2) - (c.y + c.h / 2)] : null);
+    const rA = relM(meterA, micA), rB = relM(meterB, micB);
+    const meterSame = !meterA || (!!rA && !!rB && Math.abs(rA[0] - rB[0]) <= 2 && Math.abs(rA[1] - rB[1]) <= 2);
+    ok = ok && meterSame; if (meterA) geo.push(`${k} 收音條相對位置 v0.11 (${meterA.x},${meterA.y}) v0.12 (${meterB && meterB.x},${meterB && meterB.y})；相對麥克風按鈕右緣與垂直中心 v0.11 ${JSON.stringify(rA)}、v0.12 ${JSON.stringify(rB)}`);
     ok = ok && same; out.push(`${k}：元素 ${sa.length}/${sb.length}、順序與文字相同=${same}${diffs.length ? "（" + diffs.join("；") + "）" : ""}`);
     geo.push(`${k} 相對頁面原點位置或尺寸差 > 1px 的元素 ${moved.length}${moved.length ? "（" + moved.slice(0, 6).join("、") + "）" : ""}`);
   }
@@ -251,7 +259,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
     await goTab(p, "part5"); const p5 = await p.ev(`(() => { const f = document.querySelector(".p5-progress__fill"); return f ? getComputedStyle(f).transitionDuration + "/" + getComputedStyle(f).transitionProperty : "無"; })()`);
     const ns = (s) => s.split(/[\/,]/).every((x) => parseFloat(x) === 0);
     const good = !!fr && /solid|auto/.test(fr.outline) && parseFloat(fr.outline.split(" ")[1]) >= 2 && fr.w >= 44 && fr.h >= 44 && entered === "main"
-      && seq.map((s) => s.tag).join(",") === "start,change,toggle" && seq.every((s) => /solid|auto/.test(s.outline) && parseFloat(s.outline.split(" ")[1]) >= 2 && s.w >= 44 && s.h >= 44)
+      && seq.map((s) => s.tag).join(",") === "change,start,toggle" /* 第 13 輪：AC-71-02 v0.22 Tab 順序「變更」→「開始今日學習」→ 資料備份 */ && seq.every((s) => /solid|auto/.test(s.outline) && parseFloat(s.outline.split(" ")[1]) >= 2 && s.w >= 44 && s.h >= 44)
       && ex1 === "true" && ex2 === "false" && t1 === "customizer" && t2 === "flashcards" && (!reduce || (anim.running === 0 && ns(anim.trans) && /^0s/.test(p5)));
     ok = ok && good;
     out.push(`${reduce ? "(b) 減少動態" : "(a) 一般"}：首次畫面 Tab 到「開始學習」焦點框 ${fr && fr.outline}、${fr && Math.round(fr.w)}×${fr && Math.round(fr.h)}，Enter → ${entered}；主控台 Tab 順序 ${seq.map((s) => `${s.tag}(${s.outline}，${Math.round(s.w)}×${Math.round(s.h)})`).join(" → ")}；空白鍵展開 ${ex1}、Enter 收合 ${ex2}；展開後動畫 ${anim.running} 個、轉場 ${anim.trans}；「變更」Enter → ${t1}、「開始今日學習」空白鍵 → ${t2}；進度條轉場 ${p5}`);
@@ -338,22 +346,25 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
     for (const [w, h] of [...TWO, [1920, 1080]]) {
       await p.viewport(w, h); await goTab(p, "dashboard");
       const r = await p.ev(`(() => { const d = document.querySelector("#view-dashboard .dashboard"); const kids = [...d.children].filter((e) => window.__qaL.shown(e));
-        const name = (e) => e.classList.contains("page-title") ? "title" : e.classList.contains("db-today") ? "today" : e.classList.contains("db-stats") ? "stats" : e.classList.contains("db-chart") ? "chart" : e.classList.contains("db-backup") ? "backup" : e.className;
+        // 第 13 輪（PRD v0.22 AC-39-01、AC-39-02 修改，R-32、Q-112、Q-113、Q-116 A）：標題列 .db-head →今日任務卡→地圖→島嶼清單→3 格→近 7 天→資料備份
+        const name = (e) => e.classList.contains("db-head") ? "head" : e.classList.contains("db-today") ? "today" : e.classList.contains("db-map") ? "map" : e.classList.contains("db-isles") ? "isles" : e.classList.contains("db-stats") ? "stats" : e.classList.contains("db-chart") ? "chart" : e.classList.contains("db-backup") ? "backup" : e.className;
         const byTop = kids.slice().sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top || a.getBoundingClientRect().left - b.getBoundingClientRect().left).map(name);
         const footer = document.getElementById("app-footer").getBoundingClientRect().top >= kids[kids.length - 1].getBoundingClientRect().bottom - 0.5;
-        const ring = document.querySelector(".db-ring-wrap").getBoundingClientRect(), st = document.querySelector(".db-start").getBoundingClientRect(), goal = document.querySelector(".db-goal").getBoundingClientRect();
+        const card = document.querySelector(".db-today"), host = document.querySelector(".db-host").getBoundingClientRect(), prog = document.querySelector(".db-today__progress").getBoundingClientRect(), st = document.querySelector(".db-start").getBoundingClientRect();
+        const cs = getComputedStyle(card), contentW = card.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
         const s = getComputedStyle(document.querySelector(".db-start"));
         const txt = d.innerText;
-        return { dom: kids.map(name).join(","), top: byTop.join(","), footer, titleText: kids[0].textContent, side: st.left >= ring.right - 0.5 && st.top < ring.bottom && st.bottom > ring.top, below: goal.top >= Math.max(ring.bottom, st.bottom) - 0.5,
+        const t = document.querySelector("#view-dashboard .dash-title");
+        return { dom: kids.map(name).join(","), top: byTop.join(","), footer, titleText: t ? t.tagName + ":" + t.textContent.trim() : null, side: host.bottom <= prog.top + 0.5 && prog.bottom <= st.top + 0.5, below: Math.abs(st.width - contentW) <= 1, order: [...card.children].filter((e) => window.__qaL.shown(e)).map((e) => e.className.split(" ")[0]).join(","),
           bw: Math.round(st.width), bh: Math.round(st.height), nowrap: s.whiteSpace, oneLine: st.height < parseFloat(s.lineHeight || "24") * 2 + 24, clip: document.querySelector(".db-start").scrollWidth > document.querySelector(".db-start").clientWidth + 0.5,
           bg: window.__qaL.hex(s.backgroundColor), fg: window.__qaL.hex(s.color), banned: ["功能入口", "學習統計", "目前目標"].filter((x) => txt.includes(x)), tiles: document.querySelectorAll("#view-dashboard .dash-entry, #view-dashboard .db-tile").length }; })()`);
-      const good = r.dom === "title,today,stats,chart,backup" && r.top === r.dom && r.footer && r.titleText === "學習主控台" && r.side && r.below && r.bw >= 44 && r.bh >= 44 && r.oneLine && !r.clip && r.bg === ACCENT && r.fg === "#1f2937" && r.banned.length === 0 && r.tiles === 0;
-      ok = ok && good; out.push(`${w}px：DOM ${r.dom}、畫面 ${r.top}、頁尾在後=${r.footer}；按鈕在環形圖右側=${r.side}、目標行在下方=${r.below}、按鈕 ${r.bw}×${r.bh} ${r.bg}/${r.fg} 不換行=${r.oneLine} 裁切=${r.clip}；禁止區塊 ${r.banned.join("、") || "無"}、圖示磚 ${r.tiles}`);
+      const good = r.dom === "head,today,map,isles,stats,chart,backup" && r.top === r.dom && r.footer && r.titleText === "H2:我的群島" && r.side && r.below && r.bw >= 44 && r.bh >= 44 && r.oneLine && !r.clip && r.bg === ACCENT && r.fg === "#1f2937" && r.banned.length === 0 && r.tiles === 0;
+      ok = ok && good; out.push(`${w}px：DOM ${r.dom}、畫面 ${r.top}、頁尾在後=${r.footer}；標題 ${r.titleText}；今日任務卡內 ${r.order}：龜龜與對話框→進度列→按鈕由上到下=${r.side}、按鈕寬 = 卡片內容寬=${r.below}、按鈕 ${r.bw}×${r.bh} ${r.bg}/${r.fg} 不換行=${r.oneLine} 裁切=${r.clip}；禁止區塊 ${r.banned.join("、") || "無"}、圖示磚 ${r.tiles}`);
       await shot(p, `r5-dash-${w}`);
     }
     const [o1, o2] = [out.join("；"), ""];
     R[ok ? "pass" : "fail"]("TC-39-01", "AC-39-01", o1);
-    R[ok ? "pass" : "fail"]("TC-39-02", "AC-39-02", "同 TC-39-01 量測：今日任務卡內主環形圖「今日已學 X / D 字」、「開始今日學習」位於環形圖右側並排、目標行在兩者下方；按鈕強調橘底深色字、≥ 44×44、不換行不裁切" + o2);
+    R[ok ? "pass" : "fail"]("TC-39-02", "AC-39-02", "（v0.22）同 TC-39-01 量測：今日任務卡內由上到下為島主龜龜與對話框、今日進度列、「開始今日學習」（寬 = 卡片內容寬）；目標行改為標題列目標標籤（見 e2e-island TC-66-04）；按鈕強調橘底深色字、≥ 44×44、不換行不裁切" + o2);
   }
   // AC-39-03：開始今日學習
   await R.check("TC-39-03", "AC-39-03、AC-22-01（量測方式）", async () => {
@@ -417,7 +428,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
         const goTargets = [...d.querySelectorAll("[data-go], a[href], button")].filter((e) => window.__qaL.shown(e)).map((e) => (e.dataset.go || "") + ":" + e.textContent.trim()).filter((x) => /^(customizer|flashcards|part5|sources|dashboard):/.test(x));
         return { acc: c("已答對 "), mas: c("單字掌握率"), streak: c("連續打卡天數"), xd, color: c("綠級"), banned: ["目前目標色級", "目前生效色級", "單字掌握數", "資料來源與授權"].filter((x) => t.includes(x)), minis: d.querySelectorAll(".db-mini").length, goTargets,
           footer: window.__qaL.shown(document.getElementById("footer-sources")) }; })()`);
-      const good = r.acc === 1 && r.mas === 1 && r.streak === 1 && r.xd === 1 && r.color === 1 && r.banned.length === 0 && r.minis === 0 && r.goTargets.join("、") === "flashcards:開始今日學習、customizer:變更" && r.footer;
+      const good = r.acc === 1 && r.mas === 1 && r.streak === 1 && r.xd === 1 && r.color === 1 && r.banned.length === 0 && r.minis === 0 && r.goTargets.join("、") === "customizer:變更、flashcards:開始今日學習" /* 第 13 輪：v0.22 目標標籤在標題列（AC-66-04），DOM 順序先「變更」 */ && r.footer;
       ok = ok && good; out.push(`${w}px：${JSON.stringify(r)}`);
     }
     await p.ev(`window.scrollTo(0, document.documentElement.scrollHeight)`); await sleep(100); await p.click("#footer-sources"); await sleep(400);
@@ -586,7 +597,7 @@ const richRecord = () => stateRecord(725, { streak: { days: 3, lastActiveDate: T
         const header = document.querySelector("h1.app-title").getBoundingClientRect().bottom <= document.querySelector(".cz-title").getBoundingClientRect().top;
         return { seq: seq.join(","), title: document.querySelector(".cz-title").textContent, sub: document.querySelector(".cz-subtitle").textContent, est: L.shown(document.querySelector(".cz-estimate")), nav: L.shown(document.getElementById("app-nav")), form: L.shown(document.querySelector(".cv-form")), tpl: [...document.querySelectorAll(".cv-templates__btn")].filter(L.shown).length, header,
           bg: getComputedStyle(document.body).backgroundColor }; })()`);
-      const good = r.seq === "cz-title,cz-subtitle,cz-vocab-note,row,row,row,row,row" && r.title === "選擇你的目標" && r.sub === "之後可以在「難易度設定」隨時變更" && !r.est && !r.nav && !r.form && r.tpl === 0 && r.header && r.bg === "rgb(238, 244, 250)";
+      const good = r.seq === "cz-title,cz-subtitle,cz-vocab-note,row,row,row,row,row" && r.title === "選擇你的目標" && r.sub === "之後可以在「難易度設定」隨時變更" && !r.est && !r.nav && !r.form && r.tpl === 0 && r.header && r.bg === "rgb(234, 247, 251)" /* 第 13 輪：AC-68-01 背景 #eaf7fb */;
       ok = ok && good; out.push(`${w}px：${JSON.stringify(r)}`);
     }
     return { ok, note: out.join("；") + "（對比見 TC-38-04 首次畫面）" };

@@ -82,7 +82,7 @@ const DEFAULTS = await freshDefaults();
     await sleep(100);
     const tab1 = await p.ev(`EMT.router.current()`); const stillOpen = !!(await dialogInfo(p));
     during = { eff: await p.ev(`EMT.store.getState().data.goal.effectiveColor`), n: await p.ev(`EMT.store.getState().runtime.studySet.length`), ls: await p.ev(`localStorage.getItem(${JSON.stringify(KEY)})`), st: await p.ev(`document.getElementById("cz-st-line").textContent.replace("目前色級：", "")`) /* 第 6 輪：AC-01-08 */ };
-    const msgOk = !!dlg && dlg.message.includes("目前已有學習統計資料，切換難易度將初始化學習紀錄") && dlg.message.includes("建議先按「取消」，到主控台按「匯出備份」保存目前紀錄");
+    const msgOk = !!dlg && dlg.message.includes("目前已有學習統計資料，切換難易度將初始化學習紀錄") && dlg.message.includes("建議先按「取消」，到「群島」頁按「匯出備份」保存目前紀錄");
     const ok = msgOk && dlg.buttons.length === 2 && dlg.buttons.includes("確定") && dlg.buttons.includes("取消") && dlg.modal === "true" && !pt.hit && tab1 === tab0 && stillOpen
       && during.eff === "green" && during.st === "綠" && during.n === n0 && during.ls === beforeApply;
     return { ok, note: `視窗標題「${dlg && dlg.title}」內文「${dlg && dlg.message.replace(/\n/g, "⏎")}」按鈕 ${JSON.stringify(dlg && dlg.buttons)}、aria-modal=${dlg && dlg.modal}；點背景導覽「單字卡」命中=${pt.hit}、頁面 ${tab0}→${tab1}、視窗仍開=${stillOpen}；視窗開啟中生效 ${during.eff}/${during.st}、單字集 ${during.n}（前 ${n0}）、localStorage 與按套用前相同=${during.ls === beforeApply}` };

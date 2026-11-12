@@ -35,6 +35,7 @@ SOFTWARE.
 條款網址：https://creativecommons.org/licenses/by-sa/4.0/
 
 PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。
+群島插圖與角色「龜龜」由 AI 依 JimmyLin 的構想繪製，作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。
 
 外部字表與辭典資料的出處與授權，請見程式內「資料來源與授權」頁。
 -->
@@ -56,8 +57,8 @@ PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="emt-build-id" content="981b0d2ab45de9d6">
-<meta name="emt-app-version" content="1.3.2">
+<meta name="emt-build-id" content="7ce555b38d85b6c4">
+<meta name="emt-app-version" content="1.4.0">
 <link rel="icon" href="data:,">
 <style>
 /* 00-base.css */
@@ -98,8 +99,8 @@ PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext
   --wrong: #b91c1c;
   --wrong-bg: #fee2e2;
 
-  /* 介面（v0.12，FE-56：architecture.md §7.19.1；--bg = PWA_BACKGROUND_COLOR，B-11 比對本檔第一個 --bg） */
-  --bg: #eef4fa;
+  /* 介面（FE-56、FE-103：architecture.md §7.19.1、§7.32.7；--bg = PWA_BACKGROUND_COLOR = layout.COLOR_TOKENS.background，B-11 比對本檔第一個 --bg） */
+  --bg: #eaf7fb;
   --surface: #ffffff;
   --text: #1f2937;
   --text-muted: #5b6472;
@@ -125,9 +126,32 @@ PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext
   --warning-bg: #fef3c7;
   --warning-text: #7c4a03;
 
+  /* 島嶼外觀（FE-103：§7.32.7；VC-4、IV-1） */
+  /* 外框色：區塊卡片、按鈕外框、插圖描邊、立體陰影；對 --bg 約 10.5:1、對白約 11.5:1（≥ 3:1，AC-68-03） */
+  --outline: #3d3550;
+  /* 外框寬：卡片、按鈕、清單列、3 格 */
+  --outline-w: 2px;
+  /* 粗外框：今日任務卡、地圖框 */
+  --outline-w-strong: 3px;
+  /* 群島地圖海面 */
+  --sea: #9fe0ec;
+  /* 龜龜對話框底色 */
+  --dialog-bg: #fff6df;
+  /* 霧中島列底色 */
+  --fog-row: #f3f6fa;
+  /* 今日進度條軌道 */
+  --isl-track: #d8eef5;
+  /* 單字卡學完回饋列底色 */
+  --feedback-bg: #e9fbef;
+
+  /* --radius 只留給輸入框、作答選項等範圍外元素 */
   --radius: 8px;
-  --radius-cta: 12px;
-  --radius-card: 16px;
+  /* 按鈕圓角（.btn） */
+  --radius-btn: 14px;
+  /* 強調橘按鈕圓角（.btn--accent） */
+  --radius-cta: 16px;
+  /* 區塊卡片圓角（= layout.UI_LAYOUT.CARD_RADIUS_PX） */
+  --radius-card: 22px;
   --gap: 12px;
   --touch: 44px;
   --content-max: 960px;
@@ -135,6 +159,8 @@ PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext
   --content-narrow: 720px;
   --shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
   --shadow-card: 0 1px 3px rgba(16, 40, 80, 0.08), 0 4px 14px rgba(16, 40, 80, 0.06);
+  /* 立體陰影：今日任務卡、地圖框、.btn--accent */
+  --shadow-pop: 0 4px 0 var(--outline);
   /* 首次畫面固定底部列預留高度（= layout.UI_LAYOUT.FIRSTBAR_RESERVE_PX，§7.19.5） */
   --emt-firstbar-h: 184px;
 
@@ -390,7 +416,7 @@ pre {
   }
 }
 
-/* ─── 按鈕（v0.12，FE-56：§7.19.2；保留 1px 透明邊框，單字卡頁按鈕幾何不變，AC-38-08） ─── */
+/* ─── 按鈕（FE-56、FE-103：§7.19.2、§7.32.7；2px 外框色外框、圓角 14px，底色與字色不變；AC-68-02、VC-4） ─── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -400,8 +426,8 @@ pre {
   min-width: var(--touch);
   max-width: 100%;
   padding: 8px 16px;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
+  border: var(--outline-w) solid var(--outline);
+  border-radius: var(--radius-btn);
   background: var(--tint);
   color: var(--brand-deep);
   font: inherit;
@@ -413,7 +439,6 @@ pre {
 
 .btn--primary {
   background: var(--primary);
-  border-color: transparent;
   color: var(--primary-text);
 }
 
@@ -423,22 +448,23 @@ pre {
 
 .btn--danger {
   background: var(--danger);
-  border-color: transparent;
   color: #ffffff;
 }
 
-/* 強調橘按鈕：只用於「開始今日學習」「開始學習」（VC-3；深色字 6.0:1，Q-53） */
+/* 強調橘按鈕：只用於「開始今日學習」「開始學習」（VC-3；深色字 6.0:1，Q-53）；外框為外框色（不得為強調橘）、立體陰影（VC-4） */
 .btn--accent {
   min-height: 48px;
   padding: 12px 20px;
-  border-color: transparent;
+  border-color: var(--outline);
   border-radius: var(--radius-cta);
+  box-shadow: var(--shadow-pop);
   background: var(--accent);
   color: var(--accent-text);
   font-weight: 700;
   white-space: nowrap;
 }
 
+/* 連結樣式按鈕（頁尾連結、「從備份還原」、應用內三頁返回等）：透明框、透明底，維持連結外觀（不屬 AC-68-02 按鈕，SD-FB-105） */
 .btn--link {
   min-height: var(--touch);
   min-width: var(--touch);
@@ -459,9 +485,9 @@ pre {
     background: var(--primary-hover);
   }
 
-  /* hover 不換底色（避免第三種橘），只加陰影 */
+  /* hover 不換底色（避免第三種橘），保留立體陰影再加柔和陰影 */
   .btn--accent:hover:not(:disabled) {
-    box-shadow: 0 2px 8px rgba(16, 40, 80, 0.18);
+    box-shadow: var(--shadow-pop), 0 2px 8px rgba(16, 40, 80, 0.18);
   }
 }
 
@@ -536,12 +562,12 @@ input[type="radio"] {
   height: 24px;
 }
 
-/* ─── 卡片（v0.12，FE-56：白底、無邊框、圓角 16px、柔和陰影；AC-38-06） ─── */
+/* ─── 區塊卡片（FE-103：§7.32.7；白底、2px 外框色外框、圓角 22px、無陰影；AC-68-02、VC-4） ─── */
 .card {
   background: var(--surface);
-  border: 0;
+  border: var(--outline-w) solid var(--outline);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
   padding: 16px;
   margin-bottom: 12px;
   min-width: 0;
@@ -814,12 +840,15 @@ body[data-entry="firstRun"] .toast-root {
 
 /* 10-dashboard.css */
 /*
- * styles/10-dashboard.css — 學習主控台（FE-08；FE-31 今日學習進度；v0.12 FE-58 主控台改版）
- * 依據：architecture.md v0.8 §7.19.4（DOM 樹、尺寸表）、§7.19.1（token 與禁止寫法）、§7.19.10；§7.11 環形圖轉場
+ * styles/10-dashboard.css — 群島頁（原主控台；FE-08；FE-31 今日學習進度；v0.12 FE-58；v0.19 FE-108 群島頁改版）
+ * 依據：architecture.md v0.8 §7.19.4、§7.19.1（token 與禁止寫法）、§7.19.10；v0.20 §7.32.2～§7.32.8、§7.32.10
  * 涵蓋：AC-39-01～AC-39-10、AC-17-01、AC-17-06、AC-20-01（無水平捲軸）、AC-20-02（觸控 ≥ 44px）、
- *       AC-30-05、AC-30-08、AC-31-03（減少動態由 05-motion.css 全域關閉 transition）、AC-38-01、AC-38-06、AC-38-07
- * 規則（v0.12）：內容寬 720px 置中；var(--accent) 只在 .db-stat__icon；長條不用 --brand（今天 --brand-deep、其他 --chart-bar）；
- *       卡片沿用全域 .card（不加 --border 外框）；新增的展開收合、箭頭旋轉不設 transition。
+ *       AC-30-05、AC-30-08、AC-31-03、AC-38-01、AC-38-06、AC-38-07、AC-63-03～AC-63-05、AC-64-10、AC-65-01～AC-65-04、
+ *       AC-66-01～AC-66-04、AC-67-01、AC-68-02、AC-68-03、AC-70-02、AC-71-02、AC-71-05
+ * 規則：內容寬 720px 置中；var(--accent) 只在 .db-stat__icon（強調橘不用於其他元素，VC-3）；
+ *       長條不用 --brand（今天 --brand-deep、其他 --chart-bar）；區塊卡片沿用全域 .card（外框色 --outline，VC-4）；
+ *       今日進度條與島嶼清單進度條 transition: none（AC-70-02）；地圖與清單 cursor: default（AC-64-10）；
+ *       展開收合、箭頭旋轉不設 transition。地圖框內的圖形與動畫屬 11-island-map.css。
  */
 
 /* 內容寬 720px 置中（AC-39-10；375px 填滿） */
@@ -829,95 +858,60 @@ body[data-entry="firstRun"] .toast-root {
   min-width: 0;
 }
 
-.dash-title {
-  margin-bottom: 12px;
-}
-
-/* ─── (1) 今日任務卡 ─── */
-.db-today__row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-width: 0;
-}
-
-/* 主環形圖 88px：SVG 與中央數值重疊 */
-.db-ring-wrap {
-  position: relative;
-  flex: none;
-  width: 88px;
-  height: 88px;
-}
-
-.db-ring {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.db-ring__track {
-  stroke: var(--track);
-}
-
-/* 進度圈：未達成 --brand（VC-1 允許）；只轉場 dashoffset，顏色以 class 切換不做轉場（§7.11） */
-.db-ring__bar {
-  stroke: var(--brand);
-  transition: stroke-dashoffset var(--emt-dur-ring) ease-out;
-}
-
-/* 達成今日目標：滿圈金色（AC-30-05） */
-.db-ring--done .db-ring__bar {
-  stroke: var(--color-gold);
-}
-
-/* 中央只顯示 X（aria-hidden，SD-FB-40） */
-.db-ring__value {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.db-today__side {
-  flex: 1;
-  display: grid;
-  gap: 8px;
-  justify-items: start;
-  min-width: 0;
-}
-
-.db-today__text {
-  margin: 0;
-  font-weight: 700;
-  overflow-wrap: anywhere;
-}
-
-.db-today__done {
-  margin: 0;
-  font-weight: 700;
-  color: var(--text);
-}
-
-/* 目標行：色點 + 文字 +「・」+「變更」（44 × 44，AC-39-04） */
-.db-goal {
+/* ─── 標題列：「我的群島」＋ 目標標籤（DB-1、DB-4；375px 標籤可換到下一行，AC-66-04） ─── */
+.db-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+.dash-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+}
+
+.dash-title__deco {
+  flex: none;
+  width: 28px;
+  height: 28px;
+}
+
+/* 目標標籤列：膠囊 +「變更」 */
+.db-goal {
+  display: flex;
+  align-items: center;
   gap: 8px;
   min-height: 44px;
-  margin: 12px 0 0;
+  margin: 0;
   min-width: 0;
+}
+
+.db-goal__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 6px 10px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .db-goal__dot {
   flex: none;
   width: 10px;
   height: 10px;
-  margin-right: 4px;
   border-radius: 50%;
   background: var(--line);
 }
@@ -933,14 +927,13 @@ body[data-entry="firstRun"] .toast-root {
   overflow-wrap: anywhere;
 }
 
-/* （v0.9，FE-66；AC-39-04、Q-61、V-LAY-10）「變更」外框按鈕：白底、四邊 1px 深藍框、無底線、≥ 44×44，置於行末 */
+/* （AC-39-04、AC-66-04、V-LAY-10）「變更」外框按鈕：白底、外框色 2px 與圓角 14px（沿用 .btn）、無底線、≥ 44×44 */
 .db-change {
+  flex: none;
   min-height: 44px;
   min-width: 44px;
-  margin-left: auto;
   padding: 0 14px;
   background: var(--surface);
-  border: 1px solid var(--brand-deep);
   color: var(--brand-deep);
   font-weight: 600;
   text-decoration: none;
@@ -952,15 +945,259 @@ body[data-entry="firstRun"] .toast-root {
   }
 }
 
-/* ─── (2) 3 格數據（同一張卡片內；格本身無邊框、無背景，VC-4） ─── */
+/* ─── (1) 今日任務卡（DB-2、§7.32.3）：3px 外框、立體陰影 ─── */
+.db-today {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-width: var(--outline-w-strong);
+  box-shadow: var(--shadow-pop);
+}
+
+/* 龜龜 + 名稱與對話框（375px 不重疊、不裁切，AC-66-01） */
+.db-host {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.db-host__turtle {
+  display: block;
+  flex: none;
+  width: 72px;
+  height: 64px;
+}
+
+.db-host__talk {
+  flex: 1;
+  min-width: 0;
+}
+
+.db-host__name {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.db-host__bubble {
+  margin: 0;
+  padding: 10px 12px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 16px 16px 16px 4px;
+  background: var(--dialog-bg);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* 今日進度列（IS-15）：文字 + 橫向進度條；「今日目標達成」在其下 */
+.db-today__progress {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.db-today__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.db-today__text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.db-today__bar {
+  flex: 1;
+  min-width: 40px;
+  height: 14px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 999px;
+  background: var(--isl-track);
+  overflow: hidden;
+}
+
+/* 填色：未達成 --brand（VC-1 允許）；達成金色（AC-30-05、AC-66-03）；無轉場（AC-70-02） */
+.db-today__fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--brand);
+  transition: none;
+}
+
+.db-today__fill--done {
+  background: var(--color-gold);
+}
+
+.db-today__done {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* 「開始今日學習」：寬度 = 卡片內容寬（AC-39-02） */
+.db-start {
+  width: 100%;
+  min-height: 52px;
+}
+
+/* ─── (2) 地圖框（§7.32.4）：最大寬 480px 置中（AC-63-04）；無點擊（AC-64-10） ─── */
+.db-map {
+  max-width: 480px;
+  margin-inline: auto;
+  padding: 0;
+  border-width: var(--outline-w-strong);
+  border-radius: 26px;
+  overflow: hidden;
+  background: var(--sea);
+  box-shadow: var(--shadow-pop);
+  cursor: default;
+}
+
+/* ─── (3) 島嶼清單（IA-2、§7.32.5） ─── */
+.db-isles {
+  margin-bottom: 12px;
+  min-width: 0;
+  cursor: default;
+}
+
+.db-isles__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.db-isle {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 16px;
+  background: var(--surface);
+  min-width: 0;
+}
+
+.db-isle.is-fog {
+  background: var(--fog-row);
+}
+
+.db-isle__dot {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.db-isle--orange .db-isle__dot,
+.db-isle--orange .db-isle__fill { background: var(--color-orange); }
+.db-isle--brown .db-isle__dot,
+.db-isle--brown .db-isle__fill { background: var(--color-brown); }
+.db-isle--green .db-isle__dot,
+.db-isle--green .db-isle__fill { background: var(--color-green); }
+.db-isle--blue .db-isle__dot { background: var(--color-blue); }
+.db-isle--gold .db-isle__dot { background: var(--color-gold); }
+
+.db-isle.is-fog .db-isle__dot {
+  opacity: 0.5;
+}
+
+.db-isle__title {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.db-isle__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.db-isle__sub {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.db-isle__right {
+  grid-column: 3;
+  grid-row: 1;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.db-isle__bar {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  height: 8px;
+  border-radius: 999px;
+  background: #e7e3f0;
+  overflow: hidden;
+}
+
+/* 填滿 P%（色級色，AC-65-02）；無轉場（AC-70-02） */
+.db-isle__fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  transition: none;
+}
+
+.db-isle__stage {
+  grid-column: 2 / 4;
+  grid-row: 3;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ─── (4) 3 格數據（DB-5、§7.32.6）：同一列並排，每格為區塊卡片樣式 ─── */
 .db-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  margin-bottom: 12px;
 }
 
 .db-stat {
   min-width: 0;
+  padding: 12px 8px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 16px;
+  background: var(--surface);
+  text-align: center;
 }
 
 .db-stat__label {
@@ -975,6 +1212,8 @@ body[data-entry="firstRun"] .toast-root {
 .db-stat__value {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 4px;
   margin: 0;
   font-size: 1.75rem;
@@ -1012,7 +1251,17 @@ body[data-entry="firstRun"] .toast-root {
   overflow-wrap: anywhere;
 }
 
-/* ─── (3) 近 7 天圖表 ───
+/* 第 1 格天氣行、第 3 格燈塔行（IS-11、IS-12；AC-67-01） */
+.db-stat__status {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ─── (5) 近 7 天圖表 ───
  * (a) 7 欄、固定高 104px：字數行 16 + 4 + 軌道 64 + 4 + 日期行 16（≤ 120；填色最高 64 ≤ 80，AC-39-07 (a)）
  * (b) 空狀態一行 24px（≤ 48，AC-39-07 (b)）；卡片上下 padding 12px、標題下距 4px：空狀態整張卡片約 77px（≤ 80） */
 .db-chart {
@@ -1096,7 +1345,7 @@ body[data-entry="firstRun"] .toast-root {
   color: var(--text-muted);
 }
 
-/* ─── (4) 「資料備份」收合區塊（DB-6） ─── */
+/* ─── (6) 「資料備份」收合區塊（DB-6） ─── */
 .db-backup__head {
   margin: 0;
 }
@@ -1157,6 +1406,100 @@ body[data-entry="firstRun"] .toast-root {
 .dash-install {
   min-height: var(--touch);
   min-width: var(--touch);
+}
+
+/* 11-island-map.css */
+/*
+ * styles/11-island-map.css — 群島地圖框內的圖形尺寸、4 種裝飾動畫與減少動態（FE-107）
+ * 依據：architecture.md v0.19 §7.32.4、§7.32.8、§7.32.10；契約 README §15.7、VC-3
+ * 涵蓋：AC-63-03、AC-63-04、AC-64-07、AC-64-10、AC-70-01、AC-70-02、AC-31-03
+ * 規則：
+ * - 地圖框 .db-map 的外框、圓角、陰影、最大寬度屬 10-dashboard.css（FE-108），本檔只管框內。
+ * - 動畫只在 .isl-map--play 下播放；有限次數，「時長 × 次數」≤ 4.4 秒；@keyframes 只改 transform。
+ *   SVG 內 px 為 viewBox 單位：480px 寬時放大約 1.356 倍，2.5 → 3.4、8 → 10.8 CSS px，旋轉 2°（AC-70-01）。
+ * - 定位由 JS 放在外層 g 的 transform 屬性，動畫只套用內層 g.isl-anim-*，兩者不互相覆蓋（T-141）。
+ * - 不做 opacity 動畫（無閃爍）；減少動態時一律停止（05-motion.css 之外再擋一層，AC-70-02）。
+ * - 不使用強調橘與 --accent、--brand 變數（VC-3）；不設 cursor: pointer（AC-64-10）。
+ */
+
+/* ─── 地圖容器與 SVG 尺寸：依原比例 354：430 縮放，不裁切、不變形 ─── */
+.db-map__figure {
+  display: block;
+  margin: 0;
+  cursor: default;
+}
+
+.isl-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 354 / 430;
+  cursor: default;
+}
+
+/* 海面色（屬性 fill 為同值的退路） */
+.isl-sea {
+  fill: var(--sea);
+}
+
+/* ─── 4 種裝飾動畫（只在 .isl-map--play 下） ─── */
+.isl-map--play .isl-anim-wave {
+  animation: isl-bob 2.2s ease-in-out 2;
+}
+
+.isl-map--play .isl-anim-boat {
+  animation: isl-bob 2.2s ease-in-out 2;
+}
+
+.isl-map--play .isl-anim-cloud {
+  animation: isl-drift 4.4s ease-in-out 1;
+}
+
+.isl-map--play .isl-anim-sway {
+  animation: isl-sway 2.2s ease-in-out 2;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+@keyframes isl-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.5px);
+  }
+}
+
+@keyframes isl-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-8px);
+  }
+}
+
+@keyframes isl-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+}
+
+/* ─── 減少動態：地圖內全部靜止（AC-70-02、AC-31-03） ─── */
+@media (prefers-reduced-motion: reduce) {
+  .isl-map,
+  .isl-map * {
+    animation: none !important;
+  }
 }
 
 /* 20-customizer.css */
@@ -1664,8 +2007,11 @@ body[data-entry="firstRun"] .toast-root {
  * 依據：architecture.md §9（行動優先 RWD；斷點 768px）、v0.4 §7.10～§7.12；沿用 00-base.css 的變數、.btn、.card
  * 涵蓋：AC-06-01～AC-06-07、AC-23-01、AC-20-01（無水平捲軸）、AC-20-02（觸控 ≥ 44px）、AC-28-01、AC-28-03、AC-28-05
  * 子元件容器 .fc-speech（FE-12）、.fc-quiz（FE-13）只定位，內部樣式由各自的 CSS 負責。
- * （v0.12，FE-59；architecture.md v0.8 §7.19.7、AC-38-08）單字卡頁只換配色：全域 .card 改為圓角 16px＋陰影、無邊框後，
- * 本頁以 #view-flashcards .card 固定回 v0.11 幾何（1px 框線、8px 圓角），只有框線顏色改為 --line；分隔線 --border → --line。
+ * （v0.12，FE-59；architecture.md v0.8 §7.19.7、AC-38-08）分隔線 --border → --line。
+ * （FE-109；architecture.md §7.32.7、§7.32.9、§7.32.10；AC-69-01、AC-69-05、AC-68-02、AC-68-03、AC-70-02）
+ * 島嶼外觀：刪除 #view-flashcards .card 的 v0.11 幾何覆寫，單字卡本體與測驗容器改用全站區塊卡片 token
+ * （00-base.css .card：白底、2px 外框色、圓角 22px）；翻面、上一張、下一張、測驗模式切換沿用全站 .btn 外框。
+ * 新增卡片角落裝飾 .fc-deco 與學完回饋列 .fc-feedback-live／.fc-feedback。
  */
 
 .fc {
@@ -1700,29 +2046,20 @@ body[data-entry="firstRun"] .toast-root {
   color: var(--text);
 }
 
+/* 選中時只換底色與字色；外框沿用 .btn 的外框色（AC-68-02） */
 .fc-mode-btn.is-active,
 .fc-mode-btn[aria-pressed="true"] {
   background: var(--primary);
-  border-color: var(--primary);
   color: var(--primary-text);
 }
 
 /* ─── 卡片 ─── */
-/* （v0.12，FE-59）卡片幾何固定為 v0.11（1px 框線、8px 圓角）；框線色改 --line */
-#view-flashcards .card {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: none;
-}
-
-/* 單字卡本體沿用 v0.11 的陰影（上一條規則的 box-shadow: none 不套用到 .fc-card） */
-#view-flashcards .card.fc-card {
-  box-shadow: var(--shadow);
-}
-
+/* 外框、圓角、白底、陰影一律沿用全站 .card（FE-109，AC-68-02）；本檔只調整內距與版面 */
 .fc-stage {
+  /* 角落裝飾 .fc-deco 的定位基準（§7.32.9） */
+  position: relative;
   min-width: 0;
-  /* 換卡滑入時卡片暫時位移 24px，裁掉水平溢出以免出現水平捲軸；保留陰影的顯示空間 */
+  /* 換卡滑入時卡片暫時位移 24px，裁掉水平溢出以免出現水平捲軸；保留外框的顯示空間 */
   overflow-x: clip;
   overflow-clip-margin: 16px;
 }
@@ -1732,14 +2069,26 @@ body[data-entry="firstRun"] .toast-root {
   touch-action: pan-y;
   cursor: pointer;
   padding: 20px 16px 12px;
-  box-shadow: var(--shadow);
   min-height: 16rem;
   display: flex;
   flex-direction: column;
 }
 
-.fc-card[data-flipped="true"] {
-  background: #fbfcfe;
+/* 卡片區內的卡片（單字卡本體、測驗容器）上內距 ≥ 34px：右上角裝飾（top 8px、高 24px）
+ * 不與卡片內任何按鈕或文字重疊（AC-69-01）；選擇器權重高於 .fc-card，桌機寬度一併適用 */
+.fc-stage > .card {
+  padding-top: 36px;
+}
+
+/* 卡片角落裝飾小島（islandArt.cardDeco，40×24，aria-hidden；AC-69-01、AC-71-02）
+ * 疊在卡片右上角內側，不攔截點擊（點到裝飾等於點卡片） */
+.fc-deco {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 40px;
+  height: 24px;
+  pointer-events: none;
 }
 
 .fc-face {
@@ -1876,6 +2225,53 @@ body[data-entry="firstRun"] .toast-root {
   min-width: 0;
 }
 
+/* ─── 學完回饋列（FE-109；§7.32.9；LF-3、LF-4；AC-69-05） ───
+ * .fc-feedback-live 是常駐的 role=status 容器；沒有回饋時無子元素、無內距、外框與外距，計算後高度 0（不顯示空白框）。
+ * 位於卡片區（含麥克風列、分數區）之下、導覽列之上，出現或更新只會往下推導覽列。 */
+.fc-feedback-live {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.fc-feedback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  background: var(--feedback-bg);
+  border: 2px solid var(--outline);
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text);
+  overflow-wrap: anywhere;
+  /* 淡入只改 opacity（時長 = --emt-dur-slide 200ms，≤ 300ms）；減少動態由 05-motion.css 全域關閉（AC-70-02） */
+  animation: fc-fb-in var(--emt-dur-slide) ease-out;
+}
+
+.fc-feedback__icon {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+}
+
+.fc-feedback__text {
+  min-width: 0;
+}
+
+@keyframes fc-fb-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* ─── 導覽列 ─── */
 .fc-nav {
   display: grid;
@@ -1944,6 +2340,9 @@ body[data-entry="firstRun"] .toast-root {
  * （v0.17，FE-99；architecture §7.30.5、契約 README §14.6 IT-6）聆聽中即時文字列 .sp-live：次要文字色 --text-muted、
  *       值斜體、無 transition／animation（一般與減少動態相同）；不設定 display，隱藏靠 [hidden]；長文字可換行不截斷
  *       （AC-62-01、AC-62-09、AC-38-04）。
+ * （v0.19，FE-110；architecture §7.32.7、契約 VC-4）朗讀與麥克風按鈕沿用全域 .btn 的 2px 外框色外框、圓角 14px；
+ *       聆聽中、準備中只換底色與字色，外框色一律 --outline（不再用 --light-red／--brand）。
+ *       收音條暗格／亮格、即時文字列、燈號色不變（AC-68-04）。
  */
 
 .sp-panel {
@@ -1991,7 +2390,7 @@ body[data-entry="firstRun"] .toast-root {
 }
 
 .sp-mic.is-listening {
-  border-color: var(--light-red);
+  border-color: var(--outline);
   background: var(--light-red);
   color: #ffffff;
   animation: sp-blink 1s ease-in-out infinite;
@@ -2003,9 +2402,10 @@ body[data-entry="firstRun"] .toast-root {
 
 /* 準備中（v0.15，AC-58-01、AC-58-13）：不用聆聽中的紅色與閃爍；只改顏色，
  * 不改邊框粗細、內距與最小寬度（8.5em 可容納「準備中」），切換狀態時座標不變。
- * 文字 --brand-deep（#0866ad）對白底 --surface 的對比 5.98:1（AC-38-04 一般文字 ≥ 4.5:1）。 */
+ * 文字 --brand-deep（#0866ad）對白底 --surface 的對比 5.98:1（AC-38-04 一般文字 ≥ 4.5:1）。
+ * 外框維持外框色（FE-110），與聆聽中以底色、字色、圓點色區分。 */
 .sp-mic.is-preparing {
-  border-color: var(--brand);
+  border-color: var(--outline);
   background: var(--surface);
   color: var(--brand-deep);
   animation: none;
@@ -3343,8 +3743,10 @@ body[data-entry="firstRun"] .toast-root {
 /* 70-sources.css */
 /* ─── 資料來源與授權頁（FE-17；AC-23-02、FB-20、FB-21） ─── */
 /* 375px 寬度下長網址與授權全文須換行，不得產生水平捲軸 */
-/* （v0.12，FE-60；§7.19.8）各區塊沿用全域 .card（白底、圓角 16px、陰影、無邊框）；授權全文等非卡片元素框線改 --line；
+/* （v0.12，FE-60；§7.19.8）各區塊沿用全域 .card；授權全文等非卡片元素框線改 --line；
  * 新增「原創內容來源」一行（.src-original，樣式同 .src-attrib） */
+/* （v0.19，FE-110；architecture §7.32.7、契約 VC-4、AC-68-02）各區塊（.src-card、.src-project）為區塊卡片：
+ * 白底、2px 外框色外框、圓角 22px（與全域 .card 同值，於本檔明示）；授權全文摺疊框不是區塊卡片，維持 1px --line。 */
 /* （architecture v0.11，FE-77；§7.22.2）頁面最後一行聯絡資訊 .src-contact：沿用 .src-muted 顏色，字級 0.8125rem 使 375px 維持 1 行；
  * 不禁止換行（放大字級時要能換行，E-119）、不禁止選取文字 */
 
@@ -3372,6 +3774,10 @@ body[data-entry="firstRun"] .toast-root {
 
 .src-card,
 .src-project {
+  background: var(--surface);
+  border: var(--outline-w) solid var(--outline);
+  border-radius: var(--radius-card);
+  box-shadow: none;
   overflow-wrap: anywhere;
   word-break: normal;
 }
@@ -3529,6 +3935,22 @@ body[data-entry="firstRun"] .toast-root {
   font-size: 1.1rem;
 }
 
+/* （v0.19，FE-110；architecture §7.32.7、契約 VC-4、AC-68-02）內容區為區塊卡片：白底、2px 外框色外框、圓角 22px；
+ * 返回按鈕（.btn--link）在卡片之外，維持連結外觀（SD-FB-105）。只改樣式，DOM 不變（AC-68-04）。 */
+.site-page__content {
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: var(--outline-w) solid var(--outline);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+
+.site-page__content > :last-child {
+  margin-bottom: 0;
+}
+
 .site-page__content p {
   margin: 0 0 8px;
 }
@@ -3673,14 +4095,14 @@ body[data-tab="dashboard"] .ad-slot[data-ad-state="filled"] {
 <!-- （v0.7，FE-50）新版提示（UP-6）：由 ui/pwa-notice.js 依 runtime.pwa 切換 hidden；不在 #app-main 內，任何進入模式皆可顯示 -->
 <div id="pwa-update" class="pwa-update" role="status" hidden></div>
 <nav id="app-nav" class="app-nav" aria-label="功能區">
-  <!-- （v0.5，FE-38）只留 4 鈕，依 NAV_TAB_ORDER；（v0.4，FE-26）每個按鈕：內嵌 SVG 圖示（單一 path、不寫命名空間屬性）＋ 文字（TAB_LABELS）；≥ 641px 以 CSS 隱藏圖示 -->
-  <button type="button" class="app-nav__btn" data-tab="dashboard"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M2 17a10 10 0 0 1 20 0h-2.5a7.5 7.5 0 0 0-15 0zm9.3-.7 5-6 1.4 1.4-5 6zM14 17a2 2 0 1 1-4 0 2 2 0 1 1 4 0zM2 19h20v2H2z"/></svg><span class="app-nav__label">主控台</span></button>
+  <!-- （v0.5，FE-38）只留 4 鈕，依 NAV_TAB_ORDER；（v0.19，FE-104）第 1 項為島嶼圖示（沙丘＋椰子樹）；（v0.4，FE-26）每個按鈕：內嵌 SVG 圖示（單一 path、不寫命名空間屬性）＋ 文字（TAB_LABELS）；≥ 641px 以 CSS 隱藏圖示 -->
+  <button type="button" class="app-nav__btn" data-tab="dashboard"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M2 20a10 4 0 0 1 20 0zM11 16.6c0-3.8.4-6.9 1.4-9.6l1.4.4c-.9 2.6-1.3 5.5-1.3 9.2zM5 7.5c2-2.7 5.5-2.9 8-.5-2.5-.8-6-.8-8 .5zM13 7c2.5-2.4 6-2.2 8 .5-2-1.3-5.5-1.3-8-.5z"/></svg><span class="app-nav__label">群島</span></button>
   <button type="button" class="app-nav__btn" data-tab="customizer"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3zM7 4h3v6H7zm7 5h3v6h-3zm-5 5h3v6H9z"/></svg><span class="app-nav__label">難易度設定</span></button>
   <button type="button" class="app-nav__btn" data-tab="flashcards"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6 3h13a2 2 0 0 1 2 2v11h-2V5H6zM3 7h13a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm1 2v10h11V9zm2 3h7v1.5H6zm0 3h5v1.5H6z"/></svg><span class="app-nav__label">單字卡</span></button>
   <button type="button" class="app-nav__btn" data-tab="part5"><svg class="app-nav__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 6l1.4-1.4 1.6 1.6 3.1-3.1 1.4 1.4-4.5 4.5zm0 6l1.4-1.4 1.6 1.6 3.1-3.1 1.4 1.4-4.5 4.5zm0 6l1.4-1.4 1.6 1.6 3.1-3.1 1.4 1.4-4.5 4.5zM12 5h9v2h-9zm0 6h9v2h-9zm0 6h9v2h-9z"/></svg><span class="app-nav__label">模擬測驗</span></button>
 </nav>
 <main id="app-main" class="app-main">
-  <section id="view-dashboard" class="view" aria-label="主控台" hidden></section>
+  <section id="view-dashboard" class="view" aria-label="群島" hidden></section>
   <section id="view-customizer" class="view" aria-label="難易度設定" hidden>
     <div id="customizer-goal"></div>
     <div id="customizer-custom"></div>
@@ -3823,7 +4245,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   // §10（v0.8）頁面畫面名稱（R-15、AC-20-03）；識別字不改，只改畫面文字
   var TAB_LABELS = {
-    dashboard: "主控台",
+    dashboard: "群島", // （v0.19，FE-104；IA-1、AC-63-01）
     customizer: "難易度設定",
     flashcards: "單字卡",
     part5: "模擬測驗",
@@ -5414,6 +5836,677 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   });
 });
 
+/* core/island.js */
+/*
+ * EMT.core.island — 島嶼推算核心（FE-102；FE-113 islandsOf 單筆快取）
+ * 依據：architecture.md v0.19 §4.16「EMT.core.island」、§7.32.1；v0.21 §4.16、§7.32.15 P-4；
+ *       契約 data-schema.ts §19、README §15.2、§15.3 IS-5～IS-10、§15.4 IS-11～IS-16、§15.5 LF-2、§15.6 IA-2、IA-4、FB-83～FB-85
+ * 涵蓋：AC-64-02～AC-64-08、AC-65-01～AC-65-03、AC-66-02、AC-66-03、AC-67-01、AC-67-02、AC-69-02～AC-69-04、AC-71-01
+ *
+ * - STAGES、THRESHOLDS、LIST_ORDER、STYLE_TOKENS、TEXTS 與 data-schema.ts §19 逐字相同（island.test.js 以 node:vm 比對），深度凍結。
+ * - 全部為純函式：不讀寫 DOM、儲存、時鐘；today 相關的值（S、X）由呼叫端算好傳入。
+ * - 任何輸入（null、非陣列、負數、NaN、空字庫）都不得產生 NaN、Infinity、負數或 undefined；
+ *   P 只能是 0～100 的整數或 null（§15.2 性質）。
+ * - 推算結果不持久化（IS-1）：回傳值只供當次繪製與學完回饋比較，不得寫入 PersistedData、瀏覽器儲存或備份檔。
+ * - L1 模組：載入時不取用任何其他模組（LD-1）；N_O 於函式被呼叫時才向 EMT.core.constants 取用，取不到丟出含模組名稱的 Error（LD-3）。
+ * - 文字一律純文字：呼叫端以 textContent／setAttribute 寫入（IA-6、C-7）。
+ * - islandsOf 單筆快取（FE-113；architecture.md v0.21 §4.16、§7.32.15 P-4）：輸入鍵與上一次全部相同時不重算，
+ *   回傳快取內容的新陣列與新物件。前提：呼叫端不原地修改傳入的 builtin、builtinMap、masteredWordKeys
+ *   （store 與 views 一律產生新陣列）；同一陣列原地加長以長度偵測、會重算，原地替換元素則無法偵測。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.core = root.EMT.core || {};
+    root.EMT.core.island = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (root) {
+  "use strict";
+
+  // 深層凍結：物件與其中所有子物件、陣列都不可再修改
+  function deepFreeze(obj) {
+    Object.getOwnPropertyNames(obj).forEach(function (name) {
+      var value = obj[name];
+      if (value && typeof value === "object") {
+        deepFreeze(value);
+      }
+    });
+    return Object.freeze(obj);
+  }
+
+  // ── data-schema.ts §19 常數（逐字複製，不得自行修改）──
+
+  /** 島嶼階段表（順序即成長順序；Q-118 A、IS-8） */
+  var STAGES = [
+    { stage: "sand", minP: 0, maxP: 0, nameZh: "沙灘", listText: "還是一片沙灘，掌握第一個字就會冒芽", levelUpText: null, sprouts: 0, palms: 0, flowers: 0, huts: 0, flags: 0 },
+    { stage: "sprout", minP: 1, maxP: 24, nameZh: "新芽", listText: "冒出新芽了", levelUpText: "{island}冒出新芽了！", sprouts: 1, palms: 0, flowers: 0, huts: 0, flags: 0 },
+    { stage: "palm", minP: 25, maxP: 49, nameZh: "一棵椰子樹", listText: "長出第一棵椰子樹", levelUpText: "{island}長出第一棵椰子樹！", sprouts: 0, palms: 1, flowers: 0, huts: 0, flags: 0 },
+    { stage: "bloom", minP: 50, maxP: 74, nameZh: "開花", listText: "樹林開花了", levelUpText: "{island}的樹林開花了！", sprouts: 0, palms: 2, flowers: 2, huts: 0, flags: 0 },
+    { stage: "hut", minP: 75, maxP: 99, nameZh: "小屋", listText: "蓋好小屋，快完成了", levelUpText: "{island}蓋好小屋了！", sprouts: 0, palms: 2, flowers: 2, huts: 1, flags: 0 },
+    { stage: "complete", minP: 100, maxP: 100, nameZh: "完成", listText: "插上旗子，這座島完成了", levelUpText: "{island}插上旗子，這座島完成了！", sprouts: 0, palms: 3, flowers: 2, huts: 1, flags: 1 }
+  ];
+
+  /** 天氣與燈塔門檻（一律以「≥」比較；E-188） */
+  var THRESHOLDS = {
+    weatherSunnyMin: 1,
+    weatherRainbowMin: 7,
+    lighthouseBuiltMin: 1,
+    lighthouseLitMin: 50
+  };
+
+  /** 島嶼清單順序（前 3 項為開放島，後 2 項為霧中島；IS-9、LF-2 的島嶼先後） */
+  var LIST_ORDER = ["orange", "brown", "green", "blue", "gold"];
+
+  /** 島嶼外觀 token（建議值，畫面實際取 CSS 變數；README §15.7） */
+  var STYLE_TOKENS = {
+    outline: "#3d3550",
+    sea: "#9fe0ec",
+    dialogBg: "#fff6df",
+    fogRowBg: "#f3f6fa"
+  };
+
+  /** 群島頁與學完回饋的文字（逐字使用；{名稱} 為佔位符） */
+  var TEXTS = {
+    islandName: { orange: "橘島", brown: "棕島", green: "綠島", blue: "藍島", gold: "金島" },
+    islandSubtitle: { orange: "入門", brown: "基礎", green: "職場與商務", blue: "高階商務", gold: "近母語" },
+    fogMapLabel: "{island}・霧中",
+    lighthouseMapLabel: "測驗燈塔",
+    lighthouseUnbuiltSign: "待建",
+    listTitle: "島嶼",
+    listMastery: "掌握 {p}%",
+    listMasteryNoData: "掌握 —",
+    listFogStatus: "尚未開放",
+    listFogStage: "還在霧中，之後的版本開放",
+    listOutOfGoalSuffix: "（目前目標未包含）",
+    progressLabel: "{island}掌握率",
+    hostName: "島主 龜龜",
+    dialogSailing: "再學 {n} 個字，今天的小船就靠岸囉！",
+    dialogDocked: "今天的小船靠岸了！想多學也可以，島上會更熱鬧。",
+    todayGoalReached: "今日目標達成",
+    weather: { cloudy: "陰天", sunny: "晴天", rainbow: "出現彩虹" },
+    lighthouse: { unbuilt: "燈塔待建", built: "燈塔蓋好", lit: "燈塔點亮" },
+    boat: { sailing: "航行中", docked: "已靠岸" },
+    feedbackMastered: "{island}又多掌握 1 個字（掌握 {p}%）",
+    feedbackDocked: "今天的小船靠岸了！",
+    feedbackSailing: "小船又前進了，再 {n} 個字靠岸",
+    mapAlt: "群島地圖：{islands}；藍島、金島尚未開放；連續打卡 {s} 天，{weather}；模擬測驗已答對 {k} 題，{lighthouse}；今日小船 {x} / {d} 字，{boat}",
+    mapAltIsland: "{island}掌握 {p}%，{stage}",
+    mapAltIslandNoData: "{island}掌握 —，{stage}",
+    mapAltIslandSeparator: "；"
+  };
+
+  deepFreeze(STAGES);
+  deepFreeze(THRESHOLDS);
+  deepFreeze(LIST_ORDER);
+  deepFreeze(STYLE_TOKENS);
+  deepFreeze(TEXTS);
+
+  /** 3 座開放島（= LIST_ORDER 前 3 項 = IslandState.islands 順序） */
+  var OPEN_ISLANDS = LIST_ORDER.slice(0, 3);
+  /** 2 座霧中島 */
+  var FOG_ISLANDS = LIST_ORDER.slice(3);
+
+  var hasOwn = Object.prototype.hasOwnProperty;
+
+  // ── 模組取用（LD-1、LD-3）──
+
+  /** 呼叫時才取用 core/constants.js；取不到屬程式組裝錯誤，丟出含模組名稱的 Error */
+  function constantsModule() {
+    if (typeof require === "function" && typeof module === "object") {
+      return require("./constants.js");
+    }
+    var emt = root && root.EMT;
+    if (!emt || !emt.core || !emt.core.constants) {
+      throw new Error("[EMT.core.island] 缺少模組 EMT.core.constants");
+    }
+    return emt.core.constants;
+  }
+
+  /** 契約常數 N_O（橘島區段上界；R-8） */
+  function nO() {
+    return toCount(constantsModule().N_O);
+  }
+
+  // ── 數值防呆 ──
+
+  /** 非負整數：有限且 > 0 的數字取 floor；其餘（null、NaN、Infinity、負數、非數字）一律 0 */
+  function toCount(v) {
+    return typeof v === "number" && isFinite(v) && v > 0 ? Math.floor(v) : 0;
+  }
+
+  /** 每日新字量 D：≥ 1 的整數；小於 1、非整數或非有限數以 1 計（§4.16 boatOf 防呆） */
+  function toDaily(v) {
+    return typeof v === "number" && isFinite(v) && v >= 1 && Math.floor(v) === v ? v : 1;
+  }
+
+  /** 合法的排名：正整數；否則 null */
+  function rankOf(item) {
+    var r = item && typeof item === "object" ? item.rank : null;
+    return typeof r === "number" && isFinite(r) && r >= 1 && Math.floor(r) === r ? r : null;
+  }
+
+  /**
+   * 排名歸屬的島（IS-5）：0 橘（1～nO）、1 棕（nO+1～nB）、2 綠（nB+1～nG）、-1 不屬任何島。
+   * 依序判斷，同一個排名只歸 1 座島（資料正常時三區段本就不重疊）。
+   */
+  function sectionIndex(rank, o, b, g) {
+    if (rank === null) { return -1; }
+    if (rank <= o) { return 0; }
+    if (rank > o && rank <= b) { return 1; }
+    if (rank > b && rank <= g) { return 2; }
+    return -1;
+  }
+
+  // ── 區段與掌握數（IS-5、IS-6）──
+
+  /** sectionSizes 的快取：以 builtin 陣列為鍵，值為 { key: "nB,nG", sizes } */
+  var sizeCache = new WeakMap();
+
+  /**
+   * 區段字數 n（IS-5）：以 rank 計數，不是區段邊界的差。上界小於下界時 n = 0。
+   * 同一份字庫（同一個陣列）與同一組 nB、nG 只數 1 次。
+   * @param {Array<{rank:number}>} builtin 已驗證、整理後的內建字庫
+   * @param {number} nB
+   * @param {number} nG
+   * @returns {number[]} [橘 n, 棕 n, 綠 n]
+   */
+  function sectionSizes(builtin, nB, nG) {
+    if (!Array.isArray(builtin)) { return [0, 0, 0]; }
+    var o = nO();
+    var b = toCount(nB);
+    var g = toCount(nG);
+    var key = o + "," + b + "," + g;
+    var hit = sizeCache.get(builtin);
+    if (hit && hit.key === key) { return hit.sizes.slice(); }
+    var sizes = [0, 0, 0];
+    for (var i = 0; i < builtin.length; i++) {
+      var idx = sectionIndex(rankOf(builtin[i]), o, b, g);
+      if (idx >= 0) { sizes[idx]++; }
+    }
+    sizeCache.set(builtin, { key: key, sizes: sizes });
+    return sizes.slice();
+  }
+
+  /**
+   * 島嶼已掌握數 m（IS-6）：已掌握集合先去重，再以 builtinMap 查內建字的 rank 歸區段。
+   * 不屬內建字庫的 wordKey（自訂單字、已不存在的字）不計；自訂卡與內建同 wordKey 時計入該內建字所屬的島（FB-85）。
+   * 只走已掌握集合（O(已掌握數)），不看目前單字集、不受生效色級影響。
+   * @param {string[]|Set<string>} masteredWordKeys
+   * @param {Map<string, {rank:number}>} builtinMap wordKey → 內建字
+   * @param {number} nB
+   * @param {number} nG
+   * @returns {number[]} [橘 m, 棕 m, 綠 m]
+   */
+  function masteredCounts(masteredWordKeys, builtinMap, nB, nG) {
+    var counts = [0, 0, 0];
+    if (!builtinMap || typeof builtinMap.get !== "function") { return counts; }
+    var list;
+    if (Array.isArray(masteredWordKeys)) {
+      list = masteredWordKeys;
+    } else if (masteredWordKeys instanceof Set) {
+      list = Array.from(masteredWordKeys);
+    } else {
+      return counts;
+    }
+    var o = nO();
+    var b = toCount(nB);
+    var g = toCount(nG);
+    var seen = new Set();
+    for (var i = 0; i < list.length; i++) {
+      var key = list[i];
+      if (typeof key !== "string" || seen.has(key)) { continue; }
+      seen.add(key);
+      var idx = sectionIndex(rankOf(builtinMap.get(key)), o, b, g);
+      if (idx >= 0) { counts[idx]++; }
+    }
+    return counts;
+  }
+
+  // ── 掌握率與階段（IS-7、IS-8）──
+
+  /**
+   * 島嶼掌握率 P（IS-7，整數運算，.5 進位）：n = 0 → null；m = 0 → 0；m ≥ n → 100；
+   * 其餘 floor((200m + n) ÷ 2n) 再限制在 1～99。
+   * @param {number} m
+   * @param {number} n
+   * @returns {number|null}
+   */
+  function percent(m, n) {
+    var mm = toCount(m);
+    var nn = toCount(n);
+    if (nn === 0) { return null; }
+    if (mm === 0) { return 0; }
+    if (mm >= nn) { return 100; }
+    return Math.min(Math.max(Math.floor((200 * mm + nn) / (2 * nn)), 1), 99);
+  }
+
+  /** 依 P 取 STAGES 的索引；null 或不合法 → 0（sand） */
+  function stageIndexOfP(p) {
+    if (typeof p !== "number" || !isFinite(p)) { return 0; }
+    for (var i = 0; i < STAGES.length; i++) {
+      if (p >= STAGES[i].minP && p <= STAGES[i].maxP) { return i; }
+    }
+    return p > 100 ? STAGES.length - 1 : 0;
+  }
+
+  /**
+   * 階段（IS-8）：依整數 P 查 STAGES；P 為 null → "sand"。
+   * @param {number|null} p
+   * @returns {string} IslandStage
+   */
+  function stageOf(p) {
+    return STAGES[stageIndexOfP(p)].stage;
+  }
+
+  /** 階段代碼在 STAGES 的索引（成長順序）；不認得的代碼 → 0 */
+  function stageIndex(stage) {
+    for (var i = 0; i < STAGES.length; i++) {
+      if (STAGES[i].stage === stage) { return i; }
+    }
+    return 0;
+  }
+
+  /** 生效色級在 LIST_ORDER 的索引；不認得時比照綠（與 vocab.limitOf 相同：橘、棕以外一律視為綠） */
+  function goalIndex(effectiveColor) {
+    var idx = LIST_ORDER.indexOf(effectiveColor);
+    return idx >= 0 ? idx : LIST_ORDER.indexOf("green");
+  }
+
+  /** islandsOf 的單筆快取：{ key, result }；result 為模組私有、不外流（回傳的一律是拷貝） */
+  var islandsCache = null;
+
+  /**
+   * 3 座開放島的推算結果（IS-5～IS-9）。
+   * @param {{builtin:Array, builtinMap:Map, nB:number, nG:number, masteredWordKeys:(string[]|Set), effectiveColor:string}} input
+   * 單筆快取：masteredWordKeys 為陣列且 builtin 參照、builtinMap 參照、nB、nG、N_O、masteredWordKeys 參照與長度、
+   * effectiveColor 都與上一次相同 → 不呼叫 sectionSizes／masteredCounts，回傳快取內容的拷貝（§4.16）。
+   * @returns {Array<{island:string, n:number, m:number, p:(number|null), stage:string, outOfGoal:boolean}>} 依序橘、棕、綠（每次都是新陣列與新物件）
+   */
+  function islandsOf(input) {
+    var src = input && typeof input === "object" ? input : {};
+    var key = islandsKeyOf(src);
+    if (key !== null && islandsCache !== null && sameIslandsKey(islandsCache.key, key)) {
+      return copyIslands(islandsCache.result);
+    }
+    var result = computeIslands(src);
+    // 只有 masteredWordKeys 為陣列時才保留；Set／非陣列每次都重算，順手清掉舊快取
+    islandsCache = key !== null ? { key: key, result: result } : null;
+    return copyIslands(result);
+  }
+
+  /**
+   * islandsOf 的快取鍵；masteredWordKeys 不是陣列 → null（不快取）。
+   * N_O 只在原邏輯會用到時才取（builtin 為陣列或 builtinMap 可查），
+   * 讓「缺少 EMT.core.constants」時是否拋錯與未加快取前完全相同（LD-3）。
+   */
+  function islandsKeyOf(src) {
+    var keys = src.masteredWordKeys;
+    if (!Array.isArray(keys)) { return null; }
+    var map = src.builtinMap;
+    var needO = Array.isArray(src.builtin) || Boolean(map && typeof map.get === "function");
+    return {
+      builtin: src.builtin,
+      builtinMap: map,
+      nB: toCount(src.nB),
+      nG: toCount(src.nG),
+      o: needO ? nO() : null,
+      keys: keys,
+      length: keys.length,
+      effectiveColor: src.effectiveColor
+    };
+  }
+
+  /** 兩組快取鍵是否全部相同（參照比較 builtin、builtinMap、masteredWordKeys；其餘比值） */
+  function sameIslandsKey(a, b) {
+    return a.builtin === b.builtin &&
+      a.builtinMap === b.builtinMap &&
+      a.nB === b.nB &&
+      a.nG === b.nG &&
+      a.o === b.o &&
+      a.keys === b.keys &&
+      a.length === b.length &&
+      a.effectiveColor === b.effectiveColor;
+  }
+
+  /** 新陣列、每島物件淺拷貝（欄位皆為基本型別），呼叫端修改或凍結回傳值都不影響快取 */
+  function copyIslands(list) {
+    return list.map(function (it) {
+      return { island: it.island, n: it.n, m: it.m, p: it.p, stage: it.stage, outOfGoal: it.outOfGoal };
+    });
+  }
+
+  /** islandsOf 的實際推算（未加快取前的原邏輯） */
+  function computeIslands(src) {
+    var sizes = sectionSizes(src.builtin, src.nB, src.nG);
+    var counts = masteredCounts(src.masteredWordKeys, src.builtinMap, src.nB, src.nG);
+    var gi = goalIndex(src.effectiveColor);
+    return OPEN_ISLANDS.map(function (island, i) {
+      var n = sizes[i];
+      // 字庫與對照表不一致時（資料異常）m 仍不得超過 n
+      var m = Math.min(counts[i], n);
+      var p = percent(m, n);
+      return {
+        island: island,
+        n: n,
+        m: m,
+        p: p,
+        stage: stageOf(p),
+        outOfGoal: LIST_ORDER.indexOf(island) > gi
+      };
+    });
+  }
+
+  // ── 天氣、燈塔、小船（IS-11～IS-13）──
+
+  /**
+   * 天氣（IS-11）：S = 0 → cloudy；1～6 → sunny；≥ 7 → rainbow。
+   * @param {number} s 連續打卡顯示值
+   * @returns {string} WeatherKind
+   */
+  function weatherOf(s) {
+    var v = toCount(s);
+    if (v >= THRESHOLDS.weatherRainbowMin) { return "rainbow"; }
+    if (v >= THRESHOLDS.weatherSunnyMin) { return "sunny"; }
+    return "cloudy";
+  }
+
+  /**
+   * 燈塔（IS-12）：K = 0 → unbuilt；1～49 → built；≥ 50 → lit（固定題數，不隨 Q 縮放）。
+   * @param {number} k 已答對題數
+   * @returns {string} LighthouseKind
+   */
+  function lighthouseOf(k) {
+    var v = toCount(k);
+    if (v >= THRESHOLDS.lighthouseLitMin) { return "lit"; }
+    if (v >= THRESHOLDS.lighthouseBuiltMin) { return "built"; }
+    return "unbuilt";
+  }
+
+  /**
+   * 小船（IS-13）：r = min(X ÷ D, 1)；r = 1 → docked，否則 sailing；remaining = max(D − X, 0)。
+   * D 小於 1 或非整數時以 1 計（防呆）。
+   * @param {number} x 今日已學數
+   * @param {number} d 每日新字量
+   * @returns {{boatRatio:number, boat:string, remaining:number}}
+   */
+  function boatOf(x, d) {
+    var xx = toCount(x);
+    var dd = toDaily(d);
+    var ratio = Math.min(xx / dd, 1);
+    return {
+      boatRatio: ratio,
+      boat: ratio >= 1 ? "docked" : "sailing",
+      remaining: Math.max(dd - xx, 0)
+    };
+  }
+
+  /**
+   * 群島頁一次繪製所需的全部推算值（IslandState；IS-3 單一來源）。
+   * 呼叫端傳入與 3 格數據、今日進度列同一組 S、K、Q、X、D。回傳值深度凍結。
+   * @param {object} input islandsOf 的欄位 + streakDays、k、q、x、d
+   * @returns {object} IslandState
+   */
+  function state(input) {
+    var src = input && typeof input === "object" ? input : {};
+    var streakDays = toCount(src.streakDays);
+    var q = toCount(src.q);
+    // K 為 0～Q 的整數；Q = 0 時 K = 0（AS-1）
+    var k = Math.min(toCount(src.k), q);
+    var x = toCount(src.x);
+    var d = toDaily(src.d);
+    var boat = boatOf(x, d);
+    return deepFreeze({
+      islands: islandsOf(src),
+      streakDays: streakDays,
+      weather: weatherOf(streakDays),
+      k: k,
+      q: q,
+      lighthouse: lighthouseOf(k),
+      x: x,
+      d: d,
+      boatRatio: boat.boatRatio,
+      boat: boat.boat,
+      remaining: boat.remaining
+    });
+  }
+
+  // ── 組字 ──
+
+  /**
+   * 格式字串替換：把 {名稱} 換成 String(values[名稱])，其餘字元逐字保留；不做 HTML 跳脫（呼叫端以 textContent 寫入）。
+   * 模板中出現但 values 沒有（或為 null／undefined）的鍵 → 拋 TypeError（屬程式錯誤，比照 layout.fill）。
+   * @param {string} template
+   * @param {object} values
+   * @returns {string}
+   */
+  function fillText(template, values) {
+    var src = values && typeof values === "object" ? values : {};
+    return String(template).replace(/\{(\w+)\}/g, function (all, key) {
+      if (!hasOwn.call(src, key) || src[key] === null || src[key] === undefined) {
+        throw new TypeError("island.fillText：缺少佔位符 {" + key + "} 的值");
+      }
+      return String(src[key]);
+    });
+  }
+
+  /** 島名；不是 LIST_ORDER 中的島 → TypeError（程式錯誤） */
+  function islandNameOf(island) {
+    if (typeof island !== "string" || !hasOwn.call(TEXTS.islandName, island)) {
+      throw new TypeError("island：未知的島嶼代碼 " + String(island));
+    }
+    return TEXTS.islandName[island];
+  }
+
+  /** IslandProgress 的 P 正規化：0～100 的整數或 null */
+  function normalizedP(p) {
+    return typeof p === "number" && isFinite(p) && p >= 0 && p <= 100 && Math.floor(p) === p ? p : null;
+  }
+
+  // ── 學完回饋（LF-2）──
+
+  /** 依島嶼代碼取快照中的 IslandProgress；找不到 → null */
+  function progressIn(st, island) {
+    var list = st && Array.isArray(st.islands) ? st.islands : [];
+    for (var i = 0; i < list.length; i++) {
+      if (list[i] && list[i].island === island) { return list[i]; }
+    }
+    return null;
+  }
+
+  /**
+   * 學完回饋（LF-2）：比較學習行為前（before）與套用全部資料變更後（after）的 IslandState，一個動作最多 1 則。
+   * 優先序：(1) 升階 > (2) 剛靠岸 > (3) 多掌握 > (4) 小船前進；(5) 都不成立 → null。
+   * (1)(3) 同時涉及兩座島時（資料異常）取 LIST_ORDER 較前者。
+   * @param {object} before 至少含 islands、x、d
+   * @param {object} after 至少含 islands、x、d
+   * @returns {{kind:string, island:(string|null), text:string}|null}
+   */
+  function feedbackOf(before, after) {
+    if (!before || typeof before !== "object" || !after || typeof after !== "object") { return null; }
+    var i, b, a;
+
+    // (1) 升階：A 階段索引 > B
+    for (i = 0; i < OPEN_ISLANDS.length; i++) {
+      b = progressIn(before, OPEN_ISLANDS[i]);
+      a = progressIn(after, OPEN_ISLANDS[i]);
+      if (!a || !b) { continue; }
+      var ai = stageIndex(a.stage);
+      if (ai > stageIndex(b.stage) && STAGES[ai].levelUpText !== null) {
+        return deepFreeze({
+          kind: "levelUp",
+          island: OPEN_ISLANDS[i],
+          text: fillText(STAGES[ai].levelUpText, { island: islandNameOf(OPEN_ISLANDS[i]) })
+        });
+      }
+    }
+
+    var bx = toCount(before.x);
+    var ax = toCount(after.x);
+    var d = toDaily(after.d);
+
+    // (2) 剛靠岸：B.x < d ≤ A.x
+    if (bx < d && d <= ax) {
+      return deepFreeze({ kind: "docked", island: null, text: TEXTS.feedbackDocked });
+    }
+
+    // (3) 多掌握：A.m > B.m（{p} = A.p）
+    for (i = 0; i < OPEN_ISLANDS.length; i++) {
+      b = progressIn(before, OPEN_ISLANDS[i]);
+      a = progressIn(after, OPEN_ISLANDS[i]);
+      if (!a || !b) { continue; }
+      var ap = normalizedP(a.p);
+      if (toCount(a.m) > toCount(b.m) && ap !== null) {
+        return deepFreeze({
+          kind: "mastered",
+          island: OPEN_ISLANDS[i],
+          text: fillText(TEXTS.feedbackMastered, { island: islandNameOf(OPEN_ISLANDS[i]), p: ap })
+        });
+      }
+    }
+
+    // (4) 小船前進：A.x > B.x 且 A.x < d（{n} = d − A.x，≥ 1）
+    if (ax > bx && ax < d) {
+      return deepFreeze({ kind: "sailing", island: null, text: fillText(TEXTS.feedbackSailing, { n: d - ax }) });
+    }
+
+    // (5) 不產生回饋
+    return null;
+  }
+
+  // ── 畫面文字 ──
+
+  /**
+   * 龜龜對話框（IS-14）：remaining > 0 → dialogSailing（{n} = remaining）；remaining = 0 → dialogDocked。
+   * @param {object} st IslandState
+   * @returns {string}
+   */
+  function dialogText(st) {
+    var remaining = toCount(st && st.remaining);
+    return remaining > 0 ? fillText(TEXTS.dialogSailing, { n: remaining }) : TEXTS.dialogDocked;
+  }
+
+  /** 天氣狀態行（AC-64-06、AC-67-01）；不認得的代碼比照 cloudy */
+  function weatherText(kind) {
+    return hasOwn.call(TEXTS.weather, kind) ? TEXTS.weather[kind] : TEXTS.weather.cloudy;
+  }
+
+  /** 燈塔狀態行（AC-64-05、AC-67-01）；不認得的代碼比照 unbuilt */
+  function lighthouseText(kind) {
+    return hasOwn.call(TEXTS.lighthouse, kind) ? TEXTS.lighthouse[kind] : TEXTS.lighthouse.unbuilt;
+  }
+
+  /** 小船文字（文字替代的 {boat}）；不認得的代碼比照 sailing */
+  function boatText(kind) {
+    return hasOwn.call(TEXTS.boat, kind) ? TEXTS.boat[kind] : TEXTS.boat.sailing;
+  }
+
+  /**
+   * 島嶼清單一列（開放島，IA-2）。
+   * - right：「掌握 {p}%」；P 為 null 時「掌握 —」（FB-84）
+   * - stageText：STAGES[階段].listText，outOfGoal 時接「（目前目標未包含）」（IS-9）
+   * - valueNow：progressbar 的 aria-valuenow；P 為 null 時 null（呼叫端省略該屬性、填滿 0）
+   * - label：progressbar 的 aria-label「{島名}掌握率」
+   * @param {object} progress IslandProgress
+   * @returns {{name:string, sub:string, right:string, stageText:string, valueNow:(number|null), label:string, fog:boolean}}
+   */
+  function listRowOf(progress) {
+    var src = progress && typeof progress === "object" ? progress : {};
+    if (OPEN_ISLANDS.indexOf(src.island) < 0) {
+      throw new TypeError("island.listRowOf：不是開放島 " + String(src.island));
+    }
+    var name = islandNameOf(src.island);
+    var p = normalizedP(src.p);
+    var stage = STAGES[stageIndex(src.stage)];
+    return deepFreeze({
+      name: name,
+      sub: TEXTS.islandSubtitle[src.island],
+      right: p === null ? TEXTS.listMasteryNoData : fillText(TEXTS.listMastery, { p: p }),
+      stageText: stage.listText + (src.outOfGoal === true ? TEXTS.listOutOfGoalSuffix : ""),
+      valueNow: p,
+      label: fillText(TEXTS.progressLabel, { island: name }),
+      fog: false
+    });
+  }
+
+  /**
+   * 島嶼清單一列（霧中島：藍、金，IA-2）。進度條為空且 aria-hidden，不是 progressbar，故 valueNow、label 皆為 null。
+   * @param {string} colorId "blue" | "gold"
+   * @returns {{name:string, sub:string, right:string, stageText:string, valueNow:null, label:null, fog:boolean}}
+   */
+  function fogRowOf(colorId) {
+    if (FOG_ISLANDS.indexOf(colorId) < 0) {
+      throw new TypeError("island.fogRowOf：不是霧中島 " + String(colorId));
+    }
+    return deepFreeze({
+      name: TEXTS.islandName[colorId],
+      sub: TEXTS.islandSubtitle[colorId],
+      right: TEXTS.listFogStatus,
+      stageText: TEXTS.listFogStage,
+      valueNow: null,
+      label: null,
+      fog: true
+    });
+  }
+
+  /**
+   * 地圖文字替代（IA-4，role="img" 的可存取名稱）。數字以 String(整數)，不加千分位；
+   * 不含「（目前目標未包含）」；P 為 null 的島以 mapAltIslandNoData 組字。
+   * @param {object} st IslandState
+   * @returns {string}
+   */
+  function mapAltText(st) {
+    var src = st && typeof st === "object" ? st : {};
+    var parts = OPEN_ISLANDS.map(function (island) {
+      var pr = progressIn(src, island) || {};
+      var p = normalizedP(pr.p);
+      var values = { island: islandNameOf(island), stage: STAGES[stageIndex(pr.stage)].nameZh };
+      if (p === null) {
+        return fillText(TEXTS.mapAltIslandNoData, values);
+      }
+      values.p = String(p);
+      return fillText(TEXTS.mapAltIsland, values);
+    });
+    return fillText(TEXTS.mapAlt, {
+      islands: parts.join(TEXTS.mapAltIslandSeparator),
+      s: String(toCount(src.streakDays)),
+      weather: weatherText(src.weather),
+      k: String(toCount(src.k)),
+      lighthouse: lighthouseText(src.lighthouse),
+      x: String(toCount(src.x)),
+      d: String(toDaily(src.d)),
+      boat: boatText(src.boat)
+    });
+  }
+
+  return deepFreeze({
+    STAGES: STAGES,
+    THRESHOLDS: THRESHOLDS,
+    LIST_ORDER: LIST_ORDER,
+    STYLE_TOKENS: STYLE_TOKENS,
+    TEXTS: TEXTS,
+    sectionSizes: sectionSizes,
+    masteredCounts: masteredCounts,
+    percent: percent,
+    stageOf: stageOf,
+    islandsOf: islandsOf,
+    weatherOf: weatherOf,
+    lighthouseOf: lighthouseOf,
+    boatOf: boatOf,
+    state: state,
+    feedbackOf: feedbackOf,
+    dialogText: dialogText,
+    weatherText: weatherText,
+    lighthouseText: lighthouseText,
+    listRowOf: listRowOf,
+    fogRowOf: fogRowOf,
+    mapAltText: mapAltText,
+    fillText: fillText
+  });
+});
+
 /* core/layout.js */
 /*
  * EMT.core.layout — 版面與視覺契約常數與純函式（FE-54）
@@ -5480,7 +6573,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     accent: "#f7893b",
     accentText: "#1f2937",
     themeColor: "#1e9bf0",
-    background: "#eef4fa",
+    background: "#eaf7fb",
     surface: "#ffffff",
     text: "#1f2937",
     textMuted: "#5b6472"
@@ -5508,7 +6601,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   /** 版面文字（逐字使用；「・」為 U+30FB，摘要行「字」與「預計」之間為全形空白 U+3000） */
   var LAYOUT_TEXTS = {
     // ── 主控台（US-39）──
-    dashboardTitle: "學習主控台",
+    dashboardTitle: "我的群島",
     todayRing: "今日已學 {x} / {d} 字",
     startToday: "開始今日學習",
     goalLineSame: "{color}級・每日 {daily} 字",
@@ -5542,7 +6635,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   // ── 架構常數（architecture.md §4.8；CSS 以同值寫死）──
   var UI_LAYOUT = {
     CONTENT_NARROW_PX: 720,
-    CARD_RADIUS_PX: 16,
+    CARD_RADIUS_PX: 22,
     NARROW_MAX_PX: 640,
     FIRSTBAR_RESERVE_PX: 184,
     CHART_TRACK_PX: 64,
@@ -7691,8 +8784,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   /** manifest theme_color 與 <meta name="theme-color"> 的值（v0.12 = COLOR_TOKENS.themeColor = --brand，VC-5、AC-34-04） */
   var PWA_THEME_COLOR = "#1e9bf0";
 
-  /** manifest background_color（v0.12 = COLOR_TOKENS.background = --bg，DS-13、VC-5、AC-34-04） */
-  var PWA_BACKGROUND_COLOR = "#eef4fa";
+  /** manifest background_color（FE-103 = COLOR_TOKENS.background = --bg，DS-13、VC-5、AC-34-04、AC-68-01） */
+  var PWA_BACKGROUND_COLOR = "#eaf7fb";
 
   /** manifest 內容；鍵順序即輸出順序（MF-1、MF-3） */
   var PWA_MANIFEST = {
@@ -7704,7 +8797,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     display: "standalone",
     lang: "zh-Hant-TW",
     theme_color: "#1e9bf0",
-    background_color: "#eef4fa",
+    background_color: "#eaf7fb",
     icons: [
       { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
@@ -9153,6 +10246,18 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   README §14.1 PR-1、PR-2、PR-9、DS-63；architecture §4.13）：sttStatus 新增 "preparing"，runtime.speech 新增
  *   preparingPhase（啟動一律 null）。兩者只在記憶體，經 setSttStatus(status, phase) 更新（setItem 0 次、不進備份）。
  *
+ * - （v0.23，FE-106）單字卡學完回饋（契約 RuntimeState.flashcard.islandFeedback、README §15.5 LF-1～LF-6、IS-1、IS-2；
+ *   architecture §4.16「EMT.store」、§7.32.9）：flipCard（翻到背面）、answerVocabQuiz、recordSttScored 在 currentTab 為
+ *   "flashcards" 時，以同一個 today 取套用前（B）與套用全部資料變更後（A）的島嶼快照（islandSnapshot），
+ *   island.feedbackOf(B, A) 非 null → 放進同一次 commitWrite 的 runtime，tags 加 "islandFeedback"；null → 維持原值。
+ *   生命週期：啟動、匯入為 null；換卡、切換模式、重建單字集保留；setTab 離開 "flashcards" 設 null（LF-3）。
+ *   只在記憶體：不進 data、localStorage、備份；不增加 setItem 次數；寫入失敗時回饋照常（LF-5）。
+ *
+ * - （v0.21，FE-114）啟動預熱（architecture §4.16「init() 預熱」、§7.32.15 P-5）：init 建好初始狀態後、發出啟動通知前，
+ *   島嶼模組已載入時以同一個 today 取 1 次快照並呼叫 feedbackOf(w, w)（結果丟棄），填入 islandsOf 單筆快取。
+ *   不改 state、tags、setItem；例外吞掉。islandsOf 快取以參照比對：store 一律以 concat／filter 產生新的
+ *   masteredWordKeys 陣列，不原地修改（§7.32.15 前提）。
+ *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
  */
@@ -9191,14 +10296,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         PWA: require("../core/pwa.js"),
         POS: require("../core/position.js"),
         PF: require("../core/part5flow.js"),
-        AD: require("../core/ad.js")
+        AD: require("../core/ad.js"),
+        // （v0.23，FE-106）島嶼推算（學完回饋比較用）
+        ISL: require("../core/island.js")
       };
     } else {
       var c = root.EMT.core;
       coreCache = {
         C: c.constants, WK: c.wordkey, GOAL: c.goal, VOCAB: c.vocab, CUSTOM: c.custom,
         STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning,
-        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow, AD: c.ad
+        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow, AD: c.ad, ISL: c.island
       };
     }
     return coreCache;
@@ -9224,7 +10331,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   /** 一次通知全部區塊時使用的 tags */
   var ALL_TAGS = ["init", "goal", "studySet", "flashcard", "quiz", "speech", "stats", "streak",
-    "customVocab", "part5", "decoder", "phrasebank", "tab", "storage", "learning"];
+    "customVocab", "part5", "decoder", "phrasebank", "tab", "storage", "learning", "islandFeedback"];
 
   // ── 共用小工具（純函式）──
 
@@ -9348,6 +10455,31 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
+   * （v0.23，FE-106）學完回饋比較用的島嶼快照（architecture §7.32.9 islandSnap；契約 LF-1、IS-13、LR-6）。
+   * 純函式：只讀傳入的內容與資料，不讀寫儲存、時鐘；回傳值只供當次 feedbackOf 比較，不得放進 data 或任何儲存（IS-1）。
+   * - islands = island.islandsOf（內容的 builtin、builtinMap、nB、nG 與 data.masteredWordKeys、data.goal.effectiveColor）
+   * - x = learning.todayCount(data.todayLearned, t)；d = learning.dailyGoal(data.goal.effectiveColor)
+   * @param {object|function} src EMT.content 相容物件或回傳它的函式（缺漏、為空時三島 n = 0）
+   * @param {object} data PersistedData
+   * @param {string} t 本次 action 取 1 次的 today（YYYY-MM-DD）
+   * @returns {{islands: object[], x: number, d: number}}
+   */
+  function islandSnapshot(src, data, t) {
+    var K = core();
+    var ct = readContent(src);
+    var d = data && typeof data === "object" ? data : {};
+    var goal = d.goal && typeof d.goal === "object" ? d.goal : {};
+    return {
+      islands: K.ISL.islandsOf({
+        builtin: ct.builtin, builtinMap: ct.builtinMap, nB: ct.nB, nG: ct.nG,
+        masteredWordKeys: d.masteredWordKeys, effectiveColor: goal.effectiveColor
+      }),
+      x: K.LEARN.todayCount(d.todayLearned || null, t),
+      d: K.LEARN.dailyGoal(goal.effectiveColor)
+    };
+  }
+
+  /**
    * 建立 store。
    * @param {{
    *   storage?: {getItem: function(string): (string|null), setItem: function(string, string): void}|null,
@@ -9460,7 +10592,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       return {
         currentTab: entryMode === "firstRun" ? "customizer" : "dashboard",
         studySet: buildStudySet(data),
-        flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null },
+        // （v0.23，FE-106）islandFeedback：學完回饋，頁面載入時 null（LF-3）
+        flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null, islandFeedback: null },
         speech: {
           ttsSupported: !!speech.ttsSupported,
           sttSupported: !!speech.sttSupported,
@@ -9489,10 +10622,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
     /**
      * 換卡後的抽認卡狀態：正面、清除 STT 結果；測驗模式則為新卡重新出題（不足 → 回抽認卡模式，AC-09-06）。
+     * （v0.23，FE-106）學完回饋 islandFeedback 帶入原值（換卡保留，LF-3）。
      * @returns {{flashcard: object, speech: object}}
      */
     function cardChanged(runtime, studySet, index) {
-      var fc = { index: index, isFlipped: false, mode: runtime.flashcard.mode, quiz: null };
+      var keep = runtime.flashcard.islandFeedback;
+      var fc = {
+        index: index, isFlipped: false, mode: runtime.flashcard.mode, quiz: null,
+        islandFeedback: keep === undefined ? null : keep
+      };
       if (fc.mode === "quiz") {
         fc.quiz = core().QUIZ.buildQuiz(studySet, index, rand);
         if (!fc.quiz) { fc.mode = "card"; }
@@ -9636,21 +10774,54 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
      * 只有「新增 wordKey」或「todayLearned 換日」時回傳 patch，否則 patch 為 null。
      * @param {object} d 目前的 PersistedData
      * @param {string} key wordKey（record 內會再以 C-2 正規化）
+     * @param {string} [t] （v0.23）本次 action 已取的 today；省略時現取
      * @returns {{patch: (object|null), changed: boolean}}
      */
-    function learnPatch(d, key) {
-      var day = today();
+    function learnPatch(d, key, t) {
+      var day = typeof t === "string" ? t : today();
       var r = core().LEARN.record(d.todayLearned, d.learnedHistory, key, day);
       var dayChanged = !d.todayLearned || d.todayLearned.date !== day;
       if (!r.changed && !dayChanged) { return { patch: null, changed: false }; }
       return { patch: { todayLearned: r.todayLearned, learnedHistory: r.learnedHistory }, changed: true };
     }
 
-    /** 學習行為打卡（AC-17-02）；回傳新的 streak（未變時為原物件） */
-    function touchStreak(streak) {
-      var next = core().STREAK.touch(streak, today());
+    /** 學習行為打卡（AC-17-02）；回傳新的 streak（未變時為原物件）。（v0.23）t 為本次 action 已取的 today，省略時現取 */
+    function touchStreak(streak, t) {
+      var next = core().STREAK.touch(streak, typeof t === "string" ? t : today());
       if (next.days === streak.days && next.lastActiveDate === streak.lastActiveDate) { return streak; }
       return next;
+    }
+
+    // ── 學完回饋（v0.23，FE-106；LF-1～LF-5）──
+
+    /**
+     * 套用前快照 B：只在單字卡頁（currentTab === "flashcards"）且島嶼模組已載入時計算，否則 null（不比較）。
+     * @param {object} rt 目前 runtime
+     * @param {object} data 套用前的 PersistedData
+     * @param {string} t 本次 action 取 1 次的 today
+     * @returns {object|null}
+     */
+    function feedbackBefore(rt, data, t) {
+      if (rt.currentTab !== "flashcards" || !core().ISL) { return null; }
+      return islandSnapshot(contentSrc, data, t);
+    }
+
+    /**
+     * 以 B 與套用全部資料變更後的快照 A 決定回饋（LF-2）。得到回饋 → 回傳帶新 islandFeedback 的 runtime 並加 tag；
+     * null 或未比較（before 為 null）→ 原 runtime 不變（維持原值，LF-3）。不修改傳入值、不寫入任何儲存（IS-1）。
+     * @param {object} runtime 準備提交的 runtime
+     * @param {object|null} before feedbackBefore 的結果
+     * @param {object} newData 套用後的 PersistedData
+     * @param {string} t 與 before 相同的 today
+     * @param {string[]} tags 本次提交的 tags（會附加 "islandFeedback"）
+     * @returns {object} runtime
+     */
+    function withFeedback(runtime, before, newData, t, tags) {
+      if (!before) { return runtime; }
+      var fb = core().ISL.feedbackOf(before, islandSnapshot(contentSrc, newData, t));
+      if (!fb) { return runtime; }
+      tags.push("islandFeedback");
+      return assign(runtime, { flashcard: assign(runtime.flashcard, { islandFeedback: fb }) });
     }
 
     // ── 啟動 ──
@@ -9675,6 +10846,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
 
       var data;
+      /** （v0.21，FE-114）本次 init 已取得的 today；只有讀到紀錄時才取，預熱沿用同一天（未取時預熱才取） */
+      var initDay = null;
       // （v0.8）首次判定（FS-1）：存取拋例外或鍵不存在 → firstRun；任何字串（含 ""、損壞、版本不符）→ main。
       // unreadable 鍵是否存在不影響判定
       var entryMode = "main";
@@ -9689,7 +10862,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           // （v0.8）以今天正規化 todayLearned、learnedHistory（V-ST-09～V-ST-11）；
           // RD-1 的 fieldsReset 不提示、不另寫回，等下一次寫入一併寫回（RD-2、SD-FB-17）
           // （v0.15）第 4 參數傳題庫 id → V-ST-05 之後再做 UO-4（只改記憶體，RD-4）
-          data = K.P.normalizeAfterLoad(parsed.data, ct.part5.length, today(), K.PF.bankIdsOf(ct.part5));
+          initDay = today();
+          data = K.P.normalizeAfterLoad(parsed.data, ct.part5.length, initDay, K.PF.bankIdsOf(ct.part5));
           startup = { status: "ok", migrated: false };
           if (parsed.migrated) {
             // 遷移後依 §5.3 驗證再以一次 setItem 寫回（MG-3：schemaVersion 2，失敗不提示）
@@ -9729,8 +10903,27 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
       state = { data: data, runtime: placed.runtime };
       initialized = true;
+      warmIsland(K, initDay);
       notify(ALL_TAGS.slice());
       return { status: startup.status, migrated: startup.migrated };
+    }
+
+    /**
+     * （v0.21，FE-114）啟動預熱（architecture §4.16「init() 預熱」、§7.32.15 P-5；AC-69-05、AC-70-03）：
+     * 島嶼模組已載入時，以 init 的同一個 today 取 1 次快照 w，再呼叫 feedbackOf(w, w)（必為 null、丟棄），
+     * 讓 islandsOf 單筆快取先填入、翻面路徑的函式先編譯，重新載入後第一次翻面不再付冷啟動成本。
+     * 只讀 state.data 與內容：不改 state、不加 tags、不呼叫 setItem；任何例外吞掉，不影響啟動、不提示使用者。
+     * @param {object} K core() 的結果
+     * @param {string|null} t init 已取得的 today（YYYY-MM-DD）；null（未讀到紀錄）時在此取 1 次
+     */
+    function warmIsland(K, t) {
+      if (!K.ISL) { return; }
+      try {
+        var w = islandSnapshot(contentSrc, state.data, typeof t === "string" ? t : today());
+        K.ISL.feedbackOf(w, w);
+      } catch (e) {
+        // 預熱失敗不影響啟動（之後的學習事件照常各自計算）
+      }
     }
 
     /** 尚未 init 就呼叫 action 時先 init，避免以預設值覆蓋已儲存資料 */
@@ -10067,15 +11260,18 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var patch = {};
       var dirty = false;
       var tags = ["flashcard"];
+      // （v0.23）翻到背面才是學習行為（LR-1）：同一個 today 供打卡、學習紀錄與回饋前後快照使用（LF-1）
+      var t = flipped ? today() : "";
+      var before = flipped ? feedbackBefore(rt, d, t) : null;
       if (flipped) {
-        var s = touchStreak(d.streak);
+        var s = touchStreak(d.streak, t);
         if (s !== d.streak) {
           patch.streak = s;
           dirty = true;
           tags.push("streak");
         }
         var card = rt.studySet[rt.flashcard.index];
-        var lp = card ? learnPatch(d, card.wordKey) : { patch: null, changed: false };
+        var lp = card ? learnPatch(d, card.wordKey, t) : { patch: null, changed: false };
         if (lp.patch) {
           patch.todayLearned = lp.patch.todayLearned;
           patch.learnedHistory = lp.patch.learnedHistory;
@@ -10083,8 +11279,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           tags.push("learning");
         }
       }
+      var newData = dirty ? assign(d, patch) : d;
+      runtime = withFeedback(runtime, before, newData, t, tags);
       if (dirty) {
-        commitWrite(assign(d, patch), runtime, tags);
+        commitWrite(newData, runtime, tags);
       } else {
         commit(d, runtime, tags);
       }
@@ -10127,16 +11325,19 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
       var correct = optionIndex === q.correctIndex;
       var d = state.data;
+      // （v0.23）同一個 today 供打卡、學習紀錄與回饋前後快照使用（LF-1）
+      var t = today();
+      var before = feedbackBefore(rt, d, t);
       var patch = {
         vocabQuiz: { answered: d.vocabQuiz.answered + 1, correct: d.vocabQuiz.correct + (correct ? 1 : 0) },
-        streak: touchStreak(d.streak)
+        streak: touchStreak(d.streak, t)
       };
       if (correct && d.masteredWordKeys.indexOf(q.wordKey) === -1) {
         patch.masteredWordKeys = d.masteredWordKeys.concat([q.wordKey]);
       }
       var tags = ["quiz", "flashcard", "stats", "streak"];
       // （v0.8）學習事件 "vocabQuiz"（對錯皆算，LR-1），與統計、已掌握、打卡合併為一次寫入（LR-5）
-      var lp = learnPatch(d, q.wordKey);
+      var lp = learnPatch(d, q.wordKey, t);
       if (lp.patch) {
         patch.todayLearned = lp.patch.todayLearned;
         patch.learnedHistory = lp.patch.learnedHistory;
@@ -10144,6 +11345,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       }
       var data = assign(d, patch);
       var runtime = assign(rt, { flashcard: assign(rt.flashcard, { quiz: assign(q, { selectedIndex: optionIndex }) }) });
+      runtime = withFeedback(runtime, before, data, t, tags);
       commitWrite(data, runtime, tags);
       return { ok: true, correct: correct };
     }
@@ -10278,7 +11480,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var rt = state.runtime;
       var patch = {};
       var tags = [];
-      var s = touchStreak(d.streak);
+      // （v0.23）同一個 today 供打卡、學習紀錄與回饋前後快照使用（LF-1）
+      var t = today();
+      var s = touchStreak(d.streak, t);
       if (s !== d.streak) {
         patch.streak = s;
         tags.push("streak");
@@ -10290,14 +11494,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         var card = rt.studySet[rt.flashcard.index];
         key = card && typeof card.wordKey === "string" ? card.wordKey : "";
       }
-      var lp = key !== "" ? learnPatch(d, key) : { patch: null, changed: false };
+      var lp = key !== "" ? learnPatch(d, key, t) : { patch: null, changed: false };
       if (lp.patch) {
         patch.todayLearned = lp.patch.todayLearned;
         patch.learnedHistory = lp.patch.learnedHistory;
         tags.push("learning");
       }
       if (tags.length === 0) { return; }
-      commitWrite(assign(d, patch), rt, tags);
+      var data = assign(d, patch);
+      commitWrite(data, withFeedback(rt, feedbackBefore(rt, d, t), data, t, tags), tags);
     }
 
     /** 按「我知道了」（AC-08-13、V-ST-08） */
@@ -10390,7 +11595,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       if (rt.entryMode === "firstRun" && FIRST_RUN_TABS.indexOf(tabId) === -1) { return; }
       var ret = opts && opts.resetReturn === true ? null : nextReturnTab(rt.currentTab, tabId, rt.sitePageReturnTab);
       if (rt.currentTab === tabId && rt.sitePageReturnTab === ret) { return; }
-      commit(state.data, assign(rt, { currentTab: tabId, sitePageReturnTab: ret }), ["tab"]);
+      var next = assign(rt, { currentTab: tabId, sitePageReturnTab: ret });
+      var tags = ["tab"];
+      // （v0.23，FE-106）離開單字卡頁 → 學完回饋同一次提交設為 null（LF-3）；原值非 null 才加 tag
+      if (rt.currentTab === "flashcards" && tabId !== "flashcards") {
+        if (rt.flashcard.islandFeedback) { tags.push("islandFeedback"); }
+        next = assign(next, { flashcard: assign(rt.flashcard, { islandFeedback: null }) });
+      }
+      commit(state.data, next, tags);
     }
 
     // ── actions：PWA（v0.11，FE-49）──
@@ -10546,8 +11758,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           var rt = state.runtime;
           // （v0.15，FP-6）步驟 9：重建單字集後依匯入的紀錄解析目前卡片（單字卡模式、正面）；
           // 解析結果只改記憶體，步驟 8 已寫入備份值，下次寫入再寫出（RD-4）
+          // （v0.23，FE-106）重設單字卡狀態時學完回饋一併設為 null（IS-4、LF-3）
           var base = assign(rt, {
-            flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null },
+            flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null, islandFeedback: null },
             speech: assign(rt.speech, { lastResult: null })
           });
           var placed = placeCard(assign(base, { studySet: [] }), data, buildStudySet(data));
@@ -10556,6 +11769,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
             data = assign(data, { flashcardPosition: placed.flashcardPosition });
           }
           var tags = ["goal", "studySet", "flashcard", "quiz", "speech", "stats", "streak", "customVocab", "part5", "learning"];
+          if (rt.flashcard.islandFeedback) { tags.push("islandFeedback"); }
           if (state.runtime.storageStatus !== "unavailable" && writeStatus !== "ok") {
             writeStatus = "ok";
             tags.push("storage");
@@ -10625,7 +11839,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     createStore: createStore,
     browserStorage: browserStorage,
     detectSpeech: detectSpeech,
-    isQuotaError: isQuotaError
+    isQuotaError: isQuotaError,
+    islandSnapshot: islandSnapshot
   };
 });
 
@@ -13392,6 +14607,863 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   };
 });
 
+/* ui/island-art.js */
+/*
+ * ui/island-art.js — 龜龜與島嶼裝飾小圖（FE-107）
+ * 依據：architecture.md v0.19 §4.16「EMT.ui.islandArt」、§7.32.3、§7.32.10、§7.32.12；
+ *       契約 README §15.7 IV-2、IV-5、VC-3
+ * 涵蓋：AC-66-01、AC-68-05、AC-71-02
+ *
+ * EMT.ui.islandArt.turtle()（72×64）、titleDeco()（28×28）、cardDeco()（40×24）、sprout()（24×24）
+ * - 各回傳 1 個新的 svg：aria-hidden="true"、focusable="false"、固定 viewBox 與 width／height；
+ *   可傳入選用的 className（例：群島頁以 "db-host__turtle" 呼叫 turtle），加在固定 class 之後。
+ * - 以 core/dom.js 的 svg() 建立，只用 path／ellipse／rect／circle／line／g；不含 text、use、image 元素，
+ *   不寫外部參照屬性、網址函式與焦點順序屬性（IV-5、AC-71-02）。
+ * - 原創造型、柔和色；fill／stroke 不使用強調橘（VC-3、AC-68-05）。素材聲明見 LT-7。
+ * 載入時只做登錄，不讀 document、不取用其他模組（LD-1）；Node 下 module.exports 供測試。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.ui = root.EMT.ui || {};
+    root.EMT.ui.islandArt = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (root) {
+  "use strict";
+
+  /** 插圖色（與 ui/island-map.js 同一組柔和色） */
+  var C = Object.freeze({
+    outline: "#3d3550",
+    shell: "#6fcf97",
+    shellLight: "#8fe3b0",
+    skin: "#b8f0c8",
+    cheek: "#ffb3c7",
+    sand: "#f7e2b0",
+    grass: "#9be3a0",
+    trunk: "#c98b5a",
+    leaf: "#6fcf97",
+    leafLight: "#8fe3b0",
+    white: "#ffffff",
+    wave: "#7fb6c6"
+  });
+
+  /**
+   * 呼叫時才取用 core/dom.js（LD-1）；取不到 → 丟出含模組名稱的 Error。
+   * @returns {object}
+   */
+  function dom() {
+    var mod = null;
+    if (typeof module === "object" && module.exports && typeof require === "function") {
+      try {
+        mod = require("../core/dom.js");
+      } catch (e) {
+        mod = null;
+      }
+    } else {
+      var emt = root && root.EMT;
+      mod = emt && emt.core && emt.core.dom ? emt.core.dom : null;
+    }
+    if (!mod) throw new Error("[EMT.ui.islandArt] 缺少 EMT.core.dom");
+    return mod;
+  }
+
+  /** 帶描邊的屬性 */
+  function ol(attrs, width) {
+    attrs.stroke = C.outline;
+    attrs["stroke-width"] = width;
+    attrs["stroke-linejoin"] = "round";
+    attrs["stroke-linecap"] = "round";
+    return attrs;
+  }
+
+  /**
+   * 建立外層 svg（裝飾圖：aria-hidden、不可聚焦）。
+   * @param {string} kind 圖名（class 後綴）
+   * @param {number} w 寬
+   * @param {number} h 高
+   * @param {string} [extraClass] 呼叫端額外的 class
+   * @param {Function} draw (s) → 子節點陣列
+   */
+  function frame(kind, w, h, extraClass, draw) {
+    var s = dom().svg;
+    var cls = "isl-art isl-art--" + kind;
+    if (typeof extraClass === "string" && extraClass.trim() !== "") cls += " " + extraClass.trim();
+    return s("svg", {
+      class: cls,
+      viewBox: "0 0 " + w + " " + h,
+      width: w,
+      height: h,
+      "aria-hidden": "true",
+      focusable: "false"
+    }, draw(s));
+  }
+
+  /** 島主「龜龜」：圓頂殼上長著一株新芽的海龜，面向右（72×64，AC-66-01） */
+  function turtle(extraClass) {
+    return frame("turtle", 72, 64, extraClass, function (s) {
+      return [
+        // 後腳與前腳
+        s("ellipse", ol({ cx: 15, cy: 53, rx: 7, ry: 4.5, fill: C.skin }, 2)),
+        s("ellipse", ol({ cx: 45, cy: 54, rx: 7.5, ry: 4.5, fill: C.skin }, 2)),
+        // 頭與頸
+        s("path", ol({ d: "M48 40 C50 34 52 30 55 28 L58 40 Z", fill: C.skin }, 2)),
+        s("circle", ol({ cx: 59, cy: 31, r: 10, fill: C.skin }, 2.4)),
+        s("circle", { cx: 62, cy: 28, r: 2.3, fill: C.outline }),
+        s("circle", { cx: 62.8, cy: 27.2, r: 0.8, fill: C.white }),
+        s("circle", { cx: 63, cy: 35, r: 2.4, fill: C.cheek }),
+        s("path", { d: "M55 36 Q58 38.5 61 36", fill: "none", stroke: C.outline, "stroke-width": 1.8, "stroke-linecap": "round" }),
+        // 圓頂殼
+        s("path", ol({ d: "M6 48 C7 28 18 18 32 18 C46 18 53 29 53 48 Z", fill: C.shell }, 2.4)),
+        // 殼上的六角紋與放射紋
+        s("path", ol({ d: "M23 37 L28 30 L36 30 L41 37 L36 43 L28 43 Z", fill: C.shellLight }, 1.8)),
+        s("path", { d: "M28 30 L24 22 M36 30 L40 22 M23 37 L12 38 M41 37 L50 38 M28 43 L26 47 M36 43 L38 47", fill: "none", stroke: C.outline, "stroke-width": 1.6, "stroke-linecap": "round", opacity: 0.6 }),
+        // 殼緣
+        s("rect", ol({ x: 4, y: 45, width: 51, height: 7, rx: 3.5, fill: C.sand }, 2)),
+        // 頭頂的新芽（島主的記號）
+        s("line", { x1: 32, y1: 18, x2: 32, y2: 10, stroke: C.outline, "stroke-width": 2, "stroke-linecap": "round" }),
+        s("path", ol({ d: "M32 12 C28 12 25 9 25 5 C29 5 32 8 32 12 Z", fill: C.leafLight }, 1.6)),
+        s("path", ol({ d: "M32 11 C36 11 39 8 39 4 C35 4 32 7 32 11 Z", fill: C.leaf }, 1.6))
+      ];
+    });
+  }
+
+  /** 標題裝飾：沙丘上的一棵椰子樹（28×28） */
+  function titleDeco(extraClass) {
+    return frame("title", 28, 28, extraClass, function (s) {
+      return [
+        s("ellipse", ol({ cx: 14, cy: 21, rx: 12, ry: 4.5, fill: C.sand }, 1.8)),
+        s("path", { d: "M14 20 C13 15 13 11 15 7", fill: "none", stroke: C.outline, "stroke-width": 3.4, "stroke-linecap": "round" }),
+        s("path", { d: "M14 20 C13 15 13 11 15 7", fill: "none", stroke: C.trunk, "stroke-width": 1.6, "stroke-linecap": "round" }),
+        s("path", ol({ d: "M15 7 C11 3 6 4 4 8 C8 7 11 7 15 9 Z", fill: C.leaf }, 1.6)),
+        s("path", ol({ d: "M15 7 C19 3 24 4 25 8 C21 7 18 7 15 9 Z", fill: C.leafLight }, 1.6))
+      ];
+    });
+  }
+
+  /** 卡片角落裝飾：浪花旁的小島與新芽（40×24） */
+  function cardDeco(extraClass) {
+    return frame("card", 40, 24, extraClass, function (s) {
+      return [
+        s("path", { d: "M2 21 q3 -2.5 6 0 q3 2.5 6 0", fill: "none", stroke: C.wave, "stroke-width": 1.8, "stroke-linecap": "round" }),
+        s("ellipse", ol({ cx: 24, cy: 18, rx: 14, ry: 4.5, fill: C.sand }, 1.8)),
+        s("ellipse", ol({ cx: 24, cy: 16, rx: 9, ry: 2.6, fill: C.grass }, 1.4)),
+        s("line", { x1: 24, y1: 15, x2: 24, y2: 9, stroke: C.outline, "stroke-width": 1.6, "stroke-linecap": "round" }),
+        s("path", ol({ d: "M24 10.5 C21 10.5 19 8.5 19 5.5 C22 5.5 24 7.5 24 10.5 Z", fill: C.leafLight }, 1.3)),
+        s("path", ol({ d: "M24 10 C27 10 29 8 29 5 C26 5 24 7 24 10 Z", fill: C.leaf }, 1.3))
+      ];
+    });
+  }
+
+  /** 學完回饋的新芽圖示（24×24） */
+  function sprout(extraClass) {
+    return frame("sprout", 24, 24, extraClass, function (s) {
+      return [
+        s("ellipse", ol({ cx: 12, cy: 20, rx: 8, ry: 2.6, fill: C.sand }, 1.6)),
+        s("line", { x1: 12, y1: 19, x2: 12, y2: 10, stroke: C.outline, "stroke-width": 2, "stroke-linecap": "round" }),
+        s("path", ol({ d: "M12 12 C8 12 5 9 5 4.5 C9.5 4.5 12 7.5 12 12 Z", fill: C.leafLight }, 1.6)),
+        s("path", ol({ d: "M12 11 C16 11 19 8 19 4 C14.5 4 12 7 12 11 Z", fill: C.leaf }, 1.6))
+      ];
+    });
+  }
+
+  return {
+    turtle: turtle,
+    titleDeco: titleDeco,
+    cardDeco: cardDeco,
+    sprout: sprout
+  };
+});
+
+/* ui/island-map.js */
+/*
+ * ui/island-map.js — 群島地圖 SVG（FE-107；簽章與動畫切換 FE-115）
+ * 依據：architecture.md v0.21 §4.16「EMT.ui.islandMap」、§7.32.4、§7.32.8、§7.32.10、§7.32.12；
+ *       契約 README §15.3 IS-8、§15.4 IS-11～IS-13、§15.6 IA-3、IA-4、IA-6、§15.7 IV-2、IV-5、VC-3；
+ *       data-schema.ts §19 ISLAND_STAGES、ISLAND_TEXTS、ISLAND_STYLE_TOKENS
+ * 涵蓋：AC-64-01、AC-64-02、AC-64-05～AC-64-07、AC-64-10、AC-65-03、AC-67-02、AC-68-05、AC-70-01、AC-70-02、
+ *       AC-71-01、AC-71-02、AC-71-04、AC-63-03、AC-63-04、AC-31-03
+ *
+ * EMT.ui.islandMap.build(st, opts) → div.db-map__figure[role="img"][aria-label = island.mapAltText(st)]
+ *   > svg.isl-map[viewBox="0 0 354 430"][aria-hidden="true"][focusable="false"]
+ * - 以 core/dom.js 的 svg() 建立節點（createElementNS），只用 path／ellipse／rect／circle／line／g／text；
+ *   不用 use、symbol、image、foreignObject 元素，不寫外部參照屬性與網址函式，不設焦點順序屬性（IV-5、AC-71-02）。
+ * - 繪製順序（後者在上）：海面 → 海浪 → 彩虹 → 太陽 → 雲 → 霧中島 → 航線 → 綠島 → 棕島 → 橘島（含碼頭）
+ *   → 燈塔島 → 小船 → 文字層 g.isl-labels（最後一個子群組，每段文字下方有白底牌，AC-71-04）。
+ * - 植物只建立需要的元素：個數逐一等於 STAGES[stage] 的 sprouts、palms、flowers、huts、flags（IS-8）。
+ * - 定位一律放外層 g 的 transform 屬性，動畫只放內層 g.isl-anim-*（CSS transform 會覆蓋屬性，T-141）；
+ *   帶 isl-anim-* class 的元素不設 transform 屬性。opts.play === true 才在 svg 加 isl-map--play（§7.32.8）。
+ * - 插圖顏色為柔和色，fill／stroke 不使用強調橘、不使用 --accent、--brand 變數（VC-3、IV-2、AC-68-05）。
+ * - 所有文字以 textContent／setAttribute 寫入（IA-6、C-7）。每次呼叫建立新節點，不讀 store、不持久化。
+ * - 素材全部為本檔以基本圖形繪製的原創 SVG（§7.32.12；聲明見 LT-7）。
+ * EMT.ui.islandMap.signature(st) → string：圖形簽章，與 build 共用同一份正規化（FE-115，§7.32.15 P-1）。
+ * EMT.ui.islandMap.setPlay(figure, play)：只切換 svg.isl-map 的 isl-map--play，不增減節點（FE-115）。
+ * 載入時只做登錄，不讀 document、不取用其他模組（LD-1）；Node 下 module.exports 供測試。
+ */
+(function (root, factory) {
+  var api = factory(root);
+  if (typeof module === "object" && module.exports) {
+    module.exports = api;
+  } else {
+    root.EMT = root.EMT || {};
+    root.EMT.ui = root.EMT.ui || {};
+    root.EMT.ui.islandMap = api;
+  }
+})(typeof self !== "undefined" ? self : this, function (root) {
+  "use strict";
+
+  // 深層凍結：物件與其中所有子物件、陣列都不可再修改
+  function deepFreeze(obj) {
+    Object.getOwnPropertyNames(obj).forEach(function (name) {
+      var value = obj[name];
+      if (value && typeof value === "object") deepFreeze(value);
+    });
+    return Object.freeze(obj);
+  }
+
+  /** viewBox 尺寸（寬：高 = 354：430，AC-63-03、AC-63-04） */
+  var VIEWBOX = deepFreeze({ w: 354, h: 430 });
+
+  /**
+   * 構圖座標（viewBox 單位；§7.32.4 表，金島與彩虹微調以通過外框不相交測試）。
+   * - waves：每段海浪外框左上角，大小 waveSize
+   * - clouds：雲中心與縮放；fog：霧中島橢圓
+   * - islands：沙灘橢圓中心與半徑；plants：植物底部錨點（相對島中心，依 rx / 66 縮放）
+   * - labels：文字牌中心與寬高（文字層）；route：航線起點 S 與碼頭 E
+   */
+  var LAYOUT = deepFreeze({
+    sea: { x: 0, y: 0, w: 354, h: 430 },
+    waveSize: { w: 32, h: 6 },
+    waves: [
+      { x: 20, y: 230 },
+      { x: 40, y: 170 },
+      { x: 150, y: 250 },
+      { x: 160, y: 410 },
+      { x: 318, y: 200 }
+    ],
+    rainbow: { cx: 200, cy: 126, radii: [52, 46, 40, 34], width: 6 },
+    sun: { cx: 316, cy: 44, r: 19 },
+    clouds: [
+      { x: 282, y: 74, scale: 1 },
+      { x: 210, y: 26, scale: 0.7 }
+    ],
+    fog: [
+      { island: "blue", cx: 46, cy: 62, rx: 26, ry: 9 },
+      { island: "gold", cx: 124, cy: 30, rx: 22, ry: 8 }
+    ],
+    route: { S: { x: 236, y: 414 }, E: { x: 206, y: 346 } },
+    // 繪製順序：綠 → 棕 → 橘（遠到近）
+    islandOrder: ["green", "brown", "orange"],
+    islands: {
+      green: { cx: 178, cy: 168, rx: 66, ry: 20 },
+      brown: { cx: 272, cy: 252, rx: 62, ry: 19 },
+      orange: { cx: 100, cy: 326, rx: 74, ry: 23 }
+    },
+    plantBaseRx: 66,
+    plants: {
+      sprout: [0, -6],
+      palms: {
+        1: [[-12, -8]],
+        2: [[-34, -4], [8, -4]],
+        3: [[-12, -8], [-34, -4], [8, -4]]
+      },
+      flowers: [[-44, 2], [22, 6]],
+      hut: [32, -4],
+      flag: [50, -2]
+    },
+    dock: { x: 156, y: 322, w: 34, h: 12, posts: [164, 182], postBottom: 344 },
+    lighthouse: { cx: 298, cy: 380, rx: 34, ry: 11 },
+    boatBox: { left: -16, right: 16, top: -24, bottom: 9 },
+    labels: {
+      blue: { cx: 46, cy: 92, w: 84, h: 22 },
+      gold: { cx: 124, cy: 56, w: 84, h: 22 },
+      green: { cx: 178, cy: 214, w: 56, h: 24 },
+      brown: { cx: 272, cy: 294, w: 56, h: 24 },
+      orange: { cx: 100, cy: 380, w: 56, h: 24 },
+      lighthouse: { cx: 298, cy: 414, w: 76, h: 24 },
+      sign: { cx: 316, cy: 352, w: 40, h: 22 }
+    }
+  });
+
+  /** 插圖色（§7.32.4 顏色；不含強調橘，VC-3） */
+  var COLOR = deepFreeze({
+    outline: "#3d3550",
+    sea: "#9fe0ec",
+    wave: "#ffffff",
+    sand: "#f7e2b0",
+    grass: { orange: "#ffd09a", brown: "#e2c39b", green: "#9be3a0" },
+    leaf: "#6fcf97",
+    leafLight: "#8fe3b0",
+    trunk: "#c98b5a",
+    coconut: "#a86b3c",
+    flower: "#ffb3c7",
+    roof: "#ff8f6b",
+    wall: "#fff3d6",
+    sun: "#ffd166",
+    cloud: "#ffffff",
+    fogFill: "#d6eef4",
+    fogStroke: "#7fb6c6",
+    rainbow: ["#ff9aa2", "#ffd166", "#9be3a0", "#8ec5ff"],
+    rock: "#c7c3d6",
+    stone: "#e4e1ee",
+    tower: "#ffffff",
+    lampOff: "#e4e1ee",
+    beam: "#fff3a6",
+    sail: "#ffffff",
+    plate: "#ffffff",
+    text: "#3d3550"
+  });
+
+  var WEATHERS = ["cloudy", "sunny", "rainbow"];
+  var LIGHTHOUSES = ["unbuilt", "built", "lit"];
+  var BOATS = ["sailing", "docked"];
+  var STAGE_IDS = ["sand", "sprout", "palm", "bloom", "hut", "complete"];
+  var FOG_ISLANDS = ["blue", "gold"];
+
+  /** 文字牌的字級、字重（§7.32.4；375px 時 14 × 0.952 ≈ 13.3 CSS px ≥ 12，AC-71-04） */
+  var LABEL_FONT_SIZE = 14;
+  var LABEL_FONT_WEIGHT = 700;
+  /** 文字基線相對牌中心的下移量 */
+  var LABEL_BASELINE_DY = 5;
+  /** 陰天時太陽群組的 opacity 屬性（IS-11：≤ 0.4） */
+  var CLOUDY_SUN_OPACITY = "0.35";
+  /** 四分之一圓的三次貝茲控制點比例（彩虹以貝茲曲線繪製，不用弧線指令） */
+  var ARC_K = 0.5523;
+
+  /**
+   * 呼叫時才取用 core 模組（LD-1）：Node 以 require，瀏覽器以 EMT.core.<name>；取不到 → 丟出含模組名稱的 Error。
+   * @param {"dom"|"island"} name
+   * @returns {object}
+   */
+  function core(name) {
+    var mod = null;
+    if (typeof module === "object" && module.exports && typeof require === "function") {
+      try {
+        if (name === "dom") mod = require("../core/dom.js");
+        if (name === "island") mod = require("../core/island.js");
+      } catch (e) {
+        mod = null;
+      }
+    } else {
+      var emt = root && root.EMT;
+      mod = emt && emt.core && emt.core[name] ? emt.core[name] : null;
+    }
+    if (!mod) throw new Error("[EMT.ui.islandMap] 缺少 EMT.core." + name);
+    return mod;
+  }
+
+  /** 數值轉屬性字串（最多 2 位小數，去除多餘的 0） */
+  function num(n) {
+    var v = Math.round(n * 100) / 100;
+    return String(v === 0 ? 0 : v);
+  }
+
+  /** translate 屬性字串 */
+  function translate(x, y) {
+    return "translate(" + num(x) + " " + num(y) + ")";
+  }
+
+  /** 比例限制在 0～1；非有限數 → 0 */
+  function clampRatio(r) {
+    var v = Number(r);
+    if (!isFinite(v) || v <= 0) return 0;
+    return v >= 1 ? 1 : v;
+  }
+
+  /**
+   * 小船錨點：起點 S 到碼頭 E 的線性內插（AC-64-07、IS-13）。
+   * @param {number} ratio r = min(X ÷ D, 1)
+   * @returns {{x: number, y: number}}
+   */
+  function boatPoint(ratio) {
+    var r = clampRatio(ratio);
+    var S = LAYOUT.route.S;
+    var E = LAYOUT.route.E;
+    return { x: S.x + (E.x - S.x) * r, y: S.y + (E.y - S.y) * r };
+  }
+
+  /** 由描邊屬性組合常用的屬性物件 */
+  function stroked(attrs, width) {
+    attrs.stroke = COLOR.outline;
+    attrs["stroke-width"] = width;
+    attrs["stroke-linejoin"] = "round";
+    return attrs;
+  }
+
+  // ── 各部件（s = dom.svg） ──
+
+  /** 海浪 5 段：外層定位、內層 g.isl-anim-wave 上下擺動 */
+  function waves(s) {
+    return LAYOUT.waves.map(function (w) {
+      return s("g", { class: "isl-wave", transform: translate(w.x, w.y) }, [
+        s("g", { class: "isl-anim-wave" }, [
+          s("path", {
+            d: "M0 3 q8 -6 16 0 q8 6 16 0",
+            fill: "none",
+            stroke: COLOR.wave,
+            "stroke-width": 2.4,
+            "stroke-linecap": "round",
+            opacity: 0.85
+          })
+        ])
+      ]);
+    });
+  }
+
+  /** 半圓弧路徑（左 → 頂 → 右，兩段三次貝茲） */
+  function semicircle(cx, cy, r) {
+    var k = ARC_K * r;
+    return [
+      "M" + num(cx - r) + " " + num(cy),
+      "C" + num(cx - r) + " " + num(cy - k) + " " + num(cx - k) + " " + num(cy - r) + " " + num(cx) + " " + num(cy - r),
+      "C" + num(cx + k) + " " + num(cy - r) + " " + num(cx + r) + " " + num(cy - k) + " " + num(cx + r) + " " + num(cy)
+    ].join(" ");
+  }
+
+  /** 彩虹（只在 rainbow 天氣建立，4 條弧） */
+  function rainbow(s) {
+    var rb = LAYOUT.rainbow;
+    return s("g", { class: "isl-rainbow", fill: "none", "stroke-width": rb.width, "stroke-linecap": "round" },
+      rb.radii.map(function (r, i) {
+        return s("path", { d: semicircle(rb.cx, rb.cy, r), stroke: COLOR.rainbow[i] });
+      }));
+  }
+
+  /** 太陽（笑臉）；陰天時群組 opacity 0.35 */
+  function sun(s, weather) {
+    var su = LAYOUT.sun;
+    var attrs = { class: "isl-sun", transform: translate(su.cx, su.cy) };
+    if (weather === "cloudy") attrs.opacity = CLOUDY_SUN_OPACITY;
+    return s("g", attrs, [
+      s("circle", stroked({ cx: 0, cy: 0, r: su.r, fill: COLOR.sun }, 2.5)),
+      s("circle", { cx: -6, cy: -3, r: 2, fill: COLOR.outline }),
+      s("circle", { cx: 6, cy: -3, r: 2, fill: COLOR.outline }),
+      s("circle", { cx: -11, cy: 4, r: 2.6, fill: COLOR.flower }),
+      s("circle", { cx: 11, cy: 4, r: 2.6, fill: COLOR.flower }),
+      s("path", { d: "M-5 5 Q0 9 5 5", fill: "none", stroke: COLOR.outline, "stroke-width": 2, "stroke-linecap": "round" })
+    ]);
+  }
+
+  /** 雲的路徑（中心 (0,0)，依 scale 縮放） */
+  function cloudPath(scale) {
+    var pts = [
+      ["M", -28, 10],
+      ["C", -38, 10, -38, -2, -28, -2],
+      ["C", -28, -12, -14, -14, -8, -6],
+      ["C", -4, -16, 16, -16, 18, -4],
+      ["C", 28, -6, 36, 2, 30, 10]
+    ];
+    return pts.map(function (seg) {
+      return seg[0] + seg.slice(1).map(function (v) { return num(v * scale); }).join(" ");
+    }).join(" ") + " Z";
+  }
+
+  /** 雲 2 朵：外層定位、內層 g.isl-anim-cloud 水平飄移 */
+  function clouds(s) {
+    return LAYOUT.clouds.map(function (c) {
+      return s("g", { class: "isl-cloud", transform: translate(c.x, c.y) }, [
+        s("g", { class: "isl-anim-cloud" }, [
+          s("path", stroked({ d: cloudPath(c.scale), fill: COLOR.cloud }, 2.4))
+        ])
+      ]);
+    });
+  }
+
+  /** 霧中島（虛線外框、較淡、無植物，AC-64-01） */
+  function fogIsland(s, f) {
+    return s("g", { class: "isl-fog", "data-island": f.island, transform: translate(f.cx, f.cy), opacity: 0.75 }, [
+      s("ellipse", {
+        cx: 0,
+        cy: 0,
+        rx: f.rx,
+        ry: f.ry,
+        fill: COLOR.fogFill,
+        stroke: COLOR.fogStroke,
+        "stroke-width": 2,
+        "stroke-dasharray": "4 4"
+      })
+    ]);
+  }
+
+  /** 航線（白色虛線，端點 = S、E） */
+  function route(s) {
+    var S = LAYOUT.route.S;
+    var E = LAYOUT.route.E;
+    return s("line", {
+      class: "isl-route",
+      x1: S.x,
+      y1: S.y,
+      x2: E.x,
+      y2: E.y,
+      stroke: COLOR.wave,
+      "stroke-width": 3,
+      "stroke-linecap": "round",
+      "stroke-dasharray": "2 7"
+    });
+  }
+
+  // ── 植物（原點 = 底部錨點） ──
+
+  function sprout(s, x, y) {
+    return s("g", { class: "isl-sprout", transform: translate(x, y) }, [
+      s("line", { x1: 0, y1: 0, x2: 0, y2: -10, stroke: COLOR.outline, "stroke-width": 2.2, "stroke-linecap": "round" }),
+      s("path", stroked({ d: "M0 -8 C-4 -8 -8 -11 -8 -16 C-3 -16 0 -12 0 -8 Z", fill: COLOR.leafLight }, 1.8)),
+      s("path", stroked({ d: "M0 -9 C4 -9 8 -12 8 -16 C3 -16 0 -13 0 -9 Z", fill: COLOR.leaf }, 1.8))
+    ]);
+  }
+
+  function palm(s, x, y) {
+    var trunk = "M0 0 C-1 -10 -2 -19 2 -28";
+    return s("g", { class: "isl-palm", transform: translate(x, y) }, [
+      s("g", { class: "isl-anim-sway" }, [
+        s("path", { d: trunk, fill: "none", stroke: COLOR.outline, "stroke-width": 5, "stroke-linecap": "round" }),
+        s("path", { d: trunk, fill: "none", stroke: COLOR.trunk, "stroke-width": 2.6, "stroke-linecap": "round" }),
+        s("path", stroked({ d: "M2 -28 C-5 -36 -13 -34 -17 -27 C-10 -30 -4 -29 2 -26 Z", fill: COLOR.leaf }, 2.2)),
+        s("path", stroked({ d: "M2 -28 C9 -36 17 -34 20 -27 C13 -30 7 -29 2 -26 Z", fill: COLOR.leaf }, 2.2)),
+        s("path", stroked({ d: "M2 -28 C-1 -38 3 -42 9 -42 C6 -38 5 -33 2 -27 Z", fill: COLOR.leafLight }, 2.2)),
+        s("circle", stroked({ cx: 0, cy: -25, r: 2.4, fill: COLOR.coconut }, 1.4)),
+        s("circle", stroked({ cx: 5, cy: -25, r: 2.4, fill: COLOR.coconut }, 1.4))
+      ])
+    ]);
+  }
+
+  function flower(s, x, y) {
+    return s("g", { class: "isl-flower", transform: translate(x, y) }, [
+      s("circle", stroked({ cx: 0, cy: -7, r: 2.6, fill: COLOR.flower }, 1.2)),
+      s("circle", stroked({ cx: -3, cy: -3, r: 2.6, fill: COLOR.flower }, 1.2)),
+      s("circle", stroked({ cx: 3, cy: -3, r: 2.6, fill: COLOR.flower }, 1.2)),
+      s("circle", { cx: 0, cy: -4.5, r: 1.8, fill: COLOR.sun })
+    ]);
+  }
+
+  function hut(s, x, y) {
+    return s("g", { class: "isl-hut", transform: translate(x, y) }, [
+      s("rect", stroked({ x: -10, y: -14, width: 20, height: 14, rx: 2, fill: COLOR.wall }, 2.2)),
+      s("path", stroked({ d: "M-14 -12 L0 -24 L14 -12 Z", fill: COLOR.roof }, 2.2)),
+      s("rect", stroked({ x: -3, y: -9, width: 6, height: 9, rx: 1.5, fill: COLOR.trunk }, 1.8))
+    ]);
+  }
+
+  function flag(s, x, y) {
+    return s("g", { class: "isl-flag", transform: translate(x, y) }, [
+      s("line", { x1: 0, y1: 0, x2: 0, y2: -28, stroke: COLOR.outline, "stroke-width": 2.4, "stroke-linecap": "round" }),
+      s("path", stroked({ d: "M1 -27 L12 -23 L1 -18 Z", fill: COLOR.sun }, 2))
+    ]);
+  }
+
+  /** 碼頭（橘島右側；座標換算為相對島中心） */
+  function dock(s, ox, oy) {
+    var d = LAYOUT.dock;
+    var parts = [s("rect", stroked({ class: "isl-dock", x: d.x - ox, y: d.y - oy, width: d.w, height: d.h, rx: 2, fill: COLOR.trunk }, 2))];
+    d.posts.forEach(function (px) {
+      parts.push(s("line", {
+        x1: px - ox,
+        y1: d.y + d.h - oy,
+        x2: px - ox,
+        y2: d.postBottom - oy,
+        stroke: COLOR.outline,
+        "stroke-width": 2.4,
+        "stroke-linecap": "round"
+      }));
+    });
+    return parts;
+  }
+
+  /**
+   * 一座開放島（沙灘、草地、依階段建立的植物）。
+   * @param {Function} s dom.svg
+   * @param {string} id orange／brown／green
+   * @param {string} stage IslandStage
+   * @param {object} def STAGES 中該階段的定義
+   */
+  function openIsland(s, id, stage, def) {
+    var g = LAYOUT.islands[id];
+    var k = g.rx / LAYOUT.plantBaseRx;
+    var P = LAYOUT.plants;
+    var children = [];
+    if (id === "orange") children = children.concat(dock(s, g.cx, g.cy));
+    children.push(s("ellipse", stroked({ cx: 0, cy: 0, rx: g.rx, ry: g.ry, fill: COLOR.sand }, 2.5)));
+    children.push(s("ellipse", stroked({
+      cx: 0,
+      cy: num(-6 * k),
+      rx: num(g.rx - 14 * k),
+      ry: num(g.ry - 7 * k),
+      fill: COLOR.grass[id]
+    }, 2.2)));
+    function at(pt, fn) {
+      children.push(fn(s, pt[0] * k, pt[1] * k));
+    }
+    var palms = Math.max(0, Math.min(3, def.palms | 0));
+    if (palms > 0) P.palms[palms].forEach(function (pt) { at(pt, palm); });
+    for (var i = 0; i < Math.min(1, def.sprouts | 0); i++) at(P.sprout, sprout);
+    for (var h = 0; h < Math.min(1, def.huts | 0); h++) at(P.hut, hut);
+    for (var f = 0; f < Math.min(1, def.flags | 0); f++) at(P.flag, flag);
+    for (var j = 0; j < Math.min(P.flowers.length, def.flowers | 0); j++) at(P.flowers[j], flower);
+    return s("g", { class: "isl-island", "data-island": id, "data-stage": stage, transform: translate(g.cx, g.cy) }, children);
+  }
+
+  /** 燈塔塔身（built：燈未亮；lit：燈亮） */
+  function tower(s, lit) {
+    return s("g", { class: "isl-lh-tower" }, [
+      s("path", stroked({ d: "M-9 -4 L-6 -46 L6 -46 L9 -4 Z", fill: COLOR.tower }, 2.4)),
+      s("path", { d: "M-8.3 -14 L8.3 -14 L8.9 -6 L-8.9 -6 Z M-7.1 -34 L7.1 -34 L7.6 -26 L-7.6 -26 Z", fill: COLOR.roof }),
+      s("rect", stroked({ x: -8, y: -58, width: 16, height: 12, rx: 3, fill: lit ? COLOR.sun : COLOR.lampOff }, 2.4)),
+      s("path", stroked({ d: "M-10 -58 L0 -68 L10 -58 Z", fill: COLOR.roof }, 2.4))
+    ]);
+  }
+
+  /** 燈塔島（3 種結構，IS-12） */
+  function lighthouse(s, kind) {
+    var L = LAYOUT.lighthouse;
+    var children = [s("ellipse", stroked({ cx: 0, cy: 0, rx: L.rx, ry: L.ry, fill: COLOR.rock }, 2.5))];
+    if (kind === "unbuilt") {
+      // 只有石塊；「待建」牌在文字層，此處只畫牌柱（不碰到牌）
+      var sign = LAYOUT.labels.sign;
+      children.push(s("g", { class: "isl-lh-rocks" }, [
+        s("circle", stroked({ cx: -14, cy: -4, r: 5, fill: COLOR.stone }, 2)),
+        s("circle", stroked({ cx: -2, cy: -6, r: 4, fill: COLOR.stone }, 2)),
+        s("circle", stroked({ cx: 8, cy: -3, r: 3, fill: COLOR.stone }, 2)),
+        s("line", {
+          x1: sign.cx - L.cx,
+          y1: -14,
+          x2: sign.cx - L.cx,
+          y2: -6,
+          stroke: COLOR.outline,
+          "stroke-width": 2,
+          "stroke-linecap": "round"
+        })
+      ]));
+    } else {
+      if (kind === "lit") {
+        children.push(s("g", { class: "isl-lh-beam" }, [
+          s("path", { d: "M-4 -52 L-44 -62 L-44 -42 Z", fill: COLOR.beam, opacity: 0.85 }),
+          s("path", { d: "M4 -52 L44 -62 L44 -42 Z", fill: COLOR.beam, opacity: 0.85 })
+        ]));
+      }
+      children.push(tower(s, kind === "lit"));
+    }
+    return s("g", { class: "isl-lighthouse", "data-state": kind, transform: translate(L.cx, L.cy) }, children);
+  }
+
+  /** 小船：外層以 transform 屬性定位，內層 g.isl-anim-boat 上下擺動 */
+  function boat(s, ratio) {
+    var p = boatPoint(ratio);
+    return s("g", { class: "isl-boat", "data-ratio": String(ratio), transform: translate(p.x, p.y) }, [
+      s("g", { class: "isl-anim-boat" }, [
+        s("path", stroked({ d: "M-16 0 L16 0 L11 9 L-11 9 Z", fill: COLOR.roof }, 2.4)),
+        s("line", { x1: 0, y1: 0, x2: 0, y2: -24, stroke: COLOR.outline, "stroke-width": 2.4, "stroke-linecap": "round" }),
+        s("path", stroked({ d: "M1 -23 L14 -4 L1 -4 Z", fill: COLOR.sail }, 2.2))
+      ])
+    ]);
+  }
+
+  /** 一段文字與其白底牌 */
+  function label(s, key, text) {
+    var b = LAYOUT.labels[key];
+    var t = s("text", {
+      x: b.cx,
+      y: b.cy + LABEL_BASELINE_DY,
+      "text-anchor": "middle",
+      "font-size": LABEL_FONT_SIZE,
+      "font-weight": LABEL_FONT_WEIGHT,
+      fill: COLOR.text
+    });
+    t.textContent = String(text);
+    return s("g", { class: "isl-label", "data-label": key }, [
+      s("rect", {
+        x: b.cx - b.w / 2,
+        y: b.cy - b.h / 2,
+        width: b.w,
+        height: b.h,
+        rx: 8,
+        fill: COLOR.plate,
+        stroke: COLOR.outline,
+        "stroke-width": 1.5
+      }),
+      t
+    ]);
+  }
+
+  /** 文字層（最上層；IA-3） */
+  function labels(s, island, lhKind) {
+    var T = island.TEXTS;
+    var parts = FOG_ISLANDS.map(function (id) {
+      return label(s, id, island.fillText(T.fogMapLabel, { island: T.islandName[id] }));
+    });
+    ["green", "brown", "orange"].forEach(function (id) {
+      parts.push(label(s, id, T.islandName[id]));
+    });
+    parts.push(label(s, "lighthouse", T.lighthouseMapLabel));
+    if (lhKind === "unbuilt") parts.push(label(s, "sign", T.lighthouseUnbuiltSign));
+    return s("g", { class: "isl-labels" }, parts);
+  }
+
+  /** 取出某島的階段（不合法 → sand） */
+  function stageOfIsland(st, id) {
+    var list = st && Array.isArray(st.islands) ? st.islands : [];
+    for (var i = 0; i < list.length; i++) {
+      var it = list[i];
+      if (it && it.island === id) return STAGE_IDS.indexOf(it.stage) >= 0 ? it.stage : "sand";
+    }
+    return "sand";
+  }
+
+  /** 依階段代碼找 STAGES 定義 */
+  function stageDef(island, stage) {
+    for (var i = 0; i < island.STAGES.length; i++) {
+      if (island.STAGES[i].stage === stage) return island.STAGES[i];
+    }
+    return island.STAGES[0];
+  }
+
+  /**
+   * 影響圖形的值的正規化（build 與 signature 共用同一份，避免兩者分歧，§7.32.15 P-1）。
+   * 不認得的天氣 → cloudy、燈塔 → unbuilt、比例夾在 0～1、小船種類不合法時依比例推導、階段不合法 → sand。
+   * @param {object} st IslandState
+   * @returns {{src: object, weather: string, lighthouse: string, ratio: number, boat: string,
+   *            stages: {green: string, brown: string, orange: string}}}
+   */
+  function normalize(st) {
+    var src = st && typeof st === "object" ? st : {};
+    var ratio = clampRatio(src.boatRatio);
+    var stages = {};
+    LAYOUT.islandOrder.forEach(function (id) { stages[id] = stageOfIsland(src, id); });
+    return {
+      src: src,
+      weather: WEATHERS.indexOf(src.weather) >= 0 ? src.weather : "cloudy",
+      lighthouse: LIGHTHOUSES.indexOf(src.lighthouse) >= 0 ? src.lighthouse : "unbuilt",
+      ratio: ratio,
+      boat: BOATS.indexOf(src.boat) >= 0 ? src.boat : ratio >= 1 ? "docked" : "sailing",
+      stages: stages
+    };
+  }
+
+  /**
+   * 圖形簽章（§4.16、§7.32.15 P-1）：天氣、燈塔、小船種類、String(boatRatio)、綠／棕／橘三島階段。
+   * 兩個 st 的簽章相同 ⇔ build 產生的 svg 子樹相同（外層 aria-label 不屬簽章）。
+   * 純函式、不建 DOM、不取用其他模組。
+   * @param {object} st IslandState
+   * @returns {string}
+   */
+  function signature(st) {
+    var g = normalize(st);
+    var parts = [g.weather, g.lighthouse, g.boat, String(g.ratio)];
+    LAYOUT.islandOrder.forEach(function (id) { parts.push(id + ":" + g.stages[id]); });
+    return parts.join("|");
+  }
+
+  /** 是否帶有指定 class（SVG 以 class 屬性為準；無 classList 時的後備） */
+  function hasClassName(node, name) {
+    if (node.classList && typeof node.classList.contains === "function") return node.classList.contains(name);
+    var raw = typeof node.getAttribute === "function" ? node.getAttribute("class") : "";
+    return String(raw || "").split(/\s+/).indexOf(name) >= 0;
+  }
+
+  /** 在 root 的子孫中找第 1 個 svg.isl-map（深度優先；找不到 → null） */
+  function findMapSvg(root) {
+    if (typeof root.querySelector === "function") return root.querySelector("svg.isl-map");
+    var kids = root.childNodes || [];
+    for (var i = 0; i < kids.length; i++) {
+      var n = kids[i];
+      if (!n || n.nodeType !== 1) continue;
+      if (String(n.tagName).toLowerCase() === "svg" && hasClassName(n, "isl-map")) return n;
+      var hit = findMapSvg(n);
+      if (hit) return hit;
+    }
+    return null;
+  }
+
+  /**
+   * 同步地圖動畫 class（§4.16、§7.32.8「重播」）：figure 內的 svg.isl-map 依 play === true 加上或移除 isl-map--play。
+   * figure 不是元素或找不到 svg.isl-map → 不做事、不拋例外；不建立或移除任何節點。
+   * @param {Element} figure build 回傳的 div.db-map__figure
+   * @param {boolean} play
+   */
+  function setPlay(figure, play) {
+    if (!figure || typeof figure !== "object" || figure.nodeType !== 1) return;
+    var svgEl = findMapSvg(figure);
+    if (!svgEl) return;
+    var on = play === true;
+    if (svgEl.classList && typeof svgEl.classList.toggle === "function") {
+      svgEl.classList.toggle("isl-map--play", on);
+      return;
+    }
+    // 無 classList 時改寫 class 屬性（保留其他 class 的順序）
+    var list = String(svgEl.getAttribute("class") || "").split(/\s+/).filter(function (c) {
+      return c && c !== "isl-map--play";
+    });
+    if (on) list.push("isl-map--play");
+    svgEl.setAttribute("class", list.join(" "));
+  }
+
+  /**
+   * 建立群島地圖。
+   * @param {object} st IslandState（core/island.js state() 的結果）
+   * @param {{ play?: boolean }} [opts] play === true 才播放 4 種裝飾動畫
+   * @returns {HTMLDivElement}
+   */
+  function build(st, opts) {
+    var dom = core("dom");
+    var island = core("island");
+    var s = dom.svg;
+    var g = normalize(st);
+    var src = g.src;
+    var weather = g.weather;
+    var lhKind = g.lighthouse;
+    var ratio = g.ratio;
+    var boatKind = g.boat;
+
+    var children = [s("rect", {
+      class: "isl-sea",
+      x: LAYOUT.sea.x,
+      y: LAYOUT.sea.y,
+      width: LAYOUT.sea.w,
+      height: LAYOUT.sea.h,
+      fill: COLOR.sea
+    })];
+    children = children.concat(waves(s));
+    if (weather === "rainbow") children.push(rainbow(s));
+    children.push(sun(s, weather));
+    children = children.concat(clouds(s));
+    LAYOUT.fog.forEach(function (f) { children.push(fogIsland(s, f)); });
+    children.push(route(s));
+    LAYOUT.islandOrder.forEach(function (id) {
+      var stage = g.stages[id];
+      children.push(openIsland(s, id, stage, stageDef(island, stage)));
+    });
+    children.push(lighthouse(s, lhKind));
+    children.push(boat(s, ratio));
+    children.push(labels(s, island, lhKind));
+
+    var cls = "isl-map" + (opts && opts.play === true ? " isl-map--play" : "");
+    var svgEl = s("svg", {
+      class: cls,
+      viewBox: "0 0 " + VIEWBOX.w + " " + VIEWBOX.h,
+      "aria-hidden": "true",
+      focusable: "false",
+      "data-weather": weather,
+      "data-lighthouse": lhKind,
+      "data-boat": boatKind
+    }, children);
+
+    return dom.el("div", {
+      className: "db-map__figure",
+      attrs: { role: "img", "aria-label": island.mapAltText(src) }
+    }, [svgEl]);
+  }
+
+  return {
+    VIEWBOX: VIEWBOX,
+    LAYOUT: LAYOUT,
+    boatPoint: boatPoint,
+    build: build,
+    signature: signature,
+    setPlay: setPlay
+  };
+});
+
 /* ui/motion.js */
 /*
  * ui/motion.js — 減少動態判斷與動畫 class 加上／移除（FE-24）
@@ -15178,7 +17250,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     // （FE-40）切換難易度初始化確認視窗（AC-32-01、Q-38；architecture.md §7.15 確認視窗表）
     reinitTitle: "切換難易度",
     reinitLine1: "目前已有學習統計資料，切換難易度將初始化學習紀錄。",
-    reinitLine2: "建議先按「取消」，到主控台按「匯出備份」保存目前紀錄。",
+    // （v0.19，FE-104；AC-32-01、AC-63-02）導覽名稱改為「群島」
+    reinitLine2: "建議先按「取消」，到「群島」頁按「匯出備份」保存目前紀錄。",
     reinitOk: "確定",
     reinitCancel: "取消",
     applyFailed: "儲存空間不足，未套用",
@@ -15991,38 +18064,47 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
 /* views/dashboard.js */
 /*
- * views/dashboard.js — 學習主控台與備份匯出／匯入（FE-08；FE-31 今日學習進度；v0.12 FE-58 主控台改版）
- * 依據：architecture.md §4.2、§7.5、v0.4 §7.7、§7.11、§9；v0.8 §4.8「views/dashboard.js」、§7.19.4（DOM 樹與表格）、§7.19.10；
+ * views/dashboard.js — 群島頁（原主控台）與備份匯出／匯入（FE-08；FE-31 今日學習進度；v0.12 FE-58；v0.19 FE-108 群島頁改版）
+ * 依據：architecture.md §4.2、§7.5、v0.4 §7.7、§9；v0.8 §4.8「views/dashboard.js」、§7.19.10；
+ *       v0.20 §4.16「views/dashboard.js」、§7.32.2～§7.32.6、§7.32.8、§7.32.10、§7.32.11、§7.32.13；
+ *       v0.21 §7.32.15 效能修正 P-1～P-3（FE-116）；
  *       契約 GoalState、StreakState、Part5Progress、BackupFile、ImportResult、COLOR_LEVELS、TodayLearnedState、LearnedHistory、
- *       DASHBOARD_CHART_DAYS、RuntimeState.dashboard、LAYOUT_TEXTS 主控台段；
- *       README §5.4 LR-6 與 v0.12 段、§6.1、§6.2（IM-1～IM-5）、§10.8 IN-1（v0.12）、§10.9 NT-1、§11.4 DB-1～DB-6、C-7
- * 涵蓋：US-17、US-24、US-30、US-39；AC-39-01～AC-39-10、AC-17-01、AC-17-06、AC-24-01、AC-24-03～AC-24-12、
- *       AC-30-01、AC-30-05、AC-30-07、AC-30-08、AC-30-10、AC-30-12、AC-31-03、AC-34-07、AC-34-08、AC-38-*
+ *       DASHBOARD_CHART_DAYS、RuntimeState.dashboard、LAYOUT_TEXTS 群島頁段、§19 ISLAND_TEXTS；
+ *       README §5.4 LR-6 與 v0.12 段、§6.1、§6.2（IM-1～IM-5）、§10.8 IN-1（v0.12）、§10.9 NT-1、§11.4 DB-1～DB-6、
+ *       §15.1 IS-1～IS-3、§15.4 IS-14～IS-16、§15.6 IA-1、IA-2、IA-5、IA-6、C-7
+ * 涵蓋：US-17、US-24、US-30、US-39、US-63～US-67、US-70、US-71；AC-39-01～AC-39-10、AC-17-01、AC-17-06、AC-24-01、
+ *       AC-24-03～AC-24-12、AC-30-01、AC-30-05、AC-30-07、AC-30-08、AC-30-10、AC-30-12、AC-31-03、AC-34-07、AC-34-08、
+ *       AC-38-*、AC-63-01～AC-63-05、AC-64-01、AC-64-09、AC-64-10、AC-65-01～AC-65-04、AC-66-01～AC-66-04、
+ *       AC-67-01、AC-67-02、AC-70-01、AC-70-02、AC-71-02、AC-71-03、AC-72-02
  *
- * 畫面（v0.12，DOM 順序 = 畫面順序 = Tab 順序；DB-1）：
- * - h2「學習主控台」
- * - (1) 今日任務卡 section.card.db-today：h3「今日任務」→ 列（主環形圖 88px：中央只顯示 X，SD-FB-40；
- *   右側「今日已學 X / D 字」、「今日目標達成」、button「開始今日學習」[data-go=flashcards]）→ 目標行
- *   （色點 + layout.goalLineText + button.btn.db-change「變更」[data-go=customizer]；v0.14 起只依生效色級，DB-4）
- * - （v0.9，FE-66；契約 v0.14 DB-4、AC-39-04、Q-61）目標行一律以生效色級組字（藍、金套用時為「綠級・每日 15 字」），
- *   不再顯示目標與生效兩個色級的對照註記與「・」分隔；色點亦依生效色級；「變更」改為外框按鈕（10-dashboard.css）。
- * - (2) 3 格數據 section.card.db-stats（aria-label「學習數據」）：連續打卡天數（強調橘圖示 + 數字 + 天）→
- *   單字掌握率（大字 % + 小字「已掌握 N 字」）→ 模擬測驗已答對行（v0.19）；無資料「—」（DB-5）
- * - (3) 近 7 天圖表 section.card.db-chart：ol.db-bars（7 根）或空狀態「開始學習後會顯示紀錄」（layout.chartIsEmpty）
- * - (4) 「資料備份」收合區塊 section.card.db-backup：標題列 toggle（aria-expanded = runtime.dashboard.backupExpanded）→
- *   展開區：備份說明 → 「匯出備份」「匯入備份」→ NT-1 → 「安裝 App」（IN-1）→ 隱藏 file input（DB-6）
- * - 移除：功能入口（ENTRIES）、學習統計、目前目標、2 個小環形圖、「今日學習進度」標題；本體不再有 data-go="sources"
+ * 畫面（v0.19 FE-108，DOM 順序 = 畫面順序 = Tab 順序；DB-1、§7.32.2）：
+ * - 標題列 div.db-head：h2「我的群島」（左側 islandArt.titleDeco，aria-hidden）＋ 目標標籤 p.db-goal
+ *   （膠囊 span.db-goal__tag：色點 + layout.goalLineText；button.btn.db-change「變更」[data-go=customizer]；只依生效色級，DB-4）
+ * - (1) 今日任務卡 section.card.db-today：h3.visually-hidden「今日任務」（SD-FB-107）→ 龜龜 + 「島主 龜龜」+ 對話框（IS-14）
+ *   → 今日進度列「今日已學 X / D 字」+ 橫向 progressbar（IS-15）+「今日目標達成」→ button「開始今日學習」[data-go=flashcards]
+ * - (2) 地圖 div.card.db-map：內含 islandMap.build 的 div[role=img]；islandMap.signature 相同就沿用同一節點，
+ *   show() 只以 setPlay 同步動畫 class（重播靠頁面 hidden 切換，§7.32.8「重播」；FE-116 P-1）
+ * - (3) 島嶼清單 section.db-isles：h3「島嶼」+ 5 列（island.listRowOf × 3、fogRowOf × 2；IA-2）
+ * - (4) 3 格數據 section.db-stats（aria-label「學習數據」）：連續打卡天數 + 天氣行 → 單字掌握率 + 「已掌握 N 字」
+ *   → 模擬測驗已答對行 + 燈塔行（DB-5）；每格為區塊卡片樣式
+ * - (5) 近 7 天圖表 section.card.db-chart；(6) 「資料備份」收合區塊 section.card.db-backup（DB-6，既有）
+ * - 移除：主環形圖（含幾何與樣式）、未使用的頁面標題文字常數；本體不再有 data-go="sources"
+ * - 單一來源（IS-3）：對話框、今日進度列、地圖、清單、3 格狀態行、地圖 aria-label 全部取自同一次 dashboardModel 的 island。
+ * - 島嶼狀態每次繪製即時推算，不寫入任何儲存（IS-1、IS-2）；地圖與清單無事件、無 tabindex（AC-64-10）。
  * - 「開始今日學習」「變更」只以 [data-go] 交給 router（view 不呼叫 setTab 或任何寫入 action）；
  *   toggle 只呼叫 store.actions.setBackupExpanded（不寫 localStorage）；訂閱 "dashboard" tag 時只更新 aria-expanded、
  *   展開區 hidden 與安裝區，節點不重建（焦點留在 toggle）
- * 所有文字以 textContent 呈現（經 core/dom.js）；版面文字於呼叫時取 EMT.core.layout（LD-2）。
+ * 所有文字以 textContent／setAttribute 呈現（經 core/dom.js；IA-6）；版面文字於呼叫時取 EMT.core.layout（LD-2）。
  *
  * （v0.19，FE-84；architecture.md v0.14 §7.25.1、§7.25.2；契約 README §13.1 AS-1、AS-3、AS-4、AS-7、§11.4 DB-5、DS-51；
- *   AC-49-01、AC-49-02、AC-49-04、AC-49-08）第 3 格改為標籤「模擬測驗」與已答對行（K、Q、P 由 part5flow.answeredSummary 計算，
+ *   AC-49-01、AC-49-02、AC-49-04、AC-49-08）第 3 格為標籤「模擬測驗」與已答對行（K、Q、P 由 part5flow.answeredSummary 計算，
  *   與模擬測驗頁同一份題庫與同一個函式）；Q = 0 顯示 statNoData。totalAnswered、totalCorrect 照常保存但不再顯示。
  *
- * 寫法：純邏輯（dashboardModel、goalInfoOf、importMessage、progressModel、ringGeometry）以 module.exports 匯出供 Node 測試；
- * 瀏覽器下登錄 EMT.views "dashboard"，載入時不操作 DOM。
+ * - （FE-116，§7.32.15）清單 5 列內容鍵相同不重建（P-2）；頁面隱藏期間的 PROGRESS_TAGS 通知不同步繪製，
+ *   改以閒置排程預先重算、重建（P-3；idleScheduler）；show() 一律以當下狀態重算（AC-64-09）。
+ *
+ * 寫法：純邏輯（dashboardModel、goalInfoOf、importMessage、progressModel、contentSnapshot、idleScheduler）以 module.exports
+ * 匯出供 Node 測試；瀏覽器下登錄 EMT.views "dashboard"，載入時不操作 DOM。
  */
 (function (root, factory) {
   var api = factory(root);
@@ -16048,13 +18130,26 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         STREAK: require("../core/streak.js"),
         LEARN: require("../core/learning.js"),
         LAY: require("../core/layout.js"),
-        PF: require("../core/part5flow.js")
+        PF: require("../core/part5flow.js"),
+        ISL: require("../core/island.js")
       };
     } else {
       var c = root.EMT.core;
-      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, LEARN: c.learning, LAY: c.layout, PF: c.part5flow };
+      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, LEARN: c.learning, LAY: c.layout, PF: c.part5flow,
+        ISL: c.island };
+    }
+    if (!coreCache.ISL) {
+      coreCache = null;
+      throw new Error("EMT.core.island 未載入（views/dashboard.js）");
     }
     return coreCache;
+  }
+
+  /** （v0.19，FE-108）取得 ui 模組 islandMap／islandArt（瀏覽器下呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function uiModule(name) {
+    var m = root && root.EMT && root.EMT.ui ? root.EMT.ui[name] : null;
+    if (!m) throw new Error("EMT.ui." + name + " 未載入（views/dashboard.js）");
+    return m;
   }
 
   /** （v0.11，FE-51）取得 core/pwa（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
@@ -16081,10 +18176,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return false;
   }
 
-  // ── 畫面文字（AC 引號內文案逐字使用；v0.12 主控台版面文字取 EMT.core.layout.LAYOUT_TEXTS）──
+  // ── 畫面文字（AC 引號內文案逐字使用；v0.12 起群島頁版面文字取 EMT.core.layout.LAYOUT_TEXTS）──
   var TEXT = {
-    title: "學習主控台",
-    // （v0.12，SD-FB-41）今日任務卡標題、3 格數據區的 aria-label、近 7 天圖表標題
+    // （v0.12，SD-FB-41）今日任務卡標題（v0.19 起只給螢幕閱讀器，SD-FB-107）、3 格數據區的 aria-label、近 7 天圖表標題
     todayTitle: "今日任務",
     statsLabel: "學習數據",
     chartTitle: "近 7 天已學字數",
@@ -16108,14 +18202,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     empty: "—"
   };
 
-  /**
-   * 環形圖幾何（SVG viewBox 0 0 120 120；半徑 52、線寬 12；CSS 縮為 88px）。
-   * 以周長作為 stroke-dasharray，stroke-dashoffset = 周長 × (1 − 比例) 表示填滿比例。
-   */
-  var RING = Object.freeze({ size: 120, r: 52, stroke: 12 });
-  var RING_CIRC = 2 * Math.PI * RING.r;
-
-  /** 會影響今日任務卡、3 格數據、近 7 天圖表的 store tag（AC-30-07 (b)：show() 時另外重繪；v0.12 加 "dashboard"） */
+  /** 會影響今日任務卡、地圖、島嶼清單、3 格數據、近 7 天圖表的 store tag（AC-30-07 (b)：show() 時另外重繪；v0.12 加 "dashboard"） */
   var PROGRESS_TAGS = ["init", "learning", "goal", "studySet", "customVocab", "part5", "flashcard", "stats", "streak",
     "storage", "dashboard"];
 
@@ -16206,18 +18293,33 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return typeof p === "number" && isFinite(p) ? p + "%" : TEXT.empty;
   }
 
+  /** 0～1 比例 → 百分比數值（小數 1 位，供 style.width；異常值 → 0） */
+  function ratioPct(ratio) {
+    return Math.round(clampRatio(ratio) * 1000) / 10;
+  }
+
   /**
-   * 環形圖的 stroke-dasharray／stroke-dashoffset（AC-30-05、AC-30-10）。
-   * @param {number} ratio 0～1（超出夾住；異常值視為 0，即空環）
-   * @returns {{ dasharray: string, dashoffset: string }}
+   * （v0.19，FE-108）島嶼推算用的內容快照 { builtin, builtinMap, nB, nG }（§4.16）。
+   * content 省略（undefined／null）時取 EMT.content；都沒有或欄位缺漏 → 空字庫（三島 n = 0、P 為 null），不拋例外（C-6）。
+   * 只讀不寫；回傳值不保存（IS-1）。
+   * @param {*} [content]
+   * @returns {{ builtin: Array, builtinMap: (Map|null), nB: number, nG: number }}
    */
-  function ringGeometry(ratio) {
-    var r = clampRatio(ratio);
-    // 取到小數 3 位，避免屬性值出現過長浮點數
-    return {
-      dasharray: RING_CIRC.toFixed(3),
-      dashoffset: (RING_CIRC * (1 - r)).toFixed(3)
-    };
+  function contentSnapshot(content) {
+    var out = { builtin: [], builtinMap: null, nB: 0, nG: 0 };
+    var c = content;
+    try {
+      if (c === undefined || c === null) c = root && root.EMT ? root.EMT.content : null;
+      if (!c || typeof c !== "object") return out;
+      if (Array.isArray(c.builtin)) out.builtin = c.builtin;
+      if (c.builtinMap && typeof c.builtinMap.get === "function") out.builtinMap = c.builtinMap;
+      if (typeof c.nB === "number" && isFinite(c.nB)) out.nB = c.nB;
+      if (typeof c.nG === "number" && isFinite(c.nG)) out.nG = c.nG;
+    } catch (e) {
+      // getter 例外：視為內容缺漏
+      return { builtin: [], builtinMap: null, nB: 0, nG: 0 };
+    }
+    return out;
   }
 
   /** （v0.19，FE-84）模擬測驗題庫：與 views/part5.js 相同的取得方式（AS-1）；取不到 → 空題庫 */
@@ -16228,7 +18330,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   /**
    * 今日進度、掌握率、已答對行與近 7 天長條的計算值（FE-31；契約 README §5.4 LR-6）。dashboardModel 由此組出畫面文字。
-   * - 主環：X = learning.todayCount、D = learning.dailyGoal(生效色級)；X 可超過 D；X ≥ D → done、滿圈。
+   * - 今日進度：X = learning.todayCount、D = learning.dailyGoal(生效色級)；X 可超過 D；X ≥ D → done、進度條填滿。
    * - 掌握率 = learning.masteryRate(runtime.studySet, data.masteredWordKeys)；
    *   已答對行 = part5flow.answeredSummary(題庫 id, part5CorrectIds)（AS-1～AS-4）；Q = 0 → statNoData「—」。
    * - 長條：learning.chartSeries(learnedHistory, X, today)，由舊到新 7 筆；高度 = 字數 ÷ 最大字數（全 0 → 0）。
@@ -16237,7 +18339,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    * @param {string} today 本地日期 YYYY-MM-DD（store.today()）
    * @param {*} [bank] 模擬測驗題庫；省略時取 EMT.content.part5
    * @returns {{
-   *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
+   *   today: { x: number, d: number, done: boolean, ratio: number, valueNow: number, fillPct: number, text: string, doneText: string },
    *   mastery: { label: string, numer: number, denom: number, percent: (number|null), ratio: number, text: string },
    *   answered: { label: string, summary: ({k: number, q: number, p: number}|null), text: string },
    *   bars: { date: string, label: string, count: number, heightPct: number, isToday: boolean }[],
@@ -16252,21 +18354,23 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     var d = st.data && typeof st.data === "object" ? st.data : {};
     var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
 
-    // 主環形圖（AC-30-01、AC-30-02、AC-30-05、AC-30-07）
+    // 今日進度列（AC-30-01、AC-30-02、AC-30-05、AC-30-07；v0.19 IS-15 橫向進度條）
     var x = L.todayCount(d.todayLearned || null, today);
     // 生效色級與「每日新字量」同一推導（goalInfoOf；R-14：依生效色級）
     var effectiveId = goalInfoOf(d.goal || null).effectiveColorId;
     var goal = L.dailyGoal(effectiveId);
     var done = x >= goal;
+    var ratio = done ? 1 : clampRatio(x / goal);
     var todayModel = {
       x: x,
       d: goal,
       done: done,
-      ratio: done ? 1 : clampRatio(x / goal),
-      // 「今日已學 X / D 字」（LAYOUT_TEXTS.todayRing；AC-39-02）
+      ratio: ratio,
+      // progressbar 的 aria-valuenow = min(X, D)；填滿寬度（%）= r × 100（IS-15）
+      valueNow: Math.min(x, goal),
+      fillPct: ratioPct(ratio),
+      // 「今日已學 X / D 字」（LAYOUT_TEXTS.todayRing；AC-39-02）；畫面只出現 1 次，進度條以 aria-valuetext 重述（AC-39-06）
       text: K.LAY.fill(LT.todayRing, { x: K.LAY.formatInt(x), d: K.LAY.formatInt(goal) }),
-      // （v0.12，SD-FB-40）環形圖中央只顯示 X，「X / D」在畫面只出現 1 次（AC-39-06）
-      centerText: K.LAY.formatInt(x),
       doneText: done ? TEXT.goalDone : ""
     };
 
@@ -16314,22 +18418,55 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   }
 
   /**
-   * （v0.12，FE-58）主控台全部顯示值（architecture.md §4.8；契約 DB-2～DB-6）。文字全部經 EMT.core.layout。
+   * （v0.19，FE-108）島嶼清單 5 列（IA-2；順序 island.LIST_ORDER）：開放島 listRowOf、霧中島 fogRowOf。
+   * 每列多帶 id（島嶼代碼）與 fillPct（進度條填滿 %；P 為 null 或霧中島 → 0）。
+   * @param {object} ISL core/island.js
+   * @param {object} st IslandState
+   * @returns {object[]}
+   */
+  function islesOf(ISL, st) {
+    var open = {};
+    (st && Array.isArray(st.islands) ? st.islands : []).forEach(function (pr) {
+      if (pr && typeof pr.island === "string") open[pr.island] = pr;
+    });
+    return ISL.LIST_ORDER.map(function (id) {
+      var row = open[id] ? ISL.listRowOf(open[id]) : ISL.fogRowOf(id);
+      return {
+        id: id,
+        name: row.name,
+        sub: row.sub,
+        right: row.right,
+        stageText: row.stageText,
+        valueNow: row.valueNow,
+        label: row.label,
+        fog: row.fog,
+        fillPct: typeof row.valueNow === "number" ? row.valueNow : 0
+      };
+    });
+  }
+
+  /**
+   * （v0.12，FE-58；v0.19 FE-108）群島頁全部顯示值（architecture.md §4.8、§4.16、§7.32.1；契約 DB-2～DB-6、IS-3）。
+   * 文字全部經 EMT.core.layout 與 EMT.core.island。島嶼值每次呼叫即時推算，不寫入任何儲存（IS-1）。
    * @param {{data: object, runtime: object}|null} state store.getState() 的結果
    * @param {string} today 本地日期 YYYY-MM-DD
    * @param {*} [bank] 模擬測驗題庫；省略時取 EMT.content.part5
+   * @param {*} [content] 內容快照 { builtin, builtinMap, nB, nG }；省略時取 EMT.content（都沒有 → 三島 n = 0、P null）
    * @returns {{
-   *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
+   *   today: { x: number, d: number, done: boolean, ratio: number, valueNow: number, fillPct: number, text: string, doneText: string },
    *   goal: { text: string, colorId: (string|null) },
-   *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, answeredText: string },
+   *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, answeredText: string,
+   *            weatherText: string, lighthouseText: string },
    *   chart: { empty: boolean, bars: object[] },
-   *   backupExpanded: boolean
+   *   backupExpanded: boolean,
+   *   island: object, dialog: string, isles: object[], mapAlt: string
    * }}
    */
-  function dashboardModel(state, today, bank) {
+  function dashboardModel(state, today, bank, content) {
     var K = core();
     var LAY = K.LAY;
     var LT = LAY.LAYOUT_TEXTS;
+    var ISL = K.ISL;
     var st = state && typeof state === "object" ? state : {};
     var d = st.data && typeof st.data === "object" ? st.data : {};
     var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
@@ -16342,6 +18479,23 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     var streakDays = K.STREAK.displayDays(d.streak || null, today);
     var masteredN = Array.isArray(d.masteredWordKeys) ? d.masteredWordKeys.length : 0;
 
+    // 島嶼（IS-3 單一來源）：S、K、Q、X、D 與 3 格、今日進度列同一組值；Q = 0 時 K = 0
+    var ct = contentSnapshot(content);
+    var sum = p.answered.summary;
+    var island = ISL.state({
+      builtin: ct.builtin,
+      builtinMap: ct.builtinMap,
+      nB: ct.nB,
+      nG: ct.nG,
+      masteredWordKeys: d.masteredWordKeys,
+      effectiveColor: info.effectiveColorId,
+      streakDays: streakDays,
+      k: sum ? sum.k : 0,
+      q: sum ? sum.q : 0,
+      x: p.today.x,
+      d: p.today.d
+    });
+
     return {
       today: p.today,
       goal: { text: LAY.goalLineText(K.GOAL.levelOf(info.effectiveColorId)), colorId: info.effectiveColorId },
@@ -16350,13 +18504,20 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         streakUnit: LT.statStreakUnit,
         masteryText: p.mastery.text,
         masteredText: LAY.fill(LT.statMasteredCount, { n: LAY.formatInt(masteredN) }),
-        answeredText: p.answered.text
+        answeredText: p.answered.text,
+        // 第 1 格天氣行（IS-11）、第 3 格燈塔行（IS-12）
+        weatherText: ISL.weatherText(island.weather),
+        lighthouseText: ISL.lighthouseText(island.lighthouse)
       },
       chart: {
         empty: LAY.chartIsEmpty(p.bars.map(function (b) { return b.count; })),
         bars: p.bars
       },
-      backupExpanded: !!(rt.dashboard && rt.dashboard.backupExpanded === true)
+      backupExpanded: !!(rt.dashboard && rt.dashboard.backupExpanded === true),
+      island: island,
+      dialog: ISL.dialogText(island),
+      isles: islesOf(ISL, island),
+      mapAlt: ISL.mapAltText(island)
     };
   }
 
@@ -16369,17 +18530,73 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return false;
   }
 
+  /** （FE-116，§7.32.15）閒置排程：requestIdleCallback 的 timeout 與 setTimeout 後備的延遲（毫秒） */
+  var IDLE_TIMEOUT_MS = 500;
+  var IDLE_FALLBACK_MS = 100;
+
+  /**
+   * （FE-116，§7.32.15 P-3）依 host 上可用的 API 建立閒置排程器：
+   * - 有 requestIdleCallback → request(fn) = requestIdleCallback(fn, { timeout: 500 })，cancel 用 cancelIdleCallback
+   * - 否則有 setTimeout → request(fn) = setTimeout(fn, 100)，cancel 用 clearTimeout
+   * - 兩者皆無 → request 回 null、不執行 fn
+   * cancel(null／undefined) 不做事。API 以 host 為 this 呼叫；不產生、不控制任何動畫格。
+   * @param {*} host 通常為 window／self
+   * @returns {{ request: function(Function): *, cancel: function(*): void }}
+   */
+  function idleScheduler(host) {
+    var h = host && (typeof host === "object" || typeof host === "function") ? host : null;
+    if (h && typeof h.requestIdleCallback === "function") {
+      return {
+        request: function (fn) { return h.requestIdleCallback(fn, { timeout: IDLE_TIMEOUT_MS }); },
+        cancel: function (handle) {
+          if (handle === null || handle === undefined) return;
+          if (typeof h.cancelIdleCallback === "function") h.cancelIdleCallback(handle);
+        }
+      };
+    }
+    if (h && typeof h.setTimeout === "function") {
+      return {
+        request: function (fn) { return h.setTimeout(fn, IDLE_FALLBACK_MS); },
+        cancel: function (handle) {
+          if (handle === null || handle === undefined) return;
+          if (typeof h.clearTimeout === "function") h.clearTimeout(handle);
+        }
+      };
+    }
+    return {
+      request: function () { return null; },
+      cancel: function () {}
+    };
+  }
+
   // ── 畫面 ──
 
   /**
-   * 建立主控台頁面模組（瀏覽器用）。
+   * 建立群島頁頁面模組（瀏覽器用）。
+   * @param {{ idle?: { request: function(Function): *, cancel: function(*): void } }} [opts]
+   *   idle：（FE-116）閒置排程器替身（單元測試注入）；省略時用 idleScheduler(root)
    * @returns {{ mount: function(Element): void, show: function(): void, hide: function(): void }}
    */
-  function createView() {
+  function createView(opts) {
     var EMT = root.EMT;
     var refs = null;     // 需要更新的節點
     var busy = false;    // 匯入或匯出進行中
     var unsubscribe = null;
+    var visible = false; // 群島頁是否正在顯示（show 後為 true、hide 後為 false）
+    // （FE-116，§7.32.15）以下狀態只在本模組，不進 store、不持久化
+    var mapFig = null;   // 目前的地圖節點（islandMap.build 回傳的 div.db-map__figure）
+    var mapSig = null;   // 目前地圖節點的簽章（islandMap.signature）
+    var mapAlt = null;   // 目前地圖節點的 aria-label
+    var islesKey = null; // 目前清單 5 列的內容鍵（JSON.stringify(m.isles)）
+    var dirty = false;   // 隱藏期間收到 PROGRESS_TAGS 後為 true；prepare 或 show 繪製完成後為 false
+    var idle = null;     // 待執行的閒置排程 { api, handle, done }；無則 null
+    var idleApiCache = opts && opts.idle && typeof opts.idle.request === "function" ? opts.idle : null;
+
+    /** 閒置排程器（opts.idle 優先；否則依 root 建立，呼叫時才取用） */
+    function idleApi() {
+      if (!idleApiCache) idleApiCache = idleScheduler(root);
+      return idleApiCache;
+    }
 
     function dom() { return EMT.core.dom; }
 
@@ -16419,41 +18636,16 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     }
 
     /**
-     * 建立 SVG 主環形圖（底圈 + 進度圈）。進度圈初始為空環。
-     * @returns {{ svg: SVGElement, bar: SVGElement }}
+     * （v0.19，FE-108）減少動態是否成立（EMT.ui.motion.reduced；模組不存在時視為成立，不播放地圖動畫）。
+     * @returns {boolean}
      */
-    function ringSvg() {
-      var D = dom();
-      var c = String(RING.size / 2);
-      var g = ringGeometry(0);
-      /** 圓的共用屬性 + 額外屬性 */
-      function circleAttrs(extra) {
-        var out = { cx: c, cy: c, r: String(RING.r), fill: "none", "stroke-width": String(RING.stroke) };
-        Object.keys(extra).forEach(function (k) { out[k] = extra[k]; });
-        return out;
-      }
-      var track = D.svg("circle", circleAttrs({ "class": "db-ring__track" }));
-      // 由 12 點鐘方向順時針填滿
-      var bar = D.svg("circle", circleAttrs({
-        "class": "db-ring__bar",
-        "stroke-dasharray": g.dasharray,
-        "stroke-dashoffset": g.dashoffset,
-        transform: "rotate(-90 " + c + " " + c + ")"
-      }));
-      var node = D.svg("svg", {
-        "class": "db-ring",
-        viewBox: "0 0 " + RING.size + " " + RING.size,
-        "aria-hidden": "true",
-        focusable: "false"
-      }, [track, bar]);
-      return { svg: node, bar: bar };
-    }
-
-    /** 設定進度圈比例；值未改變時不動屬性（transition 只在數值改變時播放，§7.11） */
-    function setRing(bar, ratio) {
-      var g = ringGeometry(ratio);
-      if (bar.getAttribute("stroke-dashoffset") !== g.dashoffset) {
-        bar.setAttribute("stroke-dashoffset", g.dashoffset);
+    function motionReduced() {
+      var mo = EMT.ui && EMT.ui.motion;
+      if (!mo || typeof mo.reduced !== "function") return true;
+      try {
+        return mo.reduced() === true;
+      } catch (e) {
+        return true;
       }
     }
 
@@ -16473,29 +18665,102 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       ]);
     }
 
-    /** 依 dashboardModel 更新今日任務卡、3 格數據、近 7 天圖表（只改屬性與 textContent，不重建節點） */
-    function renderProgress() {
+    /**
+     * 島嶼清單一列（IA-2、§7.32.5）：色點、島名＋副標、靠右文字、進度條、階段文字。
+     * 開放島進度條為 progressbar（P 為 null 時省略 aria-valuenow、填滿 0）；霧中島進度條 aria-hidden、無子元素、無 aria-label。
+     * 無事件、無 tabindex（AC-64-10）；文字以 textContent、屬性以 setAttribute 寫入（IA-6）。
+     * @param {object} row dashboardModel().isles 的一列
+     * @returns {HTMLLIElement}
+     */
+    function isleRow(row) {
+      var D = dom();
+      var bar;
+      if (row.fog) {
+        bar = D.el("div", { className: "db-isle__bar", attrs: { "aria-hidden": "true" } });
+      } else {
+        var attrs = { role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "100" };
+        if (typeof row.valueNow === "number") attrs["aria-valuenow"] = String(row.valueNow);
+        if (row.label !== null && row.label !== undefined) attrs["aria-label"] = row.label;
+        var fill = D.el("span", { className: "db-isle__fill" });
+        fill.style.width = row.fillPct + "%";
+        bar = D.el("div", { className: "db-isle__bar", attrs: attrs }, [fill]);
+      }
+      return D.el("li", { className: "db-isle db-isle--" + row.id + (row.fog ? " is-fog" : " is-open") }, [
+        D.el("span", { className: "db-isle__dot", attrs: { "aria-hidden": "true" } }),
+        D.el("p", { className: "db-isle__title" }, [
+          D.el("span", { className: "db-isle__name", text: row.name }),
+          D.el("span", { className: "db-isle__sub", text: row.sub })
+        ]),
+        D.el("p", { className: "db-isle__right", text: row.right }),
+        bar,
+        D.el("p", { className: "db-isle__stage", text: row.stageText })
+      ]);
+    }
+
+    /**
+     * 依 dashboardModel 更新群島頁（IS-3：全部取自同一次推算；§7.32.15 流程）。
+     * - 今日任務卡、目標標籤、3 格數據、近 7 天：只改屬性與 textContent，不重建節點
+     * - 島嶼清單：內容鍵與目前相同就不重建（P-2）；不同才重建 5 列（無可聚焦元素，不影響焦點）
+     * - 地圖：無節點、簽章不同、或 show 時 replay → 以 build 換上，play = (show 或 prepare) 且非減少動態，
+     *   mount 與 live 一律不播放（AC-70-01、AC-70-02）；否則沿用同一節點（P-1）：show 時 setPlay 同步動畫 class，
+     *   文字替代不同才改 aria-label
+     * @param {"mount"|"show"|"live"|"prepare"} mode
+     * @param {boolean} [replay] mode 為 show 時：true 表示 show() 未經 hide()，一律重建並播放（§7.32.8 保底）
+     */
+    function renderProgress(mode, replay) {
       if (!refs) return;
       var D = dom();
       var m = dashboardModel(currentState(), progressToday());
 
-      // 今日任務卡（AC-30-05：達成 → 滿圈金色 + 「今日目標達成」）
-      setRing(refs.ring.bar, m.today.ratio);
-      refs.ring.svg.classList.toggle("db-ring--done", m.today.done);
-      D.setText(refs.center, m.today.centerText);
+      // 今日任務卡（IS-14、IS-15；AC-30-05：達成 → 填滿金色 + 「今日目標達成」）
+      D.setText(refs.dialog, m.dialog);
       D.setText(refs.todayText, m.today.text);
+      refs.todayBar.setAttribute("aria-valuemax", String(m.today.d));
+      refs.todayBar.setAttribute("aria-valuenow", String(m.today.valueNow));
+      refs.todayBar.setAttribute("aria-valuetext", m.today.text);
+      refs.todayFill.style.width = m.today.fillPct + "%";
+      refs.todayFill.classList.toggle("db-today__fill--done", m.today.done);
       D.setText(refs.doneText, m.today.doneText);
       refs.doneText.hidden = !m.today.done;
 
-      // 目標行（DB-4 v0.14：文字與色點皆為生效色級）
+      // 目標標籤（DB-4 v0.14：文字與色點皆為生效色級）
       D.setText(refs.goalText, m.goal.text);
       refs.goalLine.setAttribute("data-color", m.goal.colorId || "");
 
-      // 3 格數據（DB-5）
+      // 地圖（§7.32.4、§7.32.8、§7.32.15 P-1）
+      var IM = uiModule("islandMap");
+      var sig = IM.signature(m.island);
+      if (!mapFig || sig !== mapSig || (mode === "show" && replay === true)) {
+        var play = (mode === "show" || mode === "prepare") && !motionReduced();
+        var fig = IM.build(m.island, { play: play });
+        D.clear(refs.mapBox);
+        refs.mapBox.appendChild(fig);
+        mapFig = fig;
+        mapSig = sig;
+        mapAlt = m.mapAlt;
+      } else {
+        if (mode === "show") IM.setPlay(mapFig, !motionReduced());
+        if (m.mapAlt !== mapAlt) {
+          mapFig.setAttribute("aria-label", m.mapAlt);
+          mapAlt = m.mapAlt;
+        }
+      }
+
+      // 島嶼清單（IA-2；P-2：內容相同不重建）
+      var key = JSON.stringify(m.isles);
+      if (key !== islesKey) {
+        D.clear(refs.islesList);
+        for (var r = 0; r < m.isles.length; r++) refs.islesList.appendChild(isleRow(m.isles[r]));
+        islesKey = key;
+      }
+
+      // 3 格數據（DB-5）＋ 天氣、燈塔狀態行（IS-11、IS-12）
       D.setText(refs.streakValue, m.stats.streakValue);
+      D.setText(refs.weatherLine, m.stats.weatherText);
       D.setText(refs.masteryValue, m.stats.masteryText);
       D.setText(refs.masteredSub, m.stats.masteredText);
       D.setText(refs.answeredValue, m.stats.answeredText);
+      D.setText(refs.lighthouseLine, m.stats.lighthouseText);
 
       // 近 7 天（AC-39-07）：空狀態只顯示一行文字；否則 7 根長條，節點固定，只改高度與文字
       refs.bars.hidden = m.chart.empty;
@@ -16539,9 +18804,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     function onToggleBackup() {
       var s = store();
       if (!s || !s.actions || typeof s.actions.setBackupExpanded !== "function") return;
-      var st = currentState();
-      var cur = !!(st && st.runtime && st.runtime.dashboard && st.runtime.dashboard.backupExpanded === true);
-      s.actions.setBackupExpanded(!cur);
+      s.actions.setBackupExpanded(!backupExpandedNow());
     }
 
     /** 匯出（AC-24-01） */
@@ -16579,7 +18842,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       var msg = importMessage(result);
       if (msg) toast(msg.text, msg.kind);
       if (result && result.ok === true) {
-        renderProgress();
+        onProgressChange();
       }
       setBusy(false);
     }
@@ -16661,13 +18924,47 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       refs.fileInput.click();
     }
 
-    /** (1) 今日任務卡 */
+    /** 標題列：h2「我的群島」（左側裝飾小圖 aria-hidden）＋ 目標標籤與「變更」（DB-1、DB-4、IS-16、AC-63-01、AC-66-04） */
+    function buildHead() {
+      var D = dom();
+      var LT = core().LAY.LAYOUT_TEXTS;
+      var goalText = D.el("span", { className: "db-goal__text", text: "" });
+      // （v0.9，Q-61、AC-39-04）「變更」為外框按鈕（不是連結樣式）；行為沿用 router 的 [data-go] 委派
+      var changeBtn = D.el("button", {
+        className: "btn db-change",
+        attrs: { type: "button", "data-go": "customizer" },
+        text: LT.changeLink
+      });
+      var goalLine = D.el("p", { className: "db-goal", attrs: { "data-color": "" } }, [
+        D.el("span", { className: "db-goal__tag" }, [
+          D.el("span", { className: "db-goal__dot", attrs: { "aria-hidden": "true" } }),
+          goalText
+        ]),
+        changeBtn
+      ]);
+      var head = D.el("div", { className: "db-head" }, [
+        D.el("h2", { className: "page-title dash-title" }, [
+          uiModule("islandArt").titleDeco("dash-title__deco"),
+          D.el("span", { className: "dash-title__text", text: LT.dashboardTitle })
+        ]),
+        goalLine
+      ]);
+      return { head: head, goalLine: goalLine, goalText: goalText, changeBtn: changeBtn };
+    }
+
+    /** (1) 今日任務卡（DB-2、§7.32.3）：龜龜與對話框 → 今日進度列 → 「開始今日學習」 */
     function buildToday() {
       var D = dom();
       var LT = core().LAY.LAYOUT_TEXTS;
-      var ring = ringSvg();
-      var center = D.el("span", { className: "db-ring__value", attrs: { "aria-hidden": "true" }, text: "" });
+      var ISL = core().ISL;
+      // 對話框不是 aria-live 區域（IS-14）
+      var dialog = D.el("p", { className: "db-host__bubble", text: "" });
       var todayText = D.el("p", { className: "db-today__text", text: "" });
+      var todayFill = D.el("span", { className: "db-today__fill" });
+      var todayBar = D.el("div", {
+        className: "db-today__bar",
+        attrs: { role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "1", "aria-valuenow": "0", "aria-valuetext": "" }
+      }, [todayFill]);
       var doneText = D.el("p", { className: "db-today__done", attrs: { "aria-live": "polite" }, text: "" });
       doneText.hidden = true;
       var startBtn = D.el("button", {
@@ -16675,46 +18972,61 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         attrs: { type: "button", "data-go": "flashcards" },
         text: LT.startToday
       });
-      var goalText = D.el("span", { className: "db-goal__text", text: "" });
-      // （v0.9，Q-61、AC-39-04）「變更」為外框按鈕（不再是連結樣式）；行為沿用 router 的 [data-go] 委派
-      var changeBtn = D.el("button", {
-        className: "btn db-change",
-        attrs: { type: "button", "data-go": "customizer" },
-        text: LT.changeLink
-      });
-      var goalLine = D.el("p", { className: "db-goal", attrs: { "data-color": "" } }, [
-        D.el("span", { className: "db-goal__dot", attrs: { "aria-hidden": "true" } }),
-        goalText,
-        changeBtn
-      ]);
       var section = D.el("section", { className: "card db-today", attrs: { "aria-labelledby": "db-today-h" } }, [
-        D.el("h3", { className: "section-title", attrs: { id: "db-today-h" }, text: TEXT.todayTitle }),
-        D.el("div", { className: "db-today__row" }, [
-          D.el("div", { className: "db-ring-wrap" }, [ring.svg, center]),
-          D.el("div", { className: "db-today__side" }, [todayText, doneText, startBtn])
+        // （SD-FB-107）可見標題會違反 AC-39-02 的由上到下順序，只給螢幕閱讀器標題導覽
+        D.el("h3", { className: "visually-hidden", attrs: { id: "db-today-h" }, text: TEXT.todayTitle }),
+        D.el("div", { className: "db-host" }, [
+          uiModule("islandArt").turtle("db-host__turtle"),
+          D.el("div", { className: "db-host__talk" }, [
+            D.el("p", { className: "db-host__name", text: ISL.TEXTS.hostName }),
+            dialog
+          ])
         ]),
-        goalLine
+        D.el("div", { className: "db-today__progress" }, [
+          D.el("div", { className: "db-today__row" }, [todayText, todayBar]),
+          doneText
+        ]),
+        startBtn
       ]);
-      return { section: section, ring: ring, center: center, todayText: todayText, doneText: doneText,
-        startBtn: startBtn, goalLine: goalLine, goalText: goalText, changeBtn: changeBtn };
+      return { section: section, dialog: dialog, todayText: todayText, todayBar: todayBar, todayFill: todayFill,
+        doneText: doneText, startBtn: startBtn };
     }
 
-    /** (2) 3 格數據（同一張卡片內；格本身無邊框與背景） */
+    /** (2) 地圖框（§7.32.4）：內容由 renderProgress 以 islandMap.build 重建；無事件、無 tabindex（AC-64-10） */
+    function buildMap() {
+      return dom().el("div", { className: "card db-map" });
+    }
+
+    /** (3) 島嶼清單（IA-2、§7.32.5）：h3「島嶼」＋ ul（5 列由 renderProgress 建立） */
+    function buildIsles() {
+      var D = dom();
+      var list = D.el("ul", { className: "db-isles__list" });
+      var section = D.el("section", { className: "db-isles", attrs: { "aria-labelledby": "db-isles-h" } }, [
+        D.el("h3", { className: "section-title", attrs: { id: "db-isles-h" }, text: core().ISL.TEXTS.listTitle }),
+        list
+      ]);
+      return { section: section, list: list };
+    }
+
+    /** (4) 3 格數據（DB-5、§7.32.6）：每格為區塊卡片樣式；第 1 格天氣行、第 3 格燈塔行 */
     function buildStats() {
       var D = dom();
       var LT = core().LAY.LAYOUT_TEXTS;
       var streakValue = D.el("span", { className: "db-stat__num", text: TEXT.empty });
+      var weatherLine = D.el("p", { className: "db-stat__status", text: "" });
       var masteryValue = D.el("p", { className: "db-stat__value", text: TEXT.empty });
       var masteredSub = D.el("p", { className: "db-stat__sub", text: "" });
       var answeredValue = D.el("p", { className: "db-stat__value db-stat__value--answered", text: TEXT.empty });
-      var section = D.el("section", { className: "card db-stats", attrs: { "aria-label": TEXT.statsLabel } }, [
+      var lighthouseLine = D.el("p", { className: "db-stat__status", text: "" });
+      var section = D.el("section", { className: "db-stats", attrs: { "aria-label": TEXT.statsLabel } }, [
         D.el("div", { className: "db-stat db-stat--streak" }, [
           D.el("p", { className: "db-stat__label", text: LT.statStreakLabel }),
           D.el("p", { className: "db-stat__value" }, [
             streakIcon(),
             streakValue,
             D.el("span", { className: "db-stat__unit", text: LT.statStreakUnit })
-          ])
+          ]),
+          weatherLine
         ]),
         D.el("div", { className: "db-stat db-stat--mastery" }, [
           D.el("p", { className: "db-stat__label", text: LT.statMasteryLabel }),
@@ -16723,14 +19035,15 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         ]),
         D.el("div", { className: "db-stat db-stat--answered" }, [
           D.el("p", { className: "db-stat__label", text: LT.statPart5Label }),
-          answeredValue
+          answeredValue,
+          lighthouseLine
         ])
       ]);
-      return { section: section, streakValue: streakValue, masteryValue: masteryValue,
-        masteredSub: masteredSub, answeredValue: answeredValue };
+      return { section: section, streakValue: streakValue, weatherLine: weatherLine, masteryValue: masteryValue,
+        masteredSub: masteredSub, answeredValue: answeredValue, lighthouseLine: lighthouseLine };
     }
 
-    /** (3) 近 7 天圖表：長條（節點固定 DASHBOARD_CHART_DAYS 組）與空狀態 */
+    /** (5) 近 7 天圖表：長條（節點固定 DASHBOARD_CHART_DAYS 組）與空狀態 */
     function buildChart() {
       var D = dom();
       var days = core().C.DASHBOARD_CHART_DAYS;
@@ -16786,11 +19099,14 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
       // （v0.11，FE-51）安裝區（IN-1）；內容由 renderInstall 依狀態增刪
       var installBox = D.el("div", { className: "dash-backup__install", attrs: { hidden: true } });
 
+      var head = buildHead();
       var today = buildToday();
+      var mapBox = buildMap();
+      var isles = buildIsles();
       var stats = buildStats();
       var chart = buildChart();
 
-      // (4) 「資料備份」收合區塊（DB-6）：預設收合
+      // (6) 「資料備份」收合區塊（DB-6）：預設收合
       var toggle = D.el("button", {
         className: "db-backup__toggle",
         attrs: { type: "button", "aria-expanded": "false", "aria-controls": "db-backup-body" },
@@ -16810,26 +19126,34 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         backupBody
       ]);
 
+      // DB-1：標題列 → 今日任務卡 → 地圖 → 島嶼清單 → 3 格數據 → 近 7 天 → 資料備份
       var page = D.el("div", { className: "dashboard" }, [
-        D.el("h2", { className: "page-title dash-title", text: LT.dashboardTitle }),
+        head.head,
         today.section,
+        mapBox,
+        isles.section,
         stats.section,
         chart.section,
         backupSection
       ]);
 
       refs = {
-        ring: today.ring,
-        center: today.center,
+        dialog: today.dialog,
         todayText: today.todayText,
+        todayBar: today.todayBar,
+        todayFill: today.todayFill,
         doneText: today.doneText,
         startBtn: today.startBtn,
-        goalLine: today.goalLine,
-        goalText: today.goalText,
+        goalLine: head.goalLine,
+        goalText: head.goalText,
+        mapBox: mapBox,
+        islesList: isles.list,
         streakValue: stats.streakValue,
+        weatherLine: stats.weatherLine,
         masteryValue: stats.masteryValue,
         masteredSub: stats.masteredSub,
         answeredValue: stats.answeredValue,
+        lighthouseLine: stats.lighthouseLine,
         bars: chart.bars,
         chartEmpty: chart.empty,
         barCells: chart.cells,
@@ -16842,31 +19166,110 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         installBox: installBox
       };
 
-      // 先在未掛上文件前繪製初值：進度圈不會從空環播放 transition（只在數值改變時播放，§7.11）
-      renderProgress();
+      // 新的 DOM：地圖與清單尚未建立
+      mapFig = null;
+      mapSig = null;
+      mapAlt = null;
+      islesKey = null;
+
+      // 先在未掛上文件前繪製初值（地圖不播放動畫；第一次 show() 簽章相同只 setPlay，啟動時少建 1 次地圖）
+      renderProgress("mount");
       renderInstall();
 
       D.clear(rootEl);
       rootEl.appendChild(page);
 
-      // 訂閱 store：相關 tag（PROGRESS_TAGS，含 "dashboard"）才重繪；安裝區依 INSTALL_TAGS
+      // 訂閱 store：相關 tag（PROGRESS_TAGS，含 "dashboard"）才處理；安裝區依 INSTALL_TAGS。
+      // 停留期間：簽章不同才以 play: false 重建地圖（不重播，§7.32.8）；隱藏期間：只排閒置預先重建（§7.32.15 P-3）
       var s = store();
       if (s && typeof s.subscribe === "function" && !unsubscribe) {
         unsubscribe = s.subscribe(function (state, tags) {
-          if (progressAffected(tags)) renderProgress();
+          if (progressAffected(tags)) onProgressChange(tags);
           if (installAffected(tags)) renderInstall();
         });
       }
     }
 
+    /** 目前狀態的「資料備份」展開值（runtime.dashboard.backupExpanded；缺漏 → false） */
+    function backupExpandedNow() {
+      var st = currentState();
+      return !!(st && st.runtime && st.runtime.dashboard && st.runtime.dashboard.backupExpanded === true);
+    }
+
+    /**
+     * （FE-116，§7.32.15）進度相關資料變更：頁面顯示中 → 立即以 live 重算；
+     * 隱藏中 → 不重算、不動文字與地圖、清單，標記 dirty，並在無待執行排程時排 1 次閒置預先重建（連續通知只排 1 次）。
+     * 隱藏中收到 "dashboard" tag 時仍同步「資料備份」收合狀態（只改 3 個屬性、不重算 dashboardModel；DB-6 節點不重建）。
+     * @param {string[]} [tags] 通知的 tags；省略（匯入完成）視為一般變更
+     */
+    function onProgressChange(tags) {
+      if (visible) {
+        renderProgress("live");
+        return;
+      }
+      if (!Array.isArray(tags) || tags.indexOf("dashboard") !== -1) renderBackup(backupExpandedNow());
+      dirty = true;
+      schedulePrepare();
+    }
+
+    /** 排 1 個閒置工作執行 prepare；排程器不可用（request 回 null）時不排程，show() 照樣重算與重建 */
+    function schedulePrepare() {
+      if (idle) return;
+      var api = idleApi();
+      var task = { api: api, handle: null, done: false };
+      idle = task;
+      var handle = null;
+      try {
+        handle = api.request(function () { prepare(task); });
+      } catch (e) {
+        handle = null;
+      }
+      if (task.done) return; // 排程器同步執行了回呼
+      if (handle === null || handle === undefined) {
+        if (idle === task) idle = null;
+        return;
+      }
+      task.handle = handle;
+    }
+
+    /** 取消待執行的閒置工作 */
+    function cancelPrepare() {
+      var task = idle;
+      idle = null;
+      if (!task) return;
+      task.done = true;
+      try {
+        task.api.cancel(task.handle);
+      } catch (e) {
+        // 取消失敗：task.done 已設，回呼即使執行也不做事
+      }
+    }
+
+    /** 閒置工作：頁面仍隱藏且有未繪製的變更 → 預先重算並重建（play 依減少動態；display: none 下動畫不執行） */
+    function prepare(task) {
+      if (task.done) return;
+      task.done = true;
+      if (idle === task) idle = null;
+      if (visible || !dirty) return;
+      renderProgress("prepare");
+      dirty = false;
+    }
+
     function show() {
-      // 回到主控台時更新（目標可能已在難易度設定變更；跨日時打卡與今日已學數也要更新，AC-30-07 (b)）
-      renderProgress();
+      // 回到群島頁時以當下狀態與 today 重算（目標可能已變更；跨日時打卡與今日已學數也要更新，AC-30-07 (b)、IS-3、AC-64-09）。
+      // 地圖簽章相同 → 沿用並以 setPlay 同步動畫 class（頁面由 hidden 變為顯示，CSS 動畫自動從頭播放）；
+      // 不同 → 以 play 依減少動態重建（AC-70-01、AC-70-02）。未經 hide() 再呼叫 → 一律重建並播放（§7.32.8 保底）
+      var replay = visible === true;
+      visible = true;
+      cancelPrepare();
+      renderProgress("show", replay);
+      dirty = false;
       renderInstall();
     }
 
     function hide() {
-      // 保留訂閱；不需處理
+      // 保留訂閱；隱藏期間的變更改由閒置排程預先重建（§7.32.15）
+      visible = false;
     }
 
     return { mount: mount, show: show, hide: hide };
@@ -16878,11 +19281,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     importMessage: importMessage,
     progressModel: progressModel,
     dashboardModel: dashboardModel,
-    ringGeometry: ringGeometry,
+    contentSnapshot: contentSnapshot,
     PROGRESS_TAGS: PROGRESS_TAGS,
     progressAffected: progressAffected,
     INSTALL_TAGS: INSTALL_TAGS,
     installAffected: installAffected,
+    idleScheduler: idleScheduler,
     createView: createView
   };
 });
@@ -17778,6 +20182,18 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *       CustomVocabItem、POS_LABELS、DataSourceEntry、RuntimeState.flashcard、README §4.3 L-6、§5.6
  * 涵蓋：AC-03-04、AC-03-05、AC-04-08、AC-06-01～AC-06-07、AC-22-02、AC-23-01、AC-24-07、
  *       AC-28-01～AC-28-08、AC-31-03
+ *       （FE-109）AC-69-01～AC-69-03、AC-69-05、AC-69-06、AC-68-02、AC-68-03、AC-70-02、AC-71-02、AC-71-05、AC-38-08
+ *
+ * 島嶼外觀與學完回饋（FE-109；architecture.md §7.32.9、§7.32.10；契約 README §15.5 LF-3、LF-4）：
+ *   - 卡片角落裝飾：EMT.ui.islandArt.cardDeco("fc-deco") 只建立 1 次，每次重建卡片區後以 appendChild
+ *     移到 .fc-stage 最後（測驗元件重繪只清空 .fc-quiz，不會清掉裝飾）；aria-hidden，不攔點擊（CSS）。
+ *   - 學完回饋列：.fc-stage 與 .fc-nav 之間的常駐 div.fc-feedback-live[role=status][aria-live=polite]
+ *     [aria-atomic=true]；runtime.flashcard.islandFeedback 非 null 時其內為 1 個 p.fc-feedback
+ *     （新芽圖示 aria-hidden ＋ span.fc-feedback__text，textContent），null 時清空。
+ *   - 新芽圖示（FE-117；§7.32.15 P-6）：mount 時以 islandArt.sprout("fc-feedback__icon") 建 1 份範本
+ *     （不掛上文件），每次建立 p.fc-feedback 時 cloneNode(true)；範本為 null 時回饋列只放文字。
+ *     物件參照改變才替換 p（重播淡入），參照相同不動 DOM；訂閱 "islandFeedback"、"tab"，show() 時同步。
+ *   - 不新增頁首返回按鈕、「今日 X / D」、色級徽章、「上一張 N 分」行（Q-119）。
  *
  * 手勢與動畫（FE-28）：
  *   - 翻面：沿用「兩面 hidden 切換、不重建 DOM」；isFlipped 改變時新顯示的那一面加 fc-face--flip-in，
@@ -17833,6 +20249,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   var FLIP_IN_CLASS = "fc-face--flip-in";
   var SLIDE_NEXT_CLASS = "fc-card--in-next";
   var SLIDE_PREV_CLASS = "fc-card--in-prev";
+  // 學完回饋與角落裝飾的 class（architecture.md §7.32.9）
+  var FEEDBACK_LIVE_CLASS = "fc-feedback-live";
+  var FEEDBACK_CLASS = "fc-feedback";
+  var FEEDBACK_ICON_CLASS = "fc-feedback__icon";
+  var FEEDBACK_TEXT_CLASS = "fc-feedback__text";
+  var DECO_CLASS = "fc-deco";
 
   // ════════════════════════════════════════════════════════════════
   // 純邏輯（可在 Node 測試）
@@ -18123,6 +20545,30 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     return changed;
   }
 
+  // ─── 學完回饋（FE-109） ───
+
+  /**
+   * 回饋列要顯示的文字（LF-4）：islandFeedback 為物件且 text 為非空白字串 → 原樣回傳；其他（null、缺欄位）→ null（不渲染）。
+   * @param {object|null} fb RuntimeState.flashcard.islandFeedback
+   * @returns {string|null}
+   */
+  function feedbackTextOf(fb) {
+    if (!fb || typeof fb !== "object") return null;
+    return typeof fb.text === "string" && fb.text.trim() !== "" ? fb.text : null;
+  }
+
+  /**
+   * 回饋列是否需要更新 DOM：只看物件參照（同一個物件 → 不動，避免重播淡入；LF-3）。
+   * 不可顯示的值一律視為 null。
+   * @param {object|null} shown 目前畫面上的回饋物件（未顯示為 null）
+   * @param {object|null} next 新狀態的回饋
+   * @returns {{ change: boolean, value: object|null }} value = 正規化後的新值
+   */
+  function feedbackChange(shown, next) {
+    var value = feedbackTextOf(next) === null ? null : next;
+    return { change: value !== shown, value: value };
+  }
+
   var logic = {
     EMPTY_MARK: EMPTY_MARK,
     CUSTOM_ORIGIN_TEXT: CUSTOM_ORIGIN_TEXT,
@@ -18143,7 +20589,12 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     suppressUntilAfter: suppressUntilAfter,
     suppressClick: suppressClick,
     slideClassFor: slideClassFor,
-    applyFlipTo: applyFlipTo
+    applyFlipTo: applyFlipTo,
+    FEEDBACK_LIVE_CLASS: FEEDBACK_LIVE_CLASS,
+    FEEDBACK_CLASS: FEEDBACK_CLASS,
+    DECO_CLASS: DECO_CLASS,
+    feedbackTextOf: feedbackTextOf,
+    feedbackChange: feedbackChange
   };
 
   // Node（單元測試）：只匯出純邏輯，不登錄頁面
@@ -18222,6 +20673,10 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
   var gesture = null;
   // 此時間之前的卡片 click 一律忽略（滑動後瀏覽器補發的 click，AC-28-05）
   var suppressUntil = 0;
+  // 回饋列目前顯示的 islandFeedback 物件（未顯示為 null；FE-109）
+  var shownFeedback = null;
+  // 回饋列新芽圖示的範本（mount 時建立 1 次、不掛上文件；建立失敗為 null；FE-117）
+  var sproutTemplate = null;
 
   /** 建立頁面骨架（只執行一次） */
   function build(rootEl) {
@@ -18262,7 +20717,17 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     });
     ui.nav = el("div", { className: "fc-nav" }, [ui.prevBtn, ui.flipBtn, ui.nextBtn]);
 
-    ui.main = el("div", { className: "fc-main" }, [ui.toolbar, ui.stage, ui.nav]);
+    // （FE-109）學完回饋的常駐即時區域：先存在、之後才放入文字，螢幕報讀器才會穩定播報（AC-69-05、AC-69-06）
+    ui.feedback = el("div", {
+      className: FEEDBACK_LIVE_CLASS,
+      attrs: { role: "status", "aria-live": "polite", "aria-atomic": "true" }
+    });
+    // （FE-117）新芽圖示範本：只在此建立 1 次，之後每個回饋列複製使用（§7.32.15 P-6）
+    sproutTemplate = makeArt("sprout", FEEDBACK_ICON_CLASS);
+    // 卡片角落裝飾（建立 1 次；islandArt 未載入時為 null，略過）
+    ui.deco = null;
+
+    ui.main = el("div", { className: "fc-main" }, [ui.toolbar, ui.stage, ui.feedback, ui.nav]);
 
     ui.empty = el("div", { className: "card fc-empty", attrs: { hidden: true } }, [
       el("p", { className: "fc-empty__msg", text: "目前單字集是空的，沒有可以顯示的單字卡。" }),
@@ -18407,6 +20872,62 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     if (r && r.ok === false && r.reason === "insufficient") toast(INSUFFICIENT_MESSAGE, "error");
   }
 
+  /** 島嶼插圖模組（不存在回 null） */
+  function islandArt() {
+    var a = EMT.ui && EMT.ui.islandArt;
+    return a && typeof a === "object" ? a : null;
+  }
+
+  /** 安全建立一張插圖；模組不存在或出錯回 null（裝飾圖缺少不影響學習功能） */
+  function makeArt(name, className) {
+    var a = islandArt();
+    if (!a || typeof a[name] !== "function") return null;
+    try {
+      return a[name](className);
+    } catch (e) {
+      if (typeof console !== "undefined") console.error("[EMT.views.flashcards] islandArt." + name + " 失敗", e);
+      return null;
+    }
+  }
+
+  /** 複製 1 份新芽圖示（範本為 null 或複製失敗回 null，回饋列只放文字；FE-117） */
+  function cloneSprout() {
+    if (!sproutTemplate || typeof sproutTemplate.cloneNode !== "function") return null;
+    try {
+      return sproutTemplate.cloneNode(true);
+    } catch (e) {
+      if (typeof console !== "undefined") console.error("[EMT.views.flashcards] 新芽圖示複製失敗", e);
+      return null;
+    }
+  }
+
+  /** 卡片角落裝飾移到 .fc-stage 最後（每次重建卡片區後呼叫；AC-69-01、AC-71-02） */
+  function placeDeco() {
+    if (!ui.deco) ui.deco = makeArt("cardDeco", DECO_CLASS);
+    if (ui.deco) ui.stage.appendChild(ui.deco);
+  }
+
+  /**
+   * 依 runtime.flashcard.islandFeedback 更新回饋列（LF-3、LF-4）：
+   * 參照改變 → 以新的 p.fc-feedback 取代（重播淡入）；null → 清空容器；參照相同 → 不動 DOM。
+   * @param {object} st AppState
+   */
+  function renderFeedback(st) {
+    if (!ui || !ui.feedback) return;
+    var fc = st && st.runtime && st.runtime.flashcard;
+    var d = feedbackChange(shownFeedback, fc ? fc.islandFeedback : null);
+    if (!d.change) return;
+    shownFeedback = d.value;
+    dom().clear(ui.feedback);
+    if (d.value === null) return;
+    var el = dom().el;
+    ui.feedback.appendChild(el("p", { className: FEEDBACK_CLASS }, [
+      cloneSprout(),
+      // 文字一律 textContent（LF-4）
+      el("span", { className: FEEDBACK_TEXT_CLASS, text: feedbackTextOf(d.value) })
+    ]));
+  }
+
   /** 建立一張卡片的 DOM（只渲染當前一張，AC-22-02） */
   function buildCard(card, model) {
     var el = dom().el;
@@ -18471,6 +20992,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
    */
   function render(st, force) {
     if (!ui || !st) return;
+    renderFeedback(st);
     var rt = st.runtime || {};
     var set = Array.isArray(rt.studySet) ? rt.studySet : [];
     var fc = rt.flashcard || { index: 0, isFlipped: false, mode: "card" };
@@ -18521,6 +21043,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
           ui.card = null;
           ui.quiz = dom().el("div", { className: "card fc-quiz" });
           ui.stage.appendChild(ui.quiz);
+          placeDeco();
         }
       } else {
         dom().clear(ui.stage);
@@ -18529,6 +21052,7 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         var prevIdx = lastCardIndex;
         ui.card = buildCard(card, model);
         ui.stage.appendChild(ui.card.root);
+        placeDeco();
         applyFlip(!!fc.isFlipped, false);
         lastCardIndex = idx;
         gesture = null;
@@ -18554,13 +21078,19 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
 
   /** store 通知：只在單字卡相關範圍變更時重繪 */
   var WATCH_TAGS = { init: 1, studySet: 1, flashcard: 1, quiz: 1, customVocab: 1 };
+  // （FE-109）只需同步回饋列的 tags：學完回饋、切頁（離開單字卡頁時 store 設為 null，LF-3）
+  var FEEDBACK_TAGS = { islandFeedback: 1, tab: 1 };
   function onStore(st, tags) {
     var hit = false;
+    var fbHit = false;
     var list = Array.isArray(tags) ? tags : [];
     for (var i = 0; i < list.length; i++) {
-      if (WATCH_TAGS[list[i]] === 1) { hit = true; break; }
+      if (WATCH_TAGS[list[i]] === 1) hit = true;
+      if (FEEDBACK_TAGS[list[i]] === 1) fbHit = true;
     }
+    // render 內已同步回饋列
     if (hit) render(st, false);
+    else if (fbHit) renderFeedback(st);
   }
 
   var view = {
@@ -20405,6 +22935,9 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
  *   TEXT.originalLicense、TEXT.trademarkNotice 改取 LEGAL_STATEMENTS，聯絡行改取 core/site-content 的 SOURCES_CONTACT_TEXT，
  *   本檔不再存這些文字；api 仍匯出同名鍵。皆於讀取時才向 core 取用（LD-2）。
  *   .src-page 最前面加共用返回按鈕（內容不動），文字由 show 依返回目標更新。
+ * - （v0.19 島嶼風格，FE-105；architecture.md v0.19 §7.32.12、契約 README §4.3 L-8 LT-7、V-LGL-03、AC-72-05）
+ *   聲明清單在 LT-4（品牌標識）之後新增 1 條 LT-7（群島插圖與角色「龜龜」聲明），逐字照契約，以 textContent 寫入；
+ *   LT-1～LT-6 與既有聲明不變；LT-7 不加入關於我（core/site-content.js 不改），因此字面值放在本檔 TEXT.islandBrand。
  *
  * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution、brandStatement）可在 Node 測試；
  * 瀏覽器下登錄 EMT.views.register("sources", { mount })。
@@ -20450,6 +22983,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
     dataLicense: "單字資料以 CC BY-SA 4.0 授權",
     get originalLicense() { return siteContent().LEGAL_STATEMENTS.originalContent; },
     get trademarkNotice() { return siteContent().LEGAL_STATEMENTS.trademark; },
+    // （v0.19 島嶼風格，FE-105）契約 L-8 LT-7 逐字（含句末全形句號）；只用於本頁，接在 LT-4 之後（AC-72-05）
+    islandBrand: "群島插圖與角色「龜龜」由 AI 依 JimmyLin 的構想繪製，作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。",
     codeLicenseUrlLabel: "MIT 條款網址",
     dataLicenseUrlLabel: "CC BY-SA 4.0 條款網址",
     // （v0.12，FE-60；NM-3、SD-FB-49）原創內容來源一行的前綴；名稱取 registry 中 ORIGINAL 的 fullName，不寫死
@@ -20737,6 +23272,8 @@ window.ACADEMIC_PHRASEBANK=[{"id":"ph-001","category":"gap","template":"Existing
         dom.el("li", { text: TEXT.dataLicense }),
         dom.el("li", { text: TEXT.originalLicense }),
         dom.el("li", { className: "src-statements__brand", text: brandStatement(pwaCore().PWA_APP_NAME) }),
+        // （v0.19 島嶼風格，FE-105）LT-7 接在 LT-4 之後（§7.32.12）
+        dom.el("li", { className: "src-statements__island", text: TEXT.islandBrand }),
         dom.el("li", { text: TEXT.trademarkNotice })
       ]),
       dom.el("p", { className: "src-attrib", text: derivedAttribution(wordlists, holder) }),

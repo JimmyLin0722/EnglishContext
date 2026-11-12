@@ -17,7 +17,9 @@ const AUTH = (r) => r.startsWith("src/app/assets/icons/") || r.startsWith("sourc
 // 主控修改、PRD v0.11 R-20 風險 (3) 已記載（workflow 中 dist/Ads.txt 改為 dist/ads.txt）；不屬 PG，非越界；MC-03 整檔取代尚未執行
 const MC = (r) => r === ".github/workflows/static.yml";
 
-const tasks = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/03-design/tasks.json"), "utf8")).tasks;
+// 已完成任務封存於 docs/archive/tasks-done.json（2026-11-11），兩檔合併視為完整任務清單
+const readTasks = (p) => (fs.existsSync(path.join(ROOT, p)) ? JSON.parse(fs.readFileSync(path.join(ROOT, p), "utf8")).tasks : []);
+const tasks = [...readTasks("docs/archive/tasks-done.json"), ...readTasks("docs/03-design/tasks.json")];
 const allowed = new Map();
 for (const t of tasks.filter((x) => x.id.startsWith("FE-") && Number(x.id.slice(3)) >= minFe)) {
   for (const p of t.paths) allowed.set(p, (allowed.get(p) || []).concat(t.id));

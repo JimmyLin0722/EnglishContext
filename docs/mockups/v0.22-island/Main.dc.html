@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>我的群島首頁</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#eaf7fb}
+a{color:#2c6e8f}a:hover{color:#1d4f68}
+.bob{animation:bob 3.2s ease-in-out infinite}
+.drift{animation:drift 9s ease-in-out infinite}
+.sway{animation:sway 4s ease-in-out infinite;transform-box:fill-box;transform-origin:50% 100%}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes drift{0%,100%{transform:translateX(0)}50%{transform:translateX(-10px)}}
+@keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+@media (prefers-reduced-motion: reduce){.bob,.drift,.sway{animation:none}}
+button:focus-visible,a:focus-visible{outline:3px solid #2c6e8f;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; min-height: 1360px; box-sizing: border-box; background: #eaf7fb; font-family: 'Noto Sans TC', 'Microsoft JhengHei', system-ui, sans-serif; color: #2f2a3d; display: flex; flex-direction: column">
+
+  <div style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: #ffffff; border-bottom: 2px dashed #c9e6ef; flex-wrap: wrap">
+    <span style="font-size: 12px; font-weight: 700; color: #5a5470">設計稿預覽進度</span>
+    <div role="group" aria-label="切換預覽進度" style="display: flex; gap: 6px">
+      <sc-for list="{{presets}}" as="pr" hint-placeholder-count="3">
+        <button type="button" aria-pressed="{{pr.pressed}}" onClick="{{pr.pick}}" style="min-height: 36px; padding: 0 12px; border-radius: 99px; border: 2px solid #3d3550; background: {{pr.bg}}; color: {{pr.fg}}; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{pr.label}}</button>
+      </sc-for>
+    </div>
+  </div>
+
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 16px 16px 4px">
+    <div style="display: flex; align-items: center; gap: 10px">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
+        <ellipse cx="17" cy="24" rx="15" ry="6" fill="#f7e2b0" stroke="#3d3550" stroke-width="2"></ellipse>
+        <path d="M17 23 C16 16 15 11 17 6" fill="none" stroke="#3d3550" stroke-width="2.4" stroke-linecap="round"></path>
+        <path d="M17 7 C12 4 7 6 5 10 C9 8 13 8 17 9 Z" fill="#7fd8a0" stroke="#3d3550" stroke-width="2" stroke-linejoin="round"></path>
+        <path d="M17 7 C22 4 27 6 29 10 C25 8 21 8 17 9 Z" fill="#7fd8a0" stroke="#3d3550" stroke-width="2" stroke-linejoin="round"></path>
+      </svg>
+      <div>
+        <p style="margin: 0; font-size: 12px; font-weight: 700; color: #5a5470">EnglishContext</p>
+        <h1 style="margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 1px">我的群島</h1>
+      </div>
+    </div>
+    <span style="font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 99px; background: #ffffff; border: 2px solid #3d3550">{{d.goalLabel}}</span>
+  </header>
+
+  <section aria-label="今日任務" style="margin: 12px 16px 0; padding: 14px; background: #ffffff; border: 2.5px solid #3d3550; border-radius: 22px; box-shadow: 0 4px 0 #3d3550; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; gap: 12px; align-items: flex-start">
+      <svg width="72" height="64" viewBox="0 0 72 64" role="img" aria-label="島主龜龜">
+        <ellipse cx="22" cy="52" rx="7" ry="5" fill="#b8f0c8" stroke="#3d3550" stroke-width="2"></ellipse>
+        <ellipse cx="46" cy="52" rx="7" ry="5" fill="#b8f0c8" stroke="#3d3550" stroke-width="2"></ellipse>
+        <circle cx="58" cy="30" r="11" fill="#b8f0c8" stroke="#3d3550" stroke-width="2.4"></circle>
+        <circle cx="61" cy="27" r="2.2" fill="#3d3550"></circle>
+        <circle cx="62" cy="34" r="2.6" fill="#ffb3b3"></circle>
+        <path d="M55 35 Q58 37 60 35" fill="none" stroke="#3d3550" stroke-width="1.8" stroke-linecap="round"></path>
+        <path d="M6 48 C6 24 20 14 34 14 C48 14 54 26 54 48 Z" fill="#6fcf97" stroke="#3d3550" stroke-width="2.4" stroke-linejoin="round"></path>
+        <path d="M18 46 L22 30 L34 24 L46 30 L48 46" fill="none" stroke="#3d3550" stroke-width="1.8" stroke-linejoin="round" opacity="0.55"></path>
+        <path d="M34 24 L34 46" stroke="#3d3550" stroke-width="1.8" opacity="0.55"></path>
+        <rect x="4" y="46" width="52" height="6" rx="3" fill="#f7e2b0" stroke="#3d3550" stroke-width="2"></rect>
+      </svg>
+      <div style="flex: 1; min-width: 0">
+        <p style="margin: 0 0 4px; font-size: 12px; font-weight: 700; color: #5a5470">島主 龜龜</p>
+        <p style="margin: 0; font-size: 16px; font-weight: 700; line-height: 1.5; padding: 10px 12px; background: #fff6df; border: 2px solid #3d3550; border-radius: 16px 16px 16px 4px">{{bubble}}</p>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px">
+      <span style="font-size: 14px; font-weight: 700; white-space: nowrap">今日已學 {{d.today}} / {{d.goal}} 字</span>
+      <div style="flex: 1; height: 14px; background: #d8eef5; border: 2px solid #3d3550; border-radius: 99px; overflow: hidden">
+        <div style="width: {{todayW}}; height: 100%; background: #4fb3cf"></div>
+      </div>
+    </div>
+    <a href="Flashcard.dc.html" style="display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border-radius: 16px; background: #ff9f68; border: 2.5px solid #3d3550; box-shadow: 0 4px 0 #3d3550; color: #2f2a3d; font-size: 18px; font-weight: 900; text-decoration: none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17h18l-2 4H5z"></path><path d="M12 3v14"></path><path d="M12 4l7 10h-7"></path></svg>
+      開始今日學習
+    </a>
+  </section>
+
+  <section aria-label="群島地圖" style="margin: 16px 16px 0; border: 2.5px solid #3d3550; border-radius: 26px; overflow: hidden; background: #9fe0ec; box-shadow: 0 4px 0 #3d3550">
+    <svg width="354" height="430" viewBox="0 0 354 430" role="img" aria-label="{{mapLabel}}" style="display: block">
+      <defs>
+        <symbol id="palm" viewBox="0 0 40 52">
+          <path d="M20 50 C19 38 18 28 21 16" fill="none" stroke="#3d3550" stroke-width="5" stroke-linecap="round"></path>
+          <path d="M20 50 C19 38 18 28 21 16" fill="none" stroke="#c98b5a" stroke-width="2.6" stroke-linecap="round"></path>
+          <path d="M21 16 C14 8 6 10 2 17 C9 14 15 15 21 18 Z" fill="#6fcf97" stroke="#3d3550" stroke-width="2.2" stroke-linejoin="round"></path>
+          <path d="M21 16 C28 8 36 10 39 17 C32 14 26 15 21 18 Z" fill="#6fcf97" stroke="#3d3550" stroke-width="2.2" stroke-linejoin="round"></path>
+          <path d="M21 16 C17 6 21 2 27 2 C24 6 23 11 21 17 Z" fill="#8fe3b0" stroke="#3d3550" stroke-width="2.2" stroke-linejoin="round"></path>
+          <circle cx="19" cy="19" r="2.6" fill="#a86b3c" stroke="#3d3550" stroke-width="1.4"></circle>
+          <circle cx="24" cy="19.5" r="2.6" fill="#a86b3c" stroke="#3d3550" stroke-width="1.4"></circle>
+        </symbol>
+        <symbol id="sprout" viewBox="0 0 20 20">
+          <path d="M10 19 L10 10" stroke="#3d3550" stroke-width="2.2" stroke-linecap="round"></path>
+          <path d="M10 11 C6 11 3 8 3 4 C7 4 10 7 10 11 Z" fill="#8fe3b0" stroke="#3d3550" stroke-width="1.8" stroke-linejoin="round"></path>
+          <path d="M10 11 C14 11 17 8 17 5 C13 5 10 7 10 11 Z" fill="#6fcf97" stroke="#3d3550" stroke-width="1.8" stroke-linejoin="round"></path>
+        </symbol>
+        <symbol id="hut" viewBox="0 0 32 28">
+          <rect x="6" y="12" width="20" height="14" rx="2" fill="#fff3d6" stroke="#3d3550" stroke-width="2.2"></rect>
+          <path d="M2 14 L16 3 L30 14 Z" fill="#ff8f6b" stroke="#3d3550" stroke-width="2.2" stroke-linejoin="round"></path>
+          <rect x="13" y="17" width="6" height="9" rx="1.5" fill="#c98b5a" stroke="#3d3550" stroke-width="1.8"></rect>
+        </symbol>
+        <symbol id="flag" viewBox="0 0 16 32">
+          <path d="M3 31 L3 3" stroke="#3d3550" stroke-width="2.4" stroke-linecap="round"></path>
+          <path d="M4 4 L15 8 L4 13 Z" fill="#ffd166" stroke="#3d3550" stroke-width="2" stroke-linejoin="round"></path>
+        </symbol>
+        <symbol id="flower" viewBox="0 0 12 12">
+          <circle cx="6" cy="3" r="2.6" fill="#ffb3c7" stroke="#3d3550" stroke-width="1.2"></circle>
+          <circle cx="3" cy="7" r="2.6" fill="#ffb3c7" stroke="#3d3550" stroke-width="1.2"></circle>
+          <circle cx="9" cy="7" r="2.6" fill="#ffb3c7" stroke="#3d3550" stroke-width="1.2"></circle>
+          <circle cx="6" cy="6" r="2" fill="#ffd166"></circle>
+        </symbol>
+      </defs>
+
+      <rect x="0" y="0" width="354" height="430" fill="#9fe0ec"></rect>
+      <g class="bob" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity="0.8">
+        <path d="M24 214 q8 -6 16 0 q8 6 16 0"></path>
+        <path d="M286 318 q8 -6 16 0 q8 6 16 0"></path>
+        <path d="M150 400 q8 -6 16 0 q8 6 16 0"></path>
+        <path d="M60 110 q8 -6 16 0 q8 6 16 0"></path>
+        <path d="M250 150 q8 -6 16 0 q8 6 16 0"></path>
+      </g>
+
+      <g opacity="{{w.rainbow}}" fill="none" stroke-width="6" stroke-linecap="round">
+        <path d="M126 120 A62 62 0 0 1 250 120" stroke="#ff9aa2"></path>
+        <path d="M133 120 A55 55 0 0 1 243 120" stroke="#ffd166"></path>
+        <path d="M140 120 A48 48 0 0 1 236 120" stroke="#9be3a0"></path>
+        <path d="M147 120 A41 41 0 0 1 229 120" stroke="#8ec5ff"></path>
+      </g>
+
+      <g opacity="{{w.sun}}">
+        <circle cx="314" cy="44" r="19" fill="#ffd166" stroke="#3d3550" stroke-width="2.5"></circle>
+        <circle cx="308" cy="42" r="2" fill="#3d3550"></circle>
+        <circle cx="320" cy="42" r="2" fill="#3d3550"></circle>
+        <path d="M309 49 Q314 53 319 49" fill="none" stroke="#3d3550" stroke-width="2" stroke-linecap="round"></path>
+        <circle cx="304" cy="48" r="2.4" fill="#ff9f68" opacity="0.7"></circle>
+        <circle cx="324" cy="48" r="2.4" fill="#ff9f68" opacity="0.7"></circle>
+      </g>
+      <g class="drift" opacity="{{w.cloud}}">
+        <path d="M262 70 a12 12 0 0 1 20 -10 a15 15 0 0 1 28 4 a10 10 0 0 1 4 20 h-48 a8 8 0 0 1 -4 -14 z" fill="#ffffff" stroke="#3d3550" stroke-width="2.4" stroke-linejoin="round"></path>
+      </g>
+
+      <g opacity="0.75">
+        <ellipse cx="44" cy="58" rx="24" ry="8" fill="#d6eef4" stroke="#7fb6c6" stroke-width="2" stroke-dasharray="4 4"></ellipse>
+        <text x="44" y="82" text-anchor="middle" font-size="11" font-weight="700" fill="#2f5b6b">藍島・霧中</text>
+        <ellipse cx="112" cy="34" rx="20" ry="7" fill="#d6eef4" stroke="#7fb6c6" stroke-width="2" stroke-dasharray="4 4"></ellipse>
+        <text x="112" y="56" text-anchor="middle" font-size="11" font-weight="700" fill="#2f5b6b">金島・霧中</text>
+      </g>
+
+      <path d="M150 316 C190 300 210 280 236 262 M250 214 C238 196 220 186 204 180" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 8"></path>
+
+      <g transform="translate(178 160)">
+        <ellipse cx="0" cy="9" rx="66" ry="20" fill="#f7e2b0" stroke="#3d3550" stroke-width="2.5"></ellipse>
+        <ellipse cx="0" cy="2" rx="52" ry="13" fill="#9be3a0" stroke="#3d3550" stroke-width="2.2"></ellipse>
+        <use href="#flower" x="-46" y="-6" width="12" height="12" opacity="{{g.flowers}}"></use>
+        <use href="#flower" x="30" y="-4" width="12" height="12" opacity="{{g.flowers}}"></use>
+        <use href="#sprout" x="-10" y="-16" width="20" height="20" opacity="{{g.sprout}}"></use>
+        <use class="sway" href="#palm" x="-44" y="-44" width="32" height="42" opacity="{{g.p1}}"></use>
+        <use class="sway" href="#palm" x="-20" y="-52" width="34" height="46" opacity="{{g.p2}}"></use>
+        <use class="sway" href="#palm" x="2" y="-44" width="30" height="40" opacity="{{g.p3}}"></use>
+        <use href="#hut" x="14" y="-26" width="32" height="28" opacity="{{g.house}}"></use>
+        <use href="#flag" x="38" y="-38" width="16" height="32" opacity="{{g.flag}}"></use>
+        <text x="0" y="46" text-anchor="middle" font-size="13" font-weight="900" fill="#2f2a3d">綠島</text>
+      </g>
+
+      <g transform="translate(272 240)">
+        <ellipse cx="0" cy="9" rx="62" ry="19" fill="#f7e2b0" stroke="#3d3550" stroke-width="2.5"></ellipse>
+        <ellipse cx="0" cy="2" rx="48" ry="12" fill="#e2c39b" stroke="#3d3550" stroke-width="2.2"></ellipse>
+        <use href="#flower" x="-42" y="-6" width="12" height="12" opacity="{{b.flowers}}"></use>
+        <use href="#flower" x="28" y="-4" width="12" height="12" opacity="{{b.flowers}}"></use>
+        <use href="#sprout" x="-10" y="-16" width="20" height="20" opacity="{{b.sprout}}"></use>
+        <use class="sway" href="#palm" x="-42" y="-42" width="30" height="40" opacity="{{b.p1}}"></use>
+        <use class="sway" href="#palm" x="-18" y="-50" width="32" height="44" opacity="{{b.p2}}"></use>
+        <use class="sway" href="#palm" x="2" y="-42" width="28" height="38" opacity="{{b.p3}}"></use>
+        <use href="#hut" x="14" y="-24" width="30" height="26" opacity="{{b.house}}"></use>
+        <use href="#flag" x="34" y="-36" width="16" height="32" opacity="{{b.flag}}"></use>
+        <text x="0" y="44" text-anchor="middle" font-size="13" font-weight="900" fill="#2f2a3d">棕島</text>
+      </g>
+
+      <g transform="translate(96 324)">
+        <rect x="56" y="-2" width="34" height="8" rx="2" fill="#c98b5a" stroke="#3d3550" stroke-width="2"></rect>
+        <path d="M64 6 v10 M82 6 v10" stroke="#3d3550" stroke-width="2.4" stroke-linecap="round"></path>
+        <ellipse cx="0" cy="10" rx="74" ry="23" fill="#f7e2b0" stroke="#3d3550" stroke-width="2.5"></ellipse>
+        <ellipse cx="0" cy="2" rx="60" ry="15" fill="#ffd09a" stroke="#3d3550" stroke-width="2.2"></ellipse>
+        <use href="#flower" x="-52" y="-6" width="12" height="12" opacity="{{o.flowers}}"></use>
+        <use href="#flower" x="34" y="-4" width="12" height="12" opacity="{{o.flowers}}"></use>
+        <use href="#sprout" x="-10" y="-16" width="20" height="20" opacity="{{o.sprout}}"></use>
+        <use class="sway" href="#palm" x="-50" y="-46" width="34" height="44" opacity="{{o.p1}}"></use>
+        <use class="sway" href="#palm" x="-24" y="-56" width="36" height="48" opacity="{{o.p2}}"></use>
+        <use class="sway" href="#palm" x="0" y="-46" width="32" height="42" opacity="{{o.p3}}"></use>
+        <use href="#hut" x="16" y="-28" width="34" height="30" opacity="{{o.house}}"></use>
+        <use href="#flag" x="44" y="-40" width="16" height="32" opacity="{{o.flag}}"></use>
+        <text x="0" y="50" text-anchor="middle" font-size="13" font-weight="900" fill="#2f2a3d">橘島</text>
+      </g>
+
+      <g transform="translate(294 384)">
+        <ellipse cx="0" cy="6" rx="34" ry="11" fill="#c7c3d6" stroke="#3d3550" stroke-width="2.5"></ellipse>
+        <g opacity="{{lh.rubble}}">
+          <circle cx="-10" cy="0" r="5" fill="#e4e1ee" stroke="#3d3550" stroke-width="2"></circle>
+          <circle cx="2" cy="-2" r="4" fill="#e4e1ee" stroke="#3d3550" stroke-width="2"></circle>
+          <rect x="8" y="-22" width="22" height="13" rx="3" fill="#fff6df" stroke="#3d3550" stroke-width="2"></rect>
+          <text x="19" y="-12" text-anchor="middle" font-size="9" font-weight="900" fill="#2f2a3d">待建</text>
+          <path d="M19 -9 v9" stroke="#3d3550" stroke-width="2"></path>
+        </g>
+        <g opacity="{{lh.beam}}">
+          <path d="M0 -58 L-46 -78 L-46 -46 Z" fill="#fff3a6" opacity="0.8"></path>
+          <path d="M0 -58 L46 -78 L46 -46 Z" fill="#fff3a6" opacity="0.8"></path>
+        </g>
+        <g opacity="{{lh.tower}}">
+          <path d="M-9 4 L-6 -48 L6 -48 L9 4 Z" fill="#ffffff" stroke="#3d3550" stroke-width="2.4" stroke-linejoin="round"></path>
+          <path d="M-8 -12 L8 -12 L8.5 -2 L-8.5 -2 Z M-7 -34 L7 -34 L7.5 -24 L-7.5 -24 Z" fill="#ff8f6b"></path>
+          <rect x="-8" y="-62" width="16" height="14" rx="3" fill="#ffd166" stroke="#3d3550" stroke-width="2.4"></rect>
+          <path d="M-10 -62 L0 -72 L10 -62 Z" fill="#ff8f6b" stroke="#3d3550" stroke-width="2.4" stroke-linejoin="round"></path>
+        </g>
+        <text x="0" y="32" text-anchor="middle" font-size="13" font-weight="900" fill="#2f2a3d">測驗燈塔</text>
+      </g>
+
+      <g transform="translate({{boat.x}} {{boat.y}})">
+        <g class="bob">
+          <path d="M-16 0 L16 0 L11 9 L-11 9 Z" fill="#ff8f6b" stroke="#3d3550" stroke-width="2.4" stroke-linejoin="round"></path>
+          <path d="M0 0 L0 -24" stroke="#3d3550" stroke-width="2.4" stroke-linecap="round"></path>
+          <path d="M1 -23 L14 -4 L1 -4 Z" fill="#ffffff" stroke="#3d3550" stroke-width="2.2" stroke-linejoin="round"></path>
+        </g>
+      </g>
+    </svg>
+  </section>
+
+  <section aria-label="島嶼清單" style="margin: 16px 16px 0; display: flex; flex-direction: column; gap: 8px">
+    <h2 style="margin: 0 0 2px; font-size: 18px; font-weight: 900">島嶼</h2>
+    <sc-for list="{{islands}}" as="it" hint-placeholder-count="5">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; min-height: 44px; background: {{it.bg}}; border: 2px solid #3d3550; border-radius: 16px">
+        <span aria-hidden="true" style="width: 28px; height: 28px; border-radius: 50%; background: {{it.color}}; border: 2px solid #3d3550; flex-shrink: 0"></span>
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+          <div style="display: flex; justify-content: space-between; gap: 8px">
+            <span style="font-size: 15px; font-weight: 900">{{it.name}}<span style="font-size: 12px; font-weight: 700; color: #5a5470; margin-left: 6px">{{it.sub}}</span></span>
+            <span style="font-size: 13px; font-weight: 700; white-space: nowrap">{{it.right}}</span>
+          </div>
+          <div style="height: 8px; background: #e7e3f0; border-radius: 99px; overflow: hidden">
+            <div style="width: {{it.w}}; height: 100%; background: {{it.color}}"></div>
+          </div>
+          <span style="font-size: 12px; color: #5a5470; font-weight: 700">{{it.stage}}</span>
+        </div>
+      </div>
+    </sc-for>
+  </section>
+
+  <section aria-label="學習數據" style="margin: 16px 16px 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+    <div style="padding: 12px 8px; background: #ffffff; border: 2px solid #3d3550; border-radius: 16px; text-align: center; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 12px; font-weight: 700; color: #5a5470">連續打卡</span>
+      <span style="font-size: 24px; font-weight: 900">{{d.streak}}<span style="font-size: 13px"> 天</span></span>
+      <span style="font-size: 12px; font-weight: 700; color: #2c6e8f">{{weatherLabel}}</span>
+    </div>
+    <div style="padding: 12px 8px; background: #ffffff; border: 2px solid #3d3550; border-radius: 16px; text-align: center; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 12px; font-weight: 700; color: #5a5470">單字掌握</span>
+      <span style="font-size: 24px; font-weight: 900">{{d.mastery}}<span style="font-size: 13px">%</span></span>
+      <span style="font-size: 12px; font-weight: 700; color: #2c6e8f">{{d.goalShort}}</span>
+    </div>
+    <div style="padding: 12px 8px; background: #ffffff; border: 2px solid #3d3550; border-radius: 16px; text-align: center; display: flex; flex-direction: column; gap: 2px">
+      <span style="font-size: 12px; font-weight: 700; color: #5a5470">模擬測驗</span>
+      <span style="font-size: 24px; font-weight: 900">{{d.ans}}<span style="font-size: 13px"> 題</span></span>
+      <span style="font-size: 12px; font-weight: 700; color: #2c6e8f">{{lighthouseLabel}}</span>
+    </div>
+  </section>
+
+  <div aria-label="廣告位置" style="margin: 16px 16px 0; height: 90px; border: 2px dashed #9aa6b8; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #5b6472; font-size: 13px; font-weight: 700; background: #f6fafc">廣告（位置固定在地圖下方）</div>
+
+  <nav aria-label="主選單" style="margin-top: auto; padding: 8px 8px 12px; background: #ffffff; border-top: 2.5px solid #3d3550; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px">
+    <a href="#" aria-current="page" style="display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; justify-content: center; border-radius: 14px; background: #fff0e2; color: #2f2a3d; text-decoration: none; font-size: 12px; font-weight: 900">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="17" rx="9" ry="3.5"></ellipse><path d="M12 16c0-4 0-7 1-10"></path><path d="M13 6c-3-2-6-1-7 1M13 6c3-2 6-1 7 1"></path></svg>
+      群島
+    </a>
+    <a href="Flashcard.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; justify-content: center; border-radius: 14px; color: #2f2a3d; text-decoration: none; font-size: 12px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="13" height="15" rx="2"></rect><path d="M8 3h11a1 1 0 0 1 1 1v13"></path></svg>
+      單字卡
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; justify-content: center; border-radius: 14px; color: #2f2a3d; text-decoration: none; font-size: 12px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21l1.5-14h3L15 21z"></path><path d="M8 7h8l-1-3H9z"></path><path d="M4 21h16"></path></svg>
+      模擬測驗
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; gap: 2px; min-height: 52px; justify-content: center; border-radius: 14px; color: #2f2a3d; text-decoration: none; font-size: 12px; font-weight: 700">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 4v3M12 17v3M4 12h3M17 12h3"></path><path d="M14.5 9.5l-1.5 4-4 1.5 1.5-4z"></path></svg>
+      目標設定
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"progress":{"editor":"enum","options":["day1","week2","month3"],"default":"week2"},"$preview":{"width":390,"height":1360}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var PRESETS = {
+      day1:   { label: "第 1 天",   orange: 3,   brown: 0,  green: 0,  streak: 1,  ans: 0,   today: 4,  goal: 10, mastery: 3,  goalLabel: "橘級・每日 10 字", goalShort: "橘級" },
+      week2:  { label: "第 2 週",   orange: 45,  brown: 8,  green: 0,  streak: 9,  ans: 36,  today: 10, goal: 10, mastery: 45, goalLabel: "橘級・每日 10 字", goalShort: "橘級" },
+      month3: { label: "第 3 個月", orange: 100, brown: 70, green: 25, streak: 42, ans: 180, today: 7,  goal: 15, mastery: 25, goalLabel: "綠級・每日 15 字", goalShort: "綠級" }
+    };
+    var key = (this.state && this.state.preset) || this.props.progress || "week2";
+    if (!PRESETS[key]) key = "week2";
+    var d = PRESETS[key];
+    var self = this;
+
+    function island(p) {
+      var palms = p >= 100 ? 3 : p >= 50 ? 2 : p >= 25 ? 1 : 0;
+      return {
+        p1: palms >= 1 ? 1 : 0, p2: palms >= 2 ? 1 : 0, p3: palms >= 3 ? 1 : 0,
+        sprout: p > 0 && p < 25 ? 1 : 0,
+        flowers: p >= 50 ? 1 : 0, house: p >= 75 ? 1 : 0, flag: p >= 100 ? 1 : 0
+      };
+    }
+    function stage(p) {
+      if (p <= 0) return "還是一片沙灘，學第一個字就會冒芽";
+      if (p < 25) return "冒出新芽了";
+      if (p < 50) return "長出第一棵椰子樹";
+      if (p < 75) return "樹林開花了";
+      if (p < 100) return "蓋好小屋，快完成了";
+      return "插上旗子，這座島完成了";
+    }
+    var remain = Math.max(d.goal - d.today, 0);
+    var bubble = remain > 0
+      ? "再學 " + remain + " 個字，今天的小船就靠岸囉！"
+      : "今天的小船靠岸了！想多學也可以，島上會更熱鬧。";
+    var r = Math.min(d.today / d.goal, 1);
+    var boat = { x: Math.round(40 + r * 172), y: Math.round(408 - r * 76) };
+    var w = d.streak >= 7 ? { sun: 1, cloud: 0.9, rainbow: 1 } : d.streak >= 1 ? { sun: 1, cloud: 0.9, rainbow: 0 } : { sun: 0.35, cloud: 1, rainbow: 0 };
+    var weatherLabel = d.streak >= 7 ? "出現彩虹" : d.streak >= 1 ? "晴天" : "陰天";
+    var lh = d.ans >= 50 ? { rubble: 0, tower: 1, beam: 1 } : d.ans >= 1 ? { rubble: 0, tower: 1, beam: 0 } : { rubble: 1, tower: 0, beam: 0 };
+    var lighthouseLabel = d.ans >= 50 ? "燈塔點亮" : d.ans >= 1 ? "燈塔蓋好" : "燈塔待建";
+
+    var islands = [
+      { name: "橘島", sub: "入門", p: d.orange, color: "#ffb26b" },
+      { name: "棕島", sub: "基礎", p: d.brown, color: "#d6a57a" },
+      { name: "綠島", sub: "職場與商務", p: d.green, color: "#7fd8a0" }
+    ].map(function (it) {
+      return { name: it.name, sub: it.sub, color: it.color, bg: "#ffffff", w: it.p + "%", right: "掌握 " + it.p + "%", stage: stage(it.p) };
+    }).concat([
+      { name: "藍島", sub: "高階商務", color: "#cfe3f7", bg: "#f3f6fa", w: "0%", right: "尚未開放", stage: "還在霧中，之後的版本開放" },
+      { name: "金島", sub: "近母語", color: "#f3e3a8", bg: "#f3f6fa", w: "0%", right: "尚未開放", stage: "還在霧中，之後的版本開放" }
+    ]);
+
+    var presets = ["day1", "week2", "month3"].map(function (id) {
+      var on = id === key;
+      return {
+        label: PRESETS[id].label,
+        bg: on ? "#3d3550" : "#ffffff",
+        fg: on ? "#ffffff" : "#3d3550",
+        pressed: on ? "true" : "false",
+        pick: function () { self.setState({ preset: id }); }
+      };
+    });
+
+    return {
+      d: d, presets: presets, bubble: bubble,
+      todayW: Math.round(r * 100) + "%",
+      o: island(d.orange), b: island(d.brown), g: island(d.green),
+      w: w, lh: lh, boat: boat,
+      islands: islands, weatherLabel: weatherLabel, lighthouseLabel: lighthouseLabel,
+      mapLabel: "群島地圖：橘島掌握 " + d.orange + "%、棕島 " + d.brown + "%、綠島 " + d.green + "%，連續打卡 " + d.streak + " 天（" + weatherLabel + "），模擬測驗已答對 " + d.ans + " 題（" + lighthouseLabel + "）"
+    };
+  }
+}
+</script>
+</body>
+</html>

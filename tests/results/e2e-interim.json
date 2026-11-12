@@ -4,7 +4,7 @@
     "tc": "TC-62-01",
     "ac": "AC-62-01、AC-33-03、V-STT-11、V-STT-15、IT-3、IT-6",
     "result": "通過",
-    "note": "start() 當下 interimResults=true、lang en-US；聆聽中收音條 755.3 ms 後亮；[\"la\"] → 「la」8.3 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11110、分數區 false、訊息「」；[\"late\"] → 「late」7.7 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11110、分數區 false、訊息「」；[\"latency\"] → 「latency」14 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11110、分數區 false、訊息「」；[\" comply \",\"with\"] → 「comply with」16.6 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11110、分數區 false、訊息「」；[\"Hello, World?\"] → 「Hello, World?」11.9 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11111、分數區 false、訊息「」"
+    "note": "start() 當下 interimResults=true、lang en-US；聆聽中收音條 452.3 ms 後亮；[\"la\"] → 「la」8.6 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11111、分數區 false、訊息「」；[\"late\"] → 「late」8.5 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11111、分數區 false、訊息「」；[\"latency\"] → 「latency」15.8 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11111、分數區 false、訊息「」；[\" comply \",\"with\"] → 「comply with」14.3 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11111、分數區 false、訊息「」；[\"Hello, World?\"] → 「Hello, World?」15.1 ms（同步顯示 true）、列數 1、標籤「聽到：」、lang en、按鈕「聆聽中」、收音條 11111、分數區 false、訊息「」"
   },
   {
     "suite": "e2e-interim",
@@ -25,7 +25,7 @@
     "tc": "TC-62-03a",
     "ac": "AC-62-03 (a)、AC-60-01、V-STT-12",
     "result": "通過",
-    "note": "即時「adress」顯示中 → 最終 address：8.5 ms 內 idle「麥克風跟讀」00000、無即時列、分數 100綠燈、辨識文字「address」；同一同步工作內即時列隱藏=true、分數區出現=true；rAF 取樣 12 格中同時可見 0 格"
+    "note": "即時「adress」顯示中 → 最終 address：9.1 ms 內 idle「麥克風跟讀」00000、無即時列、分數 100綠燈、辨識文字「address」；同一同步工作內即時列隱藏=true、分數區出現=true；rAF 取樣 12 格中同時可見 0 格"
   },
   {
     "suite": "e2e-interim",
@@ -39,21 +39,21 @@
     "tc": "TC-62-04",
     "ac": "AC-62-04、AC-59-03、V-STT-06（hadResult 但 hadText 假）",
     "result": "通過",
-    "note": "即時 ad → 最終 \"\"：6.2 ms 隱藏、idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」、今日已學 2→2；即時 ad → 最終 \"...\"：17 ms 隱藏、idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」、今日已學 2→2"
+    "note": "即時 ad → 最終 \"\"：5.4 ms 隱藏、idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」、今日已學 2→2；即時 ad → 最終 \"...\"：1.4 ms 隱藏、idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」、今日已學 2→2"
   },
   {
     "suite": "e2e-interim",
     "tc": "TC-62-05b",
     "ac": "AC-62-05（最後一段即時文字清洗後為空 → AC-59-03）、V-STT-06",
     "result": "通過",
-    "note": "即時 adr → 「...」→ end：12.8 ms、idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」、今日已學 2→2"
+    "note": "即時 adr → 「...」→ end：10.8 ms、idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」、今日已學 2→2"
   },
   {
     "suite": "e2e-interim",
     "tc": "TC-62-06",
     "ac": "AC-62-06 (a)～(f)、AC-08-10（v0.21 再按）、AC-58-10、AC-60-07、AC-08-09、AC-08-14、AC-33-05、AC-33-06 (b)、AC-59-02、IT-7、E-171",
     "result": "通過",
-    "note": "(a) 再按（手動停止）：7.2 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列；遲到事件後即時列 false、分數 false；(b) 換卡（下一張）：6.3 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列；遲到事件後即時列 false、分數 false；(b) 切換測驗模式：9.9 ms 隱藏（同步 true）→ (無面板)「」、無即時列；遲到事件後即時列 false、分數 false；返回後 idle「麥克風跟讀」00000、無即時列；(b) 按 TTS：7.8 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列；遲到事件後即時列 false、分數 false；(b) 離開單字卡頁：9.2 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列；遲到事件後即時列 false、分數 false；返回後 idle「麥克風跟讀」00000、無即時列；(c) error network：10.6 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「語音辨識需要網路連線」；遲到事件後即時列 false、分數 false；(c) error not-allowed：10.8 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「需要麥克風權限 開啟方式：點網址列左側的圖示（鎖頭或」；遲到事件後即時列 false、分數 false；(c) error audio-capture：11.5 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」；遲到事件後即時列 false、分數 false；(c) error 其他代碼 bad-grammar：7.3 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「語音辨識發生錯誤，請稍後再試一次」；遲到事件後即時列 false、分數 false；(d) error no-speech（無 speechstart）：10.6 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」；遲到事件後即時列 false、分數 false；(e) nomatch：9.6 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」；遲到事件後即時列 false、分數 false；(f) 音軌結束（拔除）：9.6 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」；遲到事件後即時列 false、分數 false；今日已學 2→2；未處理例外 0"
+    "note": "(a) 再按（手動停止）：2.9 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列；遲到事件後即時列 false、分數 false；(b) 換卡（下一張）：5.7 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列；遲到事件後即時列 false、分數 false；(b) 切換測驗模式：9.8 ms 隱藏（同步 true）→ (無面板)「」、無即時列；遲到事件後即時列 false、分數 false；返回後 idle「麥克風跟讀」00000、無即時列；(b) 按 TTS：11.6 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列；遲到事件後即時列 false、分數 false；(b) 離開單字卡頁：15.9 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列；遲到事件後即時列 false、分數 false；返回後 idle「麥克風跟讀」00000、無即時列；(c) error network：11.9 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「語音辨識需要網路連線」；遲到事件後即時列 false、分數 false；(c) error not-allowed：13 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「需要麥克風權限 開啟方式：點網址列左側的圖示（鎖頭或」；遲到事件後即時列 false、分數 false；(c) error audio-capture：14.4 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」；遲到事件後即時列 false、分數 false；(c) error 其他代碼 bad-grammar：14.8 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「語音辨識發生錯誤，請稍後再試一次」；遲到事件後即時列 false、分數 false；(d) error no-speech（無 speechstart）：3.5 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」；遲到事件後即時列 false、分數 false；(e) nomatch：17.7 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「有收到聲音，但沒聽出英文單字，請再說一次」；遲到事件後即時列 false、分數 false；(f) 音軌結束（拔除）：16 ms 隱藏（同步 true）→ idle「麥克風跟讀」00000、無即時列、訊息「找不到麥克風裝置 請確認裝置已連接麥克風後再按一次」；遲到事件後即時列 false、分數 false；今日已學 2→2；未處理例外 0"
   },
   {
     "suite": "e2e-interim",
@@ -81,14 +81,14 @@
     "tc": "TC-62-05",
     "ac": "AC-62-05、AC-08-04、AC-30-01、AC-17-02、MS-1 (2b)、IT-9、V-STT-14、LR-1",
     "result": "通過",
-    "note": "即時 adr、adress → end：8.7 ms 內分數區繪製、idle「麥克風跟讀」00000、無即時列、分數 86黃燈、辨識文字「adress」；對照（直接最終 adress，8.9 ms）idle「麥克風跟讀」00000、無即時列、分數 86黃燈；分數區 outerHTML 相同=true（476 字元）、lastResult 相同=true {\"recognizedText\":\"adress\",\"targetText\":\"address\",\"score\":86,\"light\":\"yellow\"}；評分後 localStorage data（今日已學、打卡、掌握、learnedHistory 等 12 欄）相同=true、主控台文字相同=true；今日已學 0→1、打卡 1；rAF 取樣 12 格中即時列與分數區同時可見 0"
+    "note": "即時 adr、adress → end：11 ms 內分數區繪製、idle「麥克風跟讀」00000、無即時列、分數 86黃燈、辨識文字「adress」；對照（直接最終 adress，10.5 ms）idle「麥克風跟讀」00000、無即時列、分數 86黃燈；分數區 outerHTML 相同=true（476 字元）、lastResult 相同=true {\"recognizedText\":\"adress\",\"targetText\":\"address\",\"score\":86,\"light\":\"yellow\"}；評分後 localStorage data（今日已學、打卡、掌握、learnedHistory 等 12 欄）相同=true、主控台文字相同=true；今日已學 0→1、打卡 1；rAF 取樣 11 格中即時列與分數區同時可見 0"
   },
   {
     "suite": "e2e-interim",
     "tc": "TC-62-02a",
     "ac": "AC-62-02 (a)、AC-58-07（v0.21 暫時結果）、AC-33-03、IT-5、PR-5 (b)",
     "result": "通過",
-    "note": "準備中（awaitingAudioStart）收到 ad：9.3 ms 內（同步 listening、即時「ad」）→ listening「聆聽中」00000、即時「ad」；轉聆聽中後 748.9 ms 收音條亮（11111；本頁第 1 次取得麥克風，與 audiostart 路徑相同，diag-r12-meter）；再等 6 秒（> T_READY）→ listening「聆聽中」11111、即時「ad」、未評分（今日已學 0→0）；之後 audiostart → listening「聆聽中」11111、即時「ad」"
+    "note": "準備中（awaitingAudioStart）收到 ad：9 ms 內（同步 listening、即時「ad」）→ listening「聆聽中」00000、即時「ad」；轉聆聽中後 449.8 ms 收音條亮（11111；本頁第 1 次取得麥克風，與 audiostart 路徑相同，diag-r12-meter）；再等 6 秒（> T_READY）→ listening「聆聽中」11111、即時「ad」、未評分（今日已學 0→0）；之後 audiostart → listening「聆聽中」11111、即時「ad」"
   },
   {
     "suite": "e2e-interim",
@@ -102,7 +102,7 @@
     "tc": "TC-62-02b",
     "ac": "AC-62-02 (b)、AC-58-07（v0.21 暫時結果）、AC-33-03、IT-5、PR-5 (b)、AC-58-09",
     "result": "通過",
-    "note": "準備中（fallbackWait）收到 ad：8.9 ms 內（同步 listening、即時「ad」）→ listening「聆聽中」00000、即時「ad」；轉聆聽中後 748.2 ms 收音條亮（11111；本頁第 1 次取得麥克風，與 audiostart 路徑相同，diag-r12-meter）；再等 6 秒（> T_READY、T_FALLBACK）→ listening「聆聽中」11111、即時「ad」、未評分（今日已學 0→0）"
+    "note": "準備中（fallbackWait）收到 ad：10 ms 內（同步 listening、即時「ad」）→ listening「聆聽中」00000、即時「ad」；轉聆聽中後 447.9 ms 收音條亮（11111；本頁第 1 次取得麥克風，與 audiostart 路徑相同，diag-r12-meter）；再等 6 秒（> T_READY、T_FALLBACK）→ listening「聆聽中」11111、即時「ad」、未評分（今日已學 0→0）"
   },
   {
     "suite": "e2e-interim",
@@ -130,49 +130,49 @@
     "tc": "TC-30-04i",
     "ac": "AC-30-04（v0.21：顯示過即時文字但以手動停止、換卡、錯誤、nomatch 結束）、AC-62-06、MS-6",
     "result": "通過",
-    "note": "X 初值 0；手動停止 → X=0、換卡 → X=0、TTS → X=0、error network → X=0、error no-speech → X=0、nomatch → X=0；除 flashcardPosition 外 localStorage 不變=true；之後以即時文字評分（AC-62-05，不屬本條）→ X=1；主控台「今日已學 1 / 15 字 開始今日學習 綠級・每日 1」"
+    "note": "X 初值 0；手動停止 → X=0、換卡 → X=0、TTS → X=0、error network → X=0、error no-speech → X=0、nomatch → X=0；除 flashcardPosition 外 localStorage 不變=true；之後以即時文字評分（AC-62-05，不屬本條）→ X=1；主控台「今日已學 1 / 15 字 開始今日學習 藍島・霧中 金」"
   },
   {
     "suite": "e2e-interim",
     "tc": "TC-62-09-375",
     "ac": "AC-62-09 (a)、AC-20-01、AC-38-04、AC-27-03（375px）",
     "result": "通過",
-    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 306 ≤ clientWidth 306、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 306 ≤ clientWidth 306、在面板內 true、行數 5（高 146.4）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 306 ≤ clientWidth 306、在面板內 true、行數 2（高 92.6）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
+    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 304 ≤ clientWidth 304、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 304 ≤ clientWidth 304、在面板內 true、行數 5（高 146.4）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 304 ≤ clientWidth 304、在面板內 true、行數 2（高 92.6）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
   },
   {
     "suite": "e2e-interim",
     "tc": "TC-62-09-768",
     "ac": "AC-62-09 (a)、AC-20-01、AC-38-04、AC-27-03（768px）",
     "result": "通過",
-    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 652 ≤ clientWidth 652、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 652 ≤ clientWidth 652、在面板內 true、行數 2（高 65.8）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 652 ≤ clientWidth 652、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
+    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 650 ≤ clientWidth 650、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 650 ≤ clientWidth 650、在面板內 true、行數 2（高 65.8）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 650 ≤ clientWidth 650、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
   },
   {
     "suite": "e2e-interim",
     "tc": "TC-62-09-1366",
     "ac": "AC-62-09 (a)、AC-20-01、AC-38-04、AC-27-03（1366px）",
     "result": "通過",
-    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 859 ≤ clientWidth 859、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 859 ≤ clientWidth 859、在面板內 true、行數 2（高 65.8）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 859 ≤ clientWidth 859、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
+    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 857 ≤ clientWidth 857、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 857 ≤ clientWidth 857、在面板內 true、行數 2（高 65.8）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 857 ≤ clientWidth 857、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
   },
   {
     "suite": "e2e-interim",
     "tc": "TC-62-09m-375",
     "ac": "AC-62-09 (b)、AC-20-01、AC-38-04、AC-27-03（375px）",
     "result": "通過",
-    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 306 ≤ clientWidth 306、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 306 ≤ clientWidth 306、在面板內 true、行數 5（高 146.4）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 306 ≤ clientWidth 306、在面板內 true、行數 2（高 92.6）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
+    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 304 ≤ clientWidth 304、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 304 ≤ clientWidth 304、在面板內 true、行數 5（高 146.4）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 304 ≤ clientWidth 304、在面板內 true、行數 2（高 92.6）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
   },
   {
     "suite": "e2e-interim",
     "tc": "TC-62-09m-768",
     "ac": "AC-62-09 (b)、AC-20-01、AC-38-04、AC-27-03（768px）",
     "result": "通過",
-    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 652 ≤ clientWidth 652、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 652 ≤ clientWidth 652、在面板內 true、行數 2（高 65.8）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 652 ≤ clientWidth 652、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
+    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 650 ≤ clientWidth 650、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 650 ≤ clientWidth 650、在面板內 true、行數 2（高 65.8）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 650 ≤ clientWidth 650、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
   },
   {
     "suite": "e2e-interim",
     "tc": "TC-62-09m-1366",
     "ac": "AC-62-09 (b)、AC-20-01、AC-38-04、AC-27-03（1366px）",
     "result": "通過",
-    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 859 ≤ clientWidth 859、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 859 ≤ clientWidth 859、在面板內 true、行數 2（高 65.8）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 859 ≤ clientWidth 859、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
+    "note": "comply with：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 857 ≤ clientWidth 857、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；20 字長句：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 857 ≤ clientWidth 857、在面板內 true、行數 2（高 65.8）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏；60 字元無空白：座標 待機/聆聽/出現/更新/隱藏 相同=true、全文=true、水平捲軸 false、列 scrollWidth 857 ≤ clientWidth 857、在面板內 true、行數 1（高 38.9）、italic、標籤 rgb(91, 100, 114)／值 rgb(91, 100, 114) vs 辨識文字 rgb(31, 41, 55)、對比 5.98／5.98、animation none/none/none、transition 0s/0s/0s、display block、翻面/上一張/下一張 可見/可見/可見、隱藏後 已隱藏"
   },
   {
     "suite": "e2e-interim",
@@ -186,7 +186,7 @@
     "tc": "TC-62-10b",
     "ac": "AC-62-10（部署目錄、Service Worker 與 Cache Storage）、AC-37-05",
     "result": "通過",
-    "note": "http://localhost:8080/english-master-track/：Service Worker 啟用=true（1 ms）、控制中=true；Cache Storage [\"english-master-track-pwa-981b0d2ab45de9d6\"] 共 7 筆；3 種結束前即時列顯示 [true,true,true]；即時文字命中 Cache 0、localStorage 0、IndexedDB []；期間請求 0 筆（含即時文字 0、跨來源 0）；重新載入 → idle、即時列 hidden=true；pageerror 0；瀏覽器 chrome"
+    "note": "http://localhost:8080/english-master-track/：Service Worker 啟用=true（1 ms）、控制中=true；Cache Storage [\"english-master-track-pwa-7ce555b38d85b6c4\"] 共 7 筆；3 種結束前即時列顯示 [true,true,true]；即時文字命中 Cache 0、localStorage 0、IndexedDB []；期間請求 0 筆（含即時文字 0、跨來源 0）；重新載入 → idle、即時列 hidden=true；pageerror 0；瀏覽器 chrome"
   },
   {
     "suite": "e2e-interim",

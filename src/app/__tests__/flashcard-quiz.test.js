@@ -155,7 +155,7 @@ describe("flashcard-quiz.test.js", () => {
     a.gotoCard(1);
     off();
     s = store.getState();
-    assert.deepEqual(s.runtime.flashcard, { index: 1, isFlipped: false, mode: "card", quiz: null });
+    assert.deepEqual(s.runtime.flashcard, { index: 1, isFlipped: false, mode: "card", quiz: null, islandFeedback: null });
     assert.equal(s.runtime.speech.lastResult, null);
     assert.equal(JSON.stringify(s.data.vocabQuiz), statsBefore, "統計不變");
     assert.ok(!tags.includes("storage"), "自動退回不發 storage 提示");

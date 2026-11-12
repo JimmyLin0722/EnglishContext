@@ -141,7 +141,7 @@ describe("shell.test.js：index.html 導覽", () => {
       return m ? m[1].trim() : null;
     });
     assert.deepEqual(labels, C.NAV_TAB_ORDER.map((t) => C.TAB_LABELS[t]));
-    assert.deepEqual(labels, ["主控台", "難易度設定", "單字卡", "模擬測驗"]);
+    assert.deepEqual(labels, ["群島", "難易度設定", "單字卡", "模擬測驗"]);
   });
 
   test("（v0.5，FE-38；AC-20-04）導覽不含隱藏頁按鈕；可見文字不含「解碼器」「句型庫」", () => {
@@ -613,14 +613,19 @@ describe("shell.test.js：名稱 EnglishContext 與標題列圖示（v0.12，FE-
     assert.equal(prop(rulesOf(base, ".app-title"), "display"), "flex");
   });
 
-  test("NM-4：license-header.txt 第一行 = EnglishContext，第 2 行起與 v0.12（FE-78）逐字相同（SHA-256）", () => {
+  test("NM-4：license-header.txt 第一行 = EnglishContext，第 2 行起與 v0.19 島嶼風格（FE-105）逐字相同；去掉 LT-7 那一行即與 v0.12（FE-78）相同（SHA-256）", () => {
     const crypto = require("node:crypto");
+    const sha = (s) => crypto.createHash("sha256").update(s).digest("hex");
     // 換行一律正規化為 LF（Windows checkout 可能為 CRLF）
     const lines = read("license-header.txt").replace(/\r\n/g, "\n").split("\n");
     assert.equal(lines[0].replace(/\r$/, ""), "EnglishContext");
     const rest = lines.slice(1).join("\n");
+    assert.equal(sha(rest), "cf29d40acf81a25634d79ac9e42a4f5437d08d9f200eee18158984a16770d2a0");
+    // （v0.19 島嶼風格，FE-105）契約 L-8 LT-7 恰 1 行；去掉該行後與 v0.12 雜湊相同 → 與既有聲明的差異只有新增的 LT-7
+    const LT_7 = "群島插圖與角色「龜龜」由 AI 依 JimmyLin 的構想繪製，作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。";
+    assert.equal(lines.filter((l) => l === LT_7).length, 1);
     assert.equal(
-      crypto.createHash("sha256").update(rest).digest("hex"),
+      sha(lines.slice(1).filter((l) => l !== LT_7).join("\n")),
       "a219f926540d5c4e6435448b225ce0af283b6574869fe065b204dd6b9fba1fa0"
     );
     assert.doesNotMatch(read("license-header.txt"), /english\s*master\s*track/i);

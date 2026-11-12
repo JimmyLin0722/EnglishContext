@@ -1,0 +1,15 @@
+  PASS TC-28-01 AC-28-01 點卡片非按鈕區：正面 → 動畫中（背面顯示、flip-in class 1、animation-duration 0.36s）→ 450ms 後背面、無殘留 class；再點 → 動畫中正面 → 正面（≤ 400ms，Q-33）
+  PASS TC-28-02 AC-28-02 按 1.0x、0.75x、麥克風（開始／停止）後卡片皆為正面=true；朗讀 2 次；麥克風狀態 listening
+  PASS TC-28-07 AC-28-07 鍵盤：翻面 Enter → true、空白鍵 → false；下一張 Enter → 第 5 / 5620 張、空白鍵 → 第 6 / 5620 張；上一張 Enter → 第 5 / 5620 張；三鈕可 Tab 聚焦=true
+  PASS TC-28-08 AC-28-08 動畫中連點 2 次：最終 正面、殘留動畫 class 0、正面 transform none；55 個畫格中正反面同時可見 0、皆不可見 0
+  PASS TC-28-03 AC-28-03 第 5 張（背面）向左滑 120px → 第 6 / 5620 張、正面（手指離開到新卡 1.4ms）；向右滑 → 第 5 / 5620 張（1.1ms）（實機手感列人工 TC-M05）
+  PASS TC-28-04 AC-28-04 第 1 張向右滑 → 第 1 / 5620 張；第 N 張向左滑 → 第 5620 / 5620 張
+  PASS TC-28-05 AC-28-05 水平 −49px → 第 5 / 5620 張；+49px → 第 5 / 5620 張；垂直為主（dx −60、dy −160）→ 第 5 / 5620 張、未翻面、頁面捲動 0→146；卡片 touch-action=pan-y（允許垂直捲動）
+  PASS TC-28-06 AC-28-06 測驗模式在題目與選項上左右滑動 3 次：作答=false、selectedIndex null、題目（卡片索引）4→4、答題數 0→0、選項鎖定=false；1.6 秒後點擊（tap）選項 → 作答=true、答題數 1
+  PASS TC-29-01 AC-29-01 四選一答對：點擊→顏色 6ms、動畫 "qz-opt--pop"/0.48s、700ms 後狀態 correct,neutral,neutral,neutral、鎖定=true、殘留動畫 class=false；四選一答錯：點擊→顏色 8.1ms、動畫 "qz-opt--shake"/0.48s、700ms 後狀態 neutral,neutral,correct,wrong、鎖定=true、殘留動畫 class=false；模擬測驗答對：點擊→顏色 45.7ms、動畫 "p5-opt--pop"/0.48s、700ms 後狀態 correct,locked,locked,locked、鎖定=true、殘留動畫 class=false；模擬測驗答錯：點擊→顏色 4.8ms、動畫 "p5-opt--shake"/0.48s、700ms 後狀態 locked,locked,correct,wrong、鎖定=true、殘留動畫 class=false（動畫上限 600ms，Q-33）
+  PASS TC-29-02 AC-29-02 每次作答 navigator.vibrate 呼叫：1 次 [40]（總長含停頓 40ms）；1 次 [[60,40,60]]（總長含停頓 160ms）；1 次 [40]（總長含停頓 40ms）；1 次 [[60,40,60]]（總長含停頓 160ms）；鎖定後再點 震動次數不變=true、無動畫=true（實機震動列人工）
+  PASS TC-29-03 AC-29-03 vibrate 不存在：四選一答錯與模擬測驗答對的顏色、動畫、鎖定正常=true、提示 []、錯誤 0；vibrate 拋例外：四選一答錯與模擬測驗答對的顏色、動畫、鎖定正常=true、提示 []、錯誤 0（iOS Safari 實機列人工）
+  PASS TC-31-01 AC-31-01 customizer：emt-view-in/0.24s、點擊到第一個影格 15.3ms、結束後移除 class=true；flashcards：emt-view-in/0.24s、點擊到第一個影格 21.4ms、結束後移除 class=true；part5：emt-view-in/0.24s、點擊到第一個影格 15.1ms、結束後移除 class=true；dashboard：emt-view-in/0.24s、點擊到第一個影格 6ms、結束後移除 class=true（效能多輪判定見 TC-22-01）
+  PASS TC-31-02 AC-31-02 連點 customizer→flashcards→part5（間隔 40ms）→ 目前 part5、顯示 view-part5、殘留動畫 0、opacity 1、transform none；連點 part5→dashboard→customizer（間隔 40ms）→ 目前 customizer、顯示 view-customizer、殘留動畫 0、opacity 1、transform none；連點 flashcards→customizer→dashboard（間隔 40ms）→ 目前 dashboard、顯示 view-dashboard、殘留動畫 0、opacity 1、transform none
+  PASS TC-31-03 AC-31-03 prefers-reduced-motion=true；換頁：立即顯示=true、animation none、opacity 1；翻卡：20ms 內背面=true、animation none、transform none；滑動：第 6 / 5620 張、animation none、opacity 1；作答：四選一 neutral,correct,wrong,neutral（animation none）、模擬測驗 correct,locked,locked,locked（animation none）、震動仍呼叫 2 次；今日進度條與島嶼清單進度條 transition/animation 0s/none,0s/none,0s/none,0s/none；地圖內執行中動畫 0（收音條與聆聽中見 TC-33-08、確認視窗見 TC-31-03d）
+  PASS TC-X-motion （全套件）無未處理例外 例外 []

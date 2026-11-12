@@ -176,7 +176,7 @@ describe("naming.test.js", () => {
     const text = (m) => m[2].replace(/<[^>]*>/g, "").trim();
     assert.deepEqual(btns.map((m) => m[1]), [...C.NAV_TAB_ORDER]);
     assert.deepEqual(btns.map(text), C.NAV_TAB_ORDER.map((t) => C.TAB_LABELS[t]));
-    assert.deepEqual(btns.map(text), ["主控台", "難易度設定", "單字卡", "模擬測驗"]);
+    assert.deepEqual(btns.map(text), ["群島", "難易度設定", "單字卡", "模擬測驗"]);
   });
 
   test("10 個 section：id 為 view-<TabId>；可見頁 aria-label = TAB_LABELS，隱藏頁保留 hidden、無 aria-label（HT-5）", () => {
@@ -215,14 +215,43 @@ describe("naming.test.js", () => {
     }
   });
 
+  test("（v0.19，FE-104；IA-1、AC-63-02、V-ISL-08）index.html（不含註解）文字節點與 aria-label、title 不含「主控台」「學習主控台」", () => {
+    const OLD = ["主控台", "學習主控台"];
+    const html = indexHtml();
+    // 文字節點：去除 <script>、<style> 內容後，取標籤之間的文字
+    const body = html.replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, "");
+    const texts = [...body.matchAll(/>([^<]+)</g)].map((m) => m[1].trim()).filter(Boolean);
+    assert.ok(texts.length > 0);
+    const attrs = [...html.matchAll(/\b(?:aria-label|title)="([^"]*)"/g)].map((m) => m[1]);
+    assert.ok(attrs.length > 0);
+    // <title> 元素文字也在 texts 內
+    for (const s of texts.concat(attrs)) {
+      for (const w of OLD) assert.ok(!s.includes(w), "index.html 含「" + w + "」：" + s);
+    }
+    // 群島頁 section 與導覽第 1 項
+    assert.match(html, /<section id="view-dashboard" class="view" aria-label="群島" hidden>/);
+    assert.equal(C.TAB_LABELS.dashboard, "群島");
+  });
+
+  test("（v0.19，FE-104；AC-63-01、AC-27-05）導覽第 1 項為「群島」＋ 內嵌單一 path 島嶼圖示（無外部資源）", () => {
+    const nav = indexHtml().match(/<nav id="app-nav"[\s\S]*?<\/nav>/)[0];
+    const first = nav.match(/<button\b[^>]*\bdata-tab="dashboard"[^>]*>([\s\S]*?)<\/button>/);
+    assert.ok(first, "找不到第 1 項");
+    const inner = first[1];
+    assert.match(inner, /<span class="app-nav__label">群島<\/span>/);
+    assert.equal((inner.match(/<svg\b/g) || []).length, 1);
+    assert.equal((inner.match(/<path\b/g) || []).length, 1);
+    assert.doesNotMatch(inner, /<(?:img|image|use)\b|href=|url\(|xmlns|#f7893b/i);
+  });
+
   test("（v0.12，FE-58；AC-39-01、AC-39-06、DB-1）主控台本體無模組入口與 data-go=sources；只有「開始今日學習」→ flashcards、「變更」→ customizer", () => {
     const D = require("../views/dashboard.js");
     assert.equal("ENTRIES" in D, false, "功能入口已移除");
     const lits = stringLiterals(read(path.join(VIEWS_DIR, "dashboard.js")));
-    // data-go 值只有 flashcards、customizer
+    // data-go 值只有 flashcards、customizer（v0.19，FE-108：「變更」移到標題列，原始碼與 Tab 順序皆為「變更」→「開始今日學習」）
     const src = read(path.join(VIEWS_DIR, "dashboard.js"));
     const gos = [...src.matchAll(/"data-go":\s*"([^"]+)"/g)].map((m) => m[1]);
-    assert.deepEqual(gos, ["flashcards", "customizer"]);
+    assert.deepEqual(gos, ["customizer", "flashcards"]);
     assert.ok(!lits.includes("sources"), "不含 sources 頁代碼");
     for (const t of C.HIDDEN_TAB_IDS) assert.ok(!lits.includes(t), t);
     // 模組名稱不作為主控台按鈕文字（TAB_LABELS 的 4 個功能區名稱與「資料來源與授權」）

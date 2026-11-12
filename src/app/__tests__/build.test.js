@@ -431,7 +431,7 @@ test("B-6：授權標頭含連續兩個減號即中止", async () => {
   await expectAbort({ "app/license-header.txt": "MIT -- x" }, "LICENSE_DOUBLE_DASH");
 });
 
-test("AC-23-06：專案 license-header.txt 含 MIT 全文與 CC BY-SA 4.0 聲明，且無連續兩個減號", () => {
+test("AC-23-06、AC-72-05：專案 license-header.txt 含 MIT 全文與 CC BY-SA 4.0 聲明、LT-4 之後一行 LT-7，且無連續兩個減號", () => {
   const txt = fs.readFileSync(path.join(ROOT, "src", "app", "license-header.txt"), "utf8");
   assert.equal(txt.includes("--"), false);
   assert.ok(txt.includes("Copyright (c) {{YEAR}} JimmyLin"));
@@ -452,6 +452,14 @@ test("AC-23-06：專案 license-header.txt 含 MIT 全文與 CC BY-SA 4.0 聲明
       "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。"
     )
   );
+  // （v0.19 島嶼風格，FE-105）LT-7 逐字一行，緊接在 LT-4 那一行之後（AC-72-05、§7.32.12）
+  {
+    const lines = txt.split(/\r?\n/);
+    const LT_4_LINE = "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。";
+    const LT_7 = "群島插圖與角色「龜龜」由 AI 依 JimmyLin 的構想繪製，作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。";
+    assert.equal(lines.filter((l) => l === LT_7).length, 1);
+    assert.equal(lines.indexOf(LT_7), lines.indexOf(LT_4_LINE) + 1);
+  }
   // （v0.12，FE-78）第一行名稱不變（NM-4）；舊聲明與 LT-5 不得出現（R-25 PM 判斷 (c)）
   assert.equal(txt.split(/\r?\n/)[0], "EnglishContext");
   assert.equal(txt.includes("原創內容著作權人 JimmyLin"), false);
@@ -622,7 +630,7 @@ function pwaFiles(over = {}) {
       "app/license-header.txt": LICENSE,
       "app/pwa/sw.template.js": SW_TEMPLATE_REAL,
       "app/site/static-page.css": STATIC_CSS,
-      "app/styles/00-base.css": ":root {\n  --bg: #eef4fa;\n  --primary: #0866ad;\n}\nbody { background: var(--bg); }\n",
+      "app/styles/00-base.css": ":root {\n  --bg: #eaf7fb;\n  --primary: #0866ad;\n}\nbody { background: var(--bg); }\n",
       "app/core/a.js": "/* APP_A */ var a = 1;\n",
       "app/assets/icons/icon-192.png": makePng(192),
       "app/assets/icons/icon-512.png": makePng(512),
@@ -910,7 +918,7 @@ test("PWA (7) DS-13：00-base.css 的 --bg 不符或缺漏 → PWA_BG_COLOR；�
   // v0.11 舊值 → 中止（VC-5）
   await expectPwaAbort({ "app/styles/00-base.css": ":root { --bg: #f6f7f9; }\n" }, "PWA_BG_COLOR");
   await expectPwaAbort({ "app/styles/00-base.css": null }, "PWA_BG_COLOR");
-  const { fx } = await pwaBuild({ "app/styles/00-base.css": ":root { --bg: #EEF4FA; }\n" });
+  const { fx } = await pwaBuild({ "app/styles/00-base.css": ":root { --bg: #EAF7FB; }\n" });
   fx.cleanup();
 });
 

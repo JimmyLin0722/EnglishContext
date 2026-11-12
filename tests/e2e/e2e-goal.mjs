@@ -182,7 +182,7 @@ await R.check("TC-17-06", "AC-17-06", async () => {
   await p.ev(`EMT.router.go("dashboard")`); await sleep(300);
   const st = await dashStats(p);
   const noHidden = !/解碼器|句型庫/.test(dashText) && !/目標分數|功能入口|目前目標色級|目前生效色級/.test(dashText);
-  return { ok: ok && reach.every((e) => e.endsWith("true")) && legacy.entries === 0 && legacy.goTargets === "flashcards:開始今日學習、customizer:變更" && st.labels === "連續打卡天數、單字掌握率、模擬測驗" && noHidden,
+  return { ok: ok && reach.every((e) => e.endsWith("true")) && legacy.entries === 0 && legacy.goTargets === "customizer:變更、flashcards:開始今日學習" /* 第 13 輪：v0.22 目標標籤移到標題列（AC-66-04），DOM 順序先「變更」 */ && st.labels === "連續打卡天數、單字掌握率、模擬測驗" && noHidden,
     note: out.map(([c, d]) => `${NAME[c]}：${d}`).join(" ／ ") + `；主控台本體可點擊 data-go：${legacy.goTargets}；功能入口/主控台本體資料來源入口 ${legacy.entries}；可到達 ${reach.join(" ")}；3 格標籤 ${st.labels}；含「解碼器／句型庫／目標分數／功能入口／目前目標色級」=${!noHidden}` };
 });
 

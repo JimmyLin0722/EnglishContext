@@ -101,7 +101,7 @@
 
   // §10（v0.8）頁面畫面名稱（R-15、AC-20-03）；識別字不改，只改畫面文字
   var TAB_LABELS = {
-    dashboard: "主控台",
+    dashboard: "群島", // （v0.19，FE-104；IA-1、AC-63-01）
     customizer: "難易度設定",
     flashcards: "單字卡",
     part5: "模擬測驗",

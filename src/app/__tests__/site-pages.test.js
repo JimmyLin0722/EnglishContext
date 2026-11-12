@@ -303,7 +303,7 @@ describe("site-pages.test.js", () => {
   describe("ui/site-return.js", () => {
     test("returnText：「返回」加 TAB_LABELS；4 個功能區與難易度設定逐字", () => {
       const R = require("../ui/site-return.js");
-      assert.equal(R.returnText("dashboard", C.TAB_LABELS), "返回主控台");
+      assert.equal(R.returnText("dashboard", C.TAB_LABELS), "返回群島");
       assert.equal(R.returnText("customizer", C.TAB_LABELS), "返回難易度設定");
       assert.equal(R.returnText("flashcards", C.TAB_LABELS), "返回單字卡");
       assert.equal(R.returnText("part5", C.TAB_LABELS), "返回模擬測驗");
@@ -397,7 +397,7 @@ describe("site-pages.test.js", () => {
       h.router.back();
       h.router.go("dashboard");
       h.router.go("contact");
-      assert.equal(h.btnOf("contact").textContent, "返回主控台");
+      assert.equal(h.btnOf("contact").textContent, "返回群島");
     });
 
     test("首次模式：4 頁文字皆「返回難易度設定」，返回仍在首次畫面；setItem 0 次，localStorage 前後相同（SP-4、AC-25-07）", () => {

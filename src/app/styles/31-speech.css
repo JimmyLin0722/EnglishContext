@@ -12,6 +12,9 @@
  * （v0.17，FE-99；architecture §7.30.5、契約 README §14.6 IT-6）聆聽中即時文字列 .sp-live：次要文字色 --text-muted、
  *       值斜體、無 transition／animation（一般與減少動態相同）；不設定 display，隱藏靠 [hidden]；長文字可換行不截斷
  *       （AC-62-01、AC-62-09、AC-38-04）。
+ * （v0.19，FE-110；architecture §7.32.7、契約 VC-4）朗讀與麥克風按鈕沿用全域 .btn 的 2px 外框色外框、圓角 14px；
+ *       聆聽中、準備中只換底色與字色，外框色一律 --outline（不再用 --light-red／--brand）。
+ *       收音條暗格／亮格、即時文字列、燈號色不變（AC-68-04）。
  */
 
 .sp-panel {
@@ -59,7 +62,7 @@
 }
 
 .sp-mic.is-listening {
-  border-color: var(--light-red);
+  border-color: var(--outline);
   background: var(--light-red);
   color: #ffffff;
   animation: sp-blink 1s ease-in-out infinite;
@@ -71,9 +74,10 @@
 
 /* 準備中（v0.15，AC-58-01、AC-58-13）：不用聆聽中的紅色與閃爍；只改顏色，
  * 不改邊框粗細、內距與最小寬度（8.5em 可容納「準備中」），切換狀態時座標不變。
- * 文字 --brand-deep（#0866ad）對白底 --surface 的對比 5.98:1（AC-38-04 一般文字 ≥ 4.5:1）。 */
+ * 文字 --brand-deep（#0866ad）對白底 --surface 的對比 5.98:1（AC-38-04 一般文字 ≥ 4.5:1）。
+ * 外框維持外框色（FE-110），與聆聽中以底色、字色、圓點色區分。 */
 .sp-mic.is-preparing {
-  border-color: var(--brand);
+  border-color: var(--outline);
   background: var(--surface);
   color: var(--brand-deep);
   animation: none;

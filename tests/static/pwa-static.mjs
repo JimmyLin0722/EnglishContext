@@ -55,7 +55,7 @@ const sw = fs.readFileSync(path.join(SITE, "sw.js"), "utf8");
   const rel = ["id", "start_url", "scope", ...j.icons.map((_, i) => `icons[${i}]`)].every((k) => { const v = k.startsWith("icons[") ? j.icons[Number(k.slice(6, -1))].src : j[k]; return !/^(\/|https?:)/i.test(v); });
   const icons = j.icons.every((ic) => DEPLOY.includes(ic.src) && typeof ic.purpose === "string" && !ic.purpose.includes(" "));
   const exact = b.toString("utf8") === JSON.stringify(j, null, 2) + "\n";
-  rec("TC-PS-02", "AC-34-01（V-PWA-02）", !bom && JSON.stringify(keys) === JSON.stringify(order) && rel && icons && j.name === "EnglishContext" && j.short_name === "EnglishContext" && j.theme_color === "#1e9bf0" && j.background_color === "#eef4fa" && exact && !/emt|[0-9a-f]{16}/.test(JSON.stringify(j)),
+  rec("TC-PS-02", "AC-34-01（V-PWA-02）", !bom && JSON.stringify(keys) === JSON.stringify(order) && rel && icons && j.name === "EnglishContext" && j.short_name === "EnglishContext" && j.theme_color === "#1e9bf0" && j.background_color === "#eaf7fb" /* 第 13 輪 AC-68-01 */ && exact && !/emt|[0-9a-f]{16}/.test(JSON.stringify(j)),
     `UTF-8 無 BOM=${!bom}；鍵 ${keys.length} 個、順序同契約=${JSON.stringify(keys) === JSON.stringify(order)}；相對路徑=${rel}；icons 皆在部署清單且單一 purpose=${icons}；格式為 JSON.stringify(…, null, 2)+"\\n"=${exact}；不含 BUILD_ID；theme_color ${j.theme_color}、background_color ${j.background_color}（第 5 輪：PRD v0.12 AC-38-02、Q-54）`);
 }
 

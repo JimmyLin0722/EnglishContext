@@ -30,6 +30,11 @@ tools: Read, Grep, Glob, Write, Edit, Bash
 - 若架構已定義建置指令，執行建置並確認成功。
 - 逐條確認任務的 `doneWhen`。
 
+## 讀檔範圍（省 token）
+- 只讀主控給的閱讀清單與任務的 `covers`、`contractRefs`；用 Grep 依編號定位 PRD、契約、架構，只讀命中段落，不整份讀。
+- 修 BUG 時，若對應任務不在 `tasks.json`，到 `docs/archive/tasks-done.json` 依任務 ID grep。
+- 單元測試只跑與本次修改相關的檔案；全套測試只在主控要求時跑。
+
 ## 完成後回報（給主控，簡短）
 - 任務 / BUG ID、狀態建議（`done` 或 `blocked` + 原因）
 - 修改的檔案

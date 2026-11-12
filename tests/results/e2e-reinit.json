@@ -4,7 +4,7 @@
     "tc": "TC-32-01",
     "ac": "AC-32-01",
     "result": "通過",
-    "note": "視窗標題「切換難易度」內文「目前已有學習統計資料，切換難易度將初始化學習紀錄。⏎建議先按「取消」，到主控台按「匯出備份」保存目前紀錄。」按鈕 [\"取消\",\"確定\"]、aria-modal=true；點背景導覽「單字卡」命中=false、頁面 customizer→customizer、視窗仍開=true；視窗開啟中生效 green/綠、單字集 5623（前 5623）、localStorage 與按套用前相同=true"
+    "note": "視窗標題「切換難易度」內文「目前已有學習統計資料，切換難易度將初始化學習紀錄。⏎建議先按「取消」，到「群島」頁按「匯出備份」保存目前紀錄。」按鈕 [\"取消\",\"確定\"]、aria-modal=true；點背景導覽「單字卡」命中=false、頁面 customizer→customizer、視窗仍開=true；視窗開啟中生效 green/綠、單字集 5623（前 5623）、localStorage 與按套用前相同=true"
   },
   {
     "suite": "e2e-reinit",

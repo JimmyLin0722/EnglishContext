@@ -30,5 +30,6 @@ SOFTWARE.
 條款網址：https://creativecommons.org/licenses/by-sa/4.0/
 
 PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。
+群島插圖與角色「龜龜」由 AI 依 JimmyLin 的構想繪製，作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。
 
 外部字表與辭典資料的出處與授權，請見程式內「資料來源與授權」頁。

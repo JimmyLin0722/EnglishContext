@@ -8,6 +8,11 @@
  *       「開始今日學習」「變更」的 data-go、收合區塊與 setItem 0 次、收合時 NT-1 與安裝鈕不顯示）。
  * v0.19（FE-84；architecture.md v0.14 §7.25.1、§10.11；契約 AS-1～AS-4、AS-7、DB-5、V-ANS-01～V-ANS-03）：
  *       第 3 格改驗「模擬測驗」與已答對行；Q = 0 顯示「—」；作答、清除後更新；累計資料不影響顯示。
+ * v0.19（FE-108；architecture.md v0.20 §7.32.2～§7.32.6、§7.32.8、§10.15 dashboard.test.js 列；契約 DB-1～DB-6、IS-1～IS-3、
+ *       IS-14～IS-16、IA-1、IA-2、IA-5、IA-6、V-ISL-04、V-ISL-07、V-LAY-07、V-LAY-08、V-LAY-10）：
+ *       移除主環形圖案例（ringGeometry、centerText、db-ring）；改驗群島頁 DB-1 順序（標題列 → 今日任務卡 → 地圖 → 清單 → 3 格
+ *       → 近 7 天 → 資料備份）、今日任務卡內部順序與對話框 5 句、今日進度條屬性與 2 種填色、清單 5 列與 progressbar（含 P 為 null）、
+ *       3 格狀態行 6 種、AC-39-06 各文字 1 次、show() 才播放地圖動畫與減少動態不播放、回到頁面即新值、瀏覽 setItem 0 次。
  */
 "use strict";
 
@@ -178,12 +183,15 @@ describe("dashboard.test.js", () => {
     assert.equal(m.today.doneText, "今日目標達成");
     m = at(18);
     assert.equal(m.today.text, "今日已學 18 / 15 字");
-    // （v0.12，SD-FB-40）環形圖中央只顯示 X
-    assert.equal(m.today.centerText, "18");
     assert.equal(m.today.done, true);
     assert.equal(m.today.ratio, 1);
-    // 滿圈：dashoffset = 0
-    assert.equal(Number(D.ringGeometry(m.today.ratio).dashoffset), 0);
+    // （v0.19，IS-15）進度條：aria-valuenow = min(X, D)、填滿 100%；不再有環形圖中央數字
+    assert.equal(m.today.valueNow, 15);
+    assert.equal(m.today.fillPct, 100);
+    assert.equal("centerText" in m.today, false);
+    m = at(14);
+    assert.equal(m.today.valueNow, 14);
+    assert.equal(m.today.fillPct, 93.3);
   });
 
   test("progressModel AC-30-07：同一 data，today 前進一天 → X = 0、長條最右為新日期、前一日保留 5", () => {
@@ -256,21 +264,15 @@ describe("dashboard.test.js", () => {
     assert.equal(m.answered.text, "已答對 48 / 200 題（24%）");
     assert.ok(!JSON.stringify(m).includes("70%"), "由累計計算的數字不再出現（AC-49-01）");
     assert.equal(Object.prototype.hasOwnProperty.call(m, "accuracy"), false);
-    // 環形填滿比例與數字一致（誤差 ≤ 1 個百分點）
-    const g = D.ringGeometry(m.mastery.ratio);
-    const filled = 1 - Number(g.dashoffset) / Number(g.dasharray);
-    assert.ok(Math.abs(filled * 100 - 25) <= 1);
   });
 
-  test("progressModel AC-30-10：單字集為空、Q = 0 → 空環「—」，不出現 NaN、Infinity", () => {
+  test("progressModel AC-30-10：單字集為空、Q = 0 → 「—」，不出現 NaN、Infinity", () => {
     const m = D.progressModel(stateOf(), TODAY);
     assert.equal(m.mastery.percent, null);
     assert.equal(m.mastery.text, "—");
     assert.equal(m.mastery.ratio, 0);
     assert.equal(m.answered.summary, null);
     assert.equal(m.answered.text, "—");
-    const g = D.ringGeometry(0);
-    assert.equal(g.dashoffset, g.dasharray); // 空環
     noBad(m);
   });
 
@@ -285,15 +287,21 @@ describe("dashboard.test.js", () => {
     }
   });
 
-  test("ringGeometry：比例夾在 0～1；異常值視為空環", () => {
-    const full = D.ringGeometry(1);
-    assert.equal(Number(full.dashoffset), 0);
-    assert.equal(D.ringGeometry(2).dashoffset, full.dashoffset);
-    assert.equal(D.ringGeometry(-1).dashoffset, full.dasharray);
-    assert.equal(D.ringGeometry(NaN).dashoffset, full.dasharray);
-    assert.equal(D.ringGeometry(Infinity).dashoffset, full.dasharray);
-    const half = D.ringGeometry(0.5);
-    assert.ok(Math.abs(Number(half.dashoffset) - Number(half.dasharray) / 2) < 0.01);
+  test("（v0.19，FE-108；AC-39-01、AC-63-02）主環形圖程式已移除；dashboard.js 字串常值不含「主控台」；TEXT 無 title", () => {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const src = fs.readFileSync(path.join(__dirname, "..", "views", "dashboard.js"), "utf8");
+    assert.equal("ringGeometry" in D, false);
+    assert.equal("title" in D.TEXT, false);
+    // 註解以外的程式碼不含環形圖識別字
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    for (const w of ["ringSvg", "setRing", "ringGeometry", "RING", "db-ring", "dashoffset", "dasharray", "centerText"]) {
+      assert.ok(!code.includes(w), w);
+    }
+    // 字串常值（含單、雙引號）不含「主控台」「學習主控台」（IA-1、V-ISL-08）
+    const lits = [...code.matchAll(/"((?:[^"\\\n]|\\.)*)"|'((?:[^'\\\n]|\\.)*)'/g)].map((m) => m[1] !== undefined ? m[1] : m[2]);
+    assert.ok(lits.length > 50);
+    for (const l of lits) assert.ok(!l.includes("主控台"), l);
   });
 
   test("重繪 tag：learning、goal、studySet、part5、flashcard、storage 等觸發；無關 tag 不觸發", () => {
@@ -335,6 +343,8 @@ describe("dashboard.test.js", () => {
       masteryText: "25%",
       masteredText: "已掌握 60 字",
       answeredText: "已答對 48 / 200 題（24%）",
+      weatherText: "晴天",
+      lighthouseText: "燈塔蓋好",
     });
   });
 
@@ -380,10 +390,10 @@ describe("dashboard.test.js", () => {
     assert.equal(m.stats.streakValue, "0");
   });
 
-  test("dashboardModel AC-30-05：X = 18、D = 15 → text「今日已學 18 / 15 字」、centerText「18」、done", () => {
+  test("dashboardModel AC-30-05：X = 18、D = 15 → text「今日已學 18 / 15 字」、valueNow 15、done", () => {
     const m = D.dashboardModel(stateOf({ goal: goalOf(600), todayLearned: { date: TODAY, wordKeys: keys(18) } }), TODAY);
     assert.equal(m.today.text, "今日已學 18 / 15 字");
-    assert.equal(m.today.centerText, "18");
+    assert.equal(m.today.valueNow, 15);
     assert.equal(m.today.done, true);
     assert.equal(m.today.doneText, "今日目標達成");
   });
@@ -422,6 +432,130 @@ describe("dashboard.test.js", () => {
     assert.equal(D.dashboardModel(stateOf(), TODAY).backupExpanded, false);
     assert.equal(D.dashboardModel(stateOf({}, { dashboard: { backupExpanded: true } }), TODAY).backupExpanded, true);
     assert.equal(D.dashboardModel(stateOf({}, { dashboard: { backupExpanded: "true" } }), TODAY).backupExpanded, false);
+  });
+
+  // ── 群島（v0.19，FE-108；IS-3、IS-11～IS-15、IA-2、IA-4、DB-5、V-ISL-04） ──
+
+  const WK = require("../core/wordkey.js");
+  /** 合成內容：排名 1～n 的內建字（w1…wn） */
+  const contentOf = (n, nB, nG) => {
+    const builtin = Array.from({ length: n }, (_, i) => ({ rank: i + 1, word: "w" + (i + 1) }));
+    return { builtin, builtinMap: new Map(builtin.map((b) => [WK.wordKey(b.word), b])), nB, nG };
+  };
+  /** 排名 from～to 的 wordKey */
+  const wk = (from, to) => Array.from({ length: to - from + 1 }, (_, i) => WK.wordKey("w" + (from + i)));
+  /** AC-64-03 資料：N_B 2,809、N_G 3,000；已掌握橘 250、棕 10、5 個自訂單字；S 3、K 48 / Q 200、X 4 / D 15 */
+  const ac6403 = () => ({
+    state: stateOf({
+      goal: goalOf(600),
+      masteredWordKeys: wk(1, 250).concat(wk(1001, 1010), ["custom a", "custom b", "custom c", "custom d", "custom e"]),
+      streak: { days: 3, lastActiveDate: TODAY },
+      part5CorrectIds: firstIds(48),
+      todayLearned: { date: TODAY, wordKeys: keys(4) }
+    }),
+    content: contentOf(3000, 2809, 3000)
+  });
+
+  test("dashboardModel 群島 AC-64-03、IA-4：文字替代逐字、清單 5 列、對話框、3 格狀態行（同一個 IslandState，IS-3）", () => {
+    const { state, content } = ac6403();
+    const m = D.dashboardModel(state, TODAY, bankN(200), content);
+    assert.equal(m.mapAlt, "群島地圖：橘島掌握 25%，一棵椰子樹；棕島掌握 1%，新芽；綠島掌握 0%，沙灘；藍島、金島尚未開放；"
+      + "連續打卡 3 天，晴天；模擬測驗已答對 48 題，燈塔蓋好；今日小船 4 / 15 字，航行中");
+    assert.equal(m.dialog, "再學 11 個字，今天的小船就靠岸囉！");
+    assert.deepEqual(m.isles, [
+      { id: "orange", name: "橘島", sub: "入門", right: "掌握 25%", stageText: "長出第一棵椰子樹", valueNow: 25, label: "橘島掌握率", fog: false, fillPct: 25 },
+      { id: "brown", name: "棕島", sub: "基礎", right: "掌握 1%", stageText: "冒出新芽了", valueNow: 1, label: "棕島掌握率", fog: false, fillPct: 1 },
+      { id: "green", name: "綠島", sub: "職場與商務", right: "掌握 0%", stageText: "還是一片沙灘，掌握第一個字就會冒芽", valueNow: 0, label: "綠島掌握率", fog: false, fillPct: 0 },
+      { id: "blue", name: "藍島", sub: "高階商務", right: "尚未開放", stageText: "還在霧中，之後的版本開放", valueNow: null, label: null, fog: true, fillPct: 0 },
+      { id: "gold", name: "金島", sub: "近母語", right: "尚未開放", stageText: "還在霧中，之後的版本開放", valueNow: null, label: null, fog: true, fillPct: 0 }
+    ]);
+    assert.equal(m.stats.weatherText, "晴天");
+    assert.equal(m.stats.lighthouseText, "燈塔蓋好");
+    // 3 格「已掌握 N 字」依 §5.4 末段（含自訂單字，N = 265），與島嶼值互相獨立（IS-10）
+    assert.equal(m.stats.masteredText, "已掌握 265 字");
+    // 單一來源：清單、文字替代、3 格、今日進度列取自同一個 island（V-ISL-04）
+    assert.deepEqual(m.island.islands.map((i) => i.p), [25, 1, 0]);
+    assert.deepEqual([m.island.streakDays, m.island.k, m.island.q, m.island.x, m.island.d], [3, 48, 200, 4, 15]);
+    assert.equal(m.island.x, m.today.x);
+    assert.equal(m.island.d, m.today.d);
+    assert.equal(m.stats.streakValue, String(m.island.streakDays));
+    noBad(m);
+  });
+
+  test("dashboardModel 群島：第 4 參數省略（無 EMT.content）或內容異常 → 三島 n = 0、P null「掌握 —」，不拋例外（§4.16、FB-84）", () => {
+    const st = stateOf({ masteredWordKeys: ["the", "company"] });
+    for (const c of [undefined, null, {}, 7, { builtin: 5, builtinMap: {}, nB: NaN, nG: "x" }]) {
+      const m = D.dashboardModel(st, TODAY, undefined, c);
+      assert.deepEqual(m.island.islands.map((i) => [i.n, i.m, i.p, i.stage]), [[0, 0, null, "sand"], [0, 0, null, "sand"], [0, 0, null, "sand"]]);
+      const open = m.isles.slice(0, 3);
+      assert.deepEqual(open.map((r) => [r.right, r.valueNow, r.fillPct, r.label]),
+        [["掌握 —", null, 0, "橘島掌握率"], ["掌握 —", null, 0, "棕島掌握率"], ["掌握 —", null, 0, "綠島掌握率"]]);
+      assert.ok(m.mapAlt.startsWith("群島地圖：橘島掌握 —，沙灘；棕島掌握 —，沙灘；綠島掌握 —，沙灘；"));
+      assert.ok(!/NaN|Infinity|undefined/.test(m.mapAlt + JSON.stringify(m.isles)));
+    }
+    // 內容快照：只取 4 欄
+    assert.deepEqual(Object.keys(D.contentSnapshot(contentOf(3, 2, 3))).sort(), ["builtin", "builtinMap", "nB", "nG"]);
+  });
+
+  test("dashboardModel 群島 AC-64-04：生效橘 → 棕、綠加「（目前目標未包含）」；文字替代不加註記（IS-9）", () => {
+    const content = contentOf(3000, 2809, 3000);
+    const m = D.dashboardModel(stateOf({ goal: goalOf(100), masteredWordKeys: wk(1500, 1500) }), TODAY, [], content);
+    assert.deepEqual(m.isles.slice(0, 3).map((r) => r.stageText),
+      ["還是一片沙灘，掌握第一個字就會冒芽", "冒出新芽了（目前目標未包含）", "還是一片沙灘，掌握第一個字就會冒芽（目前目標未包含）"]);
+    assert.equal(m.isles[1].valueNow, 1, "排名 1,500 計入棕島（不受生效色級影響）");
+    assert.ok(!m.mapAlt.includes("目前目標未包含"));
+    const g = D.dashboardModel(stateOf({ goal: goalOf(600) }), TODAY, [], content);
+    assert.ok(g.isles.every((r) => !r.stageText.includes("目前目標未包含")));
+  });
+
+  test("dashboardModel 對話框 AC-66-02（D = 10：X 0、4、9、10、12 → 5 句）與今日進度列 AC-66-03", () => {
+    const want = [
+      [0, "再學 10 個字，今天的小船就靠岸囉！", 0, 0, false],
+      [4, "再學 6 個字，今天的小船就靠岸囉！", 4, 40, false],
+      [9, "再學 1 個字，今天的小船就靠岸囉！", 9, 90, false],
+      [10, "今天的小船靠岸了！想多學也可以，島上會更熱鬧。", 10, 100, true],
+      [12, "今天的小船靠岸了！想多學也可以，島上會更熱鬧。", 10, 100, true]
+    ];
+    for (const [x, dialog, now, pct, done] of want) {
+      const m = D.dashboardModel(stateOf({ goal: goalOf(100), todayLearned: { date: TODAY, wordKeys: keys(x) } }), TODAY);
+      assert.equal(m.dialog, dialog, "X = " + x);
+      assert.equal(m.today.text, "今日已學 " + x + " / 10 字");
+      assert.equal(m.today.valueNow, now);
+      assert.equal(m.today.fillPct, pct);
+      assert.equal(m.today.done, done);
+      assert.equal(m.today.doneText, done ? "今日目標達成" : "");
+      assert.ok(m.mapAlt.endsWith("今日小船 " + x + " / 10 字，" + (done ? "已靠岸" : "航行中")));
+    }
+  });
+
+  test("dashboardModel 3 格狀態行 AC-67-01：S 0／3／7 → 陰天／晴天／出現彩虹；K 0／48／50 → 燈塔待建／蓋好／點亮；Q = 0 → 「—」＋燈塔待建", () => {
+    for (const [streak, text] of [
+      [{ days: 0, lastActiveDate: null }, "陰天"],
+      [{ days: 3, lastActiveDate: TODAY }, "晴天"],
+      [{ days: 7, lastActiveDate: TODAY }, "出現彩虹"],
+      [{ days: 10, lastActiveDate: "2026-10-27" }, "陰天"] // 最後打卡日 3 天前：S = 0（AC-64-06）
+    ]) {
+      const m = D.dashboardModel(stateOf({ streak }), TODAY, []);
+      assert.equal(m.stats.weatherText, text, JSON.stringify(streak));
+      assert.ok(m.mapAlt.includes("連續打卡 " + m.stats.streakValue + " 天，" + text), "地圖文字替代同一個 S（AC-67-02）");
+    }
+    for (const [k, text] of [[0, "燈塔待建"], [48, "燈塔蓋好"], [50, "燈塔點亮"]]) {
+      const m = D.dashboardModel(stateOf({ part5CorrectIds: firstIds(k) }), TODAY, bankN(200));
+      assert.equal(m.stats.lighthouseText, text, "K = " + k);
+      assert.ok(m.stats.answeredText.startsWith("已答對 " + k + " / 200 題"));
+      assert.ok(m.mapAlt.includes("模擬測驗已答對 " + k + " 題，" + text));
+    }
+    const q0 = D.dashboardModel(stateOf({ part5CorrectIds: ["p5-001"] }), TODAY, []);
+    assert.equal(q0.stats.answeredText, "—");
+    assert.equal(q0.stats.lighthouseText, "燈塔待建");
+    assert.equal(q0.island.k, 0);
+  });
+
+  test("dashboardModel 只讀：不修改傳入的 state（IS-1、IS-2）", () => {
+    const { state, content } = ac6403();
+    const before = JSON.stringify(state);
+    D.dashboardModel(state, TODAY, bankN(200), content);
+    assert.equal(JSON.stringify(state), before);
   });
 
   test("PROGRESS_TAGS、INSTALL_TAGS 含 \"dashboard\"", () => {
@@ -564,8 +698,14 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
 
   /**
    * 載入 dashboard 並 mount。
-   * @param {{ pwa?: object, tab?: string, firstRun?: boolean, noService?: boolean, content?: object }} [o]
+   * @param {{ pwa?: object, tab?: string, firstRun?: boolean, noService?: boolean, content?: object,
+   *           goal?: object, data?: object, reduced?: boolean }} [o]
    *   content：同時作為 store 的 content 與 EMT.content（與正式環境相同，題庫來自同一份快照）
+   *   goal、data：（v0.19，FE-108 加 data）預寫主鍵的 PersistedData 欄位（其餘為預設值）
+   *   reduced：EMT.ui.motion.reduced() 的回傳值（可再以回傳的 flags.reduced 切換）
+   *   idle：（FE-116）閒置排程器替身 { request, cancel }；給定時以 createView({ idle }) 建立頁面模組（不經 register）。
+   *     省略時走瀏覽器登錄路徑；沙箱無 requestIdleCallback／setTimeout → idleScheduler 不排程，不留真實計時器
+   * 回傳 counts.build：（FE-116）islandMap.build 的呼叫次數（以包裝物件計數，行為不變）
    */
   function setup(o = {}) {
     const document = {
@@ -577,10 +717,20 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     sandbox.self = sandbox;
     sandbox.window = sandbox;
     vm.createContext(sandbox);
+    // （v0.19，FE-108）群島頁另需 core/island.js、ui/island-art.js、ui/island-map.js（建置串接順序 core → ui → views）
     for (const rel of ["core/constants.js", "core/wordkey.js", "core/dom.js", "core/goal.js", "core/layout.js", "core/streak.js",
-      "core/stats.js", "core/learning.js", "core/pwa.js", "core/part5flow.js"]) {
+      "core/stats.js", "core/learning.js", "core/pwa.js", "core/part5flow.js", "core/island.js",
+      "ui/island-art.js", "ui/island-map.js"]) {
       vm.runInContext(read(rel), sandbox, { filename: rel });
     }
+    const flags = { reduced: o.reduced === true };
+    sandbox.EMT.ui.motion = { reduced: () => flags.reduced };
+    // （FE-116）islandMap.build 計數替身：包裝物件取代登錄值，其餘匯出原樣
+    const counts = { build: 0 };
+    const realMap = sandbox.EMT.ui.islandMap;
+    sandbox.EMT.ui.islandMap = Object.assign({}, realMap, {
+      build: (st, op) => { counts.build++; return realMap.build(st, op); }
+    });
     const views = {};
     sandbox.EMT.views = { register: (tab, m) => { views[tab] = m; } };
     const calls = { install: 0 };
@@ -588,11 +738,11 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
       sandbox.EMT.services = { pwa: { requestInstall: () => { calls.install++; return Promise.resolve(); } } };
     }
     let preset;
-    if (o.goal) {
+    if (o.goal || o.data) {
       // （v0.9，FE-66）以指定 goal 預寫目前版本（v0.15 起 3）主鍵（模擬已套用藍／金後重新載入；buildRecord 一律寫目前版本）
       const PERSIST = require("../core/persist.js");
-      const data = PERSIST.defaultData();
-      data.goal = o.goal;
+      const data = Object.assign(PERSIST.defaultData(), o.data || {});
+      if (o.goal) data.goal = o.goal;
       preset = F.fakeStorage({ "englishMasterTrack:state": JSON.stringify(PERSIST.buildRecord(data, new Date("2026-10-29T00:00:00Z"))) });
     }
     if (o.content) sandbox.EMT.content = o.content;
@@ -602,12 +752,22 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     // （v0.12，FE-58）預設展開「資料備份」（v0.11 既有案例檢查的是展開後的內容；收合行為另有案例）
     if (o.expanded !== false) a.setBackupExpanded(true);
     sandbox.EMT.store = store;
-    vm.runInContext(read("views/dashboard.js"), sandbox, { filename: "views/dashboard.js" });
-    const view = views.dashboard;
+    let view;
+    if (o.idle) {
+      // 暫時提供 module，讓 dashboard.js 走 module.exports 分支取得 api（沙箱無 require，core 仍取 EMT.core.*）
+      sandbox.module = { exports: {} };
+      vm.runInContext(read("views/dashboard.js"), sandbox, { filename: "views/dashboard.js" });
+      const api = sandbox.module.exports;
+      delete sandbox.module;
+      view = api.createView({ idle: o.idle });
+    } else {
+      vm.runInContext(read("views/dashboard.js"), sandbox, { filename: "views/dashboard.js" });
+      view = views.dashboard;
+    }
     const rootEl = makeNode("section");
     view.mount(rootEl);
     const backup = byClass(rootEl, "db-backup")[0];
-    return { sandbox, store, a, storage, view, rootEl, backup, calls };
+    return { sandbox, store, a, storage, view, rootEl, backup, calls, flags, counts };
   }
 
   const installBox = (s) => byClass(s.rootEl, "dash-backup__install")[0];
@@ -715,81 +875,675 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.equal(D.installAffected(["flashcard"]), false);
   });
 
-  // ── v0.12 版面（FE-58；DB-1～DB-6、V-LAY-07、V-LAY-08） ──
+  // ── v0.19 群島頁版面（FE-108；DB-1～DB-6、V-LAY-07、V-LAY-08、V-LAY-10、IS-3、IA-2、IA-6、§7.32.2～§7.32.6） ──
 
-  /** 主控台本體（.dashboard）的直接子節點 */
+  /** 群島頁本體（.dashboard） */
   const bodyOf = (s) => byClass(s.rootEl, "dashboard")[0];
-  /** 計算文字在本體中出現的次數 */
+  /** 計算文字在本體中出現的次數（textContent；aria-label 等屬性不計，IA-5） */
   const countText = (s, t) => bodyOf(s).textContent.split(t).length - 1;
+  /** 元素子節點 */
+  const elKids = (n) => n.childNodes.filter((c) => c.nodeType === 1);
+  /** store 的 today（_fixtures.makeStore 的 now 為 2026-10-30） */
+  const TODAY = "2026-10-30";
+  const keys = (n, p = "w") => Array.from({ length: n }, (_, i) => p + i);
+  /** 以 data 預寫（今天 2026-10-30，store now 同日） */
+  const withData = (data, extra = {}) => setup(Object.assign({ expanded: false, data }, extra));
 
-  test("DB-1：本體 = 標題「學習主控台」→ 今日任務 → 3 格數據 → 近 7 天 → 資料備份（恰 4 個 section）", () => {
+  test("DB-1：本體 = 標題列 → 今日任務卡 → 地圖 → 島嶼清單 → 3 格數據 → 近 7 天 → 資料備份（AC-39-01、AC-63-01）", () => {
     const s = setup({ expanded: false });
-    const kids = bodyOf(s).childNodes.filter((n) => n.nodeType === 1);
-    assert.equal(kids[0].tagName, "H2");
-    assert.equal(kids[0].textContent, "學習主控台");
-    const sections = kids.slice(1);
-    assert.equal(sections.length, 4);
-    assert.ok(sections.every((n) => n.tagName === "SECTION" && n.classList.contains("card")));
-    assert.deepEqual(sections.map((n) => ["db-today", "db-stats", "db-chart", "db-backup"].find((c) => n.classList.contains(c))),
-      ["db-today", "db-stats", "db-chart", "db-backup"]);
-    // 今日任務卡標題與圖表標題（SD-FB-41）；3 格數據區以 aria-label 命名
-    assert.equal(byClass(sections[0], "section-title")[0].textContent, "今日任務");
-    assert.equal(byClass(sections[2], "section-title")[0].textContent, "近 7 天已學字數");
-    assert.equal(sections[1].getAttribute("aria-label"), "學習數據");
+    const kids = elKids(bodyOf(s));
+    const ORDER = ["db-head", "db-today", "db-map", "db-isles", "db-stats", "db-chart", "db-backup"];
+    assert.deepEqual(kids.map((n) => ORDER.find((c) => n.classList.contains(c))), ORDER);
+    assert.deepEqual(kids.map((n) => n.tagName), ["DIV", "SECTION", "DIV", "SECTION", "SECTION", "SECTION", "SECTION"]);
+    // 今日任務卡、地圖框、近 7 天、資料備份為 .card；清單與 3 格不是單一卡片（每列、每格各自為卡片樣式，§7.32.5、§7.32.6）
+    assert.deepEqual(kids.map((n) => n.classList.contains("card")), [false, true, true, false, false, true, true]);
+    assert.equal(kids[1].getAttribute("aria-labelledby"), "db-today-h");
+    assert.equal(kids[3].getAttribute("aria-labelledby"), "db-isles-h");
+    assert.equal(kids[4].getAttribute("aria-label"), "學習數據");
+    assert.equal(byClass(kids[5], "section-title")[0].textContent, "近 7 天已學字數");
+    assert.equal(byClass(s.rootEl, "db-ring").length + byClass(s.rootEl, "db-ring-wrap").length, 0, "無環形圖");
   });
 
-  test("AC-39-06：列舉文字各 1 次；無舊標籤、無功能入口、無 data-go=sources；色級名稱只在目標行", () => {
-    const s = setup({ expanded: true });
-    for (const t of ["模擬測驗", "單字掌握率", "連續打卡天數"]) assert.equal(countText(s, t), 1, t);
-    for (const t of ["正確率", "累計答對"]) assert.equal(countText(s, t), 0, t);
-    const st = s.store.getState();
-    const x = D.dashboardModel(st, s.store.today()).today;
-    assert.equal(countText(s, x.x + " / " + x.d), 1, "X / D 只出現 1 次");
-    for (const t of ["單字掌握數", "目前目標色級", "目前生效色級", "功能入口", "學習統計", "目前目標", "今日學習進度", "資料來源與授權"]) {
-      assert.equal(countText(s, t), 0, t);
-    }
-    const gos = findAll(bodyOf(s), (n) => n.getAttribute("data-go") !== null).map((n) => n.getAttribute("data-go"));
-    assert.deepEqual(gos, ["flashcards", "customizer"]);
-    // 色級名稱（綠）只在目標行
-    const goal = byClass(s.rootEl, "db-goal")[0];
-    assert.equal(countText(s, "綠"), goal.textContent.split("綠").length - 1);
-    assert.equal(byClass(s.rootEl, "db-ring").length, 1, "只有 1 個環形圖（無小環形圖）");
-  });
-
-  test("今日任務卡：環形圖與按鈕同一列（按鈕在右側欄）、目標行在下；「開始今日學習」btn--accent[data-go=flashcards]；「變更」[data-go=customizer]", () => {
+  test("標題列：h2「我的群島」（左側裝飾 aria-hidden）＋ 目標標籤膠囊與「變更」按鈕（DB-4、IS-16、AC-63-01、AC-66-04）", () => {
     const s = setup({ expanded: false });
-    const today = byClass(s.rootEl, "db-today")[0];
-    const row = byClass(today, "db-today__row")[0];
-    const rowKids = row.childNodes;
-    assert.ok(rowKids[0].classList.contains("db-ring-wrap"));
-    assert.ok(rowKids[1].classList.contains("db-today__side"));
-    const start = byClass(rowKids[1], "db-start")[0];
-    assert.equal(start.tagName, "BUTTON");
-    assert.equal(start.textContent, "開始今日學習");
-    assert.equal(start.getAttribute("data-go"), "flashcards");
-    assert.equal(start.getAttribute("type"), "button");
-    assert.ok(start.classList.contains("btn--accent"));
-    const goal = byClass(today, "db-goal")[0];
-    assert.ok(today.childNodes.indexOf(goal) > today.childNodes.indexOf(row), "目標行在列之後");
-    // （v0.9，FE-66）子節點恰為 dot、text、db-change；無「・」分隔
+    const head = byClass(s.rootEl, "db-head")[0];
+    const [h2, goal] = elKids(head);
+    assert.equal(h2.tagName, "H2");
+    assert.ok(h2.classList.contains("page-title"));
+    assert.equal(h2.textContent, "我的群島");
+    const deco = elKids(h2)[0];
+    assert.equal(deco.tagName, "SVG");
+    assert.ok(deco.classList.contains("isl-art--title") && deco.classList.contains("dash-title__deco"));
+    assert.equal(deco.getAttribute("aria-hidden"), "true");
+    assert.equal(deco.getAttribute("focusable"), "false");
+    // 目標標籤：膠囊（色點 + 文字）→「變更」；無「・」分隔
+    assert.equal(goal.tagName, "P");
+    assert.equal(goal.className, "db-goal");
     assert.equal(goal.textContent, "綠級・每日 15 字變更");
     assert.equal(goal.getAttribute("data-color"), "green");
-    const kids = goal.childNodes.filter((n) => n.nodeType === 1);
-    assert.deepEqual(kids.map((n) => n.className), ["db-goal__dot", "db-goal__text", "btn db-change"]);
+    assert.deepEqual(elKids(goal).map((n) => n.className), ["db-goal__tag", "btn db-change"]);
+    const tag = elKids(goal)[0];
+    assert.deepEqual(elKids(tag).map((n) => n.className), ["db-goal__dot", "db-goal__text"]);
+    assert.equal(elKids(tag)[0].getAttribute("aria-hidden"), "true");
+    assert.equal(byClass(goal, "db-goal__text")[0].textContent, "綠級・每日 15 字");
     assert.equal(byClass(goal, "db-goal__sep").length, 0);
-    assert.ok(!byClass(goal, "db-goal__text")[0].textContent.endsWith("・"));
     const change = byClass(goal, "db-change")[0];
     assert.equal(change.tagName, "BUTTON");
     assert.equal(change.getAttribute("type"), "button");
     assert.equal(change.textContent, "變更");
     assert.equal(change.getAttribute("data-go"), "customizer");
-    assert.ok(!change.classList.contains("btn--link"));
     assert.ok(change.classList.contains("btn"));
-    // 環形圖中央只顯示 X（aria-hidden）
-    const center = byClass(today, "db-ring__value")[0];
-    assert.equal(center.getAttribute("aria-hidden"), "true");
-    assert.equal(center.textContent, "0");
-    assert.equal(byClass(today, "db-today__text")[0].textContent, "今日已學 0 / 15 字");
+    assert.ok(!change.classList.contains("btn--link"));
+    // 目標行不在今日任務卡內（DB-2）
+    assert.equal(byClass(byClass(s.rootEl, "db-today")[0], "db-goal").length, 0);
+  });
+
+  test("今日任務卡內部順序（DB-2、AC-39-02、AC-66-01）：visually-hidden h3 → 龜龜＋名稱＋對話框 → 今日進度列 → 「開始今日學習」", () => {
+    const s = setup({ expanded: false });
+    const today = byClass(s.rootEl, "db-today")[0];
+    const kids = elKids(today);
+    assert.deepEqual(kids.map((n) => n.className), ["visually-hidden", "db-host", "db-today__progress", "btn btn--accent db-start"]);
+    // （SD-FB-107）標題只給螢幕閱讀器
+    assert.equal(kids[0].tagName, "H3");
+    assert.equal(kids[0].getAttribute("id"), "db-today-h");
+    assert.equal(kids[0].textContent, "今日任務");
+    // 龜龜（aria-hidden、不可聚焦）在左，名稱與對話框在右
+    const [turtle, talk] = elKids(kids[1]);
+    assert.equal(turtle.tagName, "SVG");
+    assert.ok(turtle.classList.contains("isl-art--turtle") && turtle.classList.contains("db-host__turtle"));
+    assert.equal(turtle.getAttribute("aria-hidden"), "true");
+    assert.equal(turtle.getAttribute("focusable"), "false");
+    assert.equal(talk.className, "db-host__talk");
+    const [name, bubble] = elKids(talk);
+    assert.equal(name.className, "db-host__name");
+    assert.equal(name.textContent, "島主 龜龜");
+    assert.equal(bubble.className, "db-host__bubble");
+    assert.equal(bubble.textContent, "再學 15 個字，今天的小船就靠岸囉！");
+    // 對話框不是即時區域（IS-14）
+    assert.equal(bubble.getAttribute("aria-live"), null);
+    assert.equal(bubble.getAttribute("role"), null);
+    // 今日進度列：文字 + 進度條，「今日目標達成」在其下
+    const [row, done] = elKids(kids[2]);
+    assert.equal(row.className, "db-today__row");
+    assert.deepEqual(elKids(row).map((n) => n.className), ["db-today__text", "db-today__bar"]);
+    assert.equal(elKids(row)[0].textContent, "今日已學 0 / 15 字");
+    assert.equal(done.className, "db-today__done");
+    assert.equal(done.getAttribute("aria-live"), "polite");
+    assert.equal(done.hidden, true);
+    // 「開始今日學習」
+    const start = kids[3];
+    assert.equal(start.tagName, "BUTTON");
+    assert.equal(start.textContent, "開始今日學習");
+    assert.equal(start.getAttribute("data-go"), "flashcards");
+    assert.equal(start.getAttribute("type"), "button");
+  });
+
+  test("對話框 5 句（AC-66-02，D = 10：X 0、4、9、10、12）", () => {
+    const orange = { draftScore: 100, appliedScore: 100, appliedColor: "orange", effectiveColor: "orange" };
+    for (const [x, text] of [
+      [0, "再學 10 個字，今天的小船就靠岸囉！"],
+      [4, "再學 6 個字，今天的小船就靠岸囉！"],
+      [9, "再學 1 個字，今天的小船就靠岸囉！"],
+      [10, "今天的小船靠岸了！想多學也可以，島上會更熱鬧。"],
+      [12, "今天的小船靠岸了！想多學也可以，島上會更熱鬧。"]
+    ]) {
+      const s = withData({ goal: orange, todayLearned: { date: TODAY, wordKeys: keys(x) } });
+      assert.equal(byClass(s.rootEl, "db-host__bubble")[0].textContent, text, "X = " + x);
+    }
+  });
+
+  test("今日進度條（IS-15、AC-66-03、AC-30-05）：progressbar 屬性、填滿比例、X < D 品牌色／X ≥ D 金色 class 與「今日目標達成」", () => {
+    const orange = { draftScore: 100, appliedScore: 100, appliedColor: "orange", effectiveColor: "orange" };
+    for (const [x, now, width, done] of [[0, "0", "0%", false], [4, "4", "40%", false], [10, "10", "100%", true], [12, "10", "100%", true]]) {
+      const s = withData({ goal: orange, todayLearned: { date: TODAY, wordKeys: keys(x) } });
+      const bar = byClass(s.rootEl, "db-today__bar")[0];
+      const fill = elKids(bar)[0];
+      const text = "今日已學 " + x + " / 10 字";
+      assert.equal(byClass(s.rootEl, "db-today__text")[0].textContent, text);
+      assert.equal(bar.getAttribute("role"), "progressbar");
+      assert.equal(bar.getAttribute("aria-valuemin"), "0");
+      assert.equal(bar.getAttribute("aria-valuemax"), "10");
+      assert.equal(bar.getAttribute("aria-valuenow"), now, "aria-valuenow = min(X, D)");
+      assert.equal(bar.getAttribute("aria-valuetext"), text);
+      assert.equal(fill.className.split(" ")[0], "db-today__fill");
+      assert.equal(fill.style.width, width);
+      assert.equal(fill.classList.contains("db-today__fill--done"), done, "X ≥ D 金色");
+      const doneEl = byClass(s.rootEl, "db-today__done")[0];
+      assert.equal(doneEl.hidden, !done);
+      assert.equal(doneEl.textContent, done ? "今日目標達成" : "");
+      // 「X / D」只在進度列文字 1 次（進度條以 aria-valuetext 重述，不另顯示數字；AC-39-06）
+      assert.equal(countText(s, x + " / 10"), 1);
+    }
+  });
+
+  test("地圖框（§7.32.4、IA-3、IA-4）：div.card.db-map > 1 個 div.db-map__figure[role=img]，aria-label = 同一次推算的文字替代", () => {
+    const content = F.loadContent();
+    const s = setup({ expanded: false, content, data: { masteredWordKeys: ["the", "company"] } });
+    const map = byClass(s.rootEl, "db-map")[0];
+    assert.equal(map.tagName, "DIV");
+    const figs = elKids(map);
+    assert.equal(figs.length, 1);
+    assert.equal(figs[0].className, "db-map__figure");
+    assert.equal(figs[0].getAttribute("role"), "img");
+    const want = D.dashboardModel(s.store.getState(), s.store.today(), content.part5, content).mapAlt;
+    assert.equal(figs[0].getAttribute("aria-label"), want);
+    assert.ok(want.startsWith("群島地圖：橘島掌握 25%，一棵椰子樹；棕島掌握 —，沙灘；綠島掌握 —，沙灘；"));
+    const svgs = elKids(figs[0]);
+    assert.equal(svgs.length, 1);
+    assert.equal(svgs[0].getAttribute("aria-hidden"), "true");
+  });
+
+  test("島嶼清單（IA-2、AC-65-01、AC-65-02）：h3「島嶼」＋ 5 列結構；開放島 progressbar（含 P 為 null）；霧中島 aria-hidden", () => {
+    // fixture 字庫 8 字全在橘島區段（N_O = 1,000）：橘 n = 8、m = 2 → P 25；棕、綠 n = 0 → P null
+    const content = F.loadContent();
+    const s = setup({ expanded: false, content, data: { masteredWordKeys: ["the", "company"] } });
+    const sec = byClass(s.rootEl, "db-isles")[0];
+    const [h3, ul] = elKids(sec);
+    assert.equal(h3.tagName, "H3");
+    assert.equal(h3.className, "section-title");
+    assert.equal(h3.getAttribute("id"), "db-isles-h");
+    assert.equal(h3.textContent, "島嶼");
+    assert.equal(ul.tagName, "UL");
+    assert.equal(ul.className, "db-isles__list");
+    const rows = elKids(ul);
+    assert.deepEqual(rows.map((r) => r.className), [
+      "db-isle db-isle--orange is-open", "db-isle db-isle--brown is-open", "db-isle db-isle--green is-open",
+      "db-isle db-isle--blue is-fog", "db-isle db-isle--gold is-fog"
+    ]);
+    for (const r of rows) {
+      assert.equal(r.tagName, "LI");
+      assert.deepEqual(elKids(r).map((n) => n.className), ["db-isle__dot", "db-isle__title", "db-isle__right", "db-isle__bar", "db-isle__stage"]);
+      assert.equal(elKids(r)[0].getAttribute("aria-hidden"), "true", "色點 aria-hidden");
+    }
+    const part = (r, cls) => byClass(r, cls)[0];
+    assert.deepEqual(rows.map((r) => [part(r, "db-isle__name").textContent, part(r, "db-isle__sub").textContent, part(r, "db-isle__right").textContent]), [
+      ["橘島", "入門", "掌握 25%"], ["棕島", "基礎", "掌握 —"], ["綠島", "職場與商務", "掌握 —"],
+      ["藍島", "高階商務", "尚未開放"], ["金島", "近母語", "尚未開放"]
+    ]);
+    assert.deepEqual(rows.map((r) => part(r, "db-isle__stage").textContent), [
+      "長出第一棵椰子樹", "還是一片沙灘，掌握第一個字就會冒芽", "還是一片沙灘，掌握第一個字就會冒芽",
+      "還在霧中，之後的版本開放", "還在霧中，之後的版本開放"
+    ]);
+    // 開放島：progressbar、min 0、max 100、now = P、aria-label「{島}掌握率」；P 為 null → 省略 aria-valuenow、填滿 0
+    const bars = rows.map((r) => part(r, "db-isle__bar"));
+    assert.deepEqual(bars.slice(0, 3).map((b) => [b.getAttribute("role"), b.getAttribute("aria-valuemin"), b.getAttribute("aria-valuemax"),
+      b.getAttribute("aria-valuenow"), b.getAttribute("aria-label"), elKids(b)[0].style.width]), [
+      ["progressbar", "0", "100", "25", "橘島掌握率", "25%"],
+      ["progressbar", "0", "100", null, "棕島掌握率", "0%"],
+      ["progressbar", "0", "100", null, "綠島掌握率", "0%"]
+    ]);
+    assert.ok(bars.slice(0, 3).every((b) => elKids(b)[0].className === "db-isle__fill"));
+    // 霧中島：不是 progressbar、aria-hidden、無子元素、無 aria-label
+    for (const b of bars.slice(3)) {
+      assert.equal(b.getAttribute("role"), null);
+      assert.equal(b.getAttribute("aria-hidden"), "true");
+      assert.equal(b.getAttribute("aria-label"), null);
+      assert.equal(b.getAttribute("aria-valuenow"), null);
+      assert.equal(elKids(b).length, 0);
+    }
+    // 清單 P 與地圖文字替代一致（AC-65-03）
+    const alt = byClass(s.rootEl, "db-map__figure")[0].getAttribute("aria-label");
+    assert.ok(alt.includes("橘島掌握 25%，一棵椰子樹"));
+  });
+
+  test("地圖與清單無事件、無 tabindex（AC-64-10、AC-71-02）；群島頁本體的 data-go 依 Tab 順序為「變更」→「開始今日學習」", () => {
+    const s = setup({ expanded: false, content: F.loadContent() });
+    for (const cls of ["db-map", "db-isles"]) {
+      const nodes = findAll(byClass(s.rootEl, cls)[0], () => true);
+      assert.ok(nodes.length > 10, cls);
+      for (const n of nodes) {
+        assert.equal(n.getAttribute("tabindex"), null, cls + " 內無 tabindex");
+        assert.deepEqual(Object.keys(n.listeners), [], cls + " 內無事件");
+        assert.ok(n.tagName !== "BUTTON" && n.tagName !== "A" && n.tagName !== "INPUT", cls + " 內無控制項");
+      }
+    }
+    const gos = findAll(bodyOf(s), (n) => n.getAttribute("data-go") !== null).map((n) => n.getAttribute("data-go"));
+    assert.deepEqual(gos, ["customizer", "flashcards"]);
+  });
+
+  test("3 格數據（DB-5、AC-67-01）：第 1 格天氣行、第 3 格燈塔行在最下方；第 2 格不加行", () => {
+    const s = withData({ streak: { days: 3, lastActiveDate: TODAY } });
+    const cells = elKids(byClass(s.rootEl, "db-stats")[0]);
+    assert.deepEqual(cells.map((c) => c.className), ["db-stat db-stat--streak", "db-stat db-stat--mastery", "db-stat db-stat--answered"]);
+    assert.deepEqual(elKids(cells[0]).map((n) => n.className), ["db-stat__label", "db-stat__value", "db-stat__status"]);
+    assert.deepEqual(elKids(cells[1]).map((n) => n.className), ["db-stat__label", "db-stat__value", "db-stat__sub"]);
+    assert.deepEqual(elKids(cells[2]).map((n) => n.className), ["db-stat__label", "db-stat__value db-stat__value--answered", "db-stat__status"]);
+    assert.equal(byClass(cells[0], "db-stat__num")[0].textContent, "3");
+    assert.equal(byClass(cells[0], "db-stat__status")[0].textContent, "晴天");
+    // 未設定 EMT.content：Q = 0 →「—」，燈塔行仍為「燈塔待建」（IS-12）
+    assert.equal(byClass(cells[2], "db-stat__value--answered")[0].textContent, "—");
+    assert.equal(byClass(cells[2], "db-stat__status")[0].textContent, "燈塔待建");
+    const s0 = setup({ expanded: false });
+    assert.equal(byClass(s0.rootEl, "db-stat__status")[0].textContent, "陰天");
+    const s7 = withData({ streak: { days: 7, lastActiveDate: TODAY } });
+    assert.equal(byClass(s7.rootEl, "db-stat__status")[0].textContent, "出現彩虹");
+  });
+
+  test("AC-39-06、V-LAY-08：列舉文字各 1 次；色級名稱「{色}級」只在目標標籤（島名不計）；無舊標籤、功能入口、環形圖", () => {
+    const s = setup({ expanded: true, content: F.loadContent(), data: { masteredWordKeys: ["the"], streak: { days: 3, lastActiveDate: TODAY } } });
+    const st = s.store.getState();
+    const m = D.dashboardModel(st, s.store.today(), s.sandbox.EMT.content.part5, s.sandbox.EMT.content);
+    for (const t of ["模擬測驗", "單字掌握率", "連續打卡天數", m.stats.answeredText, m.today.x + " / " + m.today.d, "綠級"]) {
+      assert.equal(countText(s, t), 1, t);
+    }
+    assert.ok(m.stats.answeredText.startsWith("已答對 "));
+    for (const t of ["橘級", "棕級", "藍級", "金級", "正確率", "累計答對", "單字掌握數", "目前目標色級", "目前生效色級", "功能入口",
+      "學習統計", "目前目標", "今日學習進度", "資料來源與授權", "主控台"]) {
+      assert.equal(countText(s, t), 0, t);
+    }
+    // 島名可出現（地圖與清單），不屬色級名稱（IA-5）
+    assert.ok(countText(s, "橘島") >= 2);
+    assert.equal(byClass(s.rootEl, "db-ring").length, 0);
+  });
+
+  test("show() 才播放地圖動畫；減少動態不播放；停留期間簽章改變才重建且不播放；隱藏期間不同步重建（AC-70-01、AC-70-02、AC-31-03、§7.32.8、§7.32.15）", () => {
+    // 預設 setup 走瀏覽器登錄路徑：沙箱無 requestIdleCallback／setTimeout → 隱藏期間不排程，show() 同步重算
+    const s = setup({ expanded: false });
+    const fig = () => byClass(s.rootEl, "db-map__figure")[0];
+    const playing = () => byClass(fig(), "isl-map")[0].classList.contains("isl-map--play");
+    assert.equal(playing(), false, "mount 時不播放");
+    s.view.show();
+    assert.equal(playing(), true, "show() 播放");
+    const shown = fig();
+    // 停留期間收到 PROGRESS_TAGS 通知、簽章不變（"dashboard"：setBackupExpanded）→ 同一節點
+    s.a.setBackupExpanded(true);
+    assert.equal(fig(), shown, "簽章不變 → 沿用");
+    // 停留期間簽章改變（翻到背面：今日已學 + 1、打卡）→ 重建但不播放
+    s.a.setTab("flashcards");
+    s.a.flipCard();
+    assert.notEqual(fig(), shown, "簽章改變 → 重建");
+    assert.equal(playing(), false, "停留期間不重播");
+    s.a.flipCard(); // 翻回正面
+    // 離開群島頁：通知不同步繪製（無閒置排程器 → 也不預先重建）
+    s.view.hide();
+    const hiddenFig = fig();
+    s.a.gotoCard(1);
+    s.a.flipCard();
+    assert.equal(fig(), hiddenFig, "隱藏期間不重建地圖");
+    assert.equal(byClass(s.rootEl, "db-today__text")[0].textContent, "今日已學 1 / 15 字", "隱藏期間文字不更新");
+    // 回到群島頁：以當下狀態重算，簽章改變 → 重建並播放
+    s.a.setTab("dashboard");
+    s.view.show();
+    assert.notEqual(fig(), hiddenFig);
+    assert.equal(playing(), true, "進入即播放");
+    assert.equal(byClass(s.rootEl, "db-today__text")[0].textContent, "今日已學 2 / 15 字");
+    // 狀態未變：離開再進入 → 同一節點、帶 isl-map--play（重播靠頁面 hidden 切換）
+    const again = fig();
+    s.view.hide();
+    s.view.show();
+    assert.equal(fig(), again);
+    assert.equal(playing(), true, "沿用時以 isl-map--play 判定播放");
+    // 減少動態：show() 沿用並移除動畫 class
+    s.flags.reduced = true;
+    s.view.hide();
+    s.view.show();
+    assert.equal(fig(), again);
+    assert.equal(playing(), false, "減少動態不播放");
+    const r = setup({ expanded: false, reduced: true });
+    r.view.show();
+    assert.equal(byClass(byClass(r.rootEl, "db-map__figure")[0], "isl-map")[0].classList.contains("isl-map--play"), false);
+  });
+
+  // ── v0.21 效能修正（FE-116；§7.32.15 P-1～P-3、§10.15） ──
+
+  /** 閒置排程器替身：request 只記錄、不執行；run() 手動執行全部待執行工作 */
+  function fakeIdle() {
+    const tasks = new Map();
+    let seq = 0;
+    const log = { requests: 0, cancels: [] };
+    return {
+      log,
+      api: {
+        request(fn) { log.requests++; seq++; tasks.set(seq, fn); return seq; },
+        cancel(h) { log.cancels.push(h); tasks.delete(h); }
+      },
+      pending: () => tasks.size,
+      run() {
+        const fns = [...tasks.values()];
+        tasks.clear();
+        fns.forEach((fn) => fn({ didTimeout: false, timeRemaining: () => 50 }));
+      }
+    };
+  }
+  const figOf = (s) => byClass(s.rootEl, "db-map__figure")[0];
+  const playOf = (s) => byClass(figOf(s), "isl-map")[0].classList.contains("isl-map--play");
+  const islesOf = (s) => elKids(byClass(s.rootEl, "db-isles__list")[0]);
+  /** 執行 fn 期間的 setItem 次數 */
+  const writesDuring = (s, fn) => { const n = s.storage.setCalls.length; fn(); return s.storage.setCalls.length - n; };
+  /**
+   * 以包裝 store 覆寫 getState().data 的部分欄位（真實 store 不變、通知仍由真實 store 發出）；
+   * 回傳 box，設定 box.patch 即生效。用於構造「只改 P」等狀態。
+   */
+  function overrideData(s) {
+    const real = s.store;
+    const box = { patch: null };
+    s.sandbox.EMT.store = Object.assign(Object.create(real), {
+      getState() {
+        const st = real.getState();
+        return box.patch ? Object.assign({}, st, { data: Object.assign({}, st.data, box.patch) }) : st;
+      }
+    });
+    return box;
+  }
+
+  test("FE-116 P-1：mount → show() 只 build 1 次；hide → show() 狀態未變 → build 0 次、同一 figure、svg 有 isl-map--play", () => {
+    const idle = fakeIdle();
+    const s = setup({ expanded: false, idle: idle.api });
+    assert.equal(s.counts.build, 1, "mount 建 1 次");
+    const mounted = figOf(s);
+    assert.equal(playOf(s), false);
+    s.view.show();
+    assert.equal(s.counts.build, 1, "首次 show() 簽章相同 → 只 setPlay");
+    assert.equal(figOf(s), mounted);
+    assert.equal(playOf(s), true);
+    let w = writesDuring(s, () => {
+      for (let i = 0; i < 3; i++) {
+        s.view.hide();
+        s.view.show();
+      }
+    });
+    assert.equal(s.counts.build, 1, "狀態未變 → build 0 次");
+    assert.equal(figOf(s), mounted, "同一 figure");
+    assert.equal(playOf(s), true);
+    assert.equal(byClass(s.rootEl, "db-map__figure").length, 1);
+    assert.equal(idle.log.requests, 0, "無資料變更 → 不排閒置工作");
+    assert.equal(w, 0, "setItem 0 次");
+  });
+
+  test("FE-116 P-1：減少動態 → 沿用的 svg 無 isl-map--play；解除後再進入 → setPlay 加回（AC-70-02）", () => {
+    const s = setup({ expanded: false, reduced: true, idle: fakeIdle().api });
+    s.view.show();
+    const f = figOf(s);
+    assert.equal(playOf(s), false);
+    s.view.hide();
+    s.view.show();
+    assert.equal(figOf(s), f);
+    assert.equal(playOf(s), false, "reduced 時無該 class");
+    s.flags.reduced = false;
+    s.view.hide();
+    s.view.show();
+    assert.equal(figOf(s), f);
+    assert.equal(playOf(s), true);
+    s.flags.reduced = true;
+    s.view.hide();
+    s.view.show();
+    assert.equal(playOf(s), false, "setPlay 移除");
+    assert.equal(s.counts.build, 1);
+  });
+
+  test("FE-116 P-1：只改 P（同階段）→ 沿用並更新 aria-label；階段改變 → 重建並播放", () => {
+    const content = F.loadContent();
+    const wk = [...content.builtinMap.keys()];
+    assert.ok(wk.length >= 4);
+    const s = setup({ expanded: false, content, idle: fakeIdle().api, data: { masteredWordKeys: wk.slice(0, 2) } });
+    const box = overrideData(s);
+    s.view.show();
+    const f = figOf(s);
+    const alt0 = f.getAttribute("aria-label");
+    assert.ok(alt0.includes("橘島掌握 25%，一棵椰子樹"));
+    const builds = s.counts.build;
+    // 2 → 3 字：P 25 → 38，仍為「一棵椰子樹」
+    box.patch = { masteredWordKeys: wk.slice(0, 3) };
+    s.view.hide();
+    s.view.show();
+    assert.equal(s.counts.build, builds, "簽章不變 → 不重建");
+    assert.equal(figOf(s), f);
+    const want = D.dashboardModel(s.sandbox.EMT.store.getState(), s.store.today(), content.part5, content).mapAlt;
+    assert.notEqual(want, alt0);
+    assert.equal(f.getAttribute("aria-label"), want, "aria-label 更新為新的文字替代");
+    assert.ok(want.includes("橘島掌握 38%，一棵椰子樹"));
+    assert.equal(playOf(s), true);
+    // 2 → 4 字：P 50「開花」→ 階段改變 → 重建（play 依減少動態）
+    box.patch = { masteredWordKeys: wk.slice(0, 4) };
+    s.view.hide();
+    s.view.show();
+    assert.equal(s.counts.build, builds + 1, "階段改變 → 重建");
+    assert.notEqual(figOf(s), f);
+    assert.equal(playOf(s), true);
+    assert.ok(figOf(s).getAttribute("aria-label").includes("橘島掌握 50%，開花"));
+  });
+
+  test("FE-116：停留期間通知 → 簽章不同才重建，且不播放（AC-70-01）", () => {
+    const idle = fakeIdle();
+    const s = setup({ expanded: false, idle: idle.api });
+    s.view.show();
+    const f = figOf(s);
+    const builds = s.counts.build;
+    s.a.setBackupExpanded(true);
+    s.a.setBackupExpanded(false);
+    assert.equal(s.counts.build, builds, "簽章不變 → 不重建");
+    assert.equal(figOf(s), f);
+    assert.equal(playOf(s), true, "沿用節點不動動畫 class");
+    s.a.setTab("flashcards");
+    s.a.flipCard();
+    assert.equal(s.counts.build, builds + 1, "簽章改變 → 重建 1 次");
+    assert.notEqual(figOf(s), f);
+    assert.equal(playOf(s), false, "live 不播放");
+    assert.equal(byClass(s.rootEl, "db-today__text")[0].textContent, "今日已學 1 / 15 字");
+    s.a.flipCard();
+    assert.equal(s.counts.build, builds + 1, "翻回正面：簽章不變");
+    assert.equal(idle.log.requests, 0, "顯示中不排閒置工作");
+  });
+
+  test("FE-116 P-3：隱藏期間通知 → 當下 DOM 不變、build 0 次、只排 1 次閒置工作；執行後重建並帶 isl-map--play，之後 show() build 0 次", () => {
+    const idle = fakeIdle();
+    const s = setup({ expanded: false, idle: idle.api });
+    s.view.show();
+    s.view.hide();
+    s.a.setTab("flashcards");
+    const f = figOf(s);
+    const lis = islesOf(s);
+    const textOf = (cls) => byClass(s.rootEl, cls)[0].textContent;
+    const before = ["db-today__text", "db-host__bubble", "db-stat__num", "db-stat__status", "db-bars"].map(textOf);
+    const builds = s.counts.build;
+    s.a.flipCard(); // 背面：學習 + 打卡
+    s.a.flipCard(); // 正面
+    s.a.gotoCard(1);
+    s.a.flipCard();
+    assert.equal(s.counts.build, builds, "build 0 次");
+    assert.equal(figOf(s), f);
+    assert.deepEqual(islesOf(s), lis, "清單節點不變");
+    assert.deepEqual(["db-today__text", "db-host__bubble", "db-stat__num", "db-stat__status", "db-bars"].map(textOf), before,
+      "文字不變");
+    assert.equal(idle.log.requests, 1, "連續通知只排 1 次");
+    assert.equal(idle.pending(), 1);
+    // 執行閒置工作 → 預先重算、重建（play 依減少動態；頁面 hidden 下動畫不執行）
+    let w = writesDuring(s, () => idle.run());
+    assert.equal(w, 0, "預先重建 setItem 0 次");
+    assert.equal(s.counts.build, builds + 1);
+    const prepared = figOf(s);
+    assert.notEqual(prepared, f);
+    assert.equal(playOf(s), true, "預先重建帶 isl-map--play");
+    assert.equal(textOf("db-today__text"), "今日已學 2 / 15 字");
+    // 回到群島頁：簽章相同 → 沿用
+    s.a.setTab("dashboard");
+    w = writesDuring(s, () => s.view.show());
+    assert.equal(w, 0);
+    assert.equal(s.counts.build, builds + 1, "之後 show() build 0 次");
+    assert.equal(figOf(s), prepared);
+    assert.equal(playOf(s), true);
+    assert.equal(idle.log.cancels.length, 0, "無待執行工作可取消");
+    // 下次隱藏期間的變更會再排 1 次
+    s.view.hide();
+    s.a.setTab("flashcards");
+    s.a.flipCard();
+    assert.equal(idle.log.requests, 2);
+  });
+
+  test("FE-116 P-3：閒置工作執行前 show() → 取消排程並同步重建（AC-64-09）；之後回呼即使執行也不重建", () => {
+    const idle = fakeIdle();
+    const s = setup({ expanded: false, idle: idle.api });
+    s.view.show();
+    s.view.hide();
+    s.a.setTab("flashcards");
+    s.a.flipCard();
+    assert.equal(idle.pending(), 1);
+    const f = figOf(s);
+    const builds = s.counts.build;
+    s.a.setTab("dashboard");
+    s.view.show();
+    assert.deepEqual(idle.log.cancels, [1], "取消待執行的閒置工作");
+    assert.equal(idle.pending(), 0);
+    assert.equal(s.counts.build, builds + 1, "同步重建");
+    assert.notEqual(figOf(s), f);
+    assert.equal(playOf(s), true);
+    assert.equal(byClass(s.rootEl, "db-today__text")[0].textContent, "今日已學 1 / 15 字", "回來即新值");
+    idle.run();
+    assert.equal(s.counts.build, builds + 1);
+    // 回呼在 show() 之後才到（取消未生效的替身）：頁面顯示中 → 不做事
+    const leaky = { fns: [], request(fn) { this.fns.push(fn); return 7; }, cancel() {} };
+    const t = setup({ expanded: false, idle: leaky });
+    t.view.show();
+    t.view.hide();
+    t.a.setTab("flashcards");
+    t.a.flipCard();
+    t.view.show();
+    const n = t.counts.build;
+    const tf = figOf(t);
+    leaky.fns.forEach((fn) => fn());
+    assert.equal(t.counts.build, n, "已取消的工作不重建");
+    assert.equal(figOf(t), tf);
+  });
+
+  test("FE-116：show() 未經 hide() 再呼叫 → 重建並播放（§7.32.8 保底）；減少動態時重建但不播放", () => {
+    const s = setup({ expanded: false, idle: fakeIdle().api });
+    s.view.show();
+    const f = figOf(s);
+    const builds = s.counts.build;
+    s.view.show();
+    assert.equal(s.counts.build, builds + 1);
+    assert.notEqual(figOf(s), f);
+    assert.equal(playOf(s), true);
+    s.flags.reduced = true;
+    s.view.show();
+    assert.equal(s.counts.build, builds + 2);
+    assert.equal(playOf(s), false);
+  });
+
+  test("FE-116 P-2：清單內容不變 → li 為同一節點；內容改變才重建", () => {
+    const s = setup({ expanded: false, idle: fakeIdle().api });
+    s.view.show();
+    const lis = islesOf(s);
+    assert.equal(lis.length, 5);
+    s.view.hide();
+    s.view.show();
+    s.a.setBackupExpanded(true);
+    s.view.show();
+    assert.deepEqual(islesOf(s), lis);
+    lis.forEach((li, i) => assert.equal(islesOf(s)[i], li, "第 " + (i + 1) + " 列同一節點"));
+    // 內容改變（無內容快照時三島 P 為 null，只有今日進度變 → 清單內容不變）
+    s.a.setTab("flashcards");
+    s.a.flipCard();
+    assert.equal(islesOf(s)[0], lis[0], "清單內容不受今日進度影響");
+    // 有內容快照：掌握字數改變 → 橘島列內容改變 → 重建
+    const content = F.loadContent();
+    const t = setup({ expanded: false, content, idle: fakeIdle().api });
+    const box = overrideData(t);
+    t.view.show();
+    const before = islesOf(t);
+    box.patch = { masteredWordKeys: ["the"] };
+    t.view.hide();
+    t.view.show();
+    assert.notEqual(islesOf(t)[0], before[0]);
+    assert.equal(byClass(islesOf(t)[0], "db-isle__right")[0].textContent, "掌握 13%");
+  });
+
+  test("FE-116 idleScheduler(host)：requestIdleCallback（timeout 500）優先、否則 setTimeout（100 ms）、兩者皆無 → request 回 null", () => {
+    const log = [];
+    const fn = () => log.push("ran");
+    // 有 requestIdleCallback（同時有 setTimeout 也不用）
+    const h1 = {
+      requestIdleCallback(f, o) { log.push(["ric", f === fn, o]); return 11; },
+      cancelIdleCallback(h) { log.push(["cic", h]); },
+      setTimeout() { log.push("st"); return 99; },
+      clearTimeout() { log.push("ct"); }
+    };
+    const s1 = D.idleScheduler(h1);
+    assert.equal(s1.request(fn), 11);
+    s1.cancel(11);
+    s1.cancel(null);
+    assert.deepEqual(log.splice(0), [["ric", true, { timeout: 500 }], ["cic", 11]]);
+    // 只有 setTimeout
+    const h2 = {
+      setTimeout(f, ms) { log.push(["st", f === fn, ms]); return 22; },
+      clearTimeout(h) { log.push(["ct", h]); }
+    };
+    const s2 = D.idleScheduler(h2);
+    assert.equal(s2.request(fn), 22);
+    s2.cancel(22);
+    s2.cancel(undefined);
+    assert.deepEqual(log.splice(0), [["st", true, 100], ["ct", 22]]);
+    // 兩者皆無
+    for (const h of [{}, null, undefined, 0]) {
+      const s3 = D.idleScheduler(h);
+      assert.equal(s3.request(fn), null);
+      assert.doesNotThrow(() => s3.cancel(null));
+      assert.doesNotThrow(() => s3.cancel(5));
+    }
+    assert.deepEqual(log, [], "不執行 fn、不呼叫任何 API");
+  });
+
+  test("FE-116 原始碼：不用 requestAnimationFrame、Web Animations API、強制重排；地圖與清單無事件與 tabindex（AC-70-03、AC-64-10）", () => {
+    const src = read("views/dashboard.js");
+    for (const bad of [/requestAnimationFrame/, /\.animate\s*\(/, /getAnimations/, /offsetWidth|offsetHeight|getBoundingClientRect|getComputedStyle/]) {
+      assert.ok(!bad.test(src), String(bad));
+    }
+    const s = setup({ expanded: false, content: F.loadContent(), idle: fakeIdle().api });
+    s.view.show();
+    s.view.hide();
+    s.view.show();
+    for (const cls of ["db-map", "db-isles"]) {
+      const nodes = findAll(byClass(s.rootEl, cls)[0], () => true);
+      assert.ok(nodes.every((n) => Object.keys(n.listeners).length === 0), cls + " 無事件");
+      assert.ok(nodes.every((n) => n.getAttribute("tabindex") === null), cls + " 無 tabindex");
+    }
+  });
+
+  test("回到群島頁即新值（AC-64-09、IS-3）：單字卡答對 1 字後 show() → 對話框、今日進度、地圖、清單、3 格都是新值", () => {
+    const content = F.loadContent();
+    const s = setup({ expanded: false, content });
+    s.view.show();
+    const right0 = () => byClass(byClass(s.rootEl, "db-isle--orange")[0], "db-isle__right")[0].textContent;
+    assert.equal(right0(), "掌握 0%");
+    assert.equal(byClass(s.rootEl, "db-host__bubble")[0].textContent, "再學 15 個字，今天的小船就靠岸囉！");
+    s.view.hide();
+    s.a.setTab("flashcards");
+    assert.equal(s.a.setFlashcardMode("quiz").ok, true);
+    const q = s.store.getState().runtime.flashcard.quiz;
+    assert.equal(s.a.answerVocabQuiz(q.correctIndex).ok, true);
+    s.a.setFlashcardMode("card");
+    s.a.setTab("dashboard");
+    s.view.show();
+    // 橘 n = 8、m = 1 → P 13（新芽）；X = 1
+    assert.equal(right0(), "掌握 13%");
+    assert.equal(byClass(s.rootEl, "db-host__bubble")[0].textContent, "再學 14 個字，今天的小船就靠岸囉！");
+    assert.equal(byClass(s.rootEl, "db-today__text")[0].textContent, "今日已學 1 / 15 字");
+    assert.equal(byClass(s.rootEl, "db-stat__sub")[0].textContent, "已掌握 1 字");
+    const m = D.dashboardModel(s.store.getState(), s.store.today(), content.part5, content);
+    const alt = byClass(s.rootEl, "db-map__figure")[0].getAttribute("aria-label");
+    assert.equal(alt, m.mapAlt);
+    assert.ok(alt.includes("橘島掌握 13%，新芽") && alt.includes("今日小船 1 / 15 字，航行中"));
+  });
+
+  test("瀏覽群島頁 setItem 0 次、localStorage 不變、不含島嶼鍵（AC-72-02、IS-1、IS-2、V-ISL-07）", () => {
+    const s = setup({ expanded: false, content: F.loadContent(), data: { masteredWordKeys: ["the"] } });
+    const snap = JSON.stringify([...s.storage.map.entries()]);
+    const writes = s.storage.setCalls.length;
+    s.view.show();
+    s.view.hide();
+    s.view.show();
+    byClass(s.rootEl, "db-backup__toggle")[0].click();
+    byClass(s.rootEl, "db-backup__toggle")[0].click();
+    s.view.show();
+    assert.equal(s.storage.setCalls.length, writes, "setItem 0 次");
+    assert.equal(JSON.stringify([...s.storage.map.entries()]), snap);
+    for (const k of ["islands", "stage", "weather", "lighthouse", "boat", "islandFeedback", "mapAlt", "dialog"]) {
+      assert.ok(!snap.includes('"' + k + '"'), k);
+    }
+    // IslandState 不進入 AppState
+    const st = s.store.getState();
+    assert.equal("island" in st.data, false);
+    assert.equal("island" in st.runtime, false);
   });
 
   test("（v0.9，FE-66）已套用藍（855）／金（990）：目標行「綠級・每日 15 字」、色點為生效色級 green；無「目標」「生效」「內建上限」", () => {
@@ -823,8 +1577,8 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.equal(byClass(streak, "db-stat__unit")[0].textContent, "天");
     assert.equal(byClass(s.rootEl, "db-stat__sub")[0].textContent, "已掌握 0 字");
     assert.equal(byClass(s.rootEl, "db-stat--accuracy").length, 0);
-    // 未設定 EMT.content：Q = 0 顯示「—」（AS-4）
-    assert.equal(byClass(s.rootEl, "db-stat--answered")[0].textContent, "模擬測驗—");
+    // 未設定 EMT.content：Q = 0 顯示「—」（AS-4）；（v0.19）最下方為燈塔行（IS-12）
+    assert.equal(byClass(s.rootEl, "db-stat--answered")[0].textContent, "模擬測驗—燈塔待建");
   });
 
   // ── 第 3 格（v0.19，FE-84；AS-3、AS-4、V-ANS-02） ──
@@ -851,7 +1605,14 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
   });
 
   test("V-ANS-02：作答答對 → K + 1 並即時更新；答錯 → 不變；清除 → K = 0，累計照常保留（AC-49-04、AC-49-05、AC-46-08）", () => {
-    const { s, bank, value } = setupAnswered();
+    // （FE-116，§7.32.15 P-3）群島頁隱藏時以閒置排程預先重建：每次讀值前先執行待執行的閒置工作（替身）
+    const idle = fakeIdle();
+    const s = setup({ expanded: false, content: F.loadContent(), idle: idle.api });
+    const bank = s.sandbox.EMT.content.part5;
+    const value = () => {
+      idle.run();
+      return byClass(s.rootEl, "db-stat__value--answered")[0].textContent;
+    };
     const line = (k) => {
       const p = Math.floor((200 * k + bank.length) / (2 * bank.length));
       return "已答對 " + k + " / " + bank.length + " 題（" + p + "%）";
@@ -963,7 +1724,7 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.ok(!/setBackupExpanded/.test(src.slice(i, j)));
   });
 
-  test("10-dashboard.css：720px 置中、環形圖 88px、長條區 104px／軌道 64px、空狀態 24px、3 欄、數值 28px、目標行 44px、箭頭無 transition", () => {
+  test("10-dashboard.css：720px 置中、長條區 104px／軌道 64px、空狀態 24px、3 欄、數值 28px、目標行 44px、箭頭無 transition", () => {
     const css = read("styles/10-dashboard.css").replace(/\/\*[\s\S]*?\*\//g, "");
     const rule = (sel) => {
       const m = new RegExp("(?:^|\\})\\s*" + sel.replace(/[.[\]="()]/g, "\\$&") + "\\s*\\{([^}]*)\\}").exec(css);
@@ -973,7 +1734,6 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     const v = (r, p) => (new RegExp("(?:^|;|\\s)" + p + ":\\s*([^;]+);").exec(r) || [])[1];
     assert.equal(v(rule(".dashboard"), "max-width"), "var(--content-narrow)");
     assert.equal(v(rule(".dashboard"), "margin-inline"), "auto");
-    assert.equal(v(rule(".db-ring-wrap"), "width"), "88px");
     assert.equal(v(rule(".db-bars"), "height"), "104px");
     assert.ok(104 <= 120);
     assert.equal(v(rule(".db-bars__track"), "height"), "64px");
@@ -1006,7 +1766,7 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.ok(src.includes("LAY.goalLineText("));
   });
 
-  test("（v0.9，FE-66）10-dashboard.css：.db-change 外框按鈕（V-LAY-10）；.db-goal gap 8px；無 .db-goal__sep；無禁止色", () => {
+  test("（v0.9，FE-66；v0.19 FE-108）10-dashboard.css：.db-change 外框按鈕（V-LAY-10：外框沿用 .btn 的 2px 外框色、圓角 14px）；.db-goal gap 8px；無 .db-goal__sep；無禁止色", () => {
     const css = read("styles/10-dashboard.css").replace(/\/\*[\s\S]*?\*\//g, "");
     const rule = (sel) => {
       const m = new RegExp("(?:^|\\})\\s*" + sel.replace(/[.[\]="():]/g, "\\$&") + "\\s*\\{([^}]*)\\}").exec(css);
@@ -1017,10 +1777,17 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     const c = rule(".db-change");
     assert.equal(v(c, "min-height"), "44px");
     assert.equal(v(c, "min-width"), "44px");
-    assert.equal(v(c, "margin-left"), "auto");
     assert.equal(v(c, "padding"), "0 14px");
     assert.equal(v(c, "background"), "var(--surface)");
-    assert.equal(v(c, "border"), "1px solid var(--brand-deep)");
+    // 外框與圓角不覆寫：沿用全域 .btn（border: var(--outline-w) solid var(--outline)、var(--radius-btn) = 14px，§7.32.7）
+    for (const p of ["border", "border-width", "border-color", "border-style", "border-radius"]) assert.equal(v(c, p), undefined, p);
+    const base = read("styles/00-base.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    const btn = (/(?:^|\})\s*\.btn\s*\{([^}]*)\}/.exec(base) || [])[1];
+    assert.ok(btn, ".btn");
+    assert.equal(v(btn, "border"), "var(--outline-w) solid var(--outline)");
+    assert.equal(v(btn, "border-radius"), "var(--radius-btn)");
+    assert.match(base, /--outline-w:\s*2px;/);
+    assert.match(base, /--radius-btn:\s*14px;/);
     assert.equal(v(c, "color"), "var(--brand-deep)");
     assert.equal(v(c, "font-weight"), "600");
     assert.equal(v(c, "text-decoration"), "none");
@@ -1029,6 +1796,101 @@ describe("dashboard.test.js：NT-1 與安裝按鈕（v0.11，FE-51）", () => {
     assert.doesNotMatch(css, /\.db-goal__sep/);
     const block = css.slice(css.indexOf(".db-change"), css.indexOf("}", css.lastIndexOf(".db-change:hover")) + 1);
     for (const w of ["var(--accent)", "var(--border)", "#d5d9e0", "#f7893b", "color: var(--brand);"]) assert.ok(!block.includes(w), w);
+  });
+
+  test("（v0.19，FE-108）10-dashboard.css 群島頁：今日任務卡與地圖框外框／陰影、地圖 480px 置中、進度條無轉場、清單列與 3 格卡片樣式、無環形圖規則", () => {
+    const css = read("styles/10-dashboard.css").replace(/\/\*[\s\S]*?\*\//g, "");
+    const rule = (sel) => {
+      const m = new RegExp("(?:^|\\})\\s*" + sel.replace(/[.[\]="():]/g, "\\$&") + "\\s*\\{([^}]*)\\}").exec(css);
+      assert.ok(m, sel);
+      return m[1];
+    };
+    const v = (r, p) => (new RegExp("(?:^|;|\\s)" + p + ":\\s*([^;]+);").exec(r) || [])[1];
+    // 標題列（DB-1、AC-66-04：可換行）
+    const head = rule(".db-head");
+    assert.equal(v(head, "display"), "flex");
+    assert.equal(v(head, "flex-wrap"), "wrap");
+    assert.equal(v(head, "justify-content"), "space-between");
+    const tag = rule(".db-goal__tag");
+    assert.equal(v(tag, "border"), "var(--outline-w) solid var(--outline)");
+    assert.equal(v(tag, "border-radius"), "999px");
+    assert.equal(v(tag, "background"), "var(--surface)");
+    // 今日任務卡：3px 外框、立體陰影（§7.32.3、AC-68-02）
+    const today = rule(".db-today");
+    assert.equal(v(today, "border-width"), "var(--outline-w-strong)");
+    assert.equal(v(today, "box-shadow"), "var(--shadow-pop)");
+    assert.equal(v(today, "display"), "grid");
+    assert.equal(v(rule(".db-host__turtle"), "flex"), "none");
+    const bubble = rule(".db-host__bubble");
+    assert.equal(v(bubble, "background"), "var(--dialog-bg)");
+    assert.equal(v(bubble, "border-radius"), "16px 16px 16px 4px");
+    assert.equal(v(bubble, "overflow-wrap"), "anywhere");
+    assert.equal(v(rule(".db-host__talk"), "min-width"), "0");
+    const bar = rule(".db-today__bar");
+    assert.equal(v(bar, "height"), "14px");
+    assert.equal(v(bar, "background"), "var(--isl-track)");
+    assert.equal(v(bar, "border"), "var(--outline-w) solid var(--outline)");
+    assert.equal(v(rule(".db-today__fill"), "background"), "var(--brand)");
+    assert.equal(v(rule(".db-today__fill"), "transition"), "none");
+    assert.equal(v(rule(".db-today__fill--done"), "background"), "var(--color-gold)");
+    assert.equal(v(rule(".db-today__text"), "white-space"), "nowrap");
+    assert.equal(v(rule(".db-start"), "width"), "100%");
+    assert.equal(v(rule(".db-start"), "min-height"), "52px");
+    // 地圖框：最大寬 480px 置中、3px 外框、圓角 26px、海面底、立體陰影、cursor default（AC-63-04、AC-64-10）
+    const map = rule(".db-map");
+    assert.equal(v(map, "max-width"), "480px");
+    assert.equal(v(map, "margin-inline"), "auto");
+    assert.equal(v(map, "border-width"), "var(--outline-w-strong)");
+    assert.equal(v(map, "border-radius"), "26px");
+    assert.equal(v(map, "padding"), "0");
+    assert.equal(v(map, "overflow"), "hidden");
+    assert.equal(v(map, "background"), "var(--sea)");
+    assert.equal(v(map, "box-shadow"), "var(--shadow-pop)");
+    assert.equal(v(map, "cursor"), "default");
+    // 島嶼清單（§7.32.5、AC-65-01、AC-65-04）
+    assert.equal(v(rule(".db-isles"), "cursor"), "default");
+    assert.equal(v(rule(".db-isles__list"), "list-style"), "none");
+    const isle = rule(".db-isle");
+    assert.equal(v(isle, "grid-template-columns"), "28px minmax(0, 1fr) auto");
+    assert.equal(v(isle, "min-height"), "44px");
+    assert.equal(v(isle, "border"), "var(--outline-w) solid var(--outline)");
+    assert.equal(v(isle, "border-radius"), "16px");
+    assert.equal(v(isle, "background"), "var(--surface)");
+    assert.equal(v(rule(".db-isle.is-fog"), "background"), "var(--fog-row)");
+    assert.equal(v(rule(".db-isle.is-fog .db-isle__dot"), "opacity"), "0.5");
+    assert.equal(v(rule(".db-isle__right"), "font-variant-numeric"), "tabular-nums");
+    assert.equal(v(rule(".db-isle__title"), "min-width"), "0");
+    assert.equal(v(rule(".db-isle__bar"), "height"), "8px");
+    assert.equal(v(rule(".db-isle__fill"), "transition"), "none");
+    for (const id of ["orange", "brown", "green", "blue", "gold"]) {
+      assert.match(css, new RegExp("\\.db-isle--" + id + " \\.db-isle__dot[^{]*\\{\\s*background: var\\(--color-" + id + "\\);"), id);
+    }
+    for (const id of ["orange", "brown", "green"]) {
+      assert.match(css, new RegExp("\\.db-isle--" + id + " \\.db-isle__fill \\{\\s*background: var\\(--color-" + id + "\\);"), id);
+    }
+    // 3 格：同一列；每格為區塊卡片樣式（白底、2px 外框、圓角 16px）；狀態行 12px、--text-muted
+    const stat = rule(".db-stat");
+    assert.equal(v(stat, "border"), "var(--outline-w) solid var(--outline)");
+    assert.equal(v(stat, "border-radius"), "16px");
+    assert.equal(v(stat, "background"), "var(--surface)");
+    assert.equal(v(stat, "padding"), "12px 8px");
+    const status = rule(".db-stat__status");
+    assert.equal(v(status, "font-size"), "12px");
+    assert.equal(v(status, "color"), "var(--text-muted)");
+    assert.equal(v(status, "overflow-wrap"), "anywhere");
+    // 移除環形圖規則；無強調橘字面值；var(--accent) 只在 .db-stat__icon
+    assert.doesNotMatch(css, /\.db-ring/);
+    assert.doesNotMatch(css, /#f7893b/i);
+    assert.equal(css.split("var(--accent)").length - 1, 1);
+    // cursor: pointer 只在「資料備份」標題列按鈕（既有控制項）；地圖、清單相關規則不設 pointer（AC-64-10）
+    const blocks = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)].map((m) => ({ sel: m[1].trim(), body: m[2] }));
+    const pointer = blocks.filter((b) => /cursor:\s*pointer/.test(b.body)).map((b) => b.sel);
+    assert.deepEqual(pointer, [".db-backup__toggle"]);
+    // 版面不使用 transition（除 none 之外）
+    for (const b of blocks) {
+      const t = v(b.body, "transition");
+      if (t !== undefined) assert.equal(t, "none", b.sel);
+    }
   });
 
   test("10-dashboard.css：.dash-backup__origin 同 .dash-backup__hint 字級、overflow-wrap: anywhere、無 nowrap；.dash-install ≥ 44px", () => {

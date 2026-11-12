@@ -4,6 +4,18 @@
  *       CustomVocabItem、POS_LABELS、DataSourceEntry、RuntimeState.flashcard、README §4.3 L-6、§5.6
  * 涵蓋：AC-03-04、AC-03-05、AC-04-08、AC-06-01～AC-06-07、AC-22-02、AC-23-01、AC-24-07、
  *       AC-28-01～AC-28-08、AC-31-03
+ *       （FE-109）AC-69-01～AC-69-03、AC-69-05、AC-69-06、AC-68-02、AC-68-03、AC-70-02、AC-71-02、AC-71-05、AC-38-08
+ *
+ * 島嶼外觀與學完回饋（FE-109；architecture.md §7.32.9、§7.32.10；契約 README §15.5 LF-3、LF-4）：
+ *   - 卡片角落裝飾：EMT.ui.islandArt.cardDeco("fc-deco") 只建立 1 次，每次重建卡片區後以 appendChild
+ *     移到 .fc-stage 最後（測驗元件重繪只清空 .fc-quiz，不會清掉裝飾）；aria-hidden，不攔點擊（CSS）。
+ *   - 學完回饋列：.fc-stage 與 .fc-nav 之間的常駐 div.fc-feedback-live[role=status][aria-live=polite]
+ *     [aria-atomic=true]；runtime.flashcard.islandFeedback 非 null 時其內為 1 個 p.fc-feedback
+ *     （新芽圖示 aria-hidden ＋ span.fc-feedback__text，textContent），null 時清空。
+ *   - 新芽圖示（FE-117；§7.32.15 P-6）：mount 時以 islandArt.sprout("fc-feedback__icon") 建 1 份範本
+ *     （不掛上文件），每次建立 p.fc-feedback 時 cloneNode(true)；範本為 null 時回饋列只放文字。
+ *     物件參照改變才替換 p（重播淡入），參照相同不動 DOM；訂閱 "islandFeedback"、"tab"，show() 時同步。
+ *   - 不新增頁首返回按鈕、「今日 X / D」、色級徽章、「上一張 N 分」行（Q-119）。
  *
  * 手勢與動畫（FE-28）：
  *   - 翻面：沿用「兩面 hidden 切換、不重建 DOM」；isFlipped 改變時新顯示的那一面加 fc-face--flip-in，
@@ -59,6 +71,12 @@
   var FLIP_IN_CLASS = "fc-face--flip-in";
   var SLIDE_NEXT_CLASS = "fc-card--in-next";
   var SLIDE_PREV_CLASS = "fc-card--in-prev";
+  // 學完回饋與角落裝飾的 class（architecture.md §7.32.9）
+  var FEEDBACK_LIVE_CLASS = "fc-feedback-live";
+  var FEEDBACK_CLASS = "fc-feedback";
+  var FEEDBACK_ICON_CLASS = "fc-feedback__icon";
+  var FEEDBACK_TEXT_CLASS = "fc-feedback__text";
+  var DECO_CLASS = "fc-deco";
 
   // ════════════════════════════════════════════════════════════════
   // 純邏輯（可在 Node 測試）
@@ -349,6 +367,30 @@
     return changed;
   }
 
+  // ─── 學完回饋（FE-109） ───
+
+  /**
+   * 回饋列要顯示的文字（LF-4）：islandFeedback 為物件且 text 為非空白字串 → 原樣回傳；其他（null、缺欄位）→ null（不渲染）。
+   * @param {object|null} fb RuntimeState.flashcard.islandFeedback
+   * @returns {string|null}
+   */
+  function feedbackTextOf(fb) {
+    if (!fb || typeof fb !== "object") return null;
+    return typeof fb.text === "string" && fb.text.trim() !== "" ? fb.text : null;
+  }
+
+  /**
+   * 回饋列是否需要更新 DOM：只看物件參照（同一個物件 → 不動，避免重播淡入；LF-3）。
+   * 不可顯示的值一律視為 null。
+   * @param {object|null} shown 目前畫面上的回饋物件（未顯示為 null）
+   * @param {object|null} next 新狀態的回饋
+   * @returns {{ change: boolean, value: object|null }} value = 正規化後的新值
+   */
+  function feedbackChange(shown, next) {
+    var value = feedbackTextOf(next) === null ? null : next;
+    return { change: value !== shown, value: value };
+  }
+
   var logic = {
     EMPTY_MARK: EMPTY_MARK,
     CUSTOM_ORIGIN_TEXT: CUSTOM_ORIGIN_TEXT,
@@ -369,7 +411,12 @@
     suppressUntilAfter: suppressUntilAfter,
     suppressClick: suppressClick,
     slideClassFor: slideClassFor,
-    applyFlipTo: applyFlipTo
+    applyFlipTo: applyFlipTo,
+    FEEDBACK_LIVE_CLASS: FEEDBACK_LIVE_CLASS,
+    FEEDBACK_CLASS: FEEDBACK_CLASS,
+    DECO_CLASS: DECO_CLASS,
+    feedbackTextOf: feedbackTextOf,
+    feedbackChange: feedbackChange
   };
 
   // Node（單元測試）：只匯出純邏輯，不登錄頁面
@@ -448,6 +495,10 @@
   var gesture = null;
   // 此時間之前的卡片 click 一律忽略（滑動後瀏覽器補發的 click，AC-28-05）
   var suppressUntil = 0;
+  // 回饋列目前顯示的 islandFeedback 物件（未顯示為 null；FE-109）
+  var shownFeedback = null;
+  // 回饋列新芽圖示的範本（mount 時建立 1 次、不掛上文件；建立失敗為 null；FE-117）
+  var sproutTemplate = null;
 
   /** 建立頁面骨架（只執行一次） */
   function build(rootEl) {
@@ -488,7 +539,17 @@
     });
     ui.nav = el("div", { className: "fc-nav" }, [ui.prevBtn, ui.flipBtn, ui.nextBtn]);
 
-    ui.main = el("div", { className: "fc-main" }, [ui.toolbar, ui.stage, ui.nav]);
+    // （FE-109）學完回饋的常駐即時區域：先存在、之後才放入文字，螢幕報讀器才會穩定播報（AC-69-05、AC-69-06）
+    ui.feedback = el("div", {
+      className: FEEDBACK_LIVE_CLASS,
+      attrs: { role: "status", "aria-live": "polite", "aria-atomic": "true" }
+    });
+    // （FE-117）新芽圖示範本：只在此建立 1 次，之後每個回饋列複製使用（§7.32.15 P-6）
+    sproutTemplate = makeArt("sprout", FEEDBACK_ICON_CLASS);
+    // 卡片角落裝飾（建立 1 次；islandArt 未載入時為 null，略過）
+    ui.deco = null;
+
+    ui.main = el("div", { className: "fc-main" }, [ui.toolbar, ui.stage, ui.feedback, ui.nav]);
 
     ui.empty = el("div", { className: "card fc-empty", attrs: { hidden: true } }, [
       el("p", { className: "fc-empty__msg", text: "目前單字集是空的，沒有可以顯示的單字卡。" }),
@@ -633,6 +694,62 @@
     if (r && r.ok === false && r.reason === "insufficient") toast(INSUFFICIENT_MESSAGE, "error");
   }
 
+  /** 島嶼插圖模組（不存在回 null） */
+  function islandArt() {
+    var a = EMT.ui && EMT.ui.islandArt;
+    return a && typeof a === "object" ? a : null;
+  }
+
+  /** 安全建立一張插圖；模組不存在或出錯回 null（裝飾圖缺少不影響學習功能） */
+  function makeArt(name, className) {
+    var a = islandArt();
+    if (!a || typeof a[name] !== "function") return null;
+    try {
+      return a[name](className);
+    } catch (e) {
+      if (typeof console !== "undefined") console.error("[EMT.views.flashcards] islandArt." + name + " 失敗", e);
+      return null;
+    }
+  }
+
+  /** 複製 1 份新芽圖示（範本為 null 或複製失敗回 null，回饋列只放文字；FE-117） */
+  function cloneSprout() {
+    if (!sproutTemplate || typeof sproutTemplate.cloneNode !== "function") return null;
+    try {
+      return sproutTemplate.cloneNode(true);
+    } catch (e) {
+      if (typeof console !== "undefined") console.error("[EMT.views.flashcards] 新芽圖示複製失敗", e);
+      return null;
+    }
+  }
+
+  /** 卡片角落裝飾移到 .fc-stage 最後（每次重建卡片區後呼叫；AC-69-01、AC-71-02） */
+  function placeDeco() {
+    if (!ui.deco) ui.deco = makeArt("cardDeco", DECO_CLASS);
+    if (ui.deco) ui.stage.appendChild(ui.deco);
+  }
+
+  /**
+   * 依 runtime.flashcard.islandFeedback 更新回饋列（LF-3、LF-4）：
+   * 參照改變 → 以新的 p.fc-feedback 取代（重播淡入）；null → 清空容器；參照相同 → 不動 DOM。
+   * @param {object} st AppState
+   */
+  function renderFeedback(st) {
+    if (!ui || !ui.feedback) return;
+    var fc = st && st.runtime && st.runtime.flashcard;
+    var d = feedbackChange(shownFeedback, fc ? fc.islandFeedback : null);
+    if (!d.change) return;
+    shownFeedback = d.value;
+    dom().clear(ui.feedback);
+    if (d.value === null) return;
+    var el = dom().el;
+    ui.feedback.appendChild(el("p", { className: FEEDBACK_CLASS }, [
+      cloneSprout(),
+      // 文字一律 textContent（LF-4）
+      el("span", { className: FEEDBACK_TEXT_CLASS, text: feedbackTextOf(d.value) })
+    ]));
+  }
+
   /** 建立一張卡片的 DOM（只渲染當前一張，AC-22-02） */
   function buildCard(card, model) {
     var el = dom().el;
@@ -697,6 +814,7 @@
    */
   function render(st, force) {
     if (!ui || !st) return;
+    renderFeedback(st);
     var rt = st.runtime || {};
     var set = Array.isArray(rt.studySet) ? rt.studySet : [];
     var fc = rt.flashcard || { index: 0, isFlipped: false, mode: "card" };
@@ -747,6 +865,7 @@
           ui.card = null;
           ui.quiz = dom().el("div", { className: "card fc-quiz" });
           ui.stage.appendChild(ui.quiz);
+          placeDeco();
         }
       } else {
         dom().clear(ui.stage);
@@ -755,6 +874,7 @@
         var prevIdx = lastCardIndex;
         ui.card = buildCard(card, model);
         ui.stage.appendChild(ui.card.root);
+        placeDeco();
         applyFlip(!!fc.isFlipped, false);
         lastCardIndex = idx;
         gesture = null;
@@ -780,13 +900,19 @@
 
   /** store 通知：只在單字卡相關範圍變更時重繪 */
   var WATCH_TAGS = { init: 1, studySet: 1, flashcard: 1, quiz: 1, customVocab: 1 };
+  // （FE-109）只需同步回饋列的 tags：學完回饋、切頁（離開單字卡頁時 store 設為 null，LF-3）
+  var FEEDBACK_TAGS = { islandFeedback: 1, tab: 1 };
   function onStore(st, tags) {
     var hit = false;
+    var fbHit = false;
     var list = Array.isArray(tags) ? tags : [];
     for (var i = 0; i < list.length; i++) {
-      if (WATCH_TAGS[list[i]] === 1) { hit = true; break; }
+      if (WATCH_TAGS[list[i]] === 1) hit = true;
+      if (FEEDBACK_TAGS[list[i]] === 1) fbHit = true;
     }
+    // render 內已同步回饋列
     if (hit) render(st, false);
+    else if (fbHit) renderFeedback(st);
   }
 
   var view = {

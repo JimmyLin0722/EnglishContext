@@ -1,0 +1,92 @@
+/*
+ * styles/11-island-map.css — 群島地圖框內的圖形尺寸、4 種裝飾動畫與減少動態（FE-107）
+ * 依據：architecture.md v0.19 §7.32.4、§7.32.8、§7.32.10；契約 README §15.7、VC-3
+ * 涵蓋：AC-63-03、AC-63-04、AC-64-07、AC-64-10、AC-70-01、AC-70-02、AC-31-03
+ * 規則：
+ * - 地圖框 .db-map 的外框、圓角、陰影、最大寬度屬 10-dashboard.css（FE-108），本檔只管框內。
+ * - 動畫只在 .isl-map--play 下播放；有限次數，「時長 × 次數」≤ 4.4 秒；@keyframes 只改 transform。
+ *   SVG 內 px 為 viewBox 單位：480px 寬時放大約 1.356 倍，2.5 → 3.4、8 → 10.8 CSS px，旋轉 2°（AC-70-01）。
+ * - 定位由 JS 放在外層 g 的 transform 屬性，動畫只套用內層 g.isl-anim-*，兩者不互相覆蓋（T-141）。
+ * - 不做 opacity 動畫（無閃爍）；減少動態時一律停止（05-motion.css 之外再擋一層，AC-70-02）。
+ * - 不使用強調橘與 --accent、--brand 變數（VC-3）；不設 cursor: pointer（AC-64-10）。
+ */
+
+/* ─── 地圖容器與 SVG 尺寸：依原比例 354：430 縮放，不裁切、不變形 ─── */
+.db-map__figure {
+  display: block;
+  margin: 0;
+  cursor: default;
+}
+
+.isl-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 354 / 430;
+  cursor: default;
+}
+
+/* 海面色（屬性 fill 為同值的退路） */
+.isl-sea {
+  fill: var(--sea);
+}
+
+/* ─── 4 種裝飾動畫（只在 .isl-map--play 下） ─── */
+.isl-map--play .isl-anim-wave {
+  animation: isl-bob 2.2s ease-in-out 2;
+}
+
+.isl-map--play .isl-anim-boat {
+  animation: isl-bob 2.2s ease-in-out 2;
+}
+
+.isl-map--play .isl-anim-cloud {
+  animation: isl-drift 4.4s ease-in-out 1;
+}
+
+.isl-map--play .isl-anim-sway {
+  animation: isl-sway 2.2s ease-in-out 2;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+@keyframes isl-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2.5px);
+  }
+}
+
+@keyframes isl-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(-8px);
+  }
+}
+
+@keyframes isl-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-2deg);
+  }
+  75% {
+    transform: rotate(2deg);
+  }
+}
+
+/* ─── 減少動態：地圖內全部靜止（AC-70-02、AC-31-03） ─── */
+@media (prefers-reduced-motion: reduce) {
+  .isl-map,
+  .isl-map * {
+    animation: none !important;
+  }
+}

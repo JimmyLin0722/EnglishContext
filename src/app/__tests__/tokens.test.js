@@ -1,8 +1,9 @@
 /*
- * tokens.test.js — 色彩 token、共用元件樣式與 CSS 禁止寫法（FE-56）
- * 受測：styles/00-base.css（:root、body、.card）與 styles/*.css 全部檔案（禁止寫法掃描）
- * 依據：architecture.md v0.8 §7.19.1、§7.19.2、§10.5「tokens.test.js」列；契約 README §11.2 VC-1～VC-8、data-schema.ts §13
- * 涵蓋：AC-38-01～AC-38-04、AC-38-06、AC-38-07、AC-34-04、VC-1～VC-8
+ * tokens.test.js — 色彩 token、共用元件樣式與 CSS 禁止寫法（FE-56；FE-103 島嶼外觀 token）
+ * 受測：styles/00-base.css（:root、body、.card、.btn 系列）與 styles/*.css 全部檔案（禁止寫法掃描）
+ * 依據：architecture.md §7.19.1、§7.19.2、§7.32.7、§10.5、§10.15「tokens.test.js」列；
+ *       契約 README §11.2 VC-1～VC-8、V-LAY-02、§15.7 IV-1～IV-4；data-schema.ts §13、§19
+ * 涵蓋：AC-38-01～AC-38-04、AC-38-07、AC-34-04、AC-68-01～AC-68-03、AC-68-05、AC-68-06、AC-71-05、VC-1～VC-8
  * 期望值在測試內以字面值寫出（不讀 docs/）；對比以 WCAG 2.x 相對亮度公式在本檔計算。
  * 本檔每次 npm test 都掃描全部樣式檔：之後任何任務新增違規寫法都會失敗（§7.19.1）。
  */
@@ -132,7 +133,7 @@ function hsl(hex) {
   return { h, s: s * 100, l: l * 100 };
 }
 
-// ── 期望值（契約 COLOR_TOKENS、SEMANTIC_COLORS 與 architecture.md §7.19.1，逐字） ──
+// ── 期望值（契約 COLOR_TOKENS、SEMANTIC_COLORS 與 architecture.md §7.19.1、§7.32.7，逐字） ──
 
 const COLOR_TOKENS = {
   brand: "#1e9bf0",
@@ -140,7 +141,7 @@ const COLOR_TOKENS = {
   accent: "#f7893b",
   accentText: "#1f2937",
   themeColor: "#1e9bf0",
-  background: "#eef4fa",
+  background: "#eaf7fb",
   surface: "#ffffff",
   text: "#1f2937",
   textMuted: "#5b6472",
@@ -175,7 +176,7 @@ const SEMANTIC_VARS_V011 = {
   "--light-red": "#dc2626",
 };
 
-/** §7.19.1 新增與改值的介面變數 */
+/** §7.19.1 介面變數（--radius-cta、--radius-card 依 §7.32.7 改值；其餘不變） */
 const UI_VARS = {
   "--primary": "#0866ad",
   "--primary-hover": "#06558e",
@@ -186,12 +187,34 @@ const UI_VARS = {
   "--border": "#d5d9e0",
   "--focus": "#0866ad",
   "--radius": "8px",
-  "--radius-cta": "12px",
-  "--radius-card": "16px",
+  "--radius-cta": "16px",
+  "--radius-card": "22px",
   "--shadow-card": "0 1px 3px rgba(16, 40, 80, 0.08), 0 4px 14px rgba(16, 40, 80, 0.06)",
   "--content-narrow": "720px",
   "--emt-firstbar-h": "184px",
+  "--font": 'system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif',
 };
+
+/** §7.32.7 島嶼外觀新增變數（FE-103） */
+const ISLAND_VARS = {
+  "--outline": "#3d3550",
+  "--outline-w": "2px",
+  "--outline-w-strong": "3px",
+  "--radius-btn": "14px",
+  "--shadow-pop": "0 4px 0 var(--outline)",
+  "--sea": "#9fe0ec",
+  "--dialog-bg": "#fff6df",
+  "--fog-row": "#f3f6fa",
+  "--isl-track": "#d8eef5",
+  "--feedback-bg": "#e9fbef",
+};
+
+/** "22px" → 22（不是 px 值時測試失敗） */
+function px(v) {
+  const m = /^(\d+(?:\.\d+)?)px$/.exec(v || "");
+  assert.ok(m, "不是 px 值：" + v);
+  return Number(m[1]);
+}
 
 describe("tokens：00-base.css :root（§7.19.1）", () => {
   test("COLOR_TOKENS 測試字面值 = layout.COLOR_TOKENS（契約 §13）", () => {
@@ -225,7 +248,29 @@ describe("tokens：00-base.css :root（§7.19.1）", () => {
     assert.equal(VARS["--primary"], VARS["--brand-deep"]);
   });
 
-  test("UI_LAYOUT 與 CSS 寫死值一致（720、16、184、focus 3px）", () => {
+  test("島嶼外觀變數值（§7.32.7 表，FE-103）", () => {
+    for (const [k, v] of Object.entries(ISLAND_VARS)) {
+      assert.equal(VARS[k], v, k);
+    }
+  });
+
+  test("外框寬、圓角在 VC-4／IV-1 範圍內（外框 2～3px、卡片圓角 20～26px、按鈕圓角 12～16px）", () => {
+    for (const k of ["--outline-w", "--outline-w-strong"]) {
+      assert.ok(px(VARS[k]) >= 2 && px(VARS[k]) <= 3, k + " = " + VARS[k]);
+    }
+    assert.ok(px(VARS["--radius-card"]) >= 20 && px(VARS["--radius-card"]) <= 26, "--radius-card");
+    for (const k of ["--radius-btn", "--radius-cta"]) {
+      assert.ok(px(VARS[k]) >= 12 && px(VARS[k]) <= 16, k + " = " + VARS[k]);
+    }
+  });
+
+  test("--outline 不是強調橘與 v0.11 灰框線色（VC-3、VC-4）", () => {
+    assert.notEqual(VARS["--outline"].toLowerCase(), COLOR_TOKENS.accent);
+    assert.notEqual(VARS["--outline"].toLowerCase(), "#d5d9e0");
+    assert.doesNotMatch(VARS["--shadow-pop"], /--accent|#f7893b/i);
+  });
+
+  test("UI_LAYOUT 與 CSS 寫死值一致（720、22、184、focus 3px）", () => {
     const U = layout.UI_LAYOUT;
     assert.equal(VARS["--content-narrow"], U.CONTENT_NARROW_PX + "px");
     assert.equal(VARS["--radius-card"], U.CARD_RADIUS_PX + "px");
@@ -234,10 +279,12 @@ describe("tokens：00-base.css :root（§7.19.1）", () => {
     assert.equal(prop(baseRule(":focus-visible"), "outline-offset"), "2px");
   });
 
-  test("--bg 為檔案中第一個 --bg 宣告，值 = PWA_BACKGROUND_COLOR = manifest background_color（VC-5、B-11）", () => {
+  test("--bg 為檔案中第一個 --bg 宣告，值 = PWA_BACKGROUND_COLOR = manifest background_color = COLOR_TOKENS.background = #eaf7fb（VC-5、B-11、AC-68-01）", () => {
     const first = BASE.match(/--bg\s*:\s*([^;]+);/);
     assert.ok(first);
+    assert.equal(first[1].trim().toLowerCase(), "#eaf7fb");
     assert.equal(first[1].trim().toLowerCase(), pwa.PWA_BACKGROUND_COLOR);
+    assert.equal(pwa.PWA_BACKGROUND_COLOR, layout.COLOR_TOKENS.background);
     assert.equal(pwa.PWA_MANIFEST.background_color, COLOR_TOKENS.background);
     assert.equal(pwa.PWA_THEME_COLOR, COLOR_TOKENS.themeColor);
     assert.equal(pwa.PWA_MANIFEST.theme_color, COLOR_TOKENS.themeColor);
@@ -269,11 +316,33 @@ describe("tokens：WCAG 對比（AC-38-04、VC-7）", () => {
     ["--brand-deep 對 --tint", VARS["--brand-deep"], VARS["--tint"]],
     ["--brand-deep 對 --surface", VARS["--brand-deep"], VARS["--surface"]],
     ["--brand-deep 對 --bg", VARS["--brand-deep"], VARS["--bg"]],
+    // 島嶼新底色上的文字（AC-68-03：龜龜對話框、霧中島列、學完回饋列）
+    ["--text 對 --dialog-bg", VARS["--text"], VARS["--dialog-bg"]],
+    ["--text-muted 對 --dialog-bg", VARS["--text-muted"], VARS["--dialog-bg"]],
+    ["--text 對 --fog-row", VARS["--text"], VARS["--fog-row"]],
+    ["--text-muted 對 --fog-row", VARS["--text-muted"], VARS["--fog-row"]],
+    ["--text 對 --feedback-bg", VARS["--text"], VARS["--feedback-bg"]],
   ];
   for (const [name, fg, bg] of cases) {
     test(name + " ≥ 4.5", () => {
       const r = contrast(fg, bg);
       assert.ok(r >= 4.5, `${name} = ${r.toFixed(2)}`);
+    });
+  }
+
+  // 外框色對相鄰背景 ≥ 3:1（AC-68-03、VC-7、V-ISL-09）；焦點框對 --bg 與白 ≥ 3:1（AC-71-05）
+  const outlineCases = [
+    ["--outline 對 --bg", VARS["--outline"], VARS["--bg"]],
+    ["--outline 對 白", VARS["--outline"], W],
+    ["--outline 對 --tint", VARS["--outline"], VARS["--tint"]],
+    ["--outline 對 --accent", VARS["--outline"], VARS["--accent"]],
+    ["--focus 對 --bg", VARS["--focus"], VARS["--bg"]],
+    ["--focus 對 白", VARS["--focus"], W],
+  ];
+  for (const [name, fg, bg] of outlineCases) {
+    test(name + " ≥ 3", () => {
+      const r = contrast(fg, bg);
+      assert.ok(r >= 3, `${name} = ${r.toFixed(2)}`);
     });
   }
 
@@ -297,43 +366,84 @@ describe("tokens：共用元件樣式（§7.19.2）", () => {
     assert.equal(prop(body, "font-variant-numeric"), "tabular-nums");
   });
 
-  test(".card：--surface 底、border 0、圓角 var(--radius-card) = 16px、box-shadow 非 none（AC-38-06、VC-4）", () => {
+  test(".card：--surface 底、2px var(--outline) 實線外框、圓角 var(--radius-card) = 22px、box-shadow none（AC-68-02、VC-4、V-LAY-02）", () => {
     const card = baseRule(".card");
     assert.equal(prop(card, "background"), "var(--surface)");
-    assert.equal(prop(card, "border"), "0");
+    assert.equal(prop(card, "border"), "var(--outline-w) solid var(--outline)");
+    assert.equal(VARS["--outline-w"], "2px");
     assert.equal(prop(card, "border-radius"), "var(--radius-card)");
-    assert.equal(VARS["--radius-card"], "16px");
-    const sh = prop(card, "box-shadow");
-    assert.ok(sh && sh !== "none");
+    assert.equal(VARS["--radius-card"], "22px");
+    assert.equal(prop(card, "box-shadow"), "none");
+    for (const p of ["border-width", "border-style", "border-color"]) {
+      assert.equal(prop(card, p), null, ".card 不得另行覆寫 " + p);
+    }
   });
 
-  test(".btn：透明 1px 邊框、--tint 底、--brand-deep 字；.btn--primary 白字 --primary 底；.btn--link --brand-deep", () => {
+  test(".btn：2px var(--outline) 外框、圓角 var(--radius-btn) = 14px、--tint 底、--brand-deep 字（AC-68-02、AC-68-03、VC-4）", () => {
     const btn = baseRule(".btn");
-    assert.equal(prop(btn, "border"), "1px solid transparent");
+    assert.equal(prop(btn, "border"), "var(--outline-w) solid var(--outline)");
+    assert.equal(prop(btn, "border-radius"), "var(--radius-btn)");
+    assert.equal(VARS["--radius-btn"], "14px");
     assert.equal(prop(btn, "background"), "var(--tint)");
     assert.equal(prop(btn, "color"), "var(--brand-deep)");
-    assert.equal(prop(btn, "border-radius"), "var(--radius)");
-    const primary = baseRule(".btn--primary");
-    assert.equal(prop(primary, "background"), "var(--primary)");
-    assert.equal(prop(primary, "border-color"), "transparent");
-    const link = baseRule(".btn--link");
-    assert.equal(prop(link, "color"), "var(--brand-deep)");
   });
 
-  test(".btn--accent：--accent 底、--accent-text 字、邊框透明、圓角 12px、粗體、min-height 48px（VC-3、AC-39-02）", () => {
+  test(".btn--primary／--secondary／--danger：底色與字色不變、不覆寫外框與圓角（沿用 .btn 外框色）", () => {
+    const primary = baseRule(".btn--primary");
+    assert.equal(prop(primary, "background"), "var(--primary)");
+    assert.equal(prop(primary, "color"), "var(--primary-text)");
+    assert.equal(prop(baseRule(".btn--secondary"), "background"), "var(--tint)");
+    const danger = baseRule(".btn--danger");
+    assert.equal(prop(danger, "background"), "var(--danger)");
+    assert.equal(prop(danger, "color"), "#ffffff");
+    for (const sel of [".btn--primary", ".btn--secondary", ".btn--danger"]) {
+      const d = baseRule(sel);
+      for (const p of ["border", "border-color", "border-width", "border-style", "border-radius"]) {
+        assert.equal(prop(d, p), null, sel + " 不得覆寫 " + p);
+      }
+    }
+  });
+
+  test("00-base.css 中 .btn 與 4 種變體的規則（含 @media、:hover）不得把外框設為透明、0 或 none（.btn--link 除外）", () => {
+    const re = /^\.btn(--(primary|secondary|danger|accent))?(:[\w-]+(\([^)]*\))?)*$/;
+    for (const r of BASE_RULES) {
+      const sels = r.selector.split(",").map((x) => x.trim());
+      if (!sels.some((x) => re.test(x))) continue;
+      for (const p of ["border", "border-color"]) {
+        const v = prop(r.decls, p);
+        if (v === null) continue;
+        assert.doesNotMatch(v, /transparent|^0$|none/, r.selector + " @ " + r.media + " " + p + ": " + v);
+      }
+    }
+  });
+
+  test(".btn--accent：--accent 底、--accent-text 字、外框 var(--outline)、圓角 16px、立體陰影、粗體、min-height 48px（VC-3、VC-4、AC-39-02）", () => {
     const a = baseRule(".btn--accent");
     assert.equal(prop(a, "background"), "var(--accent)");
     assert.equal(prop(a, "color"), "var(--accent-text)");
-    assert.equal(prop(a, "border-color"), "transparent");
+    assert.equal(prop(a, "border-color"), "var(--outline)");
     assert.equal(prop(a, "border-radius"), "var(--radius-cta)");
+    assert.equal(VARS["--radius-cta"], "16px");
+    assert.equal(prop(a, "box-shadow"), "var(--shadow-pop)");
+    assert.equal(VARS["--shadow-pop"], "0 4px 0 var(--outline)");
     assert.equal(prop(a, "font-weight"), "700");
     assert.equal(prop(a, "min-height"), "48px");
-    // hover 不換底色
+    // hover 不換底色、不換外框色，立體陰影保留
     const hovers = BASE_RULES.filter((r) => /\.btn--accent:hover/.test(r.selector));
     for (const r of hovers) {
       assert.equal(prop(r.decls, "background"), null);
       assert.equal(prop(r.decls, "background-color"), null);
+      assert.equal(prop(r.decls, "border-color"), null);
+      const sh = prop(r.decls, "box-shadow");
+      if (sh !== null) assert.match(sh, /var\(--shadow-pop\)/);
     }
+  });
+
+  test(".btn--link：透明框、透明底、--brand-deep 字，維持連結外觀（SD-FB-105、AC-38-04、AC-38-09）", () => {
+    const link = baseRule(".btn--link");
+    assert.equal(prop(link, "border-color"), "transparent");
+    assert.equal(prop(link, "background"), "transparent");
+    assert.equal(prop(link, "color"), "var(--brand-deep)");
   });
 
   test(".page-title 22px／700；.section-title 18px／700（AC-38-07）", () => {

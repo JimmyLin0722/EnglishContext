@@ -55,7 +55,7 @@ await R.check("TC-20-04a", "AC-20-04（畫面入口、Tab、無障礙樹）、AC
     await p.ev(`EMT.router.go("dashboard")`); await sleep(320);
     const s = await scan(); const tf = await tabFocus();
     // 窄螢幕為底部導覽；寬螢幕導覽列
-    const navOk = s.navText.join("、") === "主控台、難易度設定、單字卡、模擬測驗";
+    const navOk = s.navText.join("、") === "群島、難易度設定、單字卡、模擬測驗" /* 第 13 輪：AC-20-03 v0.22 */;
     ok = ok && navOk && tf.hits.length === 0;
     out.push(`${w}px：導覽 ${s.navText.join("、")}；Tab ${tf.n} 個焦點落在隱藏頁或其入口 ${tf.hits.length}`);
   }

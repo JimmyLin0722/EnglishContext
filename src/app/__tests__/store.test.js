@@ -19,6 +19,7 @@
  *       gotoCard 換卡依 FP-3 寫入位置。位置、答對紀錄、開關的完整案例見 store-track.test.js。
  * （v0.20，FE-91）sttStatus 4 種狀態與 preparingPhase 子階段規則（AC-58-01、AC-58-12、AC-59-07、V-STT-01、V-STT-10）：
  *       只在記憶體、setItem 0 次；寫入主鍵與匯出備份皆不含 sttStatus、preparingPhase。
+ * （v0.23，FE-106）runtime.flashcard 形狀加 islandFeedback（啟動為 null）；學完回饋完整案例見 store-island.test.js。
  */
 "use strict";
 const test = require("node:test");
@@ -198,7 +199,8 @@ test("首次啟動：預設值 725（C.SCORE_DEFAULT）／green／green、單字
   assert.equal(st.runtime.storageStatus, "ok");
   assert.equal(st.runtime.studySet.length, 21);
   assert.equal(st.runtime.currentTab, "customizer");
-  assert.deepEqual(st.runtime.flashcard, { index: 0, isFlipped: false, mode: "card", quiz: null });
+  // （v0.23，FE-106）runtime.flashcard 5 欄，學完回饋啟動為 null（LF-3）
+  assert.deepEqual(st.runtime.flashcard, { index: 0, isFlipped: false, mode: "card", quiz: null, islandFeedback: null });
   assert.equal(store.getStartup().status, "missing");
   assert.equal(storage.setCalls.length, 0);
 });

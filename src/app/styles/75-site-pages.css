@@ -37,6 +37,22 @@
   font-size: 1.1rem;
 }
 
+/* （v0.19，FE-110；architecture §7.32.7、契約 VC-4、AC-68-02）內容區為區塊卡片：白底、2px 外框色外框、圓角 22px；
+ * 返回按鈕（.btn--link）在卡片之外，維持連結外觀（SD-FB-105）。只改樣式，DOM 不變（AC-68-04）。 */
+.site-page__content {
+  min-width: 0;
+  margin: 0 0 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: var(--outline-w) solid var(--outline);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+
+.site-page__content > :last-child {
+  margin-bottom: 0;
+}
+
 .site-page__content p {
   margin: 0 0 8px;
 }

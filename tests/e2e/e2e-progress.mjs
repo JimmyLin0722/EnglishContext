@@ -30,11 +30,14 @@ async function open(inits = [], vp = [1366, 900]) {
 }
 const toasts = (p, n = 0) => p.ev(`window.__qaToasts.slice(${n}).map((t) => t.text)`);
 const progress = (p) => p.ev(`(() => { EMT.router.go("dashboard"); const q = (s) => document.querySelector("#view-dashboard " + s);
-  const ratio = (bar) => { const c = parseFloat(bar.getAttribute("stroke-dasharray")); const o = parseFloat(bar.getAttribute("stroke-dashoffset")); return Math.round((1 - o / c) * 1000) / 10; };
-  const main = q(".db-ring"); const shown = (e) => !!e && !e.hidden && e.getClientRects().length > 0; const tx = (s) => (q(s) ? q(s).textContent : null);
-  return { text: tx(".db-today__text"), center: tx(".db-ring__value"), done: main.classList.contains("db-ring--done"), doneText: q(".db-today__done").hidden ? "" : q(".db-today__done").textContent,
-    mainRatio: ratio(main.querySelector(".db-ring__bar")), mainStroke: getComputedStyle(main.querySelector(".db-ring__bar")).stroke,
-    rings: document.querySelectorAll("#view-dashboard svg.db-ring, #view-dashboard .db-mini").length,
+  // 第 13 輪（PRD v0.22 R-32、Q-116 A；architecture §10.15 Q21）：主環形圖改為今日進度條 .db-today__bar（role=progressbar）＋填色 .db-today__fill（達成時 .db-today__fill--done）。
+  // center：進度條沒有中央數字，改取「今日已學 X / D 字」的 X（AC-30-05「之後顯示 18 / 15」）；mainRatio：填色寬 ÷ 軌道內寬；mainStroke：填色背景色；
+  // rings：主進度條＋殘留的環形圖／小環形圖總數（應為 1，即只有主進度條）。
+  const main = q(".db-today__bar"); const fill = main.querySelector(".db-today__fill"); const shown = (e) => !!e && !e.hidden && e.getClientRects().length > 0; const tx = (s) => (q(s) ? q(s).textContent : null);
+  const ratio = () => { const w = main.clientWidth; return w ? Math.round((fill.getBoundingClientRect().width / w) * 1000) / 10 : NaN; };
+  return { text: tx(".db-today__text"), center: ((tx(".db-today__text") || "").match(/(\\d+) \\/ /) || [])[1] || null, done: fill.classList.contains("db-today__fill--done"), doneText: q(".db-today__done").hidden ? "" : q(".db-today__done").textContent,
+    mainRatio: ratio(), mainStroke: getComputedStyle(fill).backgroundColor, aria: { now: main.getAttribute("aria-valuenow"), max: main.getAttribute("aria-valuemax"), text: main.getAttribute("aria-valuetext") },
+    rings: document.querySelectorAll("#view-dashboard .db-today__bar[role=progressbar], #view-dashboard svg.db-ring, #view-dashboard .db-ring, #view-dashboard .db-mini").length,
     stats: { labels: [...document.querySelectorAll("#view-dashboard .db-stat__label")].map((e) => e.textContent).join("、"), mastery: tx(".db-stat--mastery .db-stat__value"), sub: tx(".db-stat--mastery .db-stat__sub"), accuracy: tx(".db-stat--answered .db-stat__value"), streak: tx(".db-stat--streak .db-stat__num") },
     chartTitle: tx("#db-chart-h"), empty: shown(q(".db-chart__empty")) ? q(".db-chart__empty").textContent : null, barsShown: shown(q(".db-bars")),
     bars: [...document.querySelectorAll("#view-dashboard .db-bars__item")].filter((b) => !b.hidden).map((b) => ({ date: b.dataset.date, label: b.querySelector(".db-bars__label").textContent, count: Number(b.querySelector(".db-bars__count").textContent), h: parseFloat(b.querySelector(".db-bars__fill").style.height) || 0 })) }; })()`);
@@ -121,8 +124,8 @@ async function fresh(p) { await p.ev(`localStorage.clear()`); await p.reload(); 
     const c = await progress(p);
     const gold = "rgb(201, 162, 39)";
     const ok = a.text === "今日已學 14 / 15 字" && !a.done && a.mainStroke !== gold && Math.abs(a.mainRatio - 93.3) <= 1
-      && b.text === "今日已學 15 / 15 字" && b.done && b.doneText === "今日目標達成" && b.mainRatio === 100 && b.mainStroke === gold
-      && c.text === "今日已學 18 / 15 字" && c.center === "18" && c.done && c.mainRatio === 100 && c.mainStroke === gold;
+      && b.text === "今日已學 15 / 15 字" && b.done && b.doneText === "今日目標達成" && Math.abs(b.mainRatio - 100) <= 0.5 /* 第 13 輪：進度條以填色寬 ÷ clientWidth（整數）量測，容許 0.5% */ && b.mainStroke === gold
+      && c.text === "今日已學 18 / 15 字" && c.center === "18" && c.done && Math.abs(c.mainRatio - 100) <= 0.5 && c.mainStroke === gold;
     return { ok, note: `X=14：「${a.text}」比例 ${a.mainRatio}%、色 ${a.mainStroke}；X=15：「${b.text}」滿圈 ${b.mainRatio}%、金色=${b.mainStroke === gold}、「${b.doneText}」；X=18：「${c.text}」中央「${c.center}」、${c.mainRatio}%、金色=${c.mainStroke === gold}` };
   });
 

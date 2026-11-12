@@ -1,6 +1,6 @@
 ---
 doc: TEST-PLAN
-version: 0.13
+version: 0.14
 status: in-review
 author: qa-agent
 approved_by:
@@ -9,6 +9,8 @@ approved_at:
 
 # English Master Track — 測試計畫（第 5 階段驗收）
 
+> **v0.14（第 13 輪，2026-11-12）**：1.4.0，一般驗收（不跑全套回歸），範圍依 architecture v0.22 §10.15（Q21～Q28）、§13.15：PRD v0.24 R-32 島嶼風格第一階段（新增 US-63～US-72 共 50 個 AC，修改 12 個 AC，移除 AC-38-06）與 tasks.json v0.20 FE-102～FE-117 covers 中的既有 AC，共 74 個 AC。新增 §1.10、§2.13、§4.10、§5.1、§6.10、§7.1；§5、§7 全表維持第 12 輪內容，全套重新產生留待發版驗收。第 12 輪以前的內容保留。
+>
 > **v0.13（第 12 輪，2026-11-09）**：1.3.2，範圍依 architecture v0.17 §10.14（Q13～Q20）：PRD v0.21（R-30：新增 US-62 共 12 個 AC，修改 AC-08-10、AC-30-04、AC-42-02、AC-58-07、AC-59-01、AC-59-05；R-31：修改 AC-10-02、AC-54-01，連帶重跑 AC-56-03、AC-56-05～AC-56-07、AC-57-03、AC-23-08），應驗收 400 個 AC；回歸 AC-58、AC-59、AC-60、AC-33 與全套。新增 §1.9、§2.12、§4.9、§6.9，§5、§7 依第 12 輪結果重新產生。第 11 輪以前的內容保留。
 >
 > **v0.12（第 11 輪，2026-11-06）**：1.3.1 修正輪，範圍依 architecture v0.16 §10.13（Q8～Q12）：複驗 BUG-006、BUG-007、BUG-008，回歸第 10 輪涉及項目；PRD v0.20、契約 v0.20 不變（應驗收 388 個 AC）。新增 §1.8、§2.11、§4.8、§6.8，§5、§7 依第 11 輪結果重新產生。第 10 輪以前的內容保留。
@@ -164,6 +166,21 @@ approved_at:
 | 受測物 | `dist/english-master-track.html`＝`dist/site/index.html` 3,486,160 bytes（SHA-256 `9b081604199d…`）＋`dist/site/` 13 檔；版本 1.3.2、BUILD_ID `981b0d2ab45de9d6`；QA 以目前原始碼重建 2 次與 `dist/` 14 檔逐檔相同（M-6：是 FE-101 產物，不是試作分支的 `dist/`） |
 | 越界基準 | 第 11 輪變更已提交（HEAD `2cb2ca2`），本輪以 `git diff HEAD`＋未追蹤檔＋`dist/site/`（.gitignore 排除，以修改時間晚於 HEAD 判定）：須在 FE-98～FE-101 paths 內；`package.json` 只可改 version 1 行（MC-10）；`src/data/`、`tools/`、`.github/`、`package-lock.json`、`views/flashcards.js`、`state/store.js`、`services/mic.js` 須無變動（M-5）；`storage-schema.json` 只可改 meta |
 | 瀏覽器 | 本機 CDP 無頭 Chrome、Edge（`lib/cdp.mjs`，不加 `--hide-scrollbars`）；Service Worker 段（TC-62-10b、e2e-pwa）用 Playwright（本機 8080），因 CDP 開的無頭 Chrome 裝不起 Service Worker（FE-97、FE-101 回報，環境問題） |
+
+### 1.10 第 13 輪範圍（PRD v0.24 R-32：島嶼風格第一階段，版本 1.4.0）
+
+| 項目 | 內容 |
+| :--- | :--- |
+| 驗收範圍 | 一般驗收（非發版全套回歸）：PRD v0.24 R-32 的 US-63～US-72 共 50 個 AC，加上 tasks.json v0.20 FE-102～FE-117 `covers` 中的既有 AC；architecture v0.22 §7.32、§10.15（Q21～Q28、M-1～M-5、已知設計行為 (14)～(20)）、§13.15；契約 v0.24 §15 V-ISL-01～V-ISL-09、V-LAY-02、V-LAY-07、V-LAY-08、V-LAY-10、L-8 LT-7、V-LGL-03、V-LGL-04 |
+| 新增 AC（50） | AC-63-01～AC-63-05、AC-64-01～AC-64-10、AC-65-01～AC-65-04、AC-66-01～AC-66-04、AC-67-01、AC-67-02、AC-68-01～AC-68-06、AC-69-01～AC-69-06、AC-70-01～AC-70-03、AC-71-01～AC-71-05、AC-72-01～AC-72-05 |
+| 修改 AC（R-32） | AC-20-03、AC-27-01、AC-30-01、AC-30-05、AC-31-03、AC-32-01、AC-38-08、AC-39-01、AC-39-02、AC-39-05、AC-39-06、AC-42-02 |
+| 移除 AC | AC-38-06（由 AC-68-02 取代），記「不適用（v0.22 移除）」 |
+| covers 中其他既有 AC | AC-19-01、AC-19-04、AC-20-01、AC-22-01、AC-23-02、AC-23-06、AC-23-08、AC-27-05、AC-34-04、AC-36-07、AC-38-02、AC-39-10；AC-68-04、AC-69-01 指定照常通過的 AC-26-01、AC-40-01～AC-40-03、AC-41-01～AC-41-04、AC-45-04、AC-46-01、AC-48-01、AC-48-12、AC-57-01、AC-06～AC-09、AC-28、AC-33、AC-58～AC-62（由既有套件重跑） |
+| 受測物 | `dist/english-master-track.html`＝`dist/site/index.html` 3,588,990 bytes（SHA-256 `b3babdc80c4f…`）＋`dist/site/` 13 檔；版本 1.4.0、BUILD_ID `7ce555b38d85b6c4`；QA 以目前原始碼重建與 `dist/` 位元組相同（TC-S09） |
+| 對照組 | v1.3.2：`git show c16d368:dist/english-master-track.html`（AC-68-04、AC-69-01、AC-72-02、效能交錯）；v1.3.2 部署目錄以 `git archive c16d368` 的 src／tools 建置（AC-72-04 本機更新） |
+| 越界基準 | 第 12 輪已提交（HEAD `c16d368`），以 `git diff HEAD`＋未追蹤檔＋`dist/site/`（修改時間晚於 HEAD）判定，須在 FE-102～FE-117 paths 內；`package.json` 只改 version 1 行（M-1）；`src/data/`、`tools/`、`src/app/services/`、`src/app/site/static-page.css`、`.github/`、`package-lock.json` 無變動（M-5） |
+| 人工 | AC-69-06 後半與 AC-71-01 的 NVDA 播報（TC-69-06h、TC-71-01h）；AC-72-03 (b) 原創性（TC-72-03h，人類 JimmyLin 2026-11-12 已確認通過）；AC-72-04 正式網址部署後更新（TC-72-04h）；AC-70-03 基準環境（TC-M07） |
+| 不判定 | 學完後 < 0.5 秒就點「群島」的切頁時間（architecture §10.15 (19)，TC-70-03e 只記參考值） |
 
 ## 2. 測試方式
 
@@ -383,13 +400,31 @@ approved_at:
 | V-LGL-02 v0.21 | `legal-check.mjs` TC-LGL-S03：`dist/` 下 5 個 HTML 與 `sw.js` 全文（含內嵌程式註解）「TOEIC®（多益）Part 5」0 次；TC-LGL-S01 舊文字清單加入此字串；LT-3「Part 5 題目」不屬本條 |
 | 真人語音 | AC-62-12、AC-58-14、AC-59-08 只列人工（TC-62-12h、TC-58-14h、TC-59-08h，同一輪記錄）；替身結果不得當作真人行為依據（PRD v0.21 共通規則 2） |
 
+### 2.13 第 13 輪量測方式與判定規則
+
+| 項目 | 方式／判定 |
+| :--- | :--- |
+| 測試資料 | 以 localStorage 構造（AC-64-02「以 DevTools 或匯入備份建立」）：已掌握字依內建字庫排名取 wordKey；S 以 `streak { days, lastActiveDate = 今天 }`、中斷以最後打卡日 3 天前；K 以 `part5CorrectIds` 前 K 題；X 以 `todayLearned.wordKeys` X 筆；D 以套用色級（橘 215 → 10、綠 725 → 15） |
+| 地圖判定 | 依 architecture §7.32.4 的 class 與 `data-*` 計數（§10.15 Q23）：`g.isl-island[data-stage]` 內 `.isl-sprout`、`.isl-palm`、`.isl-flower`、`.isl-hut`、`.isl-flag` 個數對照「島嶼階段」表；燈塔 `g.isl-lighthouse[data-state]` 與 `.isl-lh-rocks`／`.isl-lh-tower`／`.isl-lh-beam`、待建牌；天氣 `svg[data-weather]`、`g.isl-sun` 的 `opacity`、`g.isl-rainbow` 有無 |
+| 小船 | `g.isl-boat` 的 `transform` 錨點投影到 `line.isl-route`（x1,y1 → x2,y2），與 r 的距離 ÷ 航線長 ≤ 2% |
+| 三處一致 | 同一資料下比對清單文字、地圖 `data-stage`／計數、`div[role=img]` 的 `aria-label`（文字替代逐字比對 IA-4 範例），另以 CDP `Accessibility.getFullAXTree` 確認 image 節點 1 個、名稱相同、未忽略子節點 0 |
+| n = 0、Q = 0 | 以 `run-r13.mjs` 建置的無內建資料檔（`QA_FIXTURE_NODATA`：只含 `sources.js`）驗證「掌握 —」、省略 `aria-valuenow`、文字替代「{島名}掌握 —，沙灘」、第 3 格「—」與「燈塔待建」（TC-65-02n） |
+| 動畫 | 由難易度設定頁以真實點擊進入群島頁；0.5 秒、5.1 秒以 `document.getAnimations()` 取地圖內 `playState = running` 的動畫；種類以動畫目標 class（`isl-anim-wave`、`isl-anim-cloud`、`isl-anim-boat`、`isl-anim-sway`）計（海浪與小船共用 keyframes `isl-bob`）；位移以 keyframes 值 × SVG 顯示寬 / 354 換算 CSS px；版面位移以 `layout-shift` PerformanceObserver（來源節點為今日任務卡、清單、3 格者）與 0.5～6 秒矩形比對 |
+| 對比 | 版面文字用 `lib/layout-probe.mjs`（WCAG 公式、沿祖先合成背景與 opacity）；量測前等換頁淡入（240 ms）與換卡滑入結束（≥ 600 ms），避免取到過渡畫格。地圖文字（AC-71-04）以 375 px 截圖，在每段文字矩形內取最暗像素對最常見像素，並等動畫結束（5.3 秒）後截圖 |
+| 卡片與按鈕 | AC-68-02 列舉的區塊與按鈕取計算後四邊 `border-style`／`width`／`color`、四角 `border-radius`、`background`、`box-shadow`；`.btn--link`（頁尾連結、返回連結）不屬列舉按鈕（SD-FB-105）；地圖框底色為海面色、霧中島列 `#f3f6fa` 為例外 |
+| 與 v1.3.2 比對 | AC-68-04、AC-69-01：同一資料、同一寬度下取可見元素標籤樹（含 role）與按鈕文字；排除 `.fc-deco`、`.fc-feedback-live`、SVG 子孫與 LT-7 段落；四選一選項內容為隨機抽題，只比字母與數量 |
+| 學完回饋 | 以真實點擊翻面、四選一、STT 替身評分觸發；回饋列為常駐 `div.fc-feedback-live[role=status]` 內的 `p.fc-feedback`（Q24），空容器以計算後高度 0、無子元素判定；座標比較在換卡動畫結束後的同一面（正面）量測 |
+| 不寫入 | 包裝 `Storage.prototype.setItem` 計數；只瀏覽群島頁、等動畫結束、回饋顯示後等待皆 0 次；換卡只寫 `flashcardPosition`（AC-44），比對時排除該欄 |
+| 效能（參考值） | `diag-r13-perf.mjs`：真實滑鼠事件；document 捕獲階段 click 監聽器（先於產品處理器）登錄 rAF → `setTimeout(0)`，取 `event.timeStamp` 到下一影格繪製後；另以 Event Timing（`durationThreshold` 16，未回報記 < 16 ms）取同一互動最大 duration；兩法每次 ≤ 100 ms；1 倍、4 倍 CPU 降速；與 v1.3.2 交錯。首次載入沿用 e2e-env TC-22-05a。本機無頭 Chrome 不是 Q-13 基準環境，基準環境仍為 TC-M07 |
+| TC-22-01m | 沿用 §2.3：本機 4 倍降速＋減少動態嚴格量法參考值不符時記待人工（TC-M07），並以 `diag-r13-perf` TC-22-01f 與 v1.3.2 同機交錯對照判斷是否為本版退化 |
+
 ## 3. 環境
 
 | 項目 | 版本 |
 | :--- | :--- |
 | 作業系統 | Windows 11 Pro 10.0.26200 |
 | Node.js | v24.15.0 |
-| 瀏覽器 | Google Chrome（主要，無頭）、Microsoft Edge（跨瀏覽器冒煙：重跑 e2e-goal、e2e-hidden、e2e-pwa；第 6 輪加 e2e-version 畫面類）。第 12 輪：Chrome 157.0.8103.38、Edge 157.0.4341.42（Chrome 157 預設把 http 導覽升級為 https，e2e-ad 以 `--disable-features=HttpsUpgrades,HttpsFirstModeV2,…` 關閉，test-report §23.4） |
+| 瀏覽器 | Google Chrome（主要，無頭）、Microsoft Edge（跨瀏覽器冒煙：重跑 e2e-goal、e2e-hidden、e2e-pwa；第 6 輪加 e2e-version 畫面類）。第 12 輪：Chrome 157.0.8103.38、Edge 157.0.4341.42（Chrome 157 預設把 http 導覽升級為 https，e2e-ad 以 `--disable-features=HttpsUpgrades,HttpsFirstModeV2,…` 關閉，test-report §23.4）。第 13 輪：Chrome 157.0.8103.50（一般驗收，未跑 Edge 冒煙與 `:noas` 替身） |
 | 新增相依 | （第 3 輪）無。**第 4 輪**：`devDependencies.playwright-core` 1.64.1（`npm install --save-dev --save-exact`，新增 `package-lock.json`、`node_modules/`；只供 E2E，不下載瀏覽器、使用本機 Chrome／Edge；建置與部署 workflow 不需要） |
 
 ## 4. 測試套件
@@ -522,6 +557,17 @@ approved_at:
 | 375 版面對照（新） | `tests/e2e/diag-r12-375.mjs`（結果 `diag-r12-375.json`） | TC-R12-375：375／390 與 1.3.1（HEAD `2cb2ca2`）比較，取代第 11 輪專用的 TC-R11-375（`diag-r11-gutter.mjs` 未設 `QA_R10CSS` 時不再記待人工） |
 | HTTPS-First 診斷（新） | `tests/e2e/diag-r12-httpupgrade.mjs` | TC-50-01 第一次失敗的原因（Chrome／Edge 157 把 http 導覽升級為 https） |
 | 執行中修正 | `e2e-ad.mjs`（主瀏覽器加 `--disable-features=HttpsUpgrades,HttpsFirstModeV2,…`）、`diag-r10-focus.mjs` TC-61-02b（375px 模擬測驗改比捲動量）、`e2e-compat-r10.mjs` TC-R10-C1（版本讀 `package.json`） | test-report §23.4 |
+
+### 4.10 第 13 輪新增與更新的套件
+
+| 套件 | 檔案 | 涵蓋 |
+| :--- | :--- | :--- |
+| 群島（新） | `tests/e2e/e2e-island.mjs`（結果 `e2e-island.json`；`QA_ONLY` 只供除錯） | US-63～US-72（除 AC-70-03 效能與 AC-72-04 更新）、V-ISL-01～V-ISL-09、V-LAY-02、V-LAY-10、V-LGL-03、V-LGL-04；n = 0／Q = 0 需 `QA_FIXTURE_NODATA` |
+| 效能（新） | `tests/e2e/diag-r13-perf.mjs`（結果 `diag-r13-perf.json`：摘要與原始值；第 1 次量測保存於 `tests/results/tmp/diag-r13-perf-run1.json`、`r13-diag-r13-perf-run1.txt`） | AC-70-03、AC-22-01（切換到群島頁）、AC-64-09、AC-69-05、AC-22-03、AC-29-01；參考：§10.15 (19)、TC-22-01m 位置 1 對照 |
+| PWA 更新（新） | `tests/e2e/e2e-pwa-r13.mjs`（Playwright 本機 8080） | AC-72-04、AC-36-03、AC-36-04、E-185：v1.3.2 建置 → 1.4.0 |
+| 越界（新） | `tests/static/boundary-r13.mjs`（結果 `boundary-r13.json`） | TC-B03（§1.10 越界基準） |
+| 逐一執行（新） | `tests/tools/run-r13.mjs` | 由 run-r12 複製；紀錄檔 `tests/results/tmp/r13-*.txt`；加 e2e-island、diag-r13-perf、e2e-pwa-r13、boundary-r13 |
+| 名稱與外觀（更新，§10.15 Q21） | `e2e-progress.mjs`（主環形圖 → `.db-today__bar`／`.db-today__fill(--done)`；填滿比例容許 0.5%）、`e2e-motion.mjs`（TC-31-03 改查今日進度條與清單進度條轉場、地圖內動畫數）、`e2e-layout.mjs`（TC-38-01 進度條填色、TC-38-02 背景 `#eaf7fb` 與地圖框例外、TC-38-03 達成金色、TC-38-06 記不適用、TC-38-08 排除 `.fc-deco`／`.fc-feedback-live`、TC-38-09 與 TC-39-06 Tab／DOM 順序「變更」→「開始今日學習」、TC-39-01／02 新區塊順序與今日任務卡內部、TC-41-01 背景）、`e2e-env.mjs` TC-20-03、`e2e-firstrun.mjs` TC-27-01、`e2e-hidden.mjs`、`e2e-site.mjs`（導覽「群島」、返回鈕「返回群島」）、`e2e-goal.mjs` TC-17-06（DOM 順序）、`e2e-reinit.mjs` TC-32-01（「到「群島」頁按」）、`e2e-pwa.mjs`、`pwa-static.mjs`（manifest `background_color` `#eaf7fb`）、`e2e-version.mjs`（1.4.0） | AC-20-03、AC-27-01、AC-30-01、AC-30-05、AC-31-03、AC-32-01、AC-38-01～AC-38-03、AC-38-08、AC-38-09、AC-39-01、AC-39-02、AC-39-06、AC-41-01、AC-17-06、AC-34-04、AC-42-02、AC-57-01 |
 
 ## 5. TC 清單
 
@@ -1218,6 +1264,71 @@ approved_at:
 | TC-X-track-375 | Console 無未處理錯誤、無網路請求（AC-47-08 (a)） | 自動化 E2E | `tests/e2e/e2e-track.mjs` | 例外／錯誤 []；非 file 請求 0 |
 | TC-X-track-backup | Console 無未處理錯誤、無網路請求（AC-47-08 (a)：匯出、匯入） | 自動化 E2E | `tests/e2e/e2e-track.mjs` | 未處理例外 0；非 file 請求 0 |
 
+### 5.1 第 13 輪新增 TC（PRD v0.24 R-32）
+
+第 13 輪為一般驗收，以下為本輪新增的 58 個 TC（自動化 E2E 52（其中參考值不判定 2）、QA 檢視 1、人工 4、例外檢查 1）；修改的既有 TC 見 §4.10，結果見 test-report §24。本節之外的 §5 全表為第 12 輪產生，全套重新產生留待發版驗收（`/qa-verify release`）。
+
+| TC | 對應 AC | 方式 | 腳本 | 驗證重點 |
+| :--- | :--- | :--- | :--- | :--- |
+| TC-63-01 | AC-63-01、AC-20-03、AC-27-05、AC-56-04 | 自動化 E2E | `e2e-island.mjs` | 375／700（先按「選單」）／1366：導覽 4 項「群島、難易度設定、單字卡、模擬測驗」；第 1 項為內嵌 SVG、無外部參照；點擊命中 → `aria-current="page"`；`h2`「我的群島」、裝飾 `aria-hidden`；`h1`「EnglishContext」；目標標籤同列（≤ 640 可換行）不重疊 |
+| TC-63-02 | AC-63-02、AC-32-01、V-ISL-08 | 自動化 E2E | `e2e-island.mjs` | 首次畫面、8 個應用內畫面、資料備份展開、初始化確認視窗、Toast：可見文字、DOM 文字節點、`aria-label`、`title`、`document.title`「主控台」0；確認視窗含「到「群島」頁按「匯出備份」」 |
+| TC-63-03 | AC-63-03、AC-39-10、AC-20-01、AC-27-03 | 自動化 E2E | `e2e-island.mjs` | 375×667、390×844、412×915：7 區塊單欄、上緣順序同 DOM；區塊與地圖同寬；SVG 寬高比 354：430 誤差 ≤ 1%；無水平捲軸；捲到底頁尾不被底部導覽遮住 |
+| TC-63-04 | AC-63-04、AC-39-10、AC-49-08 | 自動化 E2E | `e2e-island.mjs` | 768、1366、1920：容器 ≤ 720 置中；地圖寬 = min(容器, 480)、置中、比例；其他區塊填滿；3 格同列；清單每列 1 島 |
+| TC-63-05 | AC-63-05、AC-39-09、AC-22-05 | 自動化 E2E | `e2e-island.mjs` | V-LAYOUT 6 尺寸重新開啟不捲動：「開始今日學習」完整在視窗內、在底部導覽上緣之上、中心點命中 |
+| TC-64-01 | AC-64-01、AC-65-01 | 自動化 E2E | `e2e-island.mjs` | 兩種寬度：海面、海浪、3 座開放島、2 座霧中島（虛線、無植物、較淡）、燈塔、太陽、雲、彩虹（S = 7）、碼頭、航線、小船；6 段可見文字；文字層在最上層；地圖框圓角 ≥ 16 |
+| TC-64-02 | AC-64-02、AC-65-01、AC-65-03、V-ISL-01 | 自動化 E2E | `e2e-island.mjs` | 橘島 m = 0、1、240、250、490、500、740、750、990、999、1,000 → P 與階段、地圖 5 種元素數、清單「掌握 P%」與階段文字、progressbar 值、文字替代片段；棕、綠島 P = 0／25／100 抽測 |
+| TC-64-03 | AC-64-03、AC-30-10、AC-17-03、V-ISL-02 | 自動化 E2E | `e2e-island.mjs` | 排名 1～1,000 中 250 字、1,001～2,809 中 10 字、5 個自訂字 → 橘 25%（椰子樹）、棕 1%（新芽）、綠 0%；「已掌握 265 字」；無 NaN／Infinity |
+| TC-64-04 | AC-64-04、V-ISL-02 | 自動化 E2E | `e2e-island.mjs` | 套用橘、棕、綠、藍、金，排名 1,500 已掌握：棕島皆 1%／新芽；「（目前目標未包含）」橘 → 棕、綠；棕 → 綠；其餘無；文字替代不含 |
+| TC-64-05 | AC-64-05、AC-67-01、AC-49-04、V-ISL-03 | 自動化 E2E | `e2e-island.mjs` | K = 0、1、49、50、200：待建（石塊＋待建牌、無塔）／蓋好／點亮（塔＋光束）；第 3 格狀態行與「已答對 K / 200 題」；文字替代 |
+| TC-64-06 | AC-64-06、AC-67-01、AC-17-02、V-ISL-03 | 自動化 E2E | `e2e-island.mjs` | S = 0、1、6、7：陰天（太陽 opacity ≤ 0.4）／晴天／出現彩虹；中斷（3 天前、連續 10 天）→ 0、陰天、三島與未中斷相同 |
+| TC-64-07 | AC-64-07、V-ISL-03 | 自動化 E2E | `e2e-island.mjs` | D = 10、X = 0、5、9、10、15：錨點比例 0／0.5／0.9／1／1，誤差 ≤ 2% 航線長；X = 10 與 15 同位；`data-boat` 與文字替代 |
+| TC-64-08 | AC-64-08、V-ISL-06 | 自動化 E2E | `e2e-island.mjs` | 四選一答錯、打卡中斷、當天未學、刪除自訂單字（含與內建同 wordKey）、模擬測驗答錯、重新開始：三島 P、階段、燈塔不下降，只有中斷變陰天；「清除答對紀錄」（例外）只影響燈塔 |
+| TC-64-10 | AC-64-10、AC-71-02 | 自動化 E2E | `e2e-island.mjs` | 地圖與清單 10 處滑鼠與觸控點擊：不換頁、不開視窗、localStorage 不變；可聚焦元素 0、`cursor: pointer` 0；Tab 40 次不停在地圖與清單 |
+| TC-65-01 | AC-65-01、AC-65-02、AC-38-03 | 自動化 E2E | `e2e-island.mjs` | 兩種寬度：`h3`「島嶼」、5 列順序、色點 `aria-hidden` 與色級色、副標、開放島 progressbar 屬性與填色、`tabular-nums`；霧中島「尚未開放」、非 progressbar、底色 `#f3f6fa` |
+| TC-65-02n | AC-65-02、AC-67-01、AC-71-01、E-178 | 自動化 E2E | `e2e-island.mjs`（`QA_FIXTURE_NODATA`） | 無內建資料：三島「掌握 —」、省略 `aria-valuenow`、填滿 0；文字替代「{島名}掌握 —，沙灘」；Q = 0 第 3 格「—」與「燈塔待建」；無 NaN |
+| TC-65-04 | AC-65-04、AC-68-03 | 自動化 E2E | `e2e-island.mjs` | 375×667：5 列高 ≥ 44、文字不裁切不重疊、對比 ≥ 4.5、無水平捲軸 |
+| TC-66-01 | AC-66-01、AC-39-02、AC-71-02 | 自動化 E2E | `e2e-island.mjs` | 兩種寬度：龜龜 SVG `aria-hidden` 在左上、「島主 龜龜」、對話框；龜龜列在進度列之上；375 不重疊不裁切 |
+| TC-66-02 | AC-66-02、V-ISL-04 | 自動化 E2E | `e2e-island.mjs` | D = 10、X = 0、4、9、10、12：對話框 5 句逐字；對話框與祖先非即時區域 |
+| TC-66-03 | AC-66-03、AC-30-05、AC-38-07、AC-68-02 | 自動化 E2E | `e2e-island.mjs` | X = 0、4、10、12：文字、`tabular-nums`、填滿比例、品牌主色／金色、「今日目標達成」、progressbar 屬性（max = D、now = min(X, D)、valuetext）、高 ≥ 8、2 px 外框色 |
+| TC-66-04 | AC-66-04、AC-39-04、V-LAY-10、AC-68-02 | 自動化 E2E | `e2e-island.mjs` | 5 色級 × 2 寬度：標籤文字、「變更」緊接、外框 ≥ 2 外框色、圓角 ≥ 12、非 `#f7893b`／`#d5d9e0`、無底線、≥ 44×44、對比 ≥ 4.5、與標題不重疊；滑鼠、Enter、空白鍵到難易度設定且 localStorage 不變 |
+| TC-67-01 | AC-67-01、AC-39-05、AC-49-01、AC-49-08、AC-68-03 | 自動化 E2E | `e2e-island.mjs` | S／K = 0／0、3／48、7／50 × 2 寬度：第 1、3 格最下方狀態行、第 2 格不加行、3 格同列、對比 ≥ 4.5、不裁切 |
+| TC-68-01 | AC-68-01、AC-34-04、AC-38-02、V-LAY-02 | 自動化 E2E | `e2e-island.mjs` | 兩種寬度：首次畫面、8 個畫面、對話框 `body` 背景 `rgb(234, 247, 251)`；manifest `background_color` `#eaf7fb`、`theme_color` 與 `<meta theme-color>` `#1e9bf0` |
+| TC-68-02 | AC-68-02、V-LAY-02、VC-4 | 自動化 E2E | `e2e-island.mjs` | 群島頁各區塊、難易度設定、模擬測驗、單字卡、資料來源與授權、應用內三頁、首次畫面：卡片四邊 solid ≥ 2 px 外框色、圓角 ≥ 16、白底（例外）、今日任務卡與地圖框陰影；按鈕外框 ≥ 2、圓角 ≥ 12、非 `#d5d9e0`、「開始今日學習」「開始學習」陰影 |
+| TC-68-03 | AC-68-03、AC-38-04 | 自動化 E2E | `e2e-island.mjs` | 兩種寬度 8 個畫面可見文字 WCAG 對比；卡片、按鈕、清單列、3 格外框對相鄰背景 ≥ 3 |
+| TC-68-04 | AC-68-04、AC-26-01、AC-40-01～AC-40-03 | 自動化 E2E | `e2e-island.mjs` | 與 v1.3.2 比對首次畫面、難易度設定、模擬測驗（題目、作答後）、資料來源與授權（排除 LT-7）、應用內三頁的元素順序與按鈕文字 |
+| TC-68-05 | AC-68-05、AC-38-01 | 自動化 E2E | `e2e-island.mjs` | 群島頁、單字卡頁可見 SVG 的 `fill`／`stroke` 無 `#f7893b`（標題列品牌圖示與 `.db-stat__icon` 為 AC-38-01 位置） |
+| TC-68-06 | AC-68-06、AC-38-07 | 自動化 E2E | `e2e-island.mjs` | 原始碼無 `@font-face`、Google Fonts、字型檔網址；字型請求 0；計算後 `font-family` 只含系統字型與通用字族 |
+| TC-69-01 | AC-69-01、AC-38-08、AC-06-01、AC-06-02 | 自動化 E2E | `e2e-island.mjs` | 單字卡正面、背面、測驗模式 × 2 寬度與 v1.3.2 比對（排除角落裝飾與回饋列） |
+| TC-69-02 | AC-69-02、V-ISL-05、LF-6 | 自動化 E2E | `e2e-island.mjs` | 橘 239 字答對 W1（排名 300）「橘島又多掌握 1 個字（掌握 24%）」；調為 244 字答對 W2（排名 301）「橘島長出第一棵椰子樹！」；棕 m = 0 答對「棕島冒出新芽了！」 |
+| TC-69-03 | AC-69-03、LF-6 | 自動化 E2E | `e2e-island.mjs` | D = 10、X = 8：翻面「小船又前進了，再 1 個字靠岸」；STT 評分「今天的小船靠岸了！」；再翻新字、自訂單字答對首次掌握 → 維持；X = 12 |
+| TC-69-04 | AC-69-04、V-ISL-05 | 自動化 E2E | `e2e-island.mjs` | (a) 升階＋靠岸 → 升階文字；(b) 靠岸未升階；(c) 同字再翻面、滑動、上一張／下一張、答對已掌握且今天已學過的字、STT 錯誤、STT 訊息（nomatch）、準備中取消 → 回饋列不變 |
+| TC-69-05 | AC-69-05、AC-71-02、AC-68-03 | 自動化 E2E | `e2e-island.mjs` | 兩種寬度：空容器 `role=status`、`aria-live=polite`、高 0；回饋位置（卡片區之下、「上一張／翻面／下一張」之上）；新芽 `aria-hidden`；出現時上方元素座標差 0；換卡、切換模式保留；離開再回來、重新載入不顯示；對比 ≥ 4.5；角落裝飾不重疊；(b) 減少動態無動畫 |
+| TC-69-06 | AC-69-06、V-ISL-07、AC-62-07 | 自動化 E2E | `e2e-island.mjs` | 回饋顯示後 setItem 不增加、學習資料（X、S、掌握、K）不變；localStorage 全部鍵無島嶼／回饋字樣；回饋容器 polite、分數區不在其內 |
+| TC-70-01 | AC-70-01、AC-31-03 | 自動化 E2E | `e2e-island.mjs` | 0.5 秒 4 種動畫、只改 transform、位移 ≤ 4／12 CSS px、旋轉 ≤ 3°；5.1 秒 0 個；離開再進入重播；三區塊 layout-shift 0 |
+| TC-70-02 | AC-70-02、AC-31-03、E-181 | 自動化 E2E | `e2e-island.mjs` | 減少動態：進入群島頁 3 秒內與資料變化後回來動畫 0、無 `isl-map--play`；小船在 r 位置；進度條無轉場 |
+| TC-70-03a | AC-70-03、AC-22-01 | 自動化 E2E（本機參考值） | `diag-r13-perf.mjs` | 單字卡頁 → 群島（資料未變）各 30 次 × 1／4 倍降速，click → 下一影格與 Event Timing 皆 ≤ 100 ms；v1.3.2 交錯對照 |
+| TC-64-09p | AC-64-09、AC-70-03 | 自動化 E2E（本機參考值） | `diag-r13-perf.mjs` | 四選一答對、1.2 秒後點「群島」各 10 次 × 1／4 倍：≤ 100 ms、回到即新值 |
+| TC-69-05p | AC-69-05、AC-69-06、AC-22-03、AC-29-01、AC-70-03 | 自動化 E2E（本機參考值） | `diag-r13-perf.mjs` | 翻面、四選一作答到回饋列已出現的下一影格各 12 次、重新載入後第一次翻面 5 輪 × 1／4 倍：≤ 100 ms |
+| TC-70-03e | AC-64-09（參考） | 自動化 E2E（不判定） | `diag-r13-perf.mjs` | 答對後 0.25 秒內點「群島」（§10.15 (19)） |
+| TC-22-01f | AC-22-01（參考） | 自動化 E2E（不判定） | `diag-r13-perf.mjs` | 減少動態＋4 倍降速，群島頁 → 難易度設定，1.4.0 與 v1.3.2 交錯（TC-22-01m 位置 1 對照） |
+| TC-71-01 | AC-71-01、AC-65-03、AC-67-02、V-ISL-04 | 自動化 E2E | `e2e-island.mjs` | AC-64-03 資料、S = 3、K = 48、X = 4、D = 15：`aria-label` 逐字；`role=img`、SVG `aria-hidden`；無障礙樹 image 1 個、子節點 0；清單、地圖、3 格一致 |
+| TC-71-01b | AC-71-01、AC-64-09、AC-67-02 | 自動化 E2E | `e2e-island.mjs` | 橘 P = 24、X = 3 → 單字卡四選一答對 → 點導覽回群島頁：地圖、清單、今日進度、對話框、文字替代即為 P = 25、X = 4（不重新載入） |
+| TC-71-02 | AC-71-02、AC-52-07 | 自動化 E2E | `e2e-island.mjs` | 龜龜、標題裝飾、清單色點、目標色點 `aria-hidden`；SVG 內無可聚焦；「島主 龜龜」可見；Tab 區段序列 標題列與導覽 →「變更」→「開始今日學習」→ 資料備份 → 頁尾 |
+| TC-71-03 | AC-71-03 | 自動化 E2E | `e2e-island.mjs` | `grayscale(1)` 下各狀態皆有可見文字：清單階段、「尚未開放」、3 格狀態、「今日目標達成」、小船狀態 |
+| TC-71-04 | AC-71-04 | 自動化 E2E | `e2e-island.mjs` | 375 px，S／K = 0／0、7／50、0／50、7／0：地圖每段文字實際字級 ≥ 12 CSS px、截圖像素對比 ≥ 4.5 |
+| TC-71-05 | AC-71-05、AC-38-09、AC-61-01 | 自動化 E2E | `e2e-island.mjs` | 375 px 群島頁（資料備份展開）與單字卡頁：可操作控制項 ≥ 44×44；Tab 停駐焦點框 ≥ 2 px、對比 ≥ 3、不被底部導覽遮住 |
+| TC-72-01 | AC-72-01、AC-19-01、AC-19-04、AC-27-05、AC-37-01、AC-37-02 | 自動化 E2E | `e2e-island.mjs` | 原始碼無外部 `<image>`、`<use href>`、`url(http`、`@import`、外部 script／link（canonical 白名單除外）；≤ 5,242,880 bytes；連網、斷網、空資料夾副本斷網：插圖顯示、非 file: 請求 0、Console 錯誤 0 |
+| TC-72-02 | AC-72-02、AC-36-04、V-ISL-07 | 自動化 E2E | `e2e-island.mjs` | v1.3.2 實際學習後以 1.4.0 開啟：直接群島頁、資料不變；瀏覽 setItem 0；回饋後欄位集合不變；匯出備份頂層 5 欄、無島嶼欄位；匯入 v1.3.2 資料備份不變；首次畫面者仍首次畫面 |
+| TC-72-03 | AC-72-03 (a) | 自動化 E2E | `e2e-island.mjs` | 9 個字詞在交付 HTML、`dist/site`、`src/app` 非測試檔、8 個畫面文字與屬性 0 次 |
+| TC-72-04a | AC-72-04、AC-36-03、AC-36-04、E-185 | 自動化 E2E | `e2e-pwa-r13.mjs` | 本機 8080：v1.3.2 安裝 service worker → 部署 1.4.0 → 60 秒內更新提示；更新前仍舊版；按「更新版本」→ 群島頁、localStorage 不變、只留新快取 |
+| TC-72-05 | AC-72-05、AC-23-02、AC-23-06、AC-23-08、V-LGL-03、V-LGL-04 | 自動化 E2E | `e2e-island.mjs` | LT-7 在「資料來源與授權」頁 1 次且在 LT-4 之後、在 HTML 開頭註解 1 次且在 LT-4 那一行之後；第一行 EnglishContext；無「保留所有權利」 |
+| TC-B03（第 13 輪） | （越界） | QA 檢視 | `boundary-r13.mjs` | §1.10 越界基準 |
+| TC-69-06h | AC-69-06、AC-62-07 | 人工 | — | 見 §6.10 |
+| TC-71-01h | AC-71-01 | 人工 | — | 見 §6.10 |
+| TC-72-03h | AC-72-03 (b) | 人工（人類） | — | 見 §6.10 |
+| TC-72-04h | AC-72-04 | 人工 | — | 見 §6.10 |
+| TC-X-island | （全套件） | 自動化 E2E | `e2e-island.mjs` | 無未處理例外 |
+
 ## 6. 人工驗收 TC
 
 第 3 輪更新：TC-M01～TC-M08 依 PRD v0.10 改寫步驟（點卡片取代輸入分數、移除解碼器與句型庫）；新增 TC-M09、TC-M10 與 V-MIC 的 TC-MIC-1～TC-MIC-5。
@@ -1329,6 +1440,17 @@ V-MIC-1（TC-MIC-1）在 v0.20 另確認第 2～5 次按下先「準備中」再
 | TC-VER-H2（部署後） | AC-42-02、AC-36-07 | 正式網址 | 檢視頁尾與原始碼 | 「版本 1.3.2（建置 xxxxxxx）」；`emt-build-id` 前 7 碼＝頁尾建置碼＝`sw.js` BUILD_ID 前 7 碼（CI 為 LF 建置，與本機 `981b0d2` 不同屬正常）；`about.html` 與首頁原始碼 description 不含「Part 5」 |
 
 TC-VER-H1、TC-VER-H3、TC-TRK-H1 版本改為 1.3.2；TC-58-14h、TC-59-08h 註明與 TC-62-12h 同一輪。
+
+### 6.10 第 13 輪人工驗收
+
+| TC | 對應 AC | 環境 | 步驟 | 預期與紀錄 |
+| :--- | :--- | :--- | :--- | :--- |
+| TC-69-06h | AC-69-06、AC-62-07（§10.15 Q25） | Windows NVDA 最新穩定版＋Chrome | 單字卡頁對今天未學過的字按麥克風、念出單字得到分數（使 X 增加） | 先由分數區播報評分結果，學完回饋（如「小船又前進了，再 N 個字靠岸」）以 polite 方式在其後播報；即時文字不播報；分數區與訊息區播報與 v1.3.2 相同。記錄 NVDA、Chrome 版本與實際播報順序 |
+| TC-71-01h | AC-71-01（Q25） | 同上 | 群島頁以瀏覽模式（方向鍵）與 Tab 走過；資料變化後回到群島頁再聽一次 | 地圖只播報 1 次「群島地圖：橘島掌握 …；今日小船 X / D 字，…」；內部島名、「測驗燈塔」等文字不另播報；Tab 不停在地圖與清單 |
+| TC-72-03h | AC-72-03 (b)（Q26） | 人類 | 檢視龜龜、各島、燈塔、小船與導覽圖示 | 不模仿任何既有遊戲的角色、美術或名稱。**JimmyLin 於 2026-11-12 在對話中確認通過**（主控轉達），記「人工：人類確認通過」 |
+| TC-72-04h | AC-72-04、AC-36-03、AC-36-04、E-185（Q28） | 正式網址；已安裝或已造訪 v1.3.2 的 PWA | 部署 1.4.0 後開啟已安裝的 App | 依 AC-36-03 出現「有新版本，請更新版本」；更新前舊頁面仍為舊外觀（E-185）；按「更新版本」後顯示群島頁、版本行「版本 1.4.0（建置 xxxxxxx）」、學習資料不變。本機模擬見 TC-72-04a |
+
+TC-M07（AC-22-01～AC-22-05 基準環境）範圍加入：切換到群島頁、單字卡翻面與四選一到回饋列出現、首次載入到「開始今日學習」可點擊（AC-70-03）。TC-VER-H1～H3 版本改為 1.4.0。
 
 ## 7. AC 對照（AC → TC）
 
@@ -1765,6 +1887,88 @@ TC-VER-H1、TC-VER-H3、TC-TRK-H1 版本改為 1.3.2；TC-58-14h、TC-59-08h 註
 | AC-62-11 | 通過 | TC-62-11 |
 | AC-62-12 | 待人工（TC-62-12h（真人語音，Chrome、Edge、正式網站）） | TC-62-12h |
 
+### 7.1 第 13 輪 AC 對照（本輪範圍）
+
+第 13 輪範圍 74 個 AC（新增 50、修改 12、FE-102～FE-117 covers 中其他既有 12）皆至少對應 1 個 TC（未涵蓋 0）；AC-38-06 記「不適用（v0.22 移除）」。判定欄為第 13 輪結果：通過 64、通過（另待人工確認）9、通過（(b) 人工：人類確認通過）1、失敗 0。本節之外的 §7 全表為第 12 輪產生（PRD v0.21），全套重新產生留待發版驗收。
+
+| AC | 判定 | 對應 TC |
+| :--- | :--- | :--- |
+| AC-63-01 | 通過 | TC-63-01、TC-20-03、TC-27-01 |
+| AC-63-02 | 通過 | TC-63-02、TC-32-01 |
+| AC-63-03 | 通過 | TC-63-03 |
+| AC-63-04 | 通過 | TC-63-04 |
+| AC-63-05 | 通過 | TC-63-05、TC-39-09 |
+| AC-64-01 | 通過 | TC-64-01 |
+| AC-64-02 | 通過 | TC-64-02 |
+| AC-64-03 | 通過 | TC-64-03、TC-71-01 |
+| AC-64-04 | 通過 | TC-64-04 |
+| AC-64-05 | 通過 | TC-64-05 |
+| AC-64-06 | 通過 | TC-64-06 |
+| AC-64-07 | 通過 | TC-64-07 |
+| AC-64-08 | 通過 | TC-64-08 |
+| AC-64-09 | 通過（另待人工確認） | TC-71-01b、TC-64-09p、TC-70-03e（參考）、TC-M07 |
+| AC-64-10 | 通過 | TC-64-10 |
+| AC-65-01 | 通過 | TC-65-01、TC-64-01、TC-64-02 |
+| AC-65-02 | 通過 | TC-65-01、TC-65-02n |
+| AC-65-03 | 通過 | TC-64-02、TC-71-01 |
+| AC-65-04 | 通過 | TC-65-04 |
+| AC-66-01 | 通過 | TC-66-01 |
+| AC-66-02 | 通過 | TC-66-02 |
+| AC-66-03 | 通過 | TC-66-03、TC-30-05 |
+| AC-66-04 | 通過 | TC-66-04、TC-39-04 |
+| AC-67-01 | 通過 | TC-67-01、TC-64-05、TC-64-06、TC-65-02n |
+| AC-67-02 | 通過 | TC-71-01、TC-71-01b |
+| AC-68-01 | 通過 | TC-68-01、TC-38-02、TC-34-04、TC-PS-02 |
+| AC-68-02 | 通過 | TC-68-02 |
+| AC-68-03 | 通過 | TC-68-03、TC-65-04、TC-67-01、TC-69-05、TC-71-04 |
+| AC-68-04 | 通過 | TC-68-04、TC-26-01、TC-40-01、TC-40-03、TC-41-01～TC-41-04、TC-45-04-*、TC-46-01-*、TC-48-01-*、TC-48-12-*、TC-57-01a～c |
+| AC-68-05 | 通過 | TC-68-05、TC-38-01 |
+| AC-68-06 | 通過 | TC-68-06 |
+| AC-69-01 | 通過 | TC-69-01、TC-69-05、TC-38-08 |
+| AC-69-02 | 通過 | TC-69-02 |
+| AC-69-03 | 通過 | TC-69-03 |
+| AC-69-04 | 通過 | TC-69-04 |
+| AC-69-05 | 通過（另待人工確認） | TC-69-05、TC-69-05p、TC-M07 |
+| AC-69-06 | 通過（另待人工確認） | TC-69-06、TC-69-05p、TC-69-06h |
+| AC-70-01 | 通過 | TC-70-01 |
+| AC-70-02 | 通過 | TC-70-02、TC-69-05、TC-31-03 |
+| AC-70-03 | 通過（另待人工確認） | TC-70-03a、TC-64-09p、TC-69-05p、TC-22-05a、TC-22-01、TC-M07 |
+| AC-71-01 | 通過（另待人工確認） | TC-71-01、TC-71-01b、TC-65-02n、TC-71-01h |
+| AC-71-02 | 通過 | TC-71-02、TC-64-10、TC-66-01、TC-69-05 |
+| AC-71-03 | 通過 | TC-71-03 |
+| AC-71-04 | 通過 | TC-71-04 |
+| AC-71-05 | 通過 | TC-71-05 |
+| AC-72-01 | 通過 | TC-72-01、TC-S01、TC-S02、TC-27-05 |
+| AC-72-02 | 通過 | TC-72-02、TC-69-06 |
+| AC-72-03 | 通過（(b) 人工：人類確認通過） | TC-72-03、TC-72-03h |
+| AC-72-04 | 通過（另待人工確認） | TC-72-04a、TC-72-04h |
+| AC-72-05 | 通過 | TC-72-05、TC-23-02、TC-S06、TC-23-08a／b／s |
+| AC-20-03（修改） | 通過 | TC-20-03、TC-63-01 |
+| AC-27-01（修改） | 通過 | TC-27-01 |
+| AC-30-01（修改） | 通過 | TC-30-01 |
+| AC-30-05（修改） | 通過 | TC-30-05、TC-66-03 |
+| AC-31-03（修改） | 通過 | TC-31-03、TC-70-02、TC-69-05 |
+| AC-32-01（修改） | 通過 | TC-32-01、TC-63-02 |
+| AC-38-06（移除） | 不適用（v0.22 移除） | TC-38-06 |
+| AC-38-08（修改） | 通過 | TC-38-08、TC-69-01 |
+| AC-39-01（修改） | 通過 | TC-39-01、TC-63-03、TC-63-04 |
+| AC-39-02（修改） | 通過 | TC-39-02、TC-66-01 |
+| AC-39-05（修改） | 通過 | TC-39-05、TC-67-01 |
+| AC-39-06（修改） | 通過 | TC-39-06 |
+| AC-42-02（修改） | 通過（另待人工確認） | TC-42-02、TC-VER-H2 |
+| AC-19-01 | 通過 | TC-S01、TC-S09、TC-72-01 |
+| AC-19-04 | 通過 | TC-S02、TC-72-01 |
+| AC-20-01 | 通過 | TC-20-01、TC-63-03、TC-63-04 |
+| AC-22-01 | 通過（另待人工確認） | TC-22-01、TC-22-01m（待人工）、TC-70-03a、TC-22-01f（參考）、TC-M07 |
+| AC-23-02 | 通過 | TC-23-02、TC-23-02b～d、TC-72-05 |
+| AC-23-06 | 通過 | TC-S06、TC-72-05 |
+| AC-23-08 | 通過 | TC-23-08a、TC-23-08b、TC-23-08s |
+| AC-27-05 | 通過 | TC-27-05、TC-72-01 |
+| AC-34-04 | 通過 | TC-34-04、TC-68-01 |
+| AC-36-07 | 通過（另待人工確認） | TC-36-07a、TC-PWA-H4 |
+| AC-38-02 | 通過 | TC-38-02、TC-68-01 |
+| AC-39-10 | 通過 | TC-39-10、TC-63-03、TC-63-04 |
+
 ## 8. 變更紀錄
 
 | 版本 | 日期 | 作者 | 說明 |
@@ -1782,3 +1986,4 @@ TC-VER-H1、TC-VER-H3、TC-TRK-H1 版本改為 1.3.2；TC-58-14h、TC-59-08h 註
 | 0.11 | 2026-11-05 | qa-agent | 第 10 輪（PRD v0.20，R-29；architecture §10.12 Q1～Q7）：新增 §1.7、§2.10（V-STT-STUB 兩種替身、`micOnStrict`、≤ 100 ms 量法、時間常數、鍵盤、AC-61 量法、AC-60-07 既有規則、舊資料相容、效能 A/B）、§4.7、§6.7（TC-58-14h、TC-59-08h、TC-58-01h）；§10.12 Q2、Q7 列出的 TC 期望改為 v0.20；§5、§7 依第 10 輪結果重新產生 |
 | 0.12 | 2026-11-06 | qa-agent | 第 11 輪（1.3.1 修正輪；architecture v0.16 §10.13 Q8～Q12）：新增 §1.8（範圍、對照組、以修改時間判定的越界基準）、§2.11（click 前登錄 rAF 的畫出量法、不用 Event Timing、`getUserMedia` 次數晚 1 個畫格、AudioContext 狀態、不用 `innerWidth − clientWidth`、以 `data-ad-env` 判斷環境、同一建置內比較）、§4.8、§6.8（TC-33-03h、TC-58-01h、傳統捲軸外觀）；§5、§7 依第 11 輪結果重新產生（655 個 TC） |
 | 0.13 | 2026-11-09 | qa-agent | 第 12 輪（PRD v0.21，R-30、R-31；architecture v0.17 §10.14 Q13～Q20）：新增 §1.9（範圍、受測物 BUILD_ID `981b0d2ab45de9d6`、git 越界基準）、§2.12（V-STT-STUB 暫時結果、`interimResults` 斷言、同一次畫面更新與逐畫格取樣、AC-62-05 雙頁對照、遲到事件、收音條等待、AC-62-09 版面、AC-62-10 file:// 與 Service Worker、V-LGL-02 v0.21）、§4.9（e2e-interim、diag-r12-meter、diag-r12-375、boundary-r12、qa-review-r12、run-r12）、§6.9（TC-62-12h、TC-62-07h、部署後 TC-VER-H2）；§3 記錄瀏覽器版本；§5、§7 依第 12 輪結果重新產生（686 個 TC；400 個應驗收 AC 未涵蓋 0） |
+| 0.14 | 2026-11-12 | qa-agent | 第 13 輪一般驗收（PRD v0.24 R-32；architecture v0.22 §10.15 Q21～Q28）：新增 §1.10（範圍 74 個 AC、受測物 BUILD_ID `7ce555b38d85b6c4`、v1.3.2 對照組、git 越界基準）、§2.13（測試資料構造、地圖與小船判定、三處一致、n = 0／Q = 0 無資料建置、動畫與版面位移、對比與過渡畫格、卡片與按鈕、與 v1.3.2 比對、回饋列、不寫入、效能兩法與操作節奏、TC-22-01m）、§4.10（e2e-island、diag-r13-perf、e2e-pwa-r13、boundary-r13、run-r13；12 個既有套件改為 v0.22 期望值）、§5.1（新增 58 個 TC）、§6.10（TC-69-06h、TC-71-01h、TC-72-03h、TC-72-04h）、§7.1（74 個 AC 對照與判定）；§3 記錄 Chrome 157.0.8103.50 |

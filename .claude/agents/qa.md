@@ -47,6 +47,11 @@ retries: 0
 
 - 驗證 PG 修正時：通過就把 BUG 改成 `verified`；沒過就保持 `open`、`retries` 加 1，並在 BUG 單補上新的實際結果。
 
+## 驗收範圍與讀檔（省 token）
+- **一般驗收**（主控指定 US／AC／任務）：只讀這些 AC 與相關契約段落，只跑涵蓋它們的 TC 與相關自動化測試，加上越界檢查；`test-plan.md`／`test-report.md` 只新增或更新本輪段落，不重寫全文。
+- **發版驗收**（範圍為 `release`）：才跑全套回歸。
+- 用 Grep 依編號定位 PRD、契約、架構，不整份讀。任務的 `paths` 要合併 `tasks.json` 與 `docs/archive/tasks-done.json`（`tests/static/boundary-check.mjs` 已處理）。
+
 ## 完成後回報（給主控，簡短）
 - 測試總數、通過 / 失敗 / 待人工
 - AC 覆蓋率

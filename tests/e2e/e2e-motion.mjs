@@ -272,9 +272,11 @@ const animOk = (r, correct, re) => {
     ok = ok && ansOk; out.push(`作答：四選一 ${q.after.map((x) => x.s).join(",")}（animation ${qa.name}）、模擬測驗 ${r5.after.map((x) => x.s).join(",")}（animation ${pa.name}）、震動仍呼叫 ${r5.vib} 次`);
     // 主控台環形圖
     await p.go("dashboard"); await sleep(50);
-    const ring = await p.ev(`[...document.querySelectorAll(".db-ring__bar")].map((b) => getComputedStyle(b).transitionDuration + "/" + getComputedStyle(b).animationName).join(",")`);
-    const ringOk = ring.split(",").every((x) => /^0s\//.test(x) && x.endsWith("none"));
-    ok = ok && ringOk; out.push(`環形圖 transition/animation ${ring}`);
+    // 第 13 輪（PRD v0.22 AC-31-03 修改、AC-70-02；architecture §10.15 Q21）：主環形圖改為今日進度條 .db-today__fill；另含島嶼清單進度條 .db-isle__fill 與地圖內動畫數
+    const ring = await p.ev(`[...document.querySelectorAll("#view-dashboard .db-today__fill, #view-dashboard .db-isle__fill")].map((b) => getComputedStyle(b).transitionDuration + "/" + getComputedStyle(b).animationName).join(",")`);
+    const mapAnims = await p.ev(`(() => { const m = document.querySelector("#view-dashboard .db-map"); return m ? document.getAnimations().filter((a) => a.effect && a.effect.target && m.contains(a.effect.target) && a.playState === "running").length : -1; })()`);
+    const ringOk = ring.split(",").length === 4 /* 今日 1＋開放島 3 */ && ring.split(",").every((x) => /^0s\//.test(x) && x.endsWith("none")) && mapAnims === 0;
+    ok = ok && ringOk; out.push(`今日進度條與島嶼清單進度條 transition/animation ${ring}；地圖內執行中動畫 ${mapAnims}`);
     return { ok: ok && mq, note: `prefers-reduced-motion=${mq}；` + out.join("；") + "（收音條與聆聽中見 TC-33-08、確認視窗見 TC-31-03d）" };
   });
   await p.close();

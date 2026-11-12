@@ -18,7 +18,7 @@ const TWO = [[375, 667], [1366, 768]];
 const CONTACT = "email: d o n c l y d e 0 7 2 2 @ g m a i l . c o m";
 const LINKS = ["關於我", "聯絡我們", "隱私權政策", "資料來源與授權"];
 const PAGES = { about: "關於我", contact: "聯絡我們", privacy: "隱私權政策" };
-const LABEL = { dashboard: "主控台", customizer: "難易度設定", flashcards: "單字卡", part5: "模擬測驗" };
+const LABEL = { dashboard: "群島" /* 第 13 輪：AC-63-01 */, customizer: "難易度設定", flashcards: "單字卡", part5: "模擬測驗" };
 const errs = (p) => p.log.exceptions.concat(p.log.console.filter((c) => c.type === "error").map((c) => c.text));
 const netReqs = (p) => p.log.requests.filter((r) => !/^(file|blob|data|about|chrome-extension):/.test(r.url));
 const lsRaw = (p) => p.ev(`localStorage.getItem(${J(KEY)})`);
@@ -46,7 +46,7 @@ const content = (p, id) => p.ev(`(() => { const v = document.getElementById("vie
     const out = []; let ok = true;
     for (const [w, h] of SIZES) { await p.viewport(w, h, w < 768); await sleep(70); const line = [];
       for (const tab of ["dashboard", "customizer", "flashcards", "part5", "about", "contact", "privacy", "sources"]) { await p.ev(`EMT.router.go(${J(tab)})`); await sleep(50); const f = await footerInfo(p); const c = await footerCover(p); const nav = await p.ev(`[...document.querySelectorAll("#app-nav [data-tab]")].map((b) => b.textContent.trim()).join("、")`);
-        const small = f.sizes.filter(([a, b]) => a < 44 || b < 44); const g = J(f.texts) === J(LINKS) && small.length === 0 && f.clipped === 0 && f.versionBelow && f.countAll.every((n) => n === 1) && c.length === 0 && !f.hs && nav === "主控台、難易度設定、單字卡、模擬測驗"; ok = ok && g; if (!g) line.push(`${tab}✗ ${J(f)} 遮 ${J(c)} 導覽 ${nav}`); }
+        const small = f.sizes.filter(([a, b]) => a < 44 || b < 44); const g = J(f.texts) === J(LINKS) && small.length === 0 && f.clipped === 0 && f.versionBelow && f.countAll.every((n) => n === 1) && c.length === 0 && !f.hs && nav === "群島、難易度設定、單字卡、模擬測驗" /* 第 13 輪 AC-20-03 v0.22 */; ok = ok && g; if (!g) line.push(`${tab}✗ ${J(f)} 遮 ${J(c)} 導覽 ${nav}`); }
       const f = await footerInfo(p); out.push(`${w}×${h}：${line.length ? line.join("｜") : "8 畫面全符合"}；連結尺寸 ${J(f.sizes)}`); }
     return { ok, note: out.join("；") };
   });
@@ -110,7 +110,7 @@ const content = (p, id) => p.ev(`(() => { const v = document.getElementById("vie
   });
   await R.check("TC-57-sources", "AC-57-04（#sources 入口）、AC-20-04、V-SITE-07", async () => {
     await p.goto(FILE_URL + "#sources"); await sleep(120); const a = await p.ev(`({ tab: EMT.router.current(), hash: location.hash, back: (document.querySelector("#view-sources .site-return") || {}).textContent })`); await p.ev(`EMT.router.back()`); await sleep(60); const b = await p.ev("EMT.router.current()"); await p.goto(FILE_URL + "#decoder"); await sleep(120); const c = await p.ev(`({ tab: EMT.router.current(), hash: location.hash })`); await p.goto(FILE_URL + "#about"); await sleep(120); const d = await p.ev(`({ tab: EMT.router.current(), hash: location.hash })`); await p.goto(FILE_URL); await sleep(100);
-    return { ok: a.tab === "sources" && a.hash === "" && a.back === "返回主控台" && b === "dashboard" && c.tab === "dashboard" && d.tab === "dashboard", note: `#sources → ${J(a)}、返回 ${b}；#decoder → ${J(c)}；#about（無效片段行為不變）→ ${J(d)}` };
+    return { ok: a.tab === "sources" && a.hash === "" && a.back === "返回群島" /* 第 13 輪：IA-1 */ && b === "dashboard" && c.tab === "dashboard" && d.tab === "dashboard", note: `#sources → ${J(a)}、返回 ${b}；#decoder → ${J(c)}；#about（無效片段行為不變）→ ${J(d)}` };
   });
   await R.check("TC-X-site-a", "Console 無未處理錯誤、無網路請求（file://）", async () => ({ ok: errs(p).length === 0 && netReqs(p).length === 0, note: `錯誤 ${J(errs(p)).slice(0, 300)}；非 file 請求 ${netReqs(p).length}` }));
   await p.close();

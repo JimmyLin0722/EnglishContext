@@ -1,36 +1,45 @@
 /*
- * views/dashboard.js — 學習主控台與備份匯出／匯入（FE-08；FE-31 今日學習進度；v0.12 FE-58 主控台改版）
- * 依據：architecture.md §4.2、§7.5、v0.4 §7.7、§7.11、§9；v0.8 §4.8「views/dashboard.js」、§7.19.4（DOM 樹與表格）、§7.19.10；
+ * views/dashboard.js — 群島頁（原主控台）與備份匯出／匯入（FE-08；FE-31 今日學習進度；v0.12 FE-58；v0.19 FE-108 群島頁改版）
+ * 依據：architecture.md §4.2、§7.5、v0.4 §7.7、§9；v0.8 §4.8「views/dashboard.js」、§7.19.10；
+ *       v0.20 §4.16「views/dashboard.js」、§7.32.2～§7.32.6、§7.32.8、§7.32.10、§7.32.11、§7.32.13；
+ *       v0.21 §7.32.15 效能修正 P-1～P-3（FE-116）；
  *       契約 GoalState、StreakState、Part5Progress、BackupFile、ImportResult、COLOR_LEVELS、TodayLearnedState、LearnedHistory、
- *       DASHBOARD_CHART_DAYS、RuntimeState.dashboard、LAYOUT_TEXTS 主控台段；
- *       README §5.4 LR-6 與 v0.12 段、§6.1、§6.2（IM-1～IM-5）、§10.8 IN-1（v0.12）、§10.9 NT-1、§11.4 DB-1～DB-6、C-7
- * 涵蓋：US-17、US-24、US-30、US-39；AC-39-01～AC-39-10、AC-17-01、AC-17-06、AC-24-01、AC-24-03～AC-24-12、
- *       AC-30-01、AC-30-05、AC-30-07、AC-30-08、AC-30-10、AC-30-12、AC-31-03、AC-34-07、AC-34-08、AC-38-*
+ *       DASHBOARD_CHART_DAYS、RuntimeState.dashboard、LAYOUT_TEXTS 群島頁段、§19 ISLAND_TEXTS；
+ *       README §5.4 LR-6 與 v0.12 段、§6.1、§6.2（IM-1～IM-5）、§10.8 IN-1（v0.12）、§10.9 NT-1、§11.4 DB-1～DB-6、
+ *       §15.1 IS-1～IS-3、§15.4 IS-14～IS-16、§15.6 IA-1、IA-2、IA-5、IA-6、C-7
+ * 涵蓋：US-17、US-24、US-30、US-39、US-63～US-67、US-70、US-71；AC-39-01～AC-39-10、AC-17-01、AC-17-06、AC-24-01、
+ *       AC-24-03～AC-24-12、AC-30-01、AC-30-05、AC-30-07、AC-30-08、AC-30-10、AC-30-12、AC-31-03、AC-34-07、AC-34-08、
+ *       AC-38-*、AC-63-01～AC-63-05、AC-64-01、AC-64-09、AC-64-10、AC-65-01～AC-65-04、AC-66-01～AC-66-04、
+ *       AC-67-01、AC-67-02、AC-70-01、AC-70-02、AC-71-02、AC-71-03、AC-72-02
  *
- * 畫面（v0.12，DOM 順序 = 畫面順序 = Tab 順序；DB-1）：
- * - h2「學習主控台」
- * - (1) 今日任務卡 section.card.db-today：h3「今日任務」→ 列（主環形圖 88px：中央只顯示 X，SD-FB-40；
- *   右側「今日已學 X / D 字」、「今日目標達成」、button「開始今日學習」[data-go=flashcards]）→ 目標行
- *   （色點 + layout.goalLineText + button.btn.db-change「變更」[data-go=customizer]；v0.14 起只依生效色級，DB-4）
- * - （v0.9，FE-66；契約 v0.14 DB-4、AC-39-04、Q-61）目標行一律以生效色級組字（藍、金套用時為「綠級・每日 15 字」），
- *   不再顯示目標與生效兩個色級的對照註記與「・」分隔；色點亦依生效色級；「變更」改為外框按鈕（10-dashboard.css）。
- * - (2) 3 格數據 section.card.db-stats（aria-label「學習數據」）：連續打卡天數（強調橘圖示 + 數字 + 天）→
- *   單字掌握率（大字 % + 小字「已掌握 N 字」）→ 模擬測驗已答對行（v0.19）；無資料「—」（DB-5）
- * - (3) 近 7 天圖表 section.card.db-chart：ol.db-bars（7 根）或空狀態「開始學習後會顯示紀錄」（layout.chartIsEmpty）
- * - (4) 「資料備份」收合區塊 section.card.db-backup：標題列 toggle（aria-expanded = runtime.dashboard.backupExpanded）→
- *   展開區：備份說明 → 「匯出備份」「匯入備份」→ NT-1 → 「安裝 App」（IN-1）→ 隱藏 file input（DB-6）
- * - 移除：功能入口（ENTRIES）、學習統計、目前目標、2 個小環形圖、「今日學習進度」標題；本體不再有 data-go="sources"
+ * 畫面（v0.19 FE-108，DOM 順序 = 畫面順序 = Tab 順序；DB-1、§7.32.2）：
+ * - 標題列 div.db-head：h2「我的群島」（左側 islandArt.titleDeco，aria-hidden）＋ 目標標籤 p.db-goal
+ *   （膠囊 span.db-goal__tag：色點 + layout.goalLineText；button.btn.db-change「變更」[data-go=customizer]；只依生效色級，DB-4）
+ * - (1) 今日任務卡 section.card.db-today：h3.visually-hidden「今日任務」（SD-FB-107）→ 龜龜 + 「島主 龜龜」+ 對話框（IS-14）
+ *   → 今日進度列「今日已學 X / D 字」+ 橫向 progressbar（IS-15）+「今日目標達成」→ button「開始今日學習」[data-go=flashcards]
+ * - (2) 地圖 div.card.db-map：內含 islandMap.build 的 div[role=img]；islandMap.signature 相同就沿用同一節點，
+ *   show() 只以 setPlay 同步動畫 class（重播靠頁面 hidden 切換，§7.32.8「重播」；FE-116 P-1）
+ * - (3) 島嶼清單 section.db-isles：h3「島嶼」+ 5 列（island.listRowOf × 3、fogRowOf × 2；IA-2）
+ * - (4) 3 格數據 section.db-stats（aria-label「學習數據」）：連續打卡天數 + 天氣行 → 單字掌握率 + 「已掌握 N 字」
+ *   → 模擬測驗已答對行 + 燈塔行（DB-5）；每格為區塊卡片樣式
+ * - (5) 近 7 天圖表 section.card.db-chart；(6) 「資料備份」收合區塊 section.card.db-backup（DB-6，既有）
+ * - 移除：主環形圖（含幾何與樣式）、未使用的頁面標題文字常數；本體不再有 data-go="sources"
+ * - 單一來源（IS-3）：對話框、今日進度列、地圖、清單、3 格狀態行、地圖 aria-label 全部取自同一次 dashboardModel 的 island。
+ * - 島嶼狀態每次繪製即時推算，不寫入任何儲存（IS-1、IS-2）；地圖與清單無事件、無 tabindex（AC-64-10）。
  * - 「開始今日學習」「變更」只以 [data-go] 交給 router（view 不呼叫 setTab 或任何寫入 action）；
  *   toggle 只呼叫 store.actions.setBackupExpanded（不寫 localStorage）；訂閱 "dashboard" tag 時只更新 aria-expanded、
  *   展開區 hidden 與安裝區，節點不重建（焦點留在 toggle）
- * 所有文字以 textContent 呈現（經 core/dom.js）；版面文字於呼叫時取 EMT.core.layout（LD-2）。
+ * 所有文字以 textContent／setAttribute 呈現（經 core/dom.js；IA-6）；版面文字於呼叫時取 EMT.core.layout（LD-2）。
  *
  * （v0.19，FE-84；architecture.md v0.14 §7.25.1、§7.25.2；契約 README §13.1 AS-1、AS-3、AS-4、AS-7、§11.4 DB-5、DS-51；
- *   AC-49-01、AC-49-02、AC-49-04、AC-49-08）第 3 格改為標籤「模擬測驗」與已答對行（K、Q、P 由 part5flow.answeredSummary 計算，
+ *   AC-49-01、AC-49-02、AC-49-04、AC-49-08）第 3 格為標籤「模擬測驗」與已答對行（K、Q、P 由 part5flow.answeredSummary 計算，
  *   與模擬測驗頁同一份題庫與同一個函式）；Q = 0 顯示 statNoData。totalAnswered、totalCorrect 照常保存但不再顯示。
  *
- * 寫法：純邏輯（dashboardModel、goalInfoOf、importMessage、progressModel、ringGeometry）以 module.exports 匯出供 Node 測試；
- * 瀏覽器下登錄 EMT.views "dashboard"，載入時不操作 DOM。
+ * - （FE-116，§7.32.15）清單 5 列內容鍵相同不重建（P-2）；頁面隱藏期間的 PROGRESS_TAGS 通知不同步繪製，
+ *   改以閒置排程預先重算、重建（P-3；idleScheduler）；show() 一律以當下狀態重算（AC-64-09）。
+ *
+ * 寫法：純邏輯（dashboardModel、goalInfoOf、importMessage、progressModel、contentSnapshot、idleScheduler）以 module.exports
+ * 匯出供 Node 測試；瀏覽器下登錄 EMT.views "dashboard"，載入時不操作 DOM。
  */
 (function (root, factory) {
   var api = factory(root);
@@ -56,13 +65,26 @@
         STREAK: require("../core/streak.js"),
         LEARN: require("../core/learning.js"),
         LAY: require("../core/layout.js"),
-        PF: require("../core/part5flow.js")
+        PF: require("../core/part5flow.js"),
+        ISL: require("../core/island.js")
       };
     } else {
       var c = root.EMT.core;
-      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, LEARN: c.learning, LAY: c.layout, PF: c.part5flow };
+      coreCache = { C: c.constants, GOAL: c.goal, STREAK: c.streak, LEARN: c.learning, LAY: c.layout, PF: c.part5flow,
+        ISL: c.island };
+    }
+    if (!coreCache.ISL) {
+      coreCache = null;
+      throw new Error("EMT.core.island 未載入（views/dashboard.js）");
     }
     return coreCache;
+  }
+
+  /** （v0.19，FE-108）取得 ui 模組 islandMap／islandArt（瀏覽器下呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
+  function uiModule(name) {
+    var m = root && root.EMT && root.EMT.ui ? root.EMT.ui[name] : null;
+    if (!m) throw new Error("EMT.ui." + name + " 未載入（views/dashboard.js）");
+    return m;
   }
 
   /** （v0.11，FE-51）取得 core/pwa（呼叫時取用，LD-2）；不存在時視為組裝錯誤（LD-3） */
@@ -89,10 +111,9 @@
     return false;
   }
 
-  // ── 畫面文字（AC 引號內文案逐字使用；v0.12 主控台版面文字取 EMT.core.layout.LAYOUT_TEXTS）──
+  // ── 畫面文字（AC 引號內文案逐字使用；v0.12 起群島頁版面文字取 EMT.core.layout.LAYOUT_TEXTS）──
   var TEXT = {
-    title: "學習主控台",
-    // （v0.12，SD-FB-41）今日任務卡標題、3 格數據區的 aria-label、近 7 天圖表標題
+    // （v0.12，SD-FB-41）今日任務卡標題（v0.19 起只給螢幕閱讀器，SD-FB-107）、3 格數據區的 aria-label、近 7 天圖表標題
     todayTitle: "今日任務",
     statsLabel: "學習數據",
     chartTitle: "近 7 天已學字數",
@@ -116,14 +137,7 @@
     empty: "—"
   };
 
-  /**
-   * 環形圖幾何（SVG viewBox 0 0 120 120；半徑 52、線寬 12；CSS 縮為 88px）。
-   * 以周長作為 stroke-dasharray，stroke-dashoffset = 周長 × (1 − 比例) 表示填滿比例。
-   */
-  var RING = Object.freeze({ size: 120, r: 52, stroke: 12 });
-  var RING_CIRC = 2 * Math.PI * RING.r;
-
-  /** 會影響今日任務卡、3 格數據、近 7 天圖表的 store tag（AC-30-07 (b)：show() 時另外重繪；v0.12 加 "dashboard"） */
+  /** 會影響今日任務卡、地圖、島嶼清單、3 格數據、近 7 天圖表的 store tag（AC-30-07 (b)：show() 時另外重繪；v0.12 加 "dashboard"） */
   var PROGRESS_TAGS = ["init", "learning", "goal", "studySet", "customVocab", "part5", "flashcard", "stats", "streak",
     "storage", "dashboard"];
 
@@ -214,18 +228,33 @@
     return typeof p === "number" && isFinite(p) ? p + "%" : TEXT.empty;
   }
 
+  /** 0～1 比例 → 百分比數值（小數 1 位，供 style.width；異常值 → 0） */
+  function ratioPct(ratio) {
+    return Math.round(clampRatio(ratio) * 1000) / 10;
+  }
+
   /**
-   * 環形圖的 stroke-dasharray／stroke-dashoffset（AC-30-05、AC-30-10）。
-   * @param {number} ratio 0～1（超出夾住；異常值視為 0，即空環）
-   * @returns {{ dasharray: string, dashoffset: string }}
+   * （v0.19，FE-108）島嶼推算用的內容快照 { builtin, builtinMap, nB, nG }（§4.16）。
+   * content 省略（undefined／null）時取 EMT.content；都沒有或欄位缺漏 → 空字庫（三島 n = 0、P 為 null），不拋例外（C-6）。
+   * 只讀不寫；回傳值不保存（IS-1）。
+   * @param {*} [content]
+   * @returns {{ builtin: Array, builtinMap: (Map|null), nB: number, nG: number }}
    */
-  function ringGeometry(ratio) {
-    var r = clampRatio(ratio);
-    // 取到小數 3 位，避免屬性值出現過長浮點數
-    return {
-      dasharray: RING_CIRC.toFixed(3),
-      dashoffset: (RING_CIRC * (1 - r)).toFixed(3)
-    };
+  function contentSnapshot(content) {
+    var out = { builtin: [], builtinMap: null, nB: 0, nG: 0 };
+    var c = content;
+    try {
+      if (c === undefined || c === null) c = root && root.EMT ? root.EMT.content : null;
+      if (!c || typeof c !== "object") return out;
+      if (Array.isArray(c.builtin)) out.builtin = c.builtin;
+      if (c.builtinMap && typeof c.builtinMap.get === "function") out.builtinMap = c.builtinMap;
+      if (typeof c.nB === "number" && isFinite(c.nB)) out.nB = c.nB;
+      if (typeof c.nG === "number" && isFinite(c.nG)) out.nG = c.nG;
+    } catch (e) {
+      // getter 例外：視為內容缺漏
+      return { builtin: [], builtinMap: null, nB: 0, nG: 0 };
+    }
+    return out;
   }
 
   /** （v0.19，FE-84）模擬測驗題庫：與 views/part5.js 相同的取得方式（AS-1）；取不到 → 空題庫 */
@@ -236,7 +265,7 @@
 
   /**
    * 今日進度、掌握率、已答對行與近 7 天長條的計算值（FE-31；契約 README §5.4 LR-6）。dashboardModel 由此組出畫面文字。
-   * - 主環：X = learning.todayCount、D = learning.dailyGoal(生效色級)；X 可超過 D；X ≥ D → done、滿圈。
+   * - 今日進度：X = learning.todayCount、D = learning.dailyGoal(生效色級)；X 可超過 D；X ≥ D → done、進度條填滿。
    * - 掌握率 = learning.masteryRate(runtime.studySet, data.masteredWordKeys)；
    *   已答對行 = part5flow.answeredSummary(題庫 id, part5CorrectIds)（AS-1～AS-4）；Q = 0 → statNoData「—」。
    * - 長條：learning.chartSeries(learnedHistory, X, today)，由舊到新 7 筆；高度 = 字數 ÷ 最大字數（全 0 → 0）。
@@ -245,7 +274,7 @@
    * @param {string} today 本地日期 YYYY-MM-DD（store.today()）
    * @param {*} [bank] 模擬測驗題庫；省略時取 EMT.content.part5
    * @returns {{
-   *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
+   *   today: { x: number, d: number, done: boolean, ratio: number, valueNow: number, fillPct: number, text: string, doneText: string },
    *   mastery: { label: string, numer: number, denom: number, percent: (number|null), ratio: number, text: string },
    *   answered: { label: string, summary: ({k: number, q: number, p: number}|null), text: string },
    *   bars: { date: string, label: string, count: number, heightPct: number, isToday: boolean }[],
@@ -260,21 +289,23 @@
     var d = st.data && typeof st.data === "object" ? st.data : {};
     var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
 
-    // 主環形圖（AC-30-01、AC-30-02、AC-30-05、AC-30-07）
+    // 今日進度列（AC-30-01、AC-30-02、AC-30-05、AC-30-07；v0.19 IS-15 橫向進度條）
     var x = L.todayCount(d.todayLearned || null, today);
     // 生效色級與「每日新字量」同一推導（goalInfoOf；R-14：依生效色級）
     var effectiveId = goalInfoOf(d.goal || null).effectiveColorId;
     var goal = L.dailyGoal(effectiveId);
     var done = x >= goal;
+    var ratio = done ? 1 : clampRatio(x / goal);
     var todayModel = {
       x: x,
       d: goal,
       done: done,
-      ratio: done ? 1 : clampRatio(x / goal),
-      // 「今日已學 X / D 字」（LAYOUT_TEXTS.todayRing；AC-39-02）
+      ratio: ratio,
+      // progressbar 的 aria-valuenow = min(X, D)；填滿寬度（%）= r × 100（IS-15）
+      valueNow: Math.min(x, goal),
+      fillPct: ratioPct(ratio),
+      // 「今日已學 X / D 字」（LAYOUT_TEXTS.todayRing；AC-39-02）；畫面只出現 1 次，進度條以 aria-valuetext 重述（AC-39-06）
       text: K.LAY.fill(LT.todayRing, { x: K.LAY.formatInt(x), d: K.LAY.formatInt(goal) }),
-      // （v0.12，SD-FB-40）環形圖中央只顯示 X，「X / D」在畫面只出現 1 次（AC-39-06）
-      centerText: K.LAY.formatInt(x),
       doneText: done ? TEXT.goalDone : ""
     };
 
@@ -322,22 +353,55 @@
   }
 
   /**
-   * （v0.12，FE-58）主控台全部顯示值（architecture.md §4.8；契約 DB-2～DB-6）。文字全部經 EMT.core.layout。
+   * （v0.19，FE-108）島嶼清單 5 列（IA-2；順序 island.LIST_ORDER）：開放島 listRowOf、霧中島 fogRowOf。
+   * 每列多帶 id（島嶼代碼）與 fillPct（進度條填滿 %；P 為 null 或霧中島 → 0）。
+   * @param {object} ISL core/island.js
+   * @param {object} st IslandState
+   * @returns {object[]}
+   */
+  function islesOf(ISL, st) {
+    var open = {};
+    (st && Array.isArray(st.islands) ? st.islands : []).forEach(function (pr) {
+      if (pr && typeof pr.island === "string") open[pr.island] = pr;
+    });
+    return ISL.LIST_ORDER.map(function (id) {
+      var row = open[id] ? ISL.listRowOf(open[id]) : ISL.fogRowOf(id);
+      return {
+        id: id,
+        name: row.name,
+        sub: row.sub,
+        right: row.right,
+        stageText: row.stageText,
+        valueNow: row.valueNow,
+        label: row.label,
+        fog: row.fog,
+        fillPct: typeof row.valueNow === "number" ? row.valueNow : 0
+      };
+    });
+  }
+
+  /**
+   * （v0.12，FE-58；v0.19 FE-108）群島頁全部顯示值（architecture.md §4.8、§4.16、§7.32.1；契約 DB-2～DB-6、IS-3）。
+   * 文字全部經 EMT.core.layout 與 EMT.core.island。島嶼值每次呼叫即時推算，不寫入任何儲存（IS-1）。
    * @param {{data: object, runtime: object}|null} state store.getState() 的結果
    * @param {string} today 本地日期 YYYY-MM-DD
    * @param {*} [bank] 模擬測驗題庫；省略時取 EMT.content.part5
+   * @param {*} [content] 內容快照 { builtin, builtinMap, nB, nG }；省略時取 EMT.content（都沒有 → 三島 n = 0、P null）
    * @returns {{
-   *   today: { x: number, d: number, done: boolean, ratio: number, text: string, centerText: string, doneText: string },
+   *   today: { x: number, d: number, done: boolean, ratio: number, valueNow: number, fillPct: number, text: string, doneText: string },
    *   goal: { text: string, colorId: (string|null) },
-   *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, answeredText: string },
+   *   stats: { streakValue: string, streakUnit: string, masteryText: string, masteredText: string, answeredText: string,
+   *            weatherText: string, lighthouseText: string },
    *   chart: { empty: boolean, bars: object[] },
-   *   backupExpanded: boolean
+   *   backupExpanded: boolean,
+   *   island: object, dialog: string, isles: object[], mapAlt: string
    * }}
    */
-  function dashboardModel(state, today, bank) {
+  function dashboardModel(state, today, bank, content) {
     var K = core();
     var LAY = K.LAY;
     var LT = LAY.LAYOUT_TEXTS;
+    var ISL = K.ISL;
     var st = state && typeof state === "object" ? state : {};
     var d = st.data && typeof st.data === "object" ? st.data : {};
     var rt = st.runtime && typeof st.runtime === "object" ? st.runtime : {};
@@ -350,6 +414,23 @@
     var streakDays = K.STREAK.displayDays(d.streak || null, today);
     var masteredN = Array.isArray(d.masteredWordKeys) ? d.masteredWordKeys.length : 0;
 
+    // 島嶼（IS-3 單一來源）：S、K、Q、X、D 與 3 格、今日進度列同一組值；Q = 0 時 K = 0
+    var ct = contentSnapshot(content);
+    var sum = p.answered.summary;
+    var island = ISL.state({
+      builtin: ct.builtin,
+      builtinMap: ct.builtinMap,
+      nB: ct.nB,
+      nG: ct.nG,
+      masteredWordKeys: d.masteredWordKeys,
+      effectiveColor: info.effectiveColorId,
+      streakDays: streakDays,
+      k: sum ? sum.k : 0,
+      q: sum ? sum.q : 0,
+      x: p.today.x,
+      d: p.today.d
+    });
+
     return {
       today: p.today,
       goal: { text: LAY.goalLineText(K.GOAL.levelOf(info.effectiveColorId)), colorId: info.effectiveColorId },
@@ -358,13 +439,20 @@
         streakUnit: LT.statStreakUnit,
         masteryText: p.mastery.text,
         masteredText: LAY.fill(LT.statMasteredCount, { n: LAY.formatInt(masteredN) }),
-        answeredText: p.answered.text
+        answeredText: p.answered.text,
+        // 第 1 格天氣行（IS-11）、第 3 格燈塔行（IS-12）
+        weatherText: ISL.weatherText(island.weather),
+        lighthouseText: ISL.lighthouseText(island.lighthouse)
       },
       chart: {
         empty: LAY.chartIsEmpty(p.bars.map(function (b) { return b.count; })),
         bars: p.bars
       },
-      backupExpanded: !!(rt.dashboard && rt.dashboard.backupExpanded === true)
+      backupExpanded: !!(rt.dashboard && rt.dashboard.backupExpanded === true),
+      island: island,
+      dialog: ISL.dialogText(island),
+      isles: islesOf(ISL, island),
+      mapAlt: ISL.mapAltText(island)
     };
   }
 
@@ -377,17 +465,73 @@
     return false;
   }
 
+  /** （FE-116，§7.32.15）閒置排程：requestIdleCallback 的 timeout 與 setTimeout 後備的延遲（毫秒） */
+  var IDLE_TIMEOUT_MS = 500;
+  var IDLE_FALLBACK_MS = 100;
+
+  /**
+   * （FE-116，§7.32.15 P-3）依 host 上可用的 API 建立閒置排程器：
+   * - 有 requestIdleCallback → request(fn) = requestIdleCallback(fn, { timeout: 500 })，cancel 用 cancelIdleCallback
+   * - 否則有 setTimeout → request(fn) = setTimeout(fn, 100)，cancel 用 clearTimeout
+   * - 兩者皆無 → request 回 null、不執行 fn
+   * cancel(null／undefined) 不做事。API 以 host 為 this 呼叫；不產生、不控制任何動畫格。
+   * @param {*} host 通常為 window／self
+   * @returns {{ request: function(Function): *, cancel: function(*): void }}
+   */
+  function idleScheduler(host) {
+    var h = host && (typeof host === "object" || typeof host === "function") ? host : null;
+    if (h && typeof h.requestIdleCallback === "function") {
+      return {
+        request: function (fn) { return h.requestIdleCallback(fn, { timeout: IDLE_TIMEOUT_MS }); },
+        cancel: function (handle) {
+          if (handle === null || handle === undefined) return;
+          if (typeof h.cancelIdleCallback === "function") h.cancelIdleCallback(handle);
+        }
+      };
+    }
+    if (h && typeof h.setTimeout === "function") {
+      return {
+        request: function (fn) { return h.setTimeout(fn, IDLE_FALLBACK_MS); },
+        cancel: function (handle) {
+          if (handle === null || handle === undefined) return;
+          if (typeof h.clearTimeout === "function") h.clearTimeout(handle);
+        }
+      };
+    }
+    return {
+      request: function () { return null; },
+      cancel: function () {}
+    };
+  }
+
   // ── 畫面 ──
 
   /**
-   * 建立主控台頁面模組（瀏覽器用）。
+   * 建立群島頁頁面模組（瀏覽器用）。
+   * @param {{ idle?: { request: function(Function): *, cancel: function(*): void } }} [opts]
+   *   idle：（FE-116）閒置排程器替身（單元測試注入）；省略時用 idleScheduler(root)
    * @returns {{ mount: function(Element): void, show: function(): void, hide: function(): void }}
    */
-  function createView() {
+  function createView(opts) {
     var EMT = root.EMT;
     var refs = null;     // 需要更新的節點
     var busy = false;    // 匯入或匯出進行中
     var unsubscribe = null;
+    var visible = false; // 群島頁是否正在顯示（show 後為 true、hide 後為 false）
+    // （FE-116，§7.32.15）以下狀態只在本模組，不進 store、不持久化
+    var mapFig = null;   // 目前的地圖節點（islandMap.build 回傳的 div.db-map__figure）
+    var mapSig = null;   // 目前地圖節點的簽章（islandMap.signature）
+    var mapAlt = null;   // 目前地圖節點的 aria-label
+    var islesKey = null; // 目前清單 5 列的內容鍵（JSON.stringify(m.isles)）
+    var dirty = false;   // 隱藏期間收到 PROGRESS_TAGS 後為 true；prepare 或 show 繪製完成後為 false
+    var idle = null;     // 待執行的閒置排程 { api, handle, done }；無則 null
+    var idleApiCache = opts && opts.idle && typeof opts.idle.request === "function" ? opts.idle : null;
+
+    /** 閒置排程器（opts.idle 優先；否則依 root 建立，呼叫時才取用） */
+    function idleApi() {
+      if (!idleApiCache) idleApiCache = idleScheduler(root);
+      return idleApiCache;
+    }
 
     function dom() { return EMT.core.dom; }
 
@@ -427,41 +571,16 @@
     }
 
     /**
-     * 建立 SVG 主環形圖（底圈 + 進度圈）。進度圈初始為空環。
-     * @returns {{ svg: SVGElement, bar: SVGElement }}
+     * （v0.19，FE-108）減少動態是否成立（EMT.ui.motion.reduced；模組不存在時視為成立，不播放地圖動畫）。
+     * @returns {boolean}
      */
-    function ringSvg() {
-      var D = dom();
-      var c = String(RING.size / 2);
-      var g = ringGeometry(0);
-      /** 圓的共用屬性 + 額外屬性 */
-      function circleAttrs(extra) {
-        var out = { cx: c, cy: c, r: String(RING.r), fill: "none", "stroke-width": String(RING.stroke) };
-        Object.keys(extra).forEach(function (k) { out[k] = extra[k]; });
-        return out;
-      }
-      var track = D.svg("circle", circleAttrs({ "class": "db-ring__track" }));
-      // 由 12 點鐘方向順時針填滿
-      var bar = D.svg("circle", circleAttrs({
-        "class": "db-ring__bar",
-        "stroke-dasharray": g.dasharray,
-        "stroke-dashoffset": g.dashoffset,
-        transform: "rotate(-90 " + c + " " + c + ")"
-      }));
-      var node = D.svg("svg", {
-        "class": "db-ring",
-        viewBox: "0 0 " + RING.size + " " + RING.size,
-        "aria-hidden": "true",
-        focusable: "false"
-      }, [track, bar]);
-      return { svg: node, bar: bar };
-    }
-
-    /** 設定進度圈比例；值未改變時不動屬性（transition 只在數值改變時播放，§7.11） */
-    function setRing(bar, ratio) {
-      var g = ringGeometry(ratio);
-      if (bar.getAttribute("stroke-dashoffset") !== g.dashoffset) {
-        bar.setAttribute("stroke-dashoffset", g.dashoffset);
+    function motionReduced() {
+      var mo = EMT.ui && EMT.ui.motion;
+      if (!mo || typeof mo.reduced !== "function") return true;
+      try {
+        return mo.reduced() === true;
+      } catch (e) {
+        return true;
       }
     }
 
@@ -481,29 +600,102 @@
       ]);
     }
 
-    /** 依 dashboardModel 更新今日任務卡、3 格數據、近 7 天圖表（只改屬性與 textContent，不重建節點） */
-    function renderProgress() {
+    /**
+     * 島嶼清單一列（IA-2、§7.32.5）：色點、島名＋副標、靠右文字、進度條、階段文字。
+     * 開放島進度條為 progressbar（P 為 null 時省略 aria-valuenow、填滿 0）；霧中島進度條 aria-hidden、無子元素、無 aria-label。
+     * 無事件、無 tabindex（AC-64-10）；文字以 textContent、屬性以 setAttribute 寫入（IA-6）。
+     * @param {object} row dashboardModel().isles 的一列
+     * @returns {HTMLLIElement}
+     */
+    function isleRow(row) {
+      var D = dom();
+      var bar;
+      if (row.fog) {
+        bar = D.el("div", { className: "db-isle__bar", attrs: { "aria-hidden": "true" } });
+      } else {
+        var attrs = { role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "100" };
+        if (typeof row.valueNow === "number") attrs["aria-valuenow"] = String(row.valueNow);
+        if (row.label !== null && row.label !== undefined) attrs["aria-label"] = row.label;
+        var fill = D.el("span", { className: "db-isle__fill" });
+        fill.style.width = row.fillPct + "%";
+        bar = D.el("div", { className: "db-isle__bar", attrs: attrs }, [fill]);
+      }
+      return D.el("li", { className: "db-isle db-isle--" + row.id + (row.fog ? " is-fog" : " is-open") }, [
+        D.el("span", { className: "db-isle__dot", attrs: { "aria-hidden": "true" } }),
+        D.el("p", { className: "db-isle__title" }, [
+          D.el("span", { className: "db-isle__name", text: row.name }),
+          D.el("span", { className: "db-isle__sub", text: row.sub })
+        ]),
+        D.el("p", { className: "db-isle__right", text: row.right }),
+        bar,
+        D.el("p", { className: "db-isle__stage", text: row.stageText })
+      ]);
+    }
+
+    /**
+     * 依 dashboardModel 更新群島頁（IS-3：全部取自同一次推算；§7.32.15 流程）。
+     * - 今日任務卡、目標標籤、3 格數據、近 7 天：只改屬性與 textContent，不重建節點
+     * - 島嶼清單：內容鍵與目前相同就不重建（P-2）；不同才重建 5 列（無可聚焦元素，不影響焦點）
+     * - 地圖：無節點、簽章不同、或 show 時 replay → 以 build 換上，play = (show 或 prepare) 且非減少動態，
+     *   mount 與 live 一律不播放（AC-70-01、AC-70-02）；否則沿用同一節點（P-1）：show 時 setPlay 同步動畫 class，
+     *   文字替代不同才改 aria-label
+     * @param {"mount"|"show"|"live"|"prepare"} mode
+     * @param {boolean} [replay] mode 為 show 時：true 表示 show() 未經 hide()，一律重建並播放（§7.32.8 保底）
+     */
+    function renderProgress(mode, replay) {
       if (!refs) return;
       var D = dom();
       var m = dashboardModel(currentState(), progressToday());
 
-      // 今日任務卡（AC-30-05：達成 → 滿圈金色 + 「今日目標達成」）
-      setRing(refs.ring.bar, m.today.ratio);
-      refs.ring.svg.classList.toggle("db-ring--done", m.today.done);
-      D.setText(refs.center, m.today.centerText);
+      // 今日任務卡（IS-14、IS-15；AC-30-05：達成 → 填滿金色 + 「今日目標達成」）
+      D.setText(refs.dialog, m.dialog);
       D.setText(refs.todayText, m.today.text);
+      refs.todayBar.setAttribute("aria-valuemax", String(m.today.d));
+      refs.todayBar.setAttribute("aria-valuenow", String(m.today.valueNow));
+      refs.todayBar.setAttribute("aria-valuetext", m.today.text);
+      refs.todayFill.style.width = m.today.fillPct + "%";
+      refs.todayFill.classList.toggle("db-today__fill--done", m.today.done);
       D.setText(refs.doneText, m.today.doneText);
       refs.doneText.hidden = !m.today.done;
 
-      // 目標行（DB-4 v0.14：文字與色點皆為生效色級）
+      // 目標標籤（DB-4 v0.14：文字與色點皆為生效色級）
       D.setText(refs.goalText, m.goal.text);
       refs.goalLine.setAttribute("data-color", m.goal.colorId || "");
 
-      // 3 格數據（DB-5）
+      // 地圖（§7.32.4、§7.32.8、§7.32.15 P-1）
+      var IM = uiModule("islandMap");
+      var sig = IM.signature(m.island);
+      if (!mapFig || sig !== mapSig || (mode === "show" && replay === true)) {
+        var play = (mode === "show" || mode === "prepare") && !motionReduced();
+        var fig = IM.build(m.island, { play: play });
+        D.clear(refs.mapBox);
+        refs.mapBox.appendChild(fig);
+        mapFig = fig;
+        mapSig = sig;
+        mapAlt = m.mapAlt;
+      } else {
+        if (mode === "show") IM.setPlay(mapFig, !motionReduced());
+        if (m.mapAlt !== mapAlt) {
+          mapFig.setAttribute("aria-label", m.mapAlt);
+          mapAlt = m.mapAlt;
+        }
+      }
+
+      // 島嶼清單（IA-2；P-2：內容相同不重建）
+      var key = JSON.stringify(m.isles);
+      if (key !== islesKey) {
+        D.clear(refs.islesList);
+        for (var r = 0; r < m.isles.length; r++) refs.islesList.appendChild(isleRow(m.isles[r]));
+        islesKey = key;
+      }
+
+      // 3 格數據（DB-5）＋ 天氣、燈塔狀態行（IS-11、IS-12）
       D.setText(refs.streakValue, m.stats.streakValue);
+      D.setText(refs.weatherLine, m.stats.weatherText);
       D.setText(refs.masteryValue, m.stats.masteryText);
       D.setText(refs.masteredSub, m.stats.masteredText);
       D.setText(refs.answeredValue, m.stats.answeredText);
+      D.setText(refs.lighthouseLine, m.stats.lighthouseText);
 
       // 近 7 天（AC-39-07）：空狀態只顯示一行文字；否則 7 根長條，節點固定，只改高度與文字
       refs.bars.hidden = m.chart.empty;
@@ -547,9 +739,7 @@
     function onToggleBackup() {
       var s = store();
       if (!s || !s.actions || typeof s.actions.setBackupExpanded !== "function") return;
-      var st = currentState();
-      var cur = !!(st && st.runtime && st.runtime.dashboard && st.runtime.dashboard.backupExpanded === true);
-      s.actions.setBackupExpanded(!cur);
+      s.actions.setBackupExpanded(!backupExpandedNow());
     }
 
     /** 匯出（AC-24-01） */
@@ -587,7 +777,7 @@
       var msg = importMessage(result);
       if (msg) toast(msg.text, msg.kind);
       if (result && result.ok === true) {
-        renderProgress();
+        onProgressChange();
       }
       setBusy(false);
     }
@@ -669,13 +859,47 @@
       refs.fileInput.click();
     }
 
-    /** (1) 今日任務卡 */
+    /** 標題列：h2「我的群島」（左側裝飾小圖 aria-hidden）＋ 目標標籤與「變更」（DB-1、DB-4、IS-16、AC-63-01、AC-66-04） */
+    function buildHead() {
+      var D = dom();
+      var LT = core().LAY.LAYOUT_TEXTS;
+      var goalText = D.el("span", { className: "db-goal__text", text: "" });
+      // （v0.9，Q-61、AC-39-04）「變更」為外框按鈕（不是連結樣式）；行為沿用 router 的 [data-go] 委派
+      var changeBtn = D.el("button", {
+        className: "btn db-change",
+        attrs: { type: "button", "data-go": "customizer" },
+        text: LT.changeLink
+      });
+      var goalLine = D.el("p", { className: "db-goal", attrs: { "data-color": "" } }, [
+        D.el("span", { className: "db-goal__tag" }, [
+          D.el("span", { className: "db-goal__dot", attrs: { "aria-hidden": "true" } }),
+          goalText
+        ]),
+        changeBtn
+      ]);
+      var head = D.el("div", { className: "db-head" }, [
+        D.el("h2", { className: "page-title dash-title" }, [
+          uiModule("islandArt").titleDeco("dash-title__deco"),
+          D.el("span", { className: "dash-title__text", text: LT.dashboardTitle })
+        ]),
+        goalLine
+      ]);
+      return { head: head, goalLine: goalLine, goalText: goalText, changeBtn: changeBtn };
+    }
+
+    /** (1) 今日任務卡（DB-2、§7.32.3）：龜龜與對話框 → 今日進度列 → 「開始今日學習」 */
     function buildToday() {
       var D = dom();
       var LT = core().LAY.LAYOUT_TEXTS;
-      var ring = ringSvg();
-      var center = D.el("span", { className: "db-ring__value", attrs: { "aria-hidden": "true" }, text: "" });
+      var ISL = core().ISL;
+      // 對話框不是 aria-live 區域（IS-14）
+      var dialog = D.el("p", { className: "db-host__bubble", text: "" });
       var todayText = D.el("p", { className: "db-today__text", text: "" });
+      var todayFill = D.el("span", { className: "db-today__fill" });
+      var todayBar = D.el("div", {
+        className: "db-today__bar",
+        attrs: { role: "progressbar", "aria-valuemin": "0", "aria-valuemax": "1", "aria-valuenow": "0", "aria-valuetext": "" }
+      }, [todayFill]);
       var doneText = D.el("p", { className: "db-today__done", attrs: { "aria-live": "polite" }, text: "" });
       doneText.hidden = true;
       var startBtn = D.el("button", {
@@ -683,46 +907,61 @@
         attrs: { type: "button", "data-go": "flashcards" },
         text: LT.startToday
       });
-      var goalText = D.el("span", { className: "db-goal__text", text: "" });
-      // （v0.9，Q-61、AC-39-04）「變更」為外框按鈕（不再是連結樣式）；行為沿用 router 的 [data-go] 委派
-      var changeBtn = D.el("button", {
-        className: "btn db-change",
-        attrs: { type: "button", "data-go": "customizer" },
-        text: LT.changeLink
-      });
-      var goalLine = D.el("p", { className: "db-goal", attrs: { "data-color": "" } }, [
-        D.el("span", { className: "db-goal__dot", attrs: { "aria-hidden": "true" } }),
-        goalText,
-        changeBtn
-      ]);
       var section = D.el("section", { className: "card db-today", attrs: { "aria-labelledby": "db-today-h" } }, [
-        D.el("h3", { className: "section-title", attrs: { id: "db-today-h" }, text: TEXT.todayTitle }),
-        D.el("div", { className: "db-today__row" }, [
-          D.el("div", { className: "db-ring-wrap" }, [ring.svg, center]),
-          D.el("div", { className: "db-today__side" }, [todayText, doneText, startBtn])
+        // （SD-FB-107）可見標題會違反 AC-39-02 的由上到下順序，只給螢幕閱讀器標題導覽
+        D.el("h3", { className: "visually-hidden", attrs: { id: "db-today-h" }, text: TEXT.todayTitle }),
+        D.el("div", { className: "db-host" }, [
+          uiModule("islandArt").turtle("db-host__turtle"),
+          D.el("div", { className: "db-host__talk" }, [
+            D.el("p", { className: "db-host__name", text: ISL.TEXTS.hostName }),
+            dialog
+          ])
         ]),
-        goalLine
+        D.el("div", { className: "db-today__progress" }, [
+          D.el("div", { className: "db-today__row" }, [todayText, todayBar]),
+          doneText
+        ]),
+        startBtn
       ]);
-      return { section: section, ring: ring, center: center, todayText: todayText, doneText: doneText,
-        startBtn: startBtn, goalLine: goalLine, goalText: goalText, changeBtn: changeBtn };
+      return { section: section, dialog: dialog, todayText: todayText, todayBar: todayBar, todayFill: todayFill,
+        doneText: doneText, startBtn: startBtn };
     }
 
-    /** (2) 3 格數據（同一張卡片內；格本身無邊框與背景） */
+    /** (2) 地圖框（§7.32.4）：內容由 renderProgress 以 islandMap.build 重建；無事件、無 tabindex（AC-64-10） */
+    function buildMap() {
+      return dom().el("div", { className: "card db-map" });
+    }
+
+    /** (3) 島嶼清單（IA-2、§7.32.5）：h3「島嶼」＋ ul（5 列由 renderProgress 建立） */
+    function buildIsles() {
+      var D = dom();
+      var list = D.el("ul", { className: "db-isles__list" });
+      var section = D.el("section", { className: "db-isles", attrs: { "aria-labelledby": "db-isles-h" } }, [
+        D.el("h3", { className: "section-title", attrs: { id: "db-isles-h" }, text: core().ISL.TEXTS.listTitle }),
+        list
+      ]);
+      return { section: section, list: list };
+    }
+
+    /** (4) 3 格數據（DB-5、§7.32.6）：每格為區塊卡片樣式；第 1 格天氣行、第 3 格燈塔行 */
     function buildStats() {
       var D = dom();
       var LT = core().LAY.LAYOUT_TEXTS;
       var streakValue = D.el("span", { className: "db-stat__num", text: TEXT.empty });
+      var weatherLine = D.el("p", { className: "db-stat__status", text: "" });
       var masteryValue = D.el("p", { className: "db-stat__value", text: TEXT.empty });
       var masteredSub = D.el("p", { className: "db-stat__sub", text: "" });
       var answeredValue = D.el("p", { className: "db-stat__value db-stat__value--answered", text: TEXT.empty });
-      var section = D.el("section", { className: "card db-stats", attrs: { "aria-label": TEXT.statsLabel } }, [
+      var lighthouseLine = D.el("p", { className: "db-stat__status", text: "" });
+      var section = D.el("section", { className: "db-stats", attrs: { "aria-label": TEXT.statsLabel } }, [
         D.el("div", { className: "db-stat db-stat--streak" }, [
           D.el("p", { className: "db-stat__label", text: LT.statStreakLabel }),
           D.el("p", { className: "db-stat__value" }, [
             streakIcon(),
             streakValue,
             D.el("span", { className: "db-stat__unit", text: LT.statStreakUnit })
-          ])
+          ]),
+          weatherLine
         ]),
         D.el("div", { className: "db-stat db-stat--mastery" }, [
           D.el("p", { className: "db-stat__label", text: LT.statMasteryLabel }),
@@ -731,14 +970,15 @@
         ]),
         D.el("div", { className: "db-stat db-stat--answered" }, [
           D.el("p", { className: "db-stat__label", text: LT.statPart5Label }),
-          answeredValue
+          answeredValue,
+          lighthouseLine
         ])
       ]);
-      return { section: section, streakValue: streakValue, masteryValue: masteryValue,
-        masteredSub: masteredSub, answeredValue: answeredValue };
+      return { section: section, streakValue: streakValue, weatherLine: weatherLine, masteryValue: masteryValue,
+        masteredSub: masteredSub, answeredValue: answeredValue, lighthouseLine: lighthouseLine };
     }
 
-    /** (3) 近 7 天圖表：長條（節點固定 DASHBOARD_CHART_DAYS 組）與空狀態 */
+    /** (5) 近 7 天圖表：長條（節點固定 DASHBOARD_CHART_DAYS 組）與空狀態 */
     function buildChart() {
       var D = dom();
       var days = core().C.DASHBOARD_CHART_DAYS;
@@ -794,11 +1034,14 @@
       // （v0.11，FE-51）安裝區（IN-1）；內容由 renderInstall 依狀態增刪
       var installBox = D.el("div", { className: "dash-backup__install", attrs: { hidden: true } });
 
+      var head = buildHead();
       var today = buildToday();
+      var mapBox = buildMap();
+      var isles = buildIsles();
       var stats = buildStats();
       var chart = buildChart();
 
-      // (4) 「資料備份」收合區塊（DB-6）：預設收合
+      // (6) 「資料備份」收合區塊（DB-6）：預設收合
       var toggle = D.el("button", {
         className: "db-backup__toggle",
         attrs: { type: "button", "aria-expanded": "false", "aria-controls": "db-backup-body" },
@@ -818,26 +1061,34 @@
         backupBody
       ]);
 
+      // DB-1：標題列 → 今日任務卡 → 地圖 → 島嶼清單 → 3 格數據 → 近 7 天 → 資料備份
       var page = D.el("div", { className: "dashboard" }, [
-        D.el("h2", { className: "page-title dash-title", text: LT.dashboardTitle }),
+        head.head,
         today.section,
+        mapBox,
+        isles.section,
         stats.section,
         chart.section,
         backupSection
       ]);
 
       refs = {
-        ring: today.ring,
-        center: today.center,
+        dialog: today.dialog,
         todayText: today.todayText,
+        todayBar: today.todayBar,
+        todayFill: today.todayFill,
         doneText: today.doneText,
         startBtn: today.startBtn,
-        goalLine: today.goalLine,
-        goalText: today.goalText,
+        goalLine: head.goalLine,
+        goalText: head.goalText,
+        mapBox: mapBox,
+        islesList: isles.list,
         streakValue: stats.streakValue,
+        weatherLine: stats.weatherLine,
         masteryValue: stats.masteryValue,
         masteredSub: stats.masteredSub,
         answeredValue: stats.answeredValue,
+        lighthouseLine: stats.lighthouseLine,
         bars: chart.bars,
         chartEmpty: chart.empty,
         barCells: chart.cells,
@@ -850,31 +1101,110 @@
         installBox: installBox
       };
 
-      // 先在未掛上文件前繪製初值：進度圈不會從空環播放 transition（只在數值改變時播放，§7.11）
-      renderProgress();
+      // 新的 DOM：地圖與清單尚未建立
+      mapFig = null;
+      mapSig = null;
+      mapAlt = null;
+      islesKey = null;
+
+      // 先在未掛上文件前繪製初值（地圖不播放動畫；第一次 show() 簽章相同只 setPlay，啟動時少建 1 次地圖）
+      renderProgress("mount");
       renderInstall();
 
       D.clear(rootEl);
       rootEl.appendChild(page);
 
-      // 訂閱 store：相關 tag（PROGRESS_TAGS，含 "dashboard"）才重繪；安裝區依 INSTALL_TAGS
+      // 訂閱 store：相關 tag（PROGRESS_TAGS，含 "dashboard"）才處理；安裝區依 INSTALL_TAGS。
+      // 停留期間：簽章不同才以 play: false 重建地圖（不重播，§7.32.8）；隱藏期間：只排閒置預先重建（§7.32.15 P-3）
       var s = store();
       if (s && typeof s.subscribe === "function" && !unsubscribe) {
         unsubscribe = s.subscribe(function (state, tags) {
-          if (progressAffected(tags)) renderProgress();
+          if (progressAffected(tags)) onProgressChange(tags);
           if (installAffected(tags)) renderInstall();
         });
       }
     }
 
+    /** 目前狀態的「資料備份」展開值（runtime.dashboard.backupExpanded；缺漏 → false） */
+    function backupExpandedNow() {
+      var st = currentState();
+      return !!(st && st.runtime && st.runtime.dashboard && st.runtime.dashboard.backupExpanded === true);
+    }
+
+    /**
+     * （FE-116，§7.32.15）進度相關資料變更：頁面顯示中 → 立即以 live 重算；
+     * 隱藏中 → 不重算、不動文字與地圖、清單，標記 dirty，並在無待執行排程時排 1 次閒置預先重建（連續通知只排 1 次）。
+     * 隱藏中收到 "dashboard" tag 時仍同步「資料備份」收合狀態（只改 3 個屬性、不重算 dashboardModel；DB-6 節點不重建）。
+     * @param {string[]} [tags] 通知的 tags；省略（匯入完成）視為一般變更
+     */
+    function onProgressChange(tags) {
+      if (visible) {
+        renderProgress("live");
+        return;
+      }
+      if (!Array.isArray(tags) || tags.indexOf("dashboard") !== -1) renderBackup(backupExpandedNow());
+      dirty = true;
+      schedulePrepare();
+    }
+
+    /** 排 1 個閒置工作執行 prepare；排程器不可用（request 回 null）時不排程，show() 照樣重算與重建 */
+    function schedulePrepare() {
+      if (idle) return;
+      var api = idleApi();
+      var task = { api: api, handle: null, done: false };
+      idle = task;
+      var handle = null;
+      try {
+        handle = api.request(function () { prepare(task); });
+      } catch (e) {
+        handle = null;
+      }
+      if (task.done) return; // 排程器同步執行了回呼
+      if (handle === null || handle === undefined) {
+        if (idle === task) idle = null;
+        return;
+      }
+      task.handle = handle;
+    }
+
+    /** 取消待執行的閒置工作 */
+    function cancelPrepare() {
+      var task = idle;
+      idle = null;
+      if (!task) return;
+      task.done = true;
+      try {
+        task.api.cancel(task.handle);
+      } catch (e) {
+        // 取消失敗：task.done 已設，回呼即使執行也不做事
+      }
+    }
+
+    /** 閒置工作：頁面仍隱藏且有未繪製的變更 → 預先重算並重建（play 依減少動態；display: none 下動畫不執行） */
+    function prepare(task) {
+      if (task.done) return;
+      task.done = true;
+      if (idle === task) idle = null;
+      if (visible || !dirty) return;
+      renderProgress("prepare");
+      dirty = false;
+    }
+
     function show() {
-      // 回到主控台時更新（目標可能已在難易度設定變更；跨日時打卡與今日已學數也要更新，AC-30-07 (b)）
-      renderProgress();
+      // 回到群島頁時以當下狀態與 today 重算（目標可能已變更；跨日時打卡與今日已學數也要更新，AC-30-07 (b)、IS-3、AC-64-09）。
+      // 地圖簽章相同 → 沿用並以 setPlay 同步動畫 class（頁面由 hidden 變為顯示，CSS 動畫自動從頭播放）；
+      // 不同 → 以 play 依減少動態重建（AC-70-01、AC-70-02）。未經 hide() 再呼叫 → 一律重建並播放（§7.32.8 保底）
+      var replay = visible === true;
+      visible = true;
+      cancelPrepare();
+      renderProgress("show", replay);
+      dirty = false;
       renderInstall();
     }
 
     function hide() {
-      // 保留訂閱；不需處理
+      // 保留訂閱；隱藏期間的變更改由閒置排程預先重建（§7.32.15）
+      visible = false;
     }
 
     return { mount: mount, show: show, hide: hide };
@@ -886,11 +1216,12 @@
     importMessage: importMessage,
     progressModel: progressModel,
     dashboardModel: dashboardModel,
-    ringGeometry: ringGeometry,
+    contentSnapshot: contentSnapshot,
     PROGRESS_TAGS: PROGRESS_TAGS,
     progressAffected: progressAffected,
     INSTALL_TAGS: INSTALL_TAGS,
     installAffected: installAffected,
+    idleScheduler: idleScheduler,
     createView: createView
   };
 });

@@ -1,7 +1,9 @@
 /* ─── 資料來源與授權頁（FE-17；AC-23-02、FB-20、FB-21） ─── */
 /* 375px 寬度下長網址與授權全文須換行，不得產生水平捲軸 */
-/* （v0.12，FE-60；§7.19.8）各區塊沿用全域 .card（白底、圓角 16px、陰影、無邊框）；授權全文等非卡片元素框線改 --line；
+/* （v0.12，FE-60；§7.19.8）各區塊沿用全域 .card；授權全文等非卡片元素框線改 --line；
  * 新增「原創內容來源」一行（.src-original，樣式同 .src-attrib） */
+/* （v0.19，FE-110；architecture §7.32.7、契約 VC-4、AC-68-02）各區塊（.src-card、.src-project）為區塊卡片：
+ * 白底、2px 外框色外框、圓角 22px（與全域 .card 同值，於本檔明示）；授權全文摺疊框不是區塊卡片，維持 1px --line。 */
 /* （architecture v0.11，FE-77；§7.22.2）頁面最後一行聯絡資訊 .src-contact：沿用 .src-muted 顏色，字級 0.8125rem 使 375px 維持 1 行；
  * 不禁止換行（放大字級時要能換行，E-119）、不禁止選取文字 */
 
@@ -29,6 +31,10 @@
 
 .src-card,
 .src-project {
+  background: var(--surface);
+  border: var(--outline-w) solid var(--outline);
+  border-radius: var(--radius-card);
+  box-shadow: none;
   overflow-wrap: anywhere;
   word-break: normal;
 }

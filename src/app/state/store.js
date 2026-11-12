@@ -50,6 +50,18 @@
  *   README §14.1 PR-1、PR-2、PR-9、DS-63；architecture §4.13）：sttStatus 新增 "preparing"，runtime.speech 新增
  *   preparingPhase（啟動一律 null）。兩者只在記憶體，經 setSttStatus(status, phase) 更新（setItem 0 次、不進備份）。
  *
+ * - （v0.23，FE-106）單字卡學完回饋（契約 RuntimeState.flashcard.islandFeedback、README §15.5 LF-1～LF-6、IS-1、IS-2；
+ *   architecture §4.16「EMT.store」、§7.32.9）：flipCard（翻到背面）、answerVocabQuiz、recordSttScored 在 currentTab 為
+ *   "flashcards" 時，以同一個 today 取套用前（B）與套用全部資料變更後（A）的島嶼快照（islandSnapshot），
+ *   island.feedbackOf(B, A) 非 null → 放進同一次 commitWrite 的 runtime，tags 加 "islandFeedback"；null → 維持原值。
+ *   生命週期：啟動、匯入為 null；換卡、切換模式、重建單字集保留；setTab 離開 "flashcards" 設 null（LF-3）。
+ *   只在記憶體：不進 data、localStorage、備份；不增加 setItem 次數；寫入失敗時回饋照常（LF-5）。
+ *
+ * - （v0.21，FE-114）啟動預熱（architecture §4.16「init() 預熱」、§7.32.15 P-5）：init 建好初始狀態後、發出啟動通知前，
+ *   島嶼模組已載入時以同一個 today 取 1 次快照並呼叫 feedbackOf(w, w)（結果丟棄），填入 islandsOf 單筆快取。
+ *   不改 state、tags、setItem；例外吞掉。islandsOf 快取以參照比對：store 一律以 concat／filter 產生新的
+ *   masteredWordKeys 陣列，不原地修改（§7.32.15 前提）。
+ *
  * 寫法：工廠函式 createStore({ storage, content, now, rand, speechSupport })，Node 下以 require 取得並注入假資料測試；
  * 瀏覽器下以 window.localStorage 與 EMT.content 建立單例 EMT.store（載入時只建立，不讀 storage；main.js 呼叫 init()）。
  */
@@ -88,14 +100,16 @@
         PWA: require("../core/pwa.js"),
         POS: require("../core/position.js"),
         PF: require("../core/part5flow.js"),
-        AD: require("../core/ad.js")
+        AD: require("../core/ad.js"),
+        // （v0.23，FE-106）島嶼推算（學完回饋比較用）
+        ISL: require("../core/island.js")
       };
     } else {
       var c = root.EMT.core;
       coreCache = {
         C: c.constants, WK: c.wordkey, GOAL: c.goal, VOCAB: c.vocab, CUSTOM: c.custom,
         STREAK: c.streak, QUIZ: c.quiz, P: c.persist, BACKUP: c.backup, LEARN: c.learning,
-        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow, AD: c.ad
+        REINIT: c.reinit, PWA: c.pwa, POS: c.position, PF: c.part5flow, AD: c.ad, ISL: c.island
       };
     }
     return coreCache;
@@ -121,7 +135,7 @@
 
   /** 一次通知全部區塊時使用的 tags */
   var ALL_TAGS = ["init", "goal", "studySet", "flashcard", "quiz", "speech", "stats", "streak",
-    "customVocab", "part5", "decoder", "phrasebank", "tab", "storage", "learning"];
+    "customVocab", "part5", "decoder", "phrasebank", "tab", "storage", "learning", "islandFeedback"];
 
   // ── 共用小工具（純函式）──
 
@@ -245,6 +259,31 @@
   }
 
   /**
+   * （v0.23，FE-106）學完回饋比較用的島嶼快照（architecture §7.32.9 islandSnap；契約 LF-1、IS-13、LR-6）。
+   * 純函式：只讀傳入的內容與資料，不讀寫儲存、時鐘；回傳值只供當次 feedbackOf 比較，不得放進 data 或任何儲存（IS-1）。
+   * - islands = island.islandsOf（內容的 builtin、builtinMap、nB、nG 與 data.masteredWordKeys、data.goal.effectiveColor）
+   * - x = learning.todayCount(data.todayLearned, t)；d = learning.dailyGoal(data.goal.effectiveColor)
+   * @param {object|function} src EMT.content 相容物件或回傳它的函式（缺漏、為空時三島 n = 0）
+   * @param {object} data PersistedData
+   * @param {string} t 本次 action 取 1 次的 today（YYYY-MM-DD）
+   * @returns {{islands: object[], x: number, d: number}}
+   */
+  function islandSnapshot(src, data, t) {
+    var K = core();
+    var ct = readContent(src);
+    var d = data && typeof data === "object" ? data : {};
+    var goal = d.goal && typeof d.goal === "object" ? d.goal : {};
+    return {
+      islands: K.ISL.islandsOf({
+        builtin: ct.builtin, builtinMap: ct.builtinMap, nB: ct.nB, nG: ct.nG,
+        masteredWordKeys: d.masteredWordKeys, effectiveColor: goal.effectiveColor
+      }),
+      x: K.LEARN.todayCount(d.todayLearned || null, t),
+      d: K.LEARN.dailyGoal(goal.effectiveColor)
+    };
+  }
+
+  /**
    * 建立 store。
    * @param {{
    *   storage?: {getItem: function(string): (string|null), setItem: function(string, string): void}|null,
@@ -357,7 +396,8 @@
       return {
         currentTab: entryMode === "firstRun" ? "customizer" : "dashboard",
         studySet: buildStudySet(data),
-        flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null },
+        // （v0.23，FE-106）islandFeedback：學完回饋，頁面載入時 null（LF-3）
+        flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null, islandFeedback: null },
         speech: {
           ttsSupported: !!speech.ttsSupported,
           sttSupported: !!speech.sttSupported,
@@ -386,10 +426,15 @@
 
     /**
      * 換卡後的抽認卡狀態：正面、清除 STT 結果；測驗模式則為新卡重新出題（不足 → 回抽認卡模式，AC-09-06）。
+     * （v0.23，FE-106）學完回饋 islandFeedback 帶入原值（換卡保留，LF-3）。
      * @returns {{flashcard: object, speech: object}}
      */
     function cardChanged(runtime, studySet, index) {
-      var fc = { index: index, isFlipped: false, mode: runtime.flashcard.mode, quiz: null };
+      var keep = runtime.flashcard.islandFeedback;
+      var fc = {
+        index: index, isFlipped: false, mode: runtime.flashcard.mode, quiz: null,
+        islandFeedback: keep === undefined ? null : keep
+      };
       if (fc.mode === "quiz") {
         fc.quiz = core().QUIZ.buildQuiz(studySet, index, rand);
         if (!fc.quiz) { fc.mode = "card"; }
@@ -533,21 +578,54 @@
      * 只有「新增 wordKey」或「todayLearned 換日」時回傳 patch，否則 patch 為 null。
      * @param {object} d 目前的 PersistedData
      * @param {string} key wordKey（record 內會再以 C-2 正規化）
+     * @param {string} [t] （v0.23）本次 action 已取的 today；省略時現取
      * @returns {{patch: (object|null), changed: boolean}}
      */
-    function learnPatch(d, key) {
-      var day = today();
+    function learnPatch(d, key, t) {
+      var day = typeof t === "string" ? t : today();
       var r = core().LEARN.record(d.todayLearned, d.learnedHistory, key, day);
       var dayChanged = !d.todayLearned || d.todayLearned.date !== day;
       if (!r.changed && !dayChanged) { return { patch: null, changed: false }; }
       return { patch: { todayLearned: r.todayLearned, learnedHistory: r.learnedHistory }, changed: true };
     }
 
-    /** 學習行為打卡（AC-17-02）；回傳新的 streak（未變時為原物件） */
-    function touchStreak(streak) {
-      var next = core().STREAK.touch(streak, today());
+    /** 學習行為打卡（AC-17-02）；回傳新的 streak（未變時為原物件）。（v0.23）t 為本次 action 已取的 today，省略時現取 */
+    function touchStreak(streak, t) {
+      var next = core().STREAK.touch(streak, typeof t === "string" ? t : today());
       if (next.days === streak.days && next.lastActiveDate === streak.lastActiveDate) { return streak; }
       return next;
+    }
+
+    // ── 學完回饋（v0.23，FE-106；LF-1～LF-5）──
+
+    /**
+     * 套用前快照 B：只在單字卡頁（currentTab === "flashcards"）且島嶼模組已載入時計算，否則 null（不比較）。
+     * @param {object} rt 目前 runtime
+     * @param {object} data 套用前的 PersistedData
+     * @param {string} t 本次 action 取 1 次的 today
+     * @returns {object|null}
+     */
+    function feedbackBefore(rt, data, t) {
+      if (rt.currentTab !== "flashcards" || !core().ISL) { return null; }
+      return islandSnapshot(contentSrc, data, t);
+    }
+
+    /**
+     * 以 B 與套用全部資料變更後的快照 A 決定回饋（LF-2）。得到回饋 → 回傳帶新 islandFeedback 的 runtime 並加 tag；
+     * null 或未比較（before 為 null）→ 原 runtime 不變（維持原值，LF-3）。不修改傳入值、不寫入任何儲存（IS-1）。
+     * @param {object} runtime 準備提交的 runtime
+     * @param {object|null} before feedbackBefore 的結果
+     * @param {object} newData 套用後的 PersistedData
+     * @param {string} t 與 before 相同的 today
+     * @param {string[]} tags 本次提交的 tags（會附加 "islandFeedback"）
+     * @returns {object} runtime
+     */
+    function withFeedback(runtime, before, newData, t, tags) {
+      if (!before) { return runtime; }
+      var fb = core().ISL.feedbackOf(before, islandSnapshot(contentSrc, newData, t));
+      if (!fb) { return runtime; }
+      tags.push("islandFeedback");
+      return assign(runtime, { flashcard: assign(runtime.flashcard, { islandFeedback: fb }) });
     }
 
     // ── 啟動 ──
@@ -572,6 +650,8 @@
       }
 
       var data;
+      /** （v0.21，FE-114）本次 init 已取得的 today；只有讀到紀錄時才取，預熱沿用同一天（未取時預熱才取） */
+      var initDay = null;
       // （v0.8）首次判定（FS-1）：存取拋例外或鍵不存在 → firstRun；任何字串（含 ""、損壞、版本不符）→ main。
       // unreadable 鍵是否存在不影響判定
       var entryMode = "main";
@@ -586,7 +666,8 @@
           // （v0.8）以今天正規化 todayLearned、learnedHistory（V-ST-09～V-ST-11）；
           // RD-1 的 fieldsReset 不提示、不另寫回，等下一次寫入一併寫回（RD-2、SD-FB-17）
           // （v0.15）第 4 參數傳題庫 id → V-ST-05 之後再做 UO-4（只改記憶體，RD-4）
-          data = K.P.normalizeAfterLoad(parsed.data, ct.part5.length, today(), K.PF.bankIdsOf(ct.part5));
+          initDay = today();
+          data = K.P.normalizeAfterLoad(parsed.data, ct.part5.length, initDay, K.PF.bankIdsOf(ct.part5));
           startup = { status: "ok", migrated: false };
           if (parsed.migrated) {
             // 遷移後依 §5.3 驗證再以一次 setItem 寫回（MG-3：schemaVersion 2，失敗不提示）
@@ -626,8 +707,27 @@
       }
       state = { data: data, runtime: placed.runtime };
       initialized = true;
+      warmIsland(K, initDay);
       notify(ALL_TAGS.slice());
       return { status: startup.status, migrated: startup.migrated };
+    }
+
+    /**
+     * （v0.21，FE-114）啟動預熱（architecture §4.16「init() 預熱」、§7.32.15 P-5；AC-69-05、AC-70-03）：
+     * 島嶼模組已載入時，以 init 的同一個 today 取 1 次快照 w，再呼叫 feedbackOf(w, w)（必為 null、丟棄），
+     * 讓 islandsOf 單筆快取先填入、翻面路徑的函式先編譯，重新載入後第一次翻面不再付冷啟動成本。
+     * 只讀 state.data 與內容：不改 state、不加 tags、不呼叫 setItem；任何例外吞掉，不影響啟動、不提示使用者。
+     * @param {object} K core() 的結果
+     * @param {string|null} t init 已取得的 today（YYYY-MM-DD）；null（未讀到紀錄）時在此取 1 次
+     */
+    function warmIsland(K, t) {
+      if (!K.ISL) { return; }
+      try {
+        var w = islandSnapshot(contentSrc, state.data, typeof t === "string" ? t : today());
+        K.ISL.feedbackOf(w, w);
+      } catch (e) {
+        // 預熱失敗不影響啟動（之後的學習事件照常各自計算）
+      }
     }
 
     /** 尚未 init 就呼叫 action 時先 init，避免以預設值覆蓋已儲存資料 */
@@ -964,15 +1064,18 @@
       var patch = {};
       var dirty = false;
       var tags = ["flashcard"];
+      // （v0.23）翻到背面才是學習行為（LR-1）：同一個 today 供打卡、學習紀錄與回饋前後快照使用（LF-1）
+      var t = flipped ? today() : "";
+      var before = flipped ? feedbackBefore(rt, d, t) : null;
       if (flipped) {
-        var s = touchStreak(d.streak);
+        var s = touchStreak(d.streak, t);
         if (s !== d.streak) {
           patch.streak = s;
           dirty = true;
           tags.push("streak");
         }
         var card = rt.studySet[rt.flashcard.index];
-        var lp = card ? learnPatch(d, card.wordKey) : { patch: null, changed: false };
+        var lp = card ? learnPatch(d, card.wordKey, t) : { patch: null, changed: false };
         if (lp.patch) {
           patch.todayLearned = lp.patch.todayLearned;
           patch.learnedHistory = lp.patch.learnedHistory;
@@ -980,8 +1083,10 @@
           tags.push("learning");
         }
       }
+      var newData = dirty ? assign(d, patch) : d;
+      runtime = withFeedback(runtime, before, newData, t, tags);
       if (dirty) {
-        commitWrite(assign(d, patch), runtime, tags);
+        commitWrite(newData, runtime, tags);
       } else {
         commit(d, runtime, tags);
       }
@@ -1024,16 +1129,19 @@
       }
       var correct = optionIndex === q.correctIndex;
       var d = state.data;
+      // （v0.23）同一個 today 供打卡、學習紀錄與回饋前後快照使用（LF-1）
+      var t = today();
+      var before = feedbackBefore(rt, d, t);
       var patch = {
         vocabQuiz: { answered: d.vocabQuiz.answered + 1, correct: d.vocabQuiz.correct + (correct ? 1 : 0) },
-        streak: touchStreak(d.streak)
+        streak: touchStreak(d.streak, t)
       };
       if (correct && d.masteredWordKeys.indexOf(q.wordKey) === -1) {
         patch.masteredWordKeys = d.masteredWordKeys.concat([q.wordKey]);
       }
       var tags = ["quiz", "flashcard", "stats", "streak"];
       // （v0.8）學習事件 "vocabQuiz"（對錯皆算，LR-1），與統計、已掌握、打卡合併為一次寫入（LR-5）
-      var lp = learnPatch(d, q.wordKey);
+      var lp = learnPatch(d, q.wordKey, t);
       if (lp.patch) {
         patch.todayLearned = lp.patch.todayLearned;
         patch.learnedHistory = lp.patch.learnedHistory;
@@ -1041,6 +1149,7 @@
       }
       var data = assign(d, patch);
       var runtime = assign(rt, { flashcard: assign(rt.flashcard, { quiz: assign(q, { selectedIndex: optionIndex }) }) });
+      runtime = withFeedback(runtime, before, data, t, tags);
       commitWrite(data, runtime, tags);
       return { ok: true, correct: correct };
     }
@@ -1175,7 +1284,9 @@
       var rt = state.runtime;
       var patch = {};
       var tags = [];
-      var s = touchStreak(d.streak);
+      // （v0.23）同一個 today 供打卡、學習紀錄與回饋前後快照使用（LF-1）
+      var t = today();
+      var s = touchStreak(d.streak, t);
       if (s !== d.streak) {
         patch.streak = s;
         tags.push("streak");
@@ -1187,14 +1298,15 @@
         var card = rt.studySet[rt.flashcard.index];
         key = card && typeof card.wordKey === "string" ? card.wordKey : "";
       }
-      var lp = key !== "" ? learnPatch(d, key) : { patch: null, changed: false };
+      var lp = key !== "" ? learnPatch(d, key, t) : { patch: null, changed: false };
       if (lp.patch) {
         patch.todayLearned = lp.patch.todayLearned;
         patch.learnedHistory = lp.patch.learnedHistory;
         tags.push("learning");
       }
       if (tags.length === 0) { return; }
-      commitWrite(assign(d, patch), rt, tags);
+      var data = assign(d, patch);
+      commitWrite(data, withFeedback(rt, feedbackBefore(rt, d, t), data, t, tags), tags);
     }
 
     /** 按「我知道了」（AC-08-13、V-ST-08） */
@@ -1287,7 +1399,14 @@
       if (rt.entryMode === "firstRun" && FIRST_RUN_TABS.indexOf(tabId) === -1) { return; }
       var ret = opts && opts.resetReturn === true ? null : nextReturnTab(rt.currentTab, tabId, rt.sitePageReturnTab);
       if (rt.currentTab === tabId && rt.sitePageReturnTab === ret) { return; }
-      commit(state.data, assign(rt, { currentTab: tabId, sitePageReturnTab: ret }), ["tab"]);
+      var next = assign(rt, { currentTab: tabId, sitePageReturnTab: ret });
+      var tags = ["tab"];
+      // （v0.23，FE-106）離開單字卡頁 → 學完回饋同一次提交設為 null（LF-3）；原值非 null 才加 tag
+      if (rt.currentTab === "flashcards" && tabId !== "flashcards") {
+        if (rt.flashcard.islandFeedback) { tags.push("islandFeedback"); }
+        next = assign(next, { flashcard: assign(rt.flashcard, { islandFeedback: null }) });
+      }
+      commit(state.data, next, tags);
     }
 
     // ── actions：PWA（v0.11，FE-49）──
@@ -1443,8 +1562,9 @@
           var rt = state.runtime;
           // （v0.15，FP-6）步驟 9：重建單字集後依匯入的紀錄解析目前卡片（單字卡模式、正面）；
           // 解析結果只改記憶體，步驟 8 已寫入備份值，下次寫入再寫出（RD-4）
+          // （v0.23，FE-106）重設單字卡狀態時學完回饋一併設為 null（IS-4、LF-3）
           var base = assign(rt, {
-            flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null },
+            flashcard: { index: 0, isFlipped: false, mode: "card", quiz: null, islandFeedback: null },
             speech: assign(rt.speech, { lastResult: null })
           });
           var placed = placeCard(assign(base, { studySet: [] }), data, buildStudySet(data));
@@ -1453,6 +1573,7 @@
             data = assign(data, { flashcardPosition: placed.flashcardPosition });
           }
           var tags = ["goal", "studySet", "flashcard", "quiz", "speech", "stats", "streak", "customVocab", "part5", "learning"];
+          if (rt.flashcard.islandFeedback) { tags.push("islandFeedback"); }
           if (state.runtime.storageStatus !== "unavailable" && writeStatus !== "ok") {
             writeStatus = "ok";
             tags.push("storage");
@@ -1522,6 +1643,7 @@
     createStore: createStore,
     browserStorage: browserStorage,
     detectSpeech: detectSpeech,
-    isQuotaError: isQuotaError
+    isQuotaError: isQuotaError,
+    islandSnapshot: islandSnapshot
   };
 });

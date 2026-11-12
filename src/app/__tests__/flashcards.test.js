@@ -104,8 +104,8 @@ describe("flashcards.test.js", () => {
     const st = store.getState();
     assert.deepEqual(Object.keys(st).sort(), ["data", "runtime"]);
     assert.equal(st.flashcard, undefined, "不得有扁平的 state.flashcard");
-    assert.deepEqual(Object.keys(st.runtime.flashcard).sort(), ["index", "isFlipped", "mode", "quiz"]);
-    assert.deepEqual(st.runtime.flashcard, { index: 0, isFlipped: false, mode: "card", quiz: null });
+    assert.deepEqual(Object.keys(st.runtime.flashcard).sort(), ["index", "isFlipped", "islandFeedback", "mode", "quiz"]);
+    assert.deepEqual(st.runtime.flashcard, { index: 0, isFlipped: false, mode: "card", quiz: null, islandFeedback: null });
     const c = L.counterModel(st.runtime.flashcard.index, st.runtime.studySet.length);
     assert.equal(c.total, "共 8 張");
     assert.equal(c.position, "第 1 / 8 張");
@@ -403,5 +403,553 @@ describe("flashcards.test.js：空狀態提示（FE-43、FE-68）", () => {
     const hint = "請到難易度設定選擇色級並按「套用」，或新增自訂單字。";
     assert.ok(hint.endsWith("。"));
     assert.ok(!/[或、，]$/.test(hint.slice(0, -1)));
+  });
+});
+
+// ─────────────────────────────────────────────────────────────
+// （v0.23，FE-109）單字卡島嶼外觀、卡片角落裝飾與學完回饋列
+// 依據：architecture.md §7.32.9、§7.32.10、§10.15「flashcards.test.js」列；契約 README §15.5 LF-3、LF-4、§15.7 IV-3
+// 涵蓋：AC-69-01、AC-69-02（文字逐字呈現）、AC-69-05、AC-69-06、AC-68-02、AC-68-03、AC-70-02、AC-71-02、AC-38-08
+// 做法：極簡假 DOM ＋ node:vm 依瀏覽器方式載入 core/dom.js、ui/island-art.js 與 views/flashcards.js；
+//       store 用 _fixtures 的真實 store（Node 版），由測試代替 router 呼叫 setTab 與 show()／hide()
+// ─────────────────────────────────────────────────────────────
+
+describe("flashcards.test.js：島嶼外觀、角落裝飾與學完回饋列（FE-109）", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const vm = require("node:vm");
+  const APP_DIR = path.join(__dirname, "..");
+  const read = (rel) => fs.readFileSync(path.join(APP_DIR, rel), "utf8");
+
+  /** 極簡假節點：appendChild 會先自原父節點移除（與瀏覽器相同），hidden 屬性與特性同步 */
+  function makeNode(tag) {
+    const listeners = {};
+    const classes = new Set();
+    const n = {
+      nodeType: tag === "#text" ? 3 : 1,
+      tagName: tag.toUpperCase(),
+      attrs: {},
+      childNodes: [],
+      style: {},
+      disabled: false,
+      _text: "",
+      listeners,
+      parentNode: null,
+      classList: {
+        add: (c) => classes.add(c),
+        remove: (c) => classes.delete(c),
+        contains: (c) => classes.has(c),
+        toggle: (c, force) => {
+          const on = force === undefined ? !classes.has(c) : !!force;
+          if (on) classes.add(c); else classes.delete(c);
+          return on;
+        }
+      },
+      get className() { return [...classes].join(" "); },
+      set className(v) { classes.clear(); String(v).split(/\s+/).filter(Boolean).forEach((c) => classes.add(c)); },
+      get hidden() { return Object.prototype.hasOwnProperty.call(this.attrs, "hidden"); },
+      set hidden(v) { if (v) this.attrs.hidden = ""; else delete this.attrs.hidden; },
+      setAttribute(k, v) { if (k === "class") this.className = v; else this.attrs[k] = String(v); },
+      getAttribute(k) { return Object.prototype.hasOwnProperty.call(this.attrs, k) ? this.attrs[k] : null; },
+      removeAttribute(k) { delete this.attrs[k]; },
+      addEventListener(t, fn) { (listeners[t] = listeners[t] || []).push(fn); },
+      appendChild(c) {
+        if (c.parentNode) c.parentNode.removeChild(c);
+        this.childNodes.push(c);
+        c.parentNode = this;
+        return c;
+      },
+      removeChild(c) { this.childNodes.splice(this.childNodes.indexOf(c), 1); c.parentNode = null; return c; },
+      get firstChild() { return this.childNodes[0] || null; },
+      get children() { return this.childNodes.filter((c) => c.nodeType === 1); },
+      get textContent() { return this.nodeType === 3 ? this._text : this._text + this.childNodes.map((c) => c.textContent).join(""); },
+      set textContent(v) { this.childNodes = []; this._text = String(v); },
+      // （FE-117）同瀏覽器 cloneNode：複製標籤、屬性、class、文字；deep 時遞迴複製子節點，不複製監聽器與父節點
+      cloneNode(deep) {
+        const c = makeNode(this.nodeType === 3 ? "#text" : this.tagName.toLowerCase());
+        c.attrs = Object.assign({}, this.attrs);
+        c.className = this.className;
+        c._text = this._text;
+        if (deep) this.childNodes.forEach((k) => c.appendChild(k.cloneNode(true)));
+        return c;
+      }
+    };
+    return n;
+  }
+
+  function findAll(n, pred, out = []) {
+    if (n.nodeType === 1 && pred(n)) out.push(n);
+    for (const c of n.childNodes || []) findAll(c, pred, out);
+    return out;
+  }
+  const byClass = (root, cls) => findAll(root, (n) => n.classList.contains(cls));
+  const one = (root, cls) => {
+    const list = byClass(root, cls);
+    assert.equal(list.length, 1, "." + cls + " 應恰 1 個");
+    return list[0];
+  };
+
+  /**
+   * 以瀏覽器方式載入並 mount 單字卡頁。
+   * @param {{ store?: object, noArt?: boolean, quiz?: object, artHook?: Function }} [o]
+   *   store：省略時用 _fixtures 的真實 store；noArt：不載入 ui/island-art.js；quiz：假的 flashcardQuiz 元件；
+   *   artHook：（FE-117）載入 island-art.js 後、載入單字卡頁前以 EMT.ui.islandArt 呼叫，供包裝或替換插圖函式
+   */
+  function setup(o = {}) {
+    const document = {
+      createElement: (t) => makeNode(t),
+      createElementNS: (ns, t) => makeNode(t),
+      createTextNode: (t) => { const n = makeNode("#text"); n._text = t; return n; }
+    };
+    const errors = [];
+    const sandbox = { document, console: { log() {}, warn() {}, error: (...a) => errors.push(a) } };
+    sandbox.self = sandbox;
+    sandbox.window = sandbox;
+    vm.createContext(sandbox);
+    const files = ["core/constants.js", "core/dom.js", "core/interaction.js"];
+    if (!o.noArt) files.push("ui/island-art.js");
+    for (const rel of files) vm.runInContext(read(rel), sandbox, { filename: rel });
+    if (o.artHook && !o.noArt) o.artHook(sandbox.EMT.ui.islandArt);
+    let view = null;
+    sandbox.EMT.views = { register: (id, v) => { if (id === "flashcards") view = v; } };
+    sandbox.EMT.components = o.quiz ? { flashcardQuiz: o.quiz } : {};
+    let made = null;
+    if (o.store) sandbox.EMT.store = o.store;
+    else {
+      made = F.makeStore();
+      sandbox.EMT.store = made.store;
+    }
+    vm.runInContext(read("views/flashcards.js"), sandbox, { filename: "views/flashcards.js" });
+    assert.ok(view, "flashcards 已登錄");
+    const rootEl = makeNode("section");
+    view.mount(rootEl);
+    view.show();
+    return { view, rootEl, store: sandbox.EMT.store, a: made ? made.a : null, errors };
+  }
+
+  /** 回饋容器的元素子節點 */
+  const liveKids = (rootEl) => one(rootEl, "fc-feedback-live").children;
+
+  test("回饋容器常駐：role=status、aria-live=polite、aria-atomic=true；null 時無子元素（LF-3、AC-69-05）", () => {
+    const { rootEl, store } = setup();
+    assert.equal(store.getState().runtime.flashcard.islandFeedback, null);
+    const live = one(rootEl, "fc-feedback-live");
+    assert.equal(live.tagName, "DIV");
+    assert.equal(live.getAttribute("role"), "status");
+    assert.equal(live.getAttribute("aria-live"), "polite");
+    assert.equal(live.getAttribute("aria-atomic"), "true");
+    assert.equal(live.childNodes.length, 0, "未觸發回饋前不渲染回饋列");
+    assert.equal(live.textContent, "");
+    assert.equal(byClass(rootEl, "fc-feedback").length, 0);
+  });
+
+  test("回饋容器位於 .fc-stage 之後、.fc-nav 之前；.fc-main 其餘順序不變（AC-69-05、AC-38-08）", () => {
+    const { rootEl } = setup();
+    const main = one(rootEl, "fc-main");
+    assert.deepEqual(main.children.map((c) => c.className), ["fc-toolbar", "fc-stage", "fc-feedback-live", "fc-nav"]);
+  });
+
+  test("新值 → 1 個 p.fc-feedback：新芽圖示 aria-hidden ＋ 文字逐字（LF-4、AC-69-03、AC-71-02）", () => {
+    const { rootEl, store, a } = setup();
+    a.setTab("flashcards");
+    a.flipCard();
+    const fb = store.getState().runtime.flashcard.islandFeedback;
+    assert.ok(fb && typeof fb.text === "string", "store 產生回饋");
+    const kids = liveKids(rootEl);
+    assert.equal(kids.length, 1);
+    const p = kids[0];
+    assert.equal(p.tagName, "P");
+    assert.ok(p.classList.contains("fc-feedback"));
+    assert.equal(p.children.length, 2);
+    const [icon, span] = p.children;
+    assert.equal(icon.tagName, "SVG");
+    assert.ok(icon.classList.contains("fc-feedback__icon"));
+    assert.ok(icon.classList.contains("isl-art--sprout"));
+    assert.equal(icon.getAttribute("aria-hidden"), "true");
+    assert.equal(icon.getAttribute("focusable"), "false");
+    assert.equal(span.tagName, "SPAN");
+    assert.ok(span.classList.contains("fc-feedback__text"));
+    assert.equal(span.textContent, fb.text);
+    assert.equal(span.textContent, "小船又前進了，再 14 個字靠岸");
+    assert.equal(p.textContent, fb.text, "回饋列只有 1 行文字");
+  });
+
+  test("同值不重建；換卡、切換模式、翻回正面保留同一個 p；新值才替換（LF-3、AC-69-05）", () => {
+    const { rootEl, store, a } = setup();
+    a.setTab("flashcards");
+    a.flipCard();
+    const p1 = liveKids(rootEl)[0];
+    const fb1 = store.getState().runtime.flashcard.islandFeedback;
+    a.flipCard(); // 翻回正面：不比較
+    assert.equal(liveKids(rootEl)[0], p1);
+    a.gotoCard(1); // 換卡：保留
+    assert.equal(store.getState().runtime.flashcard.islandFeedback, fb1);
+    assert.equal(liveKids(rootEl).length, 1);
+    assert.equal(liveKids(rootEl)[0], p1, "參照相同 → 不動 DOM（不重播淡入）");
+    a.setFlashcardMode("quiz");
+    assert.equal(liveKids(rootEl)[0], p1, "切換測驗模式保留");
+    a.setFlashcardMode("card");
+    assert.equal(liveKids(rootEl)[0], p1, "切回單字卡模式保留");
+    a.flipCard(); // 第 2 個新字翻到背面 → 新回饋
+    const fb2 = store.getState().runtime.flashcard.islandFeedback;
+    assert.notEqual(fb2, fb1);
+    const kids = liveKids(rootEl);
+    assert.equal(kids.length, 1, "以新的 p 取代，不累加");
+    assert.notEqual(kids[0], p1);
+    assert.equal(byClass(kids[0], "fc-feedback__text")[0].textContent, "小船又前進了，再 13 個字靠岸");
+  });
+
+  test("切頁後清空；回到單字卡頁仍為空（LF-3、AC-69-05）", () => {
+    const { rootEl, view, a } = setup();
+    a.setTab("flashcards");
+    a.flipCard();
+    assert.equal(liveKids(rootEl).length, 1);
+    a.setTab("dashboard");
+    view.hide();
+    assert.equal(liveKids(rootEl).length, 0, "離開單字卡頁即清空");
+    a.setTab("flashcards");
+    view.show();
+    assert.equal(one(rootEl, "fc-feedback-live").childNodes.length, 0);
+  });
+
+  test("回饋文字以 textContent 寫入（XSS 字串原樣當文字）；缺 text 或空字串不渲染；tab 通知也同步", () => {
+    const base = F.makeStore().store.getState();
+    let state = base;
+    const subs = [];
+    const stub = {
+      getState: () => state,
+      subscribe: (fn) => { subs.push(fn); return () => {}; },
+      actions: {}
+    };
+    const set = (fb, tags) => {
+      state = { data: base.data, runtime: Object.assign({}, base.runtime, { flashcard: Object.assign({}, base.runtime.flashcard, { islandFeedback: fb }) }) };
+      subs.forEach((fn) => fn(state, tags));
+    };
+    const { rootEl } = setup({ store: stub });
+    const evil = "<img src=x onerror=alert(1)>";
+    set({ kind: "sailing", island: null, text: evil }, ["islandFeedback"]);
+    const span = one(rootEl, "fc-feedback__text");
+    assert.equal(span.textContent, evil);
+    assert.equal(span.children.length, 0, "不解析成元素");
+    assert.equal(findAll(rootEl, (n) => n.tagName === "IMG").length, 0);
+    set({ kind: "sailing", island: null, text: "" }, ["islandFeedback"]);
+    assert.equal(liveKids(rootEl).length, 0);
+    set({ kind: "sailing", island: null }, ["islandFeedback"]);
+    assert.equal(liveKids(rootEl).length, 0);
+    set({ kind: "docked", island: null, text: "今天的小船靠岸了！" }, ["tab"]);
+    assert.equal(one(rootEl, "fc-feedback__text").textContent, "今天的小船靠岸了！");
+    set({ kind: "levelUp", island: "orange", text: "橘島長出第一棵椰子樹！" }, ["speech"]);
+    assert.equal(one(rootEl, "fc-feedback__text").textContent, "今天的小船靠岸了！", "無關 tag 不更新");
+    set(null, ["islandFeedback"]);
+    assert.equal(liveKids(rootEl).length, 0);
+  });
+
+  test(".fc-deco：每次重建卡片區後仍為 .fc-stage 最後一個子元素、恰 1 個、aria-hidden（AC-69-01、AC-71-02、SD-FB-108）", () => {
+    const quizCalls = [];
+    const quiz = {
+      // 假測驗元件：冪等重繪，只清空並填入自己的容器
+      render(container, st) {
+        quizCalls.push(st.runtime.flashcard.index);
+        while (container.firstChild) container.removeChild(container.firstChild);
+        const q = makeNode("p");
+        q.textContent = "題目";
+        container.appendChild(q);
+      }
+    };
+    const env = setup({ quiz });
+    const { rootEl, a } = env;
+    const stage = one(rootEl, "fc-stage");
+    function check(label) {
+      const kids = stage.children;
+      const deco = kids[kids.length - 1];
+      assert.ok(deco.classList.contains("fc-deco"), label + "：最後一個子元素為 .fc-deco");
+      assert.equal(byClass(stage, "fc-deco").length, 1, label + "：恰 1 個裝飾");
+      assert.equal(deco.tagName, "SVG");
+      assert.ok(deco.classList.contains("isl-art--card"));
+      assert.equal(deco.getAttribute("aria-hidden"), "true");
+      assert.equal(deco.getAttribute("focusable"), "false");
+      assert.equal(deco.getAttribute("tabindex"), null);
+      assert.equal(kids.length, 2, label + "：卡片區只有卡片（或測驗容器）與裝飾");
+      return deco;
+    }
+    const d0 = check("首次顯示");
+    assert.ok(stage.children[0].classList.contains("fc-card"));
+    a.gotoCard(2);
+    assert.equal(check("換卡"), d0, "裝飾只建立 1 次");
+    a.flipCard();
+    check("翻面");
+    assert.equal(a.setFlashcardMode("quiz").ok, true);
+    check("進入測驗模式");
+    assert.ok(stage.children[0].classList.contains("fc-quiz"));
+    a.gotoCard(3);
+    check("測驗換題重繪");
+    assert.ok(quizCalls.length >= 2, "測驗元件已重繪");
+    a.setFlashcardMode("card");
+    assert.equal(check("切回單字卡"), d0);
+    env.view.show();
+    check("回到本頁（強制重建）");
+  });
+
+  test("islandArt 未載入：不拋例外、無裝飾；回饋仍顯示文字", () => {
+    const { rootEl, a, errors } = setup({ noArt: true });
+    assert.equal(byClass(rootEl, "fc-deco").length, 0);
+    a.setTab("flashcards");
+    a.flipCard();
+    const p = one(rootEl, "fc-feedback");
+    assert.equal(p.children.length, 1);
+    assert.equal(p.children[0].className, "fc-feedback__text");
+    assert.equal(errors.length, 0);
+  });
+
+  test("其餘元素順序、按鈕數量與文字不變；不新增返回鈕、今日 X / D、色級徽章、上一張 N 分（AC-69-01、AC-38-08、IV-3）", () => {
+    const { rootEl, a } = setup();
+    assert.deepEqual(rootEl.children[0].children.map((c) => c.className), ["fc-title", "fc-main", "card fc-empty"]);
+    assert.equal(one(rootEl, "fc-title").textContent, "單字卡");
+    const main = one(rootEl, "fc-main");
+    const btnText = () => findAll(main, (n) => n.tagName === "BUTTON").map((b) => b.textContent);
+    assert.deepEqual(btnText(), ["測驗模式", "上一張", "翻面", "下一張"]);
+    a.setTab("flashcards");
+    a.flipCard();
+    assert.deepEqual(btnText(), ["測驗模式", "上一張", "翻面", "下一張"], "回饋列不含按鈕");
+    assert.doesNotMatch(main.textContent, /今日\s*\d+\s*\/\s*\d+|上一張\s*\d+\s*分|返回|橘級|棕級|綠級/);
+    // 卡片內部結構不變：正面、背面、出處
+    const card = one(main, "fc-card");
+    assert.deepEqual(card.children.map((c) => c.className), ["fc-face fc-front", "fc-face fc-back", "fc-attrib"]);
+  });
+
+  test("純邏輯 feedbackTextOf、feedbackChange：參照相同不更新、無效值視為 null", () => {
+    const fb = { kind: "mastered", island: "orange", text: "橘島又多掌握 1 個字（掌握 24%）" };
+    assert.equal(L.feedbackTextOf(fb), "橘島又多掌握 1 個字（掌握 24%）");
+    assert.equal(L.feedbackTextOf(null), null);
+    assert.equal(L.feedbackTextOf({ text: "  " }), null);
+    assert.equal(L.feedbackTextOf({ text: 3 }), null);
+    assert.deepEqual(L.feedbackChange(null, null), { change: false, value: null });
+    assert.deepEqual(L.feedbackChange(fb, fb), { change: false, value: fb });
+    assert.deepEqual(L.feedbackChange(null, fb), { change: true, value: fb });
+    const same = Object.assign({}, fb);
+    assert.equal(L.feedbackChange(fb, same).change, true, "內容相同但物件不同 → 替換（重播淡入）");
+    assert.deepEqual(L.feedbackChange(fb, { text: "" }), { change: true, value: null });
+    assert.deepEqual(L.feedbackChange(fb, null), { change: true, value: null });
+  });
+
+  // ── CSS（architecture.md §7.32.7、§7.32.9） ──
+
+  const css = read("styles/30-flashcards.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  // 去掉 @media 區塊後的頂層規則
+  const topCss = css.replace(/@media[^{]*\{(?:[^{}]*\{[^}]*\})*\s*\}/g, "");
+  /** 取出頂層選擇器完全相同的規則宣告 */
+  function rule(sel) {
+    const esc = sel.replace(/[.*+?^${}()|[\]\\>]/g, "\\$&");
+    const m = topCss.match(new RegExp("(^|\\})\\s*" + esc + "\\s*\\{([^}]*)\\}"));
+    assert.ok(m, "缺少規則 " + sel);
+    return m[2];
+  }
+
+  test("CSS：刪除 v0.11 卡片幾何覆寫；卡片與按鈕沿用全站外框（AC-68-02、AC-69-01）", () => {
+    assert.doesNotMatch(css, /#view-flashcards\s+\.card/);
+    // 本檔不再覆寫卡片／按鈕的外框、圓角、陰影
+    const blocks = css.match(/[^{}]+\{[^{}]*\}/g) || [];
+    let checked = 0;
+    for (const b of blocks) {
+      const [sel, decls] = b.split("{");
+      if (!/\.(card|btn|fc-card|fc-quiz|fc-mode-btn|fc-prev|fc-next|fc-flip)(?![\w-])/.test(sel)) continue;
+      checked++;
+      assert.doesNotMatch(decls, /\bborder(-color|-width|-radius|-style)?\s*:|box-shadow\s*:/, "選擇器：" + sel.trim());
+    }
+    assert.ok(checked >= 4);
+    // 單字卡本體翻到背面不換底色（區塊卡片背景 = 白，AC-68-02）
+    assert.doesNotMatch(css, /\.fc-card\[data-flipped="true"\]\s*\{[^}]*background/);
+  });
+
+  test("CSS：.fc-stage 定位基準、.fc-deco 右上角絕對定位且不攔點擊、卡片上內距 ≥ 34px（AC-69-01）", () => {
+    assert.match(rule(".fc-stage"), /position:\s*relative/);
+    const deco = rule(".fc-deco");
+    assert.match(deco, /position:\s*absolute/);
+    assert.match(deco, /top:\s*8px/);
+    assert.match(deco, /right:\s*12px/);
+    assert.match(deco, /pointer-events:\s*none/);
+    const pad = rule(".fc-stage > .card").match(/padding-top:\s*(\d+)px/);
+    assert.ok(pad && Number(pad[1]) >= 34, "上內距 ≥ 34px");
+    // 裝飾矩形 top 8 + 高 24 = 32 < 上內距
+    assert.ok(8 + 24 < Number(pad[1]));
+    // 其他規則（含 @media）不得以 .fc-stage > .card 改小上內距
+    assert.equal((css.match(/\.fc-stage\s*>\s*\.card\s*\{/g) || []).length, 1);
+  });
+
+  test("CSS：回饋容器無內距、外框、外距；回饋列樣式與 200ms 只改 opacity 的淡入（AC-69-05、AC-70-02、AC-68-03）", () => {
+    const live = rule(".fc-feedback-live");
+    assert.match(live, /margin:\s*0/);
+    assert.match(live, /padding:\s*0/);
+    assert.match(live, /border:\s*0/);
+    const fb = rule(".fc-feedback");
+    for (const re of [/display:\s*flex/, /align-items:\s*center/, /gap:\s*8px/, /margin:\s*12px 0 0/, /padding:\s*8px 12px/,
+      /background:\s*var\(--feedback-bg\)/, /border:\s*2px solid var\(--outline\)/, /border-radius:\s*16px/,
+      /font-size:\s*0\.875rem/, /font-weight:\s*700/, /(^|[^-])color:\s*var\(--text\)/, /overflow-wrap:\s*anywhere/]) {
+      assert.match(fb, re);
+    }
+    // 淡入時長用變數（A-4）且 = 200ms（--emt-dur-slide）
+    assert.match(fb, /animation:\s*fc-fb-in var\(--emt-dur-slide\) ease-out/);
+    const motionCss = read("styles/05-motion.css");
+    assert.match(motionCss, /--emt-dur-slide:\s*200ms/);
+    const kf = css.match(/@keyframes fc-fb-in\s*\{([\s\S]*?\})\s*\}/);
+    assert.ok(kf, "缺少 @keyframes fc-fb-in");
+    const props = kf[1].match(/[\w-]+(?=\s*:)/g) || [];
+    assert.ok(props.length > 0 && props.every((p) => p === "opacity"), "只改 opacity：" + props.join(","));
+    // 減少動態由全域規則關閉
+    assert.match(motionCss, /prefers-reduced-motion:\s*reduce[\s\S]*animation:\s*none !important/);
+    // 回饋文字對比（--text #1f2937 對 --feedback-bg #e9fbef ≥ 4.5:1）
+    const base = read("styles/00-base.css");
+    assert.match(base, /--feedback-bg:\s*#e9fbef/);
+    assert.match(base, /--text:\s*#1f2937/);
+    const lum = (hex) => {
+      const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+        .map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    };
+    const ratio = (lum("#e9fbef") + 0.05) / (lum("#1f2937") + 0.05);
+    assert.ok(ratio >= 4.5, "對比 " + ratio.toFixed(2));
+  });
+
+  // ─────────────────────────────────────────────────────────────
+  // （FE-117）新芽圖示範本：mount 建 1 份，之後 cloneNode(true)（architecture.md §7.32.9、§7.32.15 P-6、§10.15）
+  // ─────────────────────────────────────────────────────────────
+
+  /** 可由測試直接推送 islandFeedback 的假 store（參照每次不同） */
+  function feedbackStub() {
+    const base = F.makeStore().store.getState();
+    let state = base;
+    const subs = [];
+    const store = {
+      getState: () => state,
+      subscribe: (fn) => { subs.push(fn); return () => {}; },
+      actions: {}
+    };
+    const push = (fb) => {
+      state = { data: base.data, runtime: Object.assign({}, base.runtime, { flashcard: Object.assign({}, base.runtime.flashcard, { islandFeedback: fb }) }) };
+      subs.forEach((fn) => fn(state, ["islandFeedback"]));
+    };
+    return { store, push };
+  }
+
+  /** 節點結構（標籤、class、屬性、文字、子節點），用來比較複製品與 sprout() 的輸出 */
+  const shape = (n) => ({
+    tag: n.tagName,
+    cls: n.className,
+    attrs: Object.assign({}, n.attrs),
+    text: n._text,
+    kids: n.childNodes.map(shape)
+  });
+
+  test("新芽圖示：sprout 在 mount 呼叫 1 次，之後 3 次不同回饋不再呼叫；每個圖示是不同節點、結構同 sprout()；範本不在文件中（FE-117、AC-69-05）", () => {
+    let calls = 0;
+    let template = null;
+    let art = null;
+    const { store, push } = feedbackStub();
+    const { rootEl, errors } = setup({
+      store,
+      artHook: (a) => {
+        art = a;
+        const orig = a.sprout;
+        a.sprout = function (cls) {
+          calls++;
+          template = orig.call(this, cls);
+          return template;
+        };
+      }
+    });
+    assert.equal(calls, 1, "mount 時建立 1 份範本");
+    assert.ok(template, "範本已建立");
+    assert.equal(byClass(rootEl, "fc-feedback").length, 0, "尚無回饋列");
+
+    const texts = ["小船又前進了，再 14 個字靠岸", "小船又前進了，再 13 個字靠岸", "今天的小船靠岸了！"];
+    const icons = [];
+    texts.forEach((text, i) => {
+      push({ kind: i === 2 ? "docked" : "sailing", island: null, text });
+      const p = one(rootEl, "fc-feedback");
+      assert.equal(p.tagName, "P");
+      assert.equal(p.children.length, 2);
+      const [icon, span] = p.children;
+      assert.equal(icon.tagName, "SVG");
+      assert.ok(icon.classList.contains("fc-feedback__icon"));
+      assert.ok(icon.classList.contains("isl-art--sprout"));
+      assert.equal(icon.getAttribute("aria-hidden"), "true");
+      assert.equal(icon.getAttribute("focusable"), "false");
+      assert.equal(span.textContent, text);
+      assert.equal(p.textContent, text, "圖示不帶文字");
+      icons.push(icon);
+    });
+    assert.equal(calls, 1, "之後的回饋列不再呼叫 sprout");
+    assert.equal(new Set(icons).size, 3, "每個回饋列的圖示是不同節點");
+    icons.forEach((icon) => assert.notEqual(icon, template, "不直接使用範本"));
+
+    // 結構與 sprout() 新建的圖示相同（以原函式另建一份比較，不影響計數斷言）
+    const fresh = template.cloneNode(true);
+    assert.deepEqual(shape(icons[2]), shape(fresh));
+    assert.deepEqual(shape(icons[0]), shape(template));
+    assert.ok(shape(template).kids.length > 0, "範本含圖形子節點");
+
+    // 範本不在文件中，也未被複製品取代內容
+    assert.equal(template.parentNode, null, "範本沒有父節點");
+    assert.equal(findAll(rootEl, (n) => n === template).length, 0, "範本不在頁面樹中");
+    assert.ok(art && typeof art.sprout === "function");
+    assert.equal(errors.length, 0);
+  });
+
+  test("新芽圖示：結構與直接呼叫 islandArt.sprout(\"fc-feedback__icon\") 相同（FE-117）", () => {
+    let direct = null;
+    const { store, push } = feedbackStub();
+    const { rootEl } = setup({
+      store,
+      artHook: (a) => { direct = a.sprout("fc-feedback__icon"); }
+    });
+    push({ kind: "sailing", island: null, text: "小船又前進了，再 14 個字靠岸" });
+    const icon = one(rootEl, "fc-feedback").children[0];
+    assert.notEqual(icon, direct);
+    assert.deepEqual(shape(icon), shape(direct));
+  });
+
+  test("新芽圖示：sprout 回傳 null 時回饋列只有文字、不拋例外，之後也不重試（FE-117、AC-69-05）", () => {
+    let calls = 0;
+    const { store, push } = feedbackStub();
+    const { rootEl, errors } = setup({
+      store,
+      artHook: (a) => { a.sprout = () => { calls++; return null; }; }
+    });
+    assert.equal(calls, 1);
+    ["小船又前進了，再 14 個字靠岸", "今天的小船靠岸了！"].forEach((text) => {
+      assert.doesNotThrow(() => push({ kind: "sailing", island: null, text }));
+      const p = one(rootEl, "fc-feedback");
+      assert.equal(p.children.length, 1, "只有文字");
+      assert.equal(p.children[0].className, "fc-feedback__text");
+      assert.equal(p.textContent, text);
+    });
+    assert.equal(calls, 1, "範本為 null 時不在回饋時重建");
+    assert.equal(errors.length, 0);
+    // 角落裝飾不受影響（placeDeco 不改）
+    assert.equal(byClass(rootEl, "fc-deco").length, 1);
+  });
+
+  test("新芽圖示：sprout 拋例外時記錄錯誤、回饋列只有文字（FE-117）", () => {
+    const { store, push } = feedbackStub();
+    const { rootEl, errors } = setup({
+      store,
+      artHook: (a) => { a.sprout = () => { throw new Error("boom"); }; }
+    });
+    assert.equal(errors.length, 1, "mount 時記錄 1 次");
+    assert.doesNotThrow(() => push({ kind: "sailing", island: null, text: "今天的小船靠岸了！" }));
+    const p = one(rootEl, "fc-feedback");
+    assert.equal(p.children.length, 1);
+    assert.equal(p.textContent, "今天的小船靠岸了！");
+    assert.equal(errors.length, 1, "回饋時不再呼叫");
+  });
+
+  test("原始碼：renderFeedback 不再直接呼叫 makeArt(\"sprout\")，改用範本 cloneNode(true)（FE-117）", () => {
+    const src = read("views/flashcards.js");
+    const m = src.match(/function renderFeedback\([\s\S]*?\n  \}\n/);
+    assert.ok(m, "找到 renderFeedback");
+    assert.doesNotMatch(m[0], /makeArt\(/);
+    assert.match(m[0], /cloneSprout\(\)/);
+    assert.match(src, /sproutTemplate\.cloneNode\(true\)/);
+    assert.equal((src.match(/makeArt\("sprout"/g) || []).length, 1, "只在 mount 建立範本");
   });
 });

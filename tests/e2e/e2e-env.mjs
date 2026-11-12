@@ -240,7 +240,7 @@ const LAYOUT = `(() => {
   for (const t of ["dashboard", "customizer", "flashcards", "part5"]) { await navTo(t); reach.push(`${t}:${(await cur()) === t}`); }
   const navInfo = await p.ev(`(() => { const nav = document.getElementById("app-nav"); const cs = getComputedStyle(nav); const r = nav.getBoundingClientRect();
     return { labels: [...nav.querySelectorAll("[data-tab]")].map((b) => (b.querySelector(".app-nav__label") || b).textContent.trim()).join("、"), position: cs.position, bottomGap: Math.round(window.innerHeight - r.bottom), toggle: getComputedStyle(document.getElementById("nav-toggle")).display }; })()`);
-  const labelsOk = navInfo.labels === "主控台、難易度設定、單字卡、模擬測驗";
+  const labelsOk = navInfo.labels === "群島、難易度設定、單字卡、模擬測驗" /* 第 13 輪：AC-20-03 v0.22（R-32，Q-114 A） */;
   R[reach.every((x) => x.endsWith("true")) && labelsOk && navInfo.position === "fixed" && navInfo.bottomGap === 0 ? "pass" : "fail"]("TC-20-03", "AC-20-03", `375px 以導覽到達：${reach.join(" ")}；導覽文字「${navInfo.labels}」；導覽 position=${navInfo.position}、距視窗底 ${navInfo.bottomGap}px、選單鈕 display=${navInfo.toggle}`);
 
   await navTo("customizer");

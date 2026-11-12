@@ -25,6 +25,9 @@
  *   TEXT.originalLicense、TEXT.trademarkNotice 改取 LEGAL_STATEMENTS，聯絡行改取 core/site-content 的 SOURCES_CONTACT_TEXT，
  *   本檔不再存這些文字；api 仍匯出同名鍵。皆於讀取時才向 core 取用（LD-2）。
  *   .src-page 最前面加共用返回按鈕（內容不動），文字由 show 依返回目標更新。
+ * - （v0.19 島嶼風格，FE-105；architecture.md v0.19 §7.32.12、契約 README §4.3 L-8 LT-7、V-LGL-03、AC-72-05）
+ *   聲明清單在 LT-4（品牌標識）之後新增 1 條 LT-7（群島插圖與角色「龜龜」聲明），逐字照契約，以 textContent 寫入；
+ *   LT-1～LT-6 與既有聲明不變；LT-7 不加入關於我（core/site-content.js 不改），因此字面值放在本檔 TEXT.islandBrand。
  *
  * 純邏輯（selectEntries、formatCount、countLabel、derivedAttribution、brandStatement）可在 Node 測試；
  * 瀏覽器下登錄 EMT.views.register("sources", { mount })。
@@ -70,6 +73,8 @@
     dataLicense: "單字資料以 CC BY-SA 4.0 授權",
     get originalLicense() { return siteContent().LEGAL_STATEMENTS.originalContent; },
     get trademarkNotice() { return siteContent().LEGAL_STATEMENTS.trademark; },
+    // （v0.19 島嶼風格，FE-105）契約 L-8 LT-7 逐字（含句末全形句號）；只用於本頁，接在 LT-4 之後（AC-72-05）
+    islandBrand: "群島插圖與角色「龜龜」由 AI 依 JimmyLin 的構想繪製，作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。",
     codeLicenseUrlLabel: "MIT 條款網址",
     dataLicenseUrlLabel: "CC BY-SA 4.0 條款網址",
     // （v0.12，FE-60；NM-3、SD-FB-49）原創內容來源一行的前綴；名稱取 registry 中 ORIGINAL 的 fullName，不寫死
@@ -357,6 +362,8 @@
         dom.el("li", { text: TEXT.dataLicense }),
         dom.el("li", { text: TEXT.originalLicense }),
         dom.el("li", { className: "src-statements__brand", text: brandStatement(pwaCore().PWA_APP_NAME) }),
+        // （v0.19 島嶼風格，FE-105）LT-7 接在 LT-4 之後（§7.32.12）
+        dom.el("li", { className: "src-statements__island", text: TEXT.islandBrand }),
         dom.el("li", { text: TEXT.trademarkNotice })
       ]),
       dom.el("p", { className: "src-attrib", text: derivedAttribution(wordlists, holder) }),

@@ -183,7 +183,7 @@ await R.check("TC-42-02", "AC-42-02、AC-36-02、AC-36-07、E-96", async () => {
   const swLeft = sw.match(/@@[A-Za-z0-9_]+@@/g) || [];
   const pkgInSite = fs.readdirSync(SITE).filter((f) => /package/.test(f));
   const fileText = (globalThis.__fileText || [])[0];
-  const ok = PKG.version === "1.3.2" /* 第 12 輪：v0.21 Q-105 A，MC-10（第 10 輪 1.3.1、MC-09） */ && APP_VER === PKG.version && metaCount === 1 && /^[0-9a-f]{16}$/.test(BUILD_ID) && swId === BUILD_ID && swId.slice(0, 7) === BUILD_ID.slice(0, 7)
+  const ok = PKG.version === "1.4.0" /* 第 13 輪：v0.22 Q-124 A（第 12 輪 1.3.2）；第 12 輪：v0.21 Q-105 A，MC-10（第 10 輪 1.3.1、MC-09） */ && APP_VER === PKG.version && metaCount === 1 && /^[0-9a-f]{16}$/.test(BUILD_ID) && swId === BUILD_ID && swId.slice(0, 7) === BUILD_ID.slice(0, 7)
     && same && leftovers.length === 0 && swLeft.length === 0 && pkgInSite.length === 0 && fileText === `版本 ${PKG.version}（建置 ${BUILD_ID.slice(0, 7)}）`;
   return { ok, note: `package.json version ${PKG.version}；emt-app-version ${APP_VER}（${metaCount} 個）；emt-build-id ${BUILD_ID}；sw.js BUILD_ID ${swId}、CACHE_NAME ${cacheName && cacheName.trim()}；畫面「${fileText}」；dist 與 site/index.html 逐位元組相同=${same}；@@ 殘留 HTML ${leftovers.length}／sw ${swLeft.length}；site 內 package 檔 ${pkgInSite.length}（共 ${fs.readdirSync(SITE, { recursive: true }).filter((f) => fs.statSync(path.join(SITE, f)).isFile()).length} 檔）` };
 });

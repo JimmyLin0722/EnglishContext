@@ -3,7 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-const tasks = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/03-design/tasks.json"), "utf8")).tasks;
+// 已完成任務封存於 docs/archive/tasks-done.json（2026-11-11），兩檔合併視為完整任務清單
+const readTasks = (p) => (fs.existsSync(path.join(ROOT, p)) ? JSON.parse(fs.readFileSync(path.join(ROOT, p), "utf8")).tasks : []);
+const tasks = [...readTasks("docs/archive/tasks-done.json"), ...readTasks("docs/03-design/tasks.json")];
 const owner = new Map();
 for (const t of tasks) for (const p of t.paths) { const k = p.split(path.sep).join("/"); if (!owner.has(k)) owner.set(k, []); owner.get(k).push(t.id); }
 const files = [];

@@ -96,7 +96,7 @@ test("契約常數：其餘 13 個常數字面值相同", () => {
 test("契約常數 v0.8（FE-20）／v0.9（FE-34）／v0.19（FE-83）：TAB_LABELS、NAV_TAB_ORDER、LEARNED_HISTORY_DAYS、DASHBOARD_CHART_DAYS 逐字相同", () => {
   // TAB_LABELS 10 項（v0.19 加 about、contact、privacy，SP-1），鍵順序同 data-schema.ts
   assert.deepEqual({ ...C.TAB_LABELS }, {
-    dashboard: "主控台",
+    dashboard: "群島",
     customizer: "難易度設定",
     flashcards: "單字卡",
     part5: "模擬測驗",

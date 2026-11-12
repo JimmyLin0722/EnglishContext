@@ -1,0 +1,9 @@
+[
+  {
+    "suite": "e2e-pwa-r13",
+    "tc": "TC-72-04a",
+    "ac": "AC-72-04、AC-36-03、AC-36-04、E-185",
+    "result": "通過",
+    "note": "v1.3.2（ff74b52f0605c465）安裝 service worker、有學習資料；部署 1.4.0（7ce555b38d85b6c4）後重新載入 → 1850 ms 顯示「有新版本，請更新版本」＋「更新版本」；更新前頁面仍為舊版（識別碼 ff74b52f0605c465、地圖=false、標題「學習主控台」，E-185 預期）；按「更新版本」→ 識別碼 7ce555b38d85b6c4、main/dashboard、地圖=true、標題「我的群島」、導覽 群島、難易度設定、單字卡、模擬測驗、body rgb(234, 247, 251)；localStorage 與更新前完全相同=true；本專案快取 [\"english-master-track-pwa-7ce555b38d85b6c4\"]"
+  }
+]

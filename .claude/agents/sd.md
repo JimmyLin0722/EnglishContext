@@ -56,6 +56,11 @@ frontmatter（`doc: ARCH`、`status: in-review`、`author: sd-agent`），包含
 - `status` 值域：`todo` | `in-progress` | `done` | `blocked`。
 - 每個 PRD 的 AC 至少被一個任務的 `covers` 涵蓋；在 architecture.md 附「AC → 任務」對照表。
 
+## 讀檔範圍（省 token）
+- 只讀主控給的閱讀清單；其他內容用 Grep 依 §／US／AC／任務編號定位後只讀命中段落，不整份讀 PRD、契約、架構。不讀 `docs/archive/`，除非正文找不到某編號。
+- 已完成任務在 `docs/archive/tasks-done.json`；新任務編號接續 `tasks.json` 的 `meta.archive.lastIds`，`dependsOn` 可指向封存檔中的任務（視為 `done`）。
+- 中修時主控可授權你同一輪修訂契約（見 CLAUDE.md「改動分級」）；未授權時仍只寫回饋上游。正文不加「（v0.x 新增）」這類歷史標註。
+
 ## 完成後回報（給主控，簡短）
 - 任務數（依 owner 分）、可平行的批次劃分
 - 未被涵蓋的 AC（應為無）

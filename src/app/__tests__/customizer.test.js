@@ -1174,10 +1174,11 @@ describe("customizer.test.js：初始化確認視窗（FE-40）", () => {
     assert.deepEqual(Object.keys(o).sort(), ["cancelText", "message", "okText", "title"]);
     assert.equal(o.title, "切換難易度");
     assert.ok(o.message.includes("目前已有學習統計資料，切換難易度將初始化學習紀錄"));
-    assert.ok(o.message.includes("建議先按「取消」，到主控台按「匯出備份」保存目前紀錄"));
+    assert.ok(o.message.includes("建議先按「取消」，到「群島」頁按「匯出備份」保存目前紀錄"));
+    assert.ok(!o.message.includes("主控台"), "確認視窗不得含「主控台」（AC-63-02）");
     assert.deepEqual(o.message.split("\n"), [
       "目前已有學習統計資料，切換難易度將初始化學習紀錄。",
-      "建議先按「取消」，到主控台按「匯出備份」保存目前紀錄。"
+      "建議先按「取消」，到「群島」頁按「匯出備份」保存目前紀錄。"
     ]);
     assert.equal(o.okText, "確定");
     assert.equal(o.cancelText, "取消");

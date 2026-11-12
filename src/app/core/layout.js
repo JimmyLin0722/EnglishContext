@@ -63,7 +63,7 @@
     accent: "#f7893b",
     accentText: "#1f2937",
     themeColor: "#1e9bf0",
-    background: "#eef4fa",
+    background: "#eaf7fb",
     surface: "#ffffff",
     text: "#1f2937",
     textMuted: "#5b6472"
@@ -91,7 +91,7 @@
   /** 版面文字（逐字使用；「・」為 U+30FB，摘要行「字」與「預計」之間為全形空白 U+3000） */
   var LAYOUT_TEXTS = {
     // ── 主控台（US-39）──
-    dashboardTitle: "學習主控台",
+    dashboardTitle: "我的群島",
     todayRing: "今日已學 {x} / {d} 字",
     startToday: "開始今日學習",
     goalLineSame: "{color}級・每日 {daily} 字",
@@ -125,7 +125,7 @@
   // ── 架構常數（architecture.md §4.8；CSS 以同值寫死）──
   var UI_LAYOUT = {
     CONTENT_NARROW_PX: 720,
-    CARD_RADIUS_PX: 16,
+    CARD_RADIUS_PX: 22,
     NARROW_MAX_PX: 640,
     FIRSTBAR_RESERVE_PX: 184,
     CHART_TRACK_PX: 64,

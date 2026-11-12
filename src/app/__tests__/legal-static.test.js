@@ -9,6 +9,8 @@
  * - 資料檔以 vm 載入後遞迴走訪字串值，因此不含註解（V-LGL-05 範圍外）；不含 _tools/、_records/。
  * - （v0.19，FE-87）V-LGL-05 範圍 (c)：關於我、聯絡我們、隱私權政策與 SEO 文字（AC-23-08）；LEGAL_STATEMENTS 與 LT-3、LT-5 逐字相同（V-SITE-02）。
  * - （v0.17，FE-100）LT-2 改為不含「Part 5」（契約 v0.21 V-LGL-02）；交付 HTML 與 3 個靜態頁「TOEIC®（多益）Part 5」0 次，LT-3 的「Part 5 題目」不變。
+ * - （v0.19 島嶼風格，FE-105；architecture.md v0.19 §7.32.12、AC-72-05）LT-7：開頭註解區恰 1 次且在 LT-4 之後、仍不含 LT-5（V-LGL-04）；
+ *   「資料來源與授權」頁（以建置方式在 vm 載入並 render）LT-7 恰 1 次且在 LT-4 之後（V-LGL-03）；關於我不含 LT-7；AC-23-08 搜尋仍 0。
  */
 "use strict";
 
@@ -31,6 +33,8 @@ const LT_3 = "原創內容（例句、解析、Part 5 題目、長難句、句�
 const LT_4 = "PWA 圖示由 AI 依 JimmyLin 的構想生成；圖示與名稱「EnglishContext」作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0";
 const LT_5 = "TOEIC® 為 ETS 的註冊商標。本網站與 ETS 無關，亦未經其認可或核准。";
 const LT_6 = "be interested in 表示「對……有興趣」，是常見的形容詞＋介系詞搭配。";
+/** （v0.19 島嶼風格，FE-105）群島插圖與龜龜聲明（含句末全形句號） */
+const LT_7 = "群島插圖與角色「龜龜」由 AI 依 JimmyLin 的構想繪製，作為品牌標識使用，JimmyLin 保留其享有的權利，不適用 MIT 與 CC BY-SA 4.0。";
 
 /** （v0.17，FE-100；Q-108 A、R-31）LT-2 舊文字的特徵片段：商標說明不再指名「Part 5」 */
 const OLD_LT_2_PART = "TOEIC®（多益）Part 5";
@@ -122,6 +126,98 @@ describe("legal-static.test.js", () => {
 
     test("全文：LT-1、LT-2、LT-3、LT-5、LT-6 至少 1 次（§10.9）", () => {
       for (const s of [LT_1, LT_2, LT_3, LT_5, LT_6]) assert.ok(countOf(html, s) >= 1, s);
+    });
+
+    test("（FE-105）開頭註解區：LT-7 恰 1 次、獨立成 1 行且緊接在 LT-4 那一行之後；仍不含 LT-5（V-LGL-04、AC-72-05）", () => {
+      assert.equal(countOf(header, LT_7), 1);
+      const lines = header.split(/\r?\n/);
+      const i4 = lines.indexOf(LT_4 + "。");
+      const i7 = lines.indexOf(LT_7);
+      assert.ok(i4 >= 0, "LT-4 應獨立成 1 行");
+      assert.equal(i7, i4 + 1, "LT-7 緊接在 LT-4 之後");
+      assert.equal(header.includes(LT_5), false);
+      assert.equal(header.includes("--"), false);
+    });
+
+    test("（FE-105）開頭註解區以外，LT-7 只出現 1 次（資料來源與授權頁的程式來源，單一出處）", () => {
+      const rest = html.replace(/<!--[\s\S]*?-->/, "");
+      assert.equal(countOf(rest, LT_7), 1);
+    });
+
+    test("（FE-105）AC-23-08：LT-7 本身不含 A＋B 同句的說法、不含舊文字", () => {
+      assert.deepEqual(claimSentences(LT_7), []);
+      for (const s of OLD_TEXTS) assert.equal(LT_7.includes(s), false, s);
+    });
+  });
+
+  describe("（v0.19 島嶼風格，FE-105）「資料來源與授權」頁 render 結果（V-LGL-03）", () => {
+    /** 依建置方式載入本頁需要的模組（與 sources-page.test.js 相同順序） */
+    const PAGE_MODULES = ["core/dom.js", "core/pwa.js", "core/site-content.js", "ui/site-return.js", "views/sources-page.js"];
+
+    /** 最小假 DOM：只支援 core/dom.js 用到的介面，textContent 取子孫文字串接 */
+    function fakeDocument() {
+      function node(tag) {
+        return {
+          nodeType: tag === "#text" ? 3 : 1,
+          tagName: tag.toUpperCase(),
+          className: "",
+          attrs: {},
+          childNodes: [],
+          _text: "",
+          setAttribute(k, v) { this.attrs[k] = String(v); },
+          getAttribute(k) { return this.attrs[k]; },
+          addEventListener() {},
+          appendChild(c) { this.childNodes.push(c); c.parentNode = this; return c; },
+          removeChild(c) { this.childNodes.splice(this.childNodes.indexOf(c), 1); return c; },
+          get firstChild() { return this.childNodes[0] || null; },
+          get textContent() { return this.nodeType === 3 ? this._text : this._text + this.childNodes.map((c) => c.textContent).join(""); },
+          set textContent(v) { this.childNodes = []; this._text = String(v); }
+        };
+      }
+      return {
+        createElement: (t) => node(t),
+        createTextNode: (t) => { const n = node("#text"); n._text = t; return n; },
+        createElementNS: (ns, t) => node(t)
+      };
+    }
+
+    let pageText = "";
+    before(() => {
+      const data = {};
+      vm.runInNewContext(fs.readFileSync(path.join(DATA_DIR, "sources.js"), "utf8"), { window: data, self: data });
+      const sandbox = { console: { warn() {}, error() {}, log() {} } };
+      sandbox.self = sandbox;
+      vm.createContext(sandbox);
+      for (const rel of PAGE_MODULES) {
+        vm.runInContext(fs.readFileSync(path.join(ROOT, "src", "app", rel), "utf8"), sandbox, { filename: rel });
+      }
+      sandbox.EMT.core.dom.setDocument(fakeDocument());
+      const rootEl = fakeDocument().createElement("section");
+      sandbox.EMT.views.sourcesPage.render(rootEl, {
+        sources: data.DATA_SOURCE_REGISTRY, builtin: [], license: data.PROJECT_LICENSE
+      });
+      pageText = rootEl.textContent;
+    });
+
+    test("LT-3、LT-4、LT-5、LT-7 各恰 1 次；LT-7 在 LT-4 之後；既有聲明與聯絡行不變；無舊聲明", () => {
+      const SITE = require("../core/site-content.js");
+      for (const s of [LT_3, LT_4, LT_5, LT_7, SITE.SOURCES_CONTACT_TEXT]) assert.equal(countOf(pageText, s), 1, s);
+      assert.ok(pageText.indexOf(LT_7) > pageText.indexOf(LT_4));
+      assert.ok(pageText.includes("程式碼以 MIT 授權（Copyright JimmyLin）"));
+      assert.ok(pageText.includes("單字資料以 CC BY-SA 4.0 授權"));
+      assert.equal(pageText.includes("著作權人 JimmyLin"), false);
+      assert.equal(pageText.includes("保留所有權利"), false);
+    });
+
+    test("關於我（SITE_PAGES about 與 about.html 部署檔）不含 LT-7（契約 LT-7「不加入關於我」）", async () => {
+      const SITE = require("../core/site-content.js");
+      const texts = [];
+      walkStrings(SITE.SITE_PAGES.find((p) => p.id === "about").blocks, "about", (s) => texts.push(s));
+      assert.equal(texts.some((s) => s.includes(LT_7)), false);
+      const { build } = await import(pathToFileURL(BUILD).href);
+      const f = build({ write: false, log() {}, warn() {} }).site.files.find((x) => x.path === "about.html");
+      assert.ok(f, "部署檔應存在：about.html");
+      assert.equal(countOf(Buffer.from(f.bytes).toString("utf8"), LT_7), 0);
     });
   });
 

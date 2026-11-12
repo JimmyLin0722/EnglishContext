@@ -25,7 +25,7 @@ const TMP = fs.mkdtempSync(path.join(process.env.QA_TMP || os.tmpdir(), "pwa-"))
 const INITS = [TOAST_RECORDER, fakeTts("ok"), fakeStt("ok"), fakeMic("ok", -25), TRUSTED_BIP];
 const MANIFEST_EXPECTED = {
   name: "EnglishContext", short_name: "EnglishContext", id: "./", start_url: "./", scope: "./", display: "standalone", lang: "zh-Hant-TW",
-  theme_color: "#1e9bf0", background_color: "#eef4fa",
+  theme_color: "#1e9bf0", background_color: "#eaf7fb" /* 第 13 輪：AC-68-01、IV-1 */,
   icons: [
     { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
     { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
@@ -220,8 +220,8 @@ if (!SMOKE) {
     await page.goto(BASE); await sleep(600);
     const a = await page.evaluate(() => ({ theme: (document.querySelector('meta[name="theme-color"]') || {}).content, bg: getComputedStyle(document.body).backgroundColor, entry: document.body.dataset.entry }));
     await env.ctx.close();
-    const ok = a.theme === MANIFEST_EXPECTED.theme_color && a.bg === "rgb(238, 244, 250)" && a.entry === "firstRun";
-    return { ok, note: `首次畫面（${a.entry}）：meta theme-color=${a.theme}（manifest ${MANIFEST_EXPECTED.theme_color}）；body 背景 ${a.bg}（manifest background_color ${MANIFEST_EXPECTED.background_color} = rgb(238, 244, 250)）` };
+    const ok = a.theme === MANIFEST_EXPECTED.theme_color && a.bg === "rgb(234, 247, 251)" /* 第 13 輪 AC-68-01 */ && a.entry === "firstRun";
+    return { ok, note: `首次畫面（${a.entry}）：meta theme-color=${a.theme}（manifest ${MANIFEST_EXPECTED.theme_color}）；body 背景 ${a.bg}（manifest background_color ${MANIFEST_EXPECTED.background_color} = rgb(234, 247, 251)）` };
   });
 
   await R.check("TC-34-05a", "AC-34-05（連結與圖示部分；iOS 實機見 TC-PWA-H3）", async () => {

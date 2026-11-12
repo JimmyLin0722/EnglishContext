@@ -1,0 +1,17 @@
+  PASS TC-23-08s AC-23-08 (1)(3)、E-122（V-LGL-05 (b) 畫面文字）、AC-38-10 (1) 檢視 首次畫面、dashboard、customizer、flashcards、part5、鎖定檢視（p5-009 解析）、清除對話框=true、結算、全部答對、初始化對話框=true、資料來源頁、Toast 0 則；文字節點 226 種；「多益常考」「多益最常見」0；A＋B 同句 0；單獨「常考」「必考」0；LT-2、LT-5 仍在=true
+  PASS TC-X-legal-screen Console 無未處理錯誤、無網路請求 錯誤 []；非 file 請求 0
+  PASS TC-10-02-375 AC-10-02、AC-20-01、AC-40-02、E-123、V-LGL-02 375×667：題目 K=0：1 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false；題目 K≥1：1 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false；鎖定檢視：1 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false；作答後：1 行、scrollWidth 343/343、與 .p5-record 重疊=false、舊文字=false
+  PASS TC-10-02z AC-10-02、E-123（375px，html font-size 150%） 375px 字級 150%：2 行、說明 scrollWidth 343/343、left 16、right 359；文件 scrollWidth 375/375（文件溢出依 §7.23.4 只回報）
+  PASS TC-10-02-768 AC-10-02、AC-20-01、AC-40-02、E-123、V-LGL-02 768×1024：題目 K=0：1 行、scrollWidth 720/720、與 .p5-record 重疊=false、舊文字=false；題目 K≥1：1 行、scrollWidth 720/720、與 .p5-record 重疊=false、舊文字=false；鎖定檢視：1 行、scrollWidth 720/720、與 .p5-record 重疊=false、舊文字=false；作答後：1 行、scrollWidth 720/720、與 .p5-record 重疊=false、舊文字=false
+  PASS TC-10-02-1366 AC-10-02、AC-20-01、AC-40-02、E-123、V-LGL-02 1366×768：題目 K=0：1 行、scrollWidth 720/720、與 .p5-record 重疊=false、舊文字=false；題目 K≥1：1 行、scrollWidth 720/720、與 .p5-record 重疊=false、舊文字=false；鎖定檢視：1 行、scrollWidth 720/720、與 .p5-record 重疊=false、舊文字=false；作答後：1 行、scrollWidth 720/720、與 .p5-record 重疊=false、舊文字=false
+  PASS TC-23-02d-375 AC-23-02（v0.17 LT-3、LT-4、LT-5）、V-LGL-03 375px：LT-3 1 次、LT-4 1 次、LT-5 1 次；舊文字 無；MIT 聲明 1、CC 聲明 1、聯絡行 1；水平捲軸=false、超出視窗元素 0
+  PASS TC-23-07-375 AC-23-07 (1)(2)(3)(5)(6)、AC-27-03、AC-38-01、AC-38-04、SD-FB-69 375px：1 行元素、逐字=true、Range 行數 1、scrollWidth 343/343、祖先有 <a>=false、<P> tabindex null、顏色 rgb(91, 100, 114) 與 .src-muted 相同=true、字級 13px（§7.22.2 定案 0.8125rem）、對比 5.47；水平捲軸=false、未被遮住=true；點擊不換頁=true、Tab 落在該行 0 次；localStorage 不變=true；請求增加 0
+  PASS TC-23-07x-375 AC-23-07 (4)（file:// 斷網）、(7)（其他畫面不顯示） 375px：dashboard：可見 0；customizer：可見 0；flashcards：可見 0；part5：可見 0；斷網仍顯示且逐字=true
+  PASS TC-X-legal-375 Console 無未處理錯誤、無網路請求 錯誤 []；非 file 請求 0
+  PASS TC-23-02d-1366 AC-23-02（v0.17 LT-3、LT-4、LT-5）、V-LGL-03 1366px：LT-3 1 次、LT-4 1 次、LT-5 1 次；舊文字 無；MIT 聲明 1、CC 聲明 1、聯絡行 1；水平捲軸=false、超出視窗元素 0
+  PASS TC-23-07-1366 AC-23-07 (1)(2)(3)(5)(6)、AC-27-03、AC-38-01、AC-38-04、SD-FB-69 1366px：1 行元素、逐字=true、Range 行數 1、scrollWidth 928/928、祖先有 <a>=false、<P> tabindex null、顏色 rgb(91, 100, 114) 與 .src-muted 相同=true、字級 13px（§7.22.2 定案 0.8125rem）、對比 5.47；水平捲軸=false、未被遮住=true；點擊不換頁=true、Tab 落在該行 0 次；localStorage 不變=true；請求增加 0
+  PASS TC-23-07x-1366 AC-23-07 (4)（file:// 斷網）、(7)（其他畫面不顯示） 1366px：dashboard：可見 0；customizer：可見 0；flashcards：可見 0；part5：可見 0；斷網仍顯示且逐字=true
+  PASS TC-X-legal-1366 Console 無未處理錯誤、無網路請求 錯誤 []；非 file 請求 0
+  PASS TC-23-07f AC-23-07 (7)（首次畫面不顯示） entry firstRun；首次畫面顯示聯絡行=false
+  PASS TC-23-07h AC-23-07 (4)(5)（V-PWA (b)）、AC-37-05 http 版聯絡行逐字=true、版本行「版本 1.4.0（建置 7ce555b）」；開啟資料來源頁新增請求 0 筆；全程跨來源或非 GET 0
+e2e-legal：通過 16、失敗 0

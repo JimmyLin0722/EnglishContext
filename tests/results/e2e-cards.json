@@ -130,14 +130,14 @@
     "tc": "TC-09-02",
     "ac": "AC-09-02",
     "result": "通過",
-    "note": "the：織物；布；結構 | （定冠詞）那 | 提供訊息的；見聞廣博的 | 剝奪；使喪失；奪去；a：認知；意識到；感覺；理解 | （不定冠詞）一個 | 因此；所以 | 應收帳款；可收到的；claim：不正確的；錯誤的；不適當的 | 要求；主張；斷言；認領 | 毫米 | 扭曲；曲折；扭；使扭轉；stadium：民族主義；民族特性 | 數據機 | 決定因素；決定物；決定性的 | 露天大型運動場；undergraduate：蚊子 | 中位數；中間的；中央的 | 精煉；淨化；使優雅 | 大學部學生；大學生的（單字集相異釋義 5606）"
+    "note": "the：曾經；究竟；永遠 | 晚餐；正餐；宴會 | 銷售者；賣方 | （定冠詞）那；a：明亮的；聰明的；鮮明的 | 錯誤選擇；誘導答案 | 在下面 | （不定冠詞）一個；claim：要求；主張；斷言；認領 | 句法的；語法的 | 藐視；使落空；挑戰 | 特性；特徵；特有的；stadium：頰；臉蛋；厚顏 | 露天大型運動場 | 帶子；錄音帶；捲尺；錄音 | 同意；協議；合約；協定；undergraduate：縱的；經度的 | 大學部學生；大學生的 | 汽車；客車；車 | 競爭力（單字集相異釋義 5606）"
   },
   {
     "suite": "e2e-cards",
     "tc": "TC-09-03",
     "ac": "AC-09-03、AC-17-03",
     "result": "通過",
-    "note": "答對：狀態 neutral,correct,neutral,neutral、鎖定=true、再點不變=true；答錯：neutral(rgb(255, 255, 255)),neutral(rgb(255, 255, 255)),correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226))；同字答對兩次後掌握數 1（主控台「已掌握 1 字」）、答題 2/2"
+    "note": "答對：狀態 neutral,correct,neutral,neutral、鎖定=true、再點不變=true；答錯：neutral(rgb(255, 255, 255)),correct(rgb(220, 252, 231)),wrong(rgb(254, 226, 226)),neutral(rgb(255, 255, 255))；同字答對兩次後掌握數 1（主控台「已掌握 1 字」）、答題 2/2"
   },
   {
     "suite": "e2e-cards",
@@ -151,14 +151,14 @@
     "tc": "TC-09-05",
     "ac": "AC-09-05",
     "result": "通過",
-    "note": "qaquizword：答覆；回答 | 明天；未來 | 足夠的；足夠；充足 | 四選一自訂測試"
+    "note": "qaquizword：接合；膠接；接頭 | 找出；設於；位於 | 四選一自訂測試 | 商標；徽標"
   },
   {
     "suite": "e2e-cards",
     "tc": "TC-09-07",
     "ac": "AC-09-07",
     "result": "通過",
-    "note": "20 次正解位置：ABACDBCCBADDACADBDBC"
+    "note": "20 次正解位置：ADBBCAACBCADDCAADDAB"
   },
   {
     "suite": "e2e-cards",
@@ -179,7 +179,7 @@
     "tc": "TC-24-01",
     "ac": "AC-24-01、AC-24-02",
     "result": "通過",
-    "note": "檔名 english-master-track-backup-20261109.json（本地日期 20261109）；網路請求 0；7059 bytes；format=english-master-track-backup、schemaVersion=3；欄位齊全=true；不含內建內容=true；goal={\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；自訂 10、已掌握 1、測驗 {\"answered\":1,\"correct\":1}、part5 {\"currentIndex\":1,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":1,\"roundCorrect\":1,\"totalAnswered\":1,\"totalCorrect\":1}、streak {\"days\":1,\"lastActiveDate\":\"2026-11-09\"}、STT 已讀 true、todayLearned {\"date\":\"2026-11-09\",\"wordKeys\":[\"the\"]}、learnedHistory {\"2026-11-09\":1}"
+    "note": "檔名 english-master-track-backup-20261112.json（本地日期 20261112）；網路請求 0；7059 bytes；format=english-master-track-backup、schemaVersion=3；欄位齊全=true；不含內建內容=true；goal={\"draftScore\":300,\"appliedScore\":300,\"appliedColor\":\"brown\",\"effectiveColor\":\"brown\"}；自訂 10、已掌握 1、測驗 {\"answered\":1,\"correct\":1}、part5 {\"currentIndex\":1,\"lockedSelection\":null,\"phase\":\"question\",\"roundAnswered\":1,\"roundCorrect\":1,\"totalAnswered\":1,\"totalCorrect\":1}、streak {\"days\":1,\"lastActiveDate\":\"2026-11-12\"}、STT 已讀 true、todayLearned {\"date\":\"2026-11-12\",\"wordKeys\":[\"the\"]}、learnedHistory {\"2026-11-12\":1}"
   },
   {
     "suite": "e2e-cards",

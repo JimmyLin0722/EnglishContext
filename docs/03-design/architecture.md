@@ -1,13 +1,18 @@
 ---
 doc: ARCH
-version: 0.17
+version: 0.22
 status: approved
 author: sd-agent
-approved_by: JimmyLin（授權主控代核；PRD v0.21 US-62 即時文字、R-31 商標說明，不改 PRD、不改持久化結構）
-approved_at: 2026-11-09
+approved_by: JimmyLin（授權主控代核）
+approved_at: 2026-11-12
 ---
 
 # English Master Track — 系統架構與設計
+
+> **v0.19 上游**：`docs/01-PRD.md` v0.23（R-32 島嶼風格第一階段，US-63～US-72；Q-109～Q-128 全採 PM 建議，Q-111 C、Q-114 A；AC-69-02 測試資料為「橘島調為 244 字後答對 W2（245 字，P = 25 升階）」；FB-84、FB-85 依 SA 解讀）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.23（approved，主控代核，2026-11-11；§15 IS-1～IS-16、LF-1～LF-6、IA-1～IA-6、IV-1～IV-5、V-ISL-01～09；§11 VC-3、VC-4、§11.2 token 表、§11.3、DB-1、DB-2、DB-4、DB-5、V-LAY-02、V-LAY-08、V-LAY-10；§10.3 `background_color`；§4.3 LT-7、L-8、V-LGL-03、V-LGL-04；§12.1 版本 1.4.0；data-schema §19 與 `RuntimeState.flashcard.islandFeedback`）、`storage-schema.json` 只改 meta（結構不變）。設計稿 `docs/mockups/v0.22-island/`（`Main.dc.html`、`Flashcard.dc.html`、`canvas.json`）只供參考，與 AC 不一致時以 AC 為準。搭配 `docs/03-design/tasks.json` v0.18（既有 127 個任務已封存於 `docs/archive/tasks-done.json`；本版新增 FE-102～FE-112 共 11 個，主控手動項目 MC-11，見 §12.17）。
+> **v0.19 增量導讀**：(1) 島嶼推算集中在新 L1 模組 `core/island.js`（§19 常數與純函式），群島頁與 store 共用（§4.16、§7.32.1）。(2) 群島頁 `views/dashboard.js` 依 DB-1 重排：頁面標題列（「我的群島」＋目標標籤）→ 今日任務卡（龜龜、對話框、今日進度條、「開始今日學習」）→ 地圖 → 島嶼清單 → 3 格數據（加天氣、燈塔行）→ 近 7 天 → 資料備份（§7.32.2～§7.32.6）；地圖與插圖在新 L4 模組 `ui/island-map.js`、`ui/island-art.js` 與新樣式檔 `styles/11-island-map.css`（§7.32.4、§7.32.8）。(3) 全站外觀 token：背景 `#eaf7fb`、區塊卡片與按鈕 2 px 外框 `#3d3550`、圓角 22／14 px、立體陰影；PWA 背景色三處同步（§7.32.7）。(4) 單字卡學完回饋：store 在 3 種學習事件比較前後島嶼狀態，寫入 `runtime.flashcard.islandFeedback`；`views/flashcards.js` 加常駐 `role="status"` 容器與卡片角落裝飾（§7.32.9）。(5) 名稱「群島」與 LT-7 聲明（§7.32.11、§7.32.12）。**不改建置程式**；部署目錄仍 13 檔、預先快取 7 項；**持久化結構不變**（`schemaVersion` 3、鍵數 2、備份格式不變）；`src/data/` 不變、不建 CT 任務。網站版本 1.4.0 由主控 MC-11 修改（Q-124 A，§5.13）。**改讀規則**：§1、§7.19.1、§7.19.2 的「`.card` 無邊框、16 px 圓角、柔和陰影」「`.btn` 1 px 透明邊框、8 px 圓角」「`.btn--accent` 邊框透明」，§7.19.4 的主控台 DOM 樹（主環形圖、可見「今日任務」標題、「學習主控台」、3 格無外框），§7.19.7「單字卡頁只換配色、`views/flashcards.js` 不改、卡片固定 v0.11 幾何」，§7.20.4 的「變更」1 px 框，§12.16 不得寫入 `views/flashcards.js`、`state/store.js`、`license-header.txt`、`views/sources-page.js` 的限制，現行一律以 §7.32 與 §12.17 為準；已完成任務的歷史敘述不逐字回改。
+> **v0.21 增量導讀**（FE-112 實測 AC-70-03 邊緣不合格；PRD、契約、持久化結構不變）：群島頁地圖狀態未變時沿用既有 SVG，靠頁面 `hidden` 切換讓 CSS 動畫自動重播；隱藏期間的資料變更不同步重繪，改以閒置排程預先重建；`islandsOf` 單筆快取、store 啟動預熱、回饋列新芽圖示以範本複製（§4.16、§7.32.2、§7.32.8、§7.32.9、§7.32.15）。任務 FE-113～FE-117，FE-112 改為依賴它們並重跑 T6（§12.17）。
+> **v0.22 上游**：`docs/01-PRD.md` v0.24（approved，JimmyLin，2026-11-12；只改 5 處文字，產品行為不變：AC-68-02 群島地圖框列為白底例外、AC-68-04 LT-7 段落不算差異、AC-69-02 D = 15）、契約 `README.md` 與 `data-schema.ts` v0.24（approved，主控代核）、`storage-schema.json` 不改。本版只把 FE-110～FE-117 已採用的實作決定寫進 §4.16、§5.13、§7.32、§10.15，並結案 SD-FB-110、SD-FB-111；不新增任務、不改程式。
 
 > **v0.17 上游**：`docs/01-PRD.md` v0.21（approved，JimmyLin，2026-11-09；R-30 US-62 聆聽中即時文字、R-31 商標說明拿掉「Part 5」，Q-103～Q-108 皆 A）、`docs/02-contract/` `README.md` 與 `data-schema.ts` v0.21（approved，主控代核，2026-11-09；§14.6 IT-1～IT-10、MS-1 (2b)／(4)、PR-5 (b)、V-STT-11～V-STT-17、L-8 LT-2、V-LGL-02、§9.14 DS-64～DS-71、FB-80～FB-82、data-schema §18 `SttStartOptions`、`SttEndInfo.lastInterimText`、`STT_FLOW_TEXTS.labelInterim`）、`storage-schema.json` 只改 meta（結構不變）。試作程式：分支 `feat/stt-interim-text` 未提交的 `services/stt.js`、`views/speech-panel.js`、`styles/31-speech.css`。搭配 `docs/03-design/tasks.json` v0.16（共 127 個任務：既有 123 個全部 `done` 不變；v0.17 新增 FE-98～FE-101 共 4 個，主控手動項目 MC-10，見 §12.16）。
 > **v0.17 增量導讀**：(1) 即時文字（US-62）：`services/stt.js` 以「是否提供 `onInterim`」決定 `interimResults`，區分暫時與最終結果，`SttEndInfo` 改 9 欄（加 `lastInterimText`），**服務不在 `end` 時補發 `onResult`**（§7.26.2 v0.17 修訂、§7.30.1）；`views/speech-panel.js` 負責即時文字列顯示與隱藏、準備中收到即時文字直接進入聆聽中、MS-1 (2b) 以最後一段即時文字評分、Q-107 的訊息判定（§7.26.4、§7.26.5 v0.17 修訂、§7.30.2～§7.30.7）。即時文字只在畫面模組變數與 DOM，**不進 `AppState`、不持久化**。(2) R-31：LT-2 改為「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」，交付物全文「TOEIC®（多益）Part 5」0 次（§7.31）。(3) 網站版本 1.3.2 由主控 MC-10 修改（Q-105 A，§5.12）。**不新增模組、不改建置程式、不改 store**；部署目錄仍 13 檔、預先快取 7 項；**持久化結構不變**（`schemaVersion` 3、鍵數 2、備份格式不變）；`src/data/` 不變、不建 CT 任務（DS-71）。**改讀規則**：§7.6 STT 列的 `interimResults = false`（FB-82）、§4.13 的 `start(opts)` 與 `SttEndInfo` 8 欄、§7.26.2 的 `snap()` 8 欄與 `onresult` 列、§7.26.5 的判定表，已就地改為 v0.17；§7.26.9「`services/stt.js` 不改」、§12.15 不得寫入 `services/stt.js`、`styles/31-speech.css` 只適用 v0.16 任務，FE-98 起以本版為準；§7.13、§7.23.1、§7.23.4、§10.9 提到的 LT-2 現行文字以 §7.31 為準，已完成任務的歷史敘述不逐字回改。同步修訂 §1、§3.4（D-22）、§4.13、§4.15、§5.12、§7.6、§7.26、§7.30、§7.31、§10.14、§11（T-132～T-140）、§12.16、§13.14、§14、§15（SD-FB-98～SD-FB-104）。
@@ -108,6 +113,13 @@ approved_at: 2026-11-09
 | （v0.17）以即時文字評分 | `outcomeOf` 加步驟 (2b)：只在 `end`、無最終結果、無錯誤、無 `nomatch`、非手動、`lastInterimText` 清洗後非空時評分，走與最終結果相同的 `finish` 路徑；步驟 (4) 加「顯示過即時文字」→ `heardNoWords` | MS-1 (2b)／(4)、IT-9、IT-10、Q-103 A、Q-107 A、§7.30.6 |
 | （v0.17）商標說明 | LT-2 拿掉「Part 5」：模擬測驗頁說明、關於我、首頁 description 等 5 處；LT-3「Part 5 題目」不改 | R-31、Q-108 A、V-LGL-02、§7.31 |
 | （v0.17）交付物 | MC-10 把 `package.json` 改為 1.3.2 後，FE-101 由原始碼重新建置 `dist/`（覆蓋試作分支修改過的 `dist/`）；13 檔、預先快取 7 項不變 | Q-105 A、DS-71、AC-42-02 |
+| 島嶼推算 | 新 L1 模組 `core/island.js`：§19 常數（深凍結）與純函式；進入群島頁推算一次 `IslandState`，地圖、島嶼清單、3 格狀態行、對話框、今日進度列、地圖文字替代共用同一個值；P 用整數公式；不寫入任何儲存 | IS-1～IS-16、§7.32.1 |
+| 群島頁 | `views/dashboard.js` 依 DB-1 重排；地圖與插圖為內嵌 SVG（`ui/island-map.js`、`ui/island-art.js`）；地圖 `role="img"` 在外層 `div`、SVG 本身 `aria-hidden`；地圖寬 = min(容器寬, 480 px)、viewBox 354 × 430 | DB-1～DB-6、IA-1～IA-6、§7.32.2～§7.32.6 |
+| 地圖動畫 | 4 種 CSS 動畫只改 `transform`，有限次數、最長 4.4 秒；只在每次進入群島頁（`show()`）時加 `isl-map--play`；減少動態時不加，全域規則也關閉 | AC-70-01、AC-70-02、§7.32.8 |
+| 島嶼外觀 token | `--bg` `#eaf7fb`、`--outline` `#3d3550`；區塊卡片 2 px 外框、22 px 圓角、無柔和陰影；按鈕 2 px 外框、14 px 圓角；今日任務卡、地圖框、強調橘按鈕 `0 4px 0` 立體陰影；PWA 背景色三處同步；`--text`、`--text-muted` 與契約建議值全部沿用 | VC-3～VC-5、IV-1～IV-5、§7.32.7 |
+| 學完回饋 | store 在 `flipCard`（翻到背面）、`answerVocabQuiz`、`recordSttScored` 內以同一個 today 取前後快照，`island.feedbackOf` 決定最多 1 則，存 `runtime.flashcard.islandFeedback`；離開單字卡頁設 `null`；`views/flashcards.js` 以常駐 `role="status"` 容器呈現 | LF-1～LF-6、§7.32.9 |
+| 名稱與聲明 | 導覽第 1 項「群島」與島嶼圖示、頁面標題「我的群島」、確認視窗第 2 行「到「群島」頁按」；LT-7 加入「資料來源與授權」頁與 HTML 開頭註解 | IA-1、LT-7、§7.32.11、§7.32.12 |
+| 交付物（1.4.0） | MC-11 把 `package.json` 改為 1.4.0 後，FE-112 由原始碼重新建置 `dist/`；13 檔、預先快取 7 項不變 | Q-124 A、AC-42-02 |
 
 ---
 
@@ -519,6 +531,38 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 | `package.json` | — | MC-10（主控） | `version` 1.3.1 → 1.3.2 |
 
 **D-22**：FE-98 與 FE-100 的 paths 不重疊，可平行；`__tests__/speech.test.js` 由 FE-98 → FE-99 依序修改（FE-99 `dependsOn` FE-98）；FE-101 在 FE-99、FE-100 與 MC-10 之後，只寫 `dist/`。`views/flashcards.js`、`state/store.js`、`services/mic.js`、`core/similarity.js`、`tools/`、`src/data/` 不改；`tests/`、`docs/04-qa/`、`.github/` 不派給 PG。
+
+### 3.5 島嶼風格第一階段目錄增量（FE-102～FE-112；PRD R-32）
+
+（`src/app/` 前綴省略，`dist/` 除外。新增 4 個執行期檔案，建置依檔名自動收集，`tools/` 不改。）
+
+| 檔案 | 層 | 任務 | 內容 |
+| :--- | :--- | :--- | :--- |
+| `core/island.js`（新） | L1 | FE-102 | §19 常數、島嶼推算與組字純函式、`feedbackOf`（§4.16、§7.32.1） |
+| `__tests__/island.test.js`（新） | 測試 | FE-102 | V-ISL-01～V-ISL-05 純函式部分、契約字面值比對 |
+| `styles/00-base.css` | 樣式 | FE-103 | `:root` 島嶼 token、`--bg`；`.card`、`.btn` 系列外框、圓角、立體陰影（§7.32.7） |
+| `core/layout.js` | L1 | FE-103 | `COLOR_TOKENS.background`、`LAYOUT_TEXTS.dashboardTitle`、`UI_LAYOUT.CARD_RADIUS_PX` |
+| `core/pwa.js` | L1 | FE-103 | `PWA_BACKGROUND_COLOR`、`PWA_MANIFEST.background_color`（VC-5） |
+| `__tests__/tokens.test.js`、`layout.test.js`、`pwa-core.test.js`、`build.test.js`、`dashboard.test.js`（標題 1 處） | 測試 | FE-103 | 新值 |
+| `core/constants.js` | L1 | FE-104 | `TAB_LABELS.dashboard`「群島」 |
+| `index.html` | 殼 | FE-104 | 導覽第 1 項文字與島嶼圖示、`#view-dashboard` 的 `aria-label` |
+| `views/customizer.js` | L5 | FE-104 | `TEXT.reinitLine2` |
+| `__tests__/goal.test.js`、`shell.test.js`、`naming.test.js`、`site-pages.test.js`、`customizer.test.js` | 測試 | FE-104 | 新名稱 |
+| `views/sources-page.js`、`license-header.txt` | L5／建置輸入 | FE-105 | LT-7 |
+| `__tests__/legal-static.test.js`、`sources-page.test.js`、`shell.test.js`、`build.test.js` | 測試 | FE-105 | V-LGL-03、V-LGL-04、開頭註解比對 |
+| `state/store.js` | L2 | FE-106 | `runtime.flashcard.islandFeedback` 生命週期；3 種學習事件的前後比較（§7.32.9） |
+| `__tests__/store-island.test.js`（新）、`store.test.js`、`store-track.test.js` | 測試 | FE-106 | V-ISL-05～V-ISL-07 的 store 部分 |
+| `ui/island-map.js`（新）、`ui/island-art.js`（新） | L4 | FE-107 | 地圖 SVG、龜龜與裝飾圖（§7.32.4、§7.32.12） |
+| `styles/11-island-map.css`（新） | 樣式 | FE-107 | 地圖框內圖形、動畫、減少動態（§7.32.8） |
+| `__tests__/island-map.test.js`（新） | 測試 | FE-107 | 元素計數、文字、動畫規則、無外部參照 |
+| `views/dashboard.js`、`styles/10-dashboard.css`、`__tests__/dashboard.test.js`、`__tests__/naming.test.js`（只在既有斷言受影響時） | L5 | FE-108 | 群島頁（§7.32.2～§7.32.6） |
+| `views/flashcards.js`、`styles/30-flashcards.css`、`__tests__/flashcards.test.js` | L5 | FE-109 | 回饋列、角落裝飾、島嶼外觀（§7.32.9） |
+| `styles/20-customizer.css`、`21-custom-vocab.css`、`31-speech.css`、`32-quiz.css`、`40-part5.css`、`70-sources.css`、`75-site-pages.css`、`80-pwa.css`、`__tests__/island-appearance.test.js`（新） | 樣式 | FE-110 | 其他畫面套用外框 token（只改 CSS） |
+| `__tests__/island-static.test.js`（新） | 測試 | FE-111 | 名稱、素材、字型、遊戲名稱、強調橘掃描（§7.32.12） |
+| `dist/` 下 14 檔 | 產物 | FE-112 | 只由 `npm run build` 產生 |
+| `package.json` | — | MC-11（主控） | `version` 1.3.2 → 1.4.0 |
+
+**D-23**：同一批的任務 paths 不重疊；跨批共用的測試檔一律以 `dependsOn` 串接：`dashboard.test.js` FE-103 → FE-108、`naming.test.js` FE-104 → FE-108、`shell.test.js` FE-104 → FE-105、`build.test.js` FE-103 → FE-105、`flashcards.test.js` FE-106 → FE-109。`tools/`、`src/data/`、`src/app/assets/`、`__tests__/_samples/`、`site/static-page.css`（靜態頁維持原樣式，IV-3）、`services/`、`views/speech-panel.js`、`views/flashcard-quiz.js`、`tests/`、`docs/`、`.github/` 不派給 PG。
 
 ---
 
@@ -993,6 +1037,56 @@ localStorage／備份 ──persist.parseStored／backup.importSteps──► Pe
 
 **`EMT.core.siteContent`（FE-100）**：常數名稱與結構不變，只改 LT-2 所在的 4 個字串值（§7.31）。
 
+### 4.16 島嶼風格第一階段的模組介面（FE-102～FE-110）
+
+全部不持久化：不新增 localStorage 鍵與欄位、不新增 window 全域變數（只在既有 `EMT.core`、`EMT.ui` 下登錄）；`IslandState` 不存入 `AppState`，只有 `runtime.flashcard.islandFeedback` 進入 store（契約 §11.3、IS-1）。
+
+**`EMT.core.island`（FE-102；L1 純函式，載入時不讀其他模組，LD-1～LD-3）**
+
+| 匯出 | 約定 |
+| :--- | :--- |
+| `STAGES`、`THRESHOLDS`、`LIST_ORDER`、`STYLE_TOKENS`、`TEXTS` | 逐字等於 data-schema §19 的 `ISLAND_STAGES`、`ISLAND_THRESHOLDS`、`ISLAND_LIST_ORDER`、`ISLAND_STYLE_TOKENS`、`ISLAND_TEXTS`；深凍結 |
+| `sectionSizes(builtin, nB, nG)` → `[nO, nBr, nGr]` | IS-5：以 `rank` 計數，橘 1～`N_O`（`constants.N_O`）、棕 `N_O`+1～`nB`、綠 `nB`+1～`nG`；上界 < 下界 → 0。以 `builtin` 陣列為鍵 `WeakMap` 快取（同一份字庫只數 1 次） |
+| `masteredCounts(masteredWordKeys, builtinMap, nB, nG)` → `[mO, mB, mG]` | IS-6：`masteredWordKeys` 先去重；`builtinMap.get(key)` 不存在 → 不計；存在 → 依其 `rank` 歸區段。只走已掌握集合（O(已掌握數)） |
+| `percent(m, n)` → `number \| null` | IS-7：n = 0 → `null`；m = 0 → 0；m ≥ n → 100；其餘 `Math.min(Math.max(Math.floor((200 * m + n) / (2 * n)), 1), 99)` |
+| `stageOf(p)` | IS-8：查 `STAGES`；`null` → `"sand"` |
+| `islandsOf(input)` → `IslandProgress[3]` | `input = { builtin, builtinMap, nB, nG, masteredWordKeys, effectiveColor }`；`outOfGoal` 依 IS-9。**單筆快取**：`masteredWordKeys` 為陣列時，以「`builtin` 參照、`builtinMap` 參照、`masteredWordKeys` 參照（另比長度）、`nB`、`nG`、`N_O`、`effectiveColor`」為鍵，與上一次呼叫全部相同 → 不重算，回傳快取內容的**新陣列與新物件**（呼叫端改動回傳值不影響快取）；任一不同 → 重算並更新快取。`masteredWordKeys` 為 `Set` 或非陣列 → 每次重算並清除快取（不存入）。前提：呼叫端不原地修改傳入的陣列或對照表（`builtin`、`builtinMap`、`masteredWordKeys`）；store 每次變更已掌握集合都產生新陣列，已以單元測試鎖定（§7.32.15） |
+| `weatherOf(s)`、`lighthouseOf(k)`、`boatOf(x, d)` | IS-11～IS-13；`boatOf` 回傳 `{ boatRatio, boat, remaining }`，d < 1 或非整數時以 1 計（防呆，不產生 NaN） |
+| `state(input)` → `IslandState` | `input` = `islandsOf` 的欄位 + `streakDays`、`k`、`q`、`x`、`d`；呼叫端傳入與 3 格、今日進度列**同一組值**（IS-3） |
+| `feedbackOf(before, after)` → `IslandFeedback \| null` | LF-2 優先序：升階 > 剛靠岸 > 多掌握 > 小船前進；`before`／`after` 至少含 `islands`、`x`、`d`；同時兩島時取 `LIST_ORDER` 較前者 |
+| `dialogText(st)`、`weatherText(kind)`、`lighthouseText(kind)` | IS-14、`TEXTS.weather`、`TEXTS.lighthouse` |
+| `listRowOf(progress)`、`fogRowOf(colorId)` | IA-2 一列的文字與進度條屬性：`{ name, sub, right, stageText, valueNow (number \| null), label, fog }`；`fogRowOf` 的 `label` 為 `null`（霧中島進度條 `aria-hidden`，FE-108 遇 `null` 不設 `aria-label`）。`listRowOf` 收到非開放島、`fogRowOf` 收到非霧中島時拋 `TypeError`（屬程式錯誤）；§7.32.1「不變式」只適用推算函式，不適用這兩個組列函式的錯誤參數 |
+| `mapAltText(st)` | IA-4；數字以 `String(n)`，**不用** `layout.formatInt`（不加千分位）；不含「（目前目標未包含）」 |
+
+**`EMT.ui.islandMap`、`EMT.ui.islandArt`（FE-107；L4，只建 DOM，不讀 store）**
+
+| 匯出 | 約定 |
+| :--- | :--- |
+| `islandMap.VIEWBOX` | `{ w: 354, h: 430 }` |
+| `islandMap.LAYOUT` | 凍結的構圖座標（§7.32.4 表），供測試計算外框是否重疊 |
+| `islandMap.build(st, opts)` → `HTMLDivElement` | 回傳 `div.db-map__figure[role="img"][aria-label=island.mapAltText(st)]`，內含 1 個 `svg.isl-map[aria-hidden="true"][focusable="false"]`；`opts.play === true` 時 `svg` 加 class `isl-map--play`。每次呼叫建立新節點；所有文字以 `textContent`／`setAttribute` 寫入（IA-6） |
+| `islandMap.signature(st)` → `string` | 圖形簽章：以 `build` 相同的正規化（不認得的天氣 → `cloudy`、燈塔 → `unbuilt`、比例夾在 0～1、階段不合法 → `sand`）組出「天氣、燈塔、小船種類、`boatRatio`（完整 `String(ratio)`，不四捨五入）、綠／棕／橘三島階段」；兩個 `st` 的簽章相同 ⇔ `build` 產生的 SVG 子樹相同。**簽章不含 `aria-label`**：外層 `aria-label` 由呼叫端另以 `island.mapAltText` 的結果比對。純函式、不建 DOM |
+| `islandMap.setPlay(figure, play)` | 參數 `figure` 是 `build` 回傳的外層 `div.db-map__figure`（不是 `svg`）；在其內的 `svg.isl-map` 上 `classList.toggle("isl-map--play", play === true)`；找不到 `svg.isl-map` 時不做事、不拋例外；不建立或移除任何節點 |
+| `islandMap.boatPoint(ratio)` → `{ x, y }` | 起點 S 到碼頭 E 的線性內插（AC-64-07） |
+| `islandArt.turtle(className?)`、`titleDeco(className?)`、`cardDeco(className?)`、`sprout(className?)` | 各回傳 1 個新的 `svg`（`aria-hidden="true"`、`focusable="false"`、固定 `viewBox` 與 `width`／`height`）；選用參數 `className` 為字串時設為 `svg` 的 class；不含 `<text>`、`<use>`、`<image>`、`href`、`url(` |
+
+**`EMT.store`（FE-106）**
+
+| 項目 | 約定 |
+| :--- | :--- |
+| `runtime.flashcard.islandFeedback` | `IslandFeedback \| null`；啟動、`importBackup` 成功重設單字卡狀態時為 `null`；`cardChanged`、`placeCard`、`setFlashcardMode` 一律保留原值 |
+| `islandSnapshot(content, data, t)`（匯出，純函式） | 回傳 `{ islands, x, d }`（§7.32.9）；`content` 為 `{ builtin, builtinMap, nB, nG }`，不讀 store 狀態，供測試直接驗證；瀏覽器中 `EMT.core.island` 未載入時 store 不比較、不拋例外，`islandFeedback` 維持原值 |
+| tags | 啟動通知 tags 含 `"islandFeedback"`；`importBackup` 在原值非 `null` 時 tags 含 `"islandFeedback"` |
+| 內部 `learnPatch`、`touchStreak` | 可接收呼叫端給的 today；同一 action 只取 1 次 today，比較快照與資料變更用同一天（避免跨午夜不一致） |
+| `setTab(tabId)` | `currentTab` 由 `"flashcards"` 改為其他值時同一次提交設為 `null`（LF-3），tags 另加 `"islandFeedback"`（原值非 `null` 時） |
+| `flipCard`（翻到背面）、`answerVocabQuiz`、`recordSttScored` | 同一個 action 內取 1 次 today，B = 套用前、A = 套用後的島嶼快照；`currentTab === "flashcards"` 且 `feedbackOf(B, A)` 非 `null` → 新值放入同一次 `commitWrite` 的 runtime，tags 加 `"islandFeedback"`；`null` → 維持原值。`setItem` 次數與寫出內容不變（LF-5） |
+| 新 tag | `"islandFeedback"`：只有 `views/flashcards.js` 訂閱 |
+| `init()` 預熱 | 建好初始狀態後、發出啟動通知前，若 `EMT.core.island` 已載入：以 `islandSnapshot(content, state.data, t)` 取 1 次快照 `w`，再呼叫 `island.feedbackOf(w, w)`（結果必為 `null`、丟棄）。`t` 沿用 `init` 讀取紀錄時取得的 today；讀不到紀錄（無紀錄、停用、損壞）而 `init` 沒有取 today 時，預熱自行取 1 次 today。目的：填入 `islandsOf` 快取並讓翻面路徑的函式先編譯；不改 state、不加 tags、不呼叫 `setItem`；任何例外吞掉不影響啟動（§7.32.15） |
+
+**`views/dashboard.js`（FE-108）**：`dashboardModel(state, today, bank, content)` 的第 4 參數為可省略的內容快照（`{ builtin, builtinMap, nB, nG }`，省略時取 `EMT.content`，都沒有時三島 `n = 0`、P 為 `null`，不拋例外）；既有回傳欄位 `goal`、`stats`（含 `answeredText`）、`chart`、`backupExpanded` 名稱與語意不變（`store-track.test.js` 依賴）；`today` 改為 `{ x, d, done, ratio, valueNow, fillPct, text, doneText }`（`valueNow` = min(X, D)、`fillPct` = r × 100，取代環形圖的 `centerText`）；新增 `island`（`IslandState`）、`dialog`、`isles`（5 列）、`stats.weatherText`、`stats.lighthouseText`、`mapAlt`。模組匯出以 `contentSnapshot(content)` 取代已移除的 `ringGeometry`，另匯出 `idleScheduler(host)`；`createView(opts)` 的 `opts.idle` 可省略（測試注入排程器）。畫面模組的重繪規則見 §7.32.2、§7.32.15。
+
+**`views/flashcards.js`（FE-109）**：對外介面不變；訂閱 tag 加 `"islandFeedback"`。回饋列的新芽圖示在 `mount` 時以 `islandArt.sprout("fc-feedback__icon")` 建 1 份範本（只建 1 次），每次建立 `p.fc-feedback` 時以 `cloneNode(true)` 複製；範本建立失敗（回傳 `null` 或拋例外）時，整個頁面週期的回饋列只顯示文字、不重試（§7.32.15）。
+
 ---
 
 ## 5. 建置與打包流程
@@ -1321,6 +1415,19 @@ jobs:
 | 部署目錄 | 仍 13 檔、`dist/` 共 14 檔、預先快取 7 項；`static.yml` 不改 |
 | 交付 | FE-101 以 `npm run build` 連續兩次產生 `dist/`，兩次 SHA-256 相同；頁尾版本行為「版本 1.3.2（建置 xxxxxxx）」 |
 | 大小 | 服務約 +0.5 KB、面板約 +1 KB、CSS 約 +0.1 KB；文字變更淨減約 0.1 KB |
+
+### 5.13 島嶼風格第一階段建置（不改建置程式；PRD R-32、Q-124 A）
+
+| 項目 | 決定 |
+| :--- | :--- |
+| 建置程式 | `tools/build.mjs`、`tools/site-pages.mjs` 不改。新檔 `core/island.js`、`ui/island-map.js`、`ui/island-art.js` 由 B-4 依層與檔名自動串接（core → state → services → ui → views）；`styles/11-island-map.css` 由 B-5 依檔名排在 `10-dashboard.css` 之後 |
+| 既有檢查 | B-7 外部資源樣式照舊（插圖不得含 `<img`、`url(http`、`@import`）；B-11 比對 `00-base.css` 第一個 `--bg` 與 `PWA_BACKGROUND_COLOR`，FE-103 同一任務改兩處（T-60 同理） |
+| 靜態頁 | `about.html` 等由 `site/static-page.css` 產生，維持原樣式（IV-3）；文字來源 `core/site-content.js` 不改 |
+| 版本號 | **1.4.0**：MC-11 由主控一次性修改 `package.json`（Q-124 A），在 FE-111 之後、FE-112 之前 |
+| BUILD_ID | 內容與版本值改變 → 必與 FE-101 產物不同，屬預期；已安裝者依 AC-36-03 看到更新提示（E-185） |
+| 部署目錄 | 仍 13 檔、`dist/` 共 14 檔、預先快取 7 項；`static.yml` 不改 |
+| 交付 | FE-112 以 `npm run build` 連續兩次產生 `dist/`，兩次 SHA-256 相同；頁尾版本行「版本 1.4.0（建置 xxxxxxx）」 |
+| 大小 | `core/island.js` 約 9 KB、`ui/island-map.js` 約 14 KB、`ui/island-art.js` 約 5 KB、`11-island-map.css` 約 3 KB、群島頁與單字卡、store、其他 CSS 合計約 +10 KB；設計估計總增量約 +41 KB；FE-112 實測交付檔（含 §7.32.15 效能修正）3,588,990 bytes，比 v1.3.2 多約 105 KB（註解、JSDoc 與測試用常數多於估計），仍遠低於 5,242,880 bytes（AC-19-04、AC-72-01） |
 
 ---
 
@@ -3834,6 +3941,407 @@ finish(id, out, out.kind === "score" ? res : null);
 | 交付 | FE-101 | `dist/` 下 5 個 HTML 與 `sw.js` 全文 0 次（V-LGL-02 v0.21：程式註解也算，SD 已查 `src/app/` 非測試原始碼只有上表 5 處）；首頁 4 處說明逐字相同 |
 | 375px | FE-101 | 依 §7.23.4 方法：`.p5-heading-note` `textContent.trim()` = LT-2、不裁切、`scrollWidth ≤ clientWidth`；拿掉「 Part 5」後估計約 320～335 px，可能變為 1 行，1 行或 2 行都合格 |
 
+### 7.32 島嶼風格第一階段（PRD R-32、US-63～US-72、Q-109～Q-128；契約 v0.24 §15、§11、LT-7）
+
+原則：**呈現改變、計算不變、持久化不變**。島嶼、天氣、燈塔、小船、對話、文字替代、學完回饋全部由既有資料即時推算（IS-1～IS-3）；既有的單字掌握率、連續打卡、X／D、K／Q 計算一行不改，只把同一組值交給 `core/island.js`。設計稿只供參考：外部字型、`<use href>`、設計稿的 `#ff9f68`、單字卡頁首按鈕與徽章一律不採用（Q-119、Q-123、Q-125）。
+
+#### 7.32.1 推算模組 `core/island.js`（FE-102；IS-5～IS-16、LF-2、IA-2、IA-4）
+
+**資料流**（群島頁一次繪製）：
+
+```
+dashboardModel(state, today, bank, content)
+ ├─ 既有：X = learning.todayCount、D = learning.dailyGoal(生效色級)、S = streak.displayDays、K/Q = part5flow.answeredSummary
+ └─ island.state({ builtin, builtinMap, nB, nG, masteredWordKeys, effectiveColor, streakDays: S, k: K, q: Q, x: X, d: D })
+      └─ IslandState ──┬─ 今日任務卡（dialogText、今日進度列）
+                       ├─ islandMap.build（地圖 + mapAltText）
+                       ├─ 島嶼清單（listRowOf × 3、fogRowOf × 2）
+                       └─ 3 格狀態行（weatherText、lighthouseText）
+```
+
+| 規則 | 實作 | 依據 |
+| :--- | :--- | :--- |
+| 區段字數 n | `sectionSizes` 以 `rank` 計數（不是 `nB − N_O` 的差）；以目前資料為 1,000、1,809、2,811。資料異常（如 `nB` < `N_O`）時每個排名依序歸類橘 → 棕 → 綠、只算進 1 島，`masteredCounts` 用同一歸類，保證 m ≤ n | IS-5、E-178 |
+| 已掌握數 m | `masteredCounts`：Set 去重 → `builtinMap.get(key)` → 依 `rank` 歸區段；自訂卡與內建同 wordKey 時計入該內建字所屬的島；不在內建字庫的 wordKey 不計 | IS-6、FB-85 |
+| P | 整數公式（§4.16）；對照 IS-7 表全部列入單元測試 | IS-7 |
+| 階段 | `STAGES` 索引即成長順序；`null` → `sand`、畫面「—」 | IS-8、FB-84 (1) |
+| （目前目標未包含） | `LIST_ORDER.indexOf(島) > LIST_ORDER.indexOf(effectiveColor)`；`effectiveColor` 不是橘、棕、綠（含藍、金與不認得的代碼）時比照綠，三島 `outOfGoal` 全為 `false` | IS-9 |
+| 天氣、燈塔、小船 | `ISLAND_THRESHOLDS` 一律以「≥」比較；Q = 0 時 K = 0 → `unbuilt`；r = min(X ÷ D, 1)、`remaining` = max(D − X, 0) | IS-11～IS-13、FB-84 (2) |
+| 學完回饋 | `feedbackOf(B, A)`：(1) 某島 A 階段索引 > B → `STAGES[A].levelUpText`；(2) B.x < d ≤ A.x → `feedbackDocked`；(3) 某島 A.m > B.m → `feedbackMastered`（`{p}` = A.p）；(4) A.x > B.x 且 A.x < d → `feedbackSailing`（`{n}` = d − A.x）；(5) 其餘 `null` | LF-2 |
+| 組字 | `fillText(template, values)`：只取代 `{名稱}`，缺值拋 `TypeError`（比照 `layout.fill`）；數字一律 `String(整數)` | IA-4、IA-6 |
+| 不變式 | 推算函式（`sectionSizes`、`masteredCounts`、`percent`、`stageOf`、`islandsOf`、`weatherOf`、`lighthouseOf`、`boatOf`、`state`、`feedbackOf`）任何輸入（`null`、非陣列、負數、`NaN`、字庫空）回傳值都不含 `NaN`、`Infinity`、負數、`undefined`；P 只能是 0～100 整數或 `null`。`listRowOf`／`fogRowOf` 收到錯誤種類的島屬程式錯誤，拋 `TypeError`（§4.16） | §15.2 性質 |
+
+**AC-69-02 測試資料**：以 PRD AC-69-02（生效色級綠、D = 15、X = 3）與 LF-6 為準（LF-6 範例 D = 10，這 3 則回饋與 D 無關、結果相同）——橘 m 239（P 24）答對 W1 →「橘島又多掌握 1 個字（掌握 24%）」；調為 244 字後答對 W2（245，P 25 升階）→「橘島長出第一棵椰子樹！」；另測 249 → 250 為「橘島又多掌握 1 個字（掌握 25%）」（V-ISL-05）。
+
+#### 7.32.2 群島頁 DOM 與版面（`views/dashboard.js`、`styles/10-dashboard.css`，FE-108；DB-1～DB-6）
+
+**DOM（順序 = 畫面順序 = Tab 順序）**
+
+```
+div.dashboard                                       max-width: var(--content-narrow); margin-inline: auto
+├─ div.db-head                                      display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px
+│  ├─ h2.page-title.dash-title                      display:flex; align-items:center; gap:8px; margin:0
+│  │  ├─ svg（islandArt.titleDeco，28×28，aria-hidden）
+│  │  └─ span「我的群島」（LAYOUT_TEXTS.dashboardTitle）
+│  └─ p.db-goal [data-color=<生效色級>]             display:flex; align-items:center; gap:8px; margin:0
+│     ├─ span.db-goal__tag                          膠囊：白底、2px 外框、圓角 999px、13px／700、padding 6px 10px
+│     │  ├─ span.db-goal__dot（aria-hidden；色級色）
+│     │  └─ span.db-goal__text「綠級・每日 15 字」（layout.goalLineText，DB-4）
+│     └─ button.btn.db-change [type=button][data-go=customizer]「變更」
+├─ section.card.db-today [aria-labelledby=db-today-h]       今日任務卡（§7.32.3）
+├─ div.card.db-map                                  地圖框（§7.32.4）；內含 islandMap.build 的 div[role=img]
+├─ section.db-isles [aria-labelledby=db-isles-h]    島嶼清單（§7.32.5）
+├─ section.db-stats [aria-label=學習數據]           3 格數據（§7.32.6）
+├─ section.card.db-chart                            近 7 天（既有，不改）
+└─ section.card.db-backup                           資料備份（既有，不改）
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 移除 | 主環形圖（`ringSvg`、`setRing`、`ringGeometry`、`RING*`、`.db-ring*` 樣式）、未使用的 `TEXT.title`「學習主控台」；`--emt-dur-ring` 與 `interaction.UI.RING_ANIM_MS` 保留不動（`router-motion.test.js` 比對，不影響畫面） | AC-39-01、AC-63-02 |
+| 重繪時機 | `show()`（每次進入，含由導覽返回）：以當下 `store.getState()` 與 today 重算 `dashboardModel`、更新文字與屬性；地圖依 `islandMap.signature` 比對，**相同 → 沿用既有節點**，只以 `setPlay(!reduced)` 同步動畫 class、`aria-label` 不同才改；不同 → 以 `play: !reduced` 重建；島嶼清單 5 列內容相同不重建。頁面停留期間收到 `PROGRESS_TAGS` 通知 → 重算，地圖簽章不同才以 `play: false` 重建（不重播動畫）。**隱藏期間**收到 `PROGRESS_TAGS` 通知 → 不同步繪製，改以閒置排程預先重算並重建（細節與狀態變數見 §7.32.15） | IS-3、AC-64-09、AC-70-01、AC-70-03 |
+| 單一來源 | 對話框、今日進度列、地圖、清單、3 格狀態行、`aria-label` 全部取自同一次 `dashboardModel` 的 `island` | AC-65-03、AC-67-02 |
+| 寬度 | 內容容器 720 px 置中（既有）；地圖框 `max-width: 480px; margin-inline: auto`；其他區塊填滿容器；3 格同一列；清單每列 1 島 | AC-63-03、AC-63-04 |
+| 不可點擊 | `.db-map`、`.db-isles` 及其子孫無事件、無 `tabindex`、`cursor: default`；`10-dashboard.css` 中 `cursor: pointer` 只有 `.db-backup__toggle` 一條（資料備份收合鈕，可點擊） | AC-64-10、AC-71-02 |
+| 單元效能預算 | `dashboardModel` + 建立整頁 DOM（3,000 個已掌握字）≤ 20 ms，指 Node 假 DOM 的**暖執行**（先跑數次再量，取 median）；以一次性腳本量測（放 scratchpad，FE-116 量得暖 median 0.368 ms），不另設常駐單元測試（避免機器負載造成不穩定）；瀏覽器中的反應時間以 §7.32.14 T6 為準 | AC-70-03 |
+| 不寫 localStorage | 瀏覽、重繪、動畫皆 `setItem` 0 次；「開始今日學習」「變更」仍只以 `[data-go]` 交給 router（DB-3、T-65） | AC-72-02、AC-39-03 |
+| 首屏預算（375×667） | 頁首 48 → `main` 上 padding 16 → 標題列（換行時 2 列，44 + 8 + 44）96 + 12 → 今日任務卡：外框 3 + padding 14 + 龜龜列約 94（名稱 18、對話框 2 行約 72）+ 12 + 進度列 24 + 達成行 20 + 12 + 按鈕 52：「開始今日學習」下緣約 y = 403（+ 陰影 4），遠小於底部導覽上緣 611；1366×768 約 y = 430 < 768 | AC-63-05、AC-39-09 |
+
+#### 7.32.3 今日任務卡與龜龜（FE-108；DB-2、IS-14、IS-15）
+
+```
+section.card.db-today                               border-width:3px; box-shadow:var(--shadow-pop); display:grid; gap:12px
+├─ h3.visually-hidden#db-today-h「今日任務」          （螢幕閱讀器導覽用；可見標題會違反 AC-39-02 的由上到下順序）
+├─ div.db-host                                      display:flex; gap:12px; align-items:flex-start
+│  ├─ svg.db-host__turtle（islandArt.turtle，72×64，aria-hidden）
+│  └─ div.db-host__talk                              flex:1; min-width:0
+│     ├─ p.db-host__name「島主 龜龜」                 12px／700、--text-muted
+│     └─ p.db-host__bubble（dialogText）              16px／700、line-height 1.5、padding 10px 12px、背景 var(--dialog-bg)、
+│                                                    2px 外框、圓角 16px 16px 16px 4px；不是 aria-live
+├─ div.db-today__progress                           display:grid; gap:4px
+│  ├─ div.db-today__row                             display:flex; align-items:center; gap:10px
+│  │  ├─ p.db-today__text「今日已學 X / D 字」（LAYOUT_TEXTS.todayRing）   14px／700、white-space:nowrap
+│  │  └─ div.db-today__bar [role=progressbar][aria-valuemin=0][aria-valuemax=D][aria-valuenow=min(X,D)][aria-valuetext=同上文字]
+│  │        flex:1; height:14px; 2px 外框; 圓角 999px; 背景 var(--isl-track); overflow:hidden
+│  │     └─ span.db-today__fill  width = r × 100%；X < D：var(--brand)；X ≥ D：var(--color-gold)；transition: none
+│  └─ p.db-today__done「今日目標達成」（X ≥ D 才顯示；aria-live=polite 沿用）
+└─ button.btn.btn--accent.db-start [type=button][data-go=flashcards]「開始今日學習」   width:100%; min-height:52px
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 對話框文字 | `island.dialogText(st)`；D = 10 時 X = 0、4、9、10、12 依序為 IS-14 五句 | AC-66-02 |
+| 「X / D」只 1 次 | 今日已學文字只在 `p.db-today__text`；進度條用 `aria-valuetext`，不另顯示數字 | AC-39-06、AC-66-03 |
+| 375px | 龜龜 `flex: none`；對話框 `min-width: 0; overflow-wrap: anywhere`；不重疊、不裁切 | AC-66-01 |
+| 對比 | 對話框 `--text` 對 `#fff6df` 約 13.6:1；名稱 `--text-muted` 對白約 6.0:1 | AC-68-03 |
+
+#### 7.32.4 地圖 SVG（`ui/island-map.js`、`styles/11-island-map.css`，FE-107；IA-3、IA-4、AC-64-01～AC-64-07）
+
+**結構**：`div.card.db-map`（`border-width: 3px; border-radius: 26px; padding: 0; overflow: hidden; background: var(--sea); box-shadow: var(--shadow-pop)`；底色海面色是 AC-68-02、VC-4 的白底例外，外框、圓角、陰影仍依區塊卡片規則）> `div.db-map__figure[role="img"][aria-label]` > `svg.isl-map[viewBox="0 0 354 430"][aria-hidden="true"][focusable="false"]`（`display: block; width: 100%; height: auto; aspect-ratio: 354 / 430`）。以 `core/dom.js` 的 `svg()` 建立節點（`createElementNS`），不寫 `xmlns`、不用 `<use>`、`<symbol>`、`<image>`、`href`、`<foreignObject>`、`url(`；每個圖形以基本 `path`／`ellipse`／`rect`／`circle`／`line` 繪製。
+
+**繪製順序（後者在上）**：海面 `rect` → 海浪 → 彩虹 → 太陽 → 雲 → 霧中島 → 航線 → 綠島 → 棕島 → 橘島（含碼頭）→ 燈塔島 → 小船 → **文字層 `g.isl-labels`（最上層）**。所有可見文字都在文字層，每段文字下方有白底圓角牌（`rect` 白色、1.5 外框色描邊），保證不被圖形遮住、對比不受霧化與彩虹影響（AC-71-04）。
+
+**構圖座標（viewBox 單位；下表為實作值，權威來源是 `islandMap.LAYOUT`；之後微調須通過 §10.15 的外框不相交測試並同步本表）**
+
+| 元素 | 錨點 | 外框（約） | 說明 |
+| :--- | :--- | :--- | :--- |
+| 藍島（霧） | (46, 62) 橢圓 rx 26、ry 9 | 牌 (46, 92) 84 × 22 | 虛線外框 `stroke-dasharray="4 4"`、圖形群組 `opacity: 0.75`、無植物；牌文字「藍島・霧中」 |
+| 金島（霧） | (124, 30) rx 22、ry 8 | 牌 (124, 56) 84 × 22 | 同上；「金島・霧中」 |
+| 太陽 | (316, 44) r 19 | x 295～337、y 23～65 | `g.isl-sun`；`cloudy` 時群組 `opacity` 屬性 0.35 |
+| 雲 × 2 | (282, 74)、(210, 26) | 含漂移 x 244～330、y 56～86；x 182～238、y 14～38 | `g.isl-cloud`，外層定位、內層 `g.isl-anim-cloud` 動畫 |
+| 彩虹 | 圓心 (200, 126)，半徑 52、46、40、34（線寬 6） | x 145～255、y 71～126 | 只在 `rainbow` 時建立 `g.isl-rainbow`（4 條弧，三次貝茲曲線繪製） |
+| 綠島 | (178, 168) 沙 rx 66、ry 20 | 島 x 112～244、y 116～190；牌 (178, 214) 56 × 24 | `g.isl-island[data-island=green]` |
+| 棕島 | (272, 252) rx 62、ry 19 | 島 x 210～334、y 200～273；牌 (272, 294) 56 × 24 | 同上 |
+| 橘島 | (100, 326) rx 74、ry 23 | 島 x 26～174、y 270～359；牌 (100, 380) 56 × 24 | 同上；右側碼頭 `rect.isl-dock` x 156～190、y 322～334（樁至 344） |
+| 燈塔島 | (298, 380) 石底 rx 34、ry 11 | 塔頂 y 308；光束 x 252～344、y 302～334；牌 (298, 414) 76 × 24 | `g.isl-lighthouse[data-state]`；「待建」牌 (316, 352) 40 × 22（在文字層） |
+| 航線 | 起點 S (236, 414) → 碼頭 E (206, 346) | — | `line.isl-route`（白色虛線）；`x1,y1,x2,y2` = S、E |
+| 小船 | `boatPoint(r)` | 錨點 x ± 16、y − 24～+ 9 | `g.isl-boat[data-ratio][transform="translate(x y)"]` > `g.isl-anim-boat` |
+| 海浪 × 5 | (20, 230)、(40, 170)、(150, 250)、(160, 410)、(318, 200) | 各 32 × 6 | `g.isl-wave` > `g.isl-anim-wave`；白色 `path`、不放在牌上 |
+
+**島上植物位置**：座標為植物**底部錨點**、相對島中心，以 rx = 66 為基準，實際位置 = 表值 × (該島 rx ÷ 66)（`LAYOUT.plantBaseRx`）；實際值在凍結的 `LAYOUT.plants`：新芽 (0, −6)；椰子樹 1 棵 (−12, −8)，2 棵 (−34, −4)、(8, −4)，3 棵 (−12, −8)、(−34, −4)、(8, −4)；花 (−44, 2)、(22, 6)；小屋 (32, −4)；旗子 (50, −2)。數量**只建立需要的元素**（不以 `opacity: 0` 隱藏）：每座開放島的 `g.isl-sprout`、`g.isl-palm`、`g.isl-flower`、`g.isl-hut`、`g.isl-flag` 個數逐一等於 `STAGES[stage]` 的 `sprouts`、`palms`、`flowers`、`huts`、`flags`（IS-8，QA 以 class 計數）。椰子樹外層 `g.isl-palm` 定位、內層 `g.isl-anim-sway` 搖擺。
+
+**狀態屬性（供測試與 QA 判定，不影響畫面）**：`svg.isl-map[data-weather][data-lighthouse][data-boat]`、`g.isl-island[data-island][data-stage]`、`g.isl-fog[data-island]`、`g.isl-lighthouse[data-state]`（`unbuilt`：`g.isl-lh-rocks` + 待建牌；`built`：`g.isl-lh-tower`；`lit`：`g.isl-lh-tower` + `g.isl-lh-beam`）、`g.isl-boat[data-ratio]`。
+
+**文字**：島名 `TEXTS.islandName`、霧中 `fill(fogMapLabel)`、`lighthouseMapLabel`、`lighthouseUnbuiltSign`；`text-anchor="middle"`、`font-size="14"`、`font-weight="700"`、`fill` = 外框色 `#3d3550`（對白牌約 11.5:1）；字型繼承頁面系統字型。375 px 時 SVG 實際寬約 337 px（容器 343 − 外框 6），縮放 0.952 → 14 × 0.952 ≈ 13.3 CSS px ≥ 12（AC-71-04）。
+
+**顏色**：海面 `--sea`；沙 `#f7e2b0`、草（橘島 `#ffd09a`、棕島 `#e2c39b`、綠島 `#9be3a0`）、椰葉 `#6fcf97`、花 `#ffb3c7`、屋頂 `#ff8f6b`、太陽與旗 `#ffd166`、描邊 `#3d3550`（採用設計稿的柔和色）。**禁止** `#f7893b` 出現在任何 `fill`／`stroke`（VC-3、AC-68-05）；也不使用 `--accent`、`--brand` 變數。
+
+#### 7.32.5 島嶼清單（FE-108；IA-2、AC-65-01～AC-65-04）
+
+```
+section.db-isles [aria-labelledby=db-isles-h]
+├─ h3.section-title#db-isles-h「島嶼」
+└─ ul.db-isles__list（list-style:none; display:grid; gap:8px; margin:0; padding:0）
+   └─ li.db-isle.db-isle--<id>（5 列，LIST_ORDER；開放島另有 .is-open，霧中島 .is-fog）
+      display:grid; grid-template-columns:28px minmax(0,1fr) auto; column-gap:12px; row-gap:4px; align-items:center;
+      min-height:44px; padding:10px 12px; background:#fff（霧中島 var(--fog-row)）; 2px 外框; border-radius:16px
+      ├─ span.db-isle__dot（aria-hidden；28×28 圓、2px 外框；背景 var(--color-<id>)，霧中島 opacity 0.5）
+      ├─ p.db-isle__title：span.db-isle__name「橘島」＋ span.db-isle__sub「入門」（--text-muted、12px）
+      ├─ p.db-isle__right「掌握 25%」／「掌握 —」／「尚未開放」  tabular-nums、700
+      ├─ div.db-isle__bar（grid-column: 2 / 4；height 8px；背景 #e7e3f0；圓角 999px；overflow hidden）
+      │    開放島：role=progressbar、aria-valuemin 0、aria-valuemax 100、aria-valuenow P（null 時省略）、aria-label「橘島掌握率」
+      │    霧中島：aria-hidden="true"，無子元素
+      │  └─ span.db-isle__fill  width P%；背景 var(--color-<id>)；transition: none
+      └─ p.db-isle__stage（grid-column: 2 / 4）階段文字 [+「（目前目標未包含）」]／「還在霧中，之後的版本開放」
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 文字來源 | `island.listRowOf`、`fogRowOf`；`textContent` 寫入 | AC-65-01、IA-6 |
+| 只靠顏色？ | 霧中島以「尚未開放」文字與不同底色區分；階段以文字呈現 | AC-71-03 |
+| 375px | 每列 ≥ 44 px；名稱與副標可換行；`min-width: 0`；無水平捲軸 | AC-65-04 |
+| 對比 | `--text` 對白、對 `#f3f6fa` 皆 > 12:1；副標與階段文字 `--text-muted` 對 `#f3f6fa` 約 5.5:1 | AC-68-03 |
+
+#### 7.32.6 3 格數據的天氣與燈塔行（FE-108；DB-5、IS-11、IS-12）
+
+`section.db-stats`（不再是單一 `.card`）`display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px`；每格 `div.db-stat` 為區塊卡片樣式（白底、2 px 外框、圓角 16 px、`padding: 12px 8px`、置中）。第 1 格最下方加 `p.db-stat__status`（`island.weatherText`），第 3 格最下方加 `p.db-stat__status`（`island.lighthouseText`），12 px、`--text-muted`、`overflow-wrap: anywhere`；第 2 格不加。標籤、數值、「已掌握 N 字」、已答對行與強調橘圖示 `.db-stat__icon` 照舊（AC-39-05、AC-49-01、AC-49-08）。
+
+#### 7.32.7 島嶼外觀 token（`styles/00-base.css` 等，FE-103、FE-108～FE-110；VC-3～VC-5、IV-1～IV-5）
+
+契約標「建議」的值全部採用，**不需修訂契約**：`background` `#eaf7fb`、`outline` `#3d3550`、`sea` `#9fe0ec`、`dialogBg` `#fff6df`、`fogRowBg` `#f3f6fa`；`text`、`textMuted` 維持 `#1f2937`／`#5b6472`。
+
+| 變數（`:root`） | 值 | 用途 |
+| :--- | :--- | :--- |
+| `--bg` | `#eaf7fb` | `body` 背景；= `PWA_BACKGROUND_COLOR` = `COLOR_TOKENS.background`（三處同一任務修改，B-11） |
+| `--outline` | `#3d3550` | 區塊卡片、按鈕外框、插圖描邊、立體陰影；對 `--bg` 約 10.5:1、對白約 11.5:1 |
+| `--outline-w` | `2px` | 卡片、按鈕、清單列、3 格 |
+| `--outline-w-strong` | `3px` | 今日任務卡、地圖框 |
+| `--radius-card` | `22px`（原 16） | 區塊卡片（= `UI_LAYOUT.CARD_RADIUS_PX`） |
+| `--radius-btn`（新） | `14px` | `.btn` |
+| `--radius-cta` | `16px`（原 12） | `.btn--accent` |
+| `--shadow-pop`（新） | `0 4px 0 var(--outline)` | 今日任務卡、地圖框、`.btn--accent` |
+| `--sea`、`--dialog-bg`、`--fog-row`（新） | `#9fe0ec`、`#fff6df`、`#f3f6fa` | 地圖海面、龜龜對話框、霧中島列 |
+| `--isl-track`（新） | `#d8eef5` | 今日進度條軌道 |
+| `--feedback-bg`（新） | `#e9fbef` | 單字卡學完回饋列 |
+| `--radius`、`--border`、`--shadow-card`、`--tint`、`--line` | 不變 | 輸入框、作答選項、色級列等範圍外元素 |
+
+| 元件 | 樣式 | AC |
+| :--- | :--- | :--- |
+| `.card` | `background: var(--surface); border: var(--outline-w) solid var(--outline); border-radius: var(--radius-card); box-shadow: none` | AC-68-02 |
+| `.btn`（含 `--primary`、`--secondary`、`--danger`） | `border: var(--outline-w) solid var(--outline); border-radius: var(--radius-btn)`；底色與字色不變（`--tint`／`--brand-deep`、`--primary`／白） | AC-68-02、AC-68-03 |
+| `.btn--accent` | `border-color: var(--outline); border-radius: var(--radius-cta); box-shadow: var(--shadow-pop)`；底 `--accent`、字 `--accent-text` 不變；`.btn--accent:hover` 為 `box-shadow: var(--shadow-pop), 0 2px 8px rgba(16, 40, 80, 0.18)`，保留立體陰影、不換底色 | VC-3、AC-68-02 |
+| `.btn--link`（頁尾連結、「從備份還原」、應用內三頁返回等連結樣式按鈕） | `border-color: transparent; background: transparent`，維持連結外觀（不屬 AC-68-02 列舉的按鈕，SD-FB-105） | AC-38-04、AC-38-09 |
+| 「變更」`.btn.db-change` | 白底、`--outline` 2 px、圓角 14 px、無底線、≥ 44 × 44 | V-LAY-10、AC-66-04 |
+| 範圍外 | 輸入框（1 px `--border`）、色級列選中樣式、作答選項對錯樣式、導覽項（樣式不改）、焦點框（3 px `--focus`，對 `--bg` 約 5.5:1）、廣告框 | AC-68-02、AC-71-05 |
+| 字型 | `--font: system-ui, "Noto Sans TC", "Microsoft JhengHei", sans-serif` 不改（已符合）；不新增 `@font-face`。交付檔 `font-family` 允許名單由 `island-static.test.js` 維護：system-ui、Noto Sans TC、Microsoft JhengHei、Segoe UI、Lucida Sans Unicode、Arial Unicode MS、Consolas、Courier New 與通用字族；新增任何字型須同一任務更新該名單 | AC-68-06 |
+
+**禁止寫法（`tokens.test.js` 既有規則不放寬）**：`var(--accent)` 只在 `.btn--accent`、`.db-stat__icon` 規則；`#f7893b`、`#1e9bf0` 字面值只在 `:root`；`.btn`／`.card` 規則不得用 `var(--border)` 或 `#d5d9e0`；無 `@font-face`、無 `url(`。新樣式檔（`11-island-map.css`）同受掃描。
+
+**其他畫面（FE-110，只改 CSS，DOM 不變）**：檢查 8 個樣式檔中覆寫 `.card`、`.btn` 邊框、圓角或陰影的規則，改為 token；`.site-page__content`（應用內三頁內容區）與「資料來源與授權」各區塊套用區塊卡片樣式；TTS、麥克風按鈕套用按鈕外框；色級列、作答選項、輸入框、廣告框不動（AC-68-04）。「資料來源與授權」頁的授權全文摺疊框（`.src-license`，`70-sources.css`）維持 1 px `var(--line)`、圓角 `var(--radius)`（8 px）：它是區塊卡片內的子元件，不屬 AC-68-02 列舉的區塊，`island-appearance.test.js` 不檢查。
+
+#### 7.32.8 動畫與減少動態（`styles/11-island-map.css`、`views/dashboard.js`，FE-107、FE-108；AC-70-01、AC-70-02、AC-31-03）
+
+```css
+/* 只在 .isl-map--play 下播放；有限次數，最長 4.4 秒；只改 transform */
+.isl-map--play .isl-anim-wave  { animation: isl-bob   2.2s ease-in-out 2; }
+.isl-map--play .isl-anim-boat  { animation: isl-bob   2.2s ease-in-out 2; }
+.isl-map--play .isl-anim-cloud { animation: isl-drift 4.4s ease-in-out 1; }
+.isl-map--play .isl-anim-sway  { animation: isl-sway  2.2s ease-in-out 2; transform-box: fill-box; transform-origin: 50% 100%; }
+@keyframes isl-bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
+@keyframes isl-drift { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-8px); } }
+@keyframes isl-sway  { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-2deg); } 75% { transform: rotate(2deg); } }
+@media (prefers-reduced-motion: reduce) { .isl-map, .isl-map * { animation: none !important; } }
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 位移上限 | SVG 內 `px` 是 viewBox 單位，480 px 寬時放大 480 / 354 ≈ 1.356 倍：2.5 → 3.4 CSS px（≤ 4）、8 → 10.8 CSS px（≤ 12）、旋轉 2°（≤ 3°） | AC-70-01 |
+| 定位與動畫分層 | CSS `transform` 會覆蓋 SVG 的 `transform` 屬性，因此**定位一律放外層 `g` 的屬性，動畫只放內層 `g.isl-anim-*`**（T-141） | AC-64-07 |
+| 停止 | 有限次數且 `animation-fill-mode` 預設 `none`：結束後回到原位，`getAnimations()` 不再列出；4.4 秒 < 5 秒，留 0.6 秒給換頁與首次繪製 | AC-70-01 |
+| 重播 | 依 CSS Animations 規範，元素（含祖先）由 `display: none` 變為顯示時，套用中的動畫一律從頭開始；離開群島頁時 router 把 `#view-dashboard` 設 `hidden`（`00-base.css` `[hidden] { display: none !important }`），回來時移除。因此 `show()` 沿用既有 SVG、只要 `isl-map--play` 在，動畫就自動重播，**不需移除再加 class、不強制重排**。地圖簽章不同時 `show()` 以 `play: !reduced` 重建；停留期間的資料更新以 `play: false` 重建（不重播）。保底：`show()` 被呼叫時頁面未經過 `hide()`（`visible` 已為 `true`），一律以 `play: !reduced` 重建，保證每次 `show()` 都會播放 | AC-70-01 |
+| 減少動態 | `show()` 先查 `EMT.ui.motion.reduced()`：沿用時以 `setPlay(figure, !reduced)` 同步 class，重建時成立就不加 class；全域 `05-motion.css` 與本檔 `!important` 規則再擋一層；小船直接畫在 r 位置（位置本來就不做動畫） | AC-70-02、E-181 |
+| 進度條 | 今日進度條、清單進度條 `transition: none`（一般設定也無轉場） | AC-70-02 |
+| 閃爍 | 不做 `opacity` 動畫 | AC-70-01 |
+| 版面位移 | 動畫只在 SVG 內改 `transform`；SVG 尺寸由 `aspect-ratio` 固定，不影響其他區塊 | AC-70-01 |
+| 不依賴 | 動畫本身不用 `requestAnimationFrame`、Web Animations API、計時器（A-1）；隱藏期間的預先重建（§7.32.15）是背景工作，以 `requestIdleCallback` 排程（無此 API 時 `setTimeout`），不產生、不控制任何動畫格 | AC-70-03 |
+
+#### 7.32.9 單字卡外觀與學完回饋（`state/store.js` FE-106；`views/flashcards.js`、`styles/30-flashcards.css` FE-109；LF-1～LF-6、AC-69-01～AC-69-06）
+
+**store（FE-106）**
+
+```
+export function islandSnapshot(ct, data, t):   // 純函式；ct = content()；t = 本 action 取 1 次的 today()
+  return { islands: island.islandsOf({ builtin: ct.builtin, builtinMap: ct.builtinMap, nB: ct.nB, nG: ct.nG,
+                                       masteredWordKeys: data.masteredWordKeys, effectiveColor: data.goal.effectiveColor }),
+           x: learning.todayCount(data.todayLearned, t), d: learning.dailyGoal(data.goal.effectiveColor) }
+
+flipCard（flipped = true）／answerVocabQuiz／recordSttScored：
+  t = today()（只取 1 次；learnPatch(…, t)、touchStreak(…, t) 用同一個 t）
+  B = islandSnapshot(content(), state.data, t)；組好 newData（既有邏輯不變）
+  if (runtime.currentTab === "flashcards" && EMT.core.island 已載入):
+     fb = island.feedbackOf(B, islandSnapshot(content(), newData, t))
+     if (fb) { runtime.flashcard = assign(runtime.flashcard, { islandFeedback: fb }); tags.push("islandFeedback") }
+  commitWrite(newData, runtime, tags)   // 既有的單次寫入；寫入失敗不影響回饋（LF-5）
+```
+
+| 項目 | 決定 | 依據 |
+| :--- | :--- | :--- |
+| 不比較的操作 | 翻回正面、`gotoCard`、滑動、`setFlashcardMode`、STT 訊息或錯誤（不呼叫 `recordSttScored`）、準備中取消：不呼叫 `feedbackOf`，`islandFeedback` 不變 | LF-1、AC-69-04 (c) |
+| 保留 | `cardChanged` 產生的新 `flashcard` 物件帶入原 `islandFeedback`；`placeCard`、`setFlashcardMode` 以 `assign` 保留 | LF-3、T-145 |
+| 清除 | `initialRuntime` 為 `null`；`setTab` 離開 `"flashcards"` 設 `null`；`importBackup` 重設單字卡狀態時設 `null` | LF-3 |
+| tags | 啟動通知 tags 含 `"islandFeedback"`；`setTab`、`importBackup` 在原值非 `null` 時 tags 加 `"islandFeedback"` | LF-3 |
+| 模組未載入 | 瀏覽器中 `EMT.core.island` 未載入（載入順序異常）時不比較、不拋例外，`islandFeedback` 維持原值，學習資料照常寫入 | LF-5 |
+| 同一天 | `learnPatch`、`touchStreak` 接收呼叫端給的 today；同一 action 的資料變更與 B／A 快照用同一個 t | LF-1、LR-1 |
+| 效能 | `sectionSizes` 快取、`masteredCounts` 只走已掌握集合；`islandsOf` 單筆快取讓下一個 action 的 B 直接取用上一個 action 的 A（同一個 `masteredWordKeys` 陣列）；`init()` 預熱 1 次（§4.16）；群島頁隱藏時不在翻面當下同步重繪（§7.32.15）。目標：4 倍降速下翻面／作答到回饋列出現（含重新載入後第一次翻面）≤ 100 ms 且有餘裕 | AC-69-05、AC-69-06、AC-22-03、AC-29-01 |
+| D 的來源 | `data.goal.effectiveColor`；與 `dashboard.goalInfoOf` 在合法資料下相同（FE-106 測試以同一組資料比對兩者） | IS-13 |
+
+**單字卡頁 DOM（FE-109；只新增 2 個元素，其餘順序不變）**
+
+```
+div.fc-main
+├─ div.fc-toolbar                                   （不變）
+├─ div.fc-stage                                     position: relative
+│  ├─ article.card.fc-card ／ div.card.fc-quiz      （不變；外觀改為區塊卡片 token）
+│  └─ svg.fc-deco（islandArt.cardDeco，40×24，aria-hidden；建立 1 次，每次重建卡片區後以 appendChild 移到最後）
+│        position:absolute; top:8px; right:12px; pointer-events:none
+├─ div.fc-feedback-live [role=status][aria-live=polite][aria-atomic=true]    常駐；無子元素時尺寸 0、無框
+│  └─ p.fc-feedback（islandFeedback 非 null 才建立）
+│     ├─ svg.fc-feedback__icon（islandArt.sprout，24×24，aria-hidden）
+│     └─ span.fc-feedback__text（IslandFeedback.text，textContent）
+└─ div.fc-nav「上一張／翻面／下一張」                （不變）
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 常駐即時區域 | 即時區域先存在、之後才放入文字，NVDA 才會穩定播報；回饋為 `null` 時不建立 `p.fc-feedback`（契約 LF-3「不渲染回饋列」），容器沒有 padding、border、margin，計算後高度 0 | AC-69-05、AC-69-06 |
+| 更新 | 訂閱 `"islandFeedback"`、`"tab"` 與 `show()`：值的物件參照改變 → 以新的 `p.fc-feedback` 取代（重播淡入）；`null` → 清空容器；值不變 → 不動 DOM | AC-69-04、AC-69-05 |
+| 淡入 | `.fc-feedback { animation: fc-fb-in var(--emt-dur-slide) ease-out; }`（`--emt-dur-slide` = 200 ms；既有 `tokens.test.js` 禁止在規則中寫毫秒數字，一律用時長變數；只改 `opacity`）；減少動態由全域規則關閉 | AC-69-05、AC-70-02 |
+| 新芽圖示 | `mount` 時以 `islandArt.sprout("fc-feedback__icon")` 建 1 份範本（只建 1 次、不掛上文件），每次建立 `p.fc-feedback` 時 `cloneNode(true)`；範本建立失敗（回傳 `null` 或拋例外）時，整個頁面週期的回饋列只放文字、不再重試建立（同既有 `makeArt` 失敗行為） | AC-69-05 |
+| 樣式 | `display:flex; align-items:center; gap:8px; margin:12px 0 0; padding:8px 12px; background:var(--feedback-bg); border:2px solid var(--outline); border-radius:16px; font-size:0.875rem; font-weight:700; color:var(--text); overflow-wrap:anywhere`；`--text` 對 `#e9fbef` 約 13.6:1 | AC-69-05、AC-68-03 |
+| 不位移 | 回饋列在卡片區、麥克風列、分數區**之下**，出現或更新只往下推「上一張／翻面／下一張」 | AC-69-05 |
+| 角落裝飾 | 放在 `.fc-stage` 右上角而不是卡片或測驗元件內部（測驗元件重繪會清空容器）；`.fc-stage > .card` 的上 padding 增加到 ≥ 34 px，保證裝飾的矩形不與卡片內任何按鈕、文字重疊（FE-112 以 `getBoundingClientRect` 驗證） | AC-69-01 |
+| 卡片外觀 | 刪除 `#view-flashcards .card { border: 1px solid var(--line); border-radius: var(--radius); box-shadow: none; }`，改用全站區塊卡片樣式；按鈕（翻面、上一張、下一張、TTS、麥克風）外框依 §7.32.7。為符合 AC-68-02（卡片白底、外框 `--outline`、`box-shadow: none`），同時刪除背面底色 `#fbfcfe`、`.fc-card` 的陰影、測驗切換鈕選中狀態的 `--primary` 外框；設計稿的卡片立體陰影不採用 | AC-69-01、AC-68-02 |
+| 不新增 | 頁首返回按鈕、「今日 X / D」、色級徽章、「上一張 N 分」行一律不做 | Q-119、AC-69-01 |
+
+#### 7.32.10 無障礙（FE-107～FE-109；US-71）
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 地圖名稱 | `div.db-map__figure[role="img"]` 的 `aria-label` = `mapAltText`；SVG 整個 `aria-hidden`，內部文字不另被報讀 | AC-71-01 |
+| 裝飾 | 龜龜、標題裝飾、卡片裝飾、回饋新芽、清單色點、目標膠囊色點皆 `aria-hidden="true"`；SVG 一律 `focusable="false"`、無 `tabindex` | AC-71-02 |
+| Tab 順序 | 標題列與導覽 →「變更」→「開始今日學習」→ 資料備份 toggle（展開時加匯出、匯入、安裝）→（廣告框）→ 頁尾連結；地圖、清單無停駐點 | AC-71-02、AC-64-10 |
+| 不只靠顏色 | 每種狀態都有可見文字：清單階段文字、「尚未開放」、3 格狀態行、「今日目標達成」 | AC-71-03 |
+| 觸控與焦點 | 「變更」、「開始今日學習」≥ 44 × 44；焦點框 3 px `--focus`，對 `--bg` 約 5.5:1、對白約 6.0:1 | AC-71-05 |
+
+#### 7.32.11 名稱（FE-104、FE-108；IA-1、AC-63-01、AC-63-02）
+
+| 位置 | 改為 | 任務 |
+| :--- | :--- | :--- |
+| `core/constants.js` `TAB_LABELS.dashboard` | 群島（應用內三頁返回鈕因此為「返回群島」） | FE-104 |
+| `index.html` 導覽第 1 項文字、圖示 | 「群島」；圖示改為島嶼（沙丘＋椰子樹）的單一 `path`、`fill="currentColor"`、不寫命名空間屬性（沿用 §9.1 圖示慣例） | FE-104 |
+| `index.html` `#view-dashboard` `aria-label` | 群島 | FE-104 |
+| `views/customizer.js` `TEXT.reinitLine2` | 「建議先按「取消」，到「群島」頁按「匯出備份」保存目前紀錄。」（只改「到主控台按」→「到「群島」頁按」，句末標點沿用現行） | FE-104 |
+| `core/layout.js` `LAYOUT_TEXTS.dashboardTitle` | 我的群島 | FE-103 |
+| `views/dashboard.js` | 刪除 `TEXT.title`「學習主控台」 | FE-108 |
+| 不改 | 識別字 `"dashboard"`、`view-dashboard`、`data-tab="dashboard"`、`db-*` class、鍵名；程式註解 | — |
+
+#### 7.32.12 離線單檔、原創素材與聲明（FE-105、FE-107、FE-111；IV-4、IV-5、LT-7、US-72）
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 內嵌 | 全部插圖由 JS 以 `createElementNS` 建立（隨 HTML 內嵌的程式），導覽圖示為 `index.html` 內嵌 SVG；不產生任何請求 | AC-72-01 |
+| 原創 | 龜龜、島、燈塔、小船以基本圖形繪製；造型可參考人類認可的設計稿，不模仿任何既有遊戲角色、美術或名稱；原創性由人類判定（AC-72-03 (b)），不符時只改 `ui/island-art.js`、`ui/island-map.js` | AC-72-03 |
+| 遊戲名稱掃描 | `island-static.test.js` 以 Unicode 跳脫組出 AC-72-03 (a) 的 9 個字詞（**原始碼不出現字詞本身**，避免測試檔被當成命中），掃描 `src/app/` 非測試檔與建置產物 | AC-72-03 |
+| LT-7 | 「資料來源與授權」頁：接在 LT-4 段落之後新增 1 段（`textContent`）；`license-header.txt`：接在 LT-4 那一行之後新增 1 行；不加入關於我；LT-1～LT-6 與既有聲明逐字不變；LT-4 結尾無句號、LT-7 結尾有「。」，依契約 L-8 各自逐字、不統一標點 | AC-72-05、V-LGL-03、V-LGL-04 |
+
+#### 7.32.13 不持久化與不改清單
+
+| 項目 | 結論 |
+| :--- | :--- |
+| localStorage | 鍵 2 個、`schemaVersion` 3、`PersistedData` 12 欄、備份頂層 5 欄不變；`islandFeedback` 只在 runtime；`persist`、`backup` 不改 |
+| 不改的模組 | `core/learning.js`、`core/streak.js`、`core/part5flow.js`、`core/persist.js`、`core/backup.js`、`services/*`、`views/speech-panel.js`、`views/flashcard-quiz.js`、`views/part5.js`、`ui/router.js`、`ui/ad-slot.js`、`tools/`、`src/data/` |
+| 靜態頁 | `site/static-page.css` 與 `tools/site-pages.mjs` 不改（IV-3） |
+| 第二階段 | 不預留貝殼、裝飾、擺設的欄位、入口或「即將開放」字樣（Q-126） |
+
+#### 7.32.14 實測方法（FE-112；對 `dist/english-master-track.html`，無頭 Chrome，腳本只放 scratchpad）
+
+| # | 項目 | 方法與判定 | AC |
+| :--- | :--- | :--- | :--- |
+| T1 | 版面 | 375×667、390×844、412×915、768×1024、1366×768、1920×1080：區塊上緣順序依 DB-1；`scrollWidth ≤ clientWidth`；地圖 `getBoundingClientRect` 寬 = min(容器, 480)、寬高比 354：430 誤差 ≤ 1%；清單每列高 ≥ 44 | AC-63-03、AC-63-04、AC-65-04 |
+| T2 | 首屏 | V-LAYOUT 全部尺寸不捲動時「開始今日學習」完整在視窗內且在底部導覽之上 | AC-63-05 |
+| T3 | 導覽 | 375、700（先按「選單」）、1366：第 1 項文字「群島」、圖示為內嵌 SVG、點擊後 `aria-current="page"`、標題 `h2`「我的群島」 | AC-63-01 |
+| T4 | 小船 | D = 10、X = 0、5、9、10、15：`g.isl-boat` 錨點在 S→E 的比例 0、0.5、0.9、1、1，誤差 ≤ 航線長 2% | AC-64-07 |
+| T5 | 動畫 | 一般設定進入群島頁：0.5 秒時地圖內動畫 4 種、`transform` 以外屬性 0；第 5.1 秒 `getAnimations()` 地圖內 0；離開再進入重播；PerformanceObserver `layout-shift` 6 秒內今日任務卡、清單、3 格累計 0；減少動態：始終 0 | AC-70-01、AC-70-02 |
+| T6 | 效能 | 基準兩種條件（1 倍、4 倍 CPU 降速）：(a) 由單字卡頁點導覽「群島」、資料未變 ≥ 20 次；(b) AC-64-09：單字卡四選一答對 1 題、等 ≥ 1 秒（使用者操作節奏，讓 §7.32.15 的閒置預先重建完成）再點「群島」≥ 10 次；(c) 首次載入到「開始今日學習」可點擊 ≤ 3 秒／4 倍降速 ≤ 6 秒，各 10 次（`file://` 沒有 HTTP 快取，「首次載入」以每次重新開頁量測）；(d) 翻到背面、四選一作答到回饋列出現各 ≥ 10 次，另含「重新載入後第一次翻面」≥ 5 輪。(a)(b)(d) 每次 ≤ 100 ms，以「click → 下一影格」與 Event Timing `duration` 兩種方法量測，兩者都要合格；同時回報中位數與最大值，並與 v1.3.2 對照組交錯量測 (a)。(e) 參考值（不判定）：答對後立即（< 0.5 秒）點「群島」10 次。不合格時附 Performance 追蹤的事件處理、樣式、版面、繪製各階段耗時 | AC-70-03、AC-64-09、AC-69-05 |
+| T7 | 外觀 | AC-68-01 列舉畫面 `body` 背景 `rgb(234, 247, 251)`；AC-68-02 列舉的卡片與按鈕計算後外框、圓角、陰影（卡片背景白色，霧中島列與地圖框 `.db-map` 為例外）；manifest `background_color` `#eaf7fb`、`theme-color` `#1e9bf0` | AC-68-01、AC-68-02 |
+| T8 | 對比與字級 | 取樣 AC-68-03 列舉文字與外框；地圖每段文字 `getBoundingClientRect` 推算的實際字級 ≥ 12、對實際背景像素（截圖取樣）≥ 4.5:1（S = 0／7、K = 0／50） | AC-68-03、AC-71-04 |
+| T9 | 回饋列 | 觸發回饋前後 `.fc-card`／`.fc-quiz`、TTS、麥克風、收音條、分數區座標差 0；`.fc-deco` 矩形與卡片內按鈕、文字不相交；空容器高 0；換卡、切換模式保留；切頁回來與重新載入後無 `p.fc-feedback` | AC-69-01、AC-69-05 |
+| T10 | 離線與資料 | `file://` 連網與斷網：請求 0、Console 錯誤 0；v1.3.2 localStorage 與備份開啟、瀏覽、匯出、匯入：鍵與欄位不變、序列化結果無 `islands`、`stage`、`weather`、`lighthouse`、`boat`、`islandFeedback`；只瀏覽群島頁前後 localStorage 相同 | AC-72-01、AC-72-02 |
+| T11 | 觸控與焦點 | 375 px 群島頁與單字卡頁：可操作控制項 ≥ 44 × 44；Tab 順序依 §7.32.10；焦點框可見 | AC-71-02、AC-71-05 |
+| T12 | 其他畫面 | 首次畫面、難易度設定、模擬測驗（題目、結算、全部答對）、「資料來源與授權」、應用內三頁：DOM 元素順序、按鈕數量與文字與 v1.3.2 產物相同（「資料來源與授權」頁排除 AC-72-05 新增的 LT-7 段落後比對，AC-68-04；建置前先把現有 `dist/english-master-track.html` 複製到 scratchpad 作對照組） | AC-68-04 |
+
+本機沒有 Chrome 時，回報中列出未完成項目交主控代為執行（同 M-3）。
+
+#### 7.32.15 效能修正（FE-113～FE-117；AC-70-03、AC-22-01、AC-64-09、AC-69-05）
+
+**實測與原因**（FE-112，無頭 Chrome，對交付檔，4 倍 CPU 降速）
+
+| 路徑 | 實測 | 推定原因 |
+| :--- | :--- | :--- |
+| 切到群島頁（AC-22-01） | 中位 40.1 ms、最大 102.2 ms（40 次中 2 次 > 100）；Event Timing 最大 112 ms。v1.3.2 中位 21.7、最大 48.1；1 倍速最大 11.5 | 點擊處理 9～40 ms（舊版約 4）：`show()` 每次重算後**整個重建**地圖 SVG（約 200 個節點）與清單 5 列；其餘是新 SVG 與 10 個動畫的樣式、版面、繪製 |
+| 翻面到回饋列（AC-69-05） | 重新載入後第一次 146.3 ms；其他輪最大 66.4／55.3 ms | 群島頁隱藏時仍在 store 通知中同步 `renderProgress`（`dashboardModel`、清單重建、文字），落在翻面的同一個工作；第一次執行的島嶼快照、`feedbackOf`、新芽圖示函式為冷啟動 |
+
+**對策**（不改 PRD、契約、localStorage；AC-70-01 進頁播放與重播、AC-64-09 回來即新值、減少動態行為不變）
+
+| # | 對策 | 位置 | 任務 | 作用 |
+| :--- | :--- | :--- | :--- | :--- |
+| P-1 | 地圖簽章相同就沿用既有 SVG；重播靠頁面 `hidden` → 顯示時 CSS 動畫自動從頭開始（§7.32.8「重播」） | `ui/island-map.js` `signature`、`setPlay`；`views/dashboard.js` | FE-115、FE-116 | 資料未變時進入群島頁不建立任何地圖節點、不強制重排 |
+| P-2 | 清單 5 列內容鍵（`JSON.stringify(m.isles)`）相同就不重建 | `views/dashboard.js` | FE-116 | 省去 5 列約 35 個節點 |
+| P-3 | 隱藏期間收到 `PROGRESS_TAGS` 不同步繪製，改以閒置排程預先重算、重建 | `views/dashboard.js` | FE-116 | 翻面、作答路徑不再含群島頁工作；學習後回到群島頁通常也走 P-1 沿用路徑 |
+| P-4 | `islandsOf` 單筆快取（§4.16） | `core/island.js` | FE-113 | 下一個 action 的 B 快照、群島頁 `island.state` 直接取用 |
+| P-5 | store `init()` 預熱 1 次快照與 `feedbackOf`（§4.16） | `state/store.js` | FE-114 | 第一次翻面不再付冷啟動成本；預熱在啟動時（AC-22-05 預算 ≤ 6 秒，增加約數 ms） |
+| P-6 | 回饋列新芽圖示以範本 `cloneNode(true)`（§7.32.9） | `views/flashcards.js` | FE-117 | 第一次與之後的回饋列建立成本降低 |
+
+不採用：移除再加 `.isl-map--play` 並強制重排（點擊處理中多一次同步樣式與版面計算）；把地圖重建延後到下一個影格（第一個影格會顯示舊地圖，違反 AC-64-09「回到群島頁時地圖已是最新值」）；Web Animations API 重播（A-1）。
+
+**群島頁畫面模組的狀態（`createView` 內，不進 store、不持久化）**
+
+| 變數 | 意義 |
+| :--- | :--- |
+| `visible` | 既有；`show()` 後 `true`、`hide()` 後 `false` |
+| `mapSig`、`mapAlt` | 目前地圖節點的簽章與 `aria-label`；尚未建立時 `null` |
+| `islesKey` | 目前清單 5 列的內容鍵；尚未建立時 `null` |
+| `dirty` | 隱藏期間收到 `PROGRESS_TAGS` 後為 `true`；`prepare` 或 `show` 繪製完成後 `false` |
+| `idle` | 待執行的閒置排程 `{ api, handle }`；無則 `null` |
+
+**流程**
+
+```
+renderProgress(mode)            // mode："mount" | "show" | "live" | "prepare"
+  m = dashboardModel(store.getState(), today)        // 每次都重算（today、目標可能已變）
+  更新今日任務卡、目標標籤、3 格、近 7 天的文字與屬性（既有寫法）
+  key = JSON.stringify(m.isles); if key !== islesKey → 重建 5 列; islesKey = key
+  sig = islandMap.signature(m.island)
+  if 無地圖節點 || sig !== mapSig || (mode === "show" && replay):
+       play = (mode === "show" || mode === "prepare") && !reduced()
+       換上 islandMap.build(m.island, { play }); mapSig = sig; mapAlt = m.mapAlt
+  else:
+       if mode === "show": islandMap.setPlay(figure, !reduced())
+       if m.mapAlt !== mapAlt: figure.setAttribute("aria-label", m.mapAlt); mapAlt = m.mapAlt
+
+mount(root)  建 DOM → renderProgress("mount")（play false）→ 掛上文件 → 訂閱
+通知(tags)   progressAffected(tags) 才處理：
+               visible → renderProgress("live")（簽章不同才重建，play false）
+               否則    → tags 含 "dashboard" 時同步「資料備份」收合（renderBackup，只改 3 個屬性）；
+                         dirty = true；idle 為 null 時 idle = scheduleIdle(prepare)
+prepare()    idle = null；visible 或 !dirty → 結束；renderProgress("prepare")；dirty = false
+show()       replay = (visible === true)；visible = true；取消 idle；renderProgress("show")；dirty = false；renderInstall()
+hide()       visible = false（保留訂閱）
+```
+
+| 項目 | 決定 | AC |
+| :--- | :--- | :--- |
+| 閒置排程 | `root.requestIdleCallback(fn, { timeout: 500 })`；無此 API → `root.setTimeout(fn, 100)`；兩者皆無 → 不排程（`show()` 照樣重算與重建）。取消用對應的 `cancelIdleCallback`／`clearTimeout`。一次只排 1 個。模組匯出 `idleScheduler(host)` → `{ request(fn), cancel(handle) }`（依 `host` 上有無 `requestIdleCallback`／`setTimeout` 決定，兩者皆無時 `request` 回 `null`、不執行）；`createView(opts)` 加可省略參數 `opts.idle`（同形狀）供單元測試注入，省略時用 `idleScheduler(root)`（瀏覽器登錄時不傳）；Node 測試不得留下真實計時器 | AC-70-03、AC-69-05 |
+| 預先重建的動畫 | `prepare` 在頁面 `hidden` 時以 `play: !reduced` 建立：`display: none` 下動畫不執行，顯示時才從頭播放；`show()` 再以 `setPlay` 同步減少動態 | AC-70-01、AC-70-02 |
+| 回來即新值 | `show()` 一律以當下狀態重算；預先重建未執行（學習後 < 約 0.5 秒就點「群島」）時，`show()` 以簽章不同而同步重建，結果相同、只是點擊處理較久 | AC-64-09 |
+| 即時區域 | 「今日目標達成」(`aria-live=polite`) 在隱藏期間不再更新，改在 `show()` 與頁面同一個工作中更新；元素同時由不可見變為可見，不另被播報（與舊版隱藏期間更新的結果相同） | AC-30-05 |
+| 首次 `mount` 後立即 `show()` | `mount` 已建地圖（play false），`show()` 簽章相同 → 只 `setPlay(true)`，啟動時少建 1 次地圖 | AC-22-05 |
+| 匯入備份等停留期間變更 | 走 `live`：簽章不同才重建、不重播 | AC-70-01 |
+| 隱藏期間的「資料備份」收合 | 隱藏期間收到 `"dashboard"` tag（如 `setBackupExpanded`）仍立即同步收合狀態的 3 個屬性：toggle 的 `aria-expanded`、展開區的 `hidden`、區塊的 `is-expanded` class；不重算 `dashboardModel`、不重建節點（DB-6）。其他群島頁內容照 P-3 由閒置工作或 `show()` 更新 | AC-39-08 |
+| 不寫 localStorage | 預先重建、沿用、`setPlay` 皆 `setItem` 0 次 | AC-72-02 |
+
+**預期**：資料未變時點擊處理回到接近 v1.3.2（重算 `dashboardModel` 與文字，4 倍降速約數 ms），其餘為整頁繪製；翻面路徑不含群島頁工作、第一次翻面不付冷啟動成本。以 FE-112 T6 實測確認；若第一次翻面仍 > 100 ms，FE-112 須附 Performance 追蹤各階段耗時，由主控再派 SD。
+
 ---
 
 ## 8. 內容製作設計（pg-content）
@@ -4876,6 +5384,71 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 
 **給 QA 的已知設計行為**：(9) 以即時文字評分只在 `end` 且無錯誤、無 `nomatch`、非手動時發生；之前出現過的即時文字不會在錯誤或 `nomatch` 後補評分。(10) 空白暫時結果不回報，畫面保留上一段（FB-80）。(11) 準備中收到即時文字時，即時文字列與「聆聽中」同時出現，收音條從此時開始點亮。(12) 即時文字列不是即時區域，報讀器不播報。(13) 自 `resultIndex` 起沒有結果的 `result` 事件視為即時文字（SD-FB-98）。
 
+### 10.15 島嶼風格第一階段測試範圍（PRD v0.24；契約 v0.24 V-ISL-01～09、V-LAY-02、V-LAY-08、V-LAY-10、V-LGL-03、V-LGL-04）
+
+驗證分 3 層：(1) 單元測試驗證推算、組字、DOM 結構與 CSS 規則；(2) FE-112 以無頭 Chrome 對交付檔量測版面、動畫、對比、效能（§7.32.14）；(3) 人工：原創性（AC-72-03 (b)，人類）、NVDA 播報（AC-69-06、AC-71-01，QA）。
+
+**單元測試（PG，`npm test`）**
+
+| 檔案 | 任務 | 案例 |
+| :--- | :--- | :--- |
+| `__tests__/island.test.js`（新） | FE-102 | 常數以 `node:vm` 取 data-schema.ts §19 字面值深度相等（去除型別註記與 `as const`，比照 `site-content.test.js`）；V-ISL-01（m 0～1,000 共 11 點 → P 與階段；IS-7 對照表全部；n = 0 → `null`／`sand`）；V-ISL-02（AC-64-03 資料 → m 250、10、0；自訂單字不計；同 wordKey 自訂卡計入內建所屬島；生效橘時排名 1,500 計入棕島；`outOfGoal` 三種）；V-ISL-03（S 0、1、6、7 與中斷資料；K 0、1、49、50、200、Q = 0；X 0、5、9、10、15）；V-ISL-04（對話框 5 句、清單 5 列含 `null` 列「掌握 —」與 `valueNow: null`、3 格狀態行、IA-4 範例逐字、`null` 片段「{島名}掌握 —，沙灘」、文字替代不含「（目前目標未包含）」、數字無千分位）；V-ISL-05 純函式部分（LF-6 全部序列、249 → 250、AC-69-04 (a)(b)、同時兩島取前者）；1,000 組隨機輸入不變式 |
+| `__tests__/tokens.test.js` 等 | FE-103 | `:root` 新變數與值（§7.32.7 表）；`--bg` = `PWA_BACKGROUND_COLOR` = `COLOR_TOKENS.background` = `#eaf7fb`、HSL 條件；`--outline` 對 `--bg` 與白 ≥ 3:1；`.card` 外框、圓角 22 px、`box-shadow: none`；`.btn` 2 px 外框、圓角 14 px；`.btn--accent` 外框色、圓角 16 px、`--shadow-pop`；`.btn--link` 透明框；既有禁止寫法 (1)～(5) 照舊 |
+| `goal.test.js`、`shell.test.js`、`naming.test.js`、`site-pages.test.js`、`customizer.test.js` | FE-104 | `TAB_LABELS.dashboard`「群島」；導覽 4 項依序「群島」「難易度設定」「單字卡」「模擬測驗」、第 1 項圖示為單一 `path`；返回鈕「返回群島」；確認視窗含「到「群島」頁按「匯出備份」」、不含「主控台」；`index.html` 文字與屬性不含「主控台」 |
+| `legal-static.test.js`、`sources-page.test.js`、`shell.test.js`、`build.test.js` | FE-105 | V-LGL-03（LT-7 在頁面恰 1 次、接在 LT-4 之後）、V-LGL-04（開頭註解含 LT-7、仍不含 LT-5）；`shell.test.js` NM-4 雜湊改為新內容；`build.test.js` AC-23-06 案例加 LT-7 |
+| `__tests__/store-island.test.js`（新）、`store.test.js`、`store-track.test.js`、`flashcard-quiz.test.js`、`flashcards.test.js`（後兩檔只補形狀斷言） | FE-106 | 以合成字庫夾具（排名 1～3,000，前 2,809 筆含 `NGSL`）驅動 action：LF-6 全部序列（四選一答對 W1、244 → 245 升階、棕 0 → 1、翻面 8 → 9、STT 9 → 10、10 → 11 不變、自訂單字不變）；AC-69-04 (c) 各操作不變；換卡、切換模式保留；`setTab` 離開 → `null`、回來仍 `null`；啟動、匯入 → `null`；`setItem` 次數與無本功能時相同、序列化 localStorage 與匯出備份不含 `islandFeedback` 等鍵（V-ISL-07）；V-ISL-06 一般操作前後 `islandsOf` 的 P 與階段不下降；寫入容量不足時回饋照常（LF-5）；既有 `runtime.flashcard` 形狀斷言加 `islandFeedback` |
+| `__tests__/island-map.test.js`（新） | FE-107 | 6 種階段 × 3 島的元素計數；霧中島無植物、虛線；天氣 3 種（`cloudy` 太陽 `opacity` ≤ 0.4、彩虹有無）；燈塔 3 種；`boatPoint` 線性；文字層為最後一個子群組、每段 `font-size` ≥ 14、文字逐字；`LAYOUT` 文字牌外框與其他圖形外框（含小船 r = 0～1 掃過範圍、雲的漂移範圍）不相交；`div[role=img]` 名稱 = `mapAltText`、`svg` `aria-hidden`、全樹無 `tabindex`、`use`、`image`、`foreignObject`、`href`、`xlink:href`；任何 `fill`／`stroke` 不為 `#f7893b`（不分大小寫）；`play` 才有 `isl-map--play`；`11-island-map.css`：每個 `animation` 次數有限且「時長 × 次數」≤ 4.4 秒、只出現在 `.isl-map--play` 規則下、`@keyframes` 只用 `transform`、位移值 ≤ 2.5／8、旋轉 ≤ 2deg、有 `prefers-reduced-motion` 規則；`islandArt` 4 個函式回傳 `aria-hidden` SVG |
+| `__tests__/dashboard.test.js` | FE-108 | DB-1 子元素順序（標題列 → 今日任務卡 → 地圖 → 清單 → 3 格 → 近 7 天 → 資料備份）；標題「我的群島」、目標膠囊與「變更」；今日任務卡內部順序、對話框 5 句、進度條屬性與填色 class（X < D／≥ D）、「今日目標達成」；清單 5 列結構與 progressbar 屬性；3 格狀態行（S 0／3／7、K 0／48／50）；AC-39-06 各文字只 1 次；`show()` 才 `play`、`motion.reduced()` 為真時不 `play`、停留期間通知不 `play`；回到頁面即新值（AC-64-09）；瀏覽與動畫 `setItem` 0 次；`.db-map`、`.db-isles` 無事件與 `tabindex`；`10-dashboard.css` 的 `cursor: pointer` 只有 `.db-backup__toggle` 一條、地圖與清單 `cursor: default`、進度條 `transition: none`。`dashboardModel` + 建立 DOM（3,000 個已掌握字）暖執行 median ≤ 20 ms 以一次性腳本量測（§7.32.2），不列為常駐案例 |
+| `__tests__/flashcards.test.js` | FE-109 | 回饋容器常駐、`role=status`、`aria-live=polite`；`null` 時無子元素；新值 → 1 個 `p.fc-feedback`（新芽圖示 `aria-hidden` + 文字逐字）；同值不重建；切頁後清空；`.fc-deco` 每次重建後仍為 `.fc-stage` 最後一個子元素且 `aria-hidden`；回饋容器位於 `.fc-stage` 之後、`.fc-nav` 之前；其餘元素順序與按鈕文字不變 |
+| `__tests__/island-appearance.test.js`（新） | FE-110 | 掃描 FE-110 的 8 個樣式檔：選擇器含 `.card`、`.btn`（`.btn--link` 除外）的規則若設定邊框，寬 ≥ 2 px 且顏色為 `var(--outline)`、不得 `border: 0`／`none`；圓角 ≥ 16（卡片）／12（按鈕）；`.site-page__content` 與「資料來源與授權」區塊有卡片樣式；範圍外選擇器（`input`、`.cz-level`、作答選項、`.app-nav`、`.ad-*`）不在檢查內 |
+| `__tests__/island-static.test.js`（新） | FE-111 | 以 `build()` 產生暫存交付檔：AC-72-03 (a) 9 個字詞（Unicode 跳脫組字）在交付 HTML 與 `src/app/` 非測試檔 0 次；畫面字串（`src/app/` 非測試 `.js` 的字串常值，不含註解，與 `index.html` 文字節點、`aria-label`、`title`）不含「主控台」；交付 HTML 不含 `<image`、`<use`、`<foreignObject`、`@font-face`、`@import`、`fonts.googleapis`、`fonts.gstatic`、`url(http`；`font-family` 宣告只含允許名單內的字型（system-ui、Noto Sans TC、Microsoft JhengHei、Segoe UI、Lucida Sans Unicode、Arial Unicode MS、Consolas、Courier New）與通用字族，名單由本測試維護，新增字型須同步改名單；`ui/island-*.js`、`11-island-map.css` 不含 `f7893b`；交付檔 ≤ 5,242,880 bytes；3 個新模組依 LD-1 在 vm 沙箱載入時不讀其他模組 |
+| `__tests__/island.test.js` | FE-113 | `islandsOf` 單筆快取：同一組參照連續呼叫 → 內容深度相等、回傳物件與陣列每次都是新的（改動回傳值後再呼叫結果不變）；`masteredWordKeys` 換新陣列（內容不同）、同陣列原地加長、`effectiveColor`、`nB`、`nG`、`builtin` 任一改變 → 重算為正確值；`Set` 輸入每次重算；交錯兩組輸入 A、B、A 皆正確；既有 V-ISL-01～05 與 1,000 組隨機不變式照常通過 |
+| `__tests__/store-island.test.js` | FE-114 | `init()` 在 island 模組可用時呼叫 `islandsOf` 與 `feedbackOf` 各 1 次（以替身或包裝計數，方式依現有夾具）；預熱前後 `getState()` 深度相等、啟動通知 tags 不變、`setItem` 次數與無預熱時相同；island 模組不可用或預熱拋例外 → `init()` 照常完成、不拋例外；預熱後第一次翻面的回饋與既有 LF-6 序列結果相同 |
+| `__tests__/island-map.test.js` | FE-115 | `signature`：天氣 3 種、燈塔 3 種、小船比例、三島各階段任一改變 → 簽章不同；只有 P、`m`、`n`、`streakDays`、`k`、`q`、`remaining` 等不影響圖形的值改變 → 相同；不合法值與 `build` 同樣正規化（如未知天氣與 `cloudy` 簽章相同）；任意兩組簽章相同的輸入 `build` 出的 SVG `outerHTML` 相同（6 階段 × 3 島抽樣＋天氣、燈塔、比例組合）；`setPlay` 加上與移除 `isl-map--play`、找不到 SVG 時不拋例外、不增減節點；既有案例照常 |
+| `__tests__/dashboard.test.js` | FE-116 | 以 `islandMap.build` 計數替身驗證：`mount` → `show()` 只建 1 次；`hide` → `show()` 狀態未變 → 地圖 `figure` 為同一節點、build 0 次、`svg` 有 `isl-map--play`；`motion.reduced()` 為真 → 沿用的 `svg` 無該 class；只改 P（同階段）→ 沿用且 `aria-label` 更新；階段改變 → 重建；停留期間通知 → 簽章不同才重建且無 `isl-map--play`；隱藏期間通知 → 當下文字與清單不變、build 0 次，且排 1 次閒置工作（替身 `requestIdleCallback`）、連續通知只排 1 次；執行閒置工作 → 重建且帶 `isl-map--play`，之後 `show()` build 0 次；閒置工作執行前 `show()` → 取消排程並同步重建；`idleScheduler(host)` 以假 host 驗證：有 `requestIdleCallback` 時用它（`timeout: 500`）、否則 `setTimeout`（100 ms）、兩者皆無時 `request` 回 `null`；`cancel` 呼叫對應 API；`show()` 未經 `hide()` 再呼叫 → 重建並播放；清單內容不變 → `li` 節點相同；以上全程 `setItem` 0 次；既有 FE-108 案例除下表所列斷言外照常 |
+| `__tests__/flashcards.test.js` | FE-117 | 新芽圖示 `islandArt.sprout` 在 `mount` 呼叫 1 次，之後 3 次不同回饋都不再呼叫；每個 `p.fc-feedback` 的圖示是不同節點、`class` 含 `fc-feedback__icon`、`aria-hidden="true"`、結構與 `sprout()` 相同；範本不在文件中；`sprout` 回傳 `null` 時回饋列只有文字、不拋例外；既有 FE-109 案例照常 |
+
+**既有單元測試要改的地方（由 PG 在任務內修改）**
+
+| 位置 | 舊假設 | 新期望 | 任務 |
+| :--- | :--- | :--- | :--- |
+| `tokens.test.js:143`、`:186`～`:191`、`:300`～`:332` | `#eef4fa`；`.card` `border: 0`、16 px；`.btn` 1 px 透明框、8 px；`.btn--accent` 透明框、12 px | §7.32.7 | FE-103 |
+| `layout.test.js:42`、`:65`；`pwa-core.test.js:21`、`:31`；`build.test.js:615`、`:625`（若比對常數） | `#eef4fa`、「學習主控台」 | `#eaf7fb`、「我的群島」 | FE-103 |
+| `dashboard.test.js:725`～`:729` | 標題「學習主控台」 | 「我的群島」（FE-108 再整檔改寫） | FE-103 |
+| `layout.test.js` 的 `UI_LAYOUT.CARD_RADIUS_PX` 案例 | 16 | 22（= `--radius-card`） | FE-103 |
+| `build.test.js` DS-13 背景色大小寫案例 | `#EEF4FA` | `#EAF7FB`（同一案例的大寫寫法） | FE-103 |
+| `goal.test.js:99`、`shell.test.js:144`、`naming.test.js:179`、`site-pages.test.js:306`、`:400`、`customizer.test.js:1177`～`:1180` | 「主控台」 | 「群島」「返回群島」「到「群島」頁按」 | FE-104 |
+| `shell.test.js:616`～`:626`、`build.test.js:434`～`:452` | 開頭註解第 2 行起與 v0.12 逐字相同 | 加 LT-7 一行 | FE-105 |
+| `store.test.js`、`store-track.test.js` 中 `runtime.flashcard` 的形狀斷言 | 4 欄 | 加 `islandFeedback` | FE-106 |
+| `flashcard-quiz.test.js:158`（`setFlashcardMode` 回到 card 的 `deepEqual`） | 4 欄 | 加 `islandFeedback: null` | FE-106 |
+| `flashcards.test.js:107`～`:108`（「AppState 結構」案例的 keys 與 `deepEqual`） | 4 欄 | 加 `islandFeedback`、`islandFeedback: null`；本檔其餘案例屬 FE-109（依賴 FE-106） | FE-106 |
+| `dashboard.test.js` 環形圖、`ringGeometry`、舊 DOM 順序案例 | 主環形圖 | 進度條與新順序 | FE-108 |
+| `naming.test.js:218`、`:250`（只在受影響時） | 舊主控台結構 | 新結構（入口仍只有「開始今日學習」「變更」） | FE-108 |
+| `dashboard.test.js` 案例「show() 才播放地圖動畫；…隱藏期間不重建」 | 停留期間任何 `PROGRESS_TAGS` 通知（如 `setBackupExpanded`）即重建；每次 `show()` 都重建（`notEqual(fig(), hiddenFig)`） | 簽章不變（如 `setBackupExpanded`）→ 同一節點；簽章改變才重建；`show()` 沿用時以 `isl-map--play` 判定播放；隱藏期間翻面後依有無閒置替身分別驗證（§7.32.15） | FE-116 |
+| `dashboard.test.js` 案例「V-ANS-02：作答答對 → K + 1 並即時更新…」（FE-84） | 群島頁隱藏時作答，3 格已答對行在同一次通知中同步更新 | 注入閒置替身（`opts.idle`），每次讀值前先執行待執行的閒置工作再讀 `db-stat__value--answered`；K、Q、P 期望值不變 | FE-116 |
+| `dashboard.test.js` 案例「DB-6／V-LAY-07：預設收合…」（只 `mount`、未 `show()`，等同隱藏期間） | 任何 `PROGRESS_TAGS` 通知都同步重繪，toggle 點擊後屬性立即改變 | 斷言不改：靠「隱藏期間收到 `"dashboard"` tag 仍同步 `aria-expanded`、展開區 `hidden`、`is-expanded`」照常通過（§7.32.15） | FE-116 |
+
+中間狀態：FE-103 完成、FE-108 未完成前，群島頁標題已是「我的群島」但版面仍為舊版；FE-103 完成、FE-109／FE-110 未完成前，單字卡頁與部分畫面仍保留舊幾何覆寫。每個任務完成時 `npm test` 都必須全過（同批任務 paths 不重疊，跨批共用測試檔依 §3.5 D-23 串接）。
+
+**給 QA 的項目（`tests/`、`docs/04-qa/` 不派給 PG）**
+
+| # | 項目 | 說明 |
+| :--- | :--- | :--- |
+| Q21 | 名稱與文字 | `tests/` 中定位「主控台」「學習主控台」、`.db-ring`、可見「今日任務」標題、3 格單一 `.card`、`#eef4fa`、`border: 0` 的斷言改為新值；AC-32-01 確認視窗第 2 行改「到「群島」頁按」。已知：`tests/e2e/e2e-layout.mjs`、`e2e-motion.mjs`、`e2e-progress.mjs` 仍找已移除的 `.db-ring`、`.db-ring__bar`、`.db-ring__value`、`.db-ring-wrap`，須改用今日進度條 `.db-today__bar`（`role=progressbar`，數值看 `aria-valuenow`／`aria-valuetext`）與達成填色 `.db-today__fill--done` |
+| Q22 | 新 TC | AC-63-01～AC-72-05 共 50 條；修改的 AC-20-03、AC-27-01、AC-30-01、AC-30-05、AC-31-03、AC-32-01、AC-38-08、AC-39-01、AC-39-02、AC-39-05、AC-39-06、AC-42-02；AC-38-06 由 AC-68-02 取代，測試計畫標「移除」 |
+| Q23 | 地圖判定 | 以 §7.32.4 的 class 與 `data-*` 計數與判定；小船以 `g.isl-boat` 的 `transform` 與 `line.isl-route` 端點計算比例 |
+| Q24 | 回饋列 | 回饋列為常駐 `div.fc-feedback-live[role=status]` 內的 `p.fc-feedback`；「不顯示空白框」以容器計算後高度 0、無框判定（SD-FB-106） |
+| Q25 | **人工：NVDA** | AC-69-06：STT 評分後先播報分數區、再以 polite 播報回饋；AC-71-01：地圖只播報 1 次名稱、內部文字不另播報 |
+| Q26 | **人工：原創性** | AC-72-03 (b) 交人類檢視龜龜、各島、燈塔、小船與導覽圖示 |
+| Q27 | 版本與越界 | 1.3.2 → 1.4.0；越界檢查列 MC-11 為授權例外；本版允許 PG 寫入 `state/store.js`、`views/flashcards.js`、`views/sources-page.js`、`license-header.txt`（§12.17） |
+| Q28 | PWA 更新 | AC-72-04 依 V-PWA (a)：已安裝 v1.3.2 → 部署 1.4.0 → 更新後顯示群島頁、資料不變 |
+
+**主控檢查**：M-1 `git diff package.json` 只有 `version` 1 行（1.3.2 → 1.4.0）；M-2 `dist/site` 恰 13 檔、預先快取 7 項、`static.yml` diff 0；M-3 PG 本機沒有 Chrome 時代為執行 §7.32.14；M-4 localStorage 鍵名 2 個、`schemaVersion` 3、匯出備份頂層 5 欄不變；M-5 `src/data/`、`tools/`、`services/`、`site/static-page.css` diff 0。
+
+**部署後**：Actions 成功；正式網址版本行「版本 1.4.0（建置 xxxxxxx）」；已安裝的 PWA 依 AC-36-03 更新後顯示群島頁（AC-72-04、E-185）。
+
+**給 QA 的已知設計行為**：(14) 地圖動畫只在每次進入群島頁時播放約 4.4 秒；停留期間資料更新重繪地圖不重播。(15) 島嶼掌握率與「單字掌握率」定義不同，數值不一致屬預期（IS-10）。(16) 自訂卡與內建字同 wordKey 時，掌握計入該內建字所屬的島（IS-6、FB-85）。(17) 回饋列只在單字卡頁存在；離開單字卡頁即清除，回來不顯示舊回饋（LF-3）。(18) 導覽圖示 ≥ 641 px 時依既有規則隱藏，只顯示文字「群島」。(19) 群島頁隱藏期間的資料變更以閒置排程預先重建地圖（§7.32.15）；學習後 < 約 0.5 秒就點「群島」時改在點擊中同步重建，畫面結果相同但反應時間較長，AC-64-09 以使用者操作節奏（間隔 ≥ 1 秒）量測。(20) 群島頁地圖狀態未變時沿用同一個 SVG 節點，動畫重播靠頁面 `hidden` 切換，QA 以 `getAnimations()` 判定重播，不以節點是否重建判定。
+
 ---
 
 ## 11. 技術風險與對策
@@ -5022,6 +5595,20 @@ H-1 字集由資料導出，會納入「s2twp 一律轉成別的字、但本身�
 | T-138 | （v0.17）`TEXT` 鍵沿用試作 `liveLabel`，V-STT-09 以契約鍵比對時找不到 | 測試失敗或漏驗 | 改名 `labelInterim`（SD-FB-99）；`speech-flow.test.js:599` 鍵集合同步 |
 | T-139 | （v0.17）試作分支修改過的 `dist/` 被提交為交付物 | 交付內容與原始碼不一致、版本行仍 1.3.1 | FE-101 由建置覆蓋；主控 M-6；QA Q19 |
 | T-140 | （v0.17）`tests/` 仍用舊 LT-2 與 `interimResults === false`，QA 未更新就跑 | 預期失敗被誤判為缺陷 | §10.14 Q13～Q15 列出檔案與行號；QA 先更新再跑；PG 不得代改 |
+| T-141 | CSS `transform` 套在已有 `transform` 屬性的 SVG 元素上，會覆蓋定位，使椰子樹、雲、小船跳到原點 | 地圖錯亂、AC-64-07 不通過 | 定位放外層 `g` 屬性、動畫只放內層 `g.isl-anim-*`（§7.32.8）；`island-map.test.js` 斷言帶 `isl-anim-*` 的元素沒有 `transform` 屬性 |
+| T-142 | SVG 內 `px` 為 viewBox 單位，地圖放大到 480 px 時位移被放大 1.356 倍 | 超過 AC-70-01 的 4／12 CSS px | 位移取 2.5／8；測試以 480 / 354 換算上限 |
+| T-143 | 全域 `.card`、`.btn` 改為 2 px 外框後，所有按鈕與卡片尺寸各多 2～4 px，個別樣式檔的覆寫造成風格不一 | AC-68-02、AC-68-04、AC-40-02 | FE-110 逐檔處理覆寫、FE-109 處理單字卡；FE-112 T7、T12 量測；`island-appearance.test.js` 掃描 |
+| T-144 | 回饋列以「需要時才建立的即時區域」呈現，NVDA 可能不播報 | AC-69-06 | 容器常駐、只替換內部 `p`（§7.32.9）；QA Q25 人工確認 |
+| T-145 | `cardChanged` 每次建立新的 `flashcard` 物件，換卡時遺失 `islandFeedback` | AC-69-05「換卡時保留」不通過 | §4.16 規定帶入原值；`store-island.test.js` 換卡、切換模式、`placeCard` 案例 |
+| T-146 | 每個學習事件多算 2 次島嶼快照，大量已掌握字時拖慢 | AC-22-03、AC-29-01 ≤ 100 ms | `sectionSizes` 快取、`masteredCounts` 只走已掌握集合（< 1 ms）；FE-112 T6 量測 |
+| T-147 | 插圖誤用 `#f7893b` 或 `var(--accent)` | V-LAY-01、AC-68-05 不通過 | 插圖色表不含強調橘（§7.32.4）；`island-map.test.js` 與 `island-static.test.js` 雙重掃描 |
+| T-148 | 系統字型寬度不同，375 px 時標題列換 2 行、對話框 3 行，「開始今日學習」下移 | AC-63-05、AC-39-09 | 預算下緣約 403 px，距底部導覽 611 px 尚餘約 200 px；FE-112 T2 量測；不合格只能調間距，仍不合格標 `blocked` |
+| T-149 | 動畫在 `show()` 之前就已建立，或換頁動畫延後地圖顯示，使動畫在 5 秒後仍在跑 | AC-70-01 第 5.1 秒不為 0 | 總長 4.4 秒、只在 `show()` 重建時播放；FE-112 T5 以進入時刻起算量測 |
+| T-150 | 有人為了「不倒退」或升階動畫想保存「看過的最高階段」 | 持久化結構變更，違反 Q-110 | IS-1：停止並回報 SA，須退回 PM 由人類決定；本設計不需要任何保存 |
+| T-151 | `dashboardModel` 改版時移除 `stats.answeredText` 等欄位 | `store-track.test.js`（不在 FE-108 paths）失敗 | §4.16 規定既有欄位與語意不變，只新增欄位 |
+| T-152 | 原創性判定不通過（AC-72-03 (b)） | 需重畫插圖 | 只改 `ui/island-art.js`、`ui/island-map.js` 的圖形，資料與介面不動；由主控另派小任務 |
+| T-153 | `tests/` 未更新就跑 QA：「主控台」、`.db-ring`、`#eef4fa`、卡片無框等舊斷言 | 預期失敗被誤判為缺陷 | §10.15 Q21 列出；QA 先更新再跑；PG 不得代改 |
+| T-154 | MC-11 未在 FE-112 前完成，產物仍為 1.3.2 | AC-42-02 不通過 | FE-112 `manualPrereqs` 含 MC-11；開工先檢查，不符就 `blocked` |
 
 ---
 
@@ -5481,6 +6068,67 @@ FE-19 與 FE-18 的先後（v0.3）：**FE-19 在前**。理由：FE-18 的 done
 本次由主控或人類 commit，SD 與 PG 不 commit。
 
 任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 101（FE-01～FE-101），共 127 個；主控手動項目 MC-01～MC-10。
+
+### 12.17 島嶼風格第一階段任務與執行批次（PRD v0.23、契約 v0.23）
+
+既有 127 個任務與 MC-01～MC-10 全部 `done`（已封存）。**不建 CT 任務**：島嶼區段由既有字庫的 `rank` 推算，契約 §15 明定內容資料檔格式與值不變（pg-content 無工作）；LT-7 依契約 L-8 由 pg-frontend 負責。
+
+| ID | 標題 | 批次 | dependsOn | paths | AC |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| FE-102 | 島嶼推算核心 `core/island.js` | v0.19-1 | FE-101（已 done） | `core/island.js`、`__tests__/island.test.js` | AC-64-02～AC-64-08、AC-65-01～AC-65-03、AC-66-02、AC-66-03、AC-67-01、AC-67-02、AC-69-02～AC-69-04、AC-71-01 |
+| FE-103 | 全站島嶼外觀 token 與背景色 | v0.19-1 | FE-101（已 done） | `styles/00-base.css`、`core/layout.js`、`core/pwa.js`、`__tests__/tokens.test.js`、`layout.test.js`、`pwa-core.test.js`、`build.test.js`、`dashboard.test.js`（標題 1 處） | AC-68-01～AC-68-03、AC-68-05、AC-68-06、AC-71-05、AC-34-04 |
+| FE-104 | 導覽名稱「群島」、島嶼圖示、確認視窗文字 | v0.19-1 | FE-101（已 done） | `core/constants.js`、`index.html`、`views/customizer.js`、`__tests__/goal.test.js`、`shell.test.js`、`naming.test.js`、`site-pages.test.js`、`customizer.test.js` | AC-63-01、AC-63-02、AC-20-03、AC-27-01、AC-32-01 |
+| FE-105 | 群島插圖與龜龜聲明 LT-7 | v0.19-2 | FE-103、FE-104 | `views/sources-page.js`、`license-header.txt`、`__tests__/legal-static.test.js`、`sources-page.test.js`、`shell.test.js`、`build.test.js` | AC-72-05 |
+| FE-106 | store：學完回饋 `islandFeedback` | v0.19-2 | FE-102 | `state/store.js`、`__tests__/store-island.test.js`、`store.test.js`、`store-track.test.js` | AC-69-02～AC-69-06、AC-64-08、AC-72-02 |
+| FE-107 | 群島地圖 SVG、龜龜與裝飾插圖、地圖動畫 | v0.19-2 | FE-102、FE-103 | `ui/island-map.js`、`ui/island-art.js`、`styles/11-island-map.css`、`__tests__/island-map.test.js` | AC-64-01、AC-64-02、AC-64-05～AC-64-07、AC-64-10、AC-66-01、AC-68-05、AC-70-01、AC-70-02、AC-71-01、AC-71-02、AC-71-04 |
+| FE-110 | 其他畫面套用島嶼外觀（只改 CSS） | v0.19-2 | FE-103 | `styles/20-customizer.css`、`21-custom-vocab.css`、`31-speech.css`、`32-quiz.css`、`40-part5.css`、`70-sources.css`、`75-site-pages.css`、`80-pwa.css`、`__tests__/island-appearance.test.js` | AC-68-02～AC-68-04、AC-71-05 |
+| FE-108 | 群島頁（原主控台）改版 | v0.19-3 | FE-102、FE-103、FE-104、FE-107 | `views/dashboard.js`、`styles/10-dashboard.css`、`__tests__/dashboard.test.js`、`__tests__/naming.test.js` | US-63～US-67 各 AC、AC-30-01、AC-30-05、AC-31-03、AC-39-01、AC-39-02、AC-39-05、AC-39-06、AC-70-01、AC-70-02、AC-71-02、AC-71-03、AC-72-02 |
+| FE-109 | 單字卡島嶼外觀、角落裝飾與學完回饋列 | v0.19-3 | FE-103、FE-106、FE-107 | `views/flashcards.js`、`styles/30-flashcards.css`、`__tests__/flashcards.test.js` | AC-69-01～AC-69-03、AC-69-05、AC-69-06、AC-38-08、AC-70-02、AC-71-02、AC-71-05 |
+| FE-111 | 島嶼靜態檢查測試 | v0.19-4 | FE-105、FE-108、FE-109、FE-110 | `__tests__/island-static.test.js` | AC-63-02、AC-68-05、AC-68-06、AC-72-01、AC-72-03 |
+| FE-113 | `islandsOf` 單筆快取 | v0.19-6 | FE-102 | `core/island.js`、`__tests__/island.test.js` | AC-69-05、AC-70-03 |
+| FE-115 | 地圖簽章 `signature` 與 `setPlay` | v0.19-6 | FE-107 | `ui/island-map.js`、`__tests__/island-map.test.js` | AC-70-01、AC-70-03 |
+| FE-117 | 回饋列新芽圖示範本 | v0.19-6 | FE-109 | `views/flashcards.js`、`__tests__/flashcards.test.js` | AC-69-05 |
+| FE-114 | store 啟動預熱島嶼快照 | v0.19-7 | FE-113 | `state/store.js`、`__tests__/store-island.test.js` | AC-69-05、AC-70-03 |
+| FE-116 | 群島頁沿用地圖、隱藏期間閒置預先重建 | v0.19-7 | FE-108、FE-115 | `views/dashboard.js`、`__tests__/dashboard.test.js` | AC-22-01、AC-64-09、AC-69-05、AC-70-01、AC-70-02、AC-70-03 |
+| FE-112 | 交付關卡：全測試、實測、重新建置 `dist/`（1.4.0） | v0.19-5（重跑排在 v0.19-7 之後） | FE-111、FE-113～FE-117；manualPrereqs MC-11 | `dist/english-master-track.html`、`dist/site/` 下 13 檔 | AC-42-02、§7.32.14 T1～T12 所列 AC |
+
+（FE 任務的 paths 省略前綴 `src/app/`，`dist/` 除外。）
+
+| 順序 | 項目 | 執行者 | 前置 | 說明 |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | FE-102、FE-103、FE-104（可平行） | pg-frontend | 無 | paths 不重疊 |
+| 2 | FE-105、FE-106、FE-107、FE-110（可平行） | pg-frontend | 依上表 | paths 不重疊；FE-105 接 FE-103、FE-104 的 `build.test.js`、`shell.test.js` |
+| 3 | FE-108、FE-109（可平行） | pg-frontend | 依上表 | paths 不重疊；FE-108 接 FE-103 的 `dashboard.test.js`、FE-104 的 `naming.test.js` |
+| 4 | FE-111 | pg-frontend | FE-105、FE-108、FE-109、FE-110 | 只新增 1 個測試檔 |
+| 5 | MC-11：`package.json` 改為 1.4.0 | 主控 | FE-111 | Q-124 A 一次性授權；只改 `version` 1 行 |
+| 6 | FE-112 第 1 次 | pg-frontend | FE-111、MC-11 | 已執行：T6 不合格（§7.32.15），標 `blocked` |
+| 6a | FE-113、FE-115、FE-117（可平行） | pg-frontend | 依上表 | paths 不重疊 |
+| 6b | FE-114、FE-116（可平行） | pg-frontend | 依上表 | paths 不重疊 |
+| 6c | FE-112 重跑 | pg-frontend | FE-113～FE-117 | T6 全部重量；其餘只重驗群島頁 T1、T5、T11 與單字卡 T9；重新建置 `dist/`；不改 `src/` |
+| 7 | QA | qa | FE-112 | §10.15 Q21～Q28；先更新 `tests/` 再跑 |
+| 8 | 人工 | QA／人類 | FE-112 | AC-72-03 (b) 原創性（人類）、AC-69-06／AC-71-01 NVDA（QA） |
+| 9 | 部署與部署後驗證 | 主控 | QA 通過 | §10.15 部署後；`static.yml` 不改 |
+
+**PG 不得越界的目錄**
+
+| 代理 | 可寫 | 不得寫入 |
+| :--- | :--- | :--- |
+| pg-frontend（FE-102～FE-117） | 只有上表 paths | `src/data/`、`tests/`、`docs/`、`tools/`、`package.json`、`package-lock.json`、`.github/`、`sources/`、`src/app/assets/`、`src/app/site/`、`__tests__/_samples/`、`services/`、`views/speech-panel.js`、`views/flashcard-quiz.js`、`views/part5.js`；只有 FE-112 可寫 `dist/` |
+
+本次由主控或人類 commit，SD 與 PG 不 commit。
+
+**效能修正的 AC → 任務對照**（§13.15 其餘對照不變；本表 AC 原本已由 FE-107、FE-108、FE-109、FE-112 涵蓋，新任務為追加涵蓋）
+
+| AC | 任務 |
+| :--- | :--- |
+| AC-22-01（重測於 AC-70-03） | FE-116、FE-112 |
+| AC-64-09 | FE-116、FE-112 |
+| AC-69-05 | FE-113、FE-114、FE-116、FE-117、FE-112 |
+| AC-70-01 | FE-115、FE-116、FE-112 |
+| AC-70-02 | FE-116、FE-112 |
+| AC-70-03 | FE-113、FE-114、FE-115、FE-116、FE-112 |
+
+任務數（全專案）：pg-content 26（CT-01～CT-26）、pg-frontend 117（FE-01～FE-117），共 143 個；主控手動項目 MC-01～MC-11。
 
 ---
 
@@ -6309,6 +6957,96 @@ PRD 沒有新增或修改 AC；本版只為 3 張 BUG 的 AC 加上修正任務�
 
 其餘 380 個應驗收 AC 的對照與 §13～§13.13 相同（400 − 新增 12 − 修改 8）；**400 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。AC-58-14、AC-59-08、AC-62-12 需要真人語音，不由 PG 完成，已列給 QA 與人類（§10.14 Q17、Q20）。
 
+### 13.15 島嶼風格第一階段追加對照（PRD v0.23：476 個 AC，本版應驗收 449 個）
+
+AC 數：v0.21 的 427 個 + 新增 50 個（AC-63-01～AC-72-05）− 移除 1 個（AC-38-06，由 AC-68-02 取代）= 476 個；暫停仍 27 個，應驗收 449 個。
+
+**新增 50 條**
+
+| AC | 任務 | 備註 |
+| :--- | :--- | :--- |
+| AC-63-01 | FE-104、FE-108、FE-112 | 導覽文字與圖示（FE-104）；標題 `h2`、裝飾、目標標籤（FE-108）；3 種導覽版面實測（T3） |
+| AC-63-02 | FE-104、FE-108、FE-111 | 常數、`index.html`、確認視窗；刪除 `TEXT.title`；全原始碼字串掃描 |
+| AC-63-03 | FE-107、FE-108、FE-112 | 寬高比、單欄、無水平捲軸（T1） |
+| AC-63-04 | FE-107、FE-108、FE-112 | 地圖寬 min(容器, 480)（T1） |
+| AC-63-05 | FE-108、FE-112 | 首屏預算（T2） |
+| AC-64-01 | FE-107、FE-108 | 地圖元素與可見文字 |
+| AC-64-02 | FE-102、FE-107 | P 序列；元素計數 |
+| AC-64-03 | FE-102、FE-108 | 區段歸屬；3 格掌握率不變 |
+| AC-64-04 | FE-102、FE-108 | `outOfGoal` 與清單註記 |
+| AC-64-05 | FE-102、FE-107、FE-108 | 燈塔 3 種、3 格燈塔行 |
+| AC-64-06 | FE-102、FE-107、FE-108 | 天氣 3 種、中斷資料、同一個 S |
+| AC-64-07 | FE-102、FE-107、FE-112 | r 與 `boatPoint`；實測（T4） |
+| AC-64-08 | FE-102、FE-106、FE-108 | 一般操作不倒退；確認的資料變更依資料重算 |
+| AC-64-09 | FE-106、FE-108、FE-112 | 回到頁面即新值；≤ 100 ms（T6） |
+| AC-64-10 | FE-107、FE-108、FE-112 | 無事件、無停駐、`cursor` 非 `pointer` |
+| AC-65-01 | FE-102、FE-108 | 5 列文字與結構 |
+| AC-65-02 | FE-102、FE-108 | progressbar 屬性、色級色、`tabular-nums` |
+| AC-65-03 | FE-102、FE-107、FE-108 | 清單、地圖、文字替代同一個 `IslandState` |
+| AC-65-04 | FE-108、FE-112 | 375 px 列高與裁切（T1） |
+| AC-66-01 | FE-107、FE-108 | 龜龜 SVG、名稱與對話框 |
+| AC-66-02 | FE-102、FE-108 | 對話框 5 句 |
+| AC-66-03 | FE-102、FE-108 | 今日進度列與進度條 |
+| AC-66-04 | FE-108 | 目標標籤與「變更」 |
+| AC-67-01 | FE-102、FE-108 | 天氣、燈塔狀態行 |
+| AC-67-02 | FE-102、FE-107、FE-108 | 3 處一致 |
+| AC-68-01 | FE-103、FE-112 | 背景與 manifest（T7） |
+| AC-68-02 | FE-103、FE-108、FE-109、FE-110、FE-112 | 卡片與按鈕外框、圓角、陰影（T7） |
+| AC-68-03 | FE-103、FE-108、FE-109、FE-110、FE-112 | 對比（T8） |
+| AC-68-04 | FE-110、FE-112 | 其他畫面 DOM 不變（T12） |
+| AC-68-05 | FE-103、FE-107、FE-111 | 強調橘只在既有位置、插圖不用 |
+| AC-68-06 | FE-103、FE-111 | 系統字型、無字型請求 |
+| AC-69-01 | FE-109、FE-112 | 只多回饋列與角落裝飾；不重疊（T9） |
+| AC-69-02 | FE-102、FE-106、FE-109 | 244 → 245 升階等序列 |
+| AC-69-03 | FE-102、FE-106、FE-109 | 小船序列、自訂單字不產生 |
+| AC-69-04 | FE-102、FE-106 | 優先序、不比較的操作 |
+| AC-69-05 | FE-106、FE-109、FE-112 | 位置、保留與清除、≤ 100 ms、座標差 0（T9） |
+| AC-69-06 | FE-106、FE-109 | 不改數值、不寫入；NVDA 為**人工**（QA Q25） |
+| AC-70-01 | FE-107、FE-108、FE-112 | 4 種動畫、4.4 秒、重播、位移 0（T5） |
+| AC-70-02 | FE-107、FE-108、FE-109、FE-112 | 減少動態全部靜止（T5） |
+| AC-70-03 | FE-112 | 效能門檻（T6） |
+| AC-71-01 | FE-102、FE-107 | 文字替代逐字；NVDA 為**人工**（QA Q25） |
+| AC-71-02 | FE-107、FE-108、FE-109 | 裝飾 `aria-hidden`、Tab 順序 |
+| AC-71-03 | FE-108、FE-112 | 狀態都有文字（灰階檢視） |
+| AC-71-04 | FE-107、FE-112 | 字級 ≥ 12、對比 ≥ 4.5（T8） |
+| AC-71-05 | FE-103、FE-108、FE-109、FE-110、FE-112 | 觸控目標、焦點框（T11） |
+| AC-72-01 | FE-111、FE-112 | 內嵌、零請求、≤ 5 MB（T10） |
+| AC-72-02 | FE-106、FE-108、FE-112 | 不寫入、v1.3.2 資料相容（T10） |
+| AC-72-03 | FE-111（(a)）；(b) 為**人工**（人類，QA Q26） | 遊戲名稱 0 次；原創性 |
+| AC-72-04 | FE-112（建置）；QA V-PWA (a)（Q28） | 更新後顯示群島頁 |
+| AC-72-05 | FE-105 | LT-7 兩處 |
+
+**修改 12 條、移除 1 條**
+
+| AC | 任務 |
+| :--- | :--- |
+| AC-20-03、AC-27-01 | FE-104、FE-112 |
+| AC-30-01、AC-30-05 | FE-108 |
+| AC-31-03 | FE-107、FE-108、FE-109、FE-112 |
+| AC-32-01 | FE-104 |
+| AC-38-08 | FE-109 |
+| AC-39-01、AC-39-02、AC-39-05、AC-39-06 | FE-108 |
+| AC-42-02 | FE-112（前置 MC-11） |
+| AC-38-06（移除，由 AC-68-02 取代） | — |
+
+**回歸**：AC-39-03、AC-39-04、AC-39-07～AC-39-10、AC-24-01、AC-24-12、AC-34-07、AC-49-01、AC-49-08、AC-52-01～AC-52-07（FE-108、FE-112）；AC-06、AC-07、AC-08、AC-09、AC-28、AC-33、AC-58～AC-62（FE-109、FE-112）；AC-26-01、AC-40-01～AC-40-03、AC-41-01～AC-41-04、AC-45-04、AC-46-01、AC-48-01、AC-48-12、AC-57-01（FE-110、FE-112 T12）；AC-23-02、AC-23-06、AC-23-08（FE-105）；AC-19-01、AC-19-04、AC-34-04、AC-36-07（FE-112）。
+
+| E | 任務 | 備註 |
+| :--- | :--- | :--- |
+| E-175、E-178 | FE-102 | 自訂單字、區段字數改變或為 0 |
+| E-176、E-177、E-187 | FE-102、FE-106 | 初始化、匯入、清除答對紀錄依資料重算 |
+| E-179 | FE-108 | 單字集為空照常顯示 |
+| E-180 | FE-106、FE-108 | 停用或容量不足照常推算 |
+| E-181 | FE-107、FE-108 | 減少動態 |
+| E-182 | FE-102、FE-108 | X > D |
+| E-183、E-184 | FE-102 | 打卡中斷、時鐘調回 |
+| E-185 | FE-112、QA | 舊版 PWA 更新 |
+| E-186 | FE-102、FE-108 | 生效橘、棕的註記 |
+| E-188 | FE-102 | 燈塔門檻不隨 Q 縮放 |
+| E-189 | FE-107、FE-112 | 縮放 200% |
+
+其餘 387 個應驗收 AC 的對照與 §13～§13.14 相同（449 − 新增 50 − 修改 12）；**449 個應驗收 AC 全部至少有 1 個任務涵蓋，未涵蓋 0 個**。AC-72-03 (b) 原創性與 AC-69-06、AC-71-01 的 NVDA 播報需要人工，已列給人類與 QA（§10.15 Q25、Q26）。
+
 ---
 
 ## 14. 回應契約 §9 指名 SD 的回饋
@@ -6401,6 +7139,8 @@ PRD 沒有新增或修改 AC；本版只為 3 張 BUG 的 AC 加上修正任務�
 | DS-69（v0.21） | 已確認：聆聽中再按的處理器內同步 `setStatus("idle")`，即時文字列在按下當下隱藏，不等 `end`；改為「任何非聆聽中狀態都隱藏」並以 P10 固定 | §7.30.4 |
 | DS-70（v0.21） | 已確認 `.sp-panel` 以上祖先都不是即時區域（§7.30.3 列出祖先鏈）；`TEXT` 鍵改名 `labelInterim`（SD-FB-99）；樣式定稿 §7.30.5（`--text-muted`、斜體、`transition`／`animation: none`） | §7.30.3、§7.30.5 |
 | DS-71（v0.21） | 同意：即時文字不需跨工作階段保存，不需回報人類；不建 CT 任務；`package.json` 列 MC-10；R-31 列 FE-100，SD 已查 `src/app/` 非測試原始碼只有 5 處、`src/data/` 0 處；試作 `dist/` 由 FE-101 覆蓋 | §5.12、§7.31、§12.16 |
+| 契約 v0.23 §15（無指名 SD 的 DS 項目） | 推算函式名稱與所在模組定為 `core/island.js`（§4.16）；比較時機放在 store 的 3 個學習事件 action（LF-1）；IV-1 建議值全部採用，`COLOR_TOKENS`、`ISLAND_STYLE_TOKENS` 不改值，**不需契約小修**；插圖座標、動畫、尺寸定於 §7.32.4、§7.32.8；不需改持久化結構，不必退回 PM | §4.16、§7.32 |
+| FB-83～FB-85（v0.23，指名 PM，知會） | PRD v0.23 已採 SA 建議：AC-69-02 以 244 → 245 測升階，另測 249 → 250 為「多掌握」；FB-84 三細節照 IA-2、IA-4、IS-12 實作；FB-85 依 IS-6（同 wordKey 計入內建所屬島） | §7.32.1、§10.15 |
 | FB-80～FB-82（v0.21，知會） | FB-80 依 IT-3 保留上一段（服務不回報、面板也忽略）；FB-81 依 MS-1 (4) 與開始收音事件無關，列入 §7.30.6 表；FB-82 §7.6 已改 | §7.6、§7.30 |
 | FB-76～FB-79（v0.20，知會） | FB-76 依 MS-1 以「是否已確認開始收音」判定（`outcomeOf` 第 5、6 列）；FB-77 `transcriptOf` 不改；FB-78 只在進入準備中時清除；FB-79 依核准紀錄按 PM 建議設計，PRD 文字同步屬 PM（SD-FB-89） | §7.26.5、§7.26.7 |
 | FB-70～FB-75（v0.19，知會） | FB-70 依 SP-6 實作；FB-71 列 D-11；FB-72 依 AD-10；FB-73 列第二階段核對與 T-106；FB-74 建置比對 V-AD-03；FB-75 文件不列舊地址 | §7.25、§10.11 |
@@ -6416,141 +7156,30 @@ PRD 沒有新增或修改 AC；本版只為 3 張 BUG 的 AC 加上修正任務�
 
 ## 15. 回饋上游
 
-| 編號 | 事項 | 對象 | 類型 | 建議 |
+SD-FB-01～SD-FB-104 的紀錄（編號不變）已移到 `docs/archive/architecture-history.md`；正文找不到某個編號時再去那裡 grep。
+
+| 編號 | 對象 | 事項 | 影響 | SD 處理與建議 |
 | :--- | :--- | :--- | :--- | :--- |
-| SD-FB-01 | `src/data/_tools/`（驗證與產生工具）與 `src/data/_records/`（交付紀錄）不是「內容資料」，但 pg-content 只能寫 `src/data/`，且 scratchpad 不跨工作階段保留，QA 需要這些紀錄驗 V-VOC-17、M-7 | 人類 | 待辦（確認） | 核准本設計即視為同意；這兩個目錄以 `_` 開頭，建置不打包（D-1）。若不同意，需另指定 pg-content 可寫的非打包目錄 |
-| SD-FB-02 | 建置相關檔案放在 `src/` 以外：`package.json`、`tools/build.mjs`、`dist/`（皆指派 pg-frontend）；QA 的測試放 `tests/`，並可能在 `package.json` 加 Playwright 為 devDependencies（`qa.md` 允許） | 人類、QA | 待辦（知會） | 核准即同意；QA 只可改 `package.json` 的 `devDependencies` 與 `scripts` 中以 `test:e2e` 開頭的項目 |
-| SD-FB-03 | 契約 V-ST-04「內建資料更新後與既有自訂單字 wordKey 相同，單字集只放內建那張」未說明該內建字不在目前截取範圍（如生效色級為橘，而該字排名 3,000）時的行為。SD 採：只與**本次截取**的內建卡去重，不在範圍內則保留自訂卡，使該字仍出現一次 | SA | 待辦（確認） | 若 SA 意圖不同（例如一律只看全部內建字庫），請修訂 V-ST-04；FE-04 屆時調整 |
-| SD-FB-04 | `docs/02-contract/data-schema.ts` 開頭註解區的 `status` 仍為 `in-review`、`approved_by` 空白，而 README 已 approved 且聲明三檔為一組審核 | SA、人類 | 待辦（知會） | 下次修訂契約時同步三檔 frontmatter；本設計以 README 的核准為準 |
-| SD-FB-05 | V-VOC-18 抽查比例與門檻由 SD 訂定（§8.4：每分檔 5%、至少 20 筆，不合格率 > 5% 整批退回） | QA、人類 | 待辦（知會） | QA 依 §8.4 執行；人類若要更嚴格可要求 SD 修訂 |
-| SD-FB-06 | Part 5 題庫陣列順序即出題順序（V-P5-07），契約未規定題型排列；SD 決定 CT-20 以題型交錯排列（每連續 4 題涵蓋 4 種題型），避免使用者連續 50 題同題型 | 人類 | 待辦（知會） | 核准即同意 |
-| SD-FB-08 | （v0.3）契約 README §5.3「寫入：容量不足」只寫「新增自訂單字」回滾、「其他寫入」保留記憶體，未說明範本注入屬哪一類。SD 解讀範本注入屬「新增自訂單字」（§7.5），不需改契約即可實作 | SA | 待辦（知會） | 下次修訂契約時可把該列改為「新增自訂單字（含範本注入）」；若 SA 意圖不同，請告知，FE-07／FE-10 屆時調整 |
-| SD-FB-09 | （v0.3）AC-08-09 只描述權限被拒；`audio-capture`（無麥克風）沿用同一主訊息並加補充說明（§7.6）。PRD 未規定其他 STT 錯誤碼的文案，SD 訂為通用訊息 | PM、QA | 待辦（知會） | 不需改 PRD；QA 依 §7.6 對照表判定 |
-| SD-FB-07 | 排名 ≤ 2,809 的 `academicContext` 契約允許空白；SD 訂為功能詞與無學術用途的生活字留空、其餘建議填寫（非強制），以兼顧內容量與檔案大小 | 人類 | 待辦（知會） | 若希望 ≤ 2,809 全部空白（減少約 0.3 MB 與工作量）或全部填寫，請告知 |
-| SD-FB-10 | （v0.4）PRD 只規定 ≤ 640px 用底部導覽（AC-27-01）與 768px、1366px 用寬螢幕導覽（AC-27-04），**641～767px 未規定**。SD 決定該區間維持既有「選單」按鈕展開 2 × 3 按鈕格（v0.3 行為，§9），不新增第三種版面 | PM、QA | 待辦（知會） | 不需改 PRD；QA 對 641～767px 依 AC-20-01、AC-20-03 驗證即可。若希望 641～767px 也用底部導覽或單列頁籤，請 PM 補 AC |
-| SD-FB-11 | （v0.4）AC-25-01「全螢幕顯示難易度設定的首次畫面」：SD 解讀為隱藏導覽列與選單鈕後，由頁首（產品名稱）、儲存警示列（AC-25-08 需要）、首次畫面內容、頁尾（AC-25-01 要求保留「資料來源與授權」）構成整個畫面，不另做蓋住頁首頁尾的覆蓋層 | PM、QA | 待辦（知會） | 若「全螢幕」意指連頁首也隱藏，請 PM 註明；頁尾連結依 AC-25-01 必須保留 |
-| SD-FB-12 | （v0.4）AC-25-07「開啟資料來源頁再返回」：首次模式沒有導覽列，PRD 未指定返回方式。SD 在頁尾加「返回難易度設定」按鈕（只在首次模式且位於資料來源頁時顯示，§7.9）；瀏覽器「上一頁」不支援（本系統不使用 history 路由，v0.3 起即如此） | PM、QA | 待辦（知會） | QA 以該按鈕驗證 AC-25-07 |
-| SD-FB-13 | （v0.4）QA 既有 E2E（`tests/e2e/*.mjs`）以清空的 localStorage 開啟時，v0.8 會先顯示首次畫面而非主控台，且導覽文字已更名；這些腳本屬 QA 負責、PG 不得修改 | QA | 待辦（知會） | QA 在 `/qa-verify` 時：清空狀態的案例先按「開始學習」或預寫 `schemaVersion` 2 的狀態；以 `data-tab`／`#view-*` 等識別字定位元素（R-15 不改識別字），避免依賴畫面文字 |
-| SD-FB-14 | （v0.4）首次畫面的「從備份還原」與主控台匯入各有一份結果訊息對照（`ui/import-flow.js` 與 `views/dashboard.js`），以 `first-run.test.js` 比對兩者輸出完全相同來防止分歧；本版不重構主控台改用共用模組，以降低已驗收功能的回歸風險 | 人類 | 待辦（知會） | 日後若再改匯入訊息，請一併指派兩個檔案；或另開任務把主控台改用 `ui/import-flow.js` |
-| SD-FB-15 | （v0.4）AC-29-02「震動總長 ≤ 200ms」對 `navigator.vibrate([震, 停, 震])` 是否計入停頓未說明。SD 採較嚴格解讀：**含停頓**的總和 ≤ 200ms（答錯 `[60, 40, 60]` = 160ms） | QA | 待辦（知會） | QA 以替身函式記錄參數並以相同算法判定 |
-| SD-FB-16 | （v0.4）AC-29-01「答錯時所選選項有晃動動畫」：SD 只讓所選（錯誤）選項晃動，正確選項同時標綠但不另加強調動畫，避免兩個動畫同時出現；答對時正確選項有強調動畫 | PM、QA | 待辦（知會） | 若希望答錯時正確選項也有強調動畫，請 PM 註明 |
-| SD-FB-17 | （v0.4）契約 RD-2 允許啟動時把 RD-1／V-ST-09～11 的修正立即寫回。SD 決定**不**在啟動時額外寫回（只有 MG-3 的 v1 遷移會寫回一次），修正結果在下一次 `PersistedData` 寫入時一併寫回 | SA、QA | 待辦（知會） | 不影響 AC-30-13（畫面與記憶體立即正確）；QA 檢查 localStorage 原值時請在一次學習行為之後再比對 |
-| SD-FB-18 | （v0.4）AC-30-07 (b) 只要求「切換到其他功能區再回到主控台」時反映新日期；若使用者停在主控台跨過午夜且不做任何操作，畫面仍顯示前一天的 X，直到下一次學習行為或重新進入主控台（T-31）。SD 不加計時器輪詢 | PM | 待辦（知會） | 若希望停留畫面也自動換日，請 PM 補 AC，SD 再加每分鐘檢查 |
-| SD-FB-19 | （v0.4）契約 FB-31 (a)：「開始學習」寫入失敗（容量不足）仍進入主控台，但主鍵不存在，**下次開啟會再出現首次畫面**。SD 依契約實作；PRD AC-25-08 只涵蓋 localStorage 停用的情況 | PM | 待辦（知會，與契約 FB-31 相同） | 請 PM 確認或補進 AC-25-08 |
-| SD-FB-20 | （v0.5）本系統**不使用** hash 路由（AC-20-04 的條件句不成立），但為了讓「手動輸入解碼器、句型庫網址片段時改顯示主控台」在任何寫法下都成立，router 仍以 `hashchange` 攔截隱藏頁片段（`#decoder`、`#phrasebank`、`#view-…`、`#/…`）；其他片段（如 `#flashcards`）忽略、不切頁 | QA | 待辦（知會） | QA 以上述寫法驗證 AC-20-04；其他片段不屬本 AC |
-| SD-FB-21 | （v0.5）HT-4、HT-5 要求保留程式碼，因此交付檔**原始碼**必然含「解碼器」「句型庫」字樣（`TAB_LABELS`、views 程式）；`index.html` 也保留兩個空的 `<section hidden>`（已去掉 `aria-label`）。AC-20-04 判定範圍為「畫面導覽與入口」 | QA | 待辦（知會） | QA 以可見畫面、可存取名稱與可點擊元素判定，不以原始碼字串搜尋判定 |
-| SD-FB-22 | （v0.5）`audio-capture` 與「聆聽中麥克風被拔除」皆歸為「找不到麥克風裝置」（AC-33-06 (b) 允許依 AC-08-09 或 AC-33-05）；取代 v0.3 SD-FB-09 的共用主訊息做法。`getUserMedia` 的 `SecurityError` 歸為權限問題 | QA、PM | 待辦（知會） | 不需改 PRD；QA 依 §7.14 錯誤對照判定 |
-| SD-FB-23 | （v0.5）AC-33-01「只詢問一次」能否成立取決於 Chrome／Edge 在 `file://` 下的權限實作（T-32、T-33），設計階段無法保證；第一次按下也可能出現 2 次詢問 | 人類 | 待辦（需人類注意） | 依 PRD R-18 二：V-MIC 實測不成立時 QA 開 BUG，人類判斷是否接受為瀏覽器限制 |
-| SD-FB-24 | （v0.5）V-MIC 檢查 AC-33-02 的 `MediaStreamTrack.readyState` 需要取得音軌參照；SD 在 `services/mic.js` 提供唯讀偵錯函式 `tracks()`（回傳複本，不進 store），供 DevTools 使用 | QA | 待辦（知會） | QA 依 §10.2「偵錯輔助」操作 |
-| SD-FB-25 | （v0.5）收音條只在**單字卡模式**的語音面板顯示（AC-33-03 的 Given 即為單字卡模式；測驗模式沒有語音面板）。切到測驗模式時停止聆聽與音量分析，但**不釋放**音軌（AC-33-01 允許期間切測驗模式再切回仍不詢問） | QA | 待辦（知會） | — |
-| SD-FB-26 | （v0.5）store 保留 `applyGoal()` 原行為（直接套用、不判斷初始化），另新增 `requestApplyGoal`／`confirmApplyGoal`／`cancelApplyGoal`；初始化判斷由「view 只能呼叫 `requestApplyGoal`」保證（以 `customizer.test.js` 原始碼掃描鎖定），目的是不讓既有已驗收測試大量改寫 | QA、人類 | 待辦（知會） | QA 以畫面操作驗收 US-32；若希望 store 層強制，可另開任務改 `applyGoal` 並一併改寫既有測試 |
-| SD-FB-27 | （v0.5）初始化寫入失敗時，store **不**更新 `writeStatus`（避免 banner 另跳一次「儲存空間不足」與 view 的「儲存空間不足，未套用」重複）；初始化失敗不影響之後一般寫入的提示 | QA | 待辦（知會） | AC-32-11 (b) 畫面只出現一則「儲存空間不足，未套用」 |
-| SD-FB-28 | （v0.6）單字卡頁空狀態提示「請到難易度設定套用目標分數，或新增自訂單字、注入領域範本。」（`flashcards.js`，AC 未定義此文字）仍提到「目標分數」，但 v0.10 畫面已無法設定分數。AC-26-05 只涵蓋首次畫面、難易度設定頁、主控台，本版**不改**此文字 | PM | 待辦（知會） | 若希望改為「請到難易度設定選擇色級並套用，…」，請 PM 補充文字後另開小任務（`flashcards.js`、`naming.test.js`） |
-| SD-FB-29 | （v0.6）R-19 允許保留分數輸入程式，因此交付檔**原始碼**仍含「請輸入 10～990 的分數」「目標分數滑桿」等字樣（`goal.js`、`customizer.js`）；分數區 DOM 也仍存在（隱藏、停用）。AC-26-05 判定範圍為可見畫面、Tab 焦點與可存取名稱 | QA | 待辦（知會） | QA 以可見性、焦點與無障礙樹判定，不以原始碼字串或「DOM 中存在元素」判定（同 SD-FB-21） |
-| SD-FB-30 | （v0.6）QA 既有 E2E 若以 `#cz-score-input`／滑桿設定分數、以畫面讀「目前目標分數」、或假設首次預設 600，會失敗；這些腳本屬 QA 負責 | QA | 待辦（知會） | 改為點色級卡片，分數以 localStorage 或匯出備份驗證（PRD v0.10 色級定義「驗證方式」列）；AC-26-06 構造狀態依 FB-36 |
-| SD-FB-31 | （v0.7）maskable 圖示縮放比例：PRD AC-34-03、Q-41 決議與契約 DP-4(d) 寫「圖案約縮至 85%」，主控實際產出為 **78%**（文字在 80% 安全圓內）。可判定的條件是「對話框與字樣完整位於直徑 80% 的圓內」，78% 符合且更保守 | PM、SA、QA | 待辦（知會） | 不需改設計；建議下次修訂時把 AC-34-03 與 DP-4(d) 的括號說明改為「約 78%」或「以安全區為準」，QA 以安全區判定，不以縮放比例判定 |
-| SD-FB-32 | （v0.7）tasks.json 的 `owner` 值域只有 `pg-content`、`pg-frontend`；主控要求把搬 `ads.txt`、放 PNG、改 workflow 標示為主控執行。SD 將其放在 tasks.json 頂層 `manualSteps`（MC-01～MC-03，`owner: "主控"`），不放入 `tasks`，FE 任務以 `manualPrereqs` 引用 | 主控、人類 | 待辦（知會） | 核准即同意；`/pg-run` 不派發 `manualSteps`；主控的 tasks 驗證工具若檢查 `dependsOn`，MC 項目不在其中 |
-| SD-FB-33 | （v0.7）`src/app/assets/icons/*.png` 位於 pg-frontend 目錄，但依 Q-45 由主控放置；`sources/deploy/ads.txt` 為新增的非 PG 目錄 | QA | 待辦（知會） | QA 越界檢查視為授權例外（D-11）；PG 任務不得修改這些檔案 |
-| SD-FB-34 | （v0.7）AC-24-12／NT-1「緊接『匯出備份』按鈕」：現行「匯出備份」與「匯入備份」同一按鈕列，SD 把說明放在**按鈕列的下一個元素**（不插在兩個按鈕之間，避免拆散同組操作） | PM、QA | 待辦（知會） | QA 以「同一區塊、按鈕列之後、中間無其他元素」判定；若 PM 要求緊貼「匯出備份」單一按鈕，請補註 |
-| SD-FB-35 | （v0.7）SW-4 允許兩種寫法，SD 採「只請求 `./index.html` 一次、`clone()` 寫入 `./` 與 `./index.html` 兩鍵」；因此 install 階段的網路請求為 6 個（`./` 不另請求），Cache Storage 項目仍為 7 個 | QA | 待辦（知會） | QA 驗 AC-35-01、AC-37-05 時以快取項目 7 個、請求網址皆屬預先快取清單判定，不要求 install 請求 7 次 |
-| SD-FB-36 | （v0.7）`dist/site/` 由 CI 重新建置部署；本機 `dist/` 是否提交 git 不影響部署 | 人類 | 待辦（確認） | 建議把 `dist/site/` 加入 `.gitignore`（避免本機與 CI 產物不同造成困惑，見 T-46）；`dist/english-master-track.html` 是否繼續提交由人類決定 |
-| SD-FB-37 | （v0.7）Windows checkout 換行可能為 CRLF，CI 為 LF，兩地 BUILD_ID 不同（不違反 AC-36-01） | 人類 | 待辦（確認） | 建議在專案根目錄加 `.gitattributes`：`* text=auto eol=lf`、`*.png binary`（非 PG 目錄，需人類或主控執行）；不加也不影響功能 |
-| SD-FB-38 | （v0.7）部署 workflow 不執行 `npm ci`／`npm install`（無 lockfile、零相依）。若 QA 日後在 `package.json` 加 devDependencies，部署仍不安裝；但若有人加入**建置期**相依，需同步修改 workflow（屬再次修改 `static.yml`，超出 Q-46 一次授權，須問人類） | QA、人類 | 待辦（知會） | 建置維持零相依（§1） |
-| SD-FB-39 | （v0.8）**PRD 內部衝突**：AC-38-05 要求標題列圖示為「PWA `any` 圖示的縮小版（藍底、橘色『EC』對話框）」，但 AC-38-01（與契約 VC-3、V-LAY-01）規定計算後顏色等於 `#f7893b` 的元素只能是「開始今日學習」「開始學習」按鈕底色與連續打卡圖示；強調橘本身「取自圖示」，因此圖示的橘色對話框必定被掃描到。VC-1 的 `brand` 用途表已列「標題列圖示」，`accent` 用途表卻沒有 | PM、SA、人類 | **影響 PRD（需人類決議）** | 建議 PM 在 AC-38-01 的允許清單補「標題列圖示（AC-38-05）」，SA 同步 VC-3、V-LAY-01。設計目前依 AC-38-05 使用原色（T-55）；決議前 QA 視為已知衝突、不開 BUG |
-| SD-FB-40 | （v0.8）AC-39-06 要求「今日已學 X / D」在主控台本體只出現 1 次，而 v0.11 環形圖中央另顯示「X / D」。SD 改為中央只顯示 X，完整「今日已學 X / D 字」只在環形圖旁一行；AC-30-05 的「顯示 18 / 15」由該行滿足 | QA、PM | 待辦（知會） | QA 驗 AC-30-05 時以「今日已學 18 / 15 字」那一行判定 |
-| SD-FB-41 | （v0.8）契約 FB-46 交由 SD 定案的畫面文字：今日任務卡標題「今日任務」；近 7 天圖表標題「近 7 天已學字數」（沿用 v0.11）；3 格數據區不設可見標題（`aria-label`「學習數據」，避免與 AC-39-06 列舉文字重複）；色級說明行「本系統建議字量：右側為內建字數與每日新字量」；「資料備份」展開後的說明沿用 v0.11「備份檔只含你的學習資料，不含內建字庫與題庫；可在其他裝置的同一個檔案匯入還原。」；展開指示為箭頭圖示（`aria-hidden`） | PM、QA | 待辦（知會） | 若 PM 要固定文字，補進 AC 後由 SA 加常數 |
-| SD-FB-42 | （v0.8）AC-38-08「只換配色」：全域卡片改為 16px 圓角與陰影後，單字卡頁以 `#view-flashcards .card` 固定 v0.11 幾何（8px、1px 框線、無陰影），只有框線與按鈕顏色改變；單字卡頁因此看起來與其他頁的卡片風格不同 | PM、QA | 待辦（知會） | 若 PM 希望單字卡頁的外框也換成新風格，需修改 AC-38-08 的「只有顏色依 token 改變」 |
-| SD-FB-43 | （v0.8）`--focus` 由琥珀色 `#f59e0b` 改為深品牌色 `#0866ad`（3px、offset 2px），使焦點框在淡藍灰背景上更清楚；PRD 只要求 ≥ 2px 可見 | QA | 待辦（知會） | — |
-| SD-FB-44 | （v0.8）契約 `LAYOUT_TEXTS` 說「千分位與否由 SD 定，全畫面一致」：SD 定為**整數 ≥ 1,000 一律加千分位**（沿用難易度設定頁既有 `2,809` 寫法），主控台的「今日已學」、3 格數據、長條圖字數、「已掌握 N 字」亦同（如「已掌握 1,234 字」） | QA、PM | 待辦（知會） | QA 構造大數值測試時依此判定 |
-| SD-FB-45 | （v0.8）QA 既有 E2E 受影響：主控台 `.dash-entry`、`.db-mini`、「學習統計」「目前目標」區塊、首次畫面 `#cz-guide` 與試算結果卡已移除；「匯出備份」「匯入備份」需先展開「資料備份」。保留的定位點：`#cz-start`、`#cz-restore`、`#cz-apply`、`#view-*`、`data-tab`、`data-action="export-backup"`／`"import-backup"`／`"install-app"` | QA | 待辦（知會） | QA 在 `/qa-verify` 前更新 `tests/` |
-| SD-FB-46 | （v0.8）AC-41-03 對 > 640px 允許「可固定或隨內容排列」：SD 採隨內容排列（`position: static`）；1366×768 以計算估約 733～757px 高，仍在首屏內，但餘裕只有約 10～35px | QA、PM | 待辦（知會） | 若 1366×768 量測超出，FE-62 在 `90-overrides.css` 對 > 640px 改為 `position: sticky; bottom: 0` |
-| SD-FB-47 | （v0.8）AC-26-01「說明為適用情境（一行，過長截斷）」與「375px 下 5 列文字不裁切」並存：SD 解讀為說明欄以省略號截斷屬 AC 允許，名稱與右側數字不得截斷；完整說明仍在按鈕可存取名稱中 | QA | 待辦（知會） | QA 以名稱與數字是否完整判定「不裁切」 |
-| SD-FB-48 | （v0.8）AC-38-06 的範圍「4 個功能區」包含單字卡頁的按鈕：`.btn` 全域改為透明邊框、淡藍底，單字卡頁按鈕因此只有顏色改變（尺寸不變），與 AC-38-08 不衝突 | QA | 待辦（知會） | — |
-| SD-FB-49 | （v0.8）AC-38-10 (1) 要求「資料來源與授權」頁顯示原創內容來源名稱「EnglishContext 原創內容」，但 v0.11 該頁只列字表與辭典、**不列 ORIGINAL 項目**（FE-17 依 AC-23-02 設計）。SD 在授權區塊新增一行「原創內容來源：{fullName}」（名稱取資料，NM-3）；「原創內容來源：」為 SD 定的標籤文字 | PM、QA | 待辦（知會） | 若 PM 希望以其他形式呈現（例如列為一張來源卡片），請補 AC |
-| SD-FB-50 | （v0.9）SD-FB-39 已由 PRD v0.13 解決（AC-38-01 加入標題列品牌圖示例外）；契約 v0.14 VC-3、V-LAY-01 亦已同步。程式不需修改 | QA | 已結案（知會） | QA 依 PRD v0.13 判定 `.app-logo` 橘色為允許 |
-| SD-FB-51 | （v0.9）契約 FB-51 交 SD 決定「範本單字是否另顯示領域名稱」：SD 定為**不顯示**，只標「自訂擴充」（理由見 §7.20.2） | PM、QA | 待辦（知會） | PM 下次修訂可在 AC-43-03 (2) 補「不顯示含『範本』的來源標示，也不另顯示領域名稱」；若希望保留「資工」等名稱，請補 AC，FE 另開小任務 |
-| SD-FB-52 | （v0.9）契約 `LAYOUT_TEXTS.goalLineCapped`、`goalLineSeparator` 標為停用但仍在 §13；為維持 `layout.test.js` 與契約逐字相等，`core/layout.js` 保留兩鍵與 `goalLine` 函式（標 `@deprecated`），view 不再引用 | SA | 待辦（知會） | SA 下次修訂契約刪除兩鍵時，SD 安排小任務同步刪除 `layout.js` 的兩鍵、`goalLine` 與其測試（不涉持久化，可主控代核） |
-| SD-FB-53 | （v0.9）主控台目標行色點改依**生效**色級（套用藍、金時顯示綠點），與文字「綠級」一致；DB-4 只規定文字依生效色級，未規定色點 | QA、PM | 待辦（知會） | QA 驗 AC-38-03 時，以「色點顏色 = 目標行所顯示色級的色值」判定（色值本身不變）；若 PM 希望色點仍表示目標色級，請補 AC |
-| SD-FB-54 | （v0.9）QA 既有 E2E 受影響：`.db-change` 不再有 `btn--link`；`.db-goal__sep` 移除；難易度設定狀態列 `#cz-st-target`、`#cz-st-effective`、`.cz-status__cap` 改為單一 `#cz-st-line`；`.cv-item__source` 移除；範本按鈕 `[data-template]` 仍在 DOM 但位於 `hidden` + `inert` 容器（無法點擊）；新定位點 `#app-version` | QA | 待辦（知會） | QA 在 `/qa-verify` 前更新 `tests/`；AC-22-02 的 30 個自訂單字改以匯入備份建立最快 |
-| SD-FB-55 | （v0.9）首次模式且位於「資料來源與授權」頁時，頁尾順序為「資料來源與授權」→ 版本行 →「返回難易度設定」（版本行須在連結正下方，AC-42-01）；「返回」按鈕因此移到版本行之下，Tab 順序仍為「資料來源與授權」→「返回難易度設定」 | QA、PM | 待辦（知會） | QA 驗 AC-25-07 時以按鈕存在與行為判定，不以位置判定 |
-| SD-FB-56 | （v0.9）版本行由 JS 在啟動時建立：JS 執行失敗、或未經建置的開發模板（meta 為佔位）時不顯示，屬 VR-8 允許行為；交付產物由建置 B-18、B-19 保證兩值合法 | QA | 待辦（知會） | QA 只以建置產物驗收 AC-42-01 |
-| SD-FB-57 | （v0.10）QA 既有 E2E 受影響：(1) 寫死 `schemaVersion === 2` 或 `data` 9 鍵——`e2e-cards.mjs:387`、`e2e-goal.mjs:252`、`e2e-firstrun.mjs:131`（支援版本「1、2」→「1、2、3」）、`:167`、`:269`、`:294`、`e2e-layout.mjs:292`、`e2e-progress.mjs:203`、`e2e-pwa.mjs:523`、`e2e-pwa-update.mjs:150`、`e2e-reinit.mjs:121`、`:219`、`e2e-version.mjs:145`、`:404`、`:436`；(2) `lib/state.mjs` 產生 v2 主鍵，v0.15 開啟時會遷移並寫回一次（比對位元組的案例需改產生 v3 或容許寫回）；(3) 同生效色級套用（綠 → 藍、金）不再回到第 1 張（FB-54）；(4) 新定位點 `[data-p5=correct-count]`、`[data-p5=only]`、`[data-p5=correct-badge]`、`[data-p5=allcorrect-title]`、`[data-p5=replay]`、`[data-p5=clear]` | QA | 待辦（知會） | QA 在 `/qa-verify` 前更新 `tests/`；斷言改用「目前版本 3、12 鍵」（C-8） |
-| SD-FB-58 | （v0.10）AC-47-03、AC-47-04 最可信的驗法是以 v0.14 交付檔實際產生的資料開啟 v0.15。FE-76 會覆寫 `dist/english-master-track.html`；FE-70 已凍結單元測試用的樣本並記錄其 SHA-256 | QA、主控 | 待辦（知會） | QA 若要做 E2E 實測，請在 FE-76 執行前自行複製目前的 `dist/english-master-track.html`（1.0.0）到 `tests/` 下，或由版本庫取回 1.0.0 的產物 |
-| SD-FB-59 | （v0.10，DS-36）為符合 V-ST-22「整個工作階段只出現 1 次」，SD 把**所有**一般寫入（含 `setDraft`、`applyGoal`、`deleteCustomWord`、`acknowledgeSttNotice`）的容量不足提示一併收斂為每個工作階段 1 次；v0.14 為「每次由正常轉為容量不足時提示」。新增自訂單字（AC-18-04）、初始化（CI-7）、匯入（AC-24-09）的立即提示不變 | PM、QA | 待辦（知會） | 不需改 PRD（§5.3 只要求「提示」）；若 PM 希望一般寫入維持每次提示，請補 AC，FE 另開小任務 |
-| SD-FB-60 | （v0.10）FP-2 (2) 規定「紀錄為 `null` 時解析後把記憶體紀錄更新為第 1 張」，FP-4 規定「生效色級改變、開始學習時寫入 `null`」。SD 以不變式 INV-FP 統一：`null` 與「第 1 張」等價，兩種寫法皆合法（`FlashcardPositionNormalized` 允許 `null`）；因此 V-ST-18 (a) 只在使用者換卡後檢查非 `null` 值 | SA、QA | 待辦（知會） | 不需改契約；QA 驗 AC-44-08 以「重新載入後為第 1 張」判定，不要求 localStorage 必為 `null` 以外的值 |
-| SD-FB-61 | （v0.10，CT-25）V-P5-08 快照建立後，日後修改 `part5.js` 的題目文字或正解時，`validate:data` 會出現警告或錯誤；確認是錯字修正後須以 `--accept <id>` 更新快照，新增題目後以 `--update-snapshot` 加入 | pg-content、人類 | 待辦（知會） | 屬內容維護流程；`_records/CT-25.md` 記錄指令 |
-| SD-FB-62 | （v0.10）V-ST-21 (a)「遷移後前 9 欄與遷移前深度相等」只在樣本對開啟當天已是正規化狀態時成立：MG-7 寫回的是一般讀取流程（V-ST-02 色級重算、V-ST-05、V-ST-09～V-ST-11 換日）處理後的資料，例如 v0.7 樣本的 `currentIndex: 999` 會被重設為 0 | SA、QA | 待辦（知會） | QA 以「產生樣本當天」的日期執行比對，或只比對不受一般讀取流程影響的欄位；`migrate-v3.test.js` 依此撰寫（§7.21.1） |
-| SD-FB-63 | （v0.10，契約 FB-57）`schemaVersion` 升為 3 後，舊版 `file://` 檔或未更新的舊分頁會把資料視為無法讀取並重設（原字串保留在 `englishMasterTrack:unreadable`）或以 v2 覆寫 | 人類、主控 | 待辦（知會） | 發布 1.1.0 時在說明中提醒「更新後請關閉其他舊分頁；請改用新的 `.html` 檔」；PWA 使用者依「有新版本，重新整理」更新即可 |
-| SD-FB-64 | （v0.10）題庫為空（Q = 0，資料缺漏）時模擬測驗頁沿用 v0.14 空畫面，不顯示「已答對 K / Q 題」與開關；store 的模擬測驗 action 不動作 | QA | 待辦（知會） | 屬 C-6 防禦行為，契約 §5.11 名詞段已允許 |
-| SD-FB-65 | （v0.11）QA 既有資產仍寫舊文字：`tests/e2e/e2e-pwa-update.mjs`、`tests/e2e/e2e-version.mjs`（以及 `e2e-firstrun.mjs`、`e2e-reinit.mjs`、`e2e-mic.mjs` 中的「重新整理」字樣需逐一確認是否為按鈕定位）、`tests/tools/tc-desc.json`、`docs/04-qa/test-plan.md` TC-36-03c、TC-42-04d、TC-VER-H3、TC-TRK-H1 的期望文字 | QA、主控 | 待辦（知會） | 本次使用者決定不跑 QA；下次 QA 輪次先把定位與期望文字改為「有新版本，請更新版本」「更新版本」，並新增 AC-23-07 的 TC |
-| SD-FB-66 | （v0.11）`services/pwa.js`、`pwa/sw.template.js` 的註解仍寫「按『重新整理』」（UP-4 舊稱）。不影響行為與 AC（交付 HTML 的靜態檢查只禁止完整舊提示句「有新版本，重新整理」），且改 `sw.template.js` 只會讓 `sw.js` 多一個無意義差異，因此不納入 FE-77 | 主控 | 待辦（知會） | 下次有任務修改這兩個檔案時順帶更新註解 |
-| SD-FB-67 | （v0.11，契約 FB-61、QA BUG-004）R-24 起因是人類直接改 `dist/`；`dist/` 是建置產物，下次建置會被覆寫，且手改會造成交付檔與部署版不一致 | 人類、主控 | 待辦（知會） | 日後文字調整請改需求（PRD）或請主控派任務改 `src/app/` 後重建；主控以 FE-77 回報確認 BUG-004 可結案 |
-| SD-FB-68 | （v0.12）R-25 列出 QA 需更新的測試，但沒有決定本次是否跑 QA 輪次（v0.11 由使用者決定不跑）。本版新增 AC-23-08，也修改 AC-23-06 等法律文字；`tests/` 未更新前，E2E 與靜態檢查會有預期失敗（§10.9） | 人類、主控 | 待決定 | SD 建議本次跑**針對性 QA**：先更新 §10.9 列出的項目，再跑相關套件與新 TC；若不跑，驗收由 FE-79 與主控 M-1～M-3 擔任，§10.9 的 QA 項目留待下次輪次 |
-| SD-FB-69 | （v0.12）SD 自身修正：§10.8 的 FE-77 量測與主控 H-2 以 `.src-contact` 的 `getClientRects().length === 1` 判定「1 行」，但 `p` 為 block 元素，結果恆為 1，**無法證明沒有折行**；因此 AC-23-07 (1)(6) 的 375px 1 行可能未被有效驗證 | QA、主控 | 待辦（知會） | FE-79 改以 Range 量測並回報 `.src-contact` 行數（§7.23.4）；若不是 1 行，由主控依 BUG 流程處理，不在本版任務修改（AC-23-07 不動）。§10.8 保留原文作為歷史 |
-| SD-FB-70 | （v0.12）PRD R-25 的 QA 回饋清單沒有列 `docs/04-qa/test-plan.md` TC-S06（第 684 行仍是舊的合併聲明），也沒有列 `tests/tools/tc-desc.json:160` | PM、QA | 待辦（知會） | 不需改 PRD；已列入 §10.9 |
-| SD-FB-71 | （v0.12）R-25 指名 SD 修訂的 architecture.md 行號中，現行設計敘述已就地標註（原第 208、267、588、1414、1931、2234、2632 行）；原第 2760、3198、3705、3706 行屬 v0.7 已完成任務的歷史紀錄，只以 v0.12 導讀的改讀規則處理，不逐字回改 | PM、QA | 待辦（知會） | 不需改 PRD；現行文字以 §7.23 與契約 L-8 為準 |
-| SD-FB-72 | （v0.13）PRD R-26 的 QA 清單沒有列 TC-45-07（`e2e-track-p5.mjs:139` 對曾答對題作答）、`e2e-version.mjs`、`e2e-pwa-update.mjs` 與 `tests/static/static-check.mjs` | PM、QA | 待辦（知會） | 不需改 PRD；已列入 §10.10 |
-| SD-FB-73 | （v0.13）SD-FB-68 的 §10.9 項目與 SD-FB-65 的 v0.11 項目至今未更新，已逐項確認仍是舊值；AC-23-08、V-LGL、商標聲明在 `tests/` 為 0 筆。本次針對性 QA 一併處理 | QA | 待辦（知會） | 依 §10.10 Q3、Q4 執行後，SD-FB-65、SD-FB-68 可結案 |
-| SD-FB-74 | （v0.13）`answered` 且資料不完整時，現況會在回饋與 `.p5-warning` 各顯示 1 次「這一題的資料不完整。」。LV-6「恰 1 次」只規範 `lockedReview`，本版保持現況，避免範圍外變更 | SA、QA | 待辦（知會） | 不需改契約；QA 不以 LV-6 判定此情境 |
-| SD-FB-75 | （v0.13）`package-lock.json` 的 `version` 一直是 `0.1.0`，與 `package.json` 不同；建置與 CI（不執行 `npm ci`）都不讀取，MC-04 也未更新 | 主控 | 待辦（知會） | 本版維持不動，只改 `package.json`。日後若要對齊，另行處理 |
-| SD-FB-76 | （v0.13）契約未指定 K = 0 或題庫為空時 store 層 `clearPart5CorrectIds` 的回應。SD 定為 `{ ok: false }`、不寫入，與舊有防護一致；畫面本來就不提供入口（CR-10） | SA、QA | 待辦（知會） | 不需改契約 |
-| SD-FB-77 | （v0.14）**部署會失敗**：`.github/workflows/static.yml:42` 檢查 `dist/site` 恰 8 檔，`:45` 只列 8 檔。契約 DP-1、PRD AC-36-07 要求 13 檔，但都沒有授權修改 workflow；Q-46 是一次性授權，已由 MC-03 用完（SD-FB-38） | **人類** | **待決定（阻擋部署）** | 請人類授權主控修改一次（MC-08）：`:42` 改 `-eq 13`，`:45` 的清單加 5 檔，`:53` 註解改 13 檔；其餘不動。不授權就無法部署 v1.3.0；不影響 FE 任務與 QA |
-| SD-FB-78 | （v0.14）`docs/03-design/tasks.json` FE-77（`done`）的文字仍含舊信箱的空白形式。本次指示既有任務內容不動，所以保留；不違反 ML-3、AC-55-04（只掃連續形式），但 ML-1 寫「全站只有一種寫法」 | 主控、SA | 待決定 | 主控決定是否授權單獨改這 1 處；不影響實作 |
-| SD-FB-79 | （v0.14，DS-50）移除 `#footer-first-run-back`，取代 SD-FB-12、SD-FB-55。AC-25-07 的返回由內容區的「返回難易度設定」滿足，文字相同、位置不同 | QA | 待辦（知會） | QA 改定位 `.site-return` |
-| SD-FB-80 | （v0.14）契約未提到捲軸造成的位移。SD 加 `html[data-ad-env] { scrollbar-gutter: stable }`，只在環境成立時生效；第一階段的正式網址也不受影響（`ineligible`） | SA、QA | **v0.16 由 SD-FB-94 取代** | 條件規則晚 1 個畫格生效（BUG-006），且不保護第一階段（BUG-008）；改為無條件規則（§7.29） |
-| SD-FB-81 | （v0.14）DS-48 的做法依 AdSense 公開行為推定，替身無法重現 inline 樣式與實際量測（T-106）。第一階段沒有真實廣告可驗 | 主控、人類 | 待辦（**第二階段啟用前**） | 併入 FB-73：填入單元 ID 後，第一次部署先以正式網址檢查 `loading`、切頁、`unfilled` 的版面 |
-| SD-FB-82 | （v0.14）AD-10 (b) 判定的時間點定為 `importBackup` 成功、資料已取代之後；AD-10 (a) 只在 `confirmApplyGoal` 成功路徑。寫入失敗時資料未改變，不隱藏 | SA、QA | 待辦（知會） | 不需改契約 |
-| SD-FB-83 | （v0.14）V-MAIL-01 的全庫掃描放 QA 的 `tests/static/mail-scan.mjs`，不放 `npm test`：`legal-check.mjs` 歸 QA，由 PG 跑一定失敗。FE-89 只掃自己範圍 | QA、主控 | 待辦（知會） | 主控以 D-10 驗證 |
-| SD-FB-84 | （v0.14）`SP-6` 的「正規化後恰為 `sources`」沿用既有 `normalizeHash`，因此 `#view-sources`、`#/sources` 也會開啟資料來源頁；隱藏頁片段行為不變 | QA | 待辦（知會） | 不需改契約 |
-| SD-FB-85 | （v0.15）v1.3.0 聆聽中再按停止後，若引擎仍送來 `result` 會照樣評分；v0.15 依 MS-1 (1) 與 AC-08-10「不顯示分數」改為忽略。屬行為修正，不是新需求 | PM、QA | 待辦（知會） | 不需改 PRD；QA 依 AC-08-10 判定 |
-| SD-FB-86 | （v0.15）Q-95 的「Chromium 開頭約 300 ms」SD 無法查證，`T_BUFFER` 維持 0 | 主控、QA | 待辦（AC-58-14 後） | 依 AC-58-14 (a) 結果，由主控在 0～500 內代核（§7.26.1） |
-| SD-FB-87 | （v0.15）以 `"onaudiostart" in rec` 判定可依賴 `audiostart`。若某瀏覽器有屬性但從不觸發，只能靠其他事件或逾時結束 | QA、人類 | 待辦（知會） | 列已知限制（T-116）；人工測試遇到時記錄瀏覽器與版本 |
-| SD-FB-88 | （v0.15）BUG-005 的自動驗證只在 Chrome 行動模擬；iPhone Safari 外接鍵盤的焦點捲動是否依 `scroll-padding` 未驗證 | QA、人類 | 待辦（知會） | 可列人工選測，不阻擋本版 |
-| SD-FB-89 | （v0.15）同契約 FB-79：PRD 第 6 章 Q-94～Q-102「人類決議」欄空白，多處仍寫「暫依」。本設計以 frontmatter 核准紀錄為準 | PM | 待辦（文字同步） | PM 下次修訂時補上；不影響本版 |
-| SD-FB-90 | （v0.15）PR-1 交 SD 決定的離線路徑：按下時不經過準備中，直接清除分數並顯示「語音辨識需要網路連線」，與 v1.3.0 相同 | QA | 待辦（知會） | 不需改契約 |
-| SD-FB-91 | （v0.15）首次畫面固定底部列（184 px）可能遮住頁尾連結以外、以 Tab 取得焦點的控制項；不在 AC-61-01 範圍（一般模式），本版不改 | PM、QA | 待辦（知會） | QA 若量到可另開 BUG，由人類決定是否納入 |
-| SD-FB-92 | （v0.15）準備中按鈕設 `aria-pressed="true"`（嘗試進行中），契約與 PRD 未規定 | QA | 待辦（知會） | 不需改契約 |
-| SD-FB-93 | （v0.16，BUG-007）`AudioContext` 改在畫出準備中之後才建立，不在點按處理器內。Chrome、Edge 依 sticky activation 推定為 `running`，Safari 可能 `suspended`；SD 無實機無法查證，已以 `resume()` 補救，失敗只影響收音條 | QA、人類 | 待辦（知會） | FE-95 實測 Chrome、Edge；QA 實機確認 AC-33-03，iOS Safari 選測並記錄（§10.13 Q12）。若 Safari 收音條確實不動，由人類決定是否接受或另開需求 |
-| SD-FB-94 | （v0.16，BUG-006、BUG-008）`html { scrollbar-gutter: stable }` 無條件生效，取代 SD-FB-80。傳統捲軸桌面版不可捲動的頁面右側保留 15 px，內容比 1.3.0 左移 7.5 px；不違反任何 AC（AC-52-05、AC-60-06 都是同一次載入的前後比較） | PM、QA | 待辦（知會） | 不需改 PRD；QA 跨版本不比絕對座標（§10.13 Q11） |
-| SD-FB-95 | （v0.16）BUG-006 原判「第二階段才發生」，修正後與廣告環境無關；`services/ad.js:8` 檔頭註解仍寫「SD-FB-80 的 scrollbar-gutter 依此生效」，本版依指示不改 `ad.js` | 主控 | 待辦（知會） | 日後改 `ad.js` 時順手更新註解；以本文件為準 |
-| SD-FB-96 | （v0.16）延後取得只在「尚未持有音軌」時發生；持有音軌時照舊同步，以免第 2 次以後的按下多等 1 個畫格 | QA | 待辦（知會） | 不需改契約 |
-| SD-FB-97 | （v0.16）e2e 中依賴「按下後同步呼叫 `getUserMedia`」或以 `scrollbarGutter` 判斷廣告環境的斷言需由 QA 更新（§10.13 Q9、Q10） | QA | 待辦 | QA 先更新再跑；PG 不代改 |
-| SD-FB-98 | （v0.17）IT-2 未規定兩種退化事件：`results` 不存在或不是類陣列 → SD 定為最終結果（與 v0.20 相同，畫面為 `heardNoWords`）；自 `resultIndex` 起沒有任何結果 → 依「全部為 false」字面視為即時文字（取出多半為空、不回報） | SA、QA | 待辦（知會） | 不需改契約；若 SA 認為應反過來，只改 `hasFinalOf` 1 處 |
-| SD-FB-99 | （v0.17）`TEXT` 鍵由試作 `liveLabel` 改名為契約鍵 `labelInterim`，讓 V-STT-09 以契約鍵逐一比對（契約允許自訂鍵名，此為 SD 選擇） | QA | 待辦（知會） | 不需改契約 |
-| SD-FB-100 | （v0.17）`speech-flow.test.js:599` 讀契約檔 `STT_FLOW_TEXTS`，契約 v0.21 核准後即失敗，到 FE-99 完成才恢復；FE-98、FE-100 的 doneWhen 允許此 1 個已知失敗 | 主控 | 待辦（知會） | 主控檢查 FE-98、FE-100 回報時，只接受這 1 個失敗 |
-| SD-FB-101 | （v0.17）PRD AC-30-04 列「顯示過即時文字，但以手動停止、換卡、錯誤或 `nomatch` 結束」不計，未列「最終結果清洗後為空」（AC-62-04）；依 LR-1 與 MS-6，該情況顯示 `heardNoWords`、不評分，同樣不計 | PM、QA | 待辦（知會） | 不需改 PRD；QA 以 LR-1 判定 |
-| SD-FB-102 | （v0.17）AC-62-07 的 NVDA 播報、AC-62-12 真人語音無法由 PG 或替身驗證；DOM 屬性部分已自動化（P18、T6） | QA、人類 | 待辦 | §10.14 Q17、Q18 |
-| SD-FB-103 | （v0.17）`tests/` 仍有舊 LT-2（6 個檔案）與 `interimResults` 斷言（`e2e-speech.mjs:102`），需由 QA 更新 | QA | 待辦 | §10.14 Q13～Q15；PG 不代改 |
-| SD-FB-104 | （v0.17）分支 `feat/stt-interim-text` 的 `dist/english-master-track.html` 是試作產物，版本行仍為 1.3.1；不得提交為交付物 | 主控 | 待辦 | FE-101 由建置覆蓋；主控提交前檢查 M-6 |
+| SD-FB-105 | PM | **連結樣式按鈕是否屬 AC-68-02 的「按鈕」**。AC-68-02 列舉「主要、次要、「開始今日學習」「開始學習」「變更」「翻面」「上一張」「下一張」、TTS、麥克風」，未提頁尾連結（關於我、聯絡我們、隱私權政策、資料來源與授權）、「從備份還原」、應用內三頁的返回鈕等 `.btn--link` 連結樣式按鈕 | 不阻擋；QA 若把它們列入量測會判外框不符 | SD 解讀為不在範圍，維持連結外觀（透明框、底線，§7.32.7）。若 PM 要求加外框，屬 CSS 小修（只改 `00-base.css` 的 `.btn--link`） |
+| SD-FB-106 | SA、QA | **回饋列的即時區域**：LF-3 寫「值為 null 時不渲染回饋列（不顯示空白框）」。為了讓 NVDA 穩定播報（AC-69-06），設計以常駐、尺寸 0 的 `div.fc-feedback-live[role=status]` 作容器，`null` 時不建立可見的 `p.fc-feedback` | 不阻擋；符合 LF-3「不渲染回饋列」與 AC-69-05「不顯示空白框」的意旨 | 請 SA 確認此解讀；QA 以容器高度 0、無框判定（§10.15 Q24） |
+| SD-FB-107 | PM、QA | **今日任務卡的「今日任務」標題改為視覺隱藏**：AC-39-02 規定卡片內由上到下為龜龜與對話框、今日進度列、「開始今日學習」，可見標題會違反順序；保留 `h3.visually-hidden` 供螢幕閱讀器標題導覽 | 不阻擋 | 知會；QA 不以可見「今日任務」文字定位 |
+| SD-FB-108 | QA | **測驗模式的卡片角落裝飾**：測驗元件重繪會清空容器，裝飾放在 `.fc-stage` 右上角（與卡片右上角重合），不在 `.fc-quiz` 內部 | 不阻擋 | 知會；AC-69-01 以視覺位置與不重疊判定 |
+| SD-FB-109 | PM | **641 px 以上的導覽圖示**：既有規則在 ≥ 641 px 隱藏導覽圖示、只顯示文字；AC-63-01 的「第 1 項圖示為內嵌 SVG 的島嶼圖示」引用 AC-27-05（底部導覽列）。SD 解讀為圖示只在 ≤ 640 px 顯示，DOM 中三種版面都是同一個內嵌 SVG | 不阻擋 | 知會；若 PM 要求 ≥ 641 px 也顯示圖示，屬 CSS 小修 |
+| SD-FB-110 | PM | **地圖框底色與區塊卡片白底的衝突**：AC-68-02 與契約 V-LAY-02 規定區塊卡片背景 `#ffffff`（只有霧中島列例外），但 `div.card.db-map` 依 §7.32.4 底色為海面色 `--sea`（`#9fe0ec`），是地圖本身的一部分 | 不擋實作；QA 依字面量測會判 `.db-map` 不符 | 建議 PRD 把「群島地圖框」與霧中島列一併列為白底例外（其外框、圓角、陰影仍依 AC-68-02）。**已處理（PRD v0.24）**：AC-68-02 與契約 v0.24 VC-4、V-LAY-02 已列入例外；設計維持海面色（§7.32.4） |
+| SD-FB-111 | PM | **「資料來源與授權」DOM 與 v1.3.2 相同的範圍**：AC-68-04 要求該頁 DOM（元素順序、按鈕數量與文字）與 v1.3.2 相同，但 AC-72-05 要求在該頁新增 LT-7 段落，兩者字面衝突 | 不擋實作；FE-112 T12 與 QA 比對時會多出 1 段 | 建議 AC-68-04 註明「AC-72-05 新增的 LT-7 段落不算差異」。**已處理（PRD v0.24）**：AC-68-04 與契約 v0.24 IV-3 已註明；T12 以排除 LT-7 段落後比對 |
+
+新的回饋事項寫在本節。
 
 ---
 
 ## 16. 變更紀錄
 
+v0.1～v0.17 的變更紀錄已移到 `docs/archive/architecture-history.md`。
+
 | 版本 | 日期 | 作者 | 說明 |
 | :--- | :--- | :--- | :--- |
-| 0.1 | 2026-10-30 | sd-agent | 初版：依 PRD v0.6、契約 v0.4 設計分層架構、目錄與負責代理、模組介面、建置流程（B-1～B-9）、檔案大小估算（FB-17 結案，預期 3.1 MB）、關鍵演算法、字庫 15 批分檔與撰寫慣例（P／T／O）、自查與 QA 抽查門檻、RWD、測試策略、16 項風險；拆 41 個任務（CT 23、FE 18），141 個 AC 全部涵蓋；回應 FB-04、05、06、10、14、16、17、20、21、22；回饋上游 SD-FB-01～07 |
-| 0.2 | 2026-10-30 | sd-agent | 依 /pg-run 階段 PG 回報修訂（v0.1 已由 JimmyLin 核准，改回 draft）：(1) FE-01 回報 `<meta charset>` 落在第 1,541 byte，超出 HTML 規範的前 1,024 bytes → §5 改模板開頭順序為 DOCTYPE → html → head → meta charset → 授權註解，B-1 檢查規則與 B-7 新增 charset 位置檢查，§2 架構圖、T-17 同步；授權註解仍在原始碼開頭，不影響 AC-23-06。(2) `npm test` 改為 `node --test src/app/__tests__/*.test.js`，`engines` 改 `>=22`（§3、§5、§10、T-18）。(3) §7.1 補登 `parseScoreInput` 回傳格式 `{ ok, score }`／`{ ok, message }`、`SCORE_INVALID_MESSAGE`、`levelOf`、`isOpenColor`；決議字串只接受十進位寫法（拒絕 `1e2`、`0x64` 等）；§4.3 註明 `setDraftScore` 的 `error` 來源。(4) §7.3 統一 `score(recognized, target)` 寫法與驗算例；§7.4 補異常輸入處理表，四選一效能改以 1,000 次平均 < 1 ms 判定。(5) 新增 §12.1 待派補修 R2-1（FE-01）、R2-2（FE-03）。tasks.json 同步修改 FE-02、FE-18 的 description／doneWhen，與 FE-01 description 中的 `npm test` 指令與 engines 文字。PRD、契約、localStorage 結構皆未變更。**主控代核**（2026-10-30，依 CLAUDE.md「第 4 階段自動化授權」：未改 PRD、未改持久化結構） |
-| 0.3 | 2026-10-30 | sd-agent | 依 /pg-run 後段 PG 回報的設計問題修訂（v0.2 已由主控代核，改回 draft）：(1) R6-1：§4.1 新增模組取用時機 LD-1～LD-3（core 只能在載入時取用 constants、wordkey，其餘 core 依賴在函式呼叫時才取用；不改建置順序），註明回歸測試位置 `backup.test.js` R6-1 案例與 FE-19 `load-order.test.js`；§2 L1 依賴規則同步；T-19。(2) FE-07 #2：範本注入容量不足**不沿用**一般寫入做法，改為與新增自訂字相同的回滾 + 「儲存空間不足」（§4.3、§7.5，含容量不足分類總表）；SD-FB-08。(3) FE-07 #4：確認測驗模式在單字集不足時退回 card（目前題目保留、出新題失敗才退回、不另顯示 toast），寫入 §4.3。(4) FE-11：§4.3、§4.4 補註 `AppState = { data, runtime }`、`state.runtime.flashcard`。(5) FE-12 #1：§9 新增停用按鈕例外（`aria-disabled="true"` + `title`）與 QA 判定。(6) FE-12 #2：§7.6 新增 STT 錯誤對照表，含 `audio-capture`；SD-FB-09。(7) FE-17：§7.6 寫明辭典只在有單字 `meaningSource` 使用時列出。(8) FE-09：字量 0 改由 `goal.js` 統一視為資料缺漏（§7.1），補修 R3-1。(9) CT-02：§8.4 註明個別任務用 `--file`、`--all` 由 CT-23／主控於全部完成後執行。(10) CT-03、CT-05：V-VOC-17 不加白名單，以紀錄逐筆寫判斷視為已處理，並訂 QA 判定（§8.4、§8.5）。(11) CT-01：H-1 加繁簡同形白名單（含「后」），命中改為 H-1W 警告，補修 R3-4。(12) 新增任務 FE-19（頁面單元測試移入 `src/app/__tests__/`，FE-18 之前）：§3 目錄、§10 測試規則（相對路徑、`.test.js`、不讀正式資料）、§12 批次、T-20、T-21。新增 §12.2 待派補修 R3-1～R3-4；§13 AC-18-04 加 FE-10。**tasks.json 本次未修改**（主控同步中）：FE-19 任務 JSON 與 FE-18 `dependsOn` 加 `FE-19` 由主控加入。PRD、契約、localStorage 結構皆未變更。**主控代核**（2026-10-30，依 CLAUDE.md「第 4 階段自動化授權」：未改 PRD、契約、持久化結構） |
-| 0.4 | 2026-10-30 | sd-agent | 修訂已核准的 v0.3（主控代核），原因：PRD v0.8（R-15 功能更名、R-16 介面互動、R-17 今日已學與持久化 `schemaVersion` 1 → 2）與契約 v0.8（§5.4 LR-1～LR-8、§5.5 FS-1～FS-7、§5.6、§6.3、MG-1～MG-4、RD-1／RD-2、IM-8、V-ST-09～V-ST-13、`TAB_LABELS`、`NAV_TAB_ORDER`、FB-27～FB-32）皆已由 JimmyLin 核准。status 改回 draft、核准欄位清空；**本版設計涉及持久化結構變更的實作，依 CLAUDE.md 須由人類核准**。增量內容：(1) §1、§2、§3 新增模組 `core/learning.js`、`core/interaction.js`、`ui/motion.js`、`ui/bottom-nav.js`、`ui/import-flow.js`、`services/haptics.js`、`styles/05-motion.css` 與 7 個新測試檔，既有檔案標示 v0.4 修改任務串接順序（D-6、D-7：不改 `src/data/`、不建 CT 任務）；(2) §4.2 啟動順序、`body[data-entry]`／`data-tab`、router 新行為；§4.3 store 新 API（`today`、`startLearning`、寫入守門、學習事件、tags）；§4.5 共用模組介面；(3) §6.1 交付檔（約 +62 KB）與 localStorage 容量估算（回應契約 FB-32：最壞約 0.8 MB，不做延遲寫入）；(4) §7.7 學習紀錄函式與記錄點、LR-7 實作；§7.8 v1 → v2 遷移與備份流程；§7.9 首次進入狀態機與畫面做法；§7.10 手勢判斷與測驗防誤觸；§7.11 動畫與減少動態策略（A-1～A-5）；§7.12 Q-33 設計常數（640px、240／360／200／480／500 ms、50px、震動 40 與 [60, 40, 60]）；§7.13 R-15 更名清單；(5) §9 導覽、卡片、動畫類名、色彩，§9.1 底部導覽 CSS；(6) §10.1 測試命令、中間狀態已知失敗、新增測試案例、E2E 與人工建議；(7) §11 新增 T-22～T-31；(8) §12.3 新任務 FE-20～FE-33 與 6 個批次；(9) §13.1 新增 51 個 AC 與修改／更名 AC 的追加對照（192 個 AC 全部涵蓋）；(10) §15 新增 SD-FB-10～SD-FB-19。tasks.json 同步升為 v0.3（只新增任務，既有任務不變） |
-| 0.4（核准） | 2026-10-30 | 主控 | 主控代核：持久化結構變更已由人類於契約 v0.8 核准，本版只實作該契約，不改 PRD、不另改持久化結構；tasks.json v0.3 經 check_tasks 驗證，AC 192/192 涵蓋，新任務彼此無共用 paths。 |
-| 0.4（主控代核補記） | 2026-10-30 | 主控 | /pg-run 中授權一次性擴充 paths（不改 PRD、不改持久化結構）：FE-26 修改 `src/app/__tests__/naming.test.js` 導覽按鈕比對（按鈕內含 svg）；FE-30 修改 `src/app/__tests__/_fixtures.js`：`makeStore()` 預設預寫 v2 主鍵，`opts.firstRun: true` 才模擬首次（首次模式 FS-2 不寫入導致既有測試失敗）。 |
-| 0.5 | 2026-11-02 | sd-agent | 修訂已核准的 v0.4（主控代核），原因：PRD v0.9（approved，JimmyLin，2026-11-02；R-18、US-32、US-33、AC-20-04、Q-36～Q-38）與契約 v0.9（README、data-schema.ts approved，主控代核；storage-schema.json 維持 v0.8）。status 改為 `in-review`、核准欄位清空。增量內容：(1) **推翻**「不直接存取麥克風音訊」限制：允許 `getUserMedia` + `AnalyserNode` 只讀即時音量，仍禁止 `MediaRecorder`、音訊輸出、網路傳送與保存；新增 §7.14（隱私限制、收音條常數與可調範圍 DS-01、麥克風生命週期與只在單字卡頁保留 Q-36／DS-02、`services/mic.js` API、錯誤對照 DS-03、speech-panel 修改）；修訂 §7.6 STT 列與 `audio-capture` 對照、§7.11 新增 A-6（收音條非動畫、無 transition）、A-7（確認視窗無淡入）、§10 靜態檢查（AC-21-03 改為只禁 `MediaRecorder` 並限制 `getUserMedia` 位置）、§5 B-7 擋 `MediaRecorder`；(2) 新增 §7.15 切換難易度初始化（流程、視窗文字、`core/reinit.js`、原子寫入位置 DS-04）與 §4.3 store 新 API；(3) 新增 §7.16 隱藏頁（導覽 4 項、主控台入口、router 與 hashchange 守門、store `setTab` 守門、保留程式與資料 DS-05），§7.13、§9、§9.1、§4.2 同步；(4) §1、§2、§3（新檔 `core/meter.js`、`core/reinit.js`、`services/mic.js` 與 3 個新測試檔；D-8 新任務間無共用 path、D-9 不改 `src/data/`）、§4.4、§4.6、§6.2；(5) §10.2 測試範圍、中間狀態已知失敗、E2E 建議與 **V-MIC** 實機驗證（Windows 11、Chrome 與 Edge 以 `file://` 開啟）；(6) §11 新增 T-32～T-39；(7) §12.4 新任務 FE-34～FE-41 與 4 個批次；(8) §13.2 新增 20 個 AC 與修改 AC 對照（應驗收 196 個全部涵蓋）、16 個暫停 AC 的處理；(9) §14 回應 DS-01～DS-06、FB-33～FB-35；§15 新增 SD-FB-20～SD-FB-27。tasks.json 同步升為 v0.4（只新增 FE-34～FE-41，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2） |
-| 0.6 | 2026-11-02 | sd-agent | 修訂已核准的 v0.5（JimmyLin 核准），原因：PRD v0.10（approved，JimmyLin，2026-11-02；R-19「只選色級、不顯示分數」、Q-39 預設 725、Q-40 不新增鍵盤 AC、新增 AC-26-05／AC-26-06、改寫 AC-22-04 等、暫停 6 條分數輸入 AC）與契約 v0.10（三檔 approved，主控代核；§5.9 GS-1～GS-8、V-ST-16、§9.4 DS-07～DS-10、FB-36）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §7.1 新增 `scoreForCard`、移除 Q-32 邏輯、`scoreAfterColorClick` 改語意；預設分數只引用 `SCORE_DEFAULT`（725）；(2) 新增 §7.17（資料流、分數區以 `hidden`＋`inert`＋`disabled`／`tabindex=-1` 隱藏且保留程式、「套用」「開始學習」不再讀輸入框、卡片無分數範圍、狀態列與主控台無目標分數、取消初始化確認後卡片回原色級、AC-22-04 量測點改為點卡片）；(3) §1、§3（D-10）、§4.3 v0.6、§7.9 狀態機、§9 同步；(4) §10.3 測試範圍、中間狀態已知失敗、E2E 建議；(5) §11 新增 T-40～T-44；(6) §12.5 新任務 FE-42～FE-44 與 3 個批次（依序執行）；(7) §13.3 新增 2 個 AC 與改寫 AC 對照（應驗收 192 個全部涵蓋）、6 個暫停 AC 的處理；(8) §14 回應 DS-07～DS-10、FB-36；§15 新增 SD-FB-28～SD-FB-30。tasks.json 同步升為 v0.5（只新增 FE-42～FE-44，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）、不改 `src/data/` |
-| 0.7 | 2026-11-02 | sd-agent | 修訂已核准的 v0.6（JimmyLin 核准），原因：PRD v0.11（approved，JimmyLin，2026-11-02；R-20 PWA、US-34～US-37、AC-24-12、Q-41～Q-48，修改 AC-19-01、AC-21-01、AC-21-03、AC-23-02、AC-23-06）與契約 v0.11（三檔 approved，主控代核；§10 DP／MF／HD／PE／SW／UP／IN／NT／PV、V-PWA-01～12、§9.5 DS-11～DS-18、FB-37～FB-43）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §1 新增 6 列（交付形態、PWA 啟用、service worker、建置識別碼、部署、PWA 畫面）；§2 新模組層別與 PWA 流程圖；(2) §3 目錄：部署目錄 `dist/site/`（8 檔）、`dist/english-master-track.html` 保留、`sources/deploy/ads.txt`（DS-12）、`src/app/assets/icons/`（DS-14）、`src/app/pwa/sw.template.js`、`core/pwa.js`、`services/pwa.js`、`ui/pwa-notice.js`、`styles/80-pwa.css`、`tools/serve.mjs`、4 個新測試檔；D-11、D-12；(3) §4.2 v0.7 啟動順序與 `index.html`、§4.3 `setPwa`、§4.7 PWA 模組介面；(4) §5 新命令、§5.1 建置 B-10～B-16 與 B-7 逐字白名單（不放寬既有禁止規則）、`build()` 回傳與參數、可重現性檢查（現有建置無時間戳與亂數）、`serve.mjs`；§5.2 新 workflow 全文（Node 22、不執行 `npm ci`、上傳 `dist/site`）；(5) §6.3 大小與 Cache Storage 估算；(6) §7.18 PWA 設計（兩種形態、BUILD_ID、`sw` 範本、啟動與註冊、更新流程、安裝狀態機、畫面配置、隱私對照）；(7) §9 v0.7 樣式；(8) §10.4 單元測試、E2E（localhost）與人工 V-PWA-H1～H5；(9) §11 新增 T-45～T-54；(10) §12.6 新任務 FE-45～FE-53、主控項目 MC-01～MC-03 與 5 個批次；(11) §13.4 新增 29 個 AC 與修改 5 個 AC 的對照（應驗收 221 個全部涵蓋）；(12) §14 回應 DS-11～DS-18、FB-37～FB-43；§15 新增 SD-FB-31～SD-FB-38。tasks.json 同步升為 v0.6（只新增 FE-45～FE-53 與 `manualSteps`，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）、不改 `src/data/` |
-| 0.8 | 2026-11-03 | sd-agent | 修訂已核准的 v0.7（JimmyLin 核准），原因：PRD v0.12（approved，JimmyLin，2026-11-03；R-21 版面與視覺、US-38～US-41、Q-49～Q-57，新增 27 條、修改 30 條 AC）與契約 v0.12（三檔 approved，主控代核；§11 NM／VC／DB／FT／MT／V-LAY、data-schema §13、§9.6 DS-19～DS-25、FB-44～FB-49）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §1 新增 5 列；§2 `core/layout.js` 層別；§3 檔案異動表與 D-13；(2) §4.8 `core/layout.js` API、store `runtime.dashboard`／`setBackupExpanded`、`installVisible` 新條件、各 view 匯出變更；(3) §5.3 建置 B-12 改檢查 `<title>EnglishContext</title>`；§6.4 大小（約 +8 KB）；(4) 新增 §7.19：CSS token 重整（`--primary` 改深品牌色、新增 `--brand`／`--brand-deep`／`--accent`／`--tint`／`--track`／`--chart-bar`／`--line`、`--border` 用途限縮、禁止寫法掃描）、共用元件（卡片 16px 陰影無框、`.btn--accent`、全域 `tabular-nums`、焦點框）、標題列內嵌 SVG 圖示、主控台 DOM 與尺寸、首次畫面與精簡色級列與固定底部列、模擬測驗進度條、單字卡頁只換配色、名稱與來源名稱、PWA 同步、效能與無障礙評估；(5) §9 取代說明與新類名；(6) §10.5 單元與 E2E 量測分工、中間狀態已知失敗（預期無）；(7) §11 新增 T-55～T-66；(8) §12.7 新任務 CT-24、FE-54～FE-62 與 3 個批次；(9) §13.5 新增 27 個 AC 與修改 30 個 AC 對照（應驗收 248 個全部涵蓋）；(10) §14 回應 DS-19～DS-25、FB-44～FB-49；§15 新增 SD-FB-39～SD-FB-49（SD-FB-39 為 PRD 內部衝突，需人類決議）。tasks.json 同步升為 v0.7（只新增 CT-24、FE-54～FE-62，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）；`src/data/` 只改 ORIGINAL `fullName` |
-| 0.9 | 2026-11-03 | sd-agent | 修訂已核准的 v0.8（JimmyLin 核准），原因：PRD v0.13（AC-38-01 標題列圖示例外）與 v0.14（approved，JimmyLin，2026-11-03；R-22：US-42 網站版本號、US-43 隱藏領域範本、AC-01-08 狀態列只顯示生效色級、AC-39-04 目標行與「變更」按鈕、修改 13 條、暫停 AC-05-01～05、Q-58～Q-62）、契約 v0.14（三檔 approved，主控代核；§12 VR-1～VR-9、LS-1～LS-5、V-VER-01～06、V-LAY-09～10、§5.8 HT-6～HT-9、data-schema §14、§9.7 DS-26～DS-31、FB-50～FB-53）、`package.json` `version` 1.0.0（Q-62）。status 改為 `in-review`、核准欄位清空。增量內容：(1) §1 新增 4 列；§2 新模組層別 `core/version.js`（L1，建置共用）、`ui/version-line.js`（L4）；§3 檔案異動表與 D-14；(2) §4.9 模組介面（`core.version`、`ui.versionLine`、`layout.goalLineText`／`levelStatusText`、dashboard／customizer／custom-vocab 變更）；(3) §5.4 建置 B-17～B-19：佔位 `@@APP_VERSION@@`、讀 `package.json` `version` 並以 `APP_VERSION_PATTERN` 驗證、寫入後才算 BUILD_ID、產物無 `@@` 殘留、`--package` 參數、三情境；§6.5 大小（約 +3 KB）；(4) 新增 §7.20：頁尾版本行（DOM、讀取時機、異常值、對比、底部遮擋與 AC-41-04 確認不需新留白）、隱藏範本區與 DS-27 文字定案（範本單字只標「自訂擴充」）、狀態列一行、目標行與「變更」外框按鈕、效能與無障礙；(5) §10.5 註記 SD-FB-39 結案；新增 §10.6 單元／E2E 分工；(6) §11 新增 T-67～T-74；(7) §12.8 新任務 FE-63～FE-69 與 3 個批次；(8) §13.6 新增 8 個 AC、修改 13 個 AC 對照（應驗收 251 個全部涵蓋）；(9) §14 回應 DS-26～DS-31、FB-50～FB-53；§15 新增 SD-FB-50～SD-FB-56。tasks.json 同步升為 v0.8（只新增 FE-63～FE-69，既有任務不變）。不改 PRD、不改持久化結構（`schemaVersion` 維持 2）、不改 `src/data/` |
-| 0.10 | 2026-11-04 | sd-agent | 修訂已核准的 v0.9（JimmyLin 核准），原因：PRD v0.15（approved，JimmyLin，2026-11-04；R-23：US-44 單字卡記住位置、US-45 模擬測驗答對紀錄、US-46 只練沒答對的題目、US-47 保存與相容，AC-44-01～AC-47-08 共 36 條，修改 AC-18-01、AC-24-02、AC-32-02、AC-42-02，E-102～E-117，Q-63～Q-71）與契約 v0.15（三檔 approved，Q-63 持久化結構變更由人類核准；`schemaVersion` 2 → 3、C-8、MG-5～MG-8、RD-3、RD-4、FP-1～FP-9、CR-1～CR-9、UO-1～UO-9、WR-1～WR-5、IM-9、IM-10、V-P5-08、V-ST-18～V-ST-22、CI-4／CI-5／CI-8 修改、data-schema §15、§9.8 DS-32～DS-39、FB-54～FB-60）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首加註 C-8 改讀規則與 v0.10 導讀；§1 新增 5 列；§2 新模組層別 `core/position.js`、`core/part5flow.js`（皆 L1）與資料流；§3 檔案異動表、不改清單與 D-15；(2) 新增 §4.10 模組介面（position、part5flow、layout、constants、persist、backup、reinit、store 新增與修改 action、`commitWrite`、`placeCard`、part5 view）；(3) 新增 §5.5（建置不改、順序限制）、§6.6（約 +28 KB、localStorage < 3 KB）；(4) 新增 §7.21：v2 → v3 讀取與匯入流程、測試樣本來源與產生方式、既有測試 `schemaVersion` 2 位置表（DS-32）；單字卡位置掛點表、不變式 INV-FP、取代舊定位邏輯的等價性（DS-33）；模擬測驗狀態轉移表與邊界保證（DS-34）；畫面文字定稿（全部答對說明句、確認對話框標題與內文）、DOM 結構、樣式、互動與焦點（DS-35）；`commitWrite` 與容量不足提示收斂（DS-36）；V-P5-08 快照檢查（DS-37）；版本 1.1.0（DS-38）；效能與無障礙；(5) 新增 §10.7 單元／E2E／人工驗收分工；(6) §11 新增 T-75～T-86；(7) 新增 §12.9 任務 FE-70～FE-76、CT-25、MC-04 與 5 個批次；(8) 新增 §13.7 對照（應驗收 287 個 AC 全部涵蓋）；(9) §14 回應 DS-32～DS-39、FB-54～FB-60；§15 新增 SD-FB-57～SD-FB-64。tasks.json 同步升為 v0.9（只新增任務，既有任務不變）。不改 PRD、不改契約；`src/data/` 資料檔不改（CT-25 只改 `_tools/`、`_records/`） |
-| 0.11 | 2026-11-04 | sd-agent | 修訂已核准的 v0.10（JimmyLin 授權、主控代填），原因：PRD v0.16（approved，JimmyLin，2026-11-04；R-24：人類手改產物後決定併入 1.1.0——更新提示文字改為「有新版本，請更新版本」／「更新版本」、「資料來源與授權」頁新增 1 行聯絡 email；新增 AC-23-07，修改 AC-36-03、AC-42-04 文字，E-118～E-120）與契約 v0.16（三檔 approved，主控代核：`PWA_TEXTS` 新文字、`SOURCES_CONTACT_TEXT`、L-7、DS-40、FB-61、FB-62）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件與 v0.11 導讀（含舊提示文字的改讀規則）；§1 新增 3 列；§3 新增 D-16；(2) 新增 §5.6（不改建置程式、靜態檢查放測試、重新建置取代手改 `dist/`、版本 1.1.0）；(3) 新增 §7.22：提示文字修改點與不改清單、聯絡行常數位置、DOM 位置、非連結與不可聚焦、樣式與字級理由（0.8125rem，備援 0.75rem）、防爬蟲靜態規則；(4) 新增 §10.8：單元測試、建置與交付檢查、可選量測、主控檢查 H-1～H-4（使用者決定本次不跑 QA）；(5) §11 新增 T-87～T-90；(6) 新增 §12.10 任務 FE-77 與 1 個批次；(7) 新增 §13.8 對照（應驗收 288 個 AC 全部涵蓋）；(8) §14 回應 DS-40、FB-61、FB-62；§15 新增 SD-FB-65～SD-FB-67。tasks.json 同步升為 v0.10（只新增 FE-77，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3）、不改 `src/data/`、不改 `package.json` |
-| 0.12 | 2026-11-04 | sd-agent | 修訂已核准的 v0.11（JimmyLin 授權、主控代填），原因：PRD v0.17（approved，JimmyLin，2026-11-04；R-25：權利與商標文字修訂；新增 AC-23-08，修改 AC-06-01、AC-10-02、AC-23-02、AC-23-06、AC-38-08、AC-38-10，E-121～E-123，Q-72～Q-76）與契約 v0.17（`README.md`、`data-schema.ts` approved，主控代核：L-8、§7.8 V-LGL-01～06、DS-41、DS-42、FB-63、FB-64；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空，須人類核准，不代核。增量內容：(1) 文首上游、搭配文件、v0.12 導讀與舊文字改讀規則；§1 新增 3 列；§3 新增 D-17 並更新 2 個檔案註記；(2) 就地標註舊標題說明與品牌標識聲明段落（§4.7、§7.13、§7.19.6、§7.21.4、§10.1）；(3) 新增 §5.7（不改建置程式、版本 1.1.0）；(4) 新增 §7.23：畫面文字修改點、HTML 開頭註解結構、`p5-009`、375px 預期 2 行與實測方法；(5) 新增 §10.9：單元測試、`legal-static.test.js`、交付檢查、主控檢查 M-1～M-3、給 QA 的項目；(6) §11 新增 T-91～T-95；(7) 新增 §12.11 任務 CT-26、FE-78、FE-79、MC-05 與批次；(8) 新增 §13.9 對照（應驗收 289 個 AC 全部涵蓋）；(9) §14 回應 DS-41、DS-42、FB-63、FB-64；§15 新增 SD-FB-68～SD-FB-71。tasks.json 同步升為 v0.11（只新增任務，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3）、不改 `package.json`、`p5-103`、頁尾與 AC-23-07；不新增外部資源 |
-| 0.13 | 2026-11-04 | sd-agent | 修訂已核准的 v0.12（JimmyLin 授權、主控代填），原因：PRD v0.18（approved，JimmyLin，2026-11-04；R-26：模擬測驗已答對鎖定檢視、開關說明、常駐清除入口、結算 y = 0、移除「全部題目再練一次（保留紀錄）」；新增 US-48、AC-48-01～12，修改 13 條，移除 AC-46-07，E-124～E-134，Q-77～Q-80）與契約 v0.18（`README.md`、`data-schema.ts` approved，主控代核：LV-1～LV-7、SM-1～SM-3、HN-1、CR-10、UO-7、UO-8、UO-10、V-ST-23～27、DS-43～DS-46、FB-65～FB-69；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件、v0.13 導讀與改讀規則；§1 新增 4 列；§3 新增 D-18；§4.10、§7.21.3、§7.21.4 就地標註；(2) 新增 §4.11 模組介面；(3) 新增 §5.8（不改建置程式、MC-06 順序與理由）；(4) 新增 §7.24：狀態轉移與邊界驗算、DOM 與 3 種狀態對照、樣式、375px 估算、文字定稿與移除清單（全部答對說明句刪除）、實測方法；(5) 新增 §10.10：單元測試、`part5-static.test.js`、交付檢查、主控檢查、QA 範圍 Q1～Q5（AC-48-xx、R-26 修改的 AC、§10.9 與 v0.11 舊文字、版本假設、v0.17 TC）、v1.1.0 樣本；(6) §11 新增 T-96～T-103；(7) 新增 §12.12 任務 FE-80～FE-82、MC-06；(8) 新增 §13.10 對照（應驗收 300 個 AC 全部涵蓋）；(9) §14 回應 DS-43～DS-46、FB-65～FB-69；§15 新增 SD-FB-72～SD-FB-76。tasks.json 同步升為 v0.12（只新增任務，既有任務內容與 status 不變）。不改 PRD、不改契約、不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`。主控代核（2026-11-04）：人類授權「調整好後完成測試直接推上去」；已驗證 tasks.json 可解析、任務編號不重複、相依皆存在 |
-| 0.14 | 2026-11-05 | sd-agent | 修訂已核准的 v0.13（主控代核），原因：PRD v0.19（approved，JimmyLin，2026-11-05；R-27、R-28：已答對顯示、廣告框架、隱私權政策、關於我、聯絡我們、SEO、爬蟲檔；新增 US-49～US-57、AC-49-01～AC-57-06，修改 36 條 AC，E-135～E-155，Q-81～Q-93）與契約 v0.19（`README.md`、`data-schema.ts` approved，主控代核：§13、DS-47～DS-56、FB-70～FB-75；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、搭配文件、v0.14 導讀與改讀規則；§1 新增 7 列；新增 §3.1（D-19）；(2) 新增 §4.12 模組介面；(3) 新增 §5.9（B-20～B-25、DS-55 逐字放行、13 檔、MC-07 順序、workflow 風險）；(4) 新增 §7.25：已答對公式與畫面、文字定稿、廣告分工與狀態、DS-47、DS-48、測試注入與替身、路由、頁尾與應用內頁、單一文案來源、靜態頁、信箱分派、實測方法；(5) §7.21.4、§7.22.2、§7.24.3、§10.8 就地標註，**移除本文件中的舊信箱值**；(6) 新增 §10.11：單元測試、交付檢查、主控檢查、QA 範圍 Q1～Q6、舊值位置、部署後驗證 D-1～D-11；(7) §11 新增 T-104～T-114；(8) 新增 §12.13 任務 FE-83～FE-89、MC-07、MC-08；(9) 新增 §13.11 對照（應驗收 357 個 AC 全部涵蓋）；(10) §14 回應 DS-47～DS-56、FB-70～FB-75；§15 新增 SD-FB-77～SD-FB-84（SD-FB-77 須人類決定）。tasks.json 同步升為 v0.13（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/` |
-| 0.15 | 2026-11-05 | sd-agent | 修訂已核准的 v0.14（主控代核），原因：PRD v0.20（approved，JimmyLin，2026-11-05；R-29：麥克風準備中、無文字訊息分流、三種燈號顯示辨識文字、BUG-005 窄視窗鍵盤焦點；新增 US-58～US-61、AC-58-01～AC-61-02 共 31 條，修改 15 條，E-156～E-166，Q-94～Q-102）與契約 v0.20（`README.md`、`data-schema.ts` approved，主控代核：§14 PR／MS／RT／KF／V-STT、DS-57～DS-63、FB-76～FB-79、data-schema §18；`storage-schema.json` 維持 v0.16）。status 改為 `in-review`、核准欄位清空。增量內容：(1) 文首上游、v0.15 導讀與改讀規則；§1 新增 7 列；新增 §3.2（D-20）；(2) 新增 §4.13 模組介面；(3) 新增 §5.10（不改建置程式、13 檔、MC-09 順序）；(4) 新增 §7.26：時間常數定案（5000／0／1500 ms）與調整程序、服務事件與 `audiostart` 判定、嘗試代號與 `gen`／`acquiringGen` 整合、狀態機與事件處理表、`outcomeOf` 判定表、競態表、畫面與樣式、文字定稿、實測方法；(5) 新增 §7.27：`scroll-padding-bottom` 修法、與 `scroll-margin` 相加的處理、後備方案、實測方法；(6) 新增 §10.12：單元測試、既有測試修改位置、QA 項目 Q1～Q7、主控檢查 M-1～M-5；(7) §11 新增 T-115～T-124；(8) 新增 §12.14 任務 FE-90～FE-94、MC-09；(9) 新增 §13.12 對照（應驗收 388 個 AC 全部涵蓋）；(10) §14 回應 DS-57～DS-63、FB-76～FB-79；§15 新增 SD-FB-85～SD-FB-92。tasks.json 同步升為 v0.14（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`、不改建置與 `static.yml` |
-| 0.16 | 2026-11-06 | sd-agent | 修訂已核准的 v0.15（主控代核），原因：QA 開出 BUG-006（AC-52-05，廣告環境載入期 header 因 `scrollbar-gutter` 晚 1 個畫格左移 7.5 px）、BUG-007（AC-58-01，第 1 次按麥克風 110～131 ms 才畫出「準備中」，點按處理器內同步 `new AudioContext()` 約 110 ms）、BUG-008（AC-60-06，寬螢幕出現分數後頁面變可捲動，傳統捲軸使上方按鈕左移 7.5 px、768 長句下移 48 px），需由 SD 判定修法。status 改為 `in-review`、version 0.15 → 0.16、核准欄位清空。內容：(1) 文首 v0.16 上游、導讀與改讀規則；§1 新增 4 列；新增 §3.3（D-21）、§4.14、§5.11；(2) 新增 §7.28（BUG-007：方案比較 A～D，採「先畫出準備中、以 rAF + `setTimeout(0)` 延後 `mic.acquire()`，後備 50 ms，持有音軌時照舊同步」；`mic.js` 建立後與取得音軌後 `suspended` 就 `resume()`；延後期間中斷表；自動播放政策評估；實測方法）；(3) 新增 §7.29（BUG-006、BUG-008 同源：方案比較 A～E，採 `00-base.css` `html { scrollbar-gutter: stable; }` 無條件，移除 `85-ad.css` 條件規則；影響與取捨表；實測方法）；(4) 就地標註 §7.14、§7.25.3 DS-48、§7.26.9、T-108、SD-FB-80；(5) 新增 §10.13 單元測試、既有測試修改位置、QA 項目 Q8～Q12、主控檢查；(6) §11 新增 T-125～T-131；(7) 新增 §12.15 任務 FE-95～FE-97；(8) 新增 §13.13 對照（388 個應驗收 AC 全部涵蓋）；(9) §15 新增 SD-FB-93～SD-FB-97。tasks.json 同步升為 v0.15（只新增任務，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`、不改建置與 `static.yml`；版本維持 1.3.1、不新增 MC 項目 |
-| 0.17 | 2026-11-09 | sd-agent | 修訂已核准的 v0.16（主控代核），原因：PRD v0.21（R-30：US-62 聆聽中即時文字，新增 AC-62-01～AC-62-12，修改 AC-08-10、AC-30-04、AC-42-02、AC-58-07、AC-59-01、AC-59-05；R-31：商標說明拿掉「Part 5」，修改 AC-10-02、AC-54-01 與 US-56 meta description；Q-103～Q-108 皆 A）與契約 v0.21（§14.6 IT-1～IT-10、MS-1 (2b)／(4)、PR-5 (b)、V-STT-11～V-STT-17、LT-2、V-LGL-02、§9.14 DS-64～DS-71、FB-80～FB-82）皆已核准。status 改為 in-review、核准欄位清空。(1) 即時文字：§7.6 STT 列改為 `interimResults` 依是否提供 `onInterim`（回應 FB-82、DS-64）；§4.13 加註、新增 §4.15；§7.26.2 服務事件表（暫時與最終結果區分、9 欄 `snap()`、刪除 `onend` 補發）、§7.26.4 事件處理表（`onInterim`、`onEnd` 列）、§7.26.5 `outcomeOf`（步驟 2b、步驟 4 的 `lastInterimText`、`atEnd`、`interimHasText`）、§7.26.8 文字表（`labelInterim`）就地修訂；新增 §7.30（服務判定與取出規則、面板資料、DOM 與祖先檢查、顯示與隱藏路徑、樣式、以即時文字評分、實測 T1～T9），把契約 DS-65～DS-69 的試作差異落成 FE-98、FE-99。(2) R-31：新增 §7.31（5 處修改點、LT-3 與 `src/data/` 不改、檢查方式、375px 預估），§7.23.1、§7.23.4 加註。(3) 版本 1.3.2：新增 §5.12，主控 MC-10（Q-105 A）；試作 `dist/` 由 FE-101 覆蓋。(4) §1 加 5 列、§3.4 目錄增量（D-22）、§10.14 測試範圍（S1～S10、P1～P18、既有測試修改位置、QA Q13～Q20 含人工 AC-62-12、AC-62-07、主控 M-1～M-6）、§11 T-132～T-140、§12.16 批次（v0.17-1 FE-98、FE-100；v0.17-2 FE-99；v0.17-3 MC-10 → FE-101）、§13.14 AC 對照（應驗收 400 個 AC 全部涵蓋）、§14 DS-64～DS-71 與 FB-80～FB-82 回應、§15 SD-FB-98～SD-FB-104。tasks.json 同步升為 v0.16（只新增 FE-98～FE-101 與 MC-10，既有任務內容、status、retries 不變）。不改 PRD、不改契約、不改 src、不改 tests；不改持久化結構（`schemaVersion` 3、鍵數 2、備份格式）、不改 `src/data/`、不改建置與 `static.yml`；不新增 store 欄位 |
-
-> 主控代核（2026-11-05）：architecture v0.15、tasks v0.14 依已核准 PRD v0.20 與契約 v0.20；不改 PRD、不改 localStorage 持久化結構。
-
-> 主控代核（2026-11-06）：v0.16 依使用者「繼續做完」指示修正 BUG-006、BUG-007、BUG-008；不改 PRD、不改契約、不改 localStorage 持久化結構（schemaVersion 3）。
-
-> 主控代核（2026-11-09，v0.17；tasks.json v0.16）：依已核准 PRD v0.21 與契約 v0.21 修訂；不改 PRD、不改 localStorage 持久化結構（schemaVersion 3）；tasks.json 經 JSON 解析驗證。SD-FB-98、SD-FB-99 接受 SD 定案。
+| 0.18 | 2026-11-11 | 主控 | 修訂已核准的 v0.17（主控代核），原因：精簡文件。§15 回饋上游與 §16 變更紀錄的歷史內容整段搬到 `docs/archive/architecture-history.md`，條文未改；tasks.json 同步改為 v0.17（127 個已完成任務移到 `docs/archive/tasks-done.json`）。不改 PRD、不改契約、不改 localStorage 持久化結構（schemaVersion 3）。 |
+| 0.19 | 2026-11-12 | sd-agent | 依 PRD v0.23（R-32 島嶼風格第一階段，US-63～US-72，Q-109～Q-128 已決議）與契約 v0.23（§15、§11 改寫、LT-7、§12.1 1.4.0）修訂已核准的 v0.18；status 改為 in-review、核准欄位清空。新增 §3.5（D-23）、§4.16、§5.13、§7.32、§10.15、§11 T-141～T-154、§12.17、§13.15（476 個 AC、應驗收 449 個，未涵蓋 0）、§14 兩列、§15 SD-FB-105～SD-FB-109；§1 增列 7 項；開頭加 v0.19 上游與導讀。任務 FE-102～FE-112（11 個，全部 pg-frontend）、主控 MC-11（`package.json` 1.4.0），不建 CT 任務。不改建置程式、不改 localStorage 持久化結構（schemaVersion 3）。 |
+| 0.20 | 2026-11-12 | sd-agent | 主控代核：不改 PRD、不改 localStorage 持久化結構（schemaVersion 3）；原因：FE-106 實作回饋。§10.15 FE-106 列與「既有單元測試要改的地方」補 `flashcard-quiz.test.js`、`flashcards.test.js` 的 `islandFeedback: null` 形狀斷言，並補列 FE-103 已改的 `layout.test.js` `CARD_RADIUS_PX`、`build.test.js` DS-13 大小寫案例；§3.5 D-23 加 `flashcards.test.js` FE-106 → FE-109。寫入 PG 已採用的實作決定：§4.16（`fogRowOf` 的 `label: null`、`listRowOf`／`fogRowOf` 錯誤參數拋 `TypeError`、store 匯出 `islandSnapshot(content, data, t)`、啟動與匯入的 tags、島嶼模組未載入時不比較、`learnPatch`／`touchStreak` 接收 today）；§7.32.1（N_B < N_O 時依序歸類、`effectiveColor` 不認得比照綠、不變式只適用推算函式）；§7.32.7（`.btn--accent:hover` 陰影）；§7.32.9（虛擬碼與表）。tasks.json v0.19 只改 meta 與 FE-106 的 paths／description。 |
+| 0.21 | 2026-11-12 | sd-agent | 主控代核：不改 PRD、不改 localStorage 持久化結構（schemaVersion 3）；原因：FE-112 實測 AC-70-03 效能邊緣不合格與 PG 實作回饋。新增 §7.32.15 效能修正（地圖簽章相同即沿用 SVG、重播靠頁面 `hidden` 切換、清單內容相同不重建、隱藏期間閒置預先重建、`islandsOf` 單筆快取、store 啟動預熱、新芽圖示範本）；修訂 §4.16（`islandsOf` 快取、`islandMap.signature`／`setPlay`、插圖函式選用 className、store `init()` 預熱、`dashboardModel.today` 的 `valueNow`／`fillPct`、匯出 `contentSnapshot`、`idleScheduler`）、§7.32.2（重繪時機、`cursor: pointer` 只有 `.db-backup__toggle`、20 ms 為 Node 暖執行 median）、§7.32.4（構圖表同步 `LAYOUT` 實際值：金島、彩虹、第 5 段海浪、植物底部錨點與 rx ÷ 66 縮放）、§7.32.8（重播、不依賴）、§7.32.9（效能、淡入用 `--emt-dur-slide`、新芽範本、刪除背面底色與卡片陰影及測驗切換鈕外框）、§7.32.14 T6（量測次數與方法、第一次翻面、AC-64-09 間隔）、§5.13（實測增量約 90 KB）、§10.15（FE-111 列補 `@import` 與字型允許名單、FE-108 列、FE-113～FE-117 列、`dashboard.test.js` 要改的斷言、已知設計行為 (19)(20)）、§12.17（FE-113～FE-117、FE-112 依賴與重跑範圍、效能 AC 對照）、§15 SD-FB-110、SD-FB-111。tasks.json v0.20 新增 FE-113～FE-117，只改 meta 與 FE-112 的 dependsOn／description。 |
+| 0.22 | 2026-11-12 | sd-agent | 主控代核（中修）：依 CLAUDE.md「改動分級」中修授權，與契約 README／data-schema v0.24 同一輪修訂。原因：PRD v0.24（只改 5 處文字，產品行為不變）同步，並把 FE-110～FE-117 已採用的實作決定寫進正文；只改文件，不新增任務、不改程式，不改 PRD 規定以外的行為，不改 localStorage 持久化結構（schemaVersion 3）。開頭加 v0.22 上游；§4.16（`islandsOf` 快取鍵與 `Set`／非陣列每次重算並清除快取、`signature` 不含 `aria-label` 且比例用完整 `String(ratio)`、`setPlay` 參數為 `div.db-map__figure`、`init()` 讀不到紀錄時預熱自取 today、新芽範本失敗不重試）；§5.13（交付檔實測 3,588,990 bytes，比 v1.3.2 多約 105 KB）；§7.32.1（AC-69-02 改綠、D = 15）；§7.32.2（20 ms 預算以一次性腳本量測，FE-116 暖 median 0.368 ms）；§7.32.4（地圖框為白底例外）；§7.32.7（授權全文摺疊框屬卡片內子元件、字型允許名單）；§7.32.9（新芽範本）；§7.32.12（LT-4／LT-7 標點各自定稿）；§7.32.14 T6 (c)（`file://` 每次重新開頁）、T7、T12；§7.32.15（隱藏期間 `"dashboard"` tag 同步資料備份 3 個屬性）；§10.15（FE-108 列、V-ANS-02 與 DB-6 斷言列、Q21 舊 `.db-ring*` 選擇器）；§15 SD-FB-110、SD-FB-111 標為已處理。tasks.json 只改 meta.upstream。 |

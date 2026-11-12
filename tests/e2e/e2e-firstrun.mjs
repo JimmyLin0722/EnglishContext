@@ -450,7 +450,7 @@ R.na("TC-26-03", "AC-26-03", "PRD v0.10 標「v0.10 暫停（分數輸入隱藏�
       await p.ev(`window.scrollTo(0, document.documentElement.scrollHeight)`); await sleep(100); const c = await navState();
       const reach = [];
       for (const it of a.items) { await p.click(`#app-nav [data-tab="${it.tab}"]`); await sleep(80); reach.push((await p.ev(`EMT.router.current()`)) === it.tab); }
-      const good = a.position === "fixed" && a.bottom === a.vh && b.top === a.top && c.top === a.top && a.items.map((x) => x.text).join("、") === "主控台、難易度設定、單字卡、模擬測驗"
+      const good = a.position === "fixed" && a.bottom === a.vh && b.top === a.top && c.top === a.top && a.items.map((x) => x.text).join("、") === "群島、難易度設定、單字卡、模擬測驗" /* 第 13 輪：AC-27-01 v0.22 */
         && a.items.every((x) => x.icon && !x.clipped) && reach.every(Boolean) && a.toggle === "none";
       ok = ok && good;
       out.push(`${w}px：position=${a.position}、導覽 top ${a.top}/${b.top}/${c.top}（捲動前/中/底）、bottom=${a.bottom}/視窗 ${a.vh}、項目 ${a.items.map((x) => `${x.text}${x.icon ? "+圖示" : ""}${x.clipped ? "(裁切)" : ""}`).join("、")}、點擊到達 ${reach.filter(Boolean).length}/${a.items.length}、選單鈕 display=${a.toggle}`);

@@ -13,12 +13,12 @@ disable-model-invocation: true
 任一不符就停止並說明。
 
 ## 執行
-3. 用 Agent 工具呼叫子代理 `sd`（subagent_type: `sd`），提示內容包含使用者補充說明：$ARGUMENTS
+3. 用 Agent 工具呼叫子代理 `sd`（subagent_type: `sd`），提示內容包含使用者補充說明：$ARGUMENTS，以及閱讀清單（本次異動的 US／AC、契約 §、要修訂的架構 §），並寫明「清單外不用讀」
 4. 完成後用 Node 驗證 `docs/03-design/tasks.json`：
    - JSON 可解析、`meta.status` 不是 `approved`
-   - 任務 ID 唯一；`owner` 只有 `pg-content` / `pg-frontend`
+   - 任務 ID 唯一（也不可與 `docs/archive/tasks-done.json` 重複）；`owner` 只有 `pg-content` / `pg-frontend`
    - `pg-content` 的 `paths` 都在 `src/data/` 內
-   - `dependsOn` 指向存在的任務且無循環
+   - `dependsOn` 指向存在的任務（`tasks.json` 或封存檔）且無循環
    - 可平行（彼此無相依）的任務沒有共用 `paths`
    有錯就把錯誤交回 `sd` 代理修正（最多 2 次），仍失敗就回報使用者。
 

@@ -8,6 +8,7 @@
  * （v0.18，FE-80；architecture.md v0.13 §7.24.1、§10.10）LV-1～LV-7、UO-8、UO-10、CR-6、CR-10；
  *       AC-48-02、AC-48-05、AC-48-08、AC-48-09、AC-48-10、AC-48-11；V-ST-23、V-ST-24、V-ST-26
  * （v0.19，FE-84；architecture.md v0.14 §7.25.1、§10.11）V-ANS-02、V-ANS-03；AC-49-04～AC-49-06
+ * （v0.23，FE-106）runtime.flashcard 形狀加 islandFeedback（重新載入、匯入為 null）；學完回饋完整案例見 store-island.test.js
  *
  * 做法：
  * - 以注入的假 storage（計數 setItem、可設定 quota／一般例外／停用）與假 content（21 個內建字、6 題模擬測驗）測試 createStore。
@@ -251,6 +252,8 @@ test("AC-44-01、AC-44-09：測驗模式翻到第 8 張後重新載入 → 同�
   assert.equal(fc.mode, "card");
   assert.equal(fc.isFlipped, false);
   assert.equal(fc.quiz, null);
+  // （v0.23，FE-106）runtime.flashcard 5 欄；重新載入時學完回饋為 null（LF-3）
+  assert.deepEqual(fc, { index: 8, isFlipped: false, mode: "card", quiz: null, islandFeedback: null });
   // 單字卡模式翻面後重新載入 → 正面
   again.a.flipCard();
   const third = makeStore({ storage });
@@ -469,6 +472,9 @@ test("FP-6：匯入 → 步驟 9 依備份位置定位（單字卡模式、正�
   assert.equal(fc.index, 9);
   assert.equal(fc.mode, "card");
   assert.equal(fc.isFlipped, false);
+  // （v0.23，FE-106）runtime.flashcard 5 欄；匯入重設單字卡狀態時學完回饋為 null（LF-3）
+  assert.deepEqual(Object.keys(fc).sort(), ["index", "isFlipped", "islandFeedback", "mode", "quiz"]);
+  assert.equal(fc.islandFeedback, null);
 
   // 備份位置的字不在匯入後的單字集（棕：12 張）→ min(10, 12) − 1 = 9；ordinal 超過 N → 最後一張
   const obj = JSON.parse(json);

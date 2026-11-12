@@ -18,7 +18,7 @@ const pwa = require("../core/pwa.js");
 const EXPECTED = {
   PWA_APP_NAME: "EnglishContext",
   PWA_THEME_COLOR: "#1e9bf0",
-  PWA_BACKGROUND_COLOR: "#eef4fa",
+  PWA_BACKGROUND_COLOR: "#eaf7fb",
   PWA_MANIFEST: {
     name: "EnglishContext",
     short_name: "EnglishContext",
@@ -28,7 +28,7 @@ const EXPECTED = {
     display: "standalone",
     lang: "zh-Hant-TW",
     theme_color: "#1e9bf0",
-    background_color: "#eef4fa",
+    background_color: "#eaf7fb",
     icons: [
       { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },

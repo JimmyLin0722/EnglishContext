@@ -39,7 +39,7 @@ const EXPECTED = {
     accent: "#f7893b",
     accentText: "#1f2937",
     themeColor: "#1e9bf0",
-    background: "#eef4fa",
+    background: "#eaf7fb",
     surface: "#ffffff",
     text: "#1f2937",
     textMuted: "#5b6472",
@@ -62,7 +62,7 @@ const EXPECTED = {
     goalReached: "#c9a227",
   },
   LAYOUT_TEXTS: {
-    dashboardTitle: "學習主控台",
+    dashboardTitle: "我的群島",
     todayRing: "今日已學 {x} / {d} 字",
     startToday: "開始今日學習",
     goalLineSame: "{color}級・每日 {daily} 字",
@@ -138,7 +138,7 @@ describe("契約常數（data-schema.ts §13）", () => {
   test("UI_LAYOUT 12 個值（architecture.md §4.8）", () => {
     assert.deepStrictEqual({ ...layout.UI_LAYOUT }, {
       CONTENT_NARROW_PX: 720,
-      CARD_RADIUS_PX: 16,
+      CARD_RADIUS_PX: 22,
       NARROW_MAX_PX: 640,
       FIRSTBAR_RESERVE_PX: 184,
       CHART_TRACK_PX: 64,

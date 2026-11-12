@@ -1,17 +1,19 @@
 /**
  * ---
  * doc: CONTRACT-SCHEMA
- * version: 0.21
+ * version: 0.24
  * status: approved
  * author: sa-agent
  * approved_by: JimmyLin（授權主控代核）
- * approved_at: 2026-11-09
+ * approved_at: 2026-11-12
  * ---
  *
  * English Master Track — 資料契約（型別定義）
  *（專案代號仍為 English Master Track；v0.12 起 App 內顯示名稱為「EnglishContext」，見 §13 APP_DISPLAY_NAME 與 FROZEN_IDENTIFIERS。）
  *
- * 上游：docs/01-PRD.md v0.21（approved，JimmyLin，2026-11-09；Q-103～Q-108 全部決議 A），以第 6 章「人類決議」與 R-15～R-31 為準。
+ * 上游：docs/01-PRD.md v0.24（approved，JimmyLin，2026-11-12；Q-109～Q-128 全採 PM 建議：Q-111 為 C、其餘 A），以第 6 章「人類決議」與 R-15～R-32 為準。
+ * 島嶼風格第一階段（R-32）見 §19 與 README §15；**不改持久化結構**（schemaVersion 3，PersistedData 12 欄、StorageRecord、BackupFile、
+ *   localStorage 鍵數 2 皆不變，Q-110 A）。各版修訂見下方變更紀錄。
  * v0.21（PRD R-30：US-62 聆聽中即時顯示引擎聽到的文字，Q-103～Q-107；R-31：商標說明拿掉「Part 5」，Q-108）
  *   **不改持久化結構**（schemaVersion 維持 3，PersistedData 12 欄、StorageRecord、BackupFile 不變，localStorage 鍵數 2，不需遷移，Q-106 A）：
  *   §18 新增 interface SttStartOptions（語音辨識服務 start() 選項，含新增的 onInterim）；SttEngineEventKind 新增 "interim"；
@@ -68,7 +70,7 @@
  * 本檔是「規格」不是實作：
  * - pg-content 依 §2～§7 產出 src/data/ 的資料檔；pg-frontend 依 §1、§8～§15 實作 src/app/（v0.11 §12 PWA 含建置輸出；v0.12 §13 版面與視覺；
  *   v0.14 §14 版本號；v0.15 §15 模擬測驗答對紀錄；v0.16 §16 聯絡資訊；v0.19 §17 已答對顯示、廣告、對外頁面與 SEO；
- *   v0.20 §18 語音辨識準備中、訊息分流與辨識文字；v0.21 §18 加入聆聽中即時文字）。
+ *   v0.20 §18 語音辨識準備中、訊息分流與辨識文字；v0.21 §18 加入聆聽中即時文字；§19 島嶼風格第一階段）。
  * - 兩方都不得自創欄位；欄位變更必須先改本契約（版本遞增）。
  * - 下方的 export const 是契約常數（值本身就是規格），pg-frontend 實作時須使用相同數值。
  *
@@ -239,6 +241,20 @@
  * |      |            |          |     SITE_NOSCRIPT.description 改值；§5 標題、PART5_QUESTION_BANK、TAB_LABELS 註解同步。LEGAL_STATEMENTS（LT-3 的「Part 5 題目」）不改（Q-108 A）。
  * |      |            |          | 型別數 87 → 88（interface 43、type 45）；契約常數 63 不變（STT_FLOW_TEXTS 新增 1 鍵；4 個常數改值）；
  * |      |            |          | localStorage 鍵數 2 不變；schemaVersion 維持 3，備份格式不變，不需遷移；內容資料檔格式與值不變（pg-content 無工作）。 |
+ * | 0.23 | 2026-11-11 | sa-agent | 修訂已核准的 v0.21／README v0.22，原因：PRD v0.22 R-32 島嶼風格第一階段（US-63～US-72；JimmyLin 2026-11-11 核准，
+ * |      |            |          | Q-109～Q-128 全採 PM 建議）。status 改為 in-review、核准欄位清空，三檔同步升為 0.23。
+ * |      |            |          | (1) 新增 §19：type IslandStage、WeatherKind、LighthouseKind、BoatStatus、IslandFeedbackKind；interface IslandStageDefinition、
+ * |      |            |          |     IslandProgress、IslandState、IslandFeedback；常數 ISLAND_STAGES、ISLAND_THRESHOLDS、ISLAND_LIST_ORDER、ISLAND_TEXTS、
+ * |      |            |          |     ISLAND_STYLE_TOKENS。全部為執行期推算或常數，不持久化。
+ * |      |            |          | (2) RuntimeState.flashcard 新增 islandFeedback（單字卡學完回饋，只在記憶體）。
+ * |      |            |          | (3) 改值：TAB_LABELS.dashboard「主控台」→「群島」；LAYOUT_TEXTS.dashboardTitle「學習主控台」→「我的群島」；
+ * |      |            |          |     COLOR_TOKENS.background、PWA_BACKGROUND_COLOR、PWA_MANIFEST.background_color #eef4fa → #eaf7fb（AC-68-01）。
+ * |      |            |          | (4) 註解：StreakState 顯示規則（PRD 名詞 S 確認，FB-09 結案）、COLOR_TOKENS（brand 用途、text 建議值）、SEMANTIC_COLORS.goalReached、
+ * |      |            |          |     LAYOUT_TEXTS.todayRing（今日進度條）。
+ * |      |            |          | 型別數 88 → 97（interface 47、type 50）；契約常數 63 → 68；localStorage 鍵數 2 不變；schemaVersion 維持 3，
+ * |      |            |          | 備份格式不變，不需遷移；內容資料檔格式與值不變（pg-content 無工作）。 |
+ * | 0.24 | 2026-11-12 | sd-agent | 主控代核（中修）：依 PRD v0.24 同步 README v0.24；只改開頭上游與 COLOR_TOKENS.surface 註解（群島地圖框為白底例外，AC-68-02）。
+ * |      |            |          | 型別數、契約常數與值皆不變；localStorage 持久化結構不變（schemaVersion 3），storage-schema.json 不改。 |
  */
 
 // ════════════════════════════════════════════════════════════════════
@@ -1012,7 +1028,8 @@ export interface Part5Progress {
  *   註：打卡的學習行為與 US-30「學過一個字」（LearningEventKind）不同：模擬測驗作答會打卡，但不計入今日已學數（AC-30-04）。
  *   lastActiveDate 為 null → days = 1；today = last → 不變；today = last + 1 天 → days + 1；
  *   today ≥ last + 2 天 → days = 1；today < last（時鐘調回）→ 不變（AC-17-05）。以上皆把 lastActiveDate 設為 max(last, today)。
- * 顯示規則：today ≥ last + 2 天（已中斷、尚未學習）時顯示 0；其餘顯示 days（見 README FB-09）。
+ * 顯示規則：today ≥ last + 2 天（已中斷、尚未學習）時顯示 0；lastActiveDate 為 null 時顯示 0（= days 預設值）；其餘顯示 days。
+ *   此顯示值即 PRD v0.22 名詞「S」（FB-09 結案）：3 格「連續打卡天數」與群島地圖天氣（§19 WeatherKind、README IS-11）使用同一個值。
  * 預設：{ days: 0, lastActiveDate: null }。
  */
 export interface StreakState {
@@ -1269,12 +1286,13 @@ export type TabId = "dashboard" | "customizer" | "flashcards" | "part5" | "decod
  * 導覽、頁面標題一律使用此文字。
  * （v0.17，R-25 一）模擬測驗頁必須顯示標題說明（AC-10-02、README LT-2）。（v0.21，R-31，Q-108 A）逐字為
  *   「題型參考 TOEIC®（多益），非 ETS 官方或認可內容」，說明中不得出現「Part 5」（v0.17～v0.20 為「…（多益）Part 5，非 ETS…」）。
- * （v0.12，Q-50 決議 A）主控台不再有模組入口；主控台頁面標題為 LAYOUT_TEXTS.dashboardTitle「學習主控台」（AC-39-01），
- *   導覽項文字仍為 dashboard「主控台」。
+ * dashboard 的畫面名稱為「群島」（PRD R-32、Q-114 A：導覽第 1 項只改名、順序不變）；頁面標題為 LAYOUT_TEXTS.dashboardTitle「我的群島」
+ *   （AC-63-01）。畫面文字、aria-label、title 不得出現「主控台」「學習主控台」（AC-63-02）；識別字 "dashboard" 不改（README IA-1）。
+ *   群島頁沒有模組入口（Q-50 決議 A）。
  * （v0.9）decoder、phrasebank 的文字保留供未來開放使用；本版畫面任何導覽、入口、標題都不得顯示這兩項（AC-20-04、HT-4）。
  */
 export const TAB_LABELS: Readonly<Record<TabId, string>> = {
-  dashboard: "主控台",
+  dashboard: "群島",
   customizer: "難易度設定",
   flashcards: "單字卡",
   part5: "模擬測驗",
@@ -1440,6 +1458,14 @@ export interface RuntimeState {
     mode: "card" | "quiz";
     /** 測驗模式下的目前題目；非測驗模式為 null。 */
     quiz: VocabQuizQuestion | null;
+    /**
+     * 單字卡學完回饋列目前顯示的回饋（PRD US-69、Q-120 A；README §15.5 LF-1～LF-6）。必填，可為 null。
+     * - 頁面載入時 null；null 時不渲染回饋列（不顯示空白框，AC-69-05）。
+     * - 學習行為發生時依 LF-2 比較前後 IslandState：得到回饋 → 以新值取代；得到 null → 維持原值（AC-69-04 (c)）。
+     * - 換卡、切換 mode 時保留；currentTab 由 "flashcards" 改為其他值時設為 null（AC-69-05）。
+     * 只在記憶體：不寫入 PersistedData、localStorage、備份檔或任何儲存（AC-69-06、AC-72-02）。
+     */
+    islandFeedback: IslandFeedback | null;
   };
   /** 語音。 */
   speech: {
@@ -1574,11 +1600,11 @@ export const PWA_THEME_COLOR = "#1e9bf0";
 
 /**
  * manifest background_color。必須等於首次畫面 body 計算後的背景色（AC-34-04、AC-38-02），
- * （v0.12）= COLOR_TOKENS.background #eef4fa（rgb(238, 244, 250)；原 #f6f7f9）。
- * 若 SD 在 PRD 條件內改用其他背景值，本常數、PWA_MANIFEST.background_color 與 COLOR_TOKENS.background 須同時修訂（README DS-13、VC-5）。
- * 格式 #RRGGBB（小寫 hex）。對應：AC-34-01、AC-34-02（Android 啟動畫面背景）、AC-34-04、AC-38-02。
+ * = COLOR_TOKENS.background #eaf7fb（rgb(234, 247, 251)；島嶼外觀背景，PRD US-68）。
+ * 若 SD 在 PRD 條件內改用其他背景值，本常數、PWA_MANIFEST.background_color 與 COLOR_TOKENS.background 須同時修訂（README VC-5、IV-1）。
+ * 格式 #RRGGBB（小寫 hex）。對應：AC-34-01、AC-34-02（Android 啟動畫面背景）、AC-34-04、AC-38-02、AC-68-01。
  */
-export const PWA_BACKGROUND_COLOR = "#eef4fa";
+export const PWA_BACKGROUND_COLOR = "#eaf7fb";
 
 /**
  * 圖示用途。"any" = 一般圖示（滿版不透明正方形）；"maskable" = 可套遮罩圖示。AC-34-01、AC-34-03。
@@ -1641,7 +1667,7 @@ export const PWA_MANIFEST: PwaManifest = {
   display: "standalone",
   lang: "zh-Hant-TW",
   theme_color: "#1e9bf0",
-  background_color: "#eef4fa",
+  background_color: "#eaf7fb",
   icons: [
     { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
     { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
@@ -1878,12 +1904,13 @@ export const FROZEN_IDENTIFIERS = {
  * - 「固定」值（brand、accent、themeColor、surface）不得更動。
  * - 「建議」值（brandDeep、accentText、background）為 PRD 建議值；SD 可在 PRD 條件內改用其他值並記入 architecture.md，
  *   但 background 與 PWA_BACKGROUND_COLOR、PWA_MANIFEST.background_color 綁定，改動時三者須同時修訂（契約小修，README VC-5）。
- * - text／textMuted 沿用 v0.11。
+ * - text／textMuted 為建議值（沿用 v0.11）；SD 可改用 PRD US-68 token 表的 #2f2a3d／#5a5470，仍須符合 README VC-7。
+ * - 島嶼外觀另見 §19 ISLAND_STYLE_TOKENS（外框色、海面、對話框底色、霧中島列底色）。
  * 用途限制（README §11.2 VC-1～VC-8）：brand 與 accent 不得作為任何文字的 color，也不得作為白字元素的背景（AC-38-01、AC-38-04）。
- * 對應：AC-38-01、AC-38-02、AC-38-04、AC-38-06、AC-34-04、Q-53、Q-54。
+ * 對應：AC-38-01、AC-38-02、AC-38-04、AC-34-04、AC-68-01、AC-68-05、Q-53、Q-54、Q-123。
  */
 export const COLOR_TOKENS = {
-  /** 品牌主色（固定，取自圖示）。只用於非文字品牌元素：主環形圖未達成時的進度色、模擬測驗進度條填色、選中導覽項的指示、標題列圖示。白字對比約 3.0:1。 */
+  /** 品牌主色（固定，取自圖示）。只用於非文字品牌元素：今日進度條未達成時的填色（AC-66-03）、模擬測驗進度條填色、選中導覽項的指示、標題列圖示。白字對比約 3.0:1。 */
   brand: "#1e9bf0",
   /** 深品牌色（建議值；條件：與 brand 色相差 ≤ 10°、白字對比 ≥ 4.5:1；建議值約 6.0:1）。白字主要按鈕底色（「套用」「匯出備份」等）、品牌色文字與連結。 */
   brandDeep: "#0866ad",
@@ -1893,13 +1920,16 @@ export const COLOR_TOKENS = {
   accentText: "#1f2937",
   /** manifest theme_color 與 <meta name="theme-color">（固定，Q-54 決議 A）= brand。 */
   themeColor: "#1e9bf0",
-  /** body 背景（建議值，淡藍灰；條件：HSL 色相 190°～220°、飽和度 ≥ 15%、亮度 94%～98%；建議值約 210°、55%、96%）。= PWA_BACKGROUND_COLOR。 */
-  background: "#eef4fa",
-  /** 區塊卡片底色（固定）。 */
+  /**
+   * 全站 body 背景（建議值，島嶼淡藍；條件：HSL 色相 190°～220°、飽和度 ≥ 15%、亮度 94%～98%；本值約 194°、68%、95%）。
+   * = PWA_BACKGROUND_COLOR = PWA_MANIFEST.background_color（AC-34-04、AC-68-01；README VC-5）。text、textMuted 對本值皆 ≥ 4.5:1（約 13.4:1、5.5:1）。
+   */
+  background: "#eaf7fb",
+  /** 區塊卡片底色（固定）。例外：霧中島列（§19 ISLAND_STYLE_TOKENS.fogRowBg，AC-65-01）；群島地圖框底色為 ISLAND_STYLE_TOKENS.sea，外框、圓角、陰影仍依 README VC-4（AC-68-02）。 */
   surface: "#ffffff",
   /** 內文（沿用 v0.11）。對 background 與 surface 皆 ≥ 4.5:1。 */
   text: "#1f2937",
-  /** 次要文字、說明（沿用 v0.11）。對 background 與 surface 皆 ≥ 4.5:1（對 #eef4fa 約 5.4:1）。 */
+  /** 次要文字、說明（建議值，沿用 v0.11）。對 background 與 surface 皆 ≥ 4.5:1（對 #eaf7fb 約 5.5:1）。 */
   textMuted: "#5b6472",
 } as const;
 
@@ -1927,7 +1957,7 @@ export const SEMANTIC_COLORS = {
     yellow: "#ca8a04",
     red: "#dc2626",
   },
-  /** 今日目標達成時主環形圖的金色（AC-30-05）。 */
+  /** 今日目標達成時今日進度條的填色（AC-30-05、AC-66-03）。 */
   goalReached: "#c9a227",
 } as const;
 
@@ -1942,10 +1972,16 @@ export const SEMANTIC_COLORS = {
  * （v0.14）自訂清單空狀態、單字卡空狀態的文字 PRD 未給原文，**不列為契約常數**，由 SD 定案（README HT-7、DS-27）。
  */
 export const LAYOUT_TEXTS = {
-  // ── 主控台（US-39）──
-  /** 主控台頁面標題（AC-39-01：今日任務卡之前只允許此標題）。 */
-  dashboardTitle: "學習主控台",
-  /** 今日任務卡主環形圖文字（沿用 v0.8 US-30 格式；AC-39-02）。 */
+  // ── 群島頁（原主控台，US-39、US-63、US-66）──
+  /**
+   * 群島頁頁面標題（h2；AC-39-01、AC-63-01：今日任務卡之前只允許頁面標題列）。鍵名沿用 dashboardTitle（識別字不改）。
+   * 畫面不得再出現「學習主控台」（AC-63-02）。
+   */
+  dashboardTitle: "我的群島",
+  /**
+   * 今日任務卡今日進度列文字（US-30 格式；AC-39-02、AC-66-03）。鍵名沿用 todayRing，現為橫向今日進度條的文字與 aria-valuetext；
+   * X、D 不封頂（例「今日已學 12 / 10 字」），數字 tabular-nums。進度條規則見 README IS-15。
+   */
   todayRing: "今日已學 {x} / {d} 字",
   /** 今日任務卡主按鈕（AC-39-02、AC-39-03）。強調橘底配 accentText 深色字。裝飾用箭頭等圖示若有，須 aria-hidden，不算入本文字。 */
   startToday: "開始今日學習",
@@ -2744,6 +2780,296 @@ export const STT_RESULT_ROWS: Readonly<Record<SttLight, readonly SttResultRowKin
   red: ["recognized", "target"],
 } as const;
 
+// ════════════════════════════════════════════════════════════════════
+// §19 島嶼風格第一階段（PRD R-32、US-63～US-72、Q-109～Q-128）
+//     提供者：契約常數 → pg-frontend（推算函式、群島頁、單字卡回饋列、CSS token）。pg-content 無工作（島嶼由既有字庫排名推算）。
+//     使用者：pg-frontend、QA（README §15.8 V-ISL）
+//     本節全部「不持久化」：型別皆為執行期推算結果，不得寫入 PersistedData、localStorage、IndexedDB、Cache Storage、備份檔；
+//     不新增 localStorage 鍵或欄位，schemaVersion 維持 3，備份格式不變（Q-110 A，README IS-1）；不新增 window 全域變數。
+//     推算的輸入只能是既有持久化欄位與既有衍生值（README §15.2）；推算函式名稱與所在模組由 SD 定。
+//     插圖構圖、地圖座標與比例（354：430）、動畫、斷點與尺寸屬設計層（SD）。
+// ════════════════════════════════════════════════════════════════════
+
+/**
+ * 島嶼階段（執行期推導，不持久化）。依顯示的整數 P 判定（PRD「島嶼階段」表、Q-118 A；README IS-8）：
+ * - "sand"：P = 0，或 P 為 null（區段字數 n = 0，畫面顯示「—」）
+ * - "sprout"：P 1～24（新芽）
+ * - "palm"：P 25～49（一棵椰子樹）
+ * - "bloom"：P 50～74（開花）
+ * - "hut"：P 75～99（小屋）
+ * - "complete"：P = 100（完成）
+ * 成長順序 = ISLAND_STAGES 的索引；學完回饋以索引比較是否升階（README LF-2）。
+ * 對應：AC-64-02、AC-65-01、AC-69-02、AC-71-01。
+ */
+export type IslandStage = "sand" | "sprout" | "palm" | "bloom" | "hut" | "complete";
+
+/**
+ * 島嶼階段定義（契約常數 ISLAND_STAGES 的一列）。對應：AC-64-02、AC-65-01、AC-69-02、AC-71-01、Q-118。
+ */
+export interface IslandStageDefinition {
+  /** 必填。階段代碼。 */
+  stage: IslandStage;
+  /** 必填。此階段的 P 下限（含），整數 0～100。 */
+  minP: number;
+  /** 必填。此階段的 P 上限（含），整數 0～100，≥ minP。 */
+  maxP: number;
+  /** 必填。階段名（地圖文字替代的 {stage}，AC-71-01）。例「一棵椰子樹」。 */
+  nameZh: string;
+  /** 必填。島嶼清單的階段文字（AC-65-01）。例「長出第一棵椰子樹」。 */
+  listText: string;
+  /**
+   * 必填，可為 null。升到此階段時的學完回饋格式字串（AC-69-02），{island} = 島名（ISLAND_TEXTS.islandName）。
+   * "sand" 不會是升階目標，為 null。例「{island}長出第一棵椰子樹！」。
+   */
+  levelUpText: string | null;
+  /** 必填。地圖上的新芽數（整數 ≥ 0）。各數量為「恰為」，QA 以元素計數驗收（AC-64-02）。 */
+  sprouts: number;
+  /** 必填。椰子樹數。 */
+  palms: number;
+  /** 必填。花朵數。 */
+  flowers: number;
+  /** 必填。小屋數。 */
+  huts: number;
+  /** 必填。旗子數。 */
+  flags: number;
+}
+
+/**
+ * 島嶼階段表（契約常數，逐字與逐數使用；PRD「島嶼階段」表、Q-118 A）。順序即成長順序；各列 [minP, maxP] 首尾相接涵蓋 0～100。
+ * 查表：P 為 null → "sand"；否則取 minP ≤ P ≤ maxP 的那一列。對應：AC-64-02、AC-65-01、AC-69-02、AC-71-01。
+ */
+export const ISLAND_STAGES: readonly IslandStageDefinition[] = [
+  { stage: "sand", minP: 0, maxP: 0, nameZh: "沙灘", listText: "還是一片沙灘，掌握第一個字就會冒芽", levelUpText: null, sprouts: 0, palms: 0, flowers: 0, huts: 0, flags: 0 },
+  { stage: "sprout", minP: 1, maxP: 24, nameZh: "新芽", listText: "冒出新芽了", levelUpText: "{island}冒出新芽了！", sprouts: 1, palms: 0, flowers: 0, huts: 0, flags: 0 },
+  { stage: "palm", minP: 25, maxP: 49, nameZh: "一棵椰子樹", listText: "長出第一棵椰子樹", levelUpText: "{island}長出第一棵椰子樹！", sprouts: 0, palms: 1, flowers: 0, huts: 0, flags: 0 },
+  { stage: "bloom", minP: 50, maxP: 74, nameZh: "開花", listText: "樹林開花了", levelUpText: "{island}的樹林開花了！", sprouts: 0, palms: 2, flowers: 2, huts: 0, flags: 0 },
+  { stage: "hut", minP: 75, maxP: 99, nameZh: "小屋", listText: "蓋好小屋，快完成了", levelUpText: "{island}蓋好小屋了！", sprouts: 0, palms: 2, flowers: 2, huts: 1, flags: 0 },
+  { stage: "complete", minP: 100, maxP: 100, nameZh: "完成", listText: "插上旗子，這座島完成了", levelUpText: "{island}插上旗子，這座島完成了！", sprouts: 0, palms: 3, flowers: 2, huts: 1, flags: 1 },
+];
+
+/**
+ * 一座開放島的推算結果（執行期，不持久化；README IS-5～IS-9）。對應：AC-64-02～AC-64-04、AC-65-01～AC-65-03、Q-109。
+ * 例（AC-64-03）：{ island: "brown", n: 1809, m: 10, p: 1, stage: "sprout", outOfGoal: false }。
+ */
+export interface IslandProgress {
+  /** 必填。島嶼 = 色級代碼（只有 3 座開放島；藍、金固定霧中，不在此型別）。 */
+  island: OpenColorLevel;
+  /**
+   * 必填。區段字數，整數 ≥ 0 = 內建字庫中 rank 落在該島區段的筆數（以實際資料計數，README IS-5）。
+   * 區段：orange 1～N_O；brown N_O+1～N_B；green N_B+1～N_G。目前資料為 1000、1809、2811。
+   */
+  n: number;
+  /**
+   * 必填。島嶼已掌握數，整數 0～n = 該區段內建單字中 wordKey ∈ masteredWordKeys 的筆數（README IS-6）。
+   * 不看目前單字集、不受生效色級影響；不屬內建字庫的 wordKey 不計入。
+   */
+  m: number;
+  /**
+   * 必填，可為 null。島嶼掌握率整數 0～100（README IS-7）：n = 0 → null（畫面「—」）；m = 0 → 0；m = n → 100；
+   * 其餘 Math.min(Math.max(Math.floor((200 * m + n) / (2 * n)), 1), 99)。不得用 m / n * 100 再四捨五入。
+   */
+  p: number | null;
+  /** 必填。依 p 查 ISLAND_STAGES（p 為 null → "sand"）。 */
+  stage: IslandStage;
+  /**
+   * 必填。是否不在目前生效色級範圍內：ISLAND_LIST_ORDER 中本島索引 > goal.effectiveColor 的索引（README IS-9）。
+   * true 時島嶼清單階段文字後接 ISLAND_TEXTS.listOutOfGoalSuffix；地圖與文字替代不受影響（AC-64-04）。
+   */
+  outOfGoal: boolean;
+}
+
+/**
+ * 天氣（執行期推導，不持久化；README IS-11）。S = 連續打卡顯示值（StreakState 顯示規則）。
+ * - "cloudy"：S = 0「陰天」（太陽淡化、計算後 opacity ≤ 0.4、有雲、無彩虹）
+ * - "sunny"：1 ≤ S ≤ 6「晴天」
+ * - "rainbow"：S ≥ 7「出現彩虹」
+ * 對應：AC-64-06、AC-67-01、AC-71-01、E-183、E-184。
+ */
+export type WeatherKind = "cloudy" | "sunny" | "rainbow";
+
+/**
+ * 測驗燈塔（執行期推導，不持久化；README IS-12）。K = 已答對題數（README AS-1，Q = 0 時 K = 0）。
+ * - "unbuilt"：K = 0「燈塔待建」（只有石塊與「待建」牌，無塔）
+ * - "built"：1 ≤ K ≤ 49「燈塔蓋好」（有塔、無光束）
+ * - "lit"：K ≥ 50「燈塔點亮」（塔與光束）
+ * 門檻為固定題數，不隨 Q 縮放（E-188）。對應：AC-64-05、AC-67-01、AC-71-01、E-187。
+ */
+export type LighthouseKind = "unbuilt" | "built" | "lit";
+
+/**
+ * 小船狀態（執行期推導，不持久化；README IS-13）。r = min(X ÷ D, 1)。
+ * - "sailing"：r < 1「航行中」（位於起點到碼頭航線上比例 r 處）
+ * - "docked"：r = 1「已靠岸」（停在碼頭；X > D 時位置與 X = D 相同）
+ * 對應：AC-64-07、AC-66-02、AC-71-01、E-182。
+ */
+export type BoatStatus = "sailing" | "docked";
+
+/**
+ * 群島頁一次繪製所需的全部推算值（執行期，不持久化；README §15.2、IS-3）。
+ * 每次進入群島頁以當下記憶體資料與 today 推算一次；地圖、島嶼清單、3 格狀態行、龜龜對話框、今日進度列、
+ * 地圖文字替代都取自同一個值。不得存入 AppState、localStorage 或備份檔；不得跨資料變更沿用。
+ * 任何欄位都不得為 NaN、Infinity、undefined 或負數。
+ * 對應：FR-6.1、US-64～US-67、US-71、AC-64-01～AC-64-09、AC-65-03、AC-66-02、AC-66-03、AC-67-01、AC-67-02、AC-71-01、AC-72-02。
+ */
+export interface IslandState {
+  /** 必填。恰 3 筆，順序固定：orange、brown、green（= ISLAND_LIST_ORDER 前 3 項）。 */
+  islands: readonly [IslandProgress, IslandProgress, IslandProgress];
+  /** 必填。連續打卡顯示值 S，整數 ≥ 0（與 3 格「連續打卡天數」同值）。 */
+  streakDays: number;
+  /** 必填。依 streakDays 與 ISLAND_THRESHOLDS 推導。 */
+  weather: WeatherKind;
+  /** 必填。已答對題數 K，整數 0～q（README AS-1；與 3 格「已答對 K / Q 題」的 K 同值，AC-64-05）。 */
+  k: number;
+  /** 必填。題庫題數 Q，整數 ≥ 0；0 時 k 必為 0。 */
+  q: number;
+  /** 必填。依 k 與 ISLAND_THRESHOLDS 推導。 */
+  lighthouse: LighthouseKind;
+  /** 必填。今日已學數 X，整數 ≥ 0（README LR-6，不封頂）。 */
+  x: number;
+  /** 必填。每日新字量 D，整數 ≥ 1（goal.effectiveColor 的 dailyNewWords）。 */
+  d: number;
+  /** 必填。小船進度 r = Math.min(x / d, 1)，0～1；也是今日進度條的填滿比例（README IS-13、IS-15）。 */
+  boatRatio: number;
+  /** 必填。boatRatio = 1 → "docked"，否則 "sailing"。 */
+  boat: BoatStatus;
+  /** 必填。還差幾個字靠岸 = Math.max(d − x, 0)；龜龜對話框 {n}（README IS-14）。 */
+  remaining: number;
+}
+
+/**
+ * 學完回饋的種類（優先序由高到低；README LF-2、Q-120 A）。
+ * - "levelUp"：某座開放島的階段索引上升 → 該階段 ISLAND_STAGES[].levelUpText
+ * - "docked"：今日已學由 < D 變為 ≥ D → ISLAND_TEXTS.feedbackDocked
+ * - "mastered"：某座開放島的 m 增加但未升階 → ISLAND_TEXTS.feedbackMastered
+ * - "sailing"：今日已學增加且仍 < D → ISLAND_TEXTS.feedbackSailing
+ * 對應：AC-69-02～AC-69-04。
+ */
+export type IslandFeedbackKind = "levelUp" | "docked" | "mastered" | "sailing";
+
+/**
+ * 單字卡學完回饋（執行期，不持久化；RuntimeState.flashcard.islandFeedback，README LF-1～LF-6）。
+ * 由「學習行為發生前」與「套用該行為全部資料變更後」的兩個 IslandState 比較產生；不改變任何學習數值（AC-69-06）。
+ * 例：{ kind: "mastered", island: "orange", text: "橘島又多掌握 1 個字（掌握 24%）" }。
+ * 對應：FR-2.1、FR-2.3、FR-2.4、US-69、AC-69-02～AC-69-06。
+ */
+export interface IslandFeedback {
+  /** 必填。回饋種類。 */
+  kind: IslandFeedbackKind;
+  /** 必填，可為 null。"levelUp"、"mastered" 時為該島；"docked"、"sailing" 時為 null。 */
+  island: OpenColorLevel | null;
+  /**
+   * 必填，非空。回饋列顯示的完整文字（已代入佔位符），以 textContent 寫入、role="status"（aria-live="polite"）。
+   * 例「棕島冒出新芽了！」「今天的小船靠岸了！」「小船又前進了，再 1 個字靠岸」。
+   */
+  text: string;
+}
+
+/**
+ * 天氣與燈塔門檻（契約常數；PRD 天氣／燈塔對照表、Q-118 A）。整數；比較一律「≥」。對應：AC-64-05、AC-64-06、AC-67-01、E-188。
+ */
+export const ISLAND_THRESHOLDS = {
+  /** S ≥ 本值 → 至少 "sunny"（S = 0 為 "cloudy"）。 */
+  weatherSunnyMin: 1,
+  /** S ≥ 本值 → "rainbow"。 */
+  weatherRainbowMin: 7,
+  /** K ≥ 本值 → 至少 "built"（K = 0 為 "unbuilt"）。 */
+  lighthouseBuiltMin: 1,
+  /** K ≥ 本值 → "lit"。 */
+  lighthouseLitMin: 50,
+} as const;
+
+/**
+ * 島嶼清單順序與島嶼索引（契約常數；AC-65-01）。前 3 項為開放島（= IslandState.islands 順序），後 2 項為霧中島（尚未開放）。
+ * 也用於 IslandProgress.outOfGoal 的索引比較（README IS-9）與 LF-2 的島嶼先後。
+ */
+export const ISLAND_LIST_ORDER: readonly ColorLevel[] = ["orange", "brown", "green", "blue", "gold"];
+
+/**
+ * 島嶼外觀 token（契約常數；PRD US-68「島嶼外觀 token」表、Q-111 C、Q-123 A；README §15.7）。格式 #rrggbb 小寫。
+ * 全部為「建議值」：SD 可在條件內改值並記入 architecture.md（README IV-1）；驗收以條件為準。
+ * 外框寬（≥ 2 CSS px）、圓角（卡片 ≥ 16、按鈕 ≥ 12 CSS px）、立體陰影的數值屬設計層（README VC-4）。
+ * 不得用於取代 COLOR_TOKENS.accent、SEMANTIC_COLORS 的固定值；插圖不得使用 accent（AC-68-05）。
+ */
+export const ISLAND_STYLE_TOKENS = {
+  /** 外框色（深紫灰）：區塊卡片、按鈕外框、插圖描邊、立體陰影（0 4px 0 外框色）。條件：對 COLOR_TOKENS.background 與 #ffffff 皆 ≥ 3:1（AC-68-02、AC-68-03）。 */
+  outline: "#3d3550",
+  /** 地圖海面。條件：地圖上文字對實際背景像素 ≥ 4.5:1（AC-71-04）。 */
+  sea: "#9fe0ec",
+  /** 龜龜對話框底色。條件：文字對比 ≥ 4.5:1（AC-66-01、AC-68-03）。 */
+  dialogBg: "#fff6df",
+  /** 島嶼清單霧中島（藍、金）整列底色，須與開放島列不同（AC-65-01 建議值）。 */
+  fogRowBg: "#f3f6fa",
+} as const;
+
+/**
+ * 群島頁與學完回饋的文字（契約常數，逐字使用）。含 {名稱} 的值為格式字串，以實際值取代 {…}（含大括號），其餘字元逐字保留；
+ * 數字為阿拉伯數字、不加千分位。所有文字以 textContent／setAttribute 寫入（C-7）。
+ * 頁面標題「我的群島」、導覽「群島」、今日進度列「今日已學 {x} / {d} 字」、「開始今日學習」、目標標籤分別見
+ * LAYOUT_TEXTS.dashboardTitle、TAB_LABELS.dashboard、LAYOUT_TEXTS.todayRing、startToday、goalLineSame／changeLink（不重複定義）。
+ * 階段文字見 ISLAND_STAGES。對應：AC-63-01、AC-64-01、AC-65-01、AC-65-02、AC-66-01～AC-66-03、AC-67-01、AC-69-02、AC-69-03、AC-71-01。
+ */
+export const ISLAND_TEXTS = {
+  /** 島名（地圖可見文字、清單、回饋與文字替代的 {island}；AC-64-01、AC-65-01）。不屬色級名稱「{色}級」（AC-39-06）。 */
+  islandName: { orange: "橘島", brown: "棕島", green: "綠島", blue: "藍島", gold: "金島" },
+  /** 島嶼清單副標（AC-65-01）。 */
+  islandSubtitle: { orange: "入門", brown: "基礎", green: "職場與商務", blue: "高階商務", gold: "近母語" },
+  /** 地圖上霧中島的文字（AC-64-01）；{island} = islandName.blue／gold。結果「藍島・霧中」「金島・霧中」（・ = U+30FB）。 */
+  fogMapLabel: "{island}・霧中",
+  /** 地圖上燈塔小島的文字（AC-64-01）。 */
+  lighthouseMapLabel: "測驗燈塔",
+  /** 燈塔 "unbuilt" 時的牌子文字（AC-64-05、AC-71-04）。 */
+  lighthouseUnbuiltSign: "待建",
+  /** 島嶼清單區塊標題（h3，AC-65-01）。 */
+  listTitle: "島嶼",
+  /** 開放島靠右文字（AC-65-01）；{p} = IslandProgress.p。 */
+  listMastery: "掌握 {p}%",
+  /** 開放島 p 為 null（n = 0）時的靠右文字（PRD 名詞 P、E-178；README IA-2、FB-84）。 */
+  listMasteryNoData: "掌握 —",
+  /** 霧中島靠右文字（AC-65-01）。 */
+  listFogStatus: "尚未開放",
+  /** 霧中島階段文字（AC-65-01）。 */
+  listFogStage: "還在霧中，之後的版本開放",
+  /** outOfGoal 時接在清單階段文字之後（AC-64-04）。 */
+  listOutOfGoalSuffix: "（目前目標未包含）",
+  /** 開放島進度條 aria-label（AC-65-02）；{island} = 島名。例「橘島掌握率」。 */
+  progressLabel: "{island}掌握率",
+  /** 今日任務卡角色名稱（可見文字，AC-66-01、AC-71-02）。 */
+  hostName: "島主 龜龜",
+  /** 龜龜對話框，remaining > 0（AC-66-02）；{n} = IslandState.remaining。 */
+  dialogSailing: "再學 {n} 個字，今天的小船就靠岸囉！",
+  /** 龜龜對話框，remaining = 0（AC-66-02）。 */
+  dialogDocked: "今天的小船靠岸了！想多學也可以，島上會更熱鬧。",
+  /** X ≥ D 時今日進度列顯示（AC-30-05、AC-66-03）。 */
+  todayGoalReached: "今日目標達成",
+  /** 3 格第 1 格最下方的天氣狀態行，也是文字替代的 {weather}（AC-64-06、AC-67-01）。 */
+  weather: { cloudy: "陰天", sunny: "晴天", rainbow: "出現彩虹" },
+  /** 3 格第 3 格最下方的燈塔狀態行，也是文字替代的 {lighthouse}（AC-64-05、AC-67-01）。 */
+  lighthouse: { unbuilt: "燈塔待建", built: "燈塔蓋好", lit: "燈塔點亮" },
+  /** 文字替代的 {boat}（PRD 小船對照表）。 */
+  boat: { sailing: "航行中", docked: "已靠岸" },
+  /** 學完回饋 "mastered"（AC-69-02）；{island} = 島名、{p} = 變更後的 P。 */
+  feedbackMastered: "{island}又多掌握 1 個字（掌握 {p}%）",
+  /** 學完回饋 "docked"（AC-69-03）。 */
+  feedbackDocked: "今天的小船靠岸了！",
+  /** 學完回饋 "sailing"（AC-69-03）；{n} = D − 變更後的 X（≥ 1）。 */
+  feedbackSailing: "小船又前進了，再 {n} 個字靠岸",
+  /**
+   * 地圖（role="img"）的可存取名稱（AC-71-01；README IA-4）。{islands} = 3 座開放島依序以 mapAltIsland 組字、以 mapAltIslandSeparator 連接；
+   * {s} = streakDays、{weather} = weather[…]、{k} = k、{lighthouse} = lighthouse[…]、{x}、{d}、{boat} = boat[…]。不含 listOutOfGoalSuffix。
+   * 例「群島地圖：橘島掌握 25%，一棵椰子樹；棕島掌握 1%，新芽；綠島掌握 0%，沙灘；藍島、金島尚未開放；連續打卡 3 天，晴天；
+   * 模擬測驗已答對 48 題，燈塔蓋好；今日小船 4 / 15 字，航行中」（實際為單行，無換行）。
+   */
+  mapAlt: "群島地圖：{islands}；藍島、金島尚未開放；連續打卡 {s} 天，{weather}；模擬測驗已答對 {k} 題，{lighthouse}；今日小船 {x} / {d} 字，{boat}",
+  /** mapAlt 中每座開放島的片段；{island} = 島名、{p} = P、{stage} = ISLAND_STAGES[].nameZh。 */
+  mapAltIsland: "{island}掌握 {p}%，{stage}",
+  /** p 為 null 時的片段（README IA-4、FB-84）。 */
+  mapAltIslandNoData: "{island}掌握 —，{stage}",
+  /** 開放島片段之間的分隔（全形分號）。 */
+  mapAltIslandSeparator: "；",
+} as const;
+
 export {};
 // 主控代核（2026-11-05）：依已核准 PRD v0.20 修訂；不改 PRD、不改 localStorage 持久化結構（schemaVersion 3，storage-schema.json 未改）；tsc --strict 通過。
 // （v0.21，2026-11-09）sa-agent 依已核准 PRD v0.21 修訂，待主控代核；不改 localStorage 持久化結構（schemaVersion 3）。
+// （v0.23，2026-11-11）sa-agent 依已核准 PRD v0.22 修訂，待核准；不改 localStorage 持久化結構（schemaVersion 3）。
+// 主控代核（中修，2026-11-12）：v0.24 依已核准 PRD v0.24 只改註解；不改 localStorage 持久化結構（schemaVersion 3）。

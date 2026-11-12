@@ -35,8 +35,8 @@
   --wrong: #b91c1c;
   --wrong-bg: #fee2e2;
 
-  /* 介面（v0.12，FE-56：architecture.md §7.19.1；--bg = PWA_BACKGROUND_COLOR，B-11 比對本檔第一個 --bg） */
-  --bg: #eef4fa;
+  /* 介面（FE-56、FE-103：architecture.md §7.19.1、§7.32.7；--bg = PWA_BACKGROUND_COLOR = layout.COLOR_TOKENS.background，B-11 比對本檔第一個 --bg） */
+  --bg: #eaf7fb;
   --surface: #ffffff;
   --text: #1f2937;
   --text-muted: #5b6472;
@@ -62,9 +62,32 @@
   --warning-bg: #fef3c7;
   --warning-text: #7c4a03;
 
+  /* 島嶼外觀（FE-103：§7.32.7；VC-4、IV-1） */
+  /* 外框色：區塊卡片、按鈕外框、插圖描邊、立體陰影；對 --bg 約 10.5:1、對白約 11.5:1（≥ 3:1，AC-68-03） */
+  --outline: #3d3550;
+  /* 外框寬：卡片、按鈕、清單列、3 格 */
+  --outline-w: 2px;
+  /* 粗外框：今日任務卡、地圖框 */
+  --outline-w-strong: 3px;
+  /* 群島地圖海面 */
+  --sea: #9fe0ec;
+  /* 龜龜對話框底色 */
+  --dialog-bg: #fff6df;
+  /* 霧中島列底色 */
+  --fog-row: #f3f6fa;
+  /* 今日進度條軌道 */
+  --isl-track: #d8eef5;
+  /* 單字卡學完回饋列底色 */
+  --feedback-bg: #e9fbef;
+
+  /* --radius 只留給輸入框、作答選項等範圍外元素 */
   --radius: 8px;
-  --radius-cta: 12px;
-  --radius-card: 16px;
+  /* 按鈕圓角（.btn） */
+  --radius-btn: 14px;
+  /* 強調橘按鈕圓角（.btn--accent） */
+  --radius-cta: 16px;
+  /* 區塊卡片圓角（= layout.UI_LAYOUT.CARD_RADIUS_PX） */
+  --radius-card: 22px;
   --gap: 12px;
   --touch: 44px;
   --content-max: 960px;
@@ -72,6 +95,8 @@
   --content-narrow: 720px;
   --shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
   --shadow-card: 0 1px 3px rgba(16, 40, 80, 0.08), 0 4px 14px rgba(16, 40, 80, 0.06);
+  /* 立體陰影：今日任務卡、地圖框、.btn--accent */
+  --shadow-pop: 0 4px 0 var(--outline);
   /* 首次畫面固定底部列預留高度（= layout.UI_LAYOUT.FIRSTBAR_RESERVE_PX，§7.19.5） */
   --emt-firstbar-h: 184px;
 
@@ -327,7 +352,7 @@ pre {
   }
 }
 
-/* ─── 按鈕（v0.12，FE-56：§7.19.2；保留 1px 透明邊框，單字卡頁按鈕幾何不變，AC-38-08） ─── */
+/* ─── 按鈕（FE-56、FE-103：§7.19.2、§7.32.7；2px 外框色外框、圓角 14px，底色與字色不變；AC-68-02、VC-4） ─── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -337,8 +362,8 @@ pre {
   min-width: var(--touch);
   max-width: 100%;
   padding: 8px 16px;
-  border: 1px solid transparent;
-  border-radius: var(--radius);
+  border: var(--outline-w) solid var(--outline);
+  border-radius: var(--radius-btn);
   background: var(--tint);
   color: var(--brand-deep);
   font: inherit;
@@ -350,7 +375,6 @@ pre {
 
 .btn--primary {
   background: var(--primary);
-  border-color: transparent;
   color: var(--primary-text);
 }
 
@@ -360,22 +384,23 @@ pre {
 
 .btn--danger {
   background: var(--danger);
-  border-color: transparent;
   color: #ffffff;
 }
 
-/* 強調橘按鈕：只用於「開始今日學習」「開始學習」（VC-3；深色字 6.0:1，Q-53） */
+/* 強調橘按鈕：只用於「開始今日學習」「開始學習」（VC-3；深色字 6.0:1，Q-53）；外框為外框色（不得為強調橘）、立體陰影（VC-4） */
 .btn--accent {
   min-height: 48px;
   padding: 12px 20px;
-  border-color: transparent;
+  border-color: var(--outline);
   border-radius: var(--radius-cta);
+  box-shadow: var(--shadow-pop);
   background: var(--accent);
   color: var(--accent-text);
   font-weight: 700;
   white-space: nowrap;
 }
 
+/* 連結樣式按鈕（頁尾連結、「從備份還原」、應用內三頁返回等）：透明框、透明底，維持連結外觀（不屬 AC-68-02 按鈕，SD-FB-105） */
 .btn--link {
   min-height: var(--touch);
   min-width: var(--touch);
@@ -396,9 +421,9 @@ pre {
     background: var(--primary-hover);
   }
 
-  /* hover 不換底色（避免第三種橘），只加陰影 */
+  /* hover 不換底色（避免第三種橘），保留立體陰影再加柔和陰影 */
   .btn--accent:hover:not(:disabled) {
-    box-shadow: 0 2px 8px rgba(16, 40, 80, 0.18);
+    box-shadow: var(--shadow-pop), 0 2px 8px rgba(16, 40, 80, 0.18);
   }
 }
 
@@ -473,12 +498,12 @@ input[type="radio"] {
   height: 24px;
 }
 
-/* ─── 卡片（v0.12，FE-56：白底、無邊框、圓角 16px、柔和陰影；AC-38-06） ─── */
+/* ─── 區塊卡片（FE-103：§7.32.7；白底、2px 外框色外框、圓角 22px、無陰影；AC-68-02、VC-4） ─── */
 .card {
   background: var(--surface);
-  border: 0;
+  border: var(--outline-w) solid var(--outline);
   border-radius: var(--radius-card);
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
   padding: 16px;
   margin-bottom: 12px;
   min-width: 0;

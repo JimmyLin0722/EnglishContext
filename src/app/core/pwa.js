@@ -43,8 +43,8 @@
   /** manifest theme_color 與 <meta name="theme-color"> 的值（v0.12 = COLOR_TOKENS.themeColor = --brand，VC-5、AC-34-04） */
   var PWA_THEME_COLOR = "#1e9bf0";
 
-  /** manifest background_color（v0.12 = COLOR_TOKENS.background = --bg，DS-13、VC-5、AC-34-04） */
-  var PWA_BACKGROUND_COLOR = "#eef4fa";
+  /** manifest background_color（FE-103 = COLOR_TOKENS.background = --bg，DS-13、VC-5、AC-34-04、AC-68-01） */
+  var PWA_BACKGROUND_COLOR = "#eaf7fb";
 
   /** manifest 內容；鍵順序即輸出順序（MF-1、MF-3） */
   var PWA_MANIFEST = {
@@ -56,7 +56,7 @@
     display: "standalone",
     lang: "zh-Hant-TW",
     theme_color: "#1e9bf0",
-    background_color: "#eef4fa",
+    background_color: "#eaf7fb",
     icons: [
       { src: "icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },

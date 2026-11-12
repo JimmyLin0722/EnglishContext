@@ -1,10 +1,13 @@
 /*
- * styles/10-dashboard.css — 學習主控台（FE-08；FE-31 今日學習進度；v0.12 FE-58 主控台改版）
- * 依據：architecture.md v0.8 §7.19.4（DOM 樹、尺寸表）、§7.19.1（token 與禁止寫法）、§7.19.10；§7.11 環形圖轉場
+ * styles/10-dashboard.css — 群島頁（原主控台；FE-08；FE-31 今日學習進度；v0.12 FE-58；v0.19 FE-108 群島頁改版）
+ * 依據：architecture.md v0.8 §7.19.4、§7.19.1（token 與禁止寫法）、§7.19.10；v0.20 §7.32.2～§7.32.8、§7.32.10
  * 涵蓋：AC-39-01～AC-39-10、AC-17-01、AC-17-06、AC-20-01（無水平捲軸）、AC-20-02（觸控 ≥ 44px）、
- *       AC-30-05、AC-30-08、AC-31-03（減少動態由 05-motion.css 全域關閉 transition）、AC-38-01、AC-38-06、AC-38-07
- * 規則（v0.12）：內容寬 720px 置中；var(--accent) 只在 .db-stat__icon；長條不用 --brand（今天 --brand-deep、其他 --chart-bar）；
- *       卡片沿用全域 .card（不加 --border 外框）；新增的展開收合、箭頭旋轉不設 transition。
+ *       AC-30-05、AC-30-08、AC-31-03、AC-38-01、AC-38-06、AC-38-07、AC-63-03～AC-63-05、AC-64-10、AC-65-01～AC-65-04、
+ *       AC-66-01～AC-66-04、AC-67-01、AC-68-02、AC-68-03、AC-70-02、AC-71-02、AC-71-05
+ * 規則：內容寬 720px 置中；var(--accent) 只在 .db-stat__icon（強調橘不用於其他元素，VC-3）；
+ *       長條不用 --brand（今天 --brand-deep、其他 --chart-bar）；區塊卡片沿用全域 .card（外框色 --outline，VC-4）；
+ *       今日進度條與島嶼清單進度條 transition: none（AC-70-02）；地圖與清單 cursor: default（AC-64-10）；
+ *       展開收合、箭頭旋轉不設 transition。地圖框內的圖形與動畫屬 11-island-map.css。
  */
 
 /* 內容寬 720px 置中（AC-39-10；375px 填滿） */
@@ -14,95 +17,60 @@
   min-width: 0;
 }
 
-.dash-title {
-  margin-bottom: 12px;
-}
-
-/* ─── (1) 今日任務卡 ─── */
-.db-today__row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  min-width: 0;
-}
-
-/* 主環形圖 88px：SVG 與中央數值重疊 */
-.db-ring-wrap {
-  position: relative;
-  flex: none;
-  width: 88px;
-  height: 88px;
-}
-
-.db-ring {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.db-ring__track {
-  stroke: var(--track);
-}
-
-/* 進度圈：未達成 --brand（VC-1 允許）；只轉場 dashoffset，顏色以 class 切換不做轉場（§7.11） */
-.db-ring__bar {
-  stroke: var(--brand);
-  transition: stroke-dashoffset var(--emt-dur-ring) ease-out;
-}
-
-/* 達成今日目標：滿圈金色（AC-30-05） */
-.db-ring--done .db-ring__bar {
-  stroke: var(--color-gold);
-}
-
-/* 中央只顯示 X（aria-hidden，SD-FB-40） */
-.db-ring__value {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.db-today__side {
-  flex: 1;
-  display: grid;
-  gap: 8px;
-  justify-items: start;
-  min-width: 0;
-}
-
-.db-today__text {
-  margin: 0;
-  font-weight: 700;
-  overflow-wrap: anywhere;
-}
-
-.db-today__done {
-  margin: 0;
-  font-weight: 700;
-  color: var(--text);
-}
-
-/* 目標行：色點 + 文字 +「・」+「變更」（44 × 44，AC-39-04） */
-.db-goal {
+/* ─── 標題列：「我的群島」＋ 目標標籤（DB-1、DB-4；375px 標籤可換到下一行，AC-66-04） ─── */
+.db-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+.dash-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  min-width: 0;
+}
+
+.dash-title__deco {
+  flex: none;
+  width: 28px;
+  height: 28px;
+}
+
+/* 目標標籤列：膠囊 +「變更」 */
+.db-goal {
+  display: flex;
+  align-items: center;
   gap: 8px;
   min-height: 44px;
-  margin: 12px 0 0;
+  margin: 0;
   min-width: 0;
+}
+
+.db-goal__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 6px 10px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .db-goal__dot {
   flex: none;
   width: 10px;
   height: 10px;
-  margin-right: 4px;
   border-radius: 50%;
   background: var(--line);
 }
@@ -118,14 +86,13 @@
   overflow-wrap: anywhere;
 }
 
-/* （v0.9，FE-66；AC-39-04、Q-61、V-LAY-10）「變更」外框按鈕：白底、四邊 1px 深藍框、無底線、≥ 44×44，置於行末 */
+/* （AC-39-04、AC-66-04、V-LAY-10）「變更」外框按鈕：白底、外框色 2px 與圓角 14px（沿用 .btn）、無底線、≥ 44×44 */
 .db-change {
+  flex: none;
   min-height: 44px;
   min-width: 44px;
-  margin-left: auto;
   padding: 0 14px;
   background: var(--surface);
-  border: 1px solid var(--brand-deep);
   color: var(--brand-deep);
   font-weight: 600;
   text-decoration: none;
@@ -137,15 +104,259 @@
   }
 }
 
-/* ─── (2) 3 格數據（同一張卡片內；格本身無邊框、無背景，VC-4） ─── */
+/* ─── (1) 今日任務卡（DB-2、§7.32.3）：3px 外框、立體陰影 ─── */
+.db-today {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-width: var(--outline-w-strong);
+  box-shadow: var(--shadow-pop);
+}
+
+/* 龜龜 + 名稱與對話框（375px 不重疊、不裁切，AC-66-01） */
+.db-host {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.db-host__turtle {
+  display: block;
+  flex: none;
+  width: 72px;
+  height: 64px;
+}
+
+.db-host__talk {
+  flex: 1;
+  min-width: 0;
+}
+
+.db-host__name {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.db-host__bubble {
+  margin: 0;
+  padding: 10px 12px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 16px 16px 16px 4px;
+  background: var(--dialog-bg);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* 今日進度列（IS-15）：文字 + 橫向進度條；「今日目標達成」在其下 */
+.db-today__progress {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.db-today__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.db-today__text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.db-today__bar {
+  flex: 1;
+  min-width: 40px;
+  height: 14px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 999px;
+  background: var(--isl-track);
+  overflow: hidden;
+}
+
+/* 填色：未達成 --brand（VC-1 允許）；達成金色（AC-30-05、AC-66-03）；無轉場（AC-70-02） */
+.db-today__fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: var(--brand);
+  transition: none;
+}
+
+.db-today__fill--done {
+  background: var(--color-gold);
+}
+
+.db-today__done {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* 「開始今日學習」：寬度 = 卡片內容寬（AC-39-02） */
+.db-start {
+  width: 100%;
+  min-height: 52px;
+}
+
+/* ─── (2) 地圖框（§7.32.4）：最大寬 480px 置中（AC-63-04）；無點擊（AC-64-10） ─── */
+.db-map {
+  max-width: 480px;
+  margin-inline: auto;
+  padding: 0;
+  border-width: var(--outline-w-strong);
+  border-radius: 26px;
+  overflow: hidden;
+  background: var(--sea);
+  box-shadow: var(--shadow-pop);
+  cursor: default;
+}
+
+/* ─── (3) 島嶼清單（IA-2、§7.32.5） ─── */
+.db-isles {
+  margin-bottom: 12px;
+  min-width: 0;
+  cursor: default;
+}
+
+.db-isles__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.db-isle {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 16px;
+  background: var(--surface);
+  min-width: 0;
+}
+
+.db-isle.is-fog {
+  background: var(--fog-row);
+}
+
+.db-isle__dot {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  align-self: center;
+  width: 28px;
+  height: 28px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.db-isle--orange .db-isle__dot,
+.db-isle--orange .db-isle__fill { background: var(--color-orange); }
+.db-isle--brown .db-isle__dot,
+.db-isle--brown .db-isle__fill { background: var(--color-brown); }
+.db-isle--green .db-isle__dot,
+.db-isle--green .db-isle__fill { background: var(--color-green); }
+.db-isle--blue .db-isle__dot { background: var(--color-blue); }
+.db-isle--gold .db-isle__dot { background: var(--color-gold); }
+
+.db-isle.is-fog .db-isle__dot {
+  opacity: 0.5;
+}
+
+.db-isle__title {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.db-isle__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.db-isle__sub {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.db-isle__right {
+  grid-column: 3;
+  grid-row: 1;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text);
+}
+
+.db-isle__bar {
+  grid-column: 2 / 4;
+  grid-row: 2;
+  height: 8px;
+  border-radius: 999px;
+  background: #e7e3f0;
+  overflow: hidden;
+}
+
+/* 填滿 P%（色級色，AC-65-02）；無轉場（AC-70-02） */
+.db-isle__fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  transition: none;
+}
+
+.db-isle__stage {
+  grid-column: 2 / 4;
+  grid-row: 3;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ─── (4) 3 格數據（DB-5、§7.32.6）：同一列並排，每格為區塊卡片樣式 ─── */
 .db-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+  margin-bottom: 12px;
 }
 
 .db-stat {
   min-width: 0;
+  padding: 12px 8px;
+  border: var(--outline-w) solid var(--outline);
+  border-radius: 16px;
+  background: var(--surface);
+  text-align: center;
 }
 
 .db-stat__label {
@@ -160,6 +371,8 @@
 .db-stat__value {
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 4px;
   margin: 0;
   font-size: 1.75rem;
@@ -197,7 +410,17 @@
   overflow-wrap: anywhere;
 }
 
-/* ─── (3) 近 7 天圖表 ───
+/* 第 1 格天氣行、第 3 格燈塔行（IS-11、IS-12；AC-67-01） */
+.db-stat__status {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+/* ─── (5) 近 7 天圖表 ───
  * (a) 7 欄、固定高 104px：字數行 16 + 4 + 軌道 64 + 4 + 日期行 16（≤ 120；填色最高 64 ≤ 80，AC-39-07 (a)）
  * (b) 空狀態一行 24px（≤ 48，AC-39-07 (b)）；卡片上下 padding 12px、標題下距 4px：空狀態整張卡片約 77px（≤ 80） */
 .db-chart {
@@ -281,7 +504,7 @@
   color: var(--text-muted);
 }
 
-/* ─── (4) 「資料備份」收合區塊（DB-6） ─── */
+/* ─── (6) 「資料備份」收合區塊（DB-6） ─── */
 .db-backup__head {
   margin: 0;
 }
